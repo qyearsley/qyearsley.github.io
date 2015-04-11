@@ -1,0 +1,5310 @@
+# List of standard transcriptions of foreign names in to Chinese
+# Data collected from http://www.chinese-tools.com/names 2010-02-07
+# Name	Hanzi	Pinyin
+Aaliyah	阿丽娅	Ā lì yà
+Aaron	阿隆	Ā lōng
+Abadie	阿巴迪	Ā bā dí
+Abbas	阿巴斯	Ā bā sī
+Abby	阿碧	Ā bì
+Abdel	阿卜杜勒	Ā bǔ dù lè
+Abdelfettah	阿卜德菲塔	Ā bǔ dé fēi tǎ
+Abdelhak	阿卜德拉克	Ā bǔ dé lā kè
+Abderrahim	阿卜德哈伊姆	Ā bǔ dé hā yī mǔ
+Abdias	阿布迪阿斯	Ā Bù dí Ā sī
+Abdón	阿夫东	Ā fū dōng
+Abdou	阿卜杜	Ā bǔ dù
+Abdoulaye	阿卜杜拉耶	Ā bǔ dù lā yē
+Abdul	阿卜杜勒	Ā bǔ dù lè
+Abdulaziz	阿卜杜拉希斯	Ā bǔ dù lā xī sī
+Abdulla	阿卜杜拉	Ā bǔ dù lā
+Abel	阿贝尔	Ā bèi ěr
+Abélard	阿贝拉尔	Ā bèi lā ěr
+Abelardo	阿维拉多	Ā wéi lā duō
+Abella	阿维利亚	Ā wéi lì yà
+Abi	阿比	Ā bǐ
+Abian	阿维安	Ā wéi ān
+Abie	阿碧	Ā bì
+Abigail	阿比盖尔	Ā bǐ gài ěr
+Abílio	阿比利奥	Ā bǐ lì ào
+Abraham	亚伯拉罕	Yà bó lā hǎn
+Abrahan	亚伯拉罕	Yà bó lā hǎn
+Abril	阿夫里尔	Ā fū lǐ r
+Absalón	阿夫萨隆	Ā fū sà lóng
+Abyssinia	阿比西尼亚	Ā bǐ xī ní yà
+Acedo	阿塞多	Ā sài duō
+Acero	阿塞罗	Ā sài luó
+Acevedo	阿塞维多	Ā sài wéi duō
+Acher	阿切尔	Ā qiēr
+Achille	阿希尔	Ā xī ěr
+Achraf	阿什哈弗	Ā shí hā fú
+Acoran	阿克兰	Ā kè lán
+Acorayda	阿科蕾达	Ā kē lěi dá
+Ada	阿达	Ā dá
+Adaberto	阿达尔维托	Ā dá rwéi tuō
+Adalbert	阿达贝	Ā dá bèi
+Adaluz	阿达鲁斯	Ā dá lǔ sī
+Adam	亚当	Yà dāng
+Adam	亚当	Yà dāng
+Adán	阿丹	Ā dān
+Adão	亚当	Yà dāng
+Adara	阿达拉	Ā dá lā
+Ade	阿德	Ā dé
+Adel	阿德尔	Ā dé ěr
+Adela	阿德拉	Ā dé lā
+Adelaida	阿德莱达	Ā dé lái dá
+Adélaïde	阿代拉伊德	Ā dài lā yī dé
+Adelardo	阿德拉多	Ā dé lā duō
+Adele	阿黛尔	Ā dài ěr
+Adèle	阿黛尔	Ā dài ěr
+Adélie	阿德丽	Ā dé lì
+Adelina	阿德利娜	Ā dé lì nà
+Adeline	阿德琳	Ā dé lín
+Adeline	艾德琳	Aì dé lín
+Ader	阿代尔	Ā dài ěr
+Adil	阿迪尔	Ā dí ěr
+Adina	阿蒂娜	Ā dì nà
+Aditya	阿蒂塔	Ā dì tǎ
+Adlene	阿德琳	Ā dé lín
+Adler	阿德勒	Ā dé lè
+Adli	阿迪里	Ā dí lǐ
+Adolf	阿道夫	Ā dào fū
+Adolfo	阿道弗	Ā dào fú
+Adolphe	阿道夫	Ā dào fū
+Adonay	阿多内	Ā duō nèi
+Adonias	阿多尼亚斯	Ā duō ní yà sī
+Adonis	阿多尼斯	Ā duō ní sī
+Adrià	阿德利亚	Ā dé lì yà
+Adrian	阿德里昂	Ā dé lǐ áng
+Adrian	阿德里安	Ā dé lǐ ān
+Adriana	阿德里亚娜	Ā dé lǐ yà nà
+Adriano	阿德里亚诺	Ā dé lǐ yà nuò
+Adrien	阿德里安	Ā dé lǐ ān
+Adrienne	阿德里安娜	Ā dé lǐ ān nà
+Adryan	阿德利安	Ā dé lì ān
+Adryen	阿德里恩	Ā dé lǐ ēn
+Aeryn	艾琳	Aì lín
+Affonso	阿丰索	Ā fēng suǒ
+Afi	阿菲	Ā fēi
+Afonso	阿丰索	Ā fēng suǒ
+África	阿非利加	Ā fēi lì jiā
+Agapito	阿加皮托	Ā jiā pí tuō
+Ágata	阿加塔	Ā jiā tǎ
+Agata	阿佳塔	Ā jiā tǎ
+Agathe	阿加特	Ā jiā tè
+Agathon	阿加东	Ā jiā dōng
+Agatón	阿加顿	Ā jiā dùn
+Agenor	阿惹诺	Ā rě nuò
+Agnès	阿涅斯	Ā niè sī
+Agnes	阿涅丝	Ā niè sī
+Agneska	阿涅斯卡	Ā niè sī Kǎ
+Agnieska	阿格涅什卡	Ā gé niè shí kǎ
+Agobart	阿格巴尔	Ā gé bā ěr
+Agostina	阿格斯蒂娜	Ā gé sī dì nà
+Agostinho	阿古斯丁诺	Ā gǔ sī dīng nuò
+Agripina	阿格利皮娜	Ā gé lì pí nà
+Agrippa	阿格里帕	Ā gé lǐ pà
+Aguas	阿瓜斯	Ā Guā sī
+Aguayo	阿瓜友	Ā Guā Yǒu
+Agueda	阿格达	Ā gé dá
+Agustí	阿古斯汀	Ā Gǔ sī tīng
+Agustín	阿古斯丁	Ā gǔ sī dīng
+Agustina	阿古丝蒂娜	Ā gǔ sī dì nà
+Ahlem	阿赫雷姆	Ā Hè léi mǔ
+Ahmed	阿赫麦德	Ā hè mài dé
+Ahmet	阿梅特	Ā méi tè
+Aïcha	艾伊莎	Aì yī shā
+Aida	艾达	Aì dá
+Aidan	艾丹	Aì dān
+Aiden	爱登	Aì dēng
+Aika	艾卡	Aì kǎ
+Ailann	爱兰	Aì lán
+Aïlann	爱兰	Aì lán
+Aileen	艾琳	Aì lín
+Ailin	艾琳	Aì lín
+Aimé	埃梅	Aī méi
+Aimée	艾美	Aì měi
+Aimeric	埃么利克	Aī melì kè
+Aimerick	埃默里克	Aī mò lǐ kè
+Aina	艾娜	Aì nà
+Aina	艾娜	Aì nà
+Ainhoa	爱诺阿	Aì nuò ā
+Ainoa	艾诺娅	Aì nuò yà
+Airam	艾兰	Aì lán
+Airrok	埃洛克	Aī luò kè
+Aisha	艾沙	Aì Shā
+Aisling	艾丝琳	Aì sī lín
+Aitana	艾塔纳	Aì tǎ nà
+Aitor	埃托尔	Aī tuō ěr
+Ajay	阿杰	Ā Jié
+Akbar	阿克巴尔	Ā kè Bā ěr
+Aki	阿基	Ā jī
+Akila	阿基拉	Ā jī lā
+Akio	阿吉奥	Ā Jí ào
+Akshay	阿克什	Ā kè shí
+Alain	阿兰	Ā lán
+Alaina	阿莲娜	Ā lián nà
+Alaitz	阿莱池	Ā lái chí
+Álamo	阿拉莫	Ā lā mò
+Alan	阿兰	Ā lán
+Alanis	阿拉尼斯	Ā lā ní sī
+Alanna	阿拉娜	Ā lā nà
+Alaric	阿拉里克	Ā lā lǐ kè
+Alaura	阿劳拉	Ā Láo lā
+Alba	阿尔瓦	Ā rwǎ
+Albà	阿尔巴	Ā ěr Bā
+Alban	阿尔本	Ā ěr běn
+Alban	阿尔邦	Ā ěr bāng
+Albane	阿尔班	Ā ěr bān
+Albéric	阿尔贝里克	Ā ěr bèi lǐ kè
+Albérico	阿贝里克	Ā Bèi lǐ kè
+Albert	阿尔伯特	Ā ěr bó té
+Albert	阿尔贝	Ā ěr bèi
+Alberta	阿尔伯塔	Ā ěr bó tǎ
+Alberta	阿尔贝塔	Ā ěr bèi tǎ
+Alberte	阿尔贝特	Ā ěr bèi té
+Alberto	阿尔维托	Ā rwéi tuō
+Albina	阿尔碧娜	Ā ěr bì nà
+Albrecht	阿尔伯特	Ā ěr bó tè
+Alcida	阿尔希达	Ā ěr xī dá
+Alcide	阿尔西德	Ā ěr xī dé
+Alcides	阿尔西德斯	Ā rxī dé sī
+Alcino	阿尔西诺	Ā ěr xī nuò
+Aldana	阿尔达纳	Ā rdá nà
+Aldemba	阿尔登巴	Ā ěr dēng bā
+Aldéric	阿尔德里克	Ā ěr dé lǐ kè
+Aldina	阿尔蒂纳	Ā ěr dì nà
+Aldo	阿尔多	Ā rduō
+Aldric	阿尔德里克	Ā ěr dé lǐ kè
+Alec	阿雷克	Ā léi kè
+Alegría	阿莱格里亚	Ā lái gé lǐ yà
+Aleix	阿雷克斯	Ā léi kè sī
+Aleix	阿雷克斯	Ā léi kè sī
+Alejandra	亚丽杭德拉	Yà lì háng dé lā
+Alejandro	亚历杭德罗	Yà lì háng dé luó
+Alejo	阿莱霍	Ā lái huò
+Aleksander	亚历山大	Yà lì shān dà
+Aleksandra	亚历山德拉	Yà lì shān dé lā
+Alem	阿雷姆	Ā léi mǔ
+Alen	阿伦	Ā lún
+Alessandra	阿蕾桑德拉	Ā lěi sāng dé lā
+Alessandro	阿历桑德罗	Ā lì sāng dé luó
+Alessia	阿莱西亚	Ā lái xī yà
+Alessio	阿雷西欧	Ā léi xī ōu
+Alex	阿列克斯	Ā liè kè sī
+Alex	阿雷克斯	Ā léi kè sī
+Álex	阿雷克斯	Ā léi kè sī
+Alexa	阿蕾科沙	Ā lěi kē shā
+Alexander	亚历山大	Yà lì shān dà
+Alexandra	亚历山德拉	Yà lì shān dé lā
+Alexandre	亚历山大	Yà lì shān dà
+Alexandrine	亚历山德琳	Yà lì shān dé lín
+Alexandrine	亚历山德琳	Yà lì shān dé lín
+Alexandros	亚历桑德罗斯	Yà lì sāng dé luó sī
+Alexane	阿蕾克三	Ā lěi kè sān
+Alexia	亚莉克希亚	Yà lì kè xī yà
+Alexiane	阿蕾可西安	Ā lěi kě xī ān
+Alexina	阿蕾克茜娜	Ā lěi kè xī nà
+Alexis	阿列克西	Ā liè kè xī
+Alfarroba	阿法罗巴	Ā Fǎ luó Bā
+Alfonsina	阿凤茜娜	Ā fèng xī nà
+Alfonso	阿方索	Ā fāng suǒ
+Alfred	阿尔弗雷德	Ā ěr fú léi dé
+Alfredo	阿尔弗雷多	Ā rfú léi duō
+Alhondra	阿红达	Ā hóng dá
+Ali	阿里	Ā lǐ
+Alia	阿丽娅	Ā lì yà
+Alice	爱丽丝	Aì lì sī
+Alicia	艾莉西亚	Aì lì xī yà
+Alícia	芽莉霞	Yá lì xiá
+Alicja	艾莉西亚	Aì lì xī yà
+Alida	阿里达	Ā lǐ dá
+Alila	阿丽拉	Ā lì lā
+Alime	阿利姆	Ā lì mǔ
+Alina	阿莉娜	Ā lì nà
+Aline	艾琳	Aì lín
+Aline	阿琳	Ā lín
+Alisa	艾莉莎	Aì lì shā
+Alisee	阿丽西	Ā lì xī
+Alison	阿莉森	Ā lì sēn
+Alissa	阿莉萨	Ā lì sà
+Alisson	阿莉森	Ā lì sēn
+Alix	阿里克斯	Ā lǐ kè sī
+Alizée	艾莉婕	Aì lì jié
+Allan	阿兰	Ā lán
+Allaya	阿拉娅	Ā lā yà
+Allen	阿伦	Ā lún
+Allison	埃里森	Aī lǐ sēn
+Allison	艾莉森	Aì lì sēn
+Alma	阿尔马	Ā rmǎ
+Almeida	阿尔梅达	Ā ěr Méi dá
+Almérinda	阿尔梅林达	Ā ěr méi lín dá
+Almudena	阿拉木德娜	Ā lā mù dé nà
+Alneir	阿尔内	Ā ěr nèi
+Aloïs	阿罗伊丝	Ā luoyī sī
+Aloisio	阿洛伊西奥	Ā luò yī xī ào
+Alonso	阿隆索	Ā lóng suǒ
+Aloysia	阿罗伊茜娅	Ā luó Yī xī yà
+Altamiro	阿塔米洛	Ā tǎ mǐ luò
+Altenir	阿特尼尔	Ā tè ní ěr
+Althea	阿尔特阿	Ā ěr tè Ā
+Álvar	阿尔瓦	Ā ěr wǎ
+Alvaro	阿尔瓦洛	Ā ěr wǎ luò
+Álvaro	阿尔瓦罗	Ā ěr wǎ luó
+Alvine	阿尔文	Ā ěr wén
+Alya	阿莉娅	Ā lì yà
+Alyah	阿莉雅	Ā lì Yǎ
+Alycia	艾莉西亚	Aì lì xī yà
+Alys	艾莉丝	Aì lì sī
+Alyssa	艾莉莎	Aì lì shā
+Alyssia	艾莉西亚	Aì lì xī yà
+Ama	阿玛	Ā Mǎ
+Amadeo	阿马德奥	Ā mǎ dé ào
+Amadeus	阿马德乌斯	Ā mǎ dé wū sī
+Amado	阿马多	Ā mǎ duō
+Amador	阿马多尔	Ā mǎ duō r
+Amal	阿马尔	Ā Mǎ ěr
+Amalia	阿马丽亚	Ā mǎ lì yà
+Amance	阿芒丝	Ā máng sī
+Amancio	阿曼西奥	Ā màn xī ào
+Amanda	阿曼达	Ā màn dá
+Amandine	阿芒丁	Ā máng dīng
+Amar	阿马尔	Ā mǎ ěr
+Amara	阿玛拉	Ā mǎ lā
+Amarande	阿玛朗德	Ā Mǎ lǎng dé
+Amaranta	阿马兰塔	Ā mǎ lán tǎ
+Amata	阿马塔	Ā mǎ tǎ
+Amaury	阿毛利	Ā máo lì
+Amaya	阿马亚	Ā mǎ yà
+Ámbar	安	Ān bar
+Amber	安伯	Ān bó
+Ambre	安波	Ān bō
+Ambrine	安波琳	Ān bō lín
+Ambrosio	安布罗西奥	Ān bù luó xī ào
+Amédée	阿梅蒂	Ā méi dì
+Amedeo	阿米地奥	Ā mǐ dì ào
+Amédine	阿梅丁	Ā méi dīng
+Amel	阿梅尔	Ā méi ěr
+Amelia	阿梅丽娅	Ā méi lí yà
+Amélia	阿梅丽娅	Ā méi lì yà
+Amélie	阿梅丽	Ā méi lí
+Amelys	阿梅丽丝	Ā méi lì sī
+Américo	阿梅里科	Ā méi lǐ kē
+Ameur	阿莫尔	Ā mò ěr
+Amie	艾米	Aì mǐ
+Amilcar	阿米尔卡	Ā mǐ rkǎ
+Amina	阿米娜	Ā mǐ nà
+Aminata	阿米娜塔	Ā mǐ nà tǎ
+Amine	阿明	Ā míng
+Amir	阿米尔	Ā mǐ ěr
+Amira	阿米拉	Ā mǐ lā
+Amna	阿曼娜	Ā màn nà
+Amor	阿莫尔	Ā mò ěr
+Amor	eterno	永恒恋爱 Yǒng héng liàn Aì
+Amory	阿毛利	Ā Máo lì
+Amour	阿穆尔	Ā mù ěr
+Amparo	安吧罗	Ān baluó
+Amy	艾美	Aì měi
+Ana	安娜	Ān nà
+Ana-Maria	安娜玛丽亚	Ān nà Mǎ lì yà
+Anabel	安娜佩尔	Ān nà pèi r
+Anabela	安娜被拉	Ān nà bèi lā
+Anabelle	阿娜贝	Ā nà Bèi
+Anaé	安娜伊	Ān nà yī
+Anaël	亚纳尔	Yà nà ěr
+Anael	亚纳尔	Yà nà ěr
+Anaëlle	安娜尔	Ān nà ěr
+Anahí	安娜伊	Ān nà yī
+Anahita	阿纳伊塔	Ā nà Yī tǎ
+Anaïs	阿耐斯	Ā nài sī
+Anakin	阿纳金	Ā nà Jīn
+Analia	阿纳莉亚	Ā nà lì yà
+Anas	阿娜丝	Ā nà sī
+Anastasia	阿娜丝塔西亚	Ā nà sī tǎ xī yà
+Anastasio	安纳斯塔西奥	Ān nà sī tǎ xī ào
+Anatole	阿纳托尔	Ā nà tuō ěr
+Anca	昂卡	Áng kǎ
+Anchely	安池丽	Ān chí lì
+Ancy	昂茜	Áng xī
+Anda	安达	Ān dá
+Andelin	安德林	Ān dé lín
+Anderrson	安德森	Ān dé sēn
+Anders	安德斯	Ān dé sī
+Anderson	安德森	Ān dé sēn
+Andra	昂德拉	Áng dé lā
+Andre	安德烈	Ān dé liè
+André	昂德烈	Áng dé liè
+Andréa	安德丽娅	Ān dé lì yǎ
+Andrea	安德丽娅	Ān dé lì yǎ
+Andréa	安德丽娅	Ān dé lì yà
+Andréanne	昂德蕾安	Áng dé lěi ān
+Andreas	安德雷斯	Ān dé léi sī
+Andree	安德莉	Ān dé lì
+Andrée	安德蕾	Ān dé lěi
+Andréia	安德丽娅	Ān dé lì yà
+Andreia	安德蕾娅	Ān dé lěi yà
+Andrés	安德烈斯	Ān dé liè sī
+Andres	安德雷斯	Ān dé léi sī
+Andressa	安德蕾萨	Ān dé lěi sà
+Andreu	安德雷	Ān dé léi
+Andrew	安德鲁	Ān dé lǔ
+Andreza	安德蕾萨	Ān dé lěi sà
+Andrzej	安德雷	Ān dé léi
+Andy	安迪	Ān dí
+Anésio	安埃西奥	Ān Aī xī ào
+Ange	昂热	Áng rè
+Angee	安吉	Ān jí
+Ángel	安赫尔	Ān hèr
+Ángel	安杰尔	Ān Jié ěr
+Angela	安吉拉	Ān jí lā
+Angèle	昂日尔	Áng rì ěr
+Ángeles	安赫莱斯	Ān hè lái sī
+Angélica	安赫利卡	Ān hè lì kǎ
+Angelica	安杰丽珂	Ān Jié lì kē
+Angelina	安吉丽娜	Ān jí lì nà
+Angéline	安热琳	Ān rè lín
+Angeline	昂热琳	Áng rè lín
+Angélique	安热莉克	Ān rè lì kè
+Angelique	安吉里克	Ān jí lǐ kè
+Angelo	安吉洛	Ān jí luò
+Ángels	安杰尔丝	Ān Jié ěr sī
+Angharad	安哈蕾德	Ān hā lěi dé
+Angie	安吉	Ān jí
+Aniara	安妮娅拉	Ān nī yà lā
+Aníbal	阿尼瓦尔	Ā ní wǎ r
+Anica	阿妮卡	Ā nī kǎ
+Aniceto	阿尼塞托	Ā ní sài tuō
+Anik	阿妮克	Ā nī kè
+Anika	阿妮卡	Ā nī kǎ
+Anis	阿妮斯	Ā nī sī
+Anisa	安妮莎	Ān ní shā
+Anissa	安妮莎	Ān ní shā
+Anita	安妮塔	Ān nī tǎ
+Anja	安亚	Ān yà
+Ankémi	昂克米	Áng kè mǐ
+Ann	安	Ān
+Anna	安娜	Ān nà
+Anna	阿娜	Ā nà
+Annabelle	安娜贝拉	Ān nà bèi lā
+Annaïg	阿娜伊克	Ā nà Yī kè
+Annaïk	阿耐克	Ā nài kè
+Annamaria	安娜玛丽亚	Ān nà Mǎ lì yà
+Anne	安	Ān
+Anne-Claire	安·克莱尔	Ān kè lái ěr
+Anne-France	安·弗朗丝	Ān fú lǎng sī
+Anne-Gaëlle	安盖尔	Ān Gài ěr
+Anne-Laure	安·罗尔	Ān luó ěr
+Anne-Lise	安·丽丝	Ān lí sī
+Anne-Marie	安·玛丽	Ān mǎ lì
+Anne-Sophie	安·苏菲	Ān sū fēi
+Annelie	安内莉	Ān nèi lì
+Annette	安妮特	Ān nī té
+Annick	安尼克	Ān ní kè
+Annie	安妮	Ān nī
+Annika	阿尼卡	Ā ní kǎ
+Annitia	阿妮蒂娅	Ā nī dì yà
+Anny	阿妮	Ā nī
+Anouchka	阿努什卡	Ā nǔ shí kǎ
+Anouck	阿努克	Ā nǔ kè
+Anouk	阿努克	Ā nǔ kè
+Anoushka	阿努什卡	Ā nǔ shí kǎ
+Anselmo	安塞尔莫	Ān sài rmò
+Antero	安特罗	Ān tè luó
+Anthea	安西娅	Ān xī yà
+Anthony	安东尼	Ān dōng ní
+Anthony	安托尼	Ān tuō ní
+Antígono	安蒂戈诺	Ān dì gē nuò
+Antje	安帖	Ān tiě
+Anto	安托	Ān tuō
+Antoine	安托万	Ān tuō wàn
+Antoinette	安托瓦内特	Ān tuō wǎ nèi tè
+Antona	安托娜	Ān tuō nà
+Antonela	安托内拉	Ān tuō nèi lā
+Antonella	安托内拉	Ān tuō nèi lā
+Antonette	安托内特	Ān tuō nèi tè
+Antoni	安托尼	Ān tuō ní
+Antoni	安托尼	Ān tuō ní
+Antonia	安东尼亚	Ān dōng ní yà
+Antónia	安托妮娅	Ān tuō nī yà
+Antonietta	安托涅塔	Ān tuō niè tǎ
+Antonin	安托宁	Ān tuō níng
+Antonio	安东尼奥	Ān dōng ní ào
+António	安东尼奥	Ān dōng ní ào
+António	安东尼奥	Ān dōng ní ào
+Antony	安东尼	Ān dōng ní
+Antony	安托尼	Ān tuō ní
+Anya	阿妮亚	Ā nī yà
+Anybel	阿妮贝	Ā nī Bèi
+Aodren	奥德琳	Aò dé lín
+Aolei	奥蕾	Aò lěi
+Aonzo	阿昂佐	Ā áng zuǒ
+Aora	奥拉	Aò lā
+Aparecida	阿琶蕾茜达	Ā pá lěi xī dá
+Apdil	阿卜蒂尔	Ā bù dì ěr
+Apolinario	阿波利纳里奥	Ā bō lì nà lǐ ào
+Apolline	阿波琳	Ā bō lín
+Apollon	阿波罗	Ā bō luō
+Apolodoro	阿波洛多罗	Ā bō luò duō luó
+Apolonio	阿波洛尼奥	Ā bō luò ní ào
+Appoline	阿波琳	Ā bō lín
+April	艾普尔	Aì pǔ ěr
+Aquiles	阿基莱斯	Ā jī lái sī
+Aquilino	阿基利诺	Ā jī lì nuò
+Arabesco	阿拉贝斯克	Ā lā Bèi sī kè
+Araceli	阿拉塞利	Ā lā sāi lì
+Arachele	阿拉诗	Ā lā shī
+Aramaico	阿拉麦克	Ā lā Mài kè
+Arancha	阿兰查	Ā lán chá
+Arcadio	阿卡迪奥	Ā kǎ dí ào
+Archibald	阿尔希巴	Ā ěr xī Bā
+Arelis	阿蕾莉丝	Ā lěi lì sī
+Ari	阿丽	Ā lì
+Ariadna	阿丽娅德娜	Ā lì yà dé nà
+Ariadna	阿莉娅德娜	Ā lì yà dé nà
+Ariana	艾丽安娜	Aì lí ān nà
+Ariane	艾丽安	Aì lí ān
+Arianna	艾丽安娜	Aì lí ān nà
+Arianne	艾丽安	Aì lí ān
+Aricia	阿丽霞	Ā lì xiá
+Ariel	亚列	Yà liè
+Arielle	艾丽尔	Aì lì ěr
+Ariene	阿莲	Ā lián
+Arif	阿里夫	Ā lǐ fū
+Aris	阿里斯	Ā lǐ sī
+Aristóbolo	阿里斯托沃夫	Ā lǐ sī tuō wò fū
+Aristófanes	阿里斯托法内斯	Ā lǐ sī tuō fǎ nèi sī
+Arizona	亚利桑那	Yà lì sāng nà
+Arkyabouski	阿尔卡布斯吉	Ā ěr Kǎ Bù sī Jí
+Arla	阿尔拉	Ā ěr lā
+Arlette	阿尔蕾特	Ā ěr lěi tè
+ArLyson	阿尔丽森	Ā ěr lì sēn
+Armand	阿尔芒	Ā ěr máng
+Armando	阿曼多	Ā màn duō
+Armelle	阿尔梅	Ā ěr méi
+Armindo	阿尔敏多	Ā ěr mǐn duō
+Arnaldo	阿纳尔多	Ā nà rduō
+Arnau	阿尔瑙	Ā ěr nǎo
+Arnau	阿尔诺	Ā ěr nuò
+Arnaud	阿尔诺	Ā ěr nuò
+Arnauld	阿尔诺	Ā ěr nuò
+Arnold	阿尔诺德	Ā ěr nuò dé
+Arnowde	阿尔诺德	Ā ěr nuò dé
+Aroa	阿洛阿	Ā luò Ā
+Aroha	奥哈	Aò Hā
+Aroldo	阿罗多	Ā luó duō
+Arreola	阿雷奥拉	Ā léi ào lā
+Arriano	阿里亚诺	Ā lǐ yà nuò
+Arris	阿利斯	Ā lì sī
+Arsène	亚森	Yà sēn
+Arsenio	阿赛尼奥	Ā sài ní ào
+Arshad	阿尔莎德	Ā ěr shā dé
+Artemis	阿特弥斯	Ā té mí sī
+Arthaud	阿尔托	Ā ěr tuō
+Arthur	阿瑟	Ā sè
+Arthur	阿尔图	Ā ěr tú
+Artur	阿尔图	Ā ěr tú
+Arturo	阿图罗	Ā tú luó
+Arun	阿昏	Ā hūn
+Arys	阿里斯	Ā lǐ sī
+Ascensión	阿松森	Ā sōng sēn
+Aseneth	阿斯内特	Ā sī nèi tè
+Ashanti	阿善蒂	Ā shàn dì
+Ashika	阿希卡	Ā xī Kǎ
+Ashley	艾什莉	Aì shí lì
+Ashlyn	阿什琳	Ā shí lín
+Ashok	阿苏克	Ā sū kè
+Asier	阿西尔	Ā xī ěr
+Asmaa	阿丝玛	Ā sī mǎ
+Assetou	阿斯图	Ā sī tú
+Assia	阿茜娅	Ā xī yà
+Asstou	阿斯图	Ā sī tú
+Assumpta	阿笋塔	Ā sǔn tǎ
+Assunção	阿笋萨奥	Ā sǔn sà ào
+Assunpció	阿笋秀	Ā sǔn Xiù
+Assuramaya	阿苏拉玛雅	Ā Sū lā Mǎ Yǎ
+Aston	阿斯顿	Ā sī dùn
+Astrid	阿斯特丽德	Ā sī té lì dé
+Asturia	阿斯图里亚	Ā sī tú lǐ yà
+Asunción	亚松森	Yà sōng sēn
+Aswimi	阿斯薇米	Ā sī wēi mǐ
+Atanasia	阿塔娜西亚	Ā tǎ nà xī yà
+Athalya	阿塔丽娅	Ā tǎ lì yà
+Athéna	雅典娜	Yǎ diǎn nà
+Atila	阿蒂拉	Ā dì lā
+Atilano	阿提拉诺	Ā tí lā nuò
+Atílio	阿迪利奥	Ā dí lì ào
+Atilla	阿迪拉	Ā dí lā
+Atsaliya	阿德萨丽雅	Ā dé sà lì Yǎ
+Aubin	奥宾	Aò bīn
+Aubouin	奥布昂	Aò bù áng
+Aude	奥德	Aò dé
+Audréanne	奥德蕾安	Aò dé lěi ān
+Audrey	奥黛丽	Aō dài lì
+August	奥古斯特	Aò gǔ sī tè
+Augusta	奥古斯塔	Aò gǔ sī tǎ
+Auguste	奥古斯特	Aò gǔ sī tè
+Augustin	奥古斯丁	Aò gǔ sī dīng
+Augustine	奥古斯丁	Aò gǔ sī dīng
+Augusto	奥古斯托	Aò gǔ sī tuō
+Aura	奥拉	Aò lā
+Aurane	奥兰	Aò lán
+Aure	奥尔	Aò ěr
+Aurea	奥乐阿	Aò lè ā
+Auréane	奥黑安	Aò hēi ān
+Aurelia	奥蕾莉娅	Aò lěi lì yà
+Aureliano	奥雷利亚诺	Aò léi lì yà nuò
+Aurélie	奥黑莉	Aò hēi lì
+Aurélien	奥雷里安	Aò léi lǐ ān
+Aurelio	奥雷利奥	Aò léi lì ào
+Auriane	奥丽安	Aò lí ān
+Aurora	奥罗拉	Aò luó lā
+Aurore	奥罗尔	Aò luō ěr
+Austin	奥斯汀	Aò sī dīng
+Auxanne	奥科散	Aò kē sǎn
+Ava	阿瓦	Ā wǎ
+Avelino	阿维利诺	Ā wéi lì nuò
+Avril	艾薇儿	Aì wēi ér
+Avrile	艾薇儿	Aì wēi ér
+Axel	阿克瑟尔	Ā kè sè ěr
+Axelle	阿克塞拉	Ā kè sāi lā
+Aya	阿娅	Ā yà
+Ayala	阿亚拉	Ā yà lā
+Aydan	埃旦	Aī dàn
+Aylah	艾拉	Aì lā
+Ayleen	艾琳	Aì lín
+Aymane	埃曼	Aī màn
+Aymé	埃梅	Aī méi
+Aymerick	艾默里克	Aì mò lǐ kè
+Ayoub	阿由布	Ā yóu bù
+Ayrton	阿依顿	Ā yī dùn
+Ayumi	阿玉米	Ā yù mǐ
+Azahara	阿萨阿拉	Ā sà ā lā
+Azelino	阿兹丽诺	Ā zī lì nuò
+Azhari	阿萨利	Ā sà lì
+Azhura	阿苏拉	Ā Sū lā
+Azib	阿齐	Ā Qí
+Azucena	阿苏塞纳	Ā sū sāi nà
+Azuela	阿苏埃拉	Ā sū āi lā
+Azul	阿苏了	Ā sū le
+Azura	阿苏拉	Ā sū lā
+Azzaro	阿帀罗	Ā zā luó
+Babette	芭贝特	Bā bèi té
+Baddih	巴迪	Bā dí
+Badria	芭德丽亚	Bā dé lì yà
+Badys	芭迪斯	Bā dí sī
+Bahar	巴哈	Bā hā
+Bailey	贝莉	Bèi lì
+Balbino	巴尔维诺	Bā rwéi nuò
+Baldomero	巴尔多梅罗	Bā rduō méi luó
+Balduíno	巴尔杜伊诺	Bā ěr dù yī nuò
+Baldwin	巴尔塔温	Bā ěr tǎ wēn
+Balou	巴路	Bā Lù
+Baltasar	巴尔塔萨	Bā rtǎ sà
+Balthasar	巴尔塔萨	Bā ěr tǎ sà
+Bambi	斑比	Bān bǐ
+Baptiste	巴蒂斯特	Bā dì sī té
+Barb	巴尔布	Bā ěr Bù
+Barbara	笆笆拉	Bā bā lā
+Barbara	笆笆拉	Bā bā lā
+Bárbara	笆笆拉	Bā bā lā
+Bärbel	贝尔布	Bèi ěr bù
+Barnabé	巴尔纳贝	Bā ěr nà bèi
+Barry	巴利	Bā lì
+Bart	巴尔特	Bā ěr tè
+Bartłomiej	巴尔托米	Bā ěr tuō mǐ
+Bartolmeu	巴尔托梅奥	Bā ěr tuō méi ào
+Bartolomé	巴托洛梅	Bā tuō luò méi
+Bartomeu	巴尔托梅	Bā ěr tuō Méi
+Bary	巴利	Bā lì
+Basa	巴萨	Bā sà
+Basile	巴西勒	Bā xī lè
+Basilio	巴西略	Bā xī lüè
+Basma	巴丝玛	Bā sī mǎ
+Bastian	巴斯蒂昂	Bā sī dì áng
+Bastian	巴斯蒂安	Bā sī dì ān
+Bastien	巴斯蒂安	Bā sī dì ān
+Batista	巴迪斯塔	Bā dí sī tǎ
+Batres	巴特雷斯	Bā tè léi sī
+Bautista	包蒂斯塔	Bāo dì sī tǎ
+Bay	贝	Bèi
+Bean	宾	Bīn
+Beat	比特	Bǐ tè
+Beata	贝塔	Bèi tǎ
+Béatrice	贝阿特丽丝	Bèi ā té lí sī
+Beatriu	贝芽蒂	Bèi yá dì
+Beatriz	贝亚特里斯	Bèi yà tè lǐ sī
+Beca	贝卡	Bèi kǎ
+Bécassine	贝卡辛	Bèi kǎ xīn
+Becky	贝基	Bèi jī
+Begoña	贝戈尼亚	Bèi gē ní yà
+Belén	贝莲	Bèi lián
+Bélinda	贝琳拉	Bèi lín lā
+Belinda	贝琳达	Bèi lín dá
+Belisario	贝利萨里奥	Bèi lì sà lǐ ào
+Beltrán	贝尔特兰	Bèi rtè lán
+Ben	本	Běn
+Bénamar	贝纳马尔	Bèi nà mǎ ěr
+Benancio	贝南西奥	Bèi nán xī ào
+Benavente	贝纳文特	Bèi nà wén tè
+Benavides	贝纳维德斯	Bèi nà wéi dé sī
+Bénédicte	贝内迪克特	Bèi nèi dí kè tè
+Benedicto	贝内迪克托	Bèi nèi dí kè tuō
+Benedita	贝内蒂塔	Bèi nèi dì tǎ
+Benedito	贝内迪托	Bèi nèi dí tuō
+Benigno	贝尼尼奥	Bèi ní ní ào
+Benita	贝妮塔	Bèi ní tǎ
+Benito	贝尼托	Bèi ní tuō
+Benjamim	本杰明	Běn jié míng
+Benjamin	本沙明	Běn shā míng
+Benjamin	本杰明	Běn jié míng
+Benjy	夯吉	Hāng Jí
+Benny	本尼	Běn ní
+Benoît	伯努瓦	Bó nǔ wǎ
+Bento	本托	Běn tuō
+Benvingut	本文古	Běn wén Gǔ
+Berakel	贝腊凯	Bèi là Kǎi
+Bérangère	贝朗杰	Bèi lǎng jié
+Berat	贝哈	Bèi Hā
+Berengár	贝伦嘉	Bèi lún jiā
+Bérengère	贝朗杰	Bèi lǎng jié
+Berenguer	贝伦克尔	Bèi lún kèr
+Bérénice	贝伦妮斯	Bèi lún ní sī
+Berenice	贝伦妮斯	Bèi lún ní sī
+Berkan	贝矸	Bèi gān
+Berlinda	柏琳达	Bǎi lín dá
+Bermudo	贝尔穆多	Bèi ěr mù duō
+Bernabé	贝尔纳维	Bèi ěr nà wéi
+Bernabè	巴尔纳贝	Bā ěr nà Bèi
+Bernadette	伯纳蒂特	Bó nà dì té
+Bernaldo	贝纳尔多	Bèi nà rduō
+Bernard	伯纳德	Bó nà dé
+Bernard	贝尔纳	Bèi ěr nà
+Bernardette	贝纳黛特	Bèi nà Dài tè
+Bernardí	贝尔纳丁	Bèi ěr nà dīng
+Bernardina	贝纳蒂娜	Bèi nà dì nà
+Bernardino	贝纳迪诺	Bèi nà dí nuò
+Bernardo	贝尔纳多	Bèi rnà duō
+Bernat	贝纳特	Bèi nà tè
+Bernice	柏妮丝	Bǎi nī sī
+Bernie	贝尔尼	Bèi ěr ní
+Berta	贝尔塔	Bèi rtǎ
+Berta	贝尔塔	Bèi ěr tǎ
+Bertrand	贝特朗	Bèi té lǎng
+Beta	布蕾塔	Bù lěi tǎ
+Bethan	贝覃	Bèi tán
+Bethany	贝塔尼	Bèi tǎ ní
+Betsa	贝姹	Bèi chà
+Betsy	贝琪	Bèi qí
+Bettina	贝蒂娜	Bèi dì nà
+Betto	贝托	Bèi tuō
+Betty	贝蒂	Bèi dì
+Betuca	北图卡	Běi tú Kǎ
+Betül	贝图尔	Bèi tú ěr
+Betzy	贝齐	Bèi qí
+Beverley	贝弗莉	Bèi fú lì
+Beviere	贝维尔	Bèi wéi ěr
+Beyonce	碧昂斯	Bì áng sī
+Bianca	碧昂卡	Bì áng kǎ
+Bianka	碧昂卡	Bì áng Kǎ
+Bibi	碧碧	Bì bì
+Bibiana	碧碧安娜	Bì bì ān nà
+Biel	碧艾	Bì Aì
+Bilal	比拉尔	Bǐ lā ěr
+Bilel	比雷尔	Bǐ léi ěr
+Bilitis	碧丽蒂丝	Bì lì dì sī
+Bill	比尔	Bǐ er
+Billo	比卢	Bǐ lú
+Billy	比利	Bǐ lì
+Birger	比尔格	Bǐ ěr gé
+Birgit	波吉特	Bō jí té
+Bjarne	比亚尔恩	Bǐ yà ěr ēn
+Bjorn	比尔恩	Bǐ ěr ēn
+Björn	比尤恩	Bǐ Yóu ēn
+Blai	布莱	Bù lái
+Blaise	布莱斯	Bù lái sī
+Blake	布莱克	Bù lái kè
+Blanca	布兰卡	Bù lán kǎ
+Blanche	布朗什	Bù lǎng shí
+Blanche-Neige	布朗什·内日	Bù lǎng shí nèi rì
+Blandine	布朗丁	Bù lǎng dīng
+Blas	布拉斯	Bù lā sī
+Bleuenn	布勒恩	Bù lēi ēn
+Bob	鲍步	Bào bù
+Bobbie	博比	Bó bǐ
+Bobby	鲍比	Bào bǐ
+Bodo	搏斗	Bó dòu
+Bogdan	伯格丹	Bó gé dān
+Bogusław	伯古斯瓦夫	Bó gǔ sī wǎ fū
+Bolete	波雷特	Bō léi tè
+Bommel	博梅尔	Bó Méi ěr
+Bonaventura	伯纳文图拉	Bó nà wén tú lā
+Bonifacio	博尼法西奥	Bó ní fǎ xī ào
+Bonifácio	波尼法西奥	Bō ní fǎ xī ào
+Bonnaveira	鲍纳维拉	Bào nà wéi lā
+Bonnie	伯尼	Bó ní
+Booba	布巴	Bù bā
+Bora	鲍拉	Bào lā
+Boré	波雷	Bō léi
+Boris	鲍里斯	Bào lǐ sī
+Borja	博尔哈	Bó rhā
+Boubakeur	布巴克尔	Bù Bā kè ěr
+Bouchlaghem	布什拉戈姆	Bù shí lā gē mǔ
+Bouchlaquem	布什拉克姆	Bù shí lā kè mǔ
+Bouchra	布什哈	Bù shí hā
+Bouli	布莉	Bù lì
+Boutaina	布大伊娜	Bù dà yī nà
+Bouyzane	布西安	Bù xī ān
+Brad	布拉德	Bù lā dé
+Bradley	布拉德利	Bù lā dé lì
+Brahim	布拉伊姆	Bù lā yī mǔ
+Branca	布朗卡	Bù lǎng kǎ
+Brandan	布兰丹	Bù lán dān
+Brandi	布兰迪	Bù lán dí
+Brandon	布阑登	Bù lán dēng
+Branka	布兰卡	Bù lán Kǎ
+Bras	布拉斯	Bù lā sī
+Brasão	布拉桑	Bù lā sāng
+Braulio	布劳略	Bù láo lüè
+Breiner	布莱内	Bù lái nèi
+Breizhlander	布雷兹朗德	Bù léi zī lǎng dé
+Brenda	布兰达	Bù lán dá
+Brendan	布兰丹	Bù lán dān
+Brendon	布兰登	Bù lán dēng
+Breno	布雷诺	Bù léi nuò
+Brent	布兰特	Bù lán tè
+Brett	布雷特	Bù léi tè
+Briag	布里亚格	Bù lǐ yà gé
+Brian	布莱恩	Bù lái ēn
+Brianne	布里安	Bù lǐ ān
+Brice	布里斯	Bù lǐ sī
+Bridget	布里吉特	Bù lǐ jí tè
+Bridie	布里迪	Bù lǐ dí
+Brigitte	布里吉特	Bù lǐ jí té
+Britanny	布里塔尼	Bù lǐ tǎ ní
+Brittany	布里塔尼	Bù lǐ tǎ ní
+Brodeur	布罗德尔	Bù luó dé ěr
+Bronson	布兰森	Bù lán sēn
+Brooke	布鲁克	Bù lǔ kè
+Brown	布瓦恩	Bù wǎ ēn
+Bruce	布鲁斯	Bù lǔ sī
+Bruna	布鲁纳	Bù lǔ nà
+Brunella	布鲁内拉	Bù lǔ nèi lā
+Brunin	布鲁宁	Bù lǔ nín
+Bruno	布鲁诺	Bù lǔ nuò
+Bryan	布莱恩	Bù lái ēn
+Bryand	布莱恩德	Bù lái ēn dé
+Bryanna	布莱娅娜	Bù lái yà nà
+Brynna	布莉娜	Bù lì nà
+Bryony	布莱妮	Bù lái nī
+Btisam	贝蒂萨姆	Bèi dì sà mǔ
+Buenaventura	布埃斯文图拉	Bù āi sī wén tú lā
+Buh	布	Bù
+Burak	布拉克	Bù lā kè
+Bya	巴雅	Bā Yǎ
+Byron	拜伦	Bài lún
+Cabral	卡布拉	Kǎ Bù lā
+Caddy	卡迪	Kǎ dí
+Caden	卡登	Kǎ dēng
+Cadena	卡德纳	Kǎ dé nà
+Caetà	凯棠	Kǎi táng
+Caetano	凯塔诺	Kǎi tǎ nuò
+Cailin	凯琳	Kǎi lín
+Caio	凯奥	Kǎi ào
+Caiquy	凯葵	Kǎi kuí
+Caitlin	凯特琳	Kǎi tè lín
+Caleb	卡雷布	Kǎ léi bù
+Calebe	卡雷布	Kǎ léi Bù
+Cali	卡莉	Kǎ lì
+Caliel	卡丽艾	Kǎ lì Aì
+Calista	卡莉丝塔	Kǎ lì sī tǎ
+Calixto	卡利斯托	Kǎ lì sī tuō
+Callum	卡卢姆	Kǎ Lú mǔ
+Calvin	卡尔文	Kǎ ěr wén
+Calvino	卡尔维诺	Kǎ rwéi nuò
+Caly	卡里	Kǎ lǐ
+Calypso	卡丽布索	Kǎ lì Bù suǒ
+Camargo	卡马尔格	Kǎ Mǎ ěr gé
+Camélia	卡梅莉娅	Kǎ méi lì yà
+Camellia	卡梅莉娅	Kǎ méi lì yà
+Cameron	卡梅隆	Kǎ méi lóng
+Camil	喀蜜	Kā Mì
+Camila	卡米拉	Kǎ mǐ lā
+Camilienne	卡米里安娜	Kǎ mǐ lǐ ān nà
+Camille	卡米耶	Kǎ mǐ yē
+Camilo	卡米洛	Kǎ mǐ luò
+Camissa	卡米萨	Kǎ mǐ sà
+Campo	坎波	Kǎn bō
+Camyl	卡米尔	Kǎ mǐ ěr
+Candace	坎迪斯	Kǎn dí sī
+Candela	坎德拉	Kǎn dé lā
+Candelaria	坎德拉利亚	Kǎn dé lā lì yà
+Candelária	康德拉丽亚	Kāng dé lā lì yà
+Candice	坎迪丝	Kǎn dí sī
+Cándido	坎迪多	Kǎn dí duō
+Candie	甘蒂	Gān dì
+Candy	甘蒂	Gān dì
+Candy	康蒂	Kāng dì
+Cannelle	卡内尔	Kǎ nèi ěr
+Caoimhe	卡奥恩	Kǎ ào ēn
+Caorou	高鲁	Gāo lǔ
+Capucine	卡普辛	Kǎ pǔ xīn
+Cardinali	卡尔蒂娜丽	Kǎ ěr dì nà lì
+Carena	卡蕾娜	Kǎ lěi nà
+Carina	卡莉娜	Kǎ lì nà
+Carine	卡琳	Kǎ lín
+Carla	卡尔拉	Kǎ ěr lā
+Carlee	卡尔莉	Kǎ ěr lì
+Carles	卡雷斯	Kǎ léi sī
+Carles	喀尔雷斯	Kā ěr léi sī
+Carlito	卡尔利托	Kǎ ěr lì tuō
+Carlitos	卡尔利托斯	Kǎ ěr lì tuō sī
+Carlo	卡洛	Kǎ luò
+Carlone	卡尔伦	Kǎ ěr lún
+Carlos	卡洛斯	Kǎ luò sī
+Carlota	卡洛塔	Kǎ luò tǎ
+Carlota	喀萝塔	Kā Luó tǎ
+Carly	卡尔利	Kǎ ěr lì
+Carme	喀尔美	Kā ěr měi
+Carmelo	卡梅罗	Kǎ méi luó
+Carmen	卡门	Kǎ mén
+Carmo	卡尔莫	Kǎ ěr mò
+Caro	卡罗	Kǎ luō
+Carol	卡罗尔	Kǎ luō er
+Carola	卡洛拉	Kǎ luò lā
+Carolane	卡罗兰	Kǎ luó lán
+Carolanne	卡罗兰	Kǎ luó lán
+Carole	卡罗尔	Kǎ luō er
+Carolina	卡罗利娜	Kǎ luó lì nà
+Caroline	卡罗琳	Kǎ luó lín
+Carolyn	卡洛林	Kǎ luò lín
+Carrie	凯莉	Kǎi lì
+Carsten	卡尔斯屯	Kǎ ěr sī tún
+Casandra	卡桑德拉	Kǎ sāng dé lā
+Casey	凯西	Kǎi xī
+Casiano	卡西亚诺	Kǎ xī yà nuò
+Casimiro	卡西米罗	Kǎ xī mǐ luó
+Casio	卡西奥	Kǎ xī ào
+Caso	卡索	Kǎ suǒ
+Casper	卡斯派	Kǎ sī pài
+Cassandra	卡桑德拉	Kǎ sāng dé lā
+Cassandre	卡桑德	Kǎ sāng dé
+Cassey	凯西	Kǎi xī
+Cássia	卡霞	Kǎ xiá
+Cassiano	卡夏诺	Kǎ Xià nuò
+Cassidy	卡希蒂	Kǎ xī dì
+Cassie	Jae	卡斯杰 Kǎ sī Jié
+Cast	喀斯特	Kā sī tè
+Catacha	卡塔莎	Kǎ tǎ shā
+Catalina	卡达利娜	Kǎ dá lì nà
+Catarina	卡塔丽娜	Kǎ tǎ lì nà
+Caterina	喀特琳娜	Kā tè lín nà
+Catherina	凯特琳娜	Kǎi tè lín nà
+Catherina	凯瑟琳娜	Kǎi sè lín nà
+Catherine	凯特琳	Kǎi tè lín
+Catherine	凯瑟琳	Kǎi sè lín
+Cathialine	凯缇阿琳	Kǎi Tí Ā lín
+Cathie	凯缇	Kǎi tí
+Cathleen	凯斯琳	Kǎi sī lín
+Cathy	凯西	Kǎi xī
+Catia	卡提亚	Kǎ tí yà
+Cátia	卡蒂娅	Kǎ dì yà
+Catilina	卡蒂利娜	Kǎ dì lì nà
+Catina	卡缇娜	Kǎ tí nà
+Catline	卡特琳	Kǎ tè lín
+Catón	卡顿	Kǎ dùn
+Catrin	凯特琳	Kǎi tè lín
+Cayden	凯灯	Kǎi dēng
+Cayetano	卡耶塔诺	Kǎ yē tǎ nuò
+Cecibel	瑟茜贝	Sè xī bèi
+Cécile	赛茜儿	Sài xī er
+Cecile	赛茜儿	Sài xī er
+Cecilia	塞西莉亚	Sāi xī lì yà
+Cécilia	瑟西莉娅	Sè xī lì yà
+Cecília	瑟西莉娅	Sè xī lì yà
+Cécilien	塞西利安	Sāi xī lì ān
+Cecilio	塞西利奥	Sāi xī lì ào
+Cédric	塞德里克	Sāi dé lǐ kè
+Cedric	塞德里克	Sāi dé lǐ kè
+Cédrine	塞德霖	Sāi dé lín
+Ceferino	塞费里诺	Sài fèi lǐ nuò
+Ceki	泽凯	Zé kǎi
+Celdán	塞尔丹	Sài rdān
+Celena	塞蕾娜	Sāi lěi nà
+Celeste	西莱斯特	Xī lái sī tè
+Celestí	斯雷斯丁	Sī léi sī dīng
+Célestin	塞莱斯坦	Sāi lái sī tǎn
+Celestine	塞莱斯汀	Sāi lái sī tīng
+Célestine	塞莱斯汀	Sāi lái sī tīng
+Celestino	塞莱斯蒂诺	Sāi lái sī dì nuò
+Célia	塞莉娅	Sāi lì yà
+Celia	希莉娅	Xī lì yà
+Célia	瑟莉娅	Sè lì yà
+Célian	塞利昂	Sāi lì áng
+Célicia	塞希莉娅	Sāi xī lì yà
+Celina	塞丽娜	Sāi lì nà
+Céline	塞琳	Sài lín
+Celio	西里欧	Xī lǐ ōu
+Celso	塞尔索	Sài rsuǒ
+Celya	塞莉娅	Sāi lì yà
+Cem	塞姆	Sāi mǔ
+Cemile	瑟弥勒	Sè mí lè
+Cennet	塞内特	Sāi nèi tè
+Cerrada	关上	Guān shàng
+Cervantes	塞万提斯	Sāi wàn dī sī
+Cerys	塞瑞斯	Sāi ruì sī
+Cesar	西泽	Xī zé
+César	塞萨尔	Sāi sà ěr
+Cèsar	塞萨尔	Sāi sà ěr
+Cesáreo	塞萨雷奥	Sài sà léi ào
+Cevane	塞瓦娜	Sāi wǎ nà
+Cezary	茨萨雷	Cí sà léi
+Chad	查德	Chá dé
+Chadi	沙迪	Shā dí
+Chahid	沙伊德	Shā Yī dé
+Chaiko	筛口	Shāi kǒu
+Chaïma	查伊玛	Chá yī mǎ
+Chaïmaa	查伊玛	Chá Yī Mǎ
+Chakib	沙克布	Shā kè bù
+Chanel	夏奈尔	Xià nài ěr
+Chanelle	夏奈尔	Xià nài ěr
+Chantal	尚塔尔	Shàng tǎ er
+Chantale	尚塔尔	Shàng tǎ ěr
+Chantel	尚特尔	Shàng tè ěr
+Chantelle	占特尔	Zhàn tè ěr
+Charleen	查琳	Chá lín
+Charlena	查莲娜	Chá lián nà
+Charlene	查莲	Chá lián
+Charlène	夏莲	Xià lián
+Charles	查而斯	Chá ér sī
+Charles	夏尔	Xià er
+Charley	查利	Chá lì
+Charlie	查利	Chá lì
+Charline	沙尔琳	Shā ěr lín
+Charlize	查理兹	Chá lǐ zī
+Charllène	沙尔莲	Shā ěr lián
+Charlotte	夏绿蒂	Xià lǜ dì
+Charly	查利	Chá lì
+Charrette	沙蕾德	Shā lěi dé
+Chase	蔡斯	Cài sī
+Chatelle	沙泰	Shā Tài
+Chaymaa	沙伊玛	Shā yī mǎ
+Cheick	谢克	Xiè kè
+Chelsea	切尔西	Qiè ěr xi
+Chelsey	切尔西	Qiè ěr xi
+Chema	切玛	Qiē mǎ
+Cherazade	雪拉扎德	Xuě lā zā dé
+Chérifa	雪娜莉法	Xuě nà lì Fǎ
+Cherisanne	谢丽散	Xiè lì sǎn
+Cheryl	谢丽尔	Xiè lì ěr
+Cheyenne	诗燕	Shī Yàn
+Chiara	基娅拉	Jī yà lā
+Chica	茜卡	Xī kǎ
+Chicho	池稠	Chí chóu
+Chico	奇科	Qí kē
+Chifaa	吉法阿	Jí Fǎ Ā
+Chiraz	茜拉丝	Xī lā sī
+Chirine	奇琳	Qí lín
+Chloé	克罗埃	Kè luó āi
+Chris	克里斯	Kè lǐ sī
+Christ	基督	Jī dū
+Christalline	克里斯塔琳	Kè lǐ sī tǎ lǐn
+Christelle	克里斯泰	Kè lǐ sī tài
+Christène	克莉斯戴恩	Kè lì sī Dài ēn
+Christi	科利斯蒂	Kē lì sī dì
+Christian	克里斯蒂安	Kè lǐ sī dì ān
+Christian	克里斯蒂昂	Kè lǐ sī dì áng
+Christiane	克里斯蒂安	Kè lǐ sī dì ān
+Christie	克里斯蒂	Kè lǐ sī dì
+Christin	克里斯丁	Kè lǐ sī dīng
+Christina	克里斯蒂娜	Kè lǐ sī dí nà
+Christine	克莉斯婷	Kè lì sī tíng
+Christo	克来斯多	Kè lái sī duō
+Christophe	克来斯多夫	Kè lái sī duō fū
+Christopher	克来斯多夫	Kè lái sī duō fū
+Christophine	克莱斯多芬	Kè lái sī duō fēn
+Christy	克里斯蒂	Kè lǐ sī dì
+Chrystalle	克里斯泰	Kè lǐ sī tài
+Chrystelle	克里斯泰	Kè lǐ sī tài
+Chucho	丘乔	Qiū qiáo
+Ciani	瑕尼	Xiá ní
+Ciaran	塞伦	Sāi lún
+Cibele	茜贝拉	Xī Bèi lā
+Cibelle	茜贝	Xī Bèi
+Cicerón	西塞龙	Xī sài lóng
+Cid	熙德	Xī dé
+Cidalia	希达莉娅	Xī dá lì yà
+Cidji	西琦	Xī Qí
+Cindie	辛迪	Xīn dí
+Cindy	辛迪	Xīn dí
+Cintete	新特特	Xīn tè tè
+Cintia	辛蒂亚	Xīn dì yà
+Cíntia	辛蒂娅	Xīn dì yà
+Cipria	西浦良	Xī pǔ liáng
+Cipriano	西普里亚诺	Xī pǔ lǐ yà nuò
+Circe	喀耳刻	Kā ěr kè
+Cirilo	西里洛	Xī lǐ luò
+Ciro	西罗	Xī luó
+Claire	克莱尔	Kè lái er
+Clara	克莱拉	Kè lái lā
+Clarette	克拉瑞特	Kè lā ruì tè
+Clarisse	克拉丽丝	Kè lā lí sī
+Clary	克莱莉	Kè lái lì
+Claude	克劳德	Kè láo dé
+Claudete	克劳黛特	Kè Láo Dài tè
+Claudette	克劳蒂特	Kè Láo dì tè
+Claudia	克劳迪娅	Kè láo dí yà
+Claudie	克劳迪	Kè láo dí
+Claudina	克劳迪娜	Kè láo dí nà
+Claudine	克劳汀	Kè láo tīng
+Claudio	克劳迪噢	Kè láo dí ō
+Claudy	克劳迪	Kè láo dí
+Clea	克丽	Kè lí
+Cléa	克蕾娅	Kè lěi yà
+Cleber	克雷贝尔	Kè léi Bèi ěr
+Cléber	克莱贝	Kè lái Bèi
+Cleia	克莱雅	Kè lái Yǎ
+Cleiton	克雷屯	Kè léi tún
+Clélia	柯蕾丽娅	Kē lěi lì yà
+Clémence	克雷芒丝	Kè léi máng sī
+Clemencia	克莱门西亚	Kè lái mén xī yà
+Clément	克雷芒	Kè léi máng
+Clemente	克莱门特	Kè lái mén tè
+Clémentine	克雷芒汀	Kè léi máng tīng
+Clementine	克莱门蒂娜	Kè lái mén dì nà
+Cleopatra	克蕾奥帕特拉	Kè lěi ào pà té lā
+Cléopatre	克蕾奥帕特拉	Kè lěi ào pà té lā
+Clermont	克莱蒙	Kè lái mēng
+Clervie	克莱尔维	Kè lái ěr wéi
+Cleto	克蕾托	Kè lěi tuō
+Cleverson	克雷维森	Kè léi wéi sēn
+Cleverton	克雷维屯	Kè léi wéi tún
+Climène	克丽门	Kè lì mén
+Climent	克利蒙	Kè lì mēng
+Clio	科莉欧	Kē lì ōu
+Cloé	克罗埃	Kè luó āi
+Clotario	克洛塔里奥	Kè luò tǎ lǐ ào
+Clothilde	克洛蒂尔	Kè luò dì er
+Clotilde	克洛蒂尔	Kè luò dì er
+Clovis	克罗维斯	Kè luó wéi sī
+Cochise	科奇斯	Kē qí sī
+Cody	科迪	Kē dí
+Coen	磙	Gǔn
+Cole	克勒	Kè lè
+Colette	柯莱特	Kē lái té
+Colin	科琳	Kē lín
+Coline	科琳	Kē lín
+Colleen	科琳	Kē lín
+Colombe	科隆	Kē lóng
+Côme	科姆	Kē mǔ
+Concepción	孔塞普西翁	Kǒng sài pǔ xī wēng
+Concetta	孔折塔	Kǒng zhé tǎ
+Concha	孔查	Kǒng chá
+Conchi	孔奇	Kǒng qí
+Connor	康纳	Kāng nà
+Conny	科妮	Kē nī
+Conor	康纳	Kāng nà
+Conrado	孔拉多	Kǒng lā duō
+Constance	康斯坦斯	Kāng sī tǎn sī
+Constancia	康斯坦西亚	Kāng sī tǎn xī yà
+Constancio	康斯坦西奥	Kāng sī tǎn xī ào
+Constantí	康斯棠汀	Kāng sī táng tīng
+Constantin	康斯坦丁	Kāng sī tǎn dīng
+Constantino	康斯坦丁诺	Kāng sī tǎn dīng nuò
+Constantinus	康斯坦丁努斯	Kāng sī tǎn dīng nǔ sī
+Constanza	康斯坦札	Kāng sī tǎn zhá
+Constanze	孔丝唐丝	Kǒng sī Táng sī
+Consuelo	孔苏埃洛	Kǒng sū āi luò
+Conswala	孔斯瓦拉	Kǒng sī wǎ lā
+Cooper	库珀	Kù pò
+Coral	科拉尔	Kē lā r
+Coralia	柯拉莉娅	Kē lā lì yà
+Coralie	柯拉莉	Kē lā lì
+Coraline	柯拉琳	Kē lā lín
+Cordeiro	克德罗	Kè dé luó
+Corentin	科朗汀	Kē lǎng tīng
+Corentine	科朗汀	Kē lǎng tīng
+Corey	克里	Kè lǐ
+Corina	科利纳	Kē lì nà
+Corinna	科琳娜	Kē lín nà
+Corinne	科琳	Kē lín
+Cornelio	科尔内略	Kēr nèi lüè
+Cornélio	科尔内利奥	Kē ěr nèi lì ào
+Cornelius	克内柳丝	Kè nèi liǔ sī
+Cory	克里	Kè lǐ
+Cosette	柯塞特	Kē sāi tè
+Cosima	克希马	Kè xī mǎ
+Cosme	科斯梅	Kē sī méi
+Cosme	克斯梅	Kè sī Méi
+Courtney	考特尼	Kǎo tè ní
+Couto	库透	Kù tòu
+Covadonga	科瓦东加	Kē wǎ dōng jiā
+Craig	克雷格	Kè léi gé
+Crispín	克里斯平	Kè lǐ sī píng
+Crissy	克里茜	Kè lǐ xī
+Cristhiam	克里斯蒂安	Kè lǐ sī dì ān
+Cristhian	克里斯蒂安	Kè lǐ sī dì ān
+Cristi	克莉斯蒂	Kè lì sī dì
+Cristian	克里斯蒂安	Kè lǐ sī dì ān
+Cristiano	克里斯蒂亚诺	Kè lǐ sī dì yà nuò
+Cristie	克莉斯蒂	Kè lì sī dì
+Cristina	克里斯蒂娜	Kè lǐ sī dì nà
+Cristine	克莉斯汀	Kè lì sī tīng
+Cristino	克里斯蒂诺	Kè lǐ sī dì nuò
+Cristo	克里斯托	Kè lǐ sī tuō
+Cristóbal	克里斯托瓦尔	Kè lǐ sī tuō wǎ r
+Cristofol	克里斯托佛	Kè lǐ sī tuō Fó
+Cristofor	克里斯托佛	Kè lǐ sī tuō Fó
+Cristóvão	科里斯托瓦奥	Kē lǐ sī tuō wǎ ào
+Cruz	克鲁斯	Kè lǔ sī
+Crystal	克里斯塔尔	Kè lǐ sī tǎ ěr
+Cueva	奎瓦斯	Kuí wǎ sī
+Cunégonde	酷内恭德	Kù nèi gōng dé
+Curtis	柯蒂斯	Kē dì sī
+Cydi	茜蒂	Xī dì
+Cylas	西拉斯	Xī lā sī
+Cyliane	茜丽安	Xī lì ān
+Cynthia	辛西娅	Xīn xī yà
+Cynthia	辛蒂娅	Xīn dì yà
+Cyprien	西普里安	Xī pǔ lǐ ān
+Cyriac	西里亚克	Xī lǐ yà kè
+Cyrian	西利昂	Xī lì áng
+Cyrielle	西丽尔	Xī lì ěr
+Cyril	西里尔	Xī lǐ ěr
+Cyrille	西里尔	Xī lǐ er
+Cyrine	茜琳	Xī lín
+Czesław	茨斯拉夫	Cí sī lā fū
+Dadou	达杜	Dá dù
+Dafnée	达芙妮	Dá fú nī
+Dafydd	达非德	Dá fēi dé
+Dagmar	达格玛	Dá gé mǎ
+Daiana	戴娜	Dài nà
+Daiane	达雅恩	Dá Yǎ ēn
+Daisy	戴西	Dài xī
+Dajana	达贾娜	Dá Jiǎ nà
+Daliane	达莉安	Dá lì ān
+Dalibor	达利波	Dá lì bō
+Dalila	达利拉	Dá lì lā
+Dallana	达拉纳	Dá lā nà
+Dallas	达拉斯	Dá lā sī
+Damaso	达马索	Dá mǎ suǒ
+Damian	达米安	Dá mǐ ān
+Damiãno	大米阿诺	Dà mǐ ā nuò
+Damien	达米恩	Dá mǐ ēn
+Damir	达米尔	Dá mǐ ěr
+Damon	戴蒙	Dài mēng
+Dan	丹	Dān
+Dana	丹娜	Dān nà
+Danaé	达娜伊	Dá nà Yī
+Danaly	达哪丽	Dá nǎ lì
+Dang	党	Dǎng
+Dani	丹尼	Dān ní
+Daniel	丹尼尔	Dān ní ěr
+Daniel	丹尼	Dān ní
+Daniela	丹涅拉	Dān niè lā
+Danièle	丹妮尔	Dān nī ěr
+Danielle	丹妮尔	Dān nī er
+Danika	达妮卡	Dá nī Kǎ
+Danila	达妮拉	Dá nī lā
+Danilo	达尼洛	Dá ní luò
+Danjela	达妮艾拉	Dá nī Aì lā
+Danndara	旦达拉	Dàn dá lā
+Danny	丹尼	Dān ní
+Dante	丹特	Dān tè
+Dany	丹尼	Dān ní
+Danya	达妮娅	Dá nī yà
+Daphne	达芙妮	Dá fú nī
+Daphnée	达芙妮	Dá fú nī
+Darby	达尔贝	Dá ěr Bèi
+Darcie	达尔西	Dá ěr xī
+Darcy	达尔西	Dá ěr xī
+Darian	达里安	Dá lǐ ān
+Darío	达里奥	Dá lǐ ào
+Dário	大力奥	Dà lì ào
+Dariusz	大力尤什	Dà lì yóu shí
+Darlene	达二莲	Dá èr lián
+Darlin	达尔琳	Dá ěr lín
+Darrell	达瑞尔	Dá ruì ěr
+Darren	达伦	Dá lún
+Darron	德忈	Dé Rén
+Darwin	达尔文	Dá ěr wén
+Daryl	达里尔	Dá lǐ ěr
+Dave	戴夫	Dài fū
+Davi	大卫	Dà wèi
+David	大卫	Dà wèi
+Davide	戴维德	Dài wéi dé
+Davina	戴维娜	Dài wéi nà
+Davor	达沃	Dá wò
+Davy	大卫	Dà wèi
+Dawid	大卫	Dà wèi
+Dawson	道森	Dào sēn
+Dayana	达娅娜	Dá yà nà
+Dean	迪恩	Dí ēn
+Debbie	德碧	Dé bì
+Debborah	黛博拉黛	Dài bó lā Dài
+Debby	德比	Dé bǐ
+Debora	德沃拉	Dé wò lā
+Débora	黛博拉	Dài bó lā
+Deborah	黛博拉	Dài bó lā
+Decio	德乔	Dé qiáo
+Declan	迪克兰	Dí kè lán
+Dédé	德德	Dé dé
+Dee	蒂	Dì
+Deirdre	黛尔德雷	Dài ěr dé léi
+Deivid	大维德	Dà wéi dé
+Deiziane	黛茨安	Dài cí ān
+Deleon	德蕾昂	Dé lěi áng
+Delfine	达芬	Dá fēn
+Delfino	德尔菲诺	Dér fēi nuò
+Delia	黛莉娅	Dài lì yà
+Delizia	黛丽丽	Dài lì lì
+Delma	戴尔马	Dài ěr Mǎ
+Delphine	达芬	Dá fēn
+Demetrio	德梅特里奥	Dé méi tè lǐ ào
+Demian	德米安	Dé mǐ ān
+Demóstenes	德莫斯特内斯	Dé mò sī tè nèi sī
+Denis	德尼	Dé ní
+Denise	丹妮丝	Dān nī sī
+Deniz	德尼斯	Dé ní sī
+Dennis	丹尼斯	Dān ní sī
+Deolinda	德奥琳达	Dé ào lín dá
+Déreck	待雷克	Dài léi kè
+Derek	德里克	Dé lǐ kè
+Derik	德雷克	Dé léi kè
+Desidéria	黛希德莉娅	Dài xī dé lì yà
+Desiderio	德西德里奥	Dé xī dé lǐ ào
+Desidério	德希德利奥	Dé xī dé lì ào
+Desire	德西雷	Dé xī léi
+Despina	德丝皮娜	Dé sī Pí nà
+Desree	黛丝瑞	Dài sī ruì
+Destiny	黛丝蒂妮	Dài sī dì nī
+Devis	德维斯	Dé wéi sī
+Devlin	德福琳	Dé Fú lín
+Devon	德万	Dé wàn
+Devonne	黛文	Dài wén
+Devota	德奥塔	Dé ào tǎ
+Dhouha	图哈	Tú Hā
+Diahala	蒂娅拉	Dì yà lā
+Diamantina	蒂阿曼缇娜	Dì ā màn tí nà
+Diamantino	迪亚曼陀	Dí yà màn tuó
+Diana	黛安娜	Dài ān nà
+Diana	蒂安娜	Dì ān nà
+Diandra	蒂安德拉	Dì ān dé lā
+Diane	迪安	Dí ān
+Diane	黛安	Dài ān
+Dídac	迪达克	Dí dá kè
+Didiane	迪迪安	Dí dí ān
+Didier	迪迭	Dí dié
+Diego	迭戈	Dié gē
+Dienes	甸内斯	Diàn nèi sī
+Dihya	蒂娅	Dì yà
+Dilami	蒂拉米	Dì lā mǐ
+Dimas	迪马斯	Dí mǎ sī
+Dimitri	迪米特里	Dí mǐ té lǐ
+Dina	迪娜	Dí nà
+Dinarte	蒂纳尔特	Dì nà ěr tè
+Dinio	迪尼噢	Dí ní ō
+Dinis	迪尼斯	Dí ní sī
+Dino	蒂诺	Dì nuò
+Dinorah	蒂诺拉	Dì nuò lā
+Díogenes	迪奥赫内斯	Dí ào hè nèi sī
+Diogo	迪奥格	Dí ào gé
+Díomedes	迪奥梅德斯	Dí ào méi dé sī
+Dione	蒂恩	Dì ēn
+Dionisia	迪奥尼西娅	Dí ào ní xī yà
+Dionisio	迪奥尼西奥	Dí ào ní xī ào
+Dirceu	迪尔扫	Dí ěr sǎo
+Ditry	迪特里	Dí tè lǐ
+Divya	蒂维雅	Dì wéi yǎ
+Djamel	贾米尔	Jiǎ mǐ ěr
+Djamilla	贾米拉	Jiǎ mǐ lā
+Djayna	杰娜	Jié nà
+DJeneba	杰娜巴	Jié nà Bā
+Djulian	朱丽安	Zhū lì ān
+Dobromira	多布罗米拉	Duō bù luō mǐ lā
+Doinita	托瓦妮塔	Tuō wǎ nī tǎ
+Doll	多尔	Duō ěr
+Dolly	多里	Duō lǐ
+Dolo	多洛	Duō luò
+Dolores	多洛雷斯	Duō luò léi sī
+Dolors	朵萝丝	Duǒ Luó sī
+Domènec	多梅内克	Duō Méi nèi kè
+Domi	多米	Duō mǐ
+Domiciano	多米西亚诺	Duō mǐ xī yà nuò
+Domingo	多明戈	Duō míng gē
+Domingos	多明戈斯	Duō míng gē sī
+Dominic	多米尼克	Duō mǐ ní kè
+Dominica	多米尼克	Duō mǐ ní kè
+Dominik	多米尼克	Duō mǐ ní kè
+Dominika	多米尼克	Duō mǐ ní kè
+Dominique	多米尼克	Duō mǐ ní kè
+Domitila	多密缇拉	Duō mì tí lā
+Domitille	多米蒂耶	Duō mǐ dì yē
+Don	唐	Táng
+Donald	唐纳德	Táng nà dé
+Donat	多纳	Duō nà
+Donat	多纳特	Duō nà tè
+Donatello	多纳特罗	Duō nà tè luó
+Donatien	多纳西恩	Duō nà xī ēn
+Donato	多纳托	Duō nà tuō
+Donay	多内	Duō nèi
+Donna	唐娜	Táng nà
+Donny	唐尼	Táng ní
+Donovan	多诺万	Duō nuò wàn
+Dora	多拉	Duō lā
+Doreen	多琳	Duō lín
+Dores	多莱丝	Duō lái sī
+Dori	多利	Duō lì
+Dorian	多里安	Duō lǐ ān
+Doriane	多里安	Duō lǐ ān
+Dorianne	多丽安	Duō lì ān
+Dorine	多琳	Duō lín
+Doris	多丽丝	Duō lí sī
+Dorit	多利特	Duō lì tè
+Dorota	多罗塔	Duō luó tǎ
+Dorotea	多罗特阿	Duō luó tè ā
+Dorotéia	多萝特莉娅	Duō luó tè lì yà
+Dorothée	多罗泰	Duō luō tài
+Dorothy	多萝西	Duō luó xī
+Dorraine	多瑞恩	Duō ruì ēn
+Dorssaf	多尔萨夫	Duō ěr sà fū
+Douglas	道格拉斯	Dào gé lā sī
+Dounia	杜妮娅	Dù nī yà
+Dourado	兜拉多	Dōu lā duō
+Drezan	德雷赞	Dé léi zàn
+Driss	德莉丝	Dé lì sī
+Duarte	杜阿尔特	Dù ā ěr tè
+Duda	杜达	Dù dá
+Dulcie	达尔西	Dá ěr xī
+Duncan	邓肯	Dèng kěn
+Dundy	邓迪	Dèng dí
+Durval	杜尔瓦	Dù ěr wǎ
+Dylan	迪伦	Dí lún
+Dywane	迪万	Dí wàn
+Dzejlan	泽兰	Zé lán
+Eberha	埃贝拉	Aī Bèi lā
+Eberton	埃贝屯	Aī Bèi tún
+Ecker	埃克	Aī kè
+Eddie	艾迪	Aì dí
+Eddy	艾迪	Aì dí
+Edeline	艾德琳	Aì dé lín
+Eden	伊甸	Yī diàn
+Éder	埃德	Aī dé
+Ederson	埃德森	Aī dé sēn
+Edgar	埃德加	Aī dé jiā
+Edgardo	埃德加多	Aī dé jiā duō
+Edilberto	埃迪尔韦托	Aī dí rwéi tuō
+Edilmar	艾迪马	Aì dí Mǎ
+Edimilson	埃迪米森	Aī dí mǐ sēn
+Edinton	阿丁屯	Ā dīng tún
+Edirlene	艾蒂莲	Aì dì lián
+Edison	埃迪森	Aī dí sēn
+Edite	艾蒂特	Aì dì tè
+Edith	埃迪特	Aī dí té
+Edmar	埃德马	Aī dé Mǎ
+Edmé	埃德米	Aī dé mǐ
+Edmée	埃德米	Aī dé mǐ
+Edmond	埃德蒙	Aī dé mēng
+Edmund	埃德蒙	Aī dé mēng
+Edmundo	埃德孟多	Aī dé mèng duō
+Edna	艾德娜	Aí dé nà
+Edona	埃多娜	Aī duō nà
+Edouard	埃德瓦	Aī dé wǎ
+Edson	埃德森	Aī dé sēn
+Eduard	埃杜瓦尔	Aī dù wǎ ěr
+Eduarda	艾杜阿尔达	Aì dù ā ěr dá
+Eduardo	埃德华多	Aī dé huá duō
+Edurne	诶杜尔内	
+Edward	爱德华	Aì dé huā
+Edwige	艾德薇日	Aì dé wēi rì
+Edwin	埃德温	Aī dé wēn
+Edyta	艾蒂塔	Aì dì tǎ
+Efigênia	伊翡日妮娅	Yī fěi rì nī yà
+Efrain	埃弗拉因	Aī fú lā yīn
+Églantine	艾格朗汀	Aì gé lǎng tīng
+Eglantine	艾克朗汀	Aì kè lǎng tīng
+Eiken	埃肯	Aī kěn
+Eileen	艾琳	Aì lín
+Eïleen	艾琳	Aì lín
+Eilisange	艾黎散各	Aì lí sǎn gè
+Ekrie	艾克里	Aì kè lǐ
+Eladio	埃拉迪奥	Aī lā dí ào
+Elaina	伊莱娜	Yī lái nà
+Elaine	伊莲	Yī lián
+Elalie	埃拉莉	Aī lā lì
+Élder	埃德	Aī dé
+Eldonna	艾尔多娜	Aì ěr duō nà
+Eléa	伊莉娅	Yī lì yà
+Electa	埃莱克塔	Aī lái kè tǎ
+Electra	伊莱克特拉	Yī lái kè tè lā
+Elena	伊莲娜	Yī lián nà
+Eleniudes	艾勒纽戴丝	Aì lè niǔ Dài sī
+Elenor	艾莲诺	Aì lián nuò
+Eléonore	埃莱奥诺	Aī lái ào nuò
+Elessandro	亚历山德罗	Yà lì shān dé luó
+Eleuterio	埃莱乌特里奥	Aī lái wū tè lǐ ào
+Eli	艾黎	Aì lí
+Élia	艾利阿	Aì lì Ā
+Elian	伊良	Yī liáng
+Eliana	艾莉安娜	Aì lì ān nà
+Eliane	艾莉安	Aì lì ān
+Eliangela	艾莲杰拉	Aì lián Jié lā
+Elias	埃利亚斯	Aī lì yà sī
+Elicia	艾莉西娅	Aì lì xī yà
+Elida	埃利达	Aī lì dá
+Elie	伊利	Yī lì
+Elie	艾利	Aì lì
+Eliès	艾列丝	Aì liè sī
+Eliezer	埃利泽	Aī lì zé
+Elif	埃里夫	Aī lǐ fū
+Elijah	艾里沙	Aì lǐ Shā
+Elin	艾琳	Aì lín
+Elina	艾莉娜	Aì lì nà
+Éline	艾琳	Aì lín
+Elineldo	艾黎内多	Aì lí nèi duō
+Elio	埃利奥	Aī lì ào
+Eliona	埃利奥娜	Aī lì ào nà
+Eliott	艾略特	Aì lüè tè
+Elisa	爱丽莎	Aì lí shā
+Elisabete	伊丽莎贝特	Yī lì shā bèi tè
+Elisabeth	伊丽莎白	Yī lí shā bái
+Elise	爱丽丝	Aì lí sī
+Elisenda	艾莉森达	Aì lì sēn dá
+Eliseo	埃利塞噢	Aī lì sāi ō
+Elisete	艾黎瑟特	Aì lí sè tè
+Eliseu	艾莉苏	Aì lì Sū
+Elisia	艾丽霞	Aì lì xiá
+Elislaine	爱丽丝莲	Aì lì sī lián
+Elissa	艾莉萨	Aì lì sà
+Elizabeth	伊丽莎白	Yī lì shā bái
+Elke	埃尔克	Aī ěr kè
+Elkhansae	爱龛赛	Aì kān sài
+Ella	艾拉	Aì lā
+Elle	艾莉	Aì lì
+Ellen	艾伦	Aì lún
+Elliot	艾略特	Aì lüè tè
+Elliott	艾略特	Aì lüè tè
+Elmer	埃尔梅	Aī ěr Méi
+Eloane	艾罗安	Aì luó ān
+Elodie	艾洛蒂	Aì luò dì
+Éloé	艾露	Aì Lù
+Eloi	埃洛伊	Aī luò yī
+Elóisa	埃洛伊萨	Aī luò yī sà
+Eloïse	艾萝伊丝	Aì luó yī sī
+Eloise	艾萝依	Aì luó yī
+Éloïze	艾露伊丝	Aì Lù Yī sī
+Elona	伊罗娜	Yī luó nà
+Elora	伊劳拉	Yī láo lā
+Elora	伊劳拉	Yī láo lā
+Elorie	艾洛丽	Aì luò lì
+Elouan	埃鸾	Aī luán
+Eloy	埃洛伊	Aī luò yī
+Elsa	艾尔莎	Aì ěr shā
+Elseline	艾尔斯琳	Aì ěr sī lín
+Elson	埃尔孙	Aī ěr sūn
+Elton	埃尔顿	Aī ěr dùn
+Elvin	埃尔温	Aī ěr wēn
+Elvira	埃尔维拉	Aī rwéi lā
+Elvira	艾玮拉	Aì wěi lā
+Elvire	艾尔维	Aì erwéi
+Elvis	埃尔维斯	Aī ěr wéi sī
+Elwyn	艾尔雯	Aì ěr wén
+Elyès	伊莉艾丝	Yī lì ài sī
+Elyna	爱丽娜	Aì lì nà
+Elyse	艾丽丝	Aì lì sī
+Elysia	爱丽霞	Aì lì xiá
+Elżbieta	艾热别塔	Aì rè biè tǎ
+Emanuel	埃曼努埃尔	Aī màn nǔ āi ěr
+Emanuela	艾玛努艾拉	Aì Mǎ nǔ Aì lā
+Emanuil	埃曼努埃尔	Aī màn nǔ āi ěr
+Émélie	艾梅丽	Aì méi lì
+Emelie	艾梅丽	Aì Méi lì
+Emelinda	艾梅林达	Aì méi lín dá
+Emeline	艾米琳	Aī mǐ lín
+Emely	艾梅丽	Aì mé lì
+Emelyne	艾米琳	Aī mǐ lín
+Emer	尹美尔	Yǐn měi ěr
+Emerick	埃默里克	Aī mò lǐ kè
+Emerico	埃梅里克	Aī méi lǐ kè
+Emeriza	艾米莉萨	Aì mǐ lì sà
+Emerson	艾姆森	Aì mǔ sēn
+Émerson	峨嵋森	É méi sēn
+Emeterio	埃梅特里奥	Aī méi tè lǐ ào
+Émi	艾米	Aì mǐ
+Emi	艾米	Aì mǐ
+Emie	艾米	Aì mǐ
+Emiko	埃米科	Aī mǐ Kē
+Emile	埃米尔	Aī mǐ er
+Emili	埃米利	Aī mǐ lì
+Emilia	埃米利亚	Aī mǐ lì yà
+Emilia	艾蜜莉芽	Aì Mì lì yá
+Emiliane	艾迷恋	Aì mí liàn
+Emiliano	埃米利亚诺	Aī mǐ lì yà nuò
+Emilie	艾米莉	Aì mǐ lì
+Emilien	埃米利安	Aī mǐ lì ān
+Emilienne	艾米莲	Aì mǐ lián
+Emilija	艾蜜莉芽	Aì Mì lì yá
+Emilio	埃米莉噢	Aī mǐ lì ō
+Emilse	埃米尔斯	Aī mǐ ěr sī
+Emily	艾米莉	Aì mǐ lì
+Emir	埃米尔	Aī mǐ ěr
+Emma	艾玛	Aì mǎ
+Emmanuel	埃曼努埃尔	Aī màn nǔ āi er
+Emmanuella	伊曼纽艾拉	Yī màn niǔ ài lā
+Emmanuelle	伊曼纽尔	Yī màn niǔ er
+Emmy	艾米	Aì mǐ
+Emna	艾木娜	Aì mù nà
+Emre	伊默烈	Yī mò liè
+Emrys	埃默里斯	Aī mò lǐ sī
+Emy	艾米	Aì mǐ
+Enaëlle	艾娜尔	Aì nà ěr
+Encarnación	化身	Huà shēn
+Endika	恩蒂卡	Ēn dì kǎ
+Enéa	艾内娅	Aì nèi yà
+Enéas	埃内阿斯	Aī nèi ā sī
+Énerica	婀内丽卡	Ē nèi lì Kǎ
+Énerika	婀内丽卡	Ē nèi lì Kǎ
+Eneritz	埃内利特	Aī nèi lì tè
+enfermagem	护士	Hù shì
+Engracia	恩格拉西亚	Ēn gé lā xī yà
+Enguerrand	盎格朗	Àng gé lǎng
+Enie	艾妮	Aì nī
+Enis	埃尼斯	Aī ní sī
+Ennio	恩尼奥	Ēn ní ào
+Enola	婀娜拉	Ē nuó lā
+Enora	伊诺拉	Yī nuò lā
+Enos	艾诺斯	Aì nuò sī
+Enric	恩里克	Ēn lǐ kè
+Enrick	盎利克	Àng lì kè
+Enrico	恩里科	Ēn lǐ kē
+Enrique	恩里克	Ēn lǐ kè
+Enriqueta	恩里克塔	Ēn lǐ kè tǎ
+Enzo	恩佐	Ēn zuǒ
+Eolia	埃奥利阿	Aī ào lì Ā
+Erasmo	埃拉斯莫	Aī lā sī mò
+Erendira	埃伦蒂拉	Aī lún dì lā
+Eriberto	埃里贝托	Aī lǐ Bèi tuō
+Eric	艾里克	Aī lǐ kè
+Erica	艾丽卡	Aì lí kǎ
+Érica	埃里卡	Aī lǐ Kǎ
+Erick	埃里克	Aī lǐ kè
+Érico	埃里克	Aī lǐ kè
+Erik	艾黎科	Aì lí Kē
+Erika	艾丽卡	Aì lí kǎ
+Erin	伊琳	Yī lín
+Érina	艾莉娜	Aì lì nà
+Erine	艾琳	Aì lín
+Ermenegildo	埃梅内吉尔多	Aī méi nèi jí ěr duō
+Ernesto	埃内斯托	Aī nèi sī tuō
+Ernst	恩斯特	Ēn sī tè
+Eros	艾罗斯	Aì luó sī
+Ersin	艾尔新	Aì ěr Xīn
+Ervann	艾万	Aì wàn
+Erwan	艾万	Aì wàn
+Erwann	艾万	Aì wàn
+Erwin	埃尔温	Aī ěr wēn
+Eryn	艾琳	Aì lín
+Esdras	艾丝德拉丝	Aì sī dé lā sī
+Esma	艾丝玛	Aì sī mǎ
+Esmeralda	埃斯梅拉达	Aī sī méi lā dá
+Esperanza	埃斯佩兰萨	Aī sī pèi lán sà
+Estanislao	埃斯塔尼斯劳	Aī sī tǎ ní sī láo
+Esteban	埃斯特班	Aī sī tè bān
+Estée	艾丝泰	Aì sī tài
+Estefan	Aī	sī tè fāng
+Estefanía	埃斯特法尼亚	Aī sī tè fǎ ní yà
+Estefanny	艾斯蒂法妮	Aì sī dì Fǎ nī
+Estefano	埃斯特法诺	Aī sī tè fǎ nuò
+Estefany	艾丝蒂凡妮	Aì sī dì fán nī
+Estel	艾丝泰	Aì sī Tài
+Estela	埃斯特拉	Aī sī tè lā
+Estelle	埃斯特尔	Aī sī té er
+Ester	埃斯特尔	Aī sī tèr
+Ester	艾丝泰	Aì sī Tài
+Estêvão	埃斯泰瓦	Aī sī tài wǎ
+Esteve	埃斯特韦	Aī sī tè wéi
+Estève	埃斯特夫	Aī sī tè fū
+Esther	以斯帖	Yǐ sī tiě
+Estibaliz	埃斯蒂帕利	Aī sī dì pà lì
+Estrella	埃斯特雷利亚	Aī sī tè léi lì yà
+Ethan	伊桑	Yī sāng
+Ethan	伊覃	Yī tán
+Etienne	伊天	Yī tiān
+Euclides	欧克利德斯	Oū kè lì dé sī
+Eufemia	欧菲米娅	Oū fēi mǐ yà
+Eufemio	欧费米奥	Oū fèi mǐ ào
+Eufrasio	欧弗拉西奥	Oū fú lā xī ào
+Eufrosina	欧弗拉西娜	Oū fú lā xī nà
+Eugene	尤金	Yóu jīn
+Eugène	尤金	Yóu jīn
+Eugenia	欧亨尼娅	Oū hēng ní yà
+Eugênia	欧日妮娅	Oū rì nī yà
+Eugénie	欧热妮	Oū rè nī
+Eugenio	欧亨尼奥	Oū hēng ní ào
+Eugênio	欧日尼奥	Oū rì ní ào
+Eulalia	欧拉利亚	Oū lā lì yà
+Eulália	欧拉莉娅	Oū lā lì yà
+Eulàlia	欧拉莉芽	Oū lā lì yá
+Eulalie	欧拉莉	Oū lā lì
+Eulogia	欧洛希亚	Oū luò xī yà
+Eulogio	欧洛希奥	Oū luò xī ào
+Eunice	欧妮斯	Oū nī sī
+Eunir	欧尼尔	Oū ní ěr
+Eurico	欧利科	Oū lì Kē
+Eurimar	埃里马尔	Aī lǐ Mǎ ěr
+Eurydice	欧里底斯	Oū lǐ dǐ sī
+Eusebio	欧塞维奥	Oū sài wéi ào
+Eustache	欧斯塔施	Oū sī tǎ shī
+Eustaquio	欧斯塔基奥	Oū sī tǎ jī ào
+Eutimio	欧蒂米奥	Oū dì mǐ ào
+Eva	伊娃	Yī wá
+Evan	伊万	Yī wàn
+Evander	艾文达	Aì wén dá
+Evandro	艾婉德萝	Aì wǎn dé Luó
+Evane	伊范	Yī Fàn
+Evangeline	伊文捷琳	Yī wén jié lín
+Évanie	伊范妮	Yī fàn nī
+Evans	埃文斯	Aī wén sī
+Evariste	伊瓦莉丝特	Yī wǎ lì sī tè
+Evaristo	埃瓦里斯托	Aī wǎ lǐ sī tuō
+Eve	伊夫	Yī fū
+Ève-Marie	伊夫玛丽	Yī fū Mǎ lì
+Eveline	艾维琳	Aì wéi lín
+Evelyn	艾芙琳	Aì fú lín
+Evelyne	艾芙琳	Aì fú lín
+Evens	伊文斯	Yī wén sī
+Everton	艾维屯	Aì wéi tún
+Evie	艾维	Aì wéi
+Évy	艾维	Aì wéi
+Ewa	艾瓦	Aì wǎ
+Ewald	埃瓦德	Aī wǎ dé
+Ewan	伊万	Yī wàn
+Ewelina	艾薇莉娜	Aì wēi lì nà
+Ewen	艾文	Aì wén
+Éwen	艾文	Aì wén
+Exocé	埃克索色	Aī kè suǒ sè
+Ezequiel	埃塞基耶尔	Aī sài jī yēr
+Fabián	法维安	Fǎ wéi ān
+Fabian	法比安	Fǎ bǐ ān
+Fabiana	法碧安娜	Fǎ bì ān nà
+Fabiane	法碧安	Fǎ bì ān
+Fabiano	法比阿诺	Fǎ bǐ Ā nuò
+Fabião	法比安	Fǎ bǐ ān
+Fabien	法比安	Fǎ bǐ ān
+Fabienne	法碧恩	Fǎ bì ēn
+Fabila	法维拉	Fǎ wéi lā
+Fabio	法比奥	Fǎ bǐ ào
+Fábio	法比奥	Fǎ bǐ ào
+Fabiola	法维奥拉	Fǎ wéi ào lā
+Fabrice	法布里斯	Fǎ bù lǐ sī
+Fabriciano	法夫里西亚诺	Fǎ fū lǐ xī yà nuò
+Fabricio	法布里秀	Fǎ Bù lǐ Xiù
+Fabrizio	法布利修	Fǎ Bù lì xiū
+Facundo	法昆多	Fǎ kūn duō
+Fadellah	法德拉	Fǎ dé lā
+Fadma	法蒂玛	Fǎ dì Mǎ
+Faey	斐	Fēi
+Fairouz	非胡斯	Fēi hú sī
+Fairuz	非胡斯	Fēi hú sī
+Faiz	法依兹	Fǎ Yī zī
+Fakher	法克尔	Fǎ kè ěr
+Falp	菲尔普	Fēi ěr Pǔ
+Falzia	法尔嘉	Fǎ ěr Jiā
+Fanchon	芳淑	Fāng shū
+Fancy	范茜	Fàn xī
+Fanfan	芳芳	Fāng fāng
+Fani	法妮	Fǎ nī
+Fanny	范妮	Fàn nī
+Fantine	芳汀	Fāng tīng
+Farès	法赫斯	Fǎ hè sī
+Fares	法尔	Fǎ ěr
+Farhan	法涵	Fǎ hán
+Farid	法利德	Fǎ lì dé
+Farida	法丽达	Fǎ lì dá
+Faris	法利斯	Fǎ lì sī
+Fatima	法蒂玛	Fǎ dì mǎ
+Fàtima	法蒂玛	Fǎ dì Mǎ
+Fatimzahra	法蒂姆佐拉	Fǎ dì mǔ zuǒ lā
+Fatin	法婷	Fǎ tíng
+Fatoumata	法芏玛打	Fǎ dù Mǎ dǎ
+Faudel	佛德尔	Fó dé ěr
+Faust	浮士德	Fú shì dé
+Faustin	福斯坦	Fú sī tǎn
+Faustine	福斯汀	Fú sī tīng
+Faustino	福斯蒂诺	Fú sī dì nuò
+Fausto	福斯托	Fú sī tuō
+Favio	法维哦	Fǎ wéi ó
+Faya	法娅	Fǎ yà
+Faye	斐	Fěi
+Fayou	法伊乌	Fǎ Yī Wū
+Fayrouz	飞虎斯	Fēi hǔ sī
+Fayza	法伊扎	Fǎ Yī zā
+Fe	费	Fèi
+Federica	费德丽卡	Fèi dé lì kǎ
+Federico	费德里科	Fèi dé lǐ kē
+Fedra	费德拉	Fèi dé lā
+Fedro	费德罗	Fèi dé luó
+Felicia	菲莉西亚	Fēi lì xī yà
+Félicia	菲莉夏	Fēi lì Xià
+Feliciano	费利西亚诺	Fèi lì xī yà nuò
+Felicidade	菲莉茜达德	Fēi lì xī dá dé
+Félicie	菲莉丝	Fēi lì sī
+Felicísimo	费利西西莫	Fèi lì xī xī mò
+Felicitat	菲莉茜塔	Fēi lì xī tǎ
+Felicity	幸福	Xìng Fú
+Felip	飞利浦	Fēi lì pǔ
+Felipa	费利帕	Fèi lì pà
+Felipa	菲莉葩	Fēi lì pā
+Felipe	费利佩	Fèi lì pèi
+Felisa	费利萨	Fèi lì sà
+Feliu	菲柳	Fēi liǔ
+Felix	费利克斯	Fèi lì kè sī
+Feliz	费利茨	Fèi lì cí
+Fenda	吩大	Fēn dà
+Ferdaous	斐尔塔乌斯	Fēi ěr tǎ Wū sī
+Ferduw	菲尔杜	Fēi ěr dù
+Fergal	弗加尔	Fú jiā ěr
+Fermí	菲尔敏	Fēi ěr mǐn
+Fermín	费尔明	Fèi rmíng
+Fernán	费尔南	Fèi rnán
+Fernand	费尔囊	Fèi ěr náng
+Fernanda	费尔南塔	Fèi rnán tǎ
+Fernande	费尔南德	Fèi ěr nán dé
+Fernando	费尔南多	Fèi ěr nán duō
+Fernão	费尔南	Fèi ěr nán
+Ferran	费兰	Fèi lán
+Ferran	菲朗	Fēi lǎng
+Ferrão	费兰	Fèi lán
+Feten	斐覃	Fěi tán
+Fettah	菲塔	Fēi tǎ
+Ffion	菲昂	Fēi áng
+Fidel	菲德尔	Fēi dér
+Fidjy	费奇	Fèi qí
+Filat	费拉特	Fèi lā tè
+Filemón	菲莱蒙	Fēi lái méng
+Filiberto	菲利维托	Fēi lì wéi tuō
+Filip	菲力浦	Fēi lì pǔ
+Filipa	菲莉帕	Fēi lì pà
+Filipe	菲利佩	Fēi lì pèi
+Filippo	菲利波	Fēi lì bō
+Filomena	菲洛梅娜	Fēi luò méi nà
+Finbar	芬巴	Fēn bā
+Finki	芬科	Fēn Kē
+Fiona	菲奥娜	Fēi ào nà
+Fiore	菲奥雷	Fēi ào léi
+Fiorella	菲奥雷垃	Fēi ào léi
+Flavia	弗拉维亚	Fú lā wéi yà
+Flávia	弗拉维娅	Fú lā wéi yà
+Flaviano	弗拉维亚诺	Fú lā wéi yà nuò
+Flavie	弗拉维	Fú lā wéi
+Flavio	弗拉维奥	Fú lā wéi ào
+Flávio	弗拉维奥	Fú lā wéi ào
+Fleur	弗璐尔	Fú Lù ěr
+Flo	弗罗	Fú luó
+Flor	弗落尔	Fú luò r
+Flora	弗罗拉	Fú luō lā
+Florane	弗罗兰	Fú luó lán
+Flore	弗落尔	Fú luò r
+Floréla	弗洛蕾娅	Fú luò lěi yà
+Florelle	弗落蕾勒	Fú luò lěi lè
+Florence	佛罗伦丝	Fó luó lén sī
+Florencia	弗洛伦西亚	Fú luò lún xī yà
+Florencio	弗洛伦西奥	Fú luò lún xī ào
+Florent	弗劳杭	Fú láo háng
+Florentin	弗洛朗汀	Fú luò lǎng tīng
+Florentine	弗劳杭汀	Fú láo háng tīng
+Florentino	弗洛伦蒂诺	Fú luò lún dì nuò
+Florian	弗洛里安	Fú luò lǐ ān
+Floriane	弗洛莉安	Fú luò lì ān
+Floriano	弗洛里阿诺	Fú luò lǐ Ā nuò
+Florie	弗罗丽	Fú luó lì
+Florine	芙罗琳	Fú luó lín
+Flynn	弗琳	Fú lín
+Fofucho	佛福稠	Fó Fú chóu
+Fonseca	冯色卡	Féng sè Kǎ
+Forest	佛雷斯特	Fó léi sī tè
+Fortunata	佛尔图娜塔	Fó ěr tú nà tǎ
+Fortunato	福尔图纳托	Fú rtú nà tuō
+Fouzia	弗茜娅	Fú xī yà
+Fox	福克斯	Fú kè sī
+Fraj	弗拉热	Fú lā rè
+Fran	富兰	Fù lán
+France	弗朗丝	Fú lǎng sī
+Francelle	弗朗塞尔	Fú lǎng Sāi ěr
+Francesc	弗朗塞斯	Fú lǎng Sāi sī
+Francesca	弗朗西斯卡	Fú lǎng xī sī kǎ
+Francesco	弗朗西斯科	Fú lǎng xī sī kē
+Franceska	弗兰西斯卡	Fú lán xī sī kǎ
+Francette	弗朗丝特	Fú lǎng sī tè
+Franciane	弗朗西安	Fú lǎng xī ān
+Franciele	福朗谢	Fú lǎng Xiè
+Franciellen	弗朗西伦	Fú lǎng xī lún
+Francielli	弗朗谢莉	Fú lǎng Xiè lì
+Francine	弗朗辛	Fú lǎng xīn
+Francis	弗朗西斯	Fú lǎng xī sī
+Francisca	弗朗西斯卡	Fú lǎng xī sī kǎ
+Francisco	弗朗西斯科	Fú lǎng xī sī kē
+Franck	富兰克	Fù lán kè
+Francklin	富兰克林	Fù lán kè lín
+François	弗朗索瓦	Fú láng suǒ wǎ
+Françoise	弗朗索瓦丝	Fú lǎng suǒ wǎ sī
+Frank	弗兰克	Fú lán kè
+Frankie	弗兰克	Fú lán kè
+Franklin	富兰克林	Fù lán kè lín
+Franky	弗兰克	Fú lán kè
+Frans	弗兰斯	Fú lán sī
+Franz	法兰兹	Fú lán zī
+Franziska	弗兰其丝卡	Fú lán qí sī kǎ
+Fraser	弗雷丝	Fú léi sī
+Fred	弗雷德	Fú léi dé
+Freddy	弗雷迪	Fú léi dí
+Fredegunda	弗雷德贡达	Fú léi dé gòng dá
+Frédéric	弗雷德里克	Fú léi dé lǐ kè
+Frederic	弗雷德里克	Fú léi dé lǐ kè
+Fredericke	弗雷德里克	Fú léi dé lǐ kè
+Frederico	弗雷德里克	Fú léi dé lǐ kè
+Frédérique	弗雷德里克	Fú léi dé lǐ kè
+Fredi	弗雷蒂	Fú léi dì
+Frida	弗里达	Fú lǐ dá
+Friday	弗莱达	Fú lái dá
+Friedrich	弗里德里希	Fú lǐ delǐ xī
+Frine	弗理内	Fú lǐ nèi
+Fritz	弗里茨	Fú lǐ cí
+Froila	弗罗伊拉	Fú luó yī lā
+Froilan	弗罗伊兰	Fú luó yī lán
+Fructuós	福鲁克托斯	Fú lǔ kè tuō sī
+Fructuoso	弗鲁克托索	Fú lǔ kè tuō suǒ
+Fuente	富恩特	Fù ēn tè
+Fulgencio	富尔亨西奥	Fù rhēng xī ào
+Fúlvia	弗尔维亚	Fú ěr wéi yà
+Fúlvio	弗尔维奥	Fú ěr wéi ào
+Gab	加布	Jiā Bù
+Gabi	加比	Jiā bǐ
+Gabin	加宾	Jiā bīn
+Gabino	加维诺	Jiā wéi nuò
+Gabriel	加布里埃尔	Jiā bù lǐ āi er
+Gabriela	加布里艾拉	Jiā bù lǐ ài lā
+Gabriele	加布里艾尔	Jiā Bù lǐ Aì ěr
+Gabriella	加布里艾尔拉	Jiā Bù lǐ Aì ěr lā
+Gabrielle	加布里艾尔	Jiā bù lǐ ài ěr
+Gaby	加比	Jiā bǐ
+Gadi	贾迪	Jiǎ dí
+Gaea	盖娅	Gài yà
+Gaël	盖尔	Gài ěr
+Gael	盖尔	Gài ěr
+Gaëlle	盖尔	Gài ěr
+Gaelle	盖尔	Gài ěr
+Gaëtan	盖尔唐	Gài ěr táng
+Gaétan	盖尔唐	Gài ěr táng
+Gaétane	盖尔覃	Gài ěr tán
+Gaetano	盖伊塔诺	Gài yī tǎ nuò
+Gaïa	盖娅	Gài yà
+Gail	盖尔	Gài ěr
+Gaizka	盖兹卡	Gài zī kǎ
+Galeno	加莱诺	Jiā lái nuò
+Galla	嘉拉	Jiā lā
+Gallo	公鸡	Gōng jī
+Gally	加里	Jiā lǐ
+Galo	加洛	Jiā luò
+Garance	嘉兰丝	Jiā lán sī
+Garance	嘉杭丝	Jiā háng sī
+Garcia	加西亚	Jiā xī yà
+Gareth	伽雷特	Jiā léi tè
+Garin	加林	Jiā lín
+Garry	加里	Jiā lǐ
+Gary	加里	Jiā lǐ
+Gaspar	加斯帕尔	Jiā sī pà r
+Gaspard	加斯帕德	Jiā sī pà dé
+Gaspard	嘉斯帕	Jiā sī pà
+Gaston	卡斯桐	Kǎ sī tóng
+Gatien	盖斯昂	Gài sī áng
+Gaudencio	高登西奥	Gāo dēng xī ào
+Gauthier	戈蒂耶	Gē dì yē
+Gautier	戈蒂耶	Gē dì yē
+Gavião	贾维奥	Jiǎ wéi ào
+Gavilán	贾维兰	Jiǎ wéi lán
+Gavin	贾文	Jiǎ wén
+Gaye	盖伊	Gài yī
+Gaylord	格劳德	Gé láo dé
+Gea	吉亚	Jí yà
+Gédéon	热德昂	Rè dé áng
+Geffereson	戈菲森	Gē Fēi sēn
+Gema	杰玛	Jié mǎ
+Gemini	杰米尼	Jié mǐ ní
+Geminiano	赫米尼亚诺	Hè mǐ ní yà nuò
+Géminy	日米尼	Rì mǐ ní
+Gemma	杰玛	Jié mǎ
+Genaro	格纳罗	Gé nà luó
+Génebou	日内布	Rì nèi bù
+Génésie	热内西	Rè nèi xī
+Geneviève	热纳维耶芙	Rè nà wéi yē fú
+Genoveva	赫诺维瓦	Hè nuò wéi wǎ
+Gentil	剑提	Jiàn tí
+Geny	杰妮	Jié nī
+Geoffrey	乔弗瑞	Qiáo fú ruì
+Geoffroy	乔弗瓦	Qiáo fú wǎ
+Geofredo	赫奥弗雷多	Hè ào fú léi duō
+Georg	格奥尔戈	Gé ào ěr gē
+George	乔治	Qiáo zhì
+Georges	乔治斯	Qiáo zhì sī
+Georgette	乔治特	Qiáo zhì té
+Georgia	乔治亚	Qiáo zhì yà
+Georgianne	乔吉安	Qiáo Jí ān
+Georgina	乔姬娜	Qiáo jī nà
+Georgine	乔尔妗	Qiáo ěr jìn
+Geovana	乔瓦纳	Qiáo wǎ nà
+Gérald	杰拉尔德	Jié lā ěr dé
+Géraldine	热拉尔丁	Rè lā ěr dīng
+Gérard	杰拉尔	Jié lā er
+Gerard	奇拉德	Qí lā dé
+Gerardo	赫拉尔多	Hè lā rduō
+Gerely	杰雷利	Jié léi lì
+Geremy	杰勒米	Jié lè mǐ
+Gérémy	杰勒米	Jié lè mǐ
+Gerhard	格哈德	Gé hā dé
+Germain	日尔曼	Rì ěr màn
+Germaine	日尔曼	Rì ěr màn
+Germán	赫尔曼	Hèr màn
+Gerónimo	赫罗尼莫	Hè luó ní mò
+Gersendre	日尔桑德	Rì ěr sāng dé
+Gerson	盖尔孙	Gài ěr sūn
+Gertrude	日尔特吕德	Rì ěr tè lǚ dé
+Gertrudes	杰尔特鲁黛丝	Jié ěr tè lǔ dài sī
+Gertrudis	赫特鲁迪斯	Hè tè lǔ dí sī
+Gervasio	赫瓦西奥	Hè wǎ xī ào
+Géssyka	杰希卡	Jié xī Kǎ
+Gethin	盖亭	Gài tíng
+Getulio	格图柳	Gé tú liǔ
+Ghazaleh	贾萨雷	Jiǎ sà léi
+Ghislaine	吉丝莲	Jí sī lián
+Ghita	吉塔	Jí tǎ
+Gian-Carlo	江·卡罗	Jiāng kǎ luó
+Giancarlo	江卡罗	Jiāng kǎ luó
+Gianni	吉安尼	Jí ān ní
+Gihen	吉恩	Jí ēn
+Gil	希尔	Xī r
+Gilbert	吉尔伯特	Jí ěr bó té
+Gilbert	吉尔贝	Jí ěr bèi
+Gilberte	吉尔贝特	Jí ěr bèi té
+Gilberto	吉尔贝托	Jí ěr bèi tuō
+Gildas	吉勒大斯	Jí lè dà sī
+Giles	吉尔斯	Jí ěr sī
+Gilette	吉蕾特	Jí lěi tè
+Gilles	吉勒	Jí lè
+Gillian	吉利安	Jí lì ān
+Gillou	吉鲁	Jí lǔ
+Gilmar	吉尔马	Jí ěr Mǎ
+Gilmara	吉尔马拉	Jí ěr Mǎ lā
+Gilmer	吉尔梅	Jí ěr Méi
+Gina	吉娜	Jí nà
+Ginaldo	基纳尔多	Jī nà ěr duō
+Ginés	希内斯	Xī nèi sī
+Ginette	吉内特	Jí nèi té
+Ginger	金蔗尔	Jīn zhè ěr
+Gino	吉诺	Jí nuò
+Ginova	吉诺瓦	Jí nuò wǎ
+Giorgio	希奥尔希奥	Xī ào rxī ào
+Giovana	玖瓦娜	Jiǔ wǎ nà
+Giovanna	乔瓦娜	Qiáo wǎ nà
+Giovanni	乔瓦尼	Qiáo wǎ ní
+Gisela	吉塞拉	Jí sāi lā
+Gisèle	吉赛尔	Jí sài ěr
+Gisele	吉赛尔	Jí sài ěr
+Gisell	吉赛尔	Jí sài ěr
+Giselle	吉赛尔	Jí sài ěr
+Gislanda	吉斯浪达	Jí sī làng dá
+Gisllane	吉丝兰	Jí sī lán
+Giulia	秋丽亚	Qiū lì yà
+Giuliana	朱利阿纳	Zhū lì ā nà
+Giuseppe	约瑟佩	Yāo sè pèi
+Giza	吉萨	Jí sà
+Gizela	吉泽拉	Jí Zé lā
+Gizmo	吉斯莫	Jí sī mò
+Gládis	古拉蒂斯	Gǔ lā dì sī
+Gladys	格拉蒂丝	Gé lā dì sī
+Glauce	格劳斯	Gé Láo sī
+Glaucia	格劳茜娅	Gé láo xī yà
+Glaucio	古劳西奥	Gǔ láo xī ào
+Glauco	格劳克	Gé Láo kè
+Glenford	古兰福特	Gǔ lán Fú tè
+Glenn	格伦	Gé lún
+Gleyce	古雷斯	Gǔ léi sī
+Gloria	格洛丽亚	Gé luò lì yà
+Godofredo	戈多弗雷多	Gē duō fú léi duō
+Gökhan	格堪	Gé kān
+Gomes	戈麦斯	Gē mài sī
+Gómez	戈梅斯	Gē méi sī
+Gonçal	贡萨尔	Gòng sà ěr
+Gonçalo	贡萨罗	Gòng sà luó
+Gonçalvo	贡萨维奥	Gòng sà wéi ào
+Gonzague	贡扎格	Gòng zā gé
+Gonzalo	贡萨罗	Gòng sà luó
+Gopi	戈貔	Gē pí
+Goran	戈兰	Gē lán
+Gorann	戈兰	Gē lán
+Gorete	格雷特	Gé léi tè
+Goretti	戈雷迪	Gē léi dí
+Gorka	戈尔卡	Gēr kǎ
+Goska	果斯卡	Guǒ sī Kǎ
+Goulven	古尔文	Gǔ ěr wén
+Graça	格劳莎	Gé láo shā
+Grace	格蕾丝	Gé lěi sī
+Gracia	格拉西亚	Gé lā xī yà
+Graciane	格拉西安	Gé lā xī ān
+Graciano	格拉西亚诺	Gé lā xī yà nuò
+Graciela	格拉谢拉	Gé lā xiè lā
+Graco	格拉科	Gé lā kē
+Graham	格雷厄姆	Gé léi è mǔ
+Gratien	格西恩	Gé xī ēn
+Grave	格拉维	Gé lā wéi
+Graziella	格拉谢拉	Gé lā Xiè lā
+Grażyna	格拉热娜	Gé lā rè nà
+Grecia	格蕾霞	Gé lěi xiá
+Grégoire	格雷古瓦	Gé léi gǔ wǎ
+Gregori	古雷格里	Gǔ léi gé lǐ
+Gregorio	格雷戈里奥	Gé léi gē lǐ ào
+Gregory	格雷戈里	Gé léi gē lǐ
+Greta	古蕾塔	Gǔ lěi tǎ
+Gretchen	格蕾珍	Gé lěi Zhēn
+Grzegorz	格雷戈日	Gé léi gē rì
+Guadalupe	瓜达卢佩	Guā dá lú pèi
+Gualter	古阿尔特	Gǔ ā ěr tè
+Gualterio	瓜尔特里奥	Guā rtè lǐ ào
+Guénolé	格诺雷	Gé nuò léi
+Guerau	格拉尔	Gé lā ěr
+Guga	古嘎	Gǔ gā
+Guibord	吉鲍尔	Jí Bào ěr
+Guido	吉多	Jí duō
+Guifré	贵弗雷	Guì Fú léi
+Guilhem	吉兰	Jí lán
+Guilherme	吉尔梅	Jí ěr méi
+Guiliano	吉里亚诺	Jí lǐ yà nuò
+Guillaume	吉约姆	Jí yāo mǔ
+Guillem	贵雷姆	Guì léi mǔ
+Guillemette	吉耶梅特	Jí yē méi tè
+Guillermina	吉列米娜	Jí liè mǐ nà
+Guillermo	吉列尔莫	Jí lièr mò
+Guillian	格林	Gé lín
+Guiomar	吉奥马尔	Jí ào mǎ r
+Gülümser	古卢穆塞	Gǔ Lú Mù Sāi
+Gumersindo	古梅辛多	Gǔ méi xīn duō
+Gunnar	古纳尔	Gǔ nà ěr
+Günther	君特	Jūn tè
+Gus	古斯	Gǔ sī
+Gustave	古斯塔夫	Gǔ sī tǎ fū
+Gustavo	古斯塔沃	Gǔ sī tǎ wò
+Guy	吉	Jí
+Guylaine	吉莲	Jí lián
+Gwen	沽雯	Gū wén
+Gwenaëlle	沽雯娜艾	Gū wén nà ài
+Gwendal	古雯达尔	Gǔ wén dá ěr
+Gwendoline	沽雯都琳	Gū wén dōu lín
+Gwendolyn	沽雯都琳	Gū wén dōu lín
+Gwenola	古维诺拉	Gǔ wéi nuò lā
+Gypsy	吉普赛	Jí pǔ sài
+Habiba	阿比巴	Ā bǐ Bā
+Haby	阿碧	Ā bì
+Hada	阿达	Ā dá
+Hadrien	阿德里安	Ā dé lǐ ān
+Hafida	哈菲达	Hā Fēi dá
+Hafsa	哈夫萨	Hā fū sà
+Haikel	海克	Hǎi kè
+Haïkel	海克	Hǎi kè
+Hajar	哈贾尔	Hā jiǎ ěr
+Halima	铪利玛	Hā lì Mǎ
+Hamady	阿马蒂	Ā mǎ dì
+Hamish	汉密斯	Hàn mì sī
+Hamza	哈姆扎	Hā mǔ zā
+Han	Lee	亨利 Hēng lì
+Hana	哈娜	Hā nà
+Hanaë	哈娜伊	Hā nà Yī
+Hanca	昂卡	Áng kǎ
+Hanen	阿能	Ā néng
+Hanife	哈妮夫	Hā nī fū
+Hannah	汉娜	Hàn nà
+Hannes	阿内丝	Ā nèi sī
+Hanno	汉诺	Hàn nuò
+Hanny	哈尼	Hā ní
+Hans	汉斯	Hàn sī
+Hapila	阿琵拉	Ā pí lā
+Harald	阿瓦尔德	Ā wǎ ěr dé
+Harchoux	阿尔舒	Ā ěr shū
+Hariakhan	哈里阿肯	Hā lǐ ā kěn
+Harivelo	阿利维罗	Ā lì wéi luó
+Harmonie	阿尔莫尼	Ā ěr mò ní
+Harmony	阿尔莫尼	Ā ěr Mò ní
+Harold	阿豪德	Ā háo dé
+Harrison	哈里森	Hā lǐ sēn
+Harry	哈利	Hā lì
+Harun	阿混	Ā hùn
+Harvey	哈威	Hā wēi
+Harys	哈利斯	Hā lì sī
+Hasnae	哈斯娜	Hā sī nà
+Hasret	阿苏雷特	Ā sū léi tè
+Hassan	哈桑	Hā sāng
+Hassblaide	阿斯布莱德	Ā sī Bù lái dé
+Hatice	哈蒂斯	Hā dì sī
+Hatim	哈蒂姆	Hā dì mǔ
+Hatouma	阿图玛	Ā tú mǎ
+Hawa	阿娃	Ā wá
+Hayley	海莉	Hǎi lì
+Haythem	哈伊塔姆	Hā Yī tǎ mǔ
+Haziz	哈西斯	Hā xī sī
+Heather	希瑟	Xī sè
+Hector	赫克托	Hè kè tuō
+Hèctor	赫克托	Hè kè tuō
+Hectorine	艾克多琳	Aì kè duō lín
+Hedia	海蒂娅	Hǎi dì yà
+Heidi	海蒂	Hǎi dì
+Heidy	海蒂	Hǎi dì
+Heike	海克	Hǎi kè
+Heiner	海诺尔	Hǎi nuò ěr
+Heinrich	海因里希	Hǎi yīn lǐ xī
+Heinz	海恩兹	Hǎi ēn zī
+Heitor	埃托尔	Aī tuō ěr
+Hejer	艾叶尔	Aì yè ěr
+Heládio	艾拉迪奥	Aì lā dí ào
+Helder	海尔德	Hǎi ěr dé
+Hélder	埃德尔	Aī dé ěr
+Helem	艾蕾姆	Aì lěi mǔ
+Helen	海伦	Hǎi lún
+Hélèna	伊莲娜	Yī lián nà
+Helena	伊莲娜	Yī lián nà
+Héléna	伊莲娜	Yī lián nà
+Hélène	伊莲	Yī lián
+Helessiaine	艾蕾仙	Aì lěi Xiān
+Hélida	艾黎达	Aì lí dá
+Helin	贺林	Hè lín
+Hélio	挨利奥	Aī lì ào
+Heliodoro	埃利奥多罗	Aī lì ào duō luó
+Hella	海拉	Hǎi lā
+Hellen	海伦	Hǎi lún
+Helmut	赫尔穆特	Hè ěr mù tè
+Helyette	伊埒特	Yī liè tè
+Hendriks	亨德里克斯	Hēng dé lǐ kè sī
+Henri	亨利	Hēng lì
+Henrik	亨利克	Hēng lì kè
+Henrique	恩里克	Ēn lǐ kè
+Henriques	恩里克斯	Ēn lǐ kè sī
+Henriqueta	恩丽珂塔	Ēn lì kē tǎ
+Henry	亨利	Hēng lì
+Henryk	恩里克	Ēn lǐ kè
+Henryka	恩莉卡	Ēn lì kǎ
+Herbert	赫伯特	Hè bó té
+Herberto	埃尔贝托	Aī ěr bèi tuō
+Heribert	赫里贝	Hè lǐ Bèi
+Heriberto	埃里韦托	Aī lǐ wéi tuō
+Heriyanto	埃里延托	Aī lǐ yán tuō
+Hermance	艾尔芒丝	Aì ěr máng sī
+Hermann	赫尔曼	Hè ěr màn
+Hermenegildo	埃梅内吉尔多	Aī méi nèi jí ěr duō
+Hermínia	艾尔米妮娅	Aì ěr mǐ nī yà
+Herminia	艾米尼亚	Aì mǐ ní yà
+Hermínio	埃米尼奥	Aī mǐ ní ào
+Hernan	埃尔南	Aī rnán
+Hertel	艾泰	Aì Tài
+Hervé	埃尔韦	Aī ěr wéi
+Hiba	伊巴	Yī Bā
+Hicham	伊沙姆	Yī Shā mǔ
+Hichem	伊沙姆	Yī shā mǔ
+Hien	燕	Yàn
+Higini	伊吉妮	Yī Jí nī
+Higor	依格	Yī gé
+Hilario	依拉利奥	Yī lā lì ào
+Hilda	希尔达	Xī rdá
+Hildegard	海德格	Hǎi dé gé
+Hillary	伊拉莉	Yī lā lì
+Hilona	伊罗娜	Yī luó nà
+Himaya	伊玛亚	Yī Mǎ yà
+Hina	伊娜	Yī nà
+Hind	伊恩德	Yī ēn dé
+Hingrid	因戈丽德	Yīn gē lì dé
+Hipolit	依泼里特	Yī pō lǐ tè
+Hipolito	依泼里托	Yī pō lǐ tuō
+Hippolyte	伊波利特	Yī pò lì tè
+Hoang	黄	Huáng
+Holly	荷莉	Hé lì
+Homer	荷马	Hé mǎ
+Honorat	奥诺拉特	Aò nuò lā tè
+Honoré	奥诺瑞	Aò nuò ruì
+Honorine	欧诺琳	Oū nuò lín
+Horacio	奥拉希奥	Aò lā xī ào
+Hortense	奥尔坦斯	Aò ěr tǎn sī
+Hortense	欧尔唐丝	Oū ěr táng sī
+Hosam	奥萨姆	Aò sà mǔ
+Hosannah	奥萨娜	Aò sà nà
+Houcem	乌丝姆	Wū sī mǔ
+Houcine	胡辛	Hú xīn
+Houria	胡里娅	Hú lǐ yà
+Houssein	乌萨因	Wū sà yīn
+Howard	霍华德	Huò huā dé
+Huakichan	华克蝉	Huá kè chán
+Hubert	休伯特	Xiū bó té
+Hubert	于贝尔	Yú bèi ěr
+Hudson	哈德森	Hā dé sēn
+Hug	雨歌	Yǔ gē
+Hugo	雨果	Yǔ guǒ
+Hugues	雨格	Yǔ gé
+Huguette	于盖特	Yú gài té
+Hundra	虹德拉	Hóng dé lā
+Hussein	胡萨因	Hú sà yīn
+Hyacinthe	亚辛特	Yà xīn tè
+Iaella	雅尔拉	Yǎ ěr lā
+Iain	伊恩	Yī ēn
+Ian	伊恩	Yī ēn
+Iana	娅娜	Yà nà
+Ianis	伊安尼斯	Yī ān ní sī
+iara	娅拉	Yà lā
+Iban	伊邦	Yī bāng
+Ibrahim	易卜拉辛	Yì bǔ lā xīn
+Ida	伊达	Yī dá
+Idalys	伊达丽丝	Yī dá lì sī
+Idoia	伊多娅	Yī duō yà
+Iesha	耶沙	Yē Shā
+Ieuan	爱恩	Aì ēn
+Ignacio	伊格纳西奥	Yī gé nà xī ào
+Ignasi	易纳西	Yì nà xī
+Igone	伊艮	Yī gěn
+Igor	伊缑	Yī gōu
+Iheb	伊赫布	Yī Hè Bù
+Iker	伊凯尔	Yī Kǎi ěr
+Ikram	依克拉姆	Yī kè lā mǔ
+Ikrham	依克拉姆	Yī kè lā mǔ
+Ikrima	伊克丽玛	Yī kè lì Mǎ
+Ilan	伊兰	Yī lán
+Ilana	依拉娜	Yī lā nà
+Ildefonso	伊尔德丰索	Yī rdé fēng suǒ
+Ileana	伊蕾娅娜	Yī lěi yà nà
+Iléane	伊蕾安	Yī lěi ān
+Ilena	伊蕾娜	Yī lěi nà
+Ilenia	伊莲娜	Yī lián nà
+Ilhan	伊兰	Yī lán
+Ilian	伊利安	Yī lì ān
+Iliana	伊里亚娜	Yī lǐ yà nà
+Ilias	伊利亚斯	Yī lì yà sī
+Ilona	伊罗娜	Yī luó nà
+Ilouna	伊露娜	Yī Lù nà
+Ilse	伊尔瑟	Yī rsè
+Ilyana	伊莉娅娜	Yī lì yà nà
+Ilyès	伊利亚思	Yī lì yà sī
+Ilyes	伊丽艾丝	Yī lì Aì sī
+ilyès	伊丽艾丝	Yī lì Aì sī
+Imaine	伊曼	Yī màn
+Iman	伊曼	Yī màn
+Imane	伊曼	Yī màn
+Imanol	伊马诺	Yī mǎ nuò
+Imed	伊美德	Yī měi dé
+Imène	伊门	Yī mén
+Imma	伊玛	Yī mǎ
+Ina	伊娜	Yī nà
+Iná	伊娜	Yī nà
+Inácio	纳西奥	Nà xī ào
+Iñaki	因亚吉	Yīn yà jí
+Inara	伊娜拉	Yī nà lā
+Indalecio	因达莱西奥	Yīn dá lái xī ào
+Indra	氤德拉	Yīn dé lā
+Ines	伊内丝	Yī nèi sī
+Inès	伊内丝	Yī nèi sī
+Inês	伊内丝	Yī nèi sī
+Inessa	伊内萨	Yī nèi sà
+Inesse	伊内丝	Yī nèi sī
+Ingrid	英格丽	Yīng gé lí
+Inma	因马	Yīn mǎ
+Inmaculada	伊玛库拉达	Yī Mǎ Kù lā dá
+Inmaculada	伊玛科拉达	Yī Mǎ Kē lā dá
+Inocencio	伊诺森西奥	Yī nuò sēn xī ào
+Inocente	伊诺森特	Yī nuò sēn tè
+Inola	伊诺拉	Yī nuò lā
+Ioana	尤阿娜	Yóu Ā nà
+Iona	爱欧娜	Aì ōu nà
+Ionela	瑶内拉	Yáo nèi là
+Ionna	尤娜	Yóu nà
+Ira	伊拉	Yī lā
+Iraia	意拉亚	Yì lā yà
+Iraide	伊拉伊德	Yī lā yī dé
+Iram	伊拉姆	Yī lā mǔ
+Irantzu	意兰祝	Yì lán zhù
+Irena	伊琳娜	Yī lín nà
+Irena	伊蕾娜	Yī lěi nà
+Irène	伊蕾娜	Yī lěi nà
+Irene	伊琳娜	Yī lín nà
+Ireneo	伊雷内奥	Yī léi nèi ào
+Ireneu	伊蕾娜	Yī lěi nà
+Irigoyen	伊里戈延	Yī lǐ gē yán
+Irina	伊莉娜	Yī lì nà
+Irina	伊琳娜	Yī lín nà
+Iris	埃里斯	Aī lǐ sī
+Irma	伊尔玛	Yī ěr mǎ
+Irmgard	伊姆加德	Yī mǔ jiā dé
+Irmi	伊尔米	Yī ěr mǐ
+Isa	伊莎	Yī shā
+Isaac	艾萨克	Aì sà kè
+Isaac	伊萨克	Yī sà kè
+Isabel	伊莎贝尔	Yī shā bèi r
+Isabel	伊萨贝	Yī sà Bèi
+Isabell	伊萨贝	Yī sà bèi
+Isabella	伊萨贝拉	Yī sà bèi lā
+Isabelle	伊萨贝	Yī sà bèi
+Isaías	伊萨亚斯	Yī sà yà sī
+Isha	伊莎	Yī shā
+Isi	伊西	Yī xī
+Isidoro	伊西多罗	Yī xī duō luó
+Isidro	伊西德罗	Yī xī dé luó
+Isidro	依西德罗	Yī xī dé luó
+Isis	伊西丝	Yī xī sī
+Isla	伊拉	Yī lā
+Ismael	意斯梅尔	Yì sī méi r
+Ismahane	伊斯马安	Yī sī mǎ ān
+Ismail	伊斯马伊	Yī sī mǎ yī
+Israel	伊斯雷尔	Yī sī léi r
+Ítalo	意大罗	Yì dà luó
+Itzcóatl	依瓷克	Yī cí kè
+Itziar	意弛尔	Yì chí r
+Iulia	友丽娅	Yǒu lì yà
+Iuri	友利	Yǒu lì
+Iva	伊瓦	Yī wǎ
+Ivan	伊万	Yī wàn
+Ivana	伊瓦纳	Yī wǎ nà
+Ivanilson	伊瓦尼孙	Yī wǎ ní sūn
+Ivette	伊维特	Yī wéi tè
+Ivo	依沃	Yī wò
+Ivone	伊温	Yī wēn
+Ivonete	伊沃内特	Yī wò nèi tè
+Ivonne	伊婉	Yī wǎn
+Iwona	伊沃娜	Yī wò nà
+Iza	伊萨	Yī sà
+Izabel	伊萨贝	Yī sà Bèi
+Izabela	伊萨贝拉	Yī sà bèi lā
+Izbeth	伊丝贝特	Yī sī bèi tè
+Iziki	依兹克	Yī zī kè
+Jacek	亚茨克	Yà cí kè
+Jacilane	娅茜兰	Yà xī lán
+Jacinta	娅心塔	Yà xīn tǎ
+Jacinte	杰辛特	Jié xīn tè
+Jacinto	哈辛托	Hā xīn tuō
+Jacira	亚茜拉	Yà xī lā
+Jack	杰克	Jié kè
+Jackie	杰克	Jié kè
+Jackie	杰姬	Jié jī
+Jacklyn	杰奎琳	Jié kuí lín
+Jacky	杰克	Jié kè
+Jaclyn	杰奎琳	Jié kuí lín
+Jacob	雅各布	Yǎ gè bù
+Jacobo	哈科沃	Hā kē wò
+Jacqueline	杰奎琳	Jié kuí lín
+Jacques	雅克	Yǎ kè
+Jacquie	贾奇	Jiǎ qí
+Jada	贾达	Jiǎ dá
+Jade	贾德	Jiǎ dé
+Jagdish	亚各迪士	Yà gè dí shì
+Jäger	耶戈尔	Yē gē ěr
+Jaidan	杰丹	Jié dān
+Jaime	海梅	Hǎi méi
+Jaína	翟娜	Zhái nà
+Jairo	翟罗	Zhái luó
+Jake	杰克	Jié kè
+Jalhida	佳丽达	Jiā lì dá
+Jaline	娅琳	Yà lín
+Jalis	贾利斯	Jiǎ lì sī
+Jamari	亚马里	Yà Mǎ lǐ
+Jamel	贾梅尔	Jiǎ méi ěr
+James	詹姆斯	Zhān mǔ sī
+Jamie	杰米	Jié mǐ
+Jamil	贾米尔	Jiǎ mǐ ěr
+Jamilly	眨迷丽	Zhǎ mí lì
+Jamilly	Starling	贾蜜莉 Jiǎ Mì lì
+Jamy	杰米	Jié mǐ
+Jan	雅恩	Yǎ ēn
+Jana	娅娜	Yà nà
+Janak	亚纳克	Yà nà kè
+Janas	亚纳斯	Yà nà sī
+Janay	贾娞	Jiǎ něi
+Janayna	亚乃娜	Yà Nǎi nà
+Jander	岩德	Yán dé
+Jane	简	Jiǎn
+Janelle	贾内	Jiǎ nèi
+Janet	贾内特	Jiǎ nèi tè
+Jani	杰妮	Jié nī
+Janic	贾尼克	Jiǎ ní kè
+Janice	詹妮丝	Zhān nī sī
+Janick	贾尼克	Jiǎ ní kè
+Janika	贾妮卡	Jiǎ nī Kǎ
+Janina	雅妮娜	Yǎ nī nà
+Janine	亚尼内	Yà ní nèi
+Jânio	贾尼奥	Jiǎ ní ào
+Janne	贾娜	Jiǎ nà
+Janne	亚纳	Yà nà
+Jannick	贾尼克	Jiǎ ní kè
+Jannik	雅尼克	Yǎ ní kè
+Janny	贾妮	Jiǎ nī
+Jany	贾妮	Jiǎ nī
+Janyah	贾妮娅	Jiǎ nī yà
+Jaorish	让利士	Ràng lì shì
+Jaqueline	杰克琳	Jié kè lín
+Jaquie	贾奇	Jiǎ qí
+Jared	亚雷德	Yà léi dé
+Jarno	贾尔诺	Jiǎ ěr nuò
+Jarod	贾罗德	Jiǎ luó dé
+Jarosław	亚洛斯拉夫	Yà luò sī lā fū
+Jasmin	亚斯敏	Yà sī mǐn
+Jasmine	詹斯敏	Zhān sī mǐn
+Jason	杰森	Jié sēn
+Jaume	豪梅	Háo méi
+Javi	哈韦	Hā wéi
+Javier	哈韦尔	Hā wéi r
+Javiera	哈韦拉	Hā wéi lā
+Jawaad	贾华德	Jiǎ Huá dé
+Jawad	贾瓦德	Jiǎ wǎ dé
+Jayesh	雅耶斯	Yǎ yē sī
+Jayme	杰米	Jié mǐ
+Jayron	杰龙	Jié lóng
+Jayson	杰森	Jié sēn
+Jazmin	豪斯民	Háo sī mín
+Jean	让	Ràng
+Jean-Baptiste	让·巴蒂斯特	Ràng bā dì sī té
+Jean-Brice	让布利斯	Ràng Bù lì sī
+Jean-Claude	让·克劳德	Ràng kè láo dé
+Jean-François	让·弗朗索瓦	Ràng fú lǎng suǒ wǎ
+Jean-Jacques	让·雅克	Ràng yǎ kè
+Jean-Louis	让·路易	Ràng lù yì
+Jean-Loup	让·卢	Ràng lú
+Jean-Luc	让·吕克	Ràng lǚ kè
+Jean-Marc	让·马克	Rngmk
+Jean-Marie	让·玛丽	Ràng mǎ lì
+Jean-Michel	让·米歇尔	Rangmǐ xiē er
+Jean-Paul	让·保尔	Ràng bǎo ěr
+Jean-Philippe	让·菲力浦	Ràng fēi lì pǔ
+Jean-Pierre	让·皮埃尔	Ràng pí āi er
+Jean-Sébastien	让·塞巴斯蒂安	Ràng sài bā sī dì ān
+Jean-Yves	让·伊夫	Ràng yī fū
+Jeanette	珍妮特	Zhēn nī té
+Jeanine	杰宁	Jié nín
+Jeanne	让娜	Ràng nà
+Jeannine	杰宁	Jié nín
+Jeannot	雅诺	Yǎ nuò
+Jeferson	杰弗森	Jié Fú sēn
+Jeff	杰夫	Jié fū
+Jefferson	杰斐逊	Jié fěi xùn
+Jeffrey	杰佛瑞	Jié fó ruì
+Jeimmy	黑米	Hēi mǐ
+Jelves	赫尔维斯	Hè ěr wéi sī
+Jemima	杰米玛	Jié mǐ Mǎ
+Jenifer	赫尼费尔	Hè ní fèi r
+Jenna	珍娜	Zhēn nà
+Jenni	珍妮	Zhēn nī
+Jennifer	珍尼弗	Zhēn ní fú
+Jenny	珍妮	Zhēn ní
+Jennyfer	珍尼费尔	Zhēn ní Fèi ěr
+Jens	岩寺	Yán sì
+Jérémie	杰勒米	Jié lè mǐ
+Jeremy	杰瑞米	Jié ruì mǐ
+Jerime	杰里姆	Jié lǐ mǔ
+Jérome	杰罗姆	Jié luō mǔ
+Jerome	杰罗姆	Jié luō mǔ
+Jéromine	杰罗敏	Jié luó mǐn
+Jeroni	杰罗尼	Jié luó ní
+Jerónimo	赫罗尼莫	Hè luó ní mò
+Jerrit	杰里特	Jié lǐ tè
+Jerrod	杰罗德	Jié luó dé
+Jerry	杰里	Jié lǐ
+Jesenia	耶瑟妮娅	Yē sè nī yà
+Jeshua	约书亚	Yāo shū yà
+Jess	杰斯	Jié sī
+Jesse	杰西	Jié xī
+Jessé	杰斯	Jié sī
+Jessica	杰西卡	Jié xī kǎ
+Jessie	杰西	Jié xī
+Jessily	杰西莉	Jié xī lì
+Jessy	杰西	Jié xī
+Jessyca	杰西卡	Jié xī kǎ
+Jésus	耶稣	Yē sū
+Jesus	耶稣	Yē sū
+Jesusa	赫苏萨	Hè sū sà
+Jetmir	杰特米尔	Jié tè mǐ ěr
+Jhevelyn	杰维林	Jié wéi lín
+Jhonder	勇德	Yǒng dé
+Jiandra	吉昂德拉	Jí áng dé lā
+Jihane	吉安	Jí ān
+Jill	吉尔	Jí ěr
+Jilly	吉利	Jí lì
+Jim	吉姆	Jí mǔ
+Jimena	希梅纳	Xī méi nà
+Jimi	吉米	Jí mǐ
+Jimmy	吉米	Jí mǐ
+Jinny	吉妮	Jí nī
+Joachim	约阿希姆	Yāo ā xī mǔ
+Joan	琼	Qióng
+Joan	优安	Yōu ān
+Joana	尤阿娜	Yóu ā nà
+Joana	优安娜	Yōu ān nà
+Joanarosa	朱安娜罗萨	Zhū ān nà luó sà
+Joanie	乔安妮	Qiáo ān nī
+Joanna	乔安娜	Qiáo ān nà
+Joanna	尤阿娜	Yóu ā nà
+Joanne	乔安	Qiáo ān
+Joao	若奥	Ruò ào
+João	尤安	Yóu ān
+Joaquim	若阿金	Ruò ā jīn
+Joaquín	华金	Huá jīn
+Joaquina	周阿吉娜	Zhōu Ā Jí nà
+Joberdan	周贝尔丹	Zhōu Bèi ěr Dān
+Jocelin	乔斯林	Qiáo sī lín
+Jocelyn	乔斯林	Qiáo sī lín
+Jocelyne	乔斯林	Qiāo sī lín
+Jocelyns	尤斯林	Yóu sī lín
+Jodie	朱迪	Zhū dí
+Jodilyn	友蒂琳	Yǒu dì lín
+Jodson	朱德森	Zhū dé sēn
+Jody	朱迪	Zhū dí
+Joe	乔	Qiáo
+Joé	乔	Qiáo
+Joel	乔尔	Qiáo ěr
+Joël	乔尔	Qiáo ěr
+Joelen	朱艾琳	Zhū Aì lín
+Joelle	饶爱乐	Ráo ài lè
+Joey	乔伊	Qiáo yī
+Joffrey	乔弗瑞	Qiáo fú ruì
+Johailah	乔海拉	Qiáo Hǎi lā
+Johan	约翰	Yuē hàn
+Johana	约翰娜	Yāo hàn nà
+Johanie	乔安妮	Qiáo ān nī
+Johann	乔安	Qiáo ān
+Johanna	约翰娜	Yāo hàn nà
+Johanna	约安娜	Yāo ān nà
+Johanne	乔安	Qiáo ān
+Johara	乔阿哈	Qiáo ā hā
+John	约翰	Yāo hàn
+Johnny	强尼	Qiáng ní
+Jojo	舟舟	Zhōu zhōu
+Jolanta	尤兰塔	Yóu lán tǎ
+Jolène	若莲	Ruò lián
+Joliane	乔丽安	Qiáo lí ān
+Jolianne	乔丽安	Qiáo lí ān
+Jonas	乔纳斯	Qiáo nà sī
+Jonathan	乔纳森	Qiáo nà sēn
+Jonathan	乔纳唐	Qiáo nà táng
+Jonquil	黄水仙	Huáng shuǐ Xiān
+Jony	周尼	Zhōu ní
+Jordan	乔丹	Qiáo dān
+Jordana	乔丹娜	Qiáo Dān nà
+Jordane	乔丹	Qiáo dān
+Jordi	霍尔蒂	Huò rdì
+Jörg	周尔各	Zhōu ěr gè
+Jorge	豪尔赫	Háo rhè
+Joris	乔里斯	Qiáo lǐ sī
+Joris	尤里斯	Yóu lǐ sī
+Jörn	友尔恩	Yǒu ěr ēn
+José	若瑟	Ruò sè
+José	尤塞	Yóu sāi
+Josée	若瑟	Ruò sè
+Josefa	何塞法	Hé sài fǎ
+Josefina	何塞菲娜	Hé sài fēi nà
+Josep	优斯普	Yōu sī Pǔ
+Josepa	优斯葩	Yōu sī pā
+Joseph	约瑟夫	Yuē sè fū
+Josephine	约瑟芬	Yáo sè fēn
+Joséphine	约瑟芬	Yáo sè fēn
+Josette	乔塞特	Qiáo sāi té
+Joshua	约书亚	Yāo shū yà
+Josi	尤茜	Yóu xī
+Josian	乔芗	Qiáo xiāng
+Josiane	乔西安	Qiáo xī ān
+Joss	乔斯	Qiáo sī
+Josselin	若瑟兰	Ruò sè lán
+Josué	霍苏埃	Huò sū āi
+Josué	尤素埃	Yóu sù āi
+Josune	霍苏内	Huò sū nèi
+Joumana	儒玛娜	Rú Mǎ nà
+Jovita	尤维塔	Yóu wéi tǎ
+Joy	乔伊	Qiáo yī
+Joyce	乔艾斯	Qiáo ài sī
+Juakichan	爪克蝉	Zhǎo kè chán
+Juan	胡安	Hú ān
+Juan	Carlos	胡安卡洛斯 Hú ān Kǎ luò sī
+Juana	胡安娜	Hú ān nà
+Juani	华尼	Huá ní
+Juanito	胡安尼托	Hú ān ní tuō
+Juannyolis	欢牛里斯	Huān niú lǐ sī
+Juarez	儒亚雷斯	Rú yà léi sī
+Jucileide	朱茜蕾德	Zhū xī lěi dé
+Judicaël	朱蒂卡尔	Zhū dì kǎ ěr
+Judit	优蒂特	Yōu dì tè
+Judite	尤蒂特	Yóu dì tè
+Judith	朱迪思	Zhū dí sī
+Judith	朱迪特	Zhū dí tè
+Judy	朱蒂	Zhū dì
+Judygaelle	橘蒂贾尔	Jú dì Jiǎ ěr
+Jules	儒勒	Rú lè
+Julia	朱丽娅	Zhū lì yǎ
+Julià	优利恩	Yōu lì ēn
+Júlia	优莉芽	Yōu lì yá
+Julian	朱利安	Zhū lì ān
+Juliana	朱利娅娜	Zhū lì yà nà
+Juliane	朱利安	Zhū lì ān
+Julianno	胡利亚诺	Hú lì yà nuò
+Juliano	胡利亚诺	Hú lì yà nuò
+Julie	朱丽	Zhū lì
+Julien	茹里安	Rú lǐ ān
+Julieta	胡列塔	Hú liè tǎ
+Juliette	茱丽叶	Zhū lí yè
+Juline	桔琳	Jú lín
+Julio	胡里奥	Hú lǐ ào
+June	朱恩	Zhū ēn
+Junior	朱尼奥尔	Zhū ní ào ěr
+Junior	莒尼奥尔	Jǔ ní ào ěr
+Jupiter	朱庇特	Zhū bì tè
+Juracira	朱拉希拉	Zhū lā xī lā
+Jurgen	尤尔根	Yóu ěr gēn
+Jürgen	尤尔艮	Yóu ěr gěn
+Jussara	菊萨拉	Jú sà lā
+Justin	桔斯汀	Jú sī tīng
+Justin	贾斯汀	Jiǎ sī tīng
+Justina	贾丝蒂娜	Jiǎ sī dì nà
+Justine	贾斯汀	Jiǎ sī tīng
+Justine	桔斯汀	Jú sī tīng
+Justiniano	胡斯蒂尼亚诺	Hú sī dì ní yà nuò
+Justinien	桔斯汀尼恩	Jú sī tīng ní ēn
+Justino	胡斯蒂诺	Hú sī dì nuò
+Justo	胡斯托	Hú sī tuō
+Justyna	尤斯蒂娜	Yóu sī dì nà
+Jutta	尤塔	Yóu tǎ
+Juvencio	胡文西奥	Hú wén xī ào
+Jym	吉姆	Jí mǔ
+Kaden	卡登	Kǎ dēng
+Kadir	卡蒂尔	Kǎ dì ěr
+Kaeleen	凯林	Kǎi lín
+Kaëly	卡尔利	Kǎ ěr lì
+Kaena	卡伊娜	Kǎ Yī nà
+Kahina	卡伊娜	Kǎ Yī nà
+Kai	凯	Kǎi
+Kaïs	卡伊斯	Kǎ yī sī
+Kaissy	凯茜	Kǎi xī
+Kaitlin	凯特琳	Kǎi tè lín
+Kako	卡口	Kǎ kǒu
+Kaleb	卡勒博	Kǎ lè bó
+Kalena	卡利哪	Kǎ lì nǎ
+Kaley	凯莉	Kǎi lì
+Kalia	卡丽娅	Kǎ lì yà
+Kallisté	卡丽丝特	Kǎ lí sī té
+Kalzely	卡杰利	Kǎ Jié lì
+Kamal	卡马尔	Kǎ mǎ ěr
+Kamélia	卡梅莉娅	Kǎ méi lì yà
+Kamil	卡米尔	Kǎ mǐ ěr
+Kamil	卡米尔	Kǎ mǐ ěr
+Kamila	卡米拉	Kǎ mǐ lā
+Kamille	卡蜜	Kǎ mì
+Kanis	卡尼斯	Kǎ ní sī
+Kannen	卡能	Kǎ néng
+Kanye	侃耶	Kǎn yē
+Kaoutar	卡乌塔尔	Kǎ wū tǎ ěr
+Kara	卡拉	Kǎ lā
+Kareed	凯莉特	Kǎi lì tè
+Karelle	卡雷乐	Kǎ léi lè
+Karen	凯琳	Kǎi lín
+Kari	佳丽	Jiā lì
+Kariane	卡丽安	Kǎ lì ān
+Karianne	卡丽安	Kǎ lì ān
+Kariel	卡莉尔	Kǎ lì ěr
+Karim	卡利姆	Kǎ lì mǔ
+Karima	卡丽玛	Kǎ lì mǎ
+Karina	卡莉娜	Kǎ lì nà
+Karine	卡琳	Kǎ lín
+Karis	卡莉丝	Kǎ lì sī
+Karissa	卡莉萨	Kǎ lì sà
+Karl	卡尔	Kǎ ěr
+Karl-Heinz	卡尔埃恩兹	Kǎ ěr Aī ēn zī
+Karla	卡拉	Kǎ lā
+Karlane	卡尔兰	Kǎ ěr lán
+Karlene	卡尔莲	Kǎ ěr lián
+Karlla	卡尔拉	Kǎ ěr lā
+Karo	卡罗	Kǎ luó
+Karolann	卡罗兰	Kǎ luó lán
+Karolanne	卡罗兰	Kǎ luó lán
+Karolina	卡洛丽娜	Kǎ luò lì nà
+Karsten	卡尔斯藤	Kǎ ěr sī téng
+Karyn	卡琳	Kǎ lín
+Kassandra	卡桑德拉	Kǎ sāng dé lā
+Kata	卡塔	Kǎ tǎ
+Katalina	卡塔丽娜	Kǎ tǎ lì nà
+Katarin	卡塔琳	Kǎ tǎ lín
+Katarina	卡塔丽娜	Kǎ tǎ lì nà
+Katarzyna	卡塔热娜	Kǎ tǎ rè nà
+Kate	凯特	Kǎi té
+Katel	卡特	Kǎ té
+Katell	卡特尔	Kǎ tè ěr
+Katerine	卡特琳	Kǎ tè lín
+Katherin	凯瑟琳	Kǎi sè lín
+Katherine	凯瑟琳	Kǎi sè lín
+Katheryne	凯瑟琳	Kǎi sè lín
+Kathi	卡蒂	Kǎ dì
+Kathleen	凯瑟琳	Kǎi sè lín
+Kathrin	凯思琳	Kǎi sī lín
+Kathy	凯西	Kǎi xī
+Katia	卡提亚	Kǎ tí yà
+Katie	凯蒂	Kǎi dì
+Katisy	凯蒂西	Kǎi dì xī
+Katiuska	卡铁丝卡	Kǎ tiě sī Kǎ
+Katja	凯蒂娅	Kǎi dì yà
+Katleen	凯瑟琳	Kǎi sè lín
+Katrina	凯特琳娜	Kǎi tè lín nà
+Katy	凯蒂	Kǎi dì
+KaTy	卡蒂	Kǎ dì
+Kavinhas	卡文纳斯	Kǎ wén nà sī
+Kavish	卡维士	Kǎ wéi shì
+Kay	凯	Kǎi
+Kaya	卡娅	Kǎ yà
+Kaye	凯耶	Kǎi yē
+Kayla	凯拉	Kǎi lā
+Kaylia	凯莉娅	Kǎi lì yà
+Kayna	克娜	Kè nà
+Kazimierz	卡热米埃	Kǎ rè mǐ āi
+Kean	亲	Qīn
+Keegan	凯甘	Kǎi gān
+Keiko	凯蔻	Kǎi kòu
+Keila	凯拉	Kǎi lā
+Keiler	凯勒尔	Kǎi lè ěr
+Keira	凯拉	Kǎi lā
+Keith	凯斯	Kǎi sī
+Kelian	克里安	Kè lǐ ān
+Kellen	科伦	Kē lún
+Kelliah	克丽娅	Kè lì yà
+Kelly	凯莉	Kǎi lì
+Kellya	凯黎娅	Kǎi lí yà
+Kelsey	凯尔塞	Kǎi ěr sāi
+Kelvyn	凯尔文	Kǎi ěr wén
+Kely	凯莉	Kǎi lì
+Kelyan	凯利安	Kǎi lì ān
+Kelyne	科琳	Kē lín
+Ken	肯	Kěn
+Kénan	克南	Kè nán
+Kendal	肯答尔	Kěn dá ěr
+Kendra	肯特拉	Kěn tè lā
+Kenita	肯妮塔	Kěn nī tǎ
+Kenneth	肯尼斯	Kěn ní sī
+Kenny	肯尼	Kěn ní
+Kenoly	克诺里	Kè nuò lǐ
+Kenth	肯思	Kěn sī
+Kentin	昆汀	Kūn tīng
+Keny	肯尼	Kěn ní
+Kenza	肯扎	Kěn zā
+Kenzi	肯吉	Kěn jí
+Kenzo	肯佐	Kěn zuǒ
+Kerri	凯瑞	Kǎi ruì
+Kerry	凯瑞	Kǎi ruì
+Kerry-Ann	凯莉安	Kǎi lì ān
+Kerry-Anne	凯莉安	Kǎi lì ān
+Kerstin	科尔斯汀	Kē ěr sī tīng
+Késia	科西亚	Kē xī yà
+Ketty	凯蒂	Kǎi dì
+Kéven	凯文	Kǎi wén
+Kevin	凯文	Kǎi wén
+Kévin	凯文	Kǎi wén
+Kévina	凯维娜	Kǎi wéi nà
+Keylla	凯拉	Kǎi lā
+Keziah	凯夏	Kǎi xià
+Khabbeb	卡勒博	Kǎ lè bó
+Khadija	卡蒂贾	Kǎ dì jiǎ
+Khaled	哈雷德	Hā léi dé
+Khansae	龛赛	Kān sài
+Khelina	克丽娜	Kè lí nà
+Khloé	科萝艾	Kē Luó Aì
+Khoukha	古卡	Gǔ Kǎ
+Khrystofer	克里斯多佛	Kè lǐ sī duō Fó
+Kian	吉安	Jí ān
+Kiandra	羌德莉娅	Qiāng dé lì yà
+Kiara	恰拉	Qià lā
+Kika	吉卡	Jí Kǎ
+Kiko	奇科	Qí kē
+Kilian	吉利安	Jí lì ān
+Killian	吉利安	Jí lì ān
+Killien	吉利恩	Jí lì ēn
+Kilyann	吉利安	Jí lì ān
+Kim	金	Jīn
+Kimberley	金伯利	Jīn bó lì
+Kimberly	金伯利	Jīn bó lì
+Kina	琦娜	Qí nà
+Kinga	金佳	Jīn jiā
+Kira	琦拉	Qí lā
+Kiran	凯兰	Kǎi lán
+Kirschner	科尔士内	Kē ěr shì nèi
+Kirstin	克里斯丁	Kè lǐ sī dīng
+Kirsty	科斯蒂	Kē sī dì
+Kitana	琦塔娜	Qí tá nà
+Kiven	吉文	Jí wén
+Kiwi	吉维	Jí wéi
+Kleber	库莱贝	Kù lái Bèi
+Klein	克莱恩	Kè lái ēn
+Klervi	克莱尔维	Kè lái ěr wéi
+Klivia	克莉维娅	Kè lì wéi yà
+Kobe	科比	Kē bǐ
+Kornelia	克内利亚	Kè nèi lì yà
+Koura	枯哈	Kū hā
+Krista	克莉斯塔	Kè lì sī tǎ
+Kristal	科利斯塔	Kē lì sī tǎ
+Kristen	克里斯坦	Kè lǐ sī tǎn
+Kristi	克莉斯蒂	Kè lì sī dì
+Kristian	克里斯典	Kè lǐ sī diǎn
+Kristie	克莉斯蒂	Kè lì sī dì
+Kristina	克里斯蒂娜	Kè lǐ sī dí nà
+Kristine	克莉斯汀	Kè lì sī tīng
+Kristy	克里斯蒂	Kè lǐ sī dì
+Krystyna	克里斯蒂娜	Kè lǐ sī dì nà
+Krzysztof	克什斯托弗	Kè shí sī tuō fú
+Kurro	库罗	Kù luó
+Kurt	库尔特	Kù ěr té
+Kya	迦	Jiā
+Kyara	基娅拉	Jī yà lā
+Kylan	吉兰	Jí lán
+Kyle	凯勒	Kǎi lè
+Kylian	基利安	Jī lì ān
+Kylie	琦丽	Qí lì
+Kyllian	吉利安	Jí lì ān
+Labie	拉比	Lā bǐ
+Labin	拉宾	Lā bīn
+Lachlan	拉赫兰	Lā hè lán
+Ladislas	拉迪斯拉斯	Lā dí sī lā sī
+Lærke	莱克	Lái kè
+Laetitia	莱堤西亚	Lái tí xī yǎ
+Laëtitia	莱提霞	Lái tí xiá
+Lahcen	拉森	Lā sēn
+Laia	莱芽	Lái yá
+Laïd	拉伊德	Lā yī dé
+Laïla	蕾拉	Lěi lā
+Laila	莱拉	Lái lā
+Laïs	拉伊丝	Lā Yī sī
+Lais	莱斯	Lái sī
+Laïsa	拉伊萨	Lā Yī sà
+Laith	雷特	Léi tè
+Lali	拉力	Lā lì
+Lalie	拉丽	Lā lí
+Laly	拉丽	Lā lì
+Lambert	朗贝尔	Lǎng bèi er
+Lamia	拉弥亚	Lā mí yà
+Lana	拉娜	Lā nà
+Lana	拉娜	Lā nà
+Lance	兰斯	Lán sī
+Lancelot	郎斯洛	Láng sī luò
+Landry	郎德里	Láng dé lǐ
+Lange	朗日	Lǎng rì
+Lanna	兰娜	Lán nà
+Laoise	劳伊斯	Láo Yī sī
+Laora	劳拉	Láo lā
+Laouni	拉乌尼	Lā Wū ní
+Lara	拉哈	Lā hā
+Lara	劳拉	Láo lā
+Larissa	拉莉萨	Lā lì sà
+Lars	拉尔斯	Lā ěr sī
+Laura	劳拉	Láo lā
+Lauralee	劳拉蕾	Láo lā lěi
+Lauralie	劳拉莉	Láo lā lì
+Lauraly	劳拉莉	Láo lā lì
+Lauranne	罗兰	Luō lán
+Laure	罗尔	Luó ěr
+Laure	劳荷	Láo hé
+Laureen	劳琳	Láo lín
+Laurélie	劳荷莉	Láo hé lì
+Laureline	劳荷琳	Láo hé lín
+Lauren	劳伦	Láo lún
+Lauréna	罗蕾娜	Luó lěi nà
+Laurèna	罗蕾娜	Luó lěi nà
+Laurence	洛杭丝	Luò háng sī
+Laurence	劳伦斯	Láo lún sī
+Laurene	劳伦	Láo lún
+Laurène	落莲	Luò lián
+Laurent	洛杭	Luò háng
+Laurentia	劳伦茜娅	Láo lún xī yà
+Laurett	e	罗蕾特 Luó lěi tè
+Laurette	罗蕾特	Luó lěi tè
+Lauriane	劳丽安	Láo lì ān
+Laurianne	劳丽安	Láo lì ān
+Laurie	萝莉	Luó lì
+Laurier	洛里哀	Luò lǐ āi
+Laurina	劳莉娜	Láo lì nà
+Laurine	劳琳	Láo lín
+Lauro	劳罗	Láo luó
+Laury	萝莉	Luó lì
+Laurylenn	萝莉琳	Luó lì lín
+Lautaro	劳塔罗	Láo tǎ luó
+Lauvinie	罗维妮	Luó wéi nī
+Lawrence	劳伦斯	Láo lún sī
+Layla	蕾拉	Lěi lā
+Laysi	莱茜	Lái xī
+Lazara	拉萨拉	Lā sà lā
+Lazare	拉扎尔	Lā zhā er
+Lazaro	拉萨罗	Lā sà luó
+Léa	利娅	Lì yǎ
+Leah	蕾雅	Lěi Yǎ
+Léana	蕾安娜	Lěi ān nà
+Leandra	莱昂德拉	Lái áng dé lā
+Léandre	蕾昂达	Lěi áng dá
+Leandro	莱昂德罗	Lái áng dē luō
+Léane	蕾安	Lěi ān
+Lech	雷尔	Léi ěr
+Leevan	莉凡	Lì fán
+Leïa	蕾娅	Lěi yà
+Leidimar	雷蒂玛尔	Léi dì Mǎ ěr
+Leidy	蕾蒂	Lěi dì
+Leïla	蕾拉	Lěi lā
+Leilani	蕾拉妮	Lěi lā nī
+Leilany	蕾拉妮	Lěi lā nī
+Leire	莱乐	Lái lè
+Leiya	蕾娅	Lěi yà
+Leland	雷郎	Léi Láng
+Lélya	蕾莉娅	Lěi lì yà
+Lemuel	勒姆艾	Lè mǔ Aì
+Lena	莉娜	Lì nà
+Léna	蕾娜	Lěi nà
+Lénaïg	蕾娜伊克	Lěi nà Yī kè
+Lenin	列宁	Liè níng
+Lenine	雷宁	Léi nín
+Lenisa	蕾妮萨	Lěi nī sà
+Lennart	雷纳尔特	Léi nà ěr tè
+Lenno	雷诺	Léi nuò
+Lenny	蓝尼	Lán ní
+Lenon	雷弄	Léi nòng
+Lény	雷尼	Léi ní
+Léo	雷欧	Léi ōu
+Leocádia	蕾奥卡蒂娅	Lěi ào kǎ dì yà
+Léon	莱昂	Lái áng
+Leon	莱昂	Lái áng
+Leona	莉安娜	Lì ān nà
+Léonard	雷奥纳尔	Léi ào nà ěr
+Leonardo	莱昂纳多	Lái áng nà duō
+Léone	蕾安	Lěi ān
+Leonel	莱奥耐	Lái ào nài
+Leonie	蕾奥妮	Lěi ào nī
+Léonie	蕾奥妮	Lěi ào nī
+Leonor	莱昂诺尔	Lái áng nuò r
+Léonore	莱奥诺	Lái ào nuò
+Léopold	利奥波德	Lì ào bō dé
+Leopold	利奥波德	Lì ào bō dé
+Leopoldo	莱奥波尔多	Lái ào bō rduō
+Leroy	勒沃	Lè wò
+Léry	雷利	Léi lì
+Lesley	莱丝莉	Lái sī lì
+Leslie	莱丝莉	Lái sī lì
+Lesly	莱丝莉	Lái sī lì
+Leticia	莱蒂西亚	Lái dì xī yà
+Letitia	蕾蒂夏	Lěi dì xià
+Lexy	雷克西	Léi kè xī
+Léya	蕾亚	Lěi yà
+Leyla	蕾拉	Lěi lā
+Leyre	莱乐	Lái lè
+Liam	利亚姆	Lì yà mǔ
+Lian	莱恩	Lái ēn
+Liana	莱娅娜	Lái yà nà
+Liane	丽安	Lì ān
+Liann	莱安	Lái ān
+Liantsoa	踉笮阿	Liàng zé Ā
+Libardo	利巴尔多	Lì bā ěr duō
+Libby	莉碧	Lì bì
+liberdade	自由	Zì Yóu
+Libertad	丽波尔达	Lì bō rdá
+Libertário	李贝塔柳	Lǐ Bèi tǎ liǔ
+Licas	利卡斯	Lì Kǎ sī
+Licinia	丽茜妮娅	Lì xī nī yà
+Lida	丽达	Lì dá
+Lidia	莉迪娅	Lì dí yà
+Lídia	莉蒂娅	Lì dì yà
+Lidiana	莉迪亚纳	Lì dí yà nà
+Liduvina	利杜维纳	Lì dù wéi nà
+Liena	列娜	Liè nà
+Liette	埃特	Aī tè
+Lieza	丽萨	Lì sà
+Lígia	莉嘉	Lì jiā
+Lila	莉拉	Lì lā
+Lilas	莉拉	Lì lā
+Lili	丽丽	Lì lì
+Lília	李丽娅	Lǐ lì yà
+Lilian	利利昂	Lì lì áng
+Lílian	莉莉安	Lì lì ān
+Liliana	莉莉亚娜	Lì lì yà nà
+Liliane	莉莉安	Lì lì ān
+Lilianne	莉莉安	Lì lì ān
+Lilith	莉莉丝	Lì lì sī
+Lillian	利利安	Lì lì ān
+Lilly	莉莉	Lì lì
+Lilou	郦露	Lì lù
+Lily	莉莉	Lì lì
+Lily-Fleur	丽丽弗勒	Lì lì Fú lè
+Lily-Rose	莉莉罗斯	Lì lì luó sī
+Lina	莉娜	Lì nà
+Lincoln	林垦	Lín kěn
+Linda	琳达	Lín dá
+Lindia	琳蒂娅	Lín dì yà
+Lindsay	林赛	Lín sài
+Line	琳	Lín
+Linh	琳	Lín
+Linn	琳	Lín
+Linnea	莉内娅	Lì nèi yà
+Lino	利诺	Lì nuò
+Linton	林顿	Lín dùn
+Lionel	利奥内尔	Lì ào nèi er
+Liroye	利罗依	Lì luó yī
+Lisa	丽莎	Lì shā
+Lisandru	利桑德鲁	Lì sāng dé lǔ
+Lisane	莉茜安	Lì xī ān
+Lisange	丽桑日	Lí sāng rì
+Lise	丽丝	Lí sī
+Liséa	丽赛亚	Lì sài yà
+Lisette	丽塞特	Lì Sāi tè
+Lison	莉宋	Lì sòng
+Livia	利维亚	Lì wéi yà
+Liwann	利万	Lì wàn
+Liya	丽雅	Lì yǎ
+Liz	丽丝	Lì sī
+Lizbeth	李斯贝特	Lǐ sī Bèi tè
+Lizeth	李赛特	Lǐ sài tè
+Lleó	雷昂	Léi áng
+Llorenç	罗雷	Luó léi
+Llorenç	劳朗斯	Láo lǎng sī
+Lloyd	罗伊德	Luó Yī dé
+Lluç	鲁斯	Lǔ sī
+Llúcia	露茜芽	Lù xī yá
+Lluis	乌伊斯	Wū Yī sī
+Lluis	路易斯	Lù yì sī
+Lluisa	露易萨	Lù yì sà
+Llura	露拉	Lù lā
+Loan	罗安	Luó ān
+Loana	罗安娜	Luō ān nà
+Loane	罗安	Luó ān
+Loanne	劳安	Láo ān
+Loeva	罗伊娃	Luó Yī wá
+Logan	露甘	Lòu gān
+Loghan	露甘	Lòu gān
+Lohane	罗安	Luó ān
+Lohann	罗安	Luó ān
+Lohith	罗伊斯	Luó Yī sī
+Loïc	罗伊克	Luō yī kè
+Loïca	罗伊卡	Luó yī kǎ
+Loick	罗伊克	Luō yī kè
+Loida	洛伊达	Luò yī dá
+Loïs	罗伊丝	Luō yī sī
+Lola	罗拉	Luō lā
+Lolita	洛丽塔	Luò lí tǎ
+Lolly	洛丽	Luò lì
+Lorea	罗蕾娅	Luó lěi yà
+Loredana	萝蕾丹娜	Luó lěi dān nà
+Lorelei	罗勒莱	Luó lè lái
+Loreley	洛乐雷	Luò lè léi
+Lorena	洛雷纳	Luò léi nà
+Lorène	劳伦	Láo lún
+Lorene	劳伦	Láo lún
+Lorenz	罗兰兹	Luó lán zī
+Lorenzo	劳伦佐	Láo lún zuǒ
+Loreto	洛雷托	Luò léi tuō
+Lorette	罗瑞德	Luó ruì dé
+Lorette	劳蕾特	Láo lěi tè
+Lorian	劳里昂	Láo lǐ áng
+Loriane	劳丽安	Láo lí ān
+Lorianne	劳丽安	Láo lí ān
+Lorie	劳丽	Láo lí
+Lorik	罗里克	Luó lǐ kè
+Lorin	罗林	Luó lín
+Lorine	罗琳	Luó lín
+Loris	罗利斯	Luó lì sī
+Lorna	罗尔哪	Luó ěr nǎ
+Lorraine	劳蕾娜	Láo lěi nà
+Lorriane	劳丽安	Láo lí ān
+Loryce	劳丽丝	Láo lì sī
+Loryn	罗琳	Luó lín
+Lotfi	罗德费	Luó dé Fèi
+Lothaire	罗泰荷	Luó tài hé
+Lou	璐	Lù
+Louane	路安	Lù ān
+Louella	璐尔拉	Lù ěr lā
+Louie	路易	Lù yì
+Louis	路易	Lù yì
+Louis-Philippe	路易·菲力浦	Lù yì fēi lì pǔ
+Louisa	路易莎	Lù yì shā
+Louise	路易丝	Lù yì sī
+Louisette	路易丝特	Lù yì sī tè
+Louisi	露伊茜	Lù Yī xī
+Louka	卢卡	Lú kǎ
+Louloua	露露阿	Lù lù ā
+Louna	露娜	Lù nà
+Louniz	卢尼斯	Lú ní sī
+Loup	卢	Lú
+Lourdes	洛德斯	Luò dé sī
+Lourenço	劳伦西奥	Láo lún loxī ào
+Louwana	露瓦哪	Lù wǎ nǎ
+Lowen	罗文	Luó wén
+Lowri	萝莉	Luó lì
+Loyce	罗伊丝	Luó yī sī
+Lu	Mei	鲁梅 Lǔ Méi
+Lua	露娃	Lù wá
+Luan	露安	Lù ān
+Luana	露娜	Lù nà
+Luandreo	鸾德雷奥	Luán dé léi ào
+Luanie	露安妮	Lù ān nī
+Luanna	露安娜	Lù ān nà
+Luara	露阿拉	Lù Ā lā
+Luba	露巴	Lù Bā
+Lubin	吕彬	Lǚ bīn
+Luc	吕克	Lǚ kè
+Luca	卢卡	Lú kǎ
+Lucas	卢卡	Lú kǎ
+Lucas	卢卡斯	Lú kǎ sī
+Luce	吕丝	Lǚ sī
+Lucelia	露瑟莉娅	Lù sè lì yà
+Lucero	卢瑟罗	Lú sè luó
+Lucette	吕塞特	Lǚ sāi tè
+Luci	卢西	Lú xī
+Lucia	露茜娅	Lù xī yà
+Lúcia	露茜娅	Lù xī yà
+Luciana	卢西亚娜	Lú xī yà nà
+Luciane	露西安	Lù xī ān
+Luciano	卢西亚诺	Lú xī yà nuò
+Lucie	露西	Lù xī
+Lucien	吕西安	Lǚ xī ān
+Luciene	露贤	Lù xián
+Lucienne	露茜恩	Lù xī ēn
+Lucila	卢西拉	Lú xī lā
+Lucile	露西儿	Lù xī er
+Lucília	露茜丽娅	Lù xī lì yà
+Lucille	露西儿	Lù xī ér
+Lucinda	卢新达	Lú Xīn dá
+Lucine	吕芯	Lǚ xīn
+Lúcio	卢西奥	Lú xī ào
+Luckas	卢卡斯	Lú kǎ sī
+Lucrèce	吕克蕾丝	Lǚ kè lěi sī
+Lucrecia	琉璃希娅	Liú lí xī yà
+Lucy	露西	Lù xī
+Ludger	鲁德戈	Lǔ dé gē
+Ludim	陆丁	Lù dīng
+Ludivine	吕蒂文	Lǚ dì wén
+Ludmila	卢德米拉	Lú dé mǐ lā
+Ludmillia	露特米娅	Lù tè mǐ yà
+Ludovic	吕多维克	Lǚ duō wéi kè
+Ludwig	路德维希	Lù dé wéi xī
+Ludwina	吕德威娜	Lǚ dé Wēi nà
+Ludwing	陆德温	Lù dé wēn
+Luella	露尔拉	Lù ěr lā
+Luigi	路易吉	Lù yì jí
+Luis	路易斯	Lù yì sī
+Luisa	路易莎	Lù yì shā
+Luisja	路易夏	Lù yì xià
+Luiz	路易斯	Lù yì sī
+Luka	卢卡	Lú kǎ
+Łukasz	吴卡什	Wǔ kǎ shí
+Luke	卢克	Lú kè
+Lula	露拉	Lù lā
+Lulia	露莉娅	Lù lì yà
+Luna	璐娜	Lù nà
+Luna	璐娜	Lù nà
+Lurdes	露尔黛丝	Lù ěr dài sī
+Luz	卢斯	Lú sī
+Luzia	露茜娅	Lù xī yà
+Luzie	露谢	Lù Xiè
+Ly	莉	Lì
+Lydia	莉蒂娅	Lì dì yà
+Lydie	莉蒂	Lì dì
+Lyes	埃斯	Aī sī
+Lygia	莉吉娅	Lì jí yà
+Lyla	莉拉	Lì lā
+Lylie	莉莉	Lì lì
+Lylo	利鲁	Lì lǔ
+Lylou	莉露	Lì Lù
+Lynda	琳达	Lín dá
+Lyne	琳	Lín
+Lynette	丽奈特	Lì nài té
+Lynn	琳	Lín
+Lynne	琳	Lín
+Lys	莉丝	Lì sī
+Lysa	丽莎	Lì shā
+Lysane	莉叁	Lì sān
+Lysange	丽桑日	Lí sāng rì
+Lysann	丽珊	Lì shān
+Lyséa	莉瑟阿	Lì sè ā
+Lysiane	莉西安	Lì xī ān
+Lysianne	莉西安	Lì xī ān
+Maaike	玛艾克	Mǎ ài kè
+Mabel	玛贝	Mǎ Bèi
+Mabety	玛贝蒂	Mǎ Bèi dì
+Macarena	马卡乐娜	Mǎ kǎ lè nà
+Macario	马卡利奥	Mǎ kǎ lì ào
+Macedo	马塞多	Mǎ Sāi duō
+Macha	玛莎	Mǎ shā
+Macha	玛莎	Mǎ shā
+Maciej	马切	Mǎ qiē
+Maciel	马希尔	Mǎ xī ěr
+Madalena	玛达蕾娜	Mǎ dá lěi nà
+Maddison	马蒂森	Mǎ dì sēn
+Maddy	玛迪	Mǎ dí
+Madeleine	玛德琳	Mǎ dé lín
+Madeline	玛德琳	Mǎ dé lín
+Madinina	玛蒂妮娜	Mǎ dì nī nà
+Madison	麦迪逊	Mài dí xùn
+Madisson	玛迪笋	Mǎ dí sǔn
+madisson	马迪松	Mǎ dí sōng
+Madly	玛德丽	Mǎ dé lì
+Mae	梅	Méi
+Maël	马尔	Mǎ ěr
+Maëlann	玛伊兰	Mǎ yī lán
+Maelia	玛艾娅	Mǎ ài yà
+Maëline	玛艾琳	Mǎ ài lín
+Maëlla	玛艾拉	Mǎ ài lā
+Maëlle	玛艾尔	Mǎ ài ěr
+Maëly	玛艾丽	Mǎ ài lí
+Maëlys	玛艾丽丝	Mǎ ài lí sī
+Maëlyss	玛艾丽丝	Mǎ ài lí sī
+Maena	玛艾娜	Mǎ ài nà
+Maéna	玛艾娜	Mǎ ài nà
+Maeva	玛伊瓦	Mǎ yī wǎ
+Maeve	玛伊芙	Mǎ yī fú
+Mafalda	玛法尔达	Mǎ fǎ ěr dá
+Magali	麦格丽	Mài gé lí
+Magalie	麦格丽	Mài gé lì
+Magaly	麦格丽	Mài gé lí
+Magatte	马卡特	Mǎ kǎ tè
+Magdalena	玛格达雷娜	Mǎ gé dá léi nà
+Magdalena	玛格达蕾娜	Mǎ gé dá lěi nà
+Magdalène	玛格达雷恩	Mǎ gé dá léi ēn
+Magella	玛捷拉	Mǎ jí lā
+Maggy	玛吉	Mǎ jí
+Magnolia	木兰	Mù lán
+Magnus	马格努斯	Mǎ gé nǔ sī
+Maguelone	玛克愣	Mǎ kè lèng
+Maguy	玛吉	Mǎ jí
+Maha	马阿	Mǎ ā
+Mahé	玛艾	Mǎ Aì
+Mahée	玛艾	Mǎ Aì
+Mahélie	玛艾莉	Mǎ ài lì
+Mahfooz	马夫斯	Mǎ fū sī
+Mahyna	玛依娜	Mǎ yī nà
+Maï	麦	Mài
+Maia	玛雅	Mǎ yǎ
+Maiara	玛娅拉	Mǎ yà lā
+Maik	麦克	Mài kè
+Maïka	玛伊卡	Mǎ Yī Kǎ
+Maike	麦克	Mài kè
+Maïlis	麦丽斯	Mài lí sī
+Maïly	玛伊莉	Mǎ yī lì
+Maïlys	玛伊丽丝	Mǎ yī lì sī
+Maïna	玛依娜	Mǎ yī nà
+Maireni	麦蕾妮	Mài lěi nī
+Maitane	麦达内	Mài dá nèi
+Maïté	玛伊泰	Mǎ yī tài
+Maiwen	玛伊雯	Mǎ yī wén
+Maïwenn	玛伊雯	Mǎ yī wén
+Majid	马吉德	Mǎ jí dé
+Makkoo	马库	Mǎ Kù
+Makoto	马科特	Mǎ Kē tè
+Malak	马拉克	Mǎ lā kè
+Malaury	玛罗丽	Mǎ luó lì
+Malcolm	马尔科姆	Mǎ ěr kē mǔ
+Malek	马莱克	Mǎ lái kè
+Malena	玛蕾娜	Mǎ lěi nà
+Małgorzata	毛戈雅塔	Máo gē yǎ tǎ
+Malha	玛尔哈	Mǎ ěr Hā
+Malia	玛丽亚	Mǎ lì yà
+Malik	马里克	Mǎ lǐ kè
+Malika	玛丽卡	Mǎ lí kǎ
+Mallaury	玛劳丽	Mǎ Láo lì
+Mallorie	玛罗丽	Mǎ luó lì
+Mallory	玛罗丽	Mǎ luó lì
+Malo	马罗	Mǎ luó
+Malorie	玛罗丽	Mǎ luó lì
+Malory	玛罗丽	Mǎ luó lì
+Malou	玛璐	Mǎ Lù
+Malvina	玛尔维娜	Mǎ ěr wéi nà
+Maly	玛丽	Mǎ lì
+Malysia	玛丽茜亚	Mǎ lì xī yà
+Mamadou	马马杜	Mǎ mǎ dù
+Mana	玛娜	Mǎ nà
+Manaele	玛娜艾尔	Mǎ nà Aì ěr
+Manaf	马纳夫	Mǎ nà fū
+Mandy	曼蒂	Màn dì
+Manel	马内	Mǎ nèi
+Manfred	曼弗雷德	Màn Fú léi dé
+Manhattan	马纳丹	Mǎ nà Dān
+Mani	玛妮	Mǎ nī
+Manoel	马诺埃	Mǎ nuò āi
+Manolo	马诺罗	Mǎ nuò luó
+Manon	玛侬	Mà nóng
+Manouk	玛努克	Mǎ nǔ kè
+Manu	马努	Mǎ nǔ
+Manuel	曼努埃尔	Màn nǔ āi ěr
+Manuela	玛努薇拉	Mǎ nǔ wēi lā
+Manuela	玛努薇拉	Mǎ nǔ wēi lā
+Maoline	猫琳	Māo lín
+Mar	马尔	Mǎ r
+Mara	玛拉	Mǎ lā
+Marc	马克	Mǎ kè
+Marc-Antoine	马尔康托万	Mǎ ěr kāng tuō wàn
+Marc-Olivier	马克·奥利维耶	Mǎ kè ào lì wéi yē
+Marçal	马尔沙	Mǎ ěr Shā
+Marceau	马尔索	Mǎ ěr suǒ
+Marcel	马塞尔	Mǎ sāi er
+Marcela	马塞拉	Mǎ sāi lā
+Marceline	玛尔瑟琳	Mǎ ěr sè lín
+Marcelino	马尔塞利诺	Mǎ ěr sāi lì nuò
+Marcella	玛尔瑟拉	Mǎ ěr sè lā
+Marcelle	玛莎尔	Mǎ shā er
+Marcelo	马塞洛	Mǎ sāi luò
+Márcia	玛茜娅	Mǎ xī yà
+Marcia	马尔西亚	Mǎ ěr xī yà
+Marcie	玛茜	Mǎ xī
+Marcilene	玛茜莲	Mǎ xī lián
+Marcin	马尔亲	Mǎ ěr qīn
+Márcio	马尔希奥	Mǎ ěr xī ào
+Marcio	马尔西欧	Mǎ ěr xī Oū
+Marco	马尔寇	Mǎ ěr kòu
+Marconi	马尔科尼	Mǎ ěr Kē ní
+Marcos	马科斯	Mǎ kē sī
+Marcus	马尔库斯	Mǎ ěr kù sī
+Mareike	马海克	Mǎ Hǎi kè
+Marek	马雷克	Mǎ léi kè
+Marella	玛蕾拉	Mǎ lěi lā
+Margaret	玛格丽特	Mǎ gé lí té
+Margareth	玛格蕾斯	Mǎ gé lèi sī
+Margareth	玛格蕾特	Mǎ gé lèi té
+Margarida	玛嘉莉达	Mǎ jiā lì dá
+Margarita	马格利塔	Mǎ gé lì tǎ
+Margaux	玛歌	Mǎ gē
+Marjana	玛尔佳娜	Mǎ ěr jiā nà
+Marjolaine	玛乔莲	Mǎ qiáo lián
+Marjorie	玛乔丽	Mǎ qiáo lì
+Mark	马克	Mǎ kè
+Marko	马尔克	Mǎ ěr kè
+Markus	马尔酷斯	Mǎ ěr kù sī
+Marleide	玛尔蕾德	Mǎ ěr lěi dé
+Marlen	马莱因	Mǎ lái yīn
+Marlène	玛琳	Mǎ lín
+Marlene	玛琳	Mǎ lín
+Marline	玛尔琳	Mǎ ěr lín
+Marloes	马尔露斯	Mǎ ěr Lù sī
+Marlon	马愣	Mǎ lèng
+Marluce	马尔鲁斯	Mǎ ěr lǔ sī
+Marly	玛尔丽	Mǎ ěr lì
+Marose	玛罗丝	Mǎ luó sī
+Marshall	马歇尔	Mǎ xiē ěr
+Marta	玛尔塔	Mǎ ěr tǎ
+Marta	玛尔塔	Mǎ ěr tǎ
+Martha	玛莎	Mǎ shā
+Martha	玛尔塔	Mǎ ěr tǎ
+Martí	马尔丁	Mǎ ěr dīng
+Martial	马尔西亚	Mǎ ěr xī yà
+Martin	马丁	Mǎ dīng
+Martina	马蒂纳	Mǎ dì nà
+Martine	玛婷	Mǎ tíng
+Martinez	马丁内兹	Mǎ dīng nèi zī
+Martinho	马尔提诺	Mǎ ěr tí nuò
+Marussia	玛湖茜娅	Mǎ hú xī yà
+Marvin	马文	Mǎ wén
+Marwan	马尔万	Mǎ ěr wàn
+Mary	玛丽	Mǎ lì
+Mary-Lou	玛丽·璐	Mǎ lí lù
+Maryam	玛尔耶姆	Mǎ ěr yē mǔ
+Maryane	玛丽安	Mǎ lì ān
+Maryanne	玛丽安	Mǎ lì ān
+Maryeve	玛丽伊夫	Mǎ lì Yī fū
+Marylène	玛丽蕾娜	Mǎ lì lěi nà
+Marylia	玛丽丽娅	Mǎ lì lì yà
+Marylin	玛丽琳	Mǎ lì lín
+Marylise	玛丽丽丝	Mǎ lí lí sī
+Marylka	玛丽尔卡	Mǎ lì ěr Kǎ
+Marynes	玛丽内斯	Mǎ lì nèi sī
+Maryse	玛丽丝	Mǎ lí sī
+Maryse	马瑞赛	Mǎ ruì sài
+Maryvonne	玛丽冯	Mǎ lì féng
+Matéa	玛特阿	Mǎ tè Ā
+Matéo	马特欧	Mǎ tè ōu
+Mateu	马泰奥	Mǎ Tài ào
+Mateus	马泰乌斯	Mǎ tài wū sī
+Matheo	马泰奥	Mǎ Tài ào
+Matheus	马泰乌斯	Mǎ Tài Wū sī
+Mathias	马提亚斯	Mǎ tí yǎ sī
+Mathieu	马修	Mǎ xiū
+Mathieu	玛蒂厄	Mǎ dì è
+Mathiew	马修	Mǎ xiū
+Mathilda	玛蒂尔达	Mǎ dì ěr dá
+Mathilde	玛蒂尔德	Mǎ dì ěr dé
+Mathis	玛希斯	Mǎ xī sī
+Mathis	马蒂斯	Mǎ dì sī
+Mathy	马蒂	Mǎ dì
+Matias	马蒂亚斯	Mǎ dì yà sī
+Matilde	马蒂尔德	Mǎ dì rdé
+Matisse	马蒂斯	Mǎ dì sī
+Matrika	玛特丽卡	Mǎ té lí kǎ
+Matt	马特	Mǎ té
+Matteo	马特奥	Mǎ tè ào
+Mattéo	马特奥	Mǎ tè ào
+Mattheo	马特奥	Mǎ tè ào
+Matthew	马修	Mǎ xiū
+Matthias	马提亚斯	Mǎ tí yà sī
+Matthieu	玛蒂厄	Mǎ dì è
+Mattis	马蒂斯	Mǎ dì sī
+Matty	马迪	Má dí
+Maud	茉德	Mò dé
+Maude	茉德	Mò dé
+Maura	毛拉	Máo lā
+Maurad	莫哈德	Mò hā dé
+Maurane	茉兰	Mò lán
+Mauranne	莫尔安	Mò ěr ān
+Maureen	穆琳	Mù lín
+Maurice	莫利斯	Mò lì sī
+Mauricette	莫里赛特	Mò lǐ sài té
+Maurici	茂利西	Mào lì xī
+Mauricio	毛里西噢	Máo lǐ xī ō
+Maurine	莫琳	Mò lín
+Maurizio	毛里齐奥	Máo lǐ qí ào
+Mauro	茂罗	Mào luó
+Maverick	马维利科	Mǎ wéi lì Kē
+Max	马克斯	Mǎ kè sī
+Maxance	马克桑斯	Mǎ kè sāng sī
+Maxence	马克桑斯	Mǎ kè sāng sī
+Maxi	马克西	Mǎ kè xī
+Maxim	马克辛	Mǎ kè xīn
+Maxima	马克西马	Mǎ kè xī mǎ
+Maxime	马克西姆	Mǎ kè xī mǔ
+Maximiano	马克西米阿诺	Mǎ kè xī mǐ ā nuò
+Maximilian	马克西迷恋	Mǎ kè xī mí liàn
+Maximiliano	马西米利亚诺	Mǎ xī mǐ lì yà nuò
+Maximilien	马克西米利恩	Mǎ kè xī mǐ lì ēn
+Maximilyam	马克西米利阿姆	Mǎ kè xī mǐ lì Ā mǔ
+Maximino	马克西莫	Mǎ kè xī mò
+Maximus	马克思姆斯	Mǎ kè sī mǔ sī
+Maxine	玛可欣	Mǎ kě xīn
+Maxwell	麦克斯韦	Mài kè sī wéi
+May	梅	Méi
+Maya	玛雅	Mǎ yǎ
+Mayana	玛娅娜	Mǎ yà nà
+Mayara	玛雅拉	Mǎ Yǎ lā
+Maybell	麦贝尔	Mài Bèi ěr
+Mayel	马耶尔	Mǎ yē ěr
+Mayer	马亚尔	Mǎ yà ěr
+Mayleen	梅琳	Méi lín
+Maylene	梅莲	Méi lián
+Maylène	玛伊莲	Mǎ Yī lián
+Mayliss	玛伊莉丝	Mǎ yī lì sī
+Maÿliss	玛伊丽丝	Mǎ Yī lì sī
+Mayra	迈拉	Mài lā
+Mayre	麦勒	Mài lè
+Mayte	玛伊泰	Mǎ yī tài
+Mazarine	玛莎琳	Mǎ shā lín
+Mazen	马森	Mǎ sēn
+Meaghan	米甘	Mǐ gān
+Mechthild	梅尔提德	Méi ěr tí dé
+Meda	梅达	Méi dá
+Médéric	梅代里克	Méi dài lǐ kè
+Meg	梅格	Méi gé
+Mégane	梅甘	Méi gān
+Meggie	梅吉	Méi Jí
+Méghane	梅甘	Méi gān
+Mehane	梅安	Méi ān
+Mehdi	梅迪	Méi dí
+Mehmet	莫梅特	Mò méi tè
+Meik	麦克	Mài kè
+Meilin	梅林	Méi lín
+Meire	梅尔	Méi ěr
+Méjane	梅冄	Méi rǎn
+Mejra	梅日拉	Méi rì lā
+Mekky	梅吉	Méi Jí
+Mel	梅尔	Méi ěr
+Mélaine	梅莲	Méi lián
+Mélanie	梅兰妮	Méi lán ní
+Melany	梅兰妮	Méi lán ní
+Mélany	梅兰妮	Méi lán nī
+Melba	梅尔巴	Méi ěr bā
+Melchior	梅尔邱	Méi ěr qiū
+Mélia	梅丽娅	Méi lí yà
+Melia	美莉芽	Měi lì yá
+Méliane	梅莉安	Méi lì ān
+Mélina	梅莉娜	Méi lì nà
+Melina	梅丽娜	Méi lì nà
+Melinda	美莲达	Měi lián dá
+Mélinda	梅林达	Méi lín dá
+Méline	梅琳	Méi lín
+Melissa	梅莉莎	Méi lì shā
+Mélissandre	梅莉山大	Méi lì shān dà
+Meliza	梅丽萨	Méi lì sà
+Mellar	美拉尔	Měi lā ěr
+Mellie	美丽	Měi lì
+Mélodie	梅洛迪	Méi luò dí
+Melody	梅洛迪	Méi luò dí
+Meltem	梅特恩	Méi tè ēn
+Melvin	梅尔文	Méi ěr wén
+Melvyn	梅尔文	Méi ěr wén
+Mélys	梅莉丝	Méi lì sī
+Melyssa	梅莉莎	Méi lì shā
+Mencià	门霞	Mén xiá
+Mengual	门古瓦尔	Mén gǔ wǎ ěr
+Merça	梅尔萨	Méi ěr sà
+Mercè	梅尔塞	Méi rsāi
+Mercè	麦萨	Mài sà
+Mercedes	梅塞德斯	Méi sāi dé sī
+Merche	梅尔赤	Méi ěr chì
+Meri	梅丽	Méi lì
+Meritxell	梅莉赤尔	Méi lì chì èr
+Merouane	梅鲁安	Méi lǔ ān
+Merry-Anne	梅丽安	Méi lì ān
+Merwan	梅尔万	Méi ěr wàn
+Meryem	梅尔耶姆	Méi ěr yē mǔ
+Méryl	梅丽尔	Méi lì ěr
+Meryl	梅丽尔	Méi lì ěr
+Messaline	梅萨琳	Méi sà lín
+Messias	梅西亚	Méi xī yà
+Messon	麦森	Mài sēn
+Mesut	梅苏特	Méi sū tè
+Metehan	梅代安	Méi dài ān
+Meven	梅文	Méi wén
+Mey	梅	Méi
+Meyer	梅耶尔	Méi yē ěr
+Meyling	梅玲	Méi líng
+Meyssa	梅萨	Méi sà
+Méziane	梅茜安	Méi xī ān
+Mia	米娅	Mǐ yà
+Micaela	米卡俄拉	Mǐ kǎ é lā
+Michael	米卡尔	Mǐ kǎ er
+Michael	麦克尔	Mài kè er
+Michaela	米凯拉	Mǐ kǎi lā
+Michał	米豪	Mǐ háo
+Michel	米歇尔	Mǐ xiē er
+Michèle	米歇勒	Mǐ xiē lè
+Micheline	米舍利娜	Mǐ shě lì nà
+Michelle	米歇尔	Mǐ xiē er
+Michko	米士科	Mǐ shì kē
+Mick	米克	Mǐ kè
+Mickaël	米卡尔	Mǐ kǎ ěr
+Mickey	米基	Mǐ jī
+Mieczysław	米尺斯瓦夫	Mǐ chǐ sī wǎ fū
+Miguel	米高	Mǐ gāo
+Mihriban	米利班	Mǐ lì bān
+Mijal	米哈尔	Mǐ hā ěr
+Mijer	米捷尔	Mǐ jié ěr
+Miká	米卡	Mǐ kǎ
+Mikael	米卡尔	Mǐ kǎ ěr
+Mikaël	米卡尔	Mǐ kǎ ěr
+Mike	麦克	Mài kè
+Miki	米吉	Mǐ jí
+Mikołaj	米克艾	Mǐ kè ài
+Mikou	米酷	Mǐ Kù
+Mikumi	米库米	Mǐ Kù mǐ
+Mila	米拉	Mǐ lā
+Milagros	米拉格罗斯	Mǐ lā gé luó sī
+Miled	米雷德	Mǐ léi dé
+Miléna	米蕾娜	Mǐ lěi nà
+Milena	米蕾娜	Mǐ lěi nà
+Miley	蜜蕾	Mì lěi
+Milia	米丽亚	Mǐ lì yà
+Miliana	米利亚娜	Mǐ lì yà nà
+Milie	米丽	Mǐ lì
+Milita	蜜丽塔	Mì lì tǎ
+Milla	蜜拉	Mì lā
+Millán	米兰	Mǐ lán
+Millie	米粒	Mǐ lì
+Millionneli	米柳内丽	Mǐ liǔ nèi lì
+Milly	蜜丽	Mì lì
+Milo	米罗	Mǐ luó
+Milou	米卢	Mǐ lú
+Milson	米尔森	Mǐ ěr sēn
+Milton	米尔屯	Mǐ ěr tún
+Mina	米娜	Mǐ nà
+Minea	麦妳娅	Mài nǐ yà
+Mini	米妮	Mǐ nī
+Minna	米娜	Mǐ nà
+Miquel	米凯	Mǐ Kǎi
+Miquela	蜜凯拉	Mì Kǎi lā
+Mira	米拉	Mǐ lā
+Mirana	米哈娜	Mǐ hā nà
+Miranda	米朗达	Mǐ lǎng dá
+Mireia	米雷娅	Mǐ léi yà
+Mireia	蜜蕾娅	Mì lěi yà
+Mireille	米雷	Mǐ léi
+Mirela	蜜蕾拉	Mì lěi lā
+Mirella	米蕾拉	Mǐ lěi lā
+Miren	米廉	Mǐ lián
+Miriam	米里安	Mǐ lǐ ān
+Miris	米莉斯	Mǐ lì sī
+Mirka	米尔卡	Mǐ ěr Kǎ
+Mirna	米尔纳	Mǐ rnà
+Mirose	米罗斯	Mǐ luó sī
+Miroslav	米侯斯拉夫	Mǐ hóu sī lā fū
+Miroslava	莫罗斯拉瓦	Mò luó sī lā wǎ
+Mirosław	米洛斯瓦夫	Mǐ luò sī wǎ fū
+Mirya	米莉娅	Mǐ lì yà
+Miryan	蜜丽安	Mì lì ān
+Mischa	蜜沙	Mì Shā
+Mitch	米奇	Mǐ qí
+Mitchell	米切尔	Mǐ qiē ěr
+Mitzi	密茨	Mì cí
+Miuka	米奥卡	Mǐ ào Kǎ
+Moana	莫安娜	Mò ān nà
+Modesto	莫德斯托	Mò dé sī tuō
+Moema	莫埃玛	Mò Aī Mǎ
+Moesha	莫艾莎	Mò Aì shā
+Mogwai	莫克外	Mò kè wài
+Mohamed	穆罕默德	Mò hǎn mò dé
+Mohand	莫巷	Mò hàng
+Mohcine	墨辛	Mò xīn
+Moïra	莫伊拉	Mò Yī lā
+Moïse	莫伊斯	Mò yī sī
+Moisés	莫伊塞斯	Mò yī sāi sī
+Moka	莫卡	Mò Kǎ
+Mokhtar	默克塔尔	Mò kè tǎ ěr
+Molly	茉莉	Mò lì
+Mona	蒙娜	Mēng nà
+Moncef	蒙塞夫	Mēng sài fū
+Moneefa	莫尼法	Mò ní Fǎ
+Monia	莫妮娅	Mò nī yà
+Monica	莫妮卡	Mò nī kǎ
+Mônica	莫尼卡	Mò ní kǎ
+Mònica	莫妮卡	Mò nī Kǎ
+Monika	莫妮卡	Mò nī kǎ
+Monika	莫尼卡	Mò ní kǎ
+Monique	莫尼克	Mò ní kè
+Monserrat	蒙塞拉特	Méng sāi lā tè
+Monserrat	梦瑟拉	Mèng sè lā
+Montse	蒙特塞	Méng tè sāi
+Montse	梦慈	Mèng cí
+Montserrat	蒙特塞拉特	Méng tè sāi lā tè
+Monty	梦蒂	Mèng dì
+Mony	莫尼	Mò ní
+Morais	莫莱斯	Mò lái sī
+Moreen	莫琳	Mò lín
+Morena	莫蕾娜	Mò lěi nà
+Moreno	莫雷诺	Mò léi nuò
+Morgan	摩根	Mó gēn
+Morgane	莫尔甘	Mò ěr gān
+Morissette	莫里赛特	Mò lǐ sài té
+Morris	莫里斯	Mò lǐ sī
+Mos	茅斯	Máo sī
+Moses	摩西	Mó xī
+Mouhamad	穆哈马德	Mù hā mǎ dé
+Mouloud	穆鲁德	Mù lǔ dé
+Mouna	穆娜	Mù nà
+Moune	穆恩	Mù ēn
+Mounir	穆尼尔	Mù ní ěr
+Moura	穆拉	Mù lā
+Mourad	穆哈德	Mù hā dé
+Mous	穆斯	Mù sī
+Moustafa	穆斯塔法	Mù sī tǎ fǎ
+Muhammad	穆罕默德	Mù hǎn mò dé
+Muhib	穆易贝	Mù yì Bèi
+Murat	穆拉	Mù lā
+Muriel	穆丽尔	Mù lí er
+Murielle	穆丽尔	Mù lí er
+Mustafa	穆斯塔法	Mù sī tǎ fǎ
+Mustapha	穆斯塔法	Mù sī tǎ fǎ
+Myhan	蜜安	Mì ān
+Myléna	米蕾娜	Mǐ lěi nà
+Mylène	米莲	Mǐ lián
+Myriam	米里安	Mǐ lǐ ān
+Myris	米莉丝	Mǐ lì sī
+Myrtille	米尔缇	Mǐ èr tí
+Nabiha	娜比奤	Nà bǐ tǎi
+Nabil	纳比尔	Nà bǐ ěr
+Nabila	娜碧拉	Nà bì lā
+Nacho	纳稠	Nà chóu
+Nacim	纳西姆	Nà xī mǔ
+Nada	纳达	Nà dá
+Nadège	娜德日	Nà dé rì
+Nadhem	纳德姆	Nà dé mǔ
+Nadia	娜迪娅	Nà dí yà
+Nadina	纳迪娜	Nà dí nà
+Nadine	娜丁	Nà dīng
+Nadir	纳蒂尔	Nà dì ěr
+Nadja	娜蒂娅	Nà dì yà
+Nadjie	娜杰	Nà jié
+Nadjma	纳杰玛	Nà Jié Mǎ
+Nado	纳多	Nà duō
+Nadya	娜迪娅	Nà dí yà
+Nael	纳尔	Nà ěr
+Naëlle	娜艾尔	Nà ài ěr
+Naéva	娜艾瓦	Nà ài wǎ
+Nahin	纳因	Nà yīn
+Nahomi	纳欧米	Nà ōu mǐ
+Nahuel	纳乌艾	Nà wū ài
+Naïm	娜伊姆	Nà Yī mǔ
+Naïma	娜伊玛	Nà yī mǎ
+Naïs	纳伊斯	Nà yī sī
+Nais	纳伊斯	Nà Yī sī
+Najat	纳贾特	Nà jiǎ tè
+Najeeba	娜吉巴	Nà Jí Bā
+Najim	纳吉姆	Nà jí mǔ
+Nala	娜拉	Nà lā
+Nalisa	娜丽嘉	Nà lì Jiā
+Nallely	娜蕾莉	Nà lěi lì
+Nancy	南茜	Nán xī
+Nando	南多	Nán duō
+Nano	纳诺	Nà nuò
+Nanou	纳努	Nà nǔ
+Naomi	纳奥米	Nà ào mǐ
+Naomie	纳奥米	Nà ào mǐ
+Naomy	纳奥米	Nà ào mǐ
+Napoléon	拿破仑	Ná pò lún
+Napoli	拿破里	Ná pò lǐ
+Narcís	纳尔希斯	Nà ěr xī sī
+Narciso	纳西索	Nà xī suǒ
+Nardine	纳尔丁	Nà ěr dīng
+Naredo	纳雷多	Nà léi duō
+Nareme	娜蕾梅	Nà lěi Méi
+Narlla	娜尔拉	Nà ěr lā
+Nassim	纳西姆	Nà xī mǔ
+Nassira	纳西哈	Nà xī hā
+Nastassja	娜斯塔加	Nà sī tǎ jiā
+Nata	娜塔	Nà tǎ
+Natacha	娜塔莎	Nà tǎ shā
+Natalia	娜塔莉娅	Nà tǎ lì yà
+Natalia	娜塔丽亚	Nà tǎ lì yà
+Natalie	娜塔莉	Nà tǎ lì
+Natalina	娜塔丽娜	Nà tǎ lì nà
+Natalja	娜塔莉娅	Nà tǎ lì yà
+Natanael	纳塔纳埃	Nà tǎ nà āi
+Natascha	娜塔莎	Nà tǎ shā
+Natasha	娜塔莎	Nà tǎ shā
+Nath	娜特	Nà tè
+Nathália	娜塔莉娅	Nà tǎ lì yà
+Nathalie	娜塔丽	Nà tǎ lì
+Nathaly	娜塔莉	Nà tǎ lì
+Nathan	内森	Nèi sēn
+Nathan	纳唐	Nà táng
+Nathanaël	纳塔纳尔	Nà tǎ nà ěr
+Nathaniel	纳坦耶	Nà tǎn yē
+Natius	内袖斯	Nèi xiù sī
+Natividad	纳蒂维达德	Nà dì wéi dá dé
+Natividade	圣诞	Shèng dàn
+Nausicaa	诺茜卡	Nuò xī Kǎ
+Navy	纳威	Nà Wēi
+Nawal	娜娃尔	Nà wá ěr
+Nawale	娜娃尔	Nà wá ěr
+Nawelle	娜维尔	Nà wéi ěr
+Nayadet	娜娅黛特	Nà yà dài tè
+Nayara	娜娅拉	Nà yà lā
+Nayely	娜叶丽	Nà yè lì
+Nayla	娜伊拉	Nà Yī lā
+Nayra	耐拉	Nài lā
+Nazaire	纳泽尔	Nà zé ěr
+Nazarena	纳萨雷纳	Nà sà léi nà
+Naziah	娜霞	Nà xiá
+Nazim	纳西姆	Nà xī mǔ
+Neala	妮拉	Nī lā
+Neel	尼尔	Ní ěr
+Neele	内莉	Nèi lì
+Neftalí	内弗塔莉	Nèi fú tǎ lì
+Nego	内格	Nèi gé
+Néhémie	内艾米	Nèi ài mǐ
+Neige	内日	Nèi rì
+Neil	尼尔	Ní ěr
+Neila	内拉	Nèi lā
+Nele	内勒	Nèi lè
+Nélie	内丽	Nèi lì
+Nelly	内丽	Nèi lì
+Nelson	尼尔森	Ní ěr sēn
+Nenou	内努	Nèi nǔ
+Neo	尼欧	Ní ōu
+Néo	尼欧	Ní ōu
+Nerea	内雷亚	Nèi léi yà
+Nerí	内莉	Nèi lì
+Neriman	内利曼	Nèi lì màn
+Nerina	内莉娜	Nèi lì nà
+Nesrin	内斯林	Nèi sī lín
+Nesrine	内斯林	Nèi sī lín
+Nessrine	内斯琳	Nèi sī lín
+Nestor	内斯特	Nèi sī tè
+Netuno	内图诺	Nèi tú nuò
+Neus	内务斯	Nèi wù sī
+Neus	内武斯	Nèi wǔ sī
+Neusa	乃萨	Nǎi sà
+Neuza	哪吒	Nǎ Zhà
+Neves	内维丝	Nèi wéi sī
+Neville	内维尔	Nèi wéi ěr
+Nevine	内文	Nèi wén
+Nia	妮娅	Nī yà
+Niall	奶尔	Nǎi ěr
+Niamh	妮娅姆	Ní yà mǔ
+Nic	尼克	Ní kè
+Nicholas	尼古拉斯	Ní gǔ lā sī
+Nick	尼克	Ní kè
+Nico	尼克	Ní kè
+Nicodème	尼克戴姆	Ní kè dài mǔ
+Nicodemo	尼克德莫	Ní kè dé mò
+Nicolae	尼克莱	Ní kè lái
+Nicolas	尼克拉	Ní kè lā
+Nicolas	尼古拉斯	Ní gǔ lā sī
+Nicolau	尼克劳	Ní kè láo
+Nicolau	尼科拉	Ní Kē lā
+Nicole	尼科尔	Ní kē ěr
+Nidia	妮蒂娅	Nī dì yà
+Nídia	妮蒂娅	Nī dì yà
+Nidio	尼迪奥	Ní dí ào
+Nieves	涅韦斯	Niè wéi sī
+Nijah	妮扎	Nī zhā
+Nika	妮卡	Nī Kǎ
+Nikita	尼琦塔	Ní qí tǎ
+Niklas	尼克拉斯	Ní kè lā sī
+Niko	尼克	Ní kè
+Nil	尼尔	Ní ěr
+Nils	尼尔斯	Ní ěr sī
+Nilson	尼尔森	Ní ěr sēn
+Nilton	内屯	Nèi tún
+Nilza	妮尔萨	Nī ěr sà
+Nima	妮玛	Nī mǎ
+Nina	妮娜	Ní nà
+Ning	柠	Níng
+Nini	妮妮	Nī nī
+Nino	尼诺	Ní nuò
+Ninon	妮侬	Nī nóng
+Nirmal	尼尔玛尔	Ní ěr Mǎ ěr
+Nisana	妮萨娜	Nī sà nà
+Nishil	尼希尔	Ní xī ěr
+Nishta	妮什塔	Nī shí tǎ
+Nitzia	妮吉娅	Nī jí yà
+Niura	妮奥拉	Nī ào lā
+Nivel	尼维	Ní wéi
+Nizar	尼扎尔	Ní zā ěr
+Noa	诺阿	Nuò ā
+Noah	诺阿	Nuò ā
+Noam	诺阿姆	Nuò ā mǔ
+Noan	诺昂	Nuò áng
+Nobre	诺布雷	Nuò Bù léi
+Noe	诺伊	Nuò yī
+Noé	诺伊	Nuò yī
+Noel	诺尔	Nuò ěr
+Noël	诺埃	Nuò āi
+Noelia	诺埃利亚	Nuò āi lì yà
+Noélie	诺尔丽	Nuò ěr lì
+Noëlla	诺尔拉	Nuò ěr lā
+Noelle	诺尔	Nuò ěr
+Noëllie	诺尔丽	Nuò ěr lì
+Noemi	诺诶米	Nuò mǐ
+Noémie	诺米	Nuò mǐ
+Nolan	诺兰	Nuò lán
+Nolitza	诺莉扎	Nuò lì zā
+Nollan	诺兰	Nuò lán
+Nolwenn	诺尔文	Nuò ěr wén
+Noonan	努南	Nǔ nán
+Nora	诺拉	Nuò lā
+Norah	诺拉	Nuò lā
+Norbert	诺伯特	Nuò bó té
+Norbert	诺尔贝	Nuò ěr bèi
+Norberto	诺韦尔托	Nuò wéi rtuō
+Nordahl	诺尔达	Nuò ěr dá
+Nordhal	诺尔达	Nuò ěr dá
+Noreen	诺琳	Nuò lín
+Nori	诺丽	Nuò lì
+Norien	诺里恩	Nuò lǐ ēn
+Norma	诺尔玛	Nuò rmǎ
+Normand	诺曼德	Nuò màn dé
+Normand	诺曼	Nuò màn
+Noshua	诺舒阿	Nuò shū ā
+Nubia	女碧亚	Nǚ bì yà
+Nuno	努诺	Nǔ nuò
+Nuria	纽莉娅	Niǔ lì yà
+Núria	努莉芽	Nǔ lì yá
+Nuwa	女娲	Nǚ wā
+Nyall	尼亚尔	Ní yà ěr
+Nyhéma	妮爱玛	Nī Aì Mǎ
+Nyurka	妞尔卡	Niū ěr Kǎ
+Oana	欧安娜	Oū ān nà
+Obdulio	奥夫杜略	Aò fū dù lüè
+Océane	奥赛安	Aò sài ān
+Océanne	奥赛安	Aò sài ān
+Octave	奥克塔夫	Aò kè tǎ fū
+Octaviano	奥克塔维亚诺	Aò kè tǎ wéi yà nuò
+Octavio	奥克塔维奥	Aò kè tǎ wéi ào
+Odaly	奥达利	Aò dá lì
+Odeline	奥德琳	Aò dé lín
+Odenir	欧德尼	Oū dé ní
+Odete	奥黛特	Aò dài té
+Odette	奥黛特	Aò dài té
+Odile	欧迪勒	Oū dí lè
+Odón	奥东	Aò dōng
+Odoric	奥多利克	Aò duō lì kè
+Ofelia	奥费莉亚	Aò fèi lì yà
+Ofélia	欧菲莉娅	Oū fēi lì yà
+Oihana	奥伊安娜	Aò Yī ān nà
+Oili	奥伊丽	Aò Yī lì
+Oisin	瓦心	Wǎ xīn
+Oksana	奥格萨娜	Aò gé sà nà
+Olavo	欧拉维奥	Oū lā wéi ào
+Olegario	奥莱加里奥	Aò lái jiā lǐ ào
+Oleguer	奥雷戈	Aò léi gē
+Olga	奥尔加	Aò ěr jiā
+Olgerta	欧勒格尔塔	Oū lè gé ěr tǎ
+Olive	奥利维	Aò lì wéi
+Oliveira	奥利维拉	Aò lì wéi lā
+Oliver	奥利弗	Aò lì fú
+Oliverio	奥利维里奥	Aò lì wéi lǐ ào
+Olivette	奥利维特	Aò lì wéi tè
+Olivia	奥利维亚	Aò lì wéi yà
+Olívia	欧莉维娅	Oū lì wéi yà
+Olivier	奥利维耶	Aò lì wéi yē
+Olivio	奥利维奥	Aò lì wéi ào
+Olja	奥娅	Aò yà
+Olkan	奥坎	Aò Kǎn
+Olli	奥利	Aò lì
+Ollivier	奥利维耶	Aò lì wéi yē
+Omar	奥马尔	Aò mǎ ěr
+Ombeline	昂贝琳	Áng bèi lín
+Ombline	昂贝琳	Áng bèi lín
+Ona	奥纳	Aò nà
+Ondine	昂丁	Áng dīng
+Oneida	奥内塔	Aò nèi tǎ
+Onésimo	奥内希莫	Aò nèi xī mò
+Onofre	奥诺弗雷	Aò nuò fú léi
+Oona	乌娜	Wū nà
+Opale	奥琶	Aò pá
+Ophelia	欧菲丽娅	Oū fēi lí yà
+Ophélie	欧菲丽	Oū fēi lí
+Orage	奥拉日	Aò lā rì
+Orellana	奥蕾拉娜	Aò lěi lā nà
+Orfer	奥尔菲	Aò ěr Fēi
+Oriana	欧莉雅娜	Oū lì yǎ nà
+Oriane	欧莉安	Oū lì ān
+Orianna	欧莉安娜	Oū lì ān nà
+Orietta	奥列塔	Aò liè tǎ
+Oriol	奥里奥尔	Aò lǐ ào r
+Oriol	奥六	Aò liù
+Orlanda	奥兰达	Aò lán dá
+Orlando	奥兰多	Aò lán duō
+Orlane	奥尔兰	Aò ěr lán
+Orlewilson	奥勒维孙	Aò lè wéi sūn
+Orma	奥尔玛	Aò ěr mǎ
+Ornella	奥内拉	Aò nèi lā
+Orville	欧尔维	Oū ěr wéi
+Oscar	奥斯卡	Aò sī kǎ
+Òscar	奥斯卡	Aò sī Kǎ
+Osiris	欧西里斯	Oū xī lǐ sī
+Oskar	奥斯卡	Aò sī Kǎ
+Osmar	奥斯马尔	Aò sī Mǎ ěr
+Osmundo	奥斯孟多	Aò sī mèng duō
+Ossama	奥萨马	Aò sà mǎ
+Osvaldo	奥斯瓦尔多	Aò sī wǎ rduō
+Oswaldo	奥斯瓦尔多	Aò sī wǎ rduō
+Otávio	欧塔维奥	Oū tǎ wéi ào
+Othman	奥蒂曼	Aò dì màn
+Otília	奥蒂丽娅	Aò dì lì yà
+Otman	奥特曼	Aò té màn
+Otmane	奥特曼	Aò tè màn
+Otto	奥托	Aò tuō
+Ouardia	瓦尔蒂娅	Wǎ ěr dì yà
+Oudone	五冬	Wǔ dōng
+Oulia	乌利雅	Wū lì Yǎ
+Oumayma	乌玛伊玛	Wū Mǎ Yī Mǎ
+Ousmane	乌斯曼	Wū sī màn
+Ousyous	芴鸺斯	Wù xiū sī
+Ovidio	奥维迪奥	Aò wéi dí ào
+Ovídio	欧维迪奥	Oū wéi dí ào
+Owain	欧文	Oū wén
+Owen	欧文	Oū wén
+Ozana	奥萨娜	Aò sà nà
+Pablo	帕布罗	Pà bù luō
+Paco	帕克	Pà kè
+Paggo	帕果	Pà guǒ
+Pajares	帕亚雷斯	Pà yà léi sī
+Pakizé	怕克兹	Pà kè zī
+Palmira	帕尔蜜拉	Pà ěr Mì lā
+Palmyre	帕尔米尔	Pà ěr mǐ ěr
+Paloma	帕洛玛	Pà luò mǎ
+Pam	帕姆	Pà mǔ
+Pamela	帕米拉	Pà mǐ lā
+Pamphile	蒡菲	Páng fēi
+Paola	宝拉	Bǎo lā
+Paolo	保罗	Bǎo luó
+Pâquerette	帕克蕾特	Pà kè lěi tè
+Paras	帕拉斯	Pà lā sī
+Paris	巴黎	Bā lí
+Parker	帕克	Pà kè
+Pascal	帕斯卡尔	Pà sī kǎ er
+Pascale	帕斯卡尔	Pà sī kǎ ěr
+Pascaline	帕斯卡琳	Pà sī kǎ lín
+Pascoal	帕斯卡尔	Pà sī kǎ ěr
+Pasqual	帕斯夸	Pà sī tuō
+Pat	帕特	Pà tè
+Patrice	帕特里斯	Pà tè lǐ sī
+Patricia	帕特里夏	Pà té lǐ xià
+Patrícia	帕特里夏	Pà tè lǐ Xià
+Patricio	帕特里希奥	Pà tè lǐ xī ào
+Patrick	帕特里克	Pà tè lǐ kè
+Patrick	派翠克	Pài cuì kè
+Patris	帕特里斯	Pà tè lǐ sī
+Patrizia	帕特里夏	Pà té lǐ xià
+Patrycja	帕特丽霞	Pà tè lì xiá
+Patsy	帕特茜	Pà tè xī
+Patxi	帕池	Pà chí
+Paty	帕蒂	Pà dì
+Pau	帕务	Pà wù
+Pau	包	Bāo
+Paul	保罗	Bǎo luó
+Paul	保尔	Bǎo er
+Paul-Loup	保尔·卢	Bǎo ěr lú
+Paula	宝拉	Bǎo lā
+Paule	宝勒	Bǎo lè
+Paulette	波莱特	Bō lái té
+Paulina	宝丽娜	Bǎo lì nà
+Pauline	宝林	Bǎo lín
+Paulinho	小包罗	Xiǎo Bāo luó
+Paulino	包里诺	Bāo lǐ nuò
+Paulo	保罗	Bǎo luó
+Paweł	帕维	Pà wéi
+Paz	帕斯	Pà sī
+Pear	芘尔	Pí ěr
+Pearl	珍珠	Zhēn zhū
+Pearle	珍珠	Zhēn zhū
+Pedro	佩德罗	Pèi dé luō
+Peggy	佩吉	Pèi jí
+Pélagie	佩拉吉	Pèi lā jí
+Pelai	佩莱	Pèi lái
+Pelayo	佩拉尤	Pèi lā yóu
+Penelope	佩内洛普	Pèi nèi luò pǔ
+Pénélope	佩内洛普	Pèi nèi luò pǔ
+Penèlope	佩内洛普	Pèi nèi luò Pǔ
+Penny	佩妮	Pèi nī
+Pepe	佩佩	Pèi pèi
+Percy	破尔西	Pò ěr xī
+Pere	佩勒	Pèi lè
+Peregrine	珀蕾克琳	Pò lěi kè lín
+Pereira	佩雷拉	Pèi léi lā
+Perla	佩尔拉	Pèi rlā
+Perline	佩尔琳	Pèi ěr lín
+Perrine	珀赖因	Pò lài yīn
+Perry	佩瑞	Pèi ruì
+Persefoni	佩色佛妮	Pèi sè fó nī
+Peter	彼得	Bǐ dé
+Petra	佩德拉	Pèi dé lā
+Phanie	法妮	Fǎ nī
+Philip	菲力浦	Fēi lì pǔ
+Philipp	飞利浦	Fēi lì pǔ
+Philippe	菲力浦	Fēi lì pǔ
+Philipppa	菲莉帕	Fēi lì pà
+Phillipe	菲力浦	Fēi lì pǔ
+Philomena	菲洛米娜	Fēi luò mǐ nà
+Phoebé	菲贝	Fēi Bèi
+Phoenix	菲尼克斯	Fēi ní kè sī
+Phouthisak	普提萨克	Pǔ tí sà kè
+Phylida	飞丽达	Fēi lì dá
+Phyllis	菲丽丝	Fēi lì sī
+Pia	皮亚	Pí yà
+Pichelli	辟池利	Pì chí lì
+Pier-Luc	皮埃尔吕克	Pí Aī ěr Lǚ kè
+Pierce	皮尔斯	Pí ěr sī
+Pierre	皮埃尔	Pí āi er
+Pierre-Loup	皮埃尔·卢	Pí āi ěr lú
+Pierre-Yves	皮埃尔伊夫	Pí Aī ěr Yī fū
+Pierrette	皮埃蕾特	Pí āi lěi tè
+Pierrick	皮埃里克	Pí āi lǐ kè
+Pierrot	皮埃罗	Pí Aī luó
+Pietro	皮埃特罗	Pí Aī tè luó
+Pilar	皮拉尔	Pí lā r
+Pilar	皮拉尔	Pí lā ěr
+Pinheiro	皮内罗	Pí nèi luó
+Pinho	皮诺	Pí nuò
+Pinilla	劈尼亚	Pī ní yà
+Pinky	平克	Píng kè
+Pinxi	萍西	Píng xī
+Pio	佩奥	Pèi ào
+Pira	佩拉	Pèi lā
+Pit	皮德	Pí dé
+Pius	皮武斯	Pí wǔ sī
+Plácido	普拉西多	Pǔ lā xī duō
+Plinio	普里尼奥	Pǔ lǐ ní ào
+Poca	波卡	Bō kǎ
+Pol	波尔	Bō r
+Pol	包尔	Bāo ěr
+Pola	宝拉	Bǎo lā
+Polyana	宝莉安娜	Bǎo lì ān nà
+Ponç	庞斯	Páng sī
+Ponce	庞塞	Páng sāi
+Poppy	泼皮	Pō Pí
+Poupi	普皮	Pǔ pí
+Prakash	普拉卡什	Pǔ lā Kǎ shí
+Pramod	普拉莫德	Pǔ lā mò dé
+Pranil	普拉尼尔	Pǔ lā ní ěr
+Prescilla	普蕾茜娅	Pǔ lěi xī yà
+Prescillia	普蕾西莉娅	Pǔ lǐ xī lěi yà
+Presentacion	普雷森塔松	Pǔ léi sēn tǎ sōng
+Prez	普雷兹	Pǔ léi zī
+Pri	普丽	Pǔ lì
+Prika	普丽卡	Pǔ lì Kǎ
+Priscila	普里西利亚	Pǔ lǐ xī lì yà
+Priscilla	普里西拉	Pǔ lǐ xī lā
+Priscille	普蕾西尔	Pǔ lěi xī ěr
+Priscillia	普里西莉娅	Pǔ lǐ xī lì yà
+Priska	碧莉斯卡	Bì lì sī kǎ
+Prudence	普鲁登丝	Pǔ lǔ dēng sī
+Prudenci	普鲁登希	Pǔ lǔ dēng xī
+Prune	普伦	Pǔ lún
+Przemysław	浦什梅斯瓦夫	Pǔ shí méi sī wǎ fū
+Puri	普里	Pǔ lǐ
+Quaresma	夸雷斯马	Tuō léi sī Mǎ
+Queli	科丽	Kē lì
+Quentin	昆汀	Kūn tīng
+Quentin	康汀	Kāng tīng
+Queralt	克拉尔特	Kè lā rtè
+Quim	秦	Qín
+Quisha	奎莎	Kuí shā
+Rabena	瓦比娜	Wǎ bǐ nà
+Rachael	蕾切尔	Lěi qiē ěr
+Rachel	蕾切尔	Lěi qiē er
+Rachèle	瑞琪儿	Ruì qí er
+Rachelle	瑞琪儿	Ruì qí er
+Rachid	哈西德	Hā xī dé
+Rachida	拉希达	Lā xī dá
+Racy	拉希	Lā xī
+Radja	拉佳	Lā jiā
+Radosław	拉多斯瓦夫	Lā duō sī wǎ fū
+Radouenne	拉杜安	Lā dù ān
+Rafa	拉福	Lā fú
+Rafael	拉斐尔	Lā fēi ěr
+Rafaela	拉法艾拉	Lā Fǎ Aì lā
+Rafaella	拉法艾拉	Lā Fǎ Aì lā
+Rafaelly	拉法艾黎	Lā Fǎ Aì lí
+Rafał	拉法奥	Lā fǎ ào
+Rafel	拉法尔	Lā Fǎ ěr
+Rageb	拉热伯	Lā rè bó
+Ragna	拉格娜	Lā gé nà
+Rahsa	哈沙	Hā shā
+Raik	拉伊科	Lā Yī Kē
+Raimundo	雷蒙多	Léi mēng duō
+Raïna	拉伊娜	Lā yī nà
+Raina	蕾娜	Lěi nà
+Raïssa	哈伊萨	Hā yī sà
+Ralph	拉尔夫	Lā ěr fū
+Rami	哈米	Hā mǐ
+Ramiro	拉米罗	Lā mǐ luó
+Ramo	拉莫	Lā Mò
+Ramon	拉蒙	Lā mēng
+Ramon	哈蒙	Hā mēng
+Ramona	拉莫娜	Lā Mò nà
+Ramy	哈密	Hā mì
+Randall	兰道尔	Lán dào ěr
+Randolf	兰多夫	Lán duō fū
+Randy	兰迪	Lán dí
+Rania	哈妮娅	Hā nī yà
+Rany	哈尼	Hā ní
+Raonny	劳尼	Láo ní
+Raphaël	拉斐尔	Lā fēi er
+Raphaelle	拉斐尔	Lā fēi er
+Raquel	拉克尔	Lā kèr
+Rasandja	拉叁贾	Lā sān Jiǎ
+Raul	劳尔	Láo r
+Raül	劳尔	Láo ěr
+Raven	拉文	Lā wén
+Ravina	拉薇娜	Lā wēi nà
+Ravy	瓦维	Wǎ wéi
+Ray	雷	Léi
+Raya	拉雅	Lā Yǎ
+Rayane	外安	Wài ān
+Rayanne	瓦亚恩	Wǎ yà ēn
+Raychel	瑞池尔	Ruì chí ěr
+Raylander	雷朗德	Léi lǎng dé
+Raymond	雷蒙德	Léi mēng dé
+Raymond	雷蒙	Léi mēng
+Raymonde	雷蒙德	Léi mēng dé
+Raymundo	雷蒙多	Léi mēng duō
+Rayner	雷纳	Léi nà
+Rayra	莱拉	Lái lā
+Rayzen	瑞森	Ruì sēn
+Rebeca	丽贝卡	Lì bèi kǎ
+Rébecca	丽贝卡	Lì bèi kǎ
+Rebecca	丽贝卡	Lì bèi kǎ
+Rebeckah	丽贝卡	Lì bèi kǎ
+Rebekka	丽贝卡	Lì bèi kǎ
+Rebelo	雷贝罗	Léi Bèi luó
+Réchard	瑞沙尔	Ruì shā ěr
+Reda	雷达	Léi dá
+Redouane	利图安	Lì tú ān
+Reed	列得	Liè dé
+Reggie	蕾吉	Lěi Jí
+Regiane	蕾贾内	Lěi Jiǎ nèi
+Regina	蕾吉娜	Lěi jí nà
+Reginaldo	雷吉娜多	Léi Jí nà duō
+Régine	蕾金	Lěi jīn
+Régis	雷吉斯	Léi jí sī
+Reicia	蕾霞	Lěi xiá
+Reidar	瑞达	Ruì dá
+Reijer	雷尔	Léi ěr
+Reina	蕾娜	Lěi nà
+Reinaldo	雷纳尔多	Léi nà rduō
+Reine	蕾娜	Lěi nà
+Reis	雷斯	Léi sī
+Réjane	蕾娅娜	Lěi yà nà
+Rejane	蕾珍	Lěi zhēn
+Réjean	海让	Hǎi ràng
+Remedios	雷梅蒂噢斯	Léi méi dì ō sī
+Remei	雷梅	Léi Méi
+Rémi	雷米	Léi mǐ
+Remigio	雷米希噢	Léi mǐ xī ō
+Remo	雷默	Léi mò
+Rémy	雷米	Léi mǐ
+Rénald	雷纳德	Léi nà dé
+Renan	勒南	Lè nán
+Renan	赫农	Hè nóng
+Renata	蕾娜塔	Lěi nà tǎ
+Renate	蕾娜特	Lěi nà tè
+Renato	雷纳托	Léi nà tuō
+Renaud	雷诺	Léi nuò
+René	勒内	Lè nèi
+Renè	勒内	Lè nèi
+Renee	蕾妮	Lěi nī
+Renée	蕾妮	Lěi nī
+Rênio	雷尼奥	Léi ní ào
+Renzo	伦索	Lún suǒ
+Reyes	雷耶斯	Léi yē sī
+Reynald	雷纳尔德	Léi nà ěr dé
+Rhaniery	拉涅利	Lā niè lì
+Rhany	拉尼	Lā ní
+Rhayson	莱森	Lái sēn
+Rhianne	莉安	Lì ān
+Rhiannon	莱安诺	Lái ān nuò
+Rhona	罗娜	Luó nà
+Rhym	里姆	Lǐ mǔ
+Rhys	莱斯	Lái sī
+Riana	莱娅娜	Lái yà nà
+Rianala	莉安娜拉	Lì ān nà lā
+Riaz	里亚斯	Lǐ yà sī
+Ribeiro	利贝罗	Lì Bèi luó
+Rica	丽卡	Lì kǎ
+Ricard	利卡尔	Lì Kǎ ěr
+Ricarda	丽卡尔达	Lì Kǎ ěr dá
+Ricardo	里卡多	Lǐ kǎ duō
+Riccardo	利卡多	Lì Kǎ duō
+Ricci	里奇	Lǐ qí
+Richard	理查	Lǐ chá
+Richie	里奇	Lǐ qí
+Rick	里克	Lǐ kè
+Ricky	瑞奇	Ruì qí
+Rico	利筘	Lì kòu
+Rida	莉达	Lì dá
+Rigoberto	里戈韦托	Lǐ gē wéi tuō
+Rikke	莉克	Lì kè
+Riley	莱利	Lái lì
+Rim	利姆	Lì mǔ
+Ringo	林戈	Lín gē
+Rini	琳妮	Lín nī
+Rita	莉塔	Lì tǎ
+Ritesh	利泰士	Lì Tài shì
+Riton	利桐	Lì tóng
+Rivaldo	利瓦多	Lì wǎ duō
+Riwan	理万	Lǐ wàn
+Roan	罗安	Luó ān
+Rob	罗布	Luó Bù
+Robbie	罗比	Luó bǐ
+Robby	萝比	Luó bǐ
+Robert	罗伯特	Luō bó té
+Robert	罗贝尔	Luō bèi er
+Roberta	罗伯塔	Luó bó tǎ
+Roberto	罗伯托	Luō bó tuō
+Robertson	罗贝特森	Luó Bèi tè sēn
+Robin	罗宾	Luō bīn
+Robinson	罗宾逊	Luō bīn xùn
+Robledo	罗布雷多	Luó bù léi duō
+Robson	洛布森	Luò Bù sēn
+Robyn	罗宾	Luō bīn
+Robynne	罗白哪	Luó bái nǎ
+Roc	洛克	Luò kè
+Roch	洛克	Luò kè
+Rochdi	落什蒂	Luò shí dì
+Rocio	罗希噢	Luó xī ō
+Rockia	罗迦	Luó jiā
+Roderic	罗德里克	Luó dé lǐ kè
+Rodolfo	鲁道夫	Lǔ dào fū
+Rodolphe	罗多尔夫	Luó duō ěr fū
+Rodrigo	罗德里戈	Luó dé lǐ gē
+Rodrigue	罗德利克	Luó dé lì kè
+Rodrigues	罗德里格斯	Luó dé lǐ gé sī
+Rodriguez	罗德里格斯	Luó dé lǐ gé sī
+Rogda	罗格达	Luó gé dá
+Rogelio	罗赫里噢	Luó hè lǐ ō
+Roger	罗杰	Luó jié
+Rogerio	罗杰里奥	Luó Jié lǐ ào
+Rogério	罗杰里奥	Luó Jié lǐ ào
+Roland	豪朗	Háo lǎng
+Roland	罗兰	Luō lán
+Rolande	罗朗德	Luó lǎng dé
+Roldao	罗尔道	Luó ěr dào
+Rolena	罗莲娜	Luó lián nà
+Romain	罗曼	Luō màn
+Roman	罗曼	Luō màn
+Romane	罗曼	Luō màn
+Romanowicz	罗马诺维芝	Luó Mǎ nuò wéi zhī
+Romar	罗马尔	Luó Mǎ ěr
+Romaric	罗马里克	Luó mǎ lǐ kè
+Roméo	罗密欧	Luō mì ōu
+Romeo	罗密欧	Luō mì ōu
+Romero	罗美澳	Luó měi Aò
+Romina	罗密娜	Luó mì nà
+Romina	罗米娜	Luó mǐ nà
+Rommel	罗梅尔	Luó Méi ěr
+Romona	罗蒙娜	Luó mēng nà
+Romuald	罗穆阿德	Luō mù ā dé
+Rômulo	罗姆罗	Luó mǔ luó
+Romy	罗密	Luó mì
+Ronak	罗纳克	Luó nà kè
+Ronald	罗纳德	Luō nà dé
+Ronaldo	罗纳尔多	Luó nà ěr duō
+Ronan	罗南	Luó nán
+Ronielly	罗内丽	Luó nèi lì
+Ronildo	罗尼尔多	Luó ní ěr duō
+Ronja	忈佳	Rén jiā
+Ronnie	罗尼	Luó ní
+Ronny	罗尼	Luó ní
+Ronys	罗尼斯	Luó ní sī
+Roque	罗克	Luó kè
+Rosa	萝莎	Luó shā
+Rosaire	罗塞尔	Luō sāi ěr
+Rosalía	罗萨丽雅	Luó sà lì Yǎ
+Rosalie	萝莎莉	Luó shā lì
+Rosana	罗萨娜	Luó sà nà
+Rosangela	洛桑杰拉	Luò sāng Jié lā
+Rosario	罗莎里噢	Luó shā lǐ ō
+Rose	罗斯	Luō sī
+Rose-May	罗斯梅	Luó sī Méi
+Roseline	罗斯林	Luō sī lín
+Rosella	萝色拉	Luó sè lā
+Roselyn	罗丝雷恩	Luō sī léi ēn
+Roselyne	罗丝琳	Luō sī lín
+Rosemary	罗斯玛丽	Luó sī Mǎ lì
+Rosendo	罗森多	Luó sēn duō
+Roser	萝塞尔	Luó Sāi ěr
+Rosie	萝西	Luó xī
+Rosimar	罗茜玛尔	Luó xī mǎ ěr
+Rosrena	罗斯莲哪	Luó sī lián nǎ
+Ross	罗斯	Luō sī
+Rossi	罗西	Luó xī
+Rossy	罗悉	Luó Xī
+Rosy	萝西	Luó xī
+Rowena	罗薇娜	Luó wēi nà
+Roxana	罗克莎娜	Luó kè shā nà
+Roxane	罗克珊	Luō kè shān
+Roxanne	罗克珊	Luō kè shān
+Roy	罗一	Luō yī
+Rozanne	萝桑	Luó sāng
+Rozenn	萝森	Luó sēn
+Ruben	鲁本	Lǔ běn
+Rubén	鲁本	Lǔ běn
+Rubens	鲁本斯	Lǔ běn sī
+Rubicelia	露碧瑟丽雅	Lù bì sè lì Yǎ
+Ruby	露碧	Lù bì
+Rudith	鲁迪特	Lǔ dí tè
+Rudolph	胡多尔夫	Hú duō ěr fū
+Rudy	鲁迪	Lǔ dí
+Rufino	卢菲诺	Lú fēi nuò
+Rufo	鲁福	Lǔ fú
+Rui	胡伊	Hú yī
+Ruiman	鲁伊曼	Lǔ yī màn
+Rupert	鲁贝尔德	Lǔ Bèi ěr dé
+Russell	罗素	Luó sù
+Rüster	鲁斯特	Lǔ sī tè
+Rute	露特	Lù tè
+Ruth	露丝	Lù sī
+Ryan	里安	Lǐ ān
+Ryszard	雷沙尔德	Léi shā ěr dé
+Saadia	萨蒂娅	Sà dì yà
+Sabah	沙巴	Shā bā
+Sabela	萨韦拉	Sà wéi lā
+Sabina	萨碧娜	Sà bì nà
+Sabine	萨宾	Sà bīn
+Sabri	萨布利	Sà Bù lì
+Sabrina	萨布丽娜	Sà bù lí nà
+Sabrine	萨布林	Sà Bù lín
+Sacha	萨沙	Sà shā
+Sadelsie	萨德尔西	Sà dé ěr xī
+Sadia	萨蒂娅	Sà dì yà
+Sadie	萨蒂	Sà dì
+Safae	萨法伊	Sà Fǎ Yī
+Safouane	萨夫安	Sà fū ān
+Sagui	萨吉	Sà Jí
+Sahara	撒哈拉	Sā Hā lā
+Sahdia	萨蒂娅	Sà dì yà
+Sahory	萨欧里	Sà Oū lǐ
+Saïd	萨伊德	Sà Yī dé
+Saima	赛玛	Sài mǎ
+Saionara	再见	Zài jiàn
+Sakina	萨吉娜	Sà Jí nà
+Salama	萨拉玛	Sà lā mǎ
+Salim	萨里姆	Sà lì mù
+Salimata	莎丽玛塔	Shā lì mǎ tǎ
+Salinas	萨利纳斯	Sà lì nà sī
+Sally	莎莉	Shā lì
+Salomão	萨劳曼	Sà láo màn
+Salomay	莎乐美	Shā lè měi
+Salomé	莎乐美	Shā lè měi
+Salva	萨尔瓦	Sà rwǎ
+Salvador	萨尔瓦多	Sà ěr wǎ duō
+Salvatore	萨尔瓦托雷	Sà ěr wǎ tuō léi
+Salvina	萨尔维娜	Sà ěr wéi nà
+Sam	山姆	Shān mǔ
+Samaka	萨马卡	Sà mǎ kǎ
+Samanta	萨曼塔	Sà màn tǎ
+Samantha	萨曼塔	Sà màn tǎ
+Samar	萨玛尔	Sà mǎ ěr
+Samara	萨玛拉	Sà Mǎ lā
+Samet	萨妹特	Sà mèi tè
+Samip	萨米浦	Sà mǐ pǔ
+Samir	萨米尔	Sà mǐ ěr
+Samira	萨米拉	Sà mǐ lā
+Sammuel	萨姆埃	Sà mǔ Aī
+Samuel	萨谬尔	Sà mù er
+Samy	萨米	Sà mǐ
+Sanad	萨纳德	Sà nà dé
+Sanç	桑寺	Sāng sì
+Sandie	桑迪	Sāng dí
+Sandra	桑德拉	Sāng dé lā
+Sandrina	桑德琳娜	Sāng dé lín nà
+Sandrine	桑德琳	Sāng dé lín
+Sandro	桑德罗	Sāng dé luó
+Sandy	桑迪	Sāng dí
+Sanny	萨妮	Sà ní
+Santa	叁塔	Sān tǎ
+Santeri	桑德莉	Sāng dé lì
+Santiago	圣地亚哥	Shèng dì yà gē
+Santos	桑托斯	Sāng tuō sī
+Santosh	桑托什	Sāng tuō shí
+Sara	萨哈	Sà hā
+Sara	莎拉	Shā lā
+Sarah	莎拉	Shā lā
+Sarah	萨哈	Sà hā
+Saray	萨莱	Sà lái
+Sarga	萨尔卡	Sà ěr Kǎ
+Sascha	萨沙	Sà Shā
+Sasha	萨沙	Sà shā
+Saskia	萨斯基亚	Sà sī jī yà
+Sastia	萨斯贾	Sà sī jiǎ
+Satheesh	萨荑什	Sà tí shí
+Satina	萨蒂娜	Sà dì nà
+Saturnino	萨图尔尼诺	Sà tú ěr ní nuò
+Saúl	索尔	Suǒ ěr
+Sauveur	苏维尔	Sū wéi ěr
+Savannah	萨凡纳	Sà fán nà
+Savinien	萨维念	Sà wéi niàn
+Scarlet	斯卡雷特	Sī Kǎ léi tè
+Scarlett	斯嘉丽	Sī jiā lì
+Schady	沙迪	Shā dí
+Schemaja	施玛雅	Shī Mǎ Yǎ
+Schiko	稀客	Xī kè
+Schmitz	诗米慈	Shī mǐ cí
+Scott	斯考特	Sī kǎo té
+Sean	肖恩	Xiào ēn
+Seb	塞巴	Sài bā
+Sebastià	赛巴斯蒂安	Sài Bā sī dì ān
+Sebastian	赛巴斯蒂安	Sài bā sī dì ān
+Sebastian	赛巴斯蒂安	Sài bā sī dì ān
+Sebastião	斯巴斯天	Sī Bā sī tiān
+Sébastien	塞巴斯蒂安	Sài bā sī dì ān
+Segon	赛功	Sài gōng
+Selena	塞蕾娜	Sāi lěi nà
+Séléna	塞莲娜	Sāi lián nà
+Sélène	塞琳	Sài lín
+Seleste	西莱斯特	Xī lái sī tè
+Selina	塞莉娜	Sāi lì nà
+Selma	塞尔	Sāi ěr
+Seloua	塞路阿	Sāi Lù Ā
+Selva	茜尔瓦	Xī ěr wǎ
+Sema	赛马	Sài Mǎ
+Serafí	斯莱奉	Sī lái fèng
+Serafim	瑟拉芬	Sè lā fēn
+Serafin	塞拉芬	Sāi lā fēn
+Séraphin	塞拉芬	Sāi lā fēn
+Serena	塞雷娜	Sāi léi nà
+Séréna	塞雷娜	Sāi léi nà
+Serge	塞尔日	Sāi ěr rì
+Sergei	谢尔盖	Xiè ěr gài
+Sergi	赛尔基	Sài ěr jī
+Sergio	塞尔吉奥	Sāi ěr jí ào
+Serkan	塞尔绀	Sāi ěr gàn
+Servane	赛尔瓦娜	Sài ěr wǎ nà
+Sever	赛维尔	Sài wéi ěr
+Severí	赛玮琳	Sài wěi lín
+Séverine	塞维琳	Sài wéi lín
+Severino	塞维里诺	Sāi wéi lǐ nuò
+Shabana	沙帕娜	Shā Pà nà
+Shady	沙蒂	Shā dì
+Shahed	沙哈德	Shā Hā dé
+Shaiene	沙恩	Shā ēn
+Shaina	莎伊哪	Shā Yī nǎ
+Shakyra	莎奇拉	Shā qí lā
+Shaleen	沙琳	Shā lín
+Shana	莎娜	Shā nà
+Shane	谁哪	Shuí nǎ
+Shania	沙尼娅	Shā ní yà
+Shanie	沙妮	Shā nī
+Shann	珊	Shān
+Shanna	霎娜	Shà nà
+Shannen	莎侬	Shā nóng
+Shannon	莎侬	Shā nóng
+Shany	沙妮	Shā nī
+Shanyce	莎奶斯	Shā Nǎi sī
+Shaoline	少琳	Shǎo lín
+Shaqwon	贾各文	Jiǎ gè wén
+Sharon	雪伦	Xuě lún
+Shary	莎莉	Shā lì
+Shasha	沙沙	Shā Shā
+Shatoya	赛图雅	Sài tú yǎ
+Shauna	邵娜	Shào nà
+Shawn	肖恩	Xiào ēn
+Shay	沙伊	Shā Yī
+Shayleen	晒林	Shài lín
+Shaymaa	沙伊玛	Shā yī mǎ
+Shederson	士戴孙	Shì Dài sūn
+Sheena	茜娜	Xī nà
+Sheila	晒垃	Shài lā
+Shelby	谢尔碧	Xiè ěr bì
+Shelley	谢莉	Xiè lì
+Shelly	雪莱	Xuě lái
+Sheneil	施奈	Shī nài
+Sherry	雪莉	Xuě lì
+Shiela	希拉	Xī lā
+Shirila	什丽拉	Shí lí lā
+Shirley	雪莉	Xuě lì
+Shiva	西瓦	Xī wǎ
+Shneider	施耐德	Shī nài dé
+Shobha	肖巴	Xiào Bā
+Shona	莎纳	Shā nà
+Shyam	茜娅姆	Xī yà mǔ
+Sibylle	希碧乐	Xī bì lè
+Sidjy	茜吉	Xī jí
+Sidney	悉德尼	Xī dé ní
+Sidonie	茜多妮	Xī duō nī
+Siegfried	西克弗里德	Xī kè Fú lǐ dé
+Sienas	仙娜丝	Xiān nà sī
+Sietske	西特斯克	Xī tè sī kè
+Siga	西贾	Xī jiǎ
+Sigrid	希格丽特	Xī gé lì tè
+Siham	西哈姆	Xī Hā mǔ
+Sihame	希阿姆	Xī Ā mǔ
+Sihem	西赫姆	Xī Hè mǔ
+Silas	希拉斯	Xī lā sī
+Silke	西尔克	Xī ěr kè
+Silvan	希尔文	Xī ěr wén
+Silvana	茜尔瓦娜	Xī ěr wǎ nà
+Silvia	西尔维亚	Xī rwéi yà
+Sílvia	茜尔薇芽	Xī ěr wēi yá
+Silvina	西尔维纳	Xī rwéi nà
+Silvio	西尔维奥	Xī ěr wéi ào
+Simão	西蒙	Xī mēng
+Simara	希玛拉	Xī Mǎ lā
+Simeó	西梅奥	Xī Méi ào
+Siméon	希魅昂	Xī mèi áng
+Simó	西蒙	Xī mēng
+Simon	西蒙	Xī mēng
+Simona	西莫娜	Xī Mò nà
+Simone	茜蒙	Xī méng
+Simoni	西莫尼	Xī Mò ní
+Sinah	希纳	Xī nà
+Sindra	辛德拉	Xīn dé lā
+Sindy	心蒂	Xīn dì
+Sinézio	西内玖	Xī nèi Jiǔ
+Sinh	辛	Xīn
+Sini	茜妮	Xī nī
+Sinja	新雅	Xīn Yǎ
+Siobhan	塞欧翰	Sāi ōu hàn
+Sioned	秀内	Xiù nèi
+Sira	茜拉	Xī lā
+Sirko	希尔克	Xī ěr kè
+Sity	茜蒂	Xī dì
+Siuleny	秀蕾妮	Xiù lěi nī
+Sixt	希克斯特	Xī kè sī tè
+Sjooke	秀克	Xiù kè
+Skampina	斯坎匹纳	Sī kǎn pī nà
+Sladjana	斯拉贾娜	Sī lā jiǎ nà
+Slimane	斯利曼	Sī lì màn
+Sloane	斯隆	Sī lóng
+Slobodanka	斯洛博丹卡	Sī luò bó Dān Kǎ
+Sly	斯莱	Sī lái
+Smaïn	斯麦因	Sī mài yīn
+Smith	史密斯	Shǐ mì sī
+Smok	斯莫卡	Sī Mò Kǎ
+Sneider	施耐德	Shī nài dé
+Snejana	丝内贾娜	Sī nèi jiǎ nà
+Snejina	丝内基娜	Sī nèi jī nà
+Sobia	索碧雅	Suǒ bì Yǎ
+Socorro	索口罗	Suǒ kǒu luó
+Socrate	苏格拉底	Sū gé lā dǐ
+Socrates	苏格拉底	Sū gé lā dǐ
+Soen	苏恩	Sū ēn
+Soey	索埃	Suǒ Aī
+Sofana	苏法娜	Sū fǎ nà
+Sofi	苏菲	Sū fēi
+Sofia	索菲娅	Suǒ fēi yà
+Sofiane	苏菲安	Sū fēi ān
+Soizic	斯瓦兹克	Sī wǎ zī kè
+Sokhna	索克娜	Suǒ kè nà
+Sokoli	苏科利	Sū Kē lì
+Sol	索尔	Suǒ r
+Solane	苏兰	Sū lán
+Solange	苏朗诗	Sū lǎng shī
+Soledad	索雷达	Suǒ léi dá
+Soleil	苏蕾	Sū lěi
+Solel	苏蕾	Sū lěi
+Solène	苏莲	Sū lián
+Solenn	苏莲	Sū lián
+Solenne	苏莲	Sū lián
+Solina	索丽娜	Suǒ lì nà
+Soline	苏林	Sū lín
+Solveig	索尔维格	Suǒ ěr wéi gé
+Sonam	苏囡	Sū nān
+Sondous	桑杜	Sāng dù
+Sonia	索尼娅	Suǒ ní yà
+Sònia	苏妮娅	Sū nī yà
+Sonja	宋雅	Sòng yá
+Sonntag	索恩塔格	Suǒ ēn tǎ gé
+Sonny	索尼	Suǒ ní
+Sony	索尼	Suǒ ní
+Sophia	苏菲娅	Sū fēi yà
+Sophie	苏菲	Sū fēi
+Soraia	苏拉雅	Sū lā Yǎ
+Soraya	苏拉娅	Sū lā yà
+Sören	索伦	Suǒ lún
+Sorenza	苏莲扎	Sū lián zā
+Sorya	索丽亚	Suǒ lì yà
+Souad	苏阿德	Sū ā dé
+Soufiène	苏菲安	Sū fēi ān
+Souhail	苏海勒	Sū hǎi lè
+Soukaina	苏凯娜	Sū kǎi nà
+Souleïma	苏雷马	Sū léi mǎ
+Soumaya	苏玛娅	Sū Mǎ yà
+Soumeya	苏梅娅	Sū méi yà
+Soumia	苏米亚	Sū mǐ yà
+Sousa	苏萨	Sū sà
+Sovannara	苏瓦纳拉	Sū wǎ nà lā
+Soviel	苏苇	Sū Wěi
+Spencer	斯盆赛	Sī pén sài
+Spike	斯派克	Sī pài kè
+Stacey	斯黛茜	Sī dài xī
+Stanislas	斯坦尼斯拉斯	Sī tǎn ní sī lā sī
+Stanisław	斯塔尼斯拉夫	Sī tǎ ní sī lā fū
+Stanley	斯丹雷	Sī Dān léi
+Stany	斯坦尼	Sī tǎn ní
+Stecy	丝特茜	Sī tè xī
+Steeve	斯蒂夫	Sī dì fū
+Steeven	史蒂文	Shǐ dì wén
+Stefan	斯特凡	Sī tè fán
+Stefan	斯特凡	Sī tè fán
+Stefania	斯蒂凡娅	Sī dì fán yà
+Stefanie	丝泰菲妮	Sī Tài Fēi nī
+Stefany	斯蒂芬妮	Sī dì fēn ní
+Stefeta	斯蒂菲达	Sī dì Fēi dá
+Steffi	士泰福	Shì Tài Fú
+Stella	斯特拉	Sī té lā
+Stémy	斯蒂米	Sī dì mǐ
+Stephan	斯蒂凡	Sī dì fán
+Stéphane	斯蒂芬	Sī dì fēn
+Stéphanie	斯蒂芬妮	Sī dì fēn ní
+Stephany	斯蒂芬妮	Sī dì fēn ní
+Stephen	斯蒂芬	Sī dì fēn
+Stessy	斯特希	Sī tè xī
+Steve	斯蒂夫	Sī dì fū
+Steven	史蒂文	Shǐ dì wén
+Stevens	史蒂文斯	Shǐ dì wén sī
+Stevie	史蒂夫	Shǐ dì fū
+Stévina	斯特维娜	Sī tè wéi nà
+Stewart	斯图尔特	Sī tú ěr té
+Sthefanie	斯泰凡妮	Sī Tài fán nī
+Stina	斯蒂娜	Sī dì nà
+Suarez	苏亚雷兹	Sū yà léi zī
+Suat	苏阿特	Sū Ā tè
+Sue	苏埃	Sū āi
+Suélen	苏艾莲	Sū Aì lián
+Suelen	苏艾莲	Sū Aì lián
+Suellen	苏艾莲	Sū Aì lián
+Sufian	苏菲安	Sū fēi ān
+Sugi	苏吉	Sū Jí
+Sujeily	苏蕾莉	Sū lěi lì
+Suleni	苏雷尼	Sū léi ní
+Sulivan	沙利文	Shā lì wén
+Sullivan	沙利文	Shā lì wén
+Sumit	斯米特	Sī mǐ tè
+Suna	苏娜	Sū nà
+Sunanda	苏南达	Sū nán dá
+Sunley	僧蕾	Sēng lěi
+Suresh	苏磊石	Sū lěi shí
+Surina	苏丽娜	Sū lì nà
+Suryani	苏里亚尼	Sū lǐ yà ní
+Susana	苏萨娜	Sū sà nà
+Susanna	苏萨娜	Sū sà nà
+Susanna	苏萨娜	Sū sà nà
+Susanne	苏珊	Sū shān
+Sushil	苏希尔	Sū xī ěr
+Sushma	苏士马	Sū shì Mǎ
+Susie	苏西	Sū xī
+Suyai	素雅	Sù Yǎ
+Suzana	苏沙娜	Sū shā nà
+Suzane	苏萨娜	Sū sà nà
+Suzanna	苏珊娜	Sū shān nà
+Suzanne	苏珊	Sū shān
+Suzel	苏塞	Sū sāi
+Suzette	苏塞特	Sū sāi tè
+Suzie	苏西	Sū xī
+Sven	斯文	Sī wén
+Svenja	斯文亚	Sī wén yà
+Svetlana	斯维特兰娜	Sī wéi tè lán nà
+Swan	斯万	Sī wàn
+Swann	斯万	Sī wàn
+Swantje	算帖	Suàn tiě
+Sweta	苏韦塔	Sū wéi tǎ
+Swetha	苏维塔	Sū wéi tǎ
+Sybelle	希贝	Xī bèi
+Sybil	希碧乐	Xī bì lè
+Sybilla	希碧拉	Xī bì lā
+Syida	希达	Xī dá
+Sylène	西莲	Xī lián
+Sylke	希尔克	Xī ěr kè
+Sylvain	西拉维	Xī lā wéi
+Sylvaine	茜尔雯	Xī ěr wén
+Sylvestre	西尔维斯特	Xī ěr wéi sī tè
+Sylvette	西尔维特	Xū ěr wéi tè
+Sylvia	西尔维娅	Xī ěr wéi yà
+Sylviane	西尔维安	Xī ěr wéi ān
+Sylvie	西尔维	Xī ěr wéi
+Sylwester	西尔维斯特	Xī ěr wéi sī tè
+Sylwia	茜尔维亚	Xī ěr wéi yà
+Syrielle	茜莉艾	Xī lì ài
+Szymon	西蒙	Xī mēng
+Tabata	塔芭塔	Tǎ bā tǎ
+Tabatha	塔芭塔	Tǎ bā tǎ
+Tácito	塔西托	Tǎ xī tuō
+Tadeo	塔德奥	Tǎ dé ào
+Tadeu	塔德武	Tǎ dé wǔ
+Taina	泰娜	Tài nà
+Tainara	泰娜拉	Tài nà lā
+Talal	塔拉尔	Tǎ lā ěr
+Talec	大蕾克	Dà lěi kè
+Talia	塔莉娅	Tǎ lì yà
+Taline	塔林	Tǎ lín
+Talita	塔丽塔	Tǎ lì tǎ
+Talyanne	塔丽安	Tǎ lì ān
+Tamara	塔玛拉	Tǎ mǎ lā
+Tameka	达美卡	Dá měi Kǎ
+Tami	达米	Dá mǐ
+Tamirys	塔蜜莉斯	Tǎ Mì lì sī
+Tammy	塔米	Tǎ mǐ
+Tancrède	唐克雷德	Táng kè léi dé
+Tanguy	唐吉	Táng jí
+Tania	塔尼娅	Tǎ ní yà
+Tânia	塔妮娅	Tǎ nī yà
+Tanja	覃娅	Tán yà
+Tansel	覃赛	Tán sài
+Tanwir	覃维尔	Tán wéi ěr
+Tanya	塔妮亚	Tǎ nī yà
+Tao	道	Dào
+Tara	泰拉	Tài lā
+Tarek	塔雷克	Tǎ léi kè
+Tarik	塔里克	Tǎ lǐ kè
+Tariq	塔里克	Tǎ lǐ kè
+Tarnia	塔尔妮娅	Tǎ ěr nī yà
+Tarsila	塔尔茜拉	Tǎ ěr xī lā
+Tarsis	塔尔西斯	Tǎ ěr xī sī
+Taru	达露	Dá Lù
+Tasia	塔西娅	Tǎ xī yà
+Tatiana	塔提安娜	Tǎ tí ān nà
+Tatyana	塔提亚娜	Tǎ tí yà nà
+Taumaturgo	陶马图戈	Táo Mǎ tú gē
+Tayla	泰拉	Tài lā
+Taylor	泰勒	Tài lè
+Tayse	泰瑟	Tài sè
+Tchabine	吒宾	Zhà bīn
+Tecla	特克莱	Tè kè lái
+Tecla	特科拉	Tè Kē lā
+Ted	泰德	Tài dé
+Teddy	泰迪	Tài dí
+Tegan	泰甘	Tài gān
+Tehano	特阿诺	Tè Ā nuò
+Teite	泰特	Tài tè
+Telémaco	特莱马科	Tè lái mǎ kē
+Telésforo	特莱斯福罗	Tè lái sī fú luó
+Tello	特略	Tè lüè
+Telma	泰尔玛	Tài ěr mǎ
+Telmo	特尔莫	Tèr mò
+Telúrio	特鲁柳	Tè lǔ liǔ
+Temístocles	特米斯托克莱斯	Tè mǐ sī tuō kè lái sī
+Tennessee	田纳西	Tián nà xī
+Tenorio	特诺里奥	Tè nuò lǐ ào
+Téo	泰欧	Tài ōu
+Teobaldo	泰奥巴尔多	Tài ào bā ěr duō
+Teodor	泰奥多尔	Tài ào duō ěr
+Teodoro	特奥多罗	Tè ào duō luó
+Teodosio	特奥多西奥	Tè ào duō xī ào
+Teodósio	泰奥多西奥	Tài ào duō xī ào
+Teódulo	特奥杜洛	Tè ào dù luò
+Teofil	特奥菲	Tè ào fēi
+Teófilo	特奥菲洛	Tè ào fēi luò
+Tere	特雷	Tè léi
+Terence	特朗丝	Tè lǎng sī
+Terencio	特伦西奥	Tè lún xī ào
+Teresa	特丽莎	Tè lì shā
+Teresa	特蕾萨	Tè lěi sà
+Teresinha	泰蕾茜娜	Tài lěi xī nà
+Terezinha	泰蕾茜娜	Tài lěi xī nà
+Teriq	塔里克	Tǎ lǐ kè
+Terri	泰瑞	Tài ruì
+Terry	特瑞	Tè ruì
+Tertuliano	特图利亚诺	Tè tú lì yà nuò
+Teru	泰卢	Tài Lú
+Tessa	特萨	Tè sà
+Tessier	德燮	Dé xiè
+Tetinho	特丁诺	Tè dīng nuò
+Teva	特瓦	Tè wǎ
+Tevai	特外	Tè wài
+Tevaite	特瓦伊特	Tè wǎ yī tè
+Thaddeus	塔德乌斯	Tǎ dé Wū sī
+Thainá	泰娜	Tài nà
+Thaïs	塔伊斯	Tǎ Yī sī
+Thais	特拉伊斯	Tè lā Yī sī
+Thaís	塔伊斯	Tǎ Yī sī
+Thalia	塔莉娅	Tǎ lì yà
+Thalianny	塔利亚娜	Tǎ lì yà nà
+Thalie	塔丽	Tǎ lí
+Thalita	塔利塔	Tǎ lì tǎ
+Thamiris	塔米利斯	Tǎ mǐ lì sī
+Thanh	覃	Tán
+Thania	塔妮娅	Tǎ nī yà
+Thanya	覃妮娅	Tán nī yà
+Thao	道	Dào
+Théa	特阿	Tè Ā
+Thelia	泰莉娅	Tài lì yà
+Thelma	塞尔玛	Sāi rmǎ
+Theo	西奥	Xī ào
+Théo	特奥	Té ào
+Theodore	西奥多	Xī ào duō
+Théodore	泰奥多尔	Tài ào duō er
+Théodule	特奥督勒	Té ào dū lè
+Théophile	泰奥菲	Tài ào fēi
+Théotime	泰奥蒂姆	Tài ào dì mǔ
+Thérèsa	特蕾萨	Tè lěi sà
+Theresa	希莉萨	Xī lì sà
+Thérèse	特蕾丝	Tè lěi sī
+Therry	特里	Tè lǐ
+Thi	蒂	Dì
+Thiago	提阿哥	Tí ā gē
+Thibald	提巴	Tí Bā
+Thibaud	蒂伯	Dì bó
+thibault	蒂伯	Dì bó
+Thibaut	蒂伯	Dì bó
+Thiefaine	蒂埃芬	Dì Aī fēn
+Thierry	蒂埃里	Dì āi lǐ
+Thilan	蒂兰	Dì lán
+Thilo	提罗	Tí luó
+Thiziri	蒂茜利	Dì xī lì
+Thoan	覃	Tán
+Thomas	托马	Tuō mǎ
+Thommy	托米	Tuō mǐ
+Thorsten	托尔斯滕	Tuō ěr sī téng
+Thya	缇娅	Tí yà
+Thylane	缇兰	Tí lán
+Tia	缇娅	Tí yà
+Tiago	蒂亚戈	Dì yà gē
+Tibisay	缇碧塞	Tí bì sāi
+Tiburcio	蒂武西奥	Dì wǔ xī ào
+Ticiano	蒂西亚诺	Dì xī yà nuò
+Tico	蒂考	Dì kǎo
+Tidian	逖迪昂	Tì dí áng
+Tiegan	戴甘	Dài gān
+Tien	天	Tiān
+Tiffanie	蒂凡妮	Dì fán nī
+Tiffany	蒂凡妮	Dì fán nī
+Tigresa	蒂格蕾萨	Dì gé lěi sà
+Tihyana	提亚娜	Tí yà nà
+Tijania	提沙妮亚	Tí Shā nī yà
+Til	提尔	Tí ěr
+Tila	蒂拉	Dì lā
+Till	提尔	Tí ěr
+Tim	蒂姆	Dì mǔ
+Timea	蒂美阿	Dì měi Ā
+Timeo	蒂梅欧	Dì méi ōu
+Timm	蒂姆	Dì mǔ
+Timmor	迪莫尔	Dí Mò ěr
+Timmy	蒂米	Dì mǐ
+Timo	蒂莫	Dì mò
+Timoteo	蒂莫特奥	Dì mò tè ào
+Timothee	蒂莫西	Dì mò xī
+Timothée	蒂莫泰	Dì mò tài
+Timothy	蒂莫西	Dì mò xī
+Tina	蒂娜	Dì nà
+Tintin	丁丁	Dīng dīng
+Tiphaine	蒂菲恩	Dì fēi ēn
+Tiphanie	蒂凡妮	Dì fán nī
+Tirso	蒂尔索	Dì rsuǒ
+Tissam	缇萨姆	Tí sà mǔ
+Tita	缇塔	Tí tǎ
+Tito	蒂托	Dì tuō
+Titouan	替图安	Tì tú ān
+Tiziana	蒂茨娅娜	Dì cí yà nà
+Tiziano	迪夏诺	Dí Xià nuò
+Tobi	特比	Tè bǐ
+Tobías	托维亚斯	Tuō wéi yà sī
+Tobias	托比亚斯	Tuō bǐ yà sī
+Toby	托比	Tuō bǐ
+Tod	托德	Tuō dé
+Tolomeo	托洛梅奥	Tuō luò méi ào
+Tom	汤姆	Tāng mǔ
+Tomás	托马斯	Tuō mǎ sī
+Tomas	托马斯	Tuō Mǎ sī
+Tommaso	托马苏	Tuō Mǎ Sū
+Tommy	托米	Tuō mǐ
+Tomos	托莫斯	Tuō mò sī
+Toni	托尼	Tuō nī
+Tony	托尼	Tuō nī
+Torcuato	托尔夸托	Tuō rkuā tuō
+Tori	托莉	Tuō lì
+Toribio	托里维奥	Tuō lǐ wéi ào
+Torsten	托斯滕	Tuō sī téng
+Toscane	托斯卡纳	Tuō sī Kǎ nà
+Tounès	图内斯	Tú nèi sī
+Tozé	托泽	Tuō Zé
+Tracy	翠西	Cuì xī
+Trayan	特拉雅恩	Tè lā Yǎ ēn
+Treena	特丽娜	Té lí nà
+Trent	德温德	Dé wēn dé
+Trésor	特雷索尔	Tè léi suǒ ěr
+Trevor	特雷弗	Tè léi fú
+Tricia	特瑞萨	Té ruì sà
+Triguel	特里格	Tè lǐ gé
+Trina	崔娜	Cuī nà
+Trinidad	特里尼达	Tè lǐ ní dá
+Trinity	翠妮缇	Cuì nī tí
+Tristan	特里斯坦	Tè lǐ sī tàn
+Tristão	特里斯坦	Tè lǐ sī tǎn
+Tristen	特里斯敦	Tè lǐ sī dūn
+Troy	特洛伊	Té luò yī
+Tuanny	图阿尼	Tú Ā ní
+Tugdual	图格杜阿勒	Tú gé dù ā lè
+Tui	图伊	Tú Yī
+Túlio	图柳	Tú liǔ
+Tupac	图帕克	Tú Pà kè
+Turner	特纳	Té nà
+Tuukka	图卡	Tú kǎ
+Tya	缇娅	Tí yà
+Tyanna	缇安娜	Tí ān nà
+Tyco	泰科	Tài kē
+Tylou	缇鲁	Tí lǔ
+Tyno	蒂诺	Dì nuò
+Typhaine	缇凡	Tí fán
+Tyquan	提圈	Tí quān
+Tyreas	图爱斯	Tú Aì sī
+Tyrone	泰朗	Tài lǎng
+Udo	乌多	Wū duō
+Udovic	尤多维克	Yóu duō wéi kè
+Ugo	雨果	Yǔ guǒ
+Ulises	乌利塞斯	Wū lì sài sī
+Ulisses	乌利塞斯	Wū lì sāi sī
+Ully	乌利	Wū lì
+Ulrich	乌利希	Wū lì xī
+Ulrik	乌尔里克	Wū ěr lǐ kè
+Ulrika	乌尔丽卡	Wū ěr lí kǎ
+Ulrike	吴利克	Wǔ lì kè
+Ulysse	尤利西斯	Yóu lì xī sī
+Umberto	翁贝托	Wēng bèi tuō
+Urbano	乌尔瓦诺	Wū rwǎ nuò
+Uriel	乌里埃	Wū lǐ Aī
+Urrea	乌雷亚	Wū léi yà
+Úrsula	耳舒拉	Er3 shū lā
+Úrsula	雾尔苏拉	Wù ěr sū lā
+Ute	乌特	Wū tè
+Vadiney	瓦蒂内	Wǎ dì nèi
+Vadson	瓦德孙	Wǎ dé sūn
+Valdeci	瓦尔德西	Wǎ ěr dé xī
+Valdelia	瓦德利亚	Wǎ dé lì yà
+Valène	瓦莲	Wǎ lián
+Valentí	瓦伦丁	Wǎ lún dīng
+Valentim	瓦伦汀	Wǎ lún tīng
+Valentin	瓦伦丁	Wǎ lún dīng
+Valentina	巴伦蒂娜	Bā lún dì nà
+Valentine	瓦伦汀	Wǎ lún tīng
+Valère	瓦雷尔	Wǎ léi ěr
+Valeria	瓦莱里娅	Wǎ lái lǐ yà
+Valéria	瓦蕾莉娅	Wǎ lěi lì yà
+Valèria	娃蕾莉芽	Wá lěi lì yá
+Valeriano	巴莱里亚诺	Bā lái lǐ yà nuò
+Valérie	瓦莱丽	Wǎ lái lì
+Valerio	瓦雷利奥	Wǎ léi lì ào
+Valero	瓦莱罗	Wǎ lái luó
+Valéry	瓦雷里	Wǎ léi lǐ
+Valeska	瓦莱斯卡	Wǎ lái sī Kǎ
+Valle	巴列	Bā liè
+Valmir	瓦勒米尔	Wǎ lè mǐ ěr
+Valter	瓦尔特	Wǎ ěr tè
+Vampiro	吸血鬼	Xī xuè guǐ
+Vanda	万达	Wàn dá
+Vanderlei	万德尔雷	Wàn dé ěr léi
+Vanderleia	婉德蕾芽	Wǎn dé lěi yá
+Vane	瓦恩	Wǎ ēn
+Vanesa	瓦内萨	Wǎ nèi sà
+Vaneska	瓦内斯卡	Wǎ nèi sī Kǎ
+Vanessa	凡妮莎	Fán nī sha
+Vânia	瓦妮娅	Wǎ nī yà
+Vania	瓦妮娅	Wǎ nī yà
+Vanina	瓦妮娜	Wǎ nī nà
+Vannia	瓦妮娅	Wǎ nī yà
+Vannina	凡妮娜	Fán nī nà
+Vanusa	瓦努萨	Wǎ nǔ sà
+Vasco	瓦斯寇	Wǎ sī kòu
+Vasilii	瓦西里	Wǎ xī lǐ
+Vasilije	瓦希利	Wǎ xī lì
+Vay	薇	Wēi
+Veani	菲安妳	Fēi ān nǐ
+Velasco	贝拉斯科	Bèi lā sī kē
+Veleri	维勒利	Wéi lè lì
+Ventura	本图拉	Běn tú lā
+Venus	维纳斯	Wéi nà sī
+Vénus	维纳斯	Wéi nà sī
+Venustiano	贝努斯蒂亚诺	Bèi nǔ sī dì yà nuò
+Vera	魏拉	Wèi lā
+Vérane	维兰	Wéi lán
+Verena	维勒娜	Wéi lè nà
+Vergil	维吉尔	Wéi jí ěr
+Veríssimo	维利西莫	Wéi lì xī mò
+Veronica	维罗尼卡	Wéi luō ní kǎ
+Verônica	苇罗妮卡	Wěi luó nī kǎ
+Véronique	维罗妮克	Wéi luó ní kè
+Veton	维桐	Wéi tóng
+Vianey	维亚内	Wéi yà nèi
+Vianney	维雅内	Wéi yǎ nèi
+Vicenç	韦森慈	Wéi sēn cí
+Vicent	韦森特	Wéi sēn tè
+Vicente	韦森特	Wéi sēn té
+Vicki	薇琪	Wēi qí
+Vicky	维吉	Wéi jí
+Victoire	维克图阿尔	Wéi kè tú ā ěr
+Victor	维克多	Wéi kè duō
+Victoria	维多利亚	Wéi duō lì yà
+Victòria	维多利亚	Wéi duō lì yà
+Victorien	维克托连	Wéi kè tuō lián
+Victorino	维多里诺	Wéi duō lǐ nuò
+Vidal	比达尔	Bǐ dá r
+Vidyashree	维蒂亚诗丽	Wéi dì yà shī lì
+Vikas	维卡斯	Wéi Kǎ sī
+Vince	文丝	Wén sī
+Vincent	樊尚	Fán shàng
+Vincent	文森特	Wén sēn té
+Vinciane	文西安	Wén xī ān
+Vinícius	韦尼西乌斯	Wéi ní xī wū sī
+Vinicius	维尼修斯	Wéi ní xiū sī
+Vinodh	魏诺德	Wèi nuò dé
+Vio	菲奥	Fēi ào
+Violaine	菲奥莲	Fēi ào lián
+Violante	比奥兰特	Bǐ ào lán tè
+Violeta	菲奥莱塔	Fēi ào lái tǎ
+Violette	菲奥莱特	Fēi ào lái tè
+Virgil	维吉尔	Wéi jí ěr
+Virgile	维吉尔	Wéi jí ěr
+Virgilio	比尔希略	Bǐ rxī lüè
+Virginia	维吉尼亚	Wéi jí ní yà
+Virginie	维吉妮	Wéi jí nī
+Viridiana	维丽蒂娅娜	Wéi lì dì yà nà
+Vitor	维托	Wéi tuō
+Vítor	维多	Wéi duō
+Vitória	韦托莉娅	Wéi tuō lì yà
+Vívian	微微安	Wēi wēi ān
+Viviana	比维亚娜	Bǐ wéi yà nà
+Viviane	维维安	Wéi wéi ān
+Vivien	维维恩	Wéi wéi ēn
+Vizcaino	比斯凯诺	Bǐ sī kǎi nuò
+Vlada	弗拉达	Fú lā dá
+Vladimir	弗拉迪米尔	Fú lā dí mǐ ěr
+Vladimiro	弗拉迪米罗	Fú lā dí mǐ luó
+Voisard	瓦萨尔	Wǎ sà ěr
+Volker	佛克尔	Fó kè ěr
+Wacław	瓦克拉夫	Wǎ kè lā fū
+Waël	瓦埃勒	Wǎ āi lè
+Wafa	瓦法	Wǎ Fǎ
+Wafaa	瓦法	Wǎ fǎ
+Wagner	瓦格内	Wǎ gé nèi
+Wahiba	瓦伊巴	Wǎ yī bā
+Walace	瓦拉斯	Wǎ lā sī
+Waldo	瓦尔多	Wǎ rduō
+Waleska	瓦雷斯卡	Wǎ léi sī Kǎ
+Walid	瓦里德	Wǎ lǐ dé
+Wallace	华莱士	Huā lái shì
+Walmir	瓦尔米尔	Wǎ ěr mǐ ěr
+Walney	瓦尔内	Wǎ ěr nèi
+Walter	沃尔特	Wò ěr tè
+Walter	瓦勒特	Wǎ lè tè
+Wanda	旺达	Wàng dá
+Wandersen	万德尔森	Wàn dé ěr sēn
+Waris	瓦利斯	Wǎ lì sī
+Warren	瓦伦	Wǎ lún
+Wassila	瓦希拉	Wǎ xī lā
+Wassila	瓦希拉	Wǎ xī lā
+Watson	瓦特森	Wǎ tè sēn
+Wayne	韦恩	Wéi ēn
+Welbi	维尔比	Wéi ěr bǐ
+Wenceslao	文策斯劳	Wén cè sī láo
+Wendelin	文德林	Wén dé lín
+Wendy	温蒂	Wēn dì
+Werner	维尔纳	Wéi ěr nà
+Weronika	薇罗尼卡	Wēi luó ní kǎ
+Wes	韦斯	Wéi sī
+Wesley	韦斯利	Wéi sī lì
+Wessim	维西姆	Wéi xī mǔ
+Weudys	为乌蒂斯	Wéi Wū dì sī
+Widelia	乌伊特丽亚	Wū Yī tè lì yà
+Wiem	瓦姆	Wǎ mǔ
+Wigny	魏格尼	Wèi gé ní
+Wijdane	维日丹	Wéi rì Dān
+Wiktroria	薇克托丽亚	Wēi kè tuō lì yà
+Wilane	维兰	Wéi lán
+Wilbia	伟比亚	Wěi bǐ yà
+Wilderg	威尔德格	Wēi ěr dé gé
+Wilfredo	维夫雷多	Wéi fū léi duō
+Wilfrid	威尔弗里德	Wēi ěr fú lǐ dé
+Wilfried	威尔弗里德	Wēi ěr fú lǐ dé
+Wilker	维克	Wéi kè
+Will	威尔	Wēi ěr
+Willa	韦拉	Wéi lā
+William	威廉	Wēi lián
+Williams	威廉斯	Wēi lián sī
+Willian	威廉	Wēi lián
+Williane	威利安	Wēi lì ān
+Willy	维利	Wéi lì
+Wilson	威尔逊	Wēi ěr xùn
+Windy	无垠地	Wú yín dì
+Wissem	威斯姆	Wēi sī mǔ
+Wladimir	弗拉迪米尔	Fú lā dí mǐ ěr
+Władysław	弗拉迪斯拉夫	Fú lā dí sī lā fū
+Wolfgang	沃尔夫冈	Wò ěr fū gāng
+Xana	克萨娜	Kè sà nà
+Xanga	尚伽	Shàng Jiā
+Xavier	柴维耶	Chái wéi yē
+Xenia	泽尼亚	Zé ní yà
+Xhezair	谢塞尔	Xiè Sāi ěr
+Ximena	希梅纳	Xī méi nà
+Xiomara	克秀马拉	Kè Xiù Mǎ lā
+Xóchitl	肖奇特	Xiào qí tè
+Yabeling	娅贝琳	Yà bèi lín
+Yacine	雅辛	Yǎ xīn
+Yadira	娅蒂拉	Yà dì lā
+Yadjna	亚德日娜	Yà dé rì nà
+Yaël	耶尔	Yē ěr
+Yaelle	雅尔	Yǎ ěr
+Yaëlle	亚爱乐	Yà Aì lè
+Yahcine	雅辛	Yǎ xīn
+Yaiza	雅伊萨	Yǎ yī sà
+Yajaira	雅斋拉	Yǎ zhāi lā
+Yakhouba	亚库巴	Yà kù bā
+Yalani	亚拉尼	Yà lā ní
+Yamila	亚米拉	Yà mǐ lā
+Yamile	亚米勒	Yà mǐ lè
+Yan	雅恩	Yǎ ēn
+Yaneth	雅内特	Yǎ nèi tè
+Yanil	雅尼尔	Yǎ ní ěr
+Yanina	亚尼娜	Yà ní nà
+Yanira	雅妮拉	Yǎ nī lā
+Yanis	亚尼斯	Yà ní sī
+Yaniss	亚尼斯	Yà ní sī
+Yann	雅恩	Yǎ ēn
+Yann	雅恩	Yǎ ēn
+Yannel	雅内尔	Yǎ nèi ěr
+Yannick	雅尼克	Yǎ ní kè
+Yannicke	雅妮克	Yǎ nī kè
+Yannis	亚尼斯	Yà ní sī
+Yannys	雅尼斯	Yǎ ní sī
+Yaphet	亚菲特	Yà Fēi tè
+Yara	雅拉	Yǎ lā
+Yarek	亚雷克	Yà léi kè
+Yasbeth	娅斯贝特	Yà sī Bèi tè
+Yash	亚石	Yà shí
+Yasha	亚沙	Yà Shā
+Yasin	亚新	Yà Xīn
+Yasmine	雅斯敏	Yǎ sī mǐn
+Yassin	雅辛	Yǎ xīn
+Yaya	娅娅	Yà yà
+Yazid	亚兹	Yà zī
+Yelisandra	耶莉桑达	Yē lì sāng dá
+Yenny	叶妮	Yè nī
+Yénora	耶诺拉	Yē nuò lā
+Yenory	耶诺莉	Yē nuò lì
+Yeny	叶尼	Yè ní
+Yeray	耶赖	Yē lài
+Yesenia	亚塞妮娅	Yà sāi nī yà
+Yessenia	耶斯尼亚	Yē sī ní yà
+Yessica	耶斯卡	Yē sī kǎ
+Yildirim	伊利德利姆	Yī lì dé lì mǔ
+Yisel	伊斯尔	Yī sī ěr
+Ylan	伊兰	Yī lán
+Yoann	约安	Yāo ān
+Yohan	尤安	Yóu ān
+Yohann	尤安	Yóu ān
+Yokasta	尤卡丝塔	Yóu kǎ sī tǎ
+Yolaine	尤莲	Yóu lián
+Yolanda	约兰达	Yuē lán dá
+Yolande	约朗德	Yāo lǎng dé
+Yoli	优莉	Yōu lì
+Yona	友娜	Yǒu nà
+Yonathan	尤纳坦	Yóu nà tǎn
+Yoni	尤尼	Yóu ní
+Yorben	尤尔本	Yóu ěr Běn
+Youcef	约瑟夫	Yāo sè fū
+Youenn	友恩	Yǒu ēn
+Youna	尤娜	Yóu nà
+Youness	尤内斯	Yóu nèi sī
+Youri	由梨	Yóu lí
+Yousra	约瑟拉	Yāo sè lā
+Youssef	约瑟夫	Yuē sè fū
+Yousuf	尤苏夫	Yóu Sū fū
+Yovana	优瓦娜	Yōu wǎ nà
+Ysabella	伊萨贝拉	Yī sà Bèi lā
+Ysaline	伊萨琳	Yī sà lín
+Ysatis	伊萨蒂斯	Yī sà dì sī
+Yudiely	友德莉	Yǒu dé lì
+Yudith	尤蒂特	Yóu dì tè
+Yuliana	玉莉娅娜	Yù lì yà nà
+Yulieth	尤丽叶	Yóu lì yè
+Yuna	玉娜	Yù nà
+Yurany	友拉尼	Yǒu lā ní
+Yuri	由梨	Yóu lí
+Yvaine	依凡	Yī fán
+Yvan	伊万	Yī wàn
+Yvann	伊万	Yī wàn
+Yvanne	伊婉	Yī wǎn
+Yveline	伊薇琳	Yī wēi lín
+Yves	伊夫	Yī fū
+Yvette	伊薇特	Yī wēi té
+Yvon	伊冯	Yī féng
+Yvoncka	伊翁卡	Yī Wēng Kǎ
+Yvonette	伊佛内特	Yī fó nèi tè
+Yvonne	伊冯	Yī féng
+Yvonnick	伊沃尼克	Yī wò ní kè
+Ywen	伊文	Yī wén
+Ywenn	伊文	Yī wén
+Zacaria	萨卡里亚	Sà Kǎ lǐ yà
+Zacarías	萨卡里亚斯	Sà kǎ lǐ yà sī
+Zachary	扎卡里	Zā kǎ lǐ
+Zackaria	扎卡丽亚	Zā Kǎ lì yà
+Zahra	佐拉	Zuǒ lā
+Zain	扎因	Zā yīn
+Zaira	栽拉	Zāi lā
+Zak	杂克	Zá kè
+Zakaria	扎卡里亚	Zā Kǎ lǐ yà
+Zakia	扎齐亚	Zā Qí yà
+Zaklina	扎卡莉娜	Zā Kǎ lì nà
+Zalayeta	扎雷塔	Zā léi tǎ
+Zan	咱	Zán
+Zavaleta	扎瓦雷塔	Zā wǎ léi tǎ
+Zayd	宰德	Zǎi dé
+Zé	泽	Zé
+Zed	泽德	Zé dé
+Zeferino	赛菲利诺	Sài fēi lì nuò
+Zehra	泽拉	Zé lā
+Zeineb	赛内布	Sài nèi Bù
+Zeiya	泽娅	Zé yà
+Zenaida	塞奈达	Sài nài dá
+Zenón	塞农	Sài nóng
+Zéphyr	泽飞尔	Zé fēi ěr
+Zephyr	泽飞尔	Zé fēi ěr
+Zerin	泽琳	Zé lín
+Zettie	兹蒂	Zī dì
+Zeus	宙斯	Zhòu sī
+Zeynep	泽内浦	Zé nèi pǔ
+Zidane	齐达内	Qí dá nèi
+Zied	齐雅德	Qí Yǎ dé
+Zineb	齐内布	Qí nèi Bù
+Zipexx	泽佩克斯	Zé Pèi kè sī
+Zita	泽塔	Zé tǎ
+Zlatica	兹拉缇卡	Zī lā tí kǎ
+Zoe	佐伊	Zuǒ yī
+Zoé	佐伊	Zuǒ yī
+Zoély	佐丽	Zuǒ lì
+Zofia	佐菲亚	Zuǒ fēi yà
+Zoïk	佐伊克	Zuǒ yī kè
+Zola	左拉	Zuǒ lā
+Zoltán	佐尔坦	Zuǒ ěr tǎn
+Zoltan	佐尔坦	Zuǒ ěr tǎn
+Zoraida	索拉伊达	Suǒ lā yī dá
+Zoroastro	索罗亚斯特罗	Suǒ luó yà sī tè luó
+Zouine	苏因	Sū yīn
+Zuki	卒克	Zú kè
+Zulema	卒蕾玛	Zú lěi Mǎ
+Zully	朱丽	Zhū lì
+Zuñiga	苏尼戈	Sū ní gē
+Zuzana	簇扎娜	Cù zā nà

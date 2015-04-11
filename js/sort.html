@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Sort</title>
+  <link rel="stylesheet" href="/static/main.css">
+  <style>button {width:10em}</style>
+
+  <script type="application/javascript;version=1.7">
+
+  /*
+   * Global variables.
+   * These variables keep track of the current state of the
+   * canvas and the array that is displayed on it.
+  */
+  var canvas;
+  var state = {};
+  var interval;
+  var width = 200;
+  var height = 100;
+  var dotSize = 2;
+
+  function init() {
+    canvas = document.getElementById("canvas");
+    canvas.width = width * dotSize;
+    canvas.height = height * dotSize;
+    canvas.dotSize = dotSize;
+    initState();
+    drawCanvas();
+  }
+
+  function initState() {
+    state.comps = 0;
+    state.swaps = 0;
+    state.sorted = false;
+    state.array = randomNums(width, height);
+  }
+
+  function run(method) {
+    clearInterval(interval);
+    initState();
+    drawCanvas();
+    var generators = {
+      "selection" : selectionSort,
+      "bubble" : bubbleSort,
+      "insertion" : insertionSort
+    };
+    var generator = generators[method];
+    animate(canvas, generator, state.array);
+  }
+
+  function stop() {
+    clearInterval(interval);
+  }
+
+  /**
+   * Selection sort.
+   * This is a generator that yields array state at each step.
+  */
+  function selectionSort(arr) {
+    state.array = arr;
+    for (var i = 0; i < arr.length; i++) {
+      var indexOfSmallest = i;
+      for (var j = i; j < arr.length; j++) {
+        state.comps++;
+        if (arr[j] < arr[indexOfSmallest]) {
+          indexOfSmallest = j;
+        }
+      }
+      state.swaps++;
+      swap(arr, i, indexOfSmallest);
+      yield state;
+    }
+  }
+
+  /**
+   * Bubble sort.
+   * This is a generator that yields array state at each step.
+  */
+  function bubbleSort(arr) {
+    state.array = arr;
+    var hasChange = true;
+    while (hasChange) {
+      hasChange = false;
+      for (var j = 0; j < arr.length-1; j++) {
+        state.comps++;
+        if (arr[j] > arr[j+1]) {
+          state.swaps++;
+          swap(arr, j, j+1);
+          hasChange = true;
+        }
+      }
+      yield state;
+    }
+  }
+
+  /**
+   * Insertion sort.
+   * This is a generator that yields array state at each step.
+  */
+  function insertionSort(arr) {
+    state.array = arr;
+    for (var i = 1; i < arr.length; i++) {
+      var temp = arr[i];
+      var j;
+      for (j = i; j > 0; j--) {
+        state.comps++;
+        if (arr[j-1] >= temp) {
+          state.swaps++;
+          swap(arr, j, j-1);
+        } else {
+          break;
+        }
+      }
+      yield state;
+    }
+  }
+
+  /**
+   * Use the given sort function generator to sort the given array,
+   * and display the changes on the canvas at each step.
+  */
+  function animate(canvas, generator, arr) {
+    drawCanvas(canvas, state);
+    var iterator = generator(arr);
+    function step() {
+      try {
+        state = iterator.next();
+      } catch (StopIteration) {
+        clearInterval(interval);
+        state.sorted = true;
+        return;
+      }
+      drawCanvas();
+    }
+    interval = setInterval(step, 10);
+  }
+
+  /**
+   * Swap the two items at the given indices in an array.
+  */
+  function swap(arr, i, j) {
+    var temp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = temp;
+  }
+
+  /**
+   * Generate an array of given length with numbers in the range [0,max).
+  */
+  function randomNums(length, maxNum) {
+    var nums = [];
+    for (var i = 0; i < length; i++) {
+      var num = Math.floor(Math.random()*maxNum);
+      nums.push(num);
+    }
+    return nums;
+  }
+
+  /**
+   * Update the canvas to display the given array.
+  */
+  function drawCanvas() {
+    var context = canvas.getContext("2d");
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    for (var i = 0; i < state.array.length; i++) {
+      x = i*canvas.dotSize;
+      y = canvas.height - state.array[i]*canvas.dotSize;
+      context.fillRect(x, y, canvas.dotSize, canvas.dotSize);
+    }
+    var stats = "Comparisons: " + state.comps.toString();
+    stats += ", Swaps: " + state.swaps.toString();
+    document.getElementById("output").innerHTML = stats;
+  }
+
+  </script>
+
+</head>
+
+<body onload="init()">
+<h1>Sort</h1>
+<time datetime="2013-05-01">Created 2013-05-01.</time>
+
+<p>This is the beginning of a sort visualization page. It requires JS 1.7.</p>
+
+<form action="javascript:void(null)">
+  <table border=1>
+  <tr>
+    <td>
+      <!--<button onclick="stop()">Stop</button>-->
+      <br><button onclick="run('selection')">Selection sort</button>
+      <br><button onclick="run('bubble')">Bubble sort</button>
+      <br><button onclick="run('insertion')">Insertion sort</button>
+    </td>
+    <td>
+    <canvas id="canvas">
+    Your browser doesn't support the canvas element.
+    </canvas>
+    <div id="output"></div>
+    </td>
+  </tr>
+  </table>
+</form>
+
+</body>
+</html>

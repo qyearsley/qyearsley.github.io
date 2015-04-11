@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Truth tables</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="/static/main.css">
+  <script src="./arrayextras.js"></script>
+  <script src="./truthtable.js"></script>
+  <script>
+
+  function update() {
+    var input = document.getElementById("input");
+    var output = document.getElementById("output");
+    var value = input.value;
+    var table = genTable(value);
+    output.innerHTML = ""
+    output.appendChild(table);
+    console.log("Update: "  + input.value);
+  }
+
+  </script>
+</head>
+<body>
+
+<h1>Truth Table Generator</h1>
+
+<div lang="en">
+
+<p>This script generates a <a
+href="http://en.wikipedia.org/wiki/Truth_table">truth table</a> given
+a logic expression. The script was written in 2008, when I was just
+learning about Javascript. I've always liked logic, and hope to write
+more similar things in the future. The operators that can be used in
+the input expression are given in a table below.</p>
+
+</div>
+
+<!--
+<div lang="zh">
+<p>輸入邏輯表達式，便可得出該表達式的真值表。表達式裏面可以包含下面列出的運算符。</p>
+</div>
+-->
+
+<form id="form" action="javascript:void(update())">
+	<label>Expression:
+	<input id="input" type="text" value="a = b"></label>
+	<input type="submit">
+</form>
+
+<div id="output"></div>
+
+<h2>Operators</h2>
+<table>
+<tr>
+	<td lang="en">Conjunction</td>
+	<td lang="zh">與</td>
+	<td><code>&</code></td>
+</tr>
+<tr>
+	<td lang="en">Disjunction</td>
+	<td lang="zh">或</td>
+	<td><code>|</code></td>
+</tr>
+<tr>
+	<td lang="en">Exclusive disjunction</td>
+	<td lang="zh">異或</td>
+	<td><code>^</code></td>
+</tr>
+<tr>
+	<td lang="en">Conditional</td>
+	<td lang="zh">條件</td>
+	<td><code>&gt;</code></td>
+</tr>
+<tr>
+	<td lang="en">Reverse conditional</td>
+	<td lang="zh">反條件</td>
+	<td><code>&lt;</code></td>
+</tr>
+<tr>
+	<td lang="en">Biconditional</td>
+	<td lang="zh">雙條件</td>
+	<td><code>&amp;</code></td>
+</tr>
+<tr>
+	<td lang="en">Negation</td>
+	<td lang="zh">非</td>
+	<td><code>!</code></td>
+</tr>
+<tr>
+	<td lang="en">True</td>
+	<td lang="zh">永真</td>
+	<td><code>1</code></td>
+</tr>
+<tr>
+	<td lang="en">False</td>
+	<td lang="zh">永假</td>
+	<td><code>0</code></td>
+</tr>
+</table>
+
+</body>
+</html>

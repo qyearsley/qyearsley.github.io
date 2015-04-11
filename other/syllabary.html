@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Hanzi Transliteration Syllabary</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="/static/main.css">
+  <style>
+  table {
+    border-collapse: collapse;
+    max-width: 100%;
+    table-layout: fixed
+  }
+  td, th {
+    background-color: #ddd;
+    color: #000;
+    border: 1px solid gray;
+    text-align: left;
+    padding: 0.25em;
+    font-size: 1.25em;
+  }
+  .frequent {
+    color: #000;
+  }
+  .infrequent {
+    color: #888;
+  }
+  </style>
+</head>
+
+<body>
+
+<h1>Hanzi Transliteration Syllabary</h1>
+
+<p lang="zh">譯音字表</p>
+
+<p>Below is a table of Chinese characters that are commonly used in
+transliterating foreign names and words. It might be helpful for beginning
+learners of Chinese who want to learn to pronounce transliterated names
+and borrowed words.</p>
+
+<p>Transliterating into Chinese characters is different from
+transliterating into other writing systems in a few ways. One important
+way is that, for any given sound in Mandarin Chinese, there are usually
+many possible characters to choose from. For transliterating given names
+and place names, however, there is a fairly standard set of characters
+that are used.</p>
+
+<p>These characters are generally chosen because they denote positive
+qualities or they have few strokes. Of course, there is variation,
+and transliterations of place names often use different characters than
+those of person names and other nouns, because meaning of characters is
+also taken into account, but there is a lot of overlap.</p>
+
+<p>The table below was compiled by analysing the frequency of
+characters found in transliterations, and generating an html table
+from <a href="translit_char_freqs_pronunciation.txt">the resulting data
+file</a>. The data files that were analysed, which are interesting in
+their own right are:
+
+<ul>
+<li><a href="borrowed_words.txt">syllabary/borrowed_words.txt</a></li>
+<li><a href="city_translit.txt">syllabary/city_translit.txt</a></li>
+<li><a href="country_translit.txt">syllabary/country_translit.txt</a></li>
+<li><a href="name_translit.txt">syllabary/name_translit.txt</a></li>
+</ul>
+</p>
+
+<table>
+<tr><th></th>
+<th>-</th> <th>b</th> <th>p</th> <th>m</th> <th>f</th> <th>d</th>
+<th>t</th> <th>n</th> <th>l</th> <th>g</th> <th>k</th> <th>h</th>
+<th>z</th> <th>c</th> <th>s</th> <th>zh</th> <th>ch</th> <th>sh</th>
+<th>r</th> <th>j</th> <th>q</th> <th>x</th> </tr>
+<tr><th>er</th>
+  <td><span title='er3; 744' class='frequent'>尔</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr><th>a</th>
+  <td><span title='a1; 456' class='frequent'>阿</span></td>
+  <td><span title='ba1; 87' class='frequent'>巴</span></td>
+  <td><span title='pa4; 45' class='frequent'>帕</span></td>
+  <td><span title='ma3; 187' class='frequent'>玛</span></td>
+  <td><span title='fa3; 68' class='frequent'>法</span></td>
+  <td><span title='da2; 152' class='frequent'>达</span></td>
+  <td><span title='ta3; 183' class='frequent'>塔</span></td>
+  <td><span title='na4; 145' class='frequent'>纳</span></td>
+  <td><span title='la1; 489' class='frequent'>拉</span></td>
+  <td><span title='ga1; 1' class='infrequent'>嘎</span></td>
+  <td><span title='ka3; 278' class='frequent'>卡</span></td>
+  <td><span title='ha1; 64' class='frequent'>哈</span></td>
+  <td><span title='za1; 19' class='frequent'>扎</span></td>
+  <td></td>
+  <td><span title='sa4; 152' class='frequent'>萨</span></td>
+  <td><span title='zha1; 19' class='frequent'>扎</span></td>
+  <td><span title='cha2; 14' class='frequent'>查</span></td>
+  <td><span title='sha1; 52' class='frequent'>莎</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr><th>o</th>
+  <td><span title='o2; 1' class='infrequent'>哦</span></td>
+  <td><span title='bo2; 29' class='frequent'>伯</span></td>
+  <td><span title='po1; 29' class='frequent'>波</span></td>
+  <td><span title='mo4; 67' class='frequent'>莫</span></td>
+  <td><span title='fo2; 13' class='frequent'>佛</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr><th>e</th>
+  <td><span title='e4; 5' class='infrequent'>厄</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='de2; 338' class='frequent'>德</span></td>
+  <td><span title='te4; 309' class='frequent'>特</span></td>
+  <td></td>
+  <td><span title='le4; 13' class='frequent'>乐</span></td>
+  <td><span title='ge2; 94' class='frequent'>格</span></td>
+  <td><span title='ke4; 390' class='frequent'>克</span></td>
+  <td><span title='he4; 32' class='frequent'>赫</span></td>
+  <td><span title='ze2; 18' class='frequent'>泽</span></td>
+  <td><span title='ce4; 1' class='infrequent'>策</span></td>
+  <td><span title='se4; 37' class='frequent'>瑟</span></td>
+  <td><span title='zhe2; 1' class='infrequent'>折</span></td>
+  <td></td>
+  <td><span title='she4; 1' class='infrequent'>射</span></td>
+  <td><span title='re4; 16' class='frequent'>热</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr><th>ai</th>
+  <td><span title='ai4; 209' class='frequent'>艾</span></td>
+  <td><span title='bai2; 5' class='infrequent'>白</span></td>
+  <td><span title='pai4; 5' class='infrequent'>派</span></td>
+  <td><span title='mai4; 26' class='frequent'>麦</span></td>
+  <td></td>
+  <td><span title='dai4; 25' class='frequent'>黛</span></td>
+  <td><span title='tai4; 49' class='frequent'>泰</span></td>
+  <td><span title='nai4; 6' class='infrequent'>耐</span></td>
+  <td><span title='lai2; 106' class='frequent'>莱</span></td>
+  <td><span title='gai4; 20' class='frequent'>盖</span></td>
+  <td><span title='kai3; 76' class='frequent'>凯</span></td>
+  <td><span title='hai3; 22' class='frequent'>海</span></td>
+  <td><span title='zai4; 1' class='infrequent'>再</span></td>
+  <td><span title='cai4; 1' class='infrequent'>蔡</span></td>
+  <td><span title='sai1; 108' class='frequent'>塞</span></td>
+  <td><span title='zhai4; 1' class='infrequent'>寨</span></td>
+  <td><span title='chai2; 1' class='infrequent'>柴</span></td>
+  <td><span title='shai4; 2' class='infrequent'>晒</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr><th>ei</th>
+  <td></td>
+  <td><span title='bei4; 134' class='frequent'>贝</span></td>
+  <td><span title='pei4; 28' class='frequent'>佩</span></td>
+  <td><span title='mei2; 125' class='frequent'>梅</span></td>
+  <td><span title='fei1; 70' class='frequent'>菲</span></td>
+  <td></td>
+  <td></td>
+  <td><span title='nei4; 129' class='frequent'>内</span></td>
+  <td><span title='lei2; 177' class='frequent'>雷</span></td>
+  <td></td>
+  <td></td>
+  <td><span title='hei1; 6' class='infrequent'>黑</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='shei2; 1' class='infrequent'>谁</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr><th>ao</th>
+  <td><span title='ao4; 288' class='frequent'>奥</span></td>
+  <td><span title='bao3; 8' class='infrequent'>保</span></td>
+  <td></td>
+  <td><span title='mao2; 8' class='infrequent'>毛</span></td>
+  <td></td>
+  <td><span title='dao4; 12' class='frequent'>道</span></td>
+  <td><span title='tao2; 2' class='infrequent'>陶</span></td>
+  <td><span title='nao3; 2' class='infrequent'>瑙</span></td>
+  <td><span title='lao2; 67' class='frequent'>劳</span></td>
+  <td><span title='gao1; 4' class='infrequent'>高</span></td>
+  <td><span title='kao3; 3' class='infrequent'>考</span></td>
+  <td><span title='hao2; 6' class='infrequent'>豪</span></td>
+  <td></td>
+  <td></td>
+  <td><span title='sao3; 1' class='infrequent'>扫</span></td>
+  <td><span title='zhao3; 1' class='infrequent'>爪</span></td>
+  <td><span title='chao2; 1' class='infrequent'>朝</span></td>
+  <td><span title='shao4; 1' class='infrequent'>少</span></td>
+  <td><span title='rao2; 1' class='infrequent'>饶</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr><th>ou</th>
+  <td><span title='ou1; 61' class='frequent'>欧</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='dou1; 1' class='infrequent'>兜</span></td>
+  <td><span title='tou2; 1' class='infrequent'>头</span></td>
+  <td></td>
+  <td><span title='lou4; 46' class='frequent'>露</span></td>
+  <td><span title='gou1; 1' class='infrequent'>缑</span></td>
+  <td><span title='kou3; 5' class='infrequent'>口</span></td>
+  <td><span title='hou2; 1' class='infrequent'>侯</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='zhou1; 4' class='infrequent'>周</span></td>
+  <td><span title='chou2; 3' class='infrequent'>稠</span></td>
+  <td><span title='shou3; 1' class='infrequent'>首</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr><th>an</th>
+  <td><span title='an1; 285' class='frequent'>安</span></td>
+  <td><span title='ban1; 4' class='infrequent'>班</span></td>
+  <td></td>
+  <td><span title='man4; 41' class='frequent'>曼</span></td>
+  <td><span title='fan2; 15' class='frequent'>凡</span></td>
+  <td><span title='dan1; 33' class='frequent'>丹</span></td>
+  <td><span title='tan3; 27' class='frequent'>坦</span></td>
+  <td><span title='nan2; 18' class='frequent'>南</span></td>
+  <td><span title='lan2; 100' class='frequent'>兰</span></td>
+  <td><span title='gan1; 11' class='frequent'>甘</span></td>
+  <td><span title='kan3; 8' class='infrequent'>坎</span></td>
+  <td><span title='han4; 5' class='infrequent'>汉</span></td>
+  <td><span title='zan4; 2' class='infrequent'>赞</span></td>
+  <td></td>
+  <td><span title='san4; 3' class='infrequent'>散</span></td>
+  <td><span title='zhan1; 3' class='infrequent'>詹</span></td>
+  <td><span title='chan2; 2' class='infrequent'>蝉</span></td>
+  <td><span title='shan1; 11' class='frequent'>山</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr><th>en</th>
+  <td><span title='en1; 71' class='frequent'>恩</span></td>
+  <td><span title='ben3; 17' class='frequent'>本</span></td>
+  <td><span title='pen2; 1' class='infrequent'>盆</span></td>
+  <td><span title='men2; 10' class='infrequent'>门</span></td>
+  <td><span title='fen1; 17' class='frequent'>芬</span></td>
+  <td></td>
+  <td></td>
+  <td><span title='nen4; 1' class='infrequent'>嫩</span></td>
+  <td></td>
+  <td><span title='gen1; 5' class='infrequent'>根</span></td>
+  <td><span title='ken3; 15' class='frequent'>肯</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='sen1; 53' class='frequent'>森</span></td>
+  <td><span title='zhen1; 10' class='infrequent'>珍</span></td>
+  <td></td>
+  <td><span title='shen1; 1' class='infrequent'>身</span></td>
+  <td><span title='ren2; 9' class='infrequent'>儿</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr><th>ang</th>
+  <td><span title='ang2; 42' class='frequent'>昂</span></td>
+  <td><span title='bang1; 2' class='infrequent'>邦</span></td>
+  <td><span title='pang2; 2' class='infrequent'>庞</span></td>
+  <td><span title='mang2; 8' class='infrequent'>芒</span></td>
+  <td><span title='fang1; 4' class='infrequent'>芳</span></td>
+  <td><span title='dang1; 3' class='infrequent'>当</span></td>
+  <td><span title='tang2; 12' class='frequent'>唐</span></td>
+  <td><span title='nang2; 1' class='infrequent'>囊</span></td>
+  <td><span title='lang3; 47' class='frequent'>朗</span></td>
+  <td><span title='gang1; 4' class='infrequent'>冈</span></td>
+  <td><span title='kang1; 14' class='frequent'>康</span></td>
+  <td><span title='hang2; 7' class='infrequent'>杭</span></td>
+  <td></td>
+  <td></td>
+  <td><span title='sang1; 34' class='frequent'>桑</span></td>
+  <td></td>
+  <td><span title='chang2; 1' class='infrequent'>长</span></td>
+  <td><span title='shang4; 5' class='infrequent'>尚</span></td>
+  <td><span title='rang4; 20' class='frequent'>让</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr><th>eng</th>
+  <td></td>
+  <td><span title='beng1; 1' class='infrequent'>绷</span></td>
+  <td><span title='peng2; 1' class='infrequent'>朋</span></td>
+  <td><span title='meng2; 26' class='frequent'>蒙</span></td>
+  <td><span title='feng1; 3' class='infrequent'>丰</span></td>
+  <td><span title='deng1; 10' class='infrequent'>登</span></td>
+  <td><span title='teng2; 2' class='infrequent'>滕</span></td>
+  <td><span title='neng2; 2' class='infrequent'>能</span></td>
+  <td><span title='leng4; 2' class='infrequent'>愣</span></td>
+  <td></td>
+  <td></td>
+  <td><span title='heng1; 7' class='infrequent'>亨</span></td>
+  <td></td>
+  <td></td>
+  <td><span title='seng1; 1' class='infrequent'>僧</span></td>
+  <td></td>
+  <td><span title='cheng2; 1' class='infrequent'>城</span></td>
+  <td><span title='sheng4; 11' class='frequent'>圣</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr><th>ong</th>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='dong1; 13' class='frequent'>东</span></td>
+  <td><span title='tong2; 3' class='infrequent'>桐</span></td>
+  <td><span title='nong2; 4' class='infrequent'>侬</span></td>
+  <td><span title='long2; 11' class='frequent'>隆</span></td>
+  <td><span title='gong4; 6' class='infrequent'>贡</span></td>
+  <td><span title='kong3; 8' class='infrequent'>孔</span></td>
+  <td><span title='hong2; 2' class='infrequent'>虹</span></td>
+  <td></td>
+  <td></td>
+  <td><span title='song1; 5' class='infrequent'>松</span></td>
+  <td><span title='zhong1; 3' class='infrequent'>中</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr><th>i</th>
+  <td><span title='yi1; 273' class='frequent'>伊</span></td>
+  <td><span title='bi3; 55' class='frequent'>比</span></td>
+  <td><span title='pi2; 24' class='frequent'>皮</span></td>
+  <td><span title='mi3; 208' class='frequent'>米</span></td>
+  <td></td>
+  <td><span title='di4; 237' class='frequent'>蒂</span></td>
+  <td><span title='ti2; 26' class='frequent'>提</span></td>
+  <td><span title='ni2; 220' class='frequent'>尼</span></td>
+  <td><span title='li3; 276' class='frequent'>里</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='zi1; 21' class='frequent'>兹</span></td>
+  <td><span title='ci2; 10' class='infrequent'>茨</span></td>
+  <td><span title='si1; 616' class='frequent'>斯</span></td>
+  <td><span title='zhi4; 5' class='infrequent'>治</span></td>
+  <td><span title='chi2; 6' class='infrequent'>池</span></td>
+  <td><span title='shi2; 22' class='frequent'>什</span></td>
+  <td><span title='ri4; 26' class='frequent'>日</span></td>
+  <td><span title='ji2; 120' class='frequent'>吉</span></td>
+  <td><span title='qi2; 15' class='frequent'>奇</span></td>
+  <td><span title='xi1; 238' class='frequent'>西</span></td>
+</tr>
+<tr><th>ia</th>
+  <td><span title='ya3; 258' class='frequent'>亚</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='jia1; 50' class='frequent'>加</span></td>
+  <td><span title='qia4; 3' class='infrequent'>恰</span></td>
+  <td><span title='xia4; 14' class='frequent'>夏</span></td>
+</tr>
+<tr><th>iao</th>
+  <td><span title='yao1; 1' class='infrequent'>么</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='liao3; 1' class='infrequent'>了</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='jiao3; 1' class='infrequent'>角</span></td>
+  <td><span title='qiao2; 48' class='frequent'>乔</span></td>
+  <td><span title='xiao4; 4' class='infrequent'>肖</span></td>
+</tr>
+<tr><th>ie</th>
+  <td><span title='ye1; 35' class='frequent'>耶</span></td>
+  <td><span title='bie2; 2' class='infrequent'>别</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='die2; 2' class='infrequent'>迭</span></td>
+  <td><span title='tie1; 3' class='infrequent'>帖</span></td>
+  <td><span title='nie4; 8' class='infrequent'>涅</span></td>
+  <td><span title='lie4; 14' class='frequent'>列</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='jie2; 74' class='frequent'>杰</span></td>
+  <td><span title='qie1; 8' class='infrequent'>切</span></td>
+  <td><span title='xie4; 12' class='frequent'>谢</span></td>
+</tr>
+<tr><th>iou</th>
+  <td><span title='you2; 37' class='frequent'>尤</span></td>
+  <td></td>
+  <td></td>
+  <td><span title='miu4; 1' class='infrequent'>谬</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='niu3; 5' class='infrequent'>纽</span></td>
+  <td><span title='liu3; 7' class='infrequent'>柳</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='jiu3; 2' class='infrequent'>玖</span></td>
+  <td><span title='qiu1; 1' class='infrequent'>丘</span></td>
+  <td><span title='xiu4; 7' class='infrequent'>秀</span></td>
+</tr>
+<tr><th>ian</th>
+  <td><span title='yan2; 2' class='infrequent'>岩</span></td>
+  <td></td>
+  <td></td>
+  <td><span title='mian3; 1' class='infrequent'>缅</span></td>
+  <td></td>
+  <td><span title='dian3; 4' class='infrequent'>典</span></td>
+  <td><span title='tian1; 3' class='infrequent'>天</span></td>
+  <td><span title='nian4; 1' class='infrequent'>念</span></td>
+  <td><span title='lian2; 46' class='frequent'>莲</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='jian4; 1' class='infrequent'>剑</span></td>
+  <td><span title='qian4; 69' class='frequent'>茜</span></td>
+  <td><span title='xian1; 3' class='infrequent'>仙</span></td>
+</tr>
+<tr><th>in</th>
+  <td><span title='yin1; 15' class='frequent'>因</span></td>
+  <td><span title='bin1; 10' class='infrequent'>宾</span></td>
+  <td><span title='pin3; 1' class='infrequent'>品</span></td>
+  <td><span title='min3; 6' class='infrequent'>敏</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='lin2; 150' class='frequent'>琳</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='jin1; 11' class='frequent'>金</span></td>
+  <td><span title='qin1; 2' class='infrequent'>亲</span></td>
+  <td><span title='xin1; 23' class='frequent'>辛</span></td>
+</tr>
+<tr><th>iang</th>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='liang2; 3' class='infrequent'>良</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='jiang1; 2' class='infrequent'>江</span></td>
+  <td><span title='qiang2; 1' class='infrequent'>强</span></td>
+  <td><span title='xiang1; 3' class='infrequent'>香</span></td>
+</tr>
+<tr><th>ing</th>
+  <td><span title='ying1; 3' class='infrequent'>英</span></td>
+  <td><span title='bing1; 1' class='infrequent'>冰</span></td>
+  <td><span title='ping2; 2' class='infrequent'>平</span></td>
+  <td><span title='ming2; 9' class='infrequent'>明</span></td>
+  <td></td>
+  <td><span title='ding1; 29' class='frequent'>丁</span></td>
+  <td><span title='ting1; 28' class='frequent'>汀</span></td>
+  <td><span title='ning2; 7' class='infrequent'>宁</span></td>
+  <td><span title='ling2; 1' class='infrequent'>玲</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='jing1; 2' class='infrequent'>京</span></td>
+  <td><span title='qing2; 1' class='infrequent'>擎</span></td>
+  <td><span title='xing4; 1' class='infrequent'>幸</span></td>
+</tr>
+<tr><th>iong</th>
+  <td><span title='yong3; 1' class='infrequent'>勇</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='qiong2; 1' class='infrequent'>琼</span></td>
+  <td><span title='xiong1; 1' class='infrequent'>匈</span></td>
+</tr>
+<tr><th>u</th>
+  <td><span title='wu1; 35' class='frequent'>乌</span></td>
+  <td><span title='bu4; 107' class='frequent'>布</span></td>
+  <td><span title='pu3; 33' class='frequent'>普</span></td>
+  <td><span title='mu3; 74' class='frequent'>姆</span></td>
+  <td><span title='fu2; 103' class='frequent'>弗</span></td>
+  <td><span title='du4; 23' class='frequent'>杜</span></td>
+  <td><span title='tu2; 35' class='frequent'>图</span></td>
+  <td><span title='nu3; 24' class='frequent'>努</span></td>
+  <td><span title='lu3; 43' class='frequent'>鲁</span></td>
+  <td><span title='gu3; 36' class='frequent'>古</span></td>
+  <td><span title='ku4; 11' class='frequent'>库</span></td>
+  <td><span title='hu2; 19' class='frequent'>胡</span></td>
+  <td><span title='zu2; 2' class='infrequent'>卒</span></td>
+  <td><span title='cu4; 1' class='infrequent'>簇</span></td>
+  <td><span title='su1; 87' class='frequent'>苏</span></td>
+  <td><span title='zhu1; 22' class='frequent'>朱</span></td>
+  <td></td>
+  <td><span title='shu1; 3' class='infrequent'>舒</span></td>
+  <td><span title='ru2; 3' class='infrequent'>儒</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr><th>ua</th>
+  <td><span title='wa3; 131' class='frequent'>瓦</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='gua1; 9' class='infrequent'>瓜</span></td>
+  <td><span title='kua1; 3' class='infrequent'>夸</span></td>
+  <td><span title='hua1; 10' class='infrequent'>华</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='zhua1; 1' class='infrequent'>挝</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr><th>uo</th>
+  <td><span title='wo4; 12' class='frequent'>沃</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='duo1; 152' class='frequent'>多</span></td>
+  <td><span title='tuo1; 108' class='frequent'>托</span></td>
+  <td><span title='nuo2; 384' class='frequent'>娜</span></td>
+  <td><span title='luo1; 249' class='frequent'>罗</span></td>
+  <td><span title='guo2; 16' class='frequent'>国</span></td>
+  <td></td>
+  <td><span title='huo4; 5' class='infrequent'>霍</span></td>
+  <td><span title='zuo3; 13' class='frequent'>佐</span></td>
+  <td></td>
+  <td><span title='suo3; 40' class='frequent'>索</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='ruo4; 6' class='infrequent'>若</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr><th>uai</th>
+  <td><span title='wai4; 3' class='infrequent'>外</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr><th>uei</th>
+  <td><span title='wei2; 170' class='frequent'>维</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='dui4; 1' class='infrequent'>对</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='gui1; 5' class='infrequent'>圭</span></td>
+  <td><span title='kui2; 5' class='infrequent'>奎</span></td>
+  <td></td>
+  <td></td>
+  <td><span title='cui4; 3' class='infrequent'>翠</span></td>
+  <td><span title='sui1; 1' class='infrequent'>娞</span></td>
+  <td></td>
+  <td></td>
+  <td><span title='shui3; 1' class='infrequent'>水</span></td>
+  <td><span title='rui4; 28' class='frequent'>瑞</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr><th>uan</th>
+  <td><span title='wan4; 23' class='frequent'>万</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='luan2; 2' class='infrequent'>鸾</span></td>
+  <td><span title='guan1; 1' class='infrequent'>关</span></td>
+  <td></td>
+  <td><span title='huan1; 1' class='infrequent'>欢</span></td>
+  <td></td>
+  <td></td>
+  <td><span title='suan4; 1' class='infrequent'>算</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='quan1; 1' class='infrequent'>圈</span></td>
+  <td></td>
+</tr>
+<tr><th>uen</th>
+  <td><span title='wen2; 53' class='frequent'>文</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr><th>uang</th>
+  <td><span title='wang4; 2' class='infrequent'>旺</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='guang1; 1' class='infrequent'>光</span></td>
+  <td></td>
+  <td><span title='huang2; 2' class='infrequent'>黄</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr><th>ueng</th>
+  <td><span title='weng1; 3' class='infrequent'>翁</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr><th>v</th>
+  <td><span title='yu3; 10' class='infrequent'>噢</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='nv3; 2' class='infrequent'>女</span></td>
+  <td><span title='lv3; 13' class='frequent'>吕</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='ju2; 1' class='infrequent'>橘</span></td>
+  <td></td>
+  <td><span title='xu4; 1' class='infrequent'>叙</span></td>
+</tr>
+<tr><th>ve</th>
+  <td><span title='yue1; 22' class='frequent'>约</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='jue2; 1' class='infrequent'>爵</span></td>
+  <td></td>
+  <td><span title='xue3; 7' class='infrequent'>雪</span></td>
+</tr>
+<tr><th>ve</th>
+  <td><span title='yuan1; 1' class='infrequent'>宛</span></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='jue2; 1' class='infrequent'>爵</span></td>
+  <td></td>
+  <td><span title='xue3; 7' class='infrequent'>雪</span></td>
+</tr>
+<tr><th>van</th>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='quan1; 1' class='infrequent'>圈</span></td>
+  <td></td>
+</tr>
+<tr><th>vn</th>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td><span title='jun1; 1' class='infrequent'>君</span></td>
+  <td><span title='qun2; 2' class='infrequent'>群</span></td>
+  <td><span title='xun4; 4' class='infrequent'>逊</span></td>
+</tr>
+</table>
+</body>
+</html>

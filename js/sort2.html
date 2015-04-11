@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Sort</title>
+  <link rel="stylesheet" href="/static/main.css">
+  <script>
+
+  /*
+   * Main entry point.
+   * Runs through various sort functions and displays the results in the UI.
+   */
+  function run() {
+    var output = document.getElementById('output');
+    output.textContent = 'Generating number list...'
+    var list = generateUnsortedList(1000);
+
+    var start = Date.now();
+    bubbleSort(list);
+    var elapsed = Date.now() - start;
+    output.textContent = 'Bubble sort: ' + elapsed + ' ms';
+  }
+
+  /* Generates a long list of numbers that is not in order. */
+  function generateUnsortedList(length) {
+    var result = [];
+    for (var i = 0; i < length; i++) {
+      result.push(Math.random());
+    }
+    return result;
+  }
+
+  function bubbleSort(list) {
+    for (var run = 0; run < list.length - 1; run++) {
+      var didSwapInThisRun = false;
+      for (var i = 0; i < list.length - 1; i++) {
+        if (list[i] > list[i + 1]) {
+          swap(list, i, i + 1);
+          didSwapInThisRun = true;
+        }
+      }
+      if (!didSwapInThisRun) {
+        return list;
+      }
+    }
+    return list;
+  }
+
+  /* Helper function to swap the items at two indexes in an array. */
+  function swap(list, i, j) {
+    var temp = list[i];
+    list[i] = list[j];
+    list[j] = temp;
+  }
+  </script>
+</head>
+
+<body>
+<h1>Sort</h1>
+<time datetime="2014-04-27">Created 2014-04-27.</time>
+
+<form action="javascript:void(null)" onsubmit="run()">
+  <input type="submit">
+</form>
+<div style="font-family:monospace" id="output"></div>
+
+</body>
+</html>

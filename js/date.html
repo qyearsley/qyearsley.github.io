@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Birthdays</title>
+  <link rel="stylesheet" href="/static/main.css">
+  <style>td {padding:0.2em}</style>
+</head>
+
+<body onload="init()">
+
+<h1>Birthdays</h1>
+
+<time datetime="2013-05-01">Created 2013-05-01.</time>
+
+<form id="form" action="javascript:void(submit())">
+  <span lang="en">When were you born? (YYYY-MM-DD)</span>
+  <input type="date" id="dateinput"><input type="submit">
+  <span id="error" style="color:red"></span>
+</form>
+
+<div id="output" style="display:none">
+<hr>
+<p lang="en">You have now been alive for:</p>
+<table border="1">
+  <tr><td align="right" id="seconds"></td><td>seconds</td></tr>
+  <tr><td align="right" id="hours"></td><td>hours</td></tr>
+  <tr><td align="right" id="days"></td><td>days</td></tr>
+  <tr><td align="right" id="weeks"></td><td>weeks</td></tr>
+</table>
+</div>
+
+<script>
+
+/* Initialize the counter if a date is specified in the query string. */
+function init() {
+  var query = getQueryString();
+  var input = query.split("date=")[1];
+  if (input) {
+    document.getElementById("dateinput").value = input;
+    date = new Date(input);
+    if (date.getTime()) {
+      update(date);
+      document.getElementById("output").style.display = "block";
+      setInterval(function() {update(date)}, 1000);
+    }
+  }
+}
+
+/* Respond to a new date being input. */
+function submit() {
+  var input = document.getElementById("dateinput").value;
+  date = new Date(input);
+  if (date.getTime()) {
+    setQueryString("date="+input);
+  } else {
+    document.getElementById("error").innerHTML = "Invalid date."
+  }
+}
+
+function update(bday) {
+  var now = new Date();
+  var diff = now.getTime() - bday.getTime();
+  var seconds = diff / 1000;
+  var hours = seconds / 3600;
+  var days = hours / 24;
+  var weeks = days / 7;
+  document.getElementById("seconds").innerHTML = Math.floor(seconds).toString();
+  document.getElementById("hours").innerHTML = Math.floor(hours).toString();
+  document.getElementById("days").innerHTML = Math.floor(days).toString();
+  document.getElementById("weeks").innerHTML = Math.floor(weeks).toString();
+}
+
+function setQueryString(str) {
+  var loc = window.location.href;
+  var base = loc.split("?")[0];
+  window.location = base + "?" + str;
+}
+
+function getQueryString() {
+  var loc = window.location.href;
+  parts = loc.split("?");
+  return (parts.length > 1) ? parts[1] : "";
+}
+
+</script>
+
+</body>
+</html>

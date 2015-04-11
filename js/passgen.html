@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Password Generator</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="/static/main.css">
+</head>
+<body>
+
+<h1>Password Generator</h1>
+
+<time datetime="2007">Created 2007, modified 2013.</time>
+
+<p>Generates a random string of given length using a given set of
+characters. The set of characters is described using JavaScript regular
+expressions. For example, <code>[aeiou]</code> matches lowercase vowels,
+<code>[0-9A-F]</code> matches digits and uppercase letters.</p>
+
+<form id="form" action="javascript:void(update())">
+  <table>
+  <tr>
+    <td>Length: </td>
+    <td><input id="length" type="text" value="10"></td>
+  </tr>
+  <tr>
+    <td>Character set: </td>
+    <td><input id="regex" type="text" value="[a-z0-9_$]"></td>
+    <td><input type="submit"></td>
+  </tr>
+  </table>
+</form>
+
+<pre id="output"></pre>
+
+<script>
+
+/**
+ * Generate a password and update the output.
+ */
+function update() {
+  var len = parseInt(document.getElementById("length").value);
+  var regex = new RegExp(document.getElementById("regex").value);
+  var chars = charset(regex)
+  var passwords = randomString(len, chars);
+  document.getElementById("output").innerText = passwords;
+}
+
+/**
+ * Generate a list of printable ASCII characters that match the given regex.
+ */
+function charset(regex) {
+  var result = [];
+  for (var i = 32; i <= 126; i++) {
+    var char = String.fromCharCode(i);
+    if (regex.test(char)) {
+      result.push(char)
+    }
+  }
+  return result;
+}
+
+/**
+ * Generate a string of given length where the characters are chosen randomly
+ * from the given character set.
+ */
+function randomString(length, chars) {
+  var pass = "";
+  for (var i = 0; i < length; i++) {
+    pass += randomElement(chars);
+  }
+  return pass;
+}
+
+/**
+ * Get a random element from an array.
+ */
+function randomElement(array) {
+  return array[Math.floor(Math.random() * array.length)];
+}
+
+</script>
+
+</body>
+</html>
