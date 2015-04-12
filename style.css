@@ -8,25 +8,26 @@ html {
 }
 
 body {
-  margin: 0 auto;
-  padding: 10px 20px;
-  border: 1px solid #888;
   background-color: #efefef;
+  border: 1px solid #888;
   color: #111;
-  min-width: 20em;
-  max-width: 50em;
   font-family: sans-serif;
+  line-height: 1.2em;
+  margin: 0 auto;
+  max-width: 50em;
+  min-width: 20em;
+  padding: 10px 20px;
 }
 
 input {
-  min-width: 3em;
   font-family: monospace;
+  min-width: 3em;
 }
 
 textarea {
-  width: 500px;
-  height: 100px;
   font-family: monospace;
+  height: 100px;
+  width: 500px;
 }
 
 table {
