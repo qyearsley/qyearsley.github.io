@@ -53,8 +53,8 @@ function indexOfMin(nums, startIndex) {
 
 function insertionSort(nums) {
   for (var i = 1; i < nums.length; i++) {
-    for (var j = i; j > 0 && nums[j-1] > nums[j]; j--) {
-      swap(nums, j-1, j);
+    for (var j = i; j > 0 && nums[j - 1] > nums[j]; j--) {
+      swap(nums, j - 1, j);
     }
   }
   return nums;
@@ -145,7 +145,7 @@ function heapRightChild(i) {
 }
 
 function isSorted(arr) {
-  for (var i = 0; i < arr.length -1; i++) {
+  for (var i = 0; i < arr.length - 1; i++) {
     if (arr[i] > arr[i + 1]) {
       return false;
     }
