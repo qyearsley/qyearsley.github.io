@@ -3,7 +3,7 @@
 <head>
   <title>Tone Tables</title>
   <meta charset=utf-8">
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" type="text/css" href="/style.css">
   <style type="text/css">
   #tonetable {
     border-collapse: collapse;
@@ -15,18 +15,18 @@
     border: 1px solid gray;
     padding: 0.1em;
   }
-  #tonetable th {max-width : 4em; }
-  #tonetable td {max-width : 6em; }
-  #tonetable .tone0 { max-width : 2em; background-color: #ddd; }
-  #tonetable .tone1 { background-color: #ccf; }
-  #tonetable .tone2 { background-color: #cfc; }
-  #tonetable .tone3 { background-color: #ffc; }
-  #tonetable .tone4 { background-color: #fcc; }
-  #tonetable .freq1 { color: #000; }
-  #tonetable .freq2 { color: #222; }
-  #tonetable .freq3 { color: #444; }
-  #tonetable .freq4 { color: #666; }
-  #tonetable .freq5 { color: #888; }
+  #tonetable th {max-width: 4em;}
+  #tonetable td {max-width: 6em;}
+  #tonetable .tone0 {max-width: 2em; background-color: #ddd;}
+  #tonetable .tone1 {background-color: #ccf;}
+  #tonetable .tone2 {background-color: #cfc;}
+  #tonetable .tone3 {background-color: #ffc;}
+  #tonetable .tone4 {background-color: #fcc;}
+  #tonetable .freq1 {color: #000;}
+  #tonetable .freq2 {color: #222;}
+  #tonetable .freq3 {color: #444;}
+  #tonetable .freq4 {color: #666;}
+  #tonetable .freq5 {color: #888;}
   </style>
 </head>
 <body>
@@ -35,15 +35,23 @@
 
 <!--  拼音表（與漢字） -->
 
-<p>This table shows example characters for each hanyu pinyin syllable by tone, allowing one to easily see which characters are grouped together, as well as which initial, final, and tone combinations are common or uncommon.</p>
+<p>This table shows example characters for each hanyu pinyin syllable by
+tone, allowing one to easily see which characters are grouped together,
+as well as which initial, final, and tone combinations are common or
+uncommon.</p>
+
 <p>To generate the table, I used the following data from Chih-Hao Tsai:
 
 <ul>
-<li><a href="http://technology.chtsai.org/charfreq/">Frequency and Stroke Counts of Chinese Characters</a></li>
-<li><a href="http://technology.chtsai.org/syllable/">Mandarin Syllable Frequency Counts for Chinese Characters</a></li>
+  <li><a href="http://technology.chtsai.org/charfreq/">Frequency and Stroke Counts of Chinese Characters</a></li>
+  <li><a href="http://technology.chtsai.org/syllable/">Mandarin Syllable Frequency Counts for Chinese Characters</a></li>
 </ul>
 
-<p>I amalamated them into a table of frequency rank and most common pronounciation for each character (<a href="frequency_pinyin_table.txt">frequency_pinyin_table.txt</a>), which was used as input to a perl script (<a href="mktonetable.pl">mktonetable.pl</a>).</p>
+<p>I amalamated them into a table of frequency rank
+and most common pronunciation for each character (<a
+href="frequency_pinyin_table.txt">frequency_pinyin_table.txt</a>),
+which was used as input to a perl script (<a
+href="mktonetable.pl">mktonetable.pl</a>).</p>
 
 <table id="tonetable">
 <tr><th></th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th></tr>
@@ -672,7 +680,6 @@
   </td>
   <td class='tone3'>
     <span class='freq5'>矮</span>
-  </td>
   <td class='tone4'>
     <span class='freq0'>愛</span>
     <span class='freq4'>艾礙</span>

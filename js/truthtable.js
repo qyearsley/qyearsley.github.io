@@ -179,7 +179,7 @@ String.prototype.containsInDepth = function(x, depth) {
 };
 
 /**
- * Remove all occurences of a substring or pattern from a string.
+ * Remove all occurrences of a substring or pattern from a string.
 */
 String.prototype.strip = function(x) {
   return this.split(x).join('');
@@ -190,7 +190,7 @@ String.prototype.strip = function(x) {
 */
 Array.prototype.removeDuplicates = function() {
   var result = [];
-  // Go through array backwards, so only later occurences are removed.
+  // Go through array backwards, so only later occurrences are removed.
   for (var i = this.length - 1; i >= 0; i--) {
     if (!(this.indexOf(this[i]) < i && this.contains(this[i]))) {
       result.push(this[i]);
