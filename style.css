@@ -1,14 +1,9 @@
-/*
- * Main stylesheet.
- * Quinten Yearsley 2013
- */
-
 html {
   background-color: #ddd;
 }
 
 body {
-  background-color: #efefef;
+  background-color: #eee;
   border: 1px solid #888;
   color: #111;
   font-family: sans-serif;
@@ -38,5 +33,5 @@ table {
 
 td {
   border-width: : 1px solid #888;
-  padding: 0.25em;
+  padding: .25em;
 }
