@@ -1,8 +1,15 @@
 # Sources of data:
-# http://technology.chtsai.org/charfreq/ Frequency and Stroke Counts of Chinese Characters
-# href="http://technology.chtsai.org/syllable/ Mandarin Syllable Frequency Counts for Chinese Characters
+#
+# * Frequency and Stroke Counts of Chinese Characters
+#   http://technology.chtsai.org/charfreq/
+#
+# - Mandarin Syllable Frequency Counts for Chinese Characters
+#   http://technology.chtsai.org/syllable/
+#
 # Both are put under GPL by Chih-Hao Tsai.
+#
 # char	rank	pinyin
+#
 的	1	de0
 是	2	shi4
 不	3	bu4

@@ -1,22 +1,19 @@
 #!/usr/bin/env perl
-# Generate a particular html table of hanzi grouped
-# by tone where each row is like:
-# xian\t先仙\t闲咸\t险显\t现线限
-# Use a data file where each row is in the format:
-# 啊\t123\ta1
-# where a * after the pinyin indicates an alternate (non-main) pronunciation.
+# Input: A data file where each row is like:
+#   啊\t123\ta1
+# Output: A HTML table of hanzi grouped by tone.
 
 use strict;
 use warnings;
 
-# Get the data from the file
-open (DATA, "frequency_pinyin_table.txt");
+# Get the data from the file.
+open(DATA, "frequency_pinyin_table.txt");
 my %SYLLABLES = ();
 while (my $record = <DATA>) {
     next if ($record =~ /^\s*$/ || $record =~ /^#/);
     my ($zi, $rank, $pinyin) = ($record =~ m/^(\S+)\s(\d+)\s(\S+)/);
-    $rank= int($rank);
-    my $is_primary = ! ($pinyin =~ m/[*]$/);
+    $rank = int($rank);
+    my $is_primary = !($pinyin =~ m/[*]$/);
     my $freq = frequency_level($rank);
     my $is_frequent = ($freq < 6);
     if ($is_primary and $is_frequent) {
