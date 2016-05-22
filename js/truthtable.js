@@ -4,6 +4,8 @@
  * Created c. 2008, edited very slightly in 2013.
 */
 
+'use strict';
+
 // TODO true and false can be represented as true and false,
 // they don't have to be represented as 0 and 1.
 
@@ -114,7 +116,7 @@ BoolExpr.prototype.evalWith = function(atoms, values) {
 
 // converts a string representing a bool expression to a BoolExpr object
 String.prototype.toBoolExpr = function() {
-  result = this;
+  var result = this;
   result = result.strip(/\s+/g);
   for (var depth = 0; depth <= result.maxDepth(); depth++) {
     for (var op in OPERATIONS_BY_SYMBOL) {
@@ -287,7 +289,9 @@ function genTable(boolExprStr) {
   var table = new TruthTable();
   var expr = boolExprStr.toBoolExpr();
   table = table.add(expr);
-  return table.to2DArray().toDOMTable();
+  var domTable = table.to2DArray().toDOMTable();
+  domTable.setAttribute('border', '1');
+  return domTable;
 }
 
 // Takes a string with substrings representing bool expressions (premises)
@@ -299,9 +303,9 @@ function test(premises, conclusion) {
   premises.split('\n').concat([conclusion]).forEach(function(str) {
       table = table.add(str.toBoolExpr());
     });
-  isValid = table.evals.every(function(eval) {
-      if (eval[eval.length - 1])
-        return eval.every(function(x) {return x;});
+  var isValid = table.evals.every(function(e) {
+      if (e[e.length - 1])
+        return e.every(function(x) {return x;});
       else
         return true;
     });
