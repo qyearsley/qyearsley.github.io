@@ -655,22 +655,10 @@ x-020 杯 bei1
 僕 [pú] servant
 	僕人 [púrén] servant
 
-術 [shù] skill
-	技術 [jìshù] technology / skill
-朮 [zhú] sorghum
-	白朮 [báizhú] rhizome of Atractylodes macrocephaia
-
-喂 [wèi] hello (interjection) / to feed
 喂 [wéi] hello (interjection)
 餵 [wéi] to feed
 	餵母乳 wèi mǔrǔ] breast feeding
 	餵養 [wèiyǎng] feeding / nutrition
-
-杆 [gān] rod
-桿 [gǎn] rod
-
-杠 [gāng] flagpole
-槓 [gàng] thick rod
 
 伙 [huǒ] partner / group / group meals
 	伙食 [huǒshí] communal meals
@@ -680,64 +668,8 @@ x-020 杯 bei1
 	夥伴 [huǒbàn] partner / companion
 	夥計 [huǒjì] fellow / shop assistant
 
-蒙 [mēng] (knocked) unconscious
-蒙 [méng] to cover/ignorant/to suffer (misfortune)/to receive (a favor)/to cheat
-蒙覆 [měngfù] to cover
-蒙 [Měng3] Mongol ethnic group (Taiwan pr. Méng)
-	蒙古 [Měng gu3] Mongolia
-濛 [méng] misty
-	迷濛 [míméng] misty
-矇 [mēng] to deceive / to make a wild guess
-	矇騙 [mēngpiàn] to hoodwink
-	矇藥 蒙药 [meng1 yao4] anesthetic
-矇 [méng] dim sighted / surname
-	矇矓 [meng2 long2] drowsy / variant of 朦朧
-	開矇 [kai1 meng2] to emerge from ignorance
-
-
-念 [niàn] to remember / to think of / to read
-	紀念 [jìniàn] to commemorate / to remember
-	思念 [sīniàn] to think of / to long for
-	念書 [niànshū] to read / to study
-唸 [niàn] to read aloud
-	唸珠 [niànzhū] prayer beads
-
-上絃 [shàngxián] to wind a string
-斷絃 [duànxián] a widow / lit. a single string
-
-沾 [zhān] 	soak / moisten
-霑 [zhān] 	moisten
-
 背 [bèi] back / memorize / recite
 揹 [bēi] carry on one's back
-
-
-
-嘗 [cháng]
-甞 [cháng]
-嚐 [cháng]
-
-惡 [è] evil
-	善惡 [shàn è] good and evil
-	惡心 [èxīn] vice
-惡 [wù] hate
-	厭惡 [yàn wù] to loath
-	可惡 [kě wù] repulsive / abominable
-惡 [ě] nausea
-	惡心 [ěxīn] nauseating / nauseous
-噁 [ě] nausea
-	噁心 [ěxīn] nauseating / nauseous
-
-
-續絃 续弦 [xu4 xian2] /to remarry (of a widow)/a second wife/cf qin and se 琴瑟, two string instruments as symbol of marital harmony/
-
-朴 朴 [po4] /Celtis sinensis var. japonica/
-朴子 朴子 [Po4 zi3] Putzu (city in west Taiwan)
-樸 朴 [pu3, TW pu2] /surname Pu (Korean Bak, Pak or Park)/plain and simple/Taiwan pr. /
-淳樸 淳朴 [chun2 pu3] /simple and honest/unsophisticated/
-白樸 白朴 [Bai2 Pu3] /Bai Pu (1226-1306), Yuan dynasty dramatist in the 雜劇|杂剧 tradition of musical comedy, one of the Four Great Yuan dramatists 元曲四大家/
-簡樸 简朴 [jian3 pu3] /simple and unadorned/plain/
-純樸 纯朴 [chun2 pu3] /variant of 淳樸|淳朴, simple and honest/unsophisticated/
 
 '岳':['岳','嶽'],
 
@@ -752,8 +684,7 @@ x-020 杯 bei1
 		贊比亞 赞比亚 [Zan4 bi3 ya4] /Zambia/
 		贊同 [zan4 tong2] /to approve of/to endorse/(vote) in favor/
 
-
 '熏':['熏','燻'],
 '腌':['醃','腌'],
+'曲':['曲','麴'],
 
-麴曲
