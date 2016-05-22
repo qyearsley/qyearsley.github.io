@@ -31,6 +31,7 @@
 </div>
 
 <script>
+'use strict';
 
 /* Initialize the counter if a date is specified in the query string. */
 function init() {
@@ -38,7 +39,7 @@ function init() {
   var input = query.split("date=")[1];
   if (input) {
     document.getElementById("dateinput").value = input;
-    date = new Date(input);
+    var date = new Date(input);
     if (date.getTime()) {
       update(date);
       document.getElementById("output").style.display = "block";
@@ -50,7 +51,7 @@ function init() {
 /* Respond to a new date being input. */
 function submit() {
   var input = document.getElementById("dateinput").value;
-  date = new Date(input);
+  var date = new Date(input);
   if (date.getTime()) {
     setQueryString("date="+input);
   } else {
@@ -79,11 +80,10 @@ function setQueryString(str) {
 
 function getQueryString() {
   var loc = window.location.href;
-  parts = loc.split("?");
+  var parts = loc.split("?");
   return (parts.length > 1) ? parts[1] : "";
 }
 
 </script>
-
 </body>
 </html>
