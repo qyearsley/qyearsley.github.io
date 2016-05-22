@@ -58,13 +58,13 @@ function update() {
 }
 
 /*
- * For each number |i| from 1 to |numSamplesets|, flip a coin |i| times
+ * For each number |i| from 1 to |numSampleSets|, flip a coin |i| times
  * record the proportion of heads As |i| increases, this number reliably
  * approaches 0.5. Return an array of the proportion of heads for each |i|.
  */
-function flip(numSamplesets) {
+function flip(numSampleSets) {
   var frequencies = [];
-  for (var i = 1; i <= numSamplesets; i++) {
+  for (var i = 1; i <= numSampleSets; i++) {
     var sum = 0;
     for (var j = 0; j < i; j++) {
       // Math.random() is not exactly like flipping a coin; it returns a number

@@ -87,7 +87,7 @@ function simp_rule(f, a, b) {
  * summing the approximations for a lot of small subintervals.
 */
 
-// Composite rule: use the given rule over n sub-intevals.
+// Composite rule: use the given rule over n sub-intervals.
 function composite(rule, n) {
   return function(f, a, b) {
     var interval_width = (b - a) / n;

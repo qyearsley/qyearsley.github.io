@@ -147,7 +147,7 @@ String.prototype.depthAt = function(index) {
   return depth;
 };
 
-// finds the depth for the mosted deeply nested nest of nesty nested parentheses
+// finds the depth for the most deeply nested nest of nesty nested parentheses
 String.prototype.maxDepth = function() {
   var max = 0;
   for (var i = 0; i < this.length; i++) {

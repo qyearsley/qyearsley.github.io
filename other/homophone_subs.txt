@@ -8,7 +8,7 @@ g-031 发 fa1
 g-042 汇 hui4
 	匯{滙} [huì] confluence
 		匯率 [huìlǜ] exchange rate
-	彙 [huì] confluence	
+	彙 [huì] confluence
 		詞彙 [cíhuì] vocabulary
 g-044 几 ji1
 	几 [jī] small table
@@ -186,7 +186,7 @@ u-100 回 hui2
 		迴轉 [huízhuǎn] to rotate
 		迴避 [huíbì] to avoid
 u-102 获 huo4
-	獲 [huò] quarry / gain	
+	獲 [huò] quarry / gain
 		獲得 [huòdé] to obtain
 		獲勝 [huòshèng] to win / to triumph
 		捉獲 [zhuōhuò] to capture
@@ -341,7 +341,7 @@ u-236 苏 su1
 	蘇 [sū] perilla (plant) / wake / (phonetic)
 		紫蘇 [zǐsū] basil
 		江蘇 [Jiāngsū] Jiangsu province
-		蘇軾 [Sū Shì] Su Shi (Song Dynastry writer)
+		蘇軾 [Sū Shì] Su Shi (Song Dynasty writer)
 		蘇醒 [sūxǐng] awaken
 	甦 [sū] wake / recover
 		甦醒 [sūxǐng] awaken
@@ -522,7 +522,7 @@ x-003 彩 cai3
 	彩 [cǎi] color / colorful
 		彩色 [cǎisè] multi-color
 		精彩 [jīngcǎi] brilliant
-	綵 [cǎi] colored ribbon or flag 
+	綵 [cǎi] colored ribbon or flag
 		綵旗 [cǎiqí] colored flag
 		剪綵 [jiǎncǎi] to cut the ribbon
 x-004 占 zhan1
@@ -590,7 +590,7 @@ x-012 采 cai3
 		採果 [cǎiguǒ] fruit picking / to pick fruit
 x-013 周 zhou1
 	周 [zhōu] surround / Zhou Dynasty / surname
-		周朝 [zhōucháo] Zhou Dynasty 
+		周朝 [zhōucháo] Zhou Dynasty
 		周圍 [zhōuwéi] surroundings
 	週 [zhōu] surround / week
 		週末 [zhōumò] weekend
@@ -650,7 +650,7 @@ x-020 杯 bei1
 		玻璃杯 [bōlibēi] a glass
 	盃 [bēi] trophy
 		世界盃 [shìjiè bēi] World Cup
-	
+
 仆 [pū] to fall forward
 僕 [pú] servant
 	僕人 [púrén] servant
@@ -666,7 +666,7 @@ x-020 杯 bei1
 	餵母乳 wèi mǔrǔ] breast feeding
 	餵養 [wèiyǎng] feeding / nutrition
 
-杆 [gān] rod	
+杆 [gān] rod
 桿 [gǎn] rod
 
 杠 [gāng] flagpole
@@ -679,7 +679,7 @@ x-020 杯 bei1
 夥 [huǒ] partner / group
 	夥伴 [huǒbàn] partner / companion
 	夥計 [huǒjì] fellow / shop assistant
-	
+
 蒙 [mēng] (knocked) unconscious
 蒙 [méng] to cover/ignorant/to suffer (misfortune)/to receive (a favor)/to cheat
 蒙覆 [měngfù] to cover

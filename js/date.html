@@ -58,9 +58,9 @@ function submit() {
   }
 }
 
-function update(bday) {
+function update(birthday) {
   var now = new Date();
-  var diff = now.getTime() - bday.getTime();
+  var diff = now.getTime() - birthday.getTime();
   var seconds = diff / 1000;
   var hours = seconds / 3600;
   var days = hours / 24;
