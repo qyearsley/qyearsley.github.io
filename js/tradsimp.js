@@ -11,7 +11,7 @@
 'use strict';
 
 $(document).ready(function() {
-  $("[lang|='zh']").each(function() {
+  $('[lang|="zh"]').each(function() {
     var text = $(this).html();
     $(this).html(simplify(text));
   });

@@ -13,15 +13,15 @@
  * Might later include more functions.
 */
 var OPERATIONS_BY_SYMBOL = {
-  '=' : function(x, y) {return x == y},
-  '>' : function(x, y) {return !x || y},
-  '<' : function(x, y) {return x || !y},
-  '&' : function(x, y) {return x && y},
-  '|' : function(x, y) {return x || y},
-  '^' : function(x, y) {return (x || y) && !(x && y)},
-  '!' : function(x) {return !x},
-  '0' : function() {return 0},
-  '1' : function() {return 1}
+  '=': function(x, y) {return x == y;},
+  '>': function(x, y) {return !x || y;},
+  '<': function(x, y) {return x || !y;},
+  '&': function(x, y) {return x && y;},
+  '|': function(x, y) {return x || y;},
+  '^': function(x, y) {return (x || y) && !(x && y);},
+  '!': function(x) {return !x;},
+  '0': function() {return 0;},
+  '1': function() {return 1;}
 };
 
 /**
@@ -39,8 +39,7 @@ function BoolExpr(type, args, func) {
   if (type == 'atom') {
     this.value = args;
     this.func = null;
-  }
-  else {
+  } else {
     this.args = args;
     this.func = func;
   }
@@ -55,7 +54,7 @@ BoolExpr.prototype.eval = function() {
     return this.value ? 1 : 0;
   else {
     var args = this.args;
-    args = args.map(function(arg) {return arg.eval()});
+    args = args.map(function(arg) {return arg.eval();});
     return this.func.apply(this, args) ? 1 : 0;
   }
 };
@@ -96,10 +95,9 @@ BoolExpr.prototype.replaceAtom = function(atom, replacement) {
       return new BoolExpr(this.type, replacement);
     else
       return this;
-  }
-  else {
+  } else {
     var args = this.args.map(function(arg) {
-        return arg.replaceAtom(atom, replacement);
+          return arg.replaceAtom(atom, replacement);
         });
     return new BoolExpr(this.type, args, this.func);
   }
@@ -124,7 +122,7 @@ String.prototype.toBoolExpr = function() {
         var args = result.splitAtFirstInDepth(op, depth);
         if (OPERATIONS_BY_SYMBOL[op].arity == 1)
           args = args.slice(1);
-        args = args.map(function(arg) {return arg.toBoolExpr()});
+        args = args.map(function(arg) {return arg.toBoolExpr();});
         return new BoolExpr(op, args, OPERATIONS_BY_SYMBOL[op]);
       }
     }
@@ -220,7 +218,7 @@ function combinations(n) {
  * Prepend something to each sublist in a list of lists.
 */
 Array.prototype.prependToAll = function(x) {
-  return this.map(function(sublist) {return [x].concat(sublist)});
+  return this.map(function(sublist) {return [x].concat(sublist);});
 };
 
 /**
@@ -275,9 +273,9 @@ TruthTable.prototype.add = function(boolExpr) {
   var exprs = this.exprs.concat([boolExpr]);
   var combs = combinations(atoms.length);
   var evals = combs.map(function(comb) {
-    return exprs.map(function(expr) {
-      return expr.evalWith(atoms, comb);
-      });
+      return exprs.map(function(expr) {
+          return expr.evalWith(atoms, comb);
+        });
     });
   return new TruthTable(atoms, exprs, combs, evals);
 };
@@ -299,13 +297,13 @@ function genTable(boolExprStr) {
 function test(premises, conclusion) {
   var table = new TruthTable;
   premises.split('\n').concat([conclusion]).forEach(function(str) {
-    table = table.add(str.toBoolExpr());
+      table = table.add(str.toBoolExpr());
     });
   isValid = table.evals.every(function(eval) {
-    if (eval[eval.length - 1])
-      return eval.every(function(x) {return x});
-    else
-      return true;
+      if (eval[eval.length - 1])
+        return eval.every(function(x) {return x;});
+      else
+        return true;
     });
   table = table.to2DArray().toDOMTable();
   var status = (isValid) ? 'The conclusion is valid.' : 'The conclusion is invalid.';

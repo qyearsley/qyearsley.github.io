@@ -46,13 +46,13 @@ function update() {
   var numSamples = parseInt(document.getElementById("numSamples").value);
   var frequencies = flip(numSamples);
   var graph = new Graph(canvas, frequencies);
-  graph.options['minValue']   = 0.15;
-  graph.options['maxValue']   = 0.85;
-  graph.options['lineCurve']  = false;
-  graph.options['lineSize']   = 1;
-  graph.options['fill']       = false;
-  graph.options['bullets']    = false;
-  graph.options['gridX']      = false;
+  graph.options['minValue'] = 0.15;
+  graph.options['maxValue'] = 0.85;
+  graph.options['lineCurve'] = false;
+  graph.options['lineSize'] = 1;
+  graph.options['fill'] = false;
+  graph.options['bullets'] = false;
+  graph.options['gridX'] = false;
   graph.options['gridYCount'] = 1;
   graph.draw()
 }
