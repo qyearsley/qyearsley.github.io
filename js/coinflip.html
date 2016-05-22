@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <title>Coin Flips</title>
   <link rel="stylesheet" href="/style.css">
-  <script src="third_party/graph.js"></script>
+  <script src="/third_party/graph.js"></script>
 </head>
 
 <body>
@@ -33,10 +33,12 @@ converges to 50%.</p>
 </form>
 
 <canvas id="myCanvas" width="800" height="300">
-  Your browser doesn't support the canvas element.
+  This text will be shown if your browser doesn't support the canvas element.
 </canvas>
 
 <script>
+
+'use strict';
 
 /*
  * Graph the visualization given the input from the form.
@@ -54,7 +56,7 @@ function update() {
   graph.options['bullets'] = false;
   graph.options['gridX'] = false;
   graph.options['gridYCount'] = 1;
-  graph.draw()
+  graph.draw();
 }
 
 /*
@@ -67,8 +69,8 @@ function flip(numSampleSets) {
   for (var i = 1; i <= numSampleSets; i++) {
     var sum = 0;
     for (var j = 0; j < i; j++) {
-      // Math.random() is not exactly like flipping a coin; it returns a number
-      // between 0 and 1. The sum here represents our 
+      // Math.random() is not exactly like flipping a coin;
+      // it returns a number between 0 and 1.
       sum += Math.random();
     }
     frequencies[i] = sum / i;
@@ -78,6 +80,5 @@ function flip(numSampleSets) {
 }
 
 </script>
-
 </body>
 </html>
