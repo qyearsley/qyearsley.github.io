@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<head>
+  <title>Snake grid table</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<h1>Snake grid table</h1>
+<time datetime="2017">2017</time>
+<p>This was was an answer for a short puzzle.</p>
+
+<form action="javascript:void()" style="font-family:monospace">
+  Num Rows: <input id="num-rows" type="number" min="1" , max="100" value="4"><br>
+  Num Cols: <input id="num-cols" type="number" min="1" , max="100" value="5"><br>
+  <input id="submit" type="submit">
+</form>
+
+<div id="out"></div>
+
+<script>
+'use strict';
+
+function refreshTable() {
+  const out = document.getElementById('out');
+  out.innerHTML = '';
+  const numRows = document.getElementById('num-rows').value;
+  const numCols = document.getElementById('num-cols').value;
+  out.appendChild(tableElement(snake(numRows, numCols)));
+}
+
+function tableElement(rows) {
+  const table = document.createElement('table');
+  for (let row of rows) {
+    let tr = document.createElement('tr');
+    for (let value of row) {
+      let td = document.createElement('td');
+      td.appendChild(document.createTextNode(value));
+      tr.appendChild(td);
+    }
+    table.appendChild(tr);
+  }
+  return table;
+}
+
+function snake(numRows, numCols) {
+  // Make a 2d array of size numRows x numCols.
+  const grid = [];
+  for (let row = 0; row < numRows; row++) {
+    grid.push(new Array(numCols));
+  }
+
+  // Snake pattern: Left to right, alternating down and up.
+  let n = 1;
+  for (let col = 0; col < numCols; col++) {
+    if (col % 2 == 0) {
+      for (let row = 0; row < numRows; row++) {
+        grid[row][col] = n++;
+      }
+    } else {
+      for (let row = numRows-1; row >= 0; row--) {
+        grid[row][col] = n++;
+      }
+    }
+  }
+  return grid;
+}
+
+document.getElementById('submit').addEventListener('click', refreshTable);
+</script>
+</body>
+</html>
