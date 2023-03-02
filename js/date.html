@@ -73,6 +73,7 @@
         if (date.getTime()) {
           let params = new URLSearchParams(window.location.search)
           params.set("date", dateInput)
+	  window.location.search = params.toString()
           update(date)
           document.getElementById("output").style.display = "block"
         } else {
