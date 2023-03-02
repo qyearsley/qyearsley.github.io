@@ -71,7 +71,8 @@
         const dateInput = document.getElementById("dateinput").value
         const date = new Date(dateInput)
         if (date.getTime()) {
-          URLSearchParams.set("date", dateInput)
+	  let params = new URLSearchParams(window.location.search);
+          params.set("date", dateInput)
           update(date)
           document.getElementById("output").style.display = "block"
         } else {
