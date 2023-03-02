@@ -3,12 +3,16 @@ module.exports = {
     browser: true,
     es2021: true
   },
-  extends: 'standard',
+  extends: [
+    'eslint:recommended',
+    'prettier'
+  ],
   overrides: [
   ],
   parserOptions: {
     ecmaVersion: 'latest'
   },
   rules: {
-  }
+  },
+  plugins: ['html']
 }

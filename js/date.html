@@ -1,80 +1,97 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <title>Birthdays</title>
-  <link rel="stylesheet" href="/style.css">
-  <style>td {padding:0.2em}</style>
-</head>
+  <head>
+    <meta charset="utf-8" />
+    <title>Birthdays</title>
+    <link rel="stylesheet" href="/style.css" />
+    <style>
+      td {
+        padding: 0.2em;
+      }
+    </style>
+  </head>
 
-<body onload="init()">
+  <body onload="init()">
+    <h1>Birthdays</h1>
 
-<h1>Birthdays</h1>
+    <time datetime="2013-05-01">Created 2013-05-01.</time>
 
-<time datetime="2013-05-01">Created 2013-05-01.</time>
+    <form id="form" action="javascript:void(submit())">
+      <span>When were you born?</span>
+      <input type="date" id="dateinput" /><input type="submit" />
+      <span id="error" style="color: red"></span>
+    </form>
 
-<form id="form" action="javascript:void(submit())">
-  <span>When were you born?</span>
-  <input type="date" id="dateinput"><input type="submit">
-  <span id="error" style="color:red"></span>
-</form>
+    <div id="output" style="display: none">
+      <hr />
+      <p>You have now been alive for:</p>
+      <table border="1">
+        <tr>
+          <td align="right" id="seconds"></td>
+          <td>seconds</td>
+        </tr>
+        <tr>
+          <td align="right" id="hours"></td>
+          <td>hours</td>
+        </tr>
+        <tr>
+          <td align="right" id="days"></td>
+          <td>days</td>
+        </tr>
+        <tr>
+          <td align="right" id="weeks"></td>
+          <td>weeks</td>
+        </tr>
+      </table>
+    </div>
 
-<div id="output" style="display:none">
-<hr>
-<p>You have now been alive for:</p>
-<table border="1">
-  <tr><td align="right" id="seconds"></td><td>seconds</td></tr>
-  <tr><td align="right" id="hours"></td><td>hours</td></tr>
-  <tr><td align="right" id="days"></td><td>days</td></tr>
-  <tr><td align="right" id="weeks"></td><td>weeks</td></tr>
-</table>
-</div>
+    <script>
+      "use strict"
 
-<script>
-'use strict';
+      /* Initialize the counter if a date is specified in the query string. */
+      function init() {
+        const params = new URLSearchParams(window.location.search)
+        const dateInput = params.get("date")
+        if (!dateInput) {
+          return
+        }
+        document.getElementById("dateinput").value = dateInput
+        const date = new Date(dateInput)
+        if (date.getTime()) {
+          update(date)
+          document.getElementById("output").style.display = "block"
+          setInterval(function () {
+            update(date)
+          }, 1000)
+        }
+      }
 
-/* Initialize the counter if a date is specified in the query string. */
-function init() {
-  let params = new URLSearchParams(window.location.search);
-  let dateInput = params.get('date');
-  if (!dateInput) {
-    return;
-  }
-  document.getElementById("dateinput").value = dateInput;
-  let date = new Date(dateInput);
-  if (date.getTime()) {
-    update(date);
-    document.getElementById("output").style.display = "block";
-    setInterval(function() {update(date)}, 1000);
-  }
-}
+      /* Respond to the form submission. */
+      function submit() {
+        const dateInput = document.getElementById("dateinput").value
+        const date = new Date(dateInput)
+        if (date.getTime()) {
+          URLSearchParams.set("date", dateInput)
+          update(date)
+          document.getElementById("output").style.display = "block"
+        } else {
+          document.getElementById("error").innerHTML = "Invalid date."
+        }
+      }
 
-/* Respond to the form submission. */
-function submit() {
-  let dateInput = document.getElementById("dateinput").value;
-  let date = new Date(input);
-  if (date.getTime()) {
-    URLSearchParams.set("date", input);
-    update(date);
-    document.getElementById("output").style.display = "block";
-  } else {
-    document.getElementById("error").innerHTML = "Invalid date."
-  }
-}
-
-/* Update the counter to show the elapsed time since the given date. */
-function update(birthday) {
-  let now = new Date();
-  let diff = now.getTime() - birthday.getTime();
-  let seconds = diff / 1000;
-  let hours = seconds / 3600;
-  let days = hours / 24;
-  let weeks = days / 7;
-  document.getElementById("seconds").innerHTML = Math.floor(seconds).toString();
-  document.getElementById("hours").innerHTML = Math.floor(hours).toString();
-  document.getElementById("days").innerHTML = Math.floor(days).toString();
-  document.getElementById("weeks").innerHTML = Math.floor(weeks).toString();
-}
-</script>
-</body>
+      /* Update the counter to show the elapsed time since the given date. */
+      function update(birthday) {
+        const now = new Date()
+        const diff = now.getTime() - birthday.getTime()
+        const seconds = diff / 1000
+        const hours = seconds / 3600
+        const days = hours / 24
+        const weeks = days / 7
+        document.getElementById("seconds").innerHTML = Math.floor(seconds).toString()
+        document.getElementById("hours").innerHTML = Math.floor(hours).toString()
+        document.getElementById("days").innerHTML = Math.floor(days).toString()
+        document.getElementById("weeks").innerHTML = Math.floor(weeks).toString()
+      }
+    </script>
+  </body>
 </html>
