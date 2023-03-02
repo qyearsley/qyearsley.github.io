@@ -1,32 +1,30 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Truth tables</title>
-  <link rel="stylesheet" href="/style.css">
-  <script src="truthtable.js"></script>
-  <script>
-  'use strict';
-  function update() {
-    var input = document.getElementById('input');
-    var output = document.getElementById('output');
-    var value = input.value;
-    var table = genTable(value);
-    output.innerHTML = ''
-    output.appendChild(table);
-  }
-  </script>
-</head>
-<body>
+  <head>
+    <title>Truth tables</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="truthtable.js"></script>
+    <script>
+      "use strict"
+      function update() {
+        var input = document.getElementById("input")
+        var output = document.getElementById("output")
+        var value = input.value
+        var table = genTable(value)
+        output.innerHTML = ""
+        output.appendChild(table)
+      }
+    </script>
+  </head>
+  <body>
+    <h1>Truth Table Generator</h1>
 
-<h1>Truth Table Generator</h1>
+    <form id="form" action="javascript:void(update())">
+      <label for="input">Expression:</label>
+      <input id="input" type="text" value="a = b" />
+      <input type="submit" />
+    </form>
 
-<form id="form" action="javascript:void(update())">
-  <label for="input">Expression:</label>
-  <input id="input" type="text" value="a = b">
-  <input type="submit">
-</form>
-
-<div id="output"></div>
-
-</body>
+    <div id="output"></div>
+  </body>
 </html>

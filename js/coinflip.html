@@ -1,83 +1,86 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <title>Coin Flips</title>
-  <link rel="stylesheet" href="/style.css">
-  <script src="/third_party/graph.js"></script>
-</head>
+  <head>
+    <meta charset="utf-8" />
+    <title>Coin Flips</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/third_party/graph.js"></script>
+  </head>
 
-<body>
+  <body>
+    <h1>Coin Flips</h1>
 
-<h1>Coin Flips</h1>
+    <time datetime="2013-03-21">Created 2013-03-21.</time>
 
-<time datetime="2013-03-21">Created 2013-03-21.</time>
+    <p>
+      Today in biology class, when the professor was talking about genetic
+      drift, I learned an interesting fact about probability. If you flip a coin
+      a small number of times, the percentage of times that the coin turns up
+      heads tends not to be near 50%. For example, if you flip a coin ten times,
+      there's a significant chance that the frequency of head will be 3/10, or
+      6/10, or 8/10. However, if you flip a coin 10000 times, the frequency of
+      heads is almost certainly going to be very close to 50%.
+    </p>
 
-<p>Today in biology class, when the professor was talking about genetic
-drift, I learned an interesting fact about probability. If you flip
-a coin a small number of times, the percentage of times that the coin
-turns up heads tends not to be near 50%. For example, if you flip a coin
-ten times, there's a significant chance that the frequency of head will
-be 3/10, or 6/10, or 8/10. However, if you flip a coin 10000 times, the
-frequency of heads is almost certainly going to be very close to 50%.</p>
+    <p>
+      This program flips coins. It starts by flipping one coin and recording the
+      percentage of heads. Then two, then three, and so on, all the way up to
+      the maximum value that you input below. Then it graphs them. You can see
+      that as the number of coins flipped increases, the frequency converges to
+      50%.
+    </p>
 
-<p>This program flips coins. It starts by flipping one coin and recording
-the percentage of heads. Then two, then three, and so on, all the way
-up to the maximum value that you input below. Then it graphs them. You
-can see that as the number of coins flipped increases, the frequency
-converges to 50%.</p>
+    <form id="form" action="javascript:void(update())">
+      <input type="text" id="numSamples" value="400" />
+      <input type="submit" />
+    </form>
 
-<form id="form" action="javascript:void(update())">
-  <input type="text" id="numSamples" value="400">
-  <input type="submit">
-</form>
+    <canvas id="myCanvas" width="800" height="300">
+      This text will be shown if your browser doesn't support the canvas
+      element.
+    </canvas>
 
-<canvas id="myCanvas" width="800" height="300">
-  This text will be shown if your browser doesn't support the canvas element.
-</canvas>
+    <script>
+      "use strict"
 
-<script>
-'use strict';
+      /*
+       * Graph the visualization given the input from the form.
+       */
+      function update() {
+        var canvas = document.getElementById("myCanvas")
+        var numSamples = parseInt(document.getElementById("numSamples").value)
+        var frequencies = flip(numSamples)
+        var graph = new Graph(canvas, frequencies)
+        graph.options["minValue"] = 0.15
+        graph.options["maxValue"] = 0.85
+        graph.options["lineCurve"] = false
+        graph.options["lineSize"] = 1
+        graph.options["fill"] = false
+        graph.options["bullets"] = false
+        graph.options["gridX"] = false
+        graph.options["gridYCount"] = 1
+        graph.draw()
+      }
 
-/*
- * Graph the visualization given the input from the form.
- */
-function update() {
-  var canvas = document.getElementById("myCanvas");
-  var numSamples = parseInt(document.getElementById("numSamples").value);
-  var frequencies = flip(numSamples);
-  var graph = new Graph(canvas, frequencies);
-  graph.options['minValue'] = 0.15;
-  graph.options['maxValue'] = 0.85;
-  graph.options['lineCurve'] = false;
-  graph.options['lineSize'] = 1;
-  graph.options['fill'] = false;
-  graph.options['bullets'] = false;
-  graph.options['gridX'] = false;
-  graph.options['gridYCount'] = 1;
-  graph.draw();
-}
-
-/*
- * For each number |i| from 1 to |numSampleSets|, flip a coin |i| times
- * record the proportion of heads As |i| increases, this number reliably
- * approaches 0.5. Return an array of the proportion of heads for each |i|.
- */
-function flip(numSampleSets) {
-  var frequencies = [];
-  for (var i = 1; i <= numSampleSets; i++) {
-    var sum = 0;
-    for (var j = 0; j < i; j++) {
-      // Math.random() is not exactly like flipping a coin;
-      // it returns a number between 0 and 1.
-      sum += Math.random();
-    }
-    frequencies[i] = sum / i;
-  }
-  frequencies.shift();
-  return frequencies;
-}
-
-</script>
-</body>
+      /*
+       * For each number |i| from 1 to |numSampleSets|, flip a coin |i| times
+       * record the proportion of heads As |i| increases, this number reliably
+       * approaches 0.5. Return an array of the proportion of heads for each |i|.
+       */
+      function flip(numSampleSets) {
+        var frequencies = []
+        for (var i = 1; i <= numSampleSets; i++) {
+          var sum = 0
+          for (var j = 0; j < i; j++) {
+            // Math.random() is not exactly like flipping a coin;
+            // it returns a number between 0 and 1.
+            sum += Math.random()
+          }
+          frequencies[i] = sum / i
+        }
+        frequencies.shift()
+        return frequencies
+      }
+    </script>
+  </body>
 </html>

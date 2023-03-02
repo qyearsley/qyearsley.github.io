@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 
+from __future__ import print_function
 import sys
 
 
@@ -50,27 +51,27 @@ def read_data(filename):
 
 
 def print_output(lookup):
-  print """<table border=1>
+  print("""<table border=1>
   <tr>
   <th width="10%">simplified character</th>
     <th width="30%">traditional character</th>
     <th>examples</th>
   </tr>
-  """
+  """)
   for (pinyin, simp) in sorted(lookup):
     # Count rows.
     total_rows = 0
     for trad in lookup[(pinyin, simp)]:
       total_rows += len(lookup[(pinyin, simp)][trad])
     # Print simplified char (note rowspan number).
-    print '<tr><th rowspan=' + str(total_rows) + '>' + simp + '</th>'
+    print('<tr><th rowspan=' + str(total_rows) + '>' + simp + '</th>')
     # Print traditional chars (note rowspan number).
     for trad in sorted(lookup[(pinyin, simp)]):
-      print '  <td rowspan=' + str(len(lookup[(pinyin, simp)][trad])) + '>',
-      print trad + '</td>'
+      print('  <td rowspan=' + str(len(lookup[(pinyin, simp)][trad])) + '>')
+      print(trad + '</td>')
       for example in lookup[(pinyin, simp)][trad]:
-        print '   <td>' + example + '</td></tr>'
-  print '</table>'
+        print('   <td>' + example + '</td></tr>')
+  print('</table>')
 
 
 if __name__ == '__main__':

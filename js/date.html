@@ -48,7 +48,7 @@
     <script>
       "use strict"
 
-      /* Initialize the counter if a date is specified in the query string. */
+      /** Initialize the counter if a date is specified in the query string. */
       function init() {
         const params = new URLSearchParams(window.location.search)
         const dateInput = params.get("date")
@@ -66,12 +66,12 @@
         }
       }
 
-      /* Respond to the form submission. */
+      /** Respond to the form submission. */
       function submit() {
         const dateInput = document.getElementById("dateinput").value
         const date = new Date(dateInput)
         if (date.getTime()) {
-	  let params = new URLSearchParams(window.location.search);
+          let params = new URLSearchParams(window.location.search)
           params.set("date", dateInput)
           update(date)
           document.getElementById("output").style.display = "block"
@@ -88,10 +88,13 @@
         const hours = seconds / 3600
         const days = hours / 24
         const weeks = days / 7
-        document.getElementById("seconds").innerHTML = Math.floor(seconds).toString()
-        document.getElementById("hours").innerHTML = Math.floor(hours).toString()
+        document.getElementById("seconds").innerHTML =
+          Math.floor(seconds).toString()
+        document.getElementById("hours").innerHTML =
+          Math.floor(hours).toString()
         document.getElementById("days").innerHTML = Math.floor(days).toString()
-        document.getElementById("weeks").innerHTML = Math.floor(weeks).toString()
+        document.getElementById("weeks").innerHTML =
+          Math.floor(weeks).toString()
       }
     </script>
   </body>
