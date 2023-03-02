@@ -1,0 +1,23 @@
+{
+  "name": "qyearsley.github.io",
+  "version": "1.0.0",
+  "description": "Github Pages Site",
+  "scripts": {
+    "lint": "eslint */**/*.js */**/*.html",
+    "format": "npx prettier --write .",
+    "start": "http-server -p 8000"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qyearsley/qyearsley.github.io.git"
+  },
+  "devDependencies": {
+    "eslint": "^8.35.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-n": "^15.6.1",
+    "eslint-plugin-promise": "^6.1.1",
+    "http-server": "^14.1.1",
+    "prettier": "^2.8.4"
+  }
+}
