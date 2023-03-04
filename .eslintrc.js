@@ -10,4 +10,9 @@ module.exports = {
   },
   rules: {},
   plugins: ["html"],
+  globals: {
+    "expect": "readonly",
+    "require": "readonly",
+    "test": "readonly"
+  }
 }
