@@ -11,8 +11,11 @@ module.exports = {
   rules: {},
   plugins: ["html"],
   globals: {
-    "expect": "readonly",
-    "require": "readonly",
-    "test": "readonly"
-  }
+    expect: true,
+    require: true,
+    test: true,
+    module: true,
+    describe: true,
+    Graph: true,
+  },
 }
