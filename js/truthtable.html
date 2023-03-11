@@ -6,15 +6,26 @@
     <script src="truthtable.js"></script>
     <script>
       "use strict"
-      // TODO: complete this
+      function update() {
+        const input = document.getElementById("input").value
+        const table = new TruthTable(input)
+        const output = document.getElementById("output")
+        output.innerHTML = ""
+        output.appendChild(table.toDOMTable())
+      }
     </script>
+<style>
+#output table td, #output table th {
+border: 1px solid black;
+}
+</style>
   </head>
   <body>
     <h1>Truth Table Generator</h1>
 
     <form id="form" action="javascript:void(update())">
       <label for="input">Expression:</label>
-      <input id="input" type="text" value="a = b" />
+      <input id="input" type="text" value="and a b" />
       <input type="submit" />
     </form>
 

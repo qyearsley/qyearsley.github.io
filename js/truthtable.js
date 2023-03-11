@@ -23,6 +23,59 @@ const OPERATIONS = {
 }
 
 /**
+ * Generate a truth table for a boolean expression.
+ *
+ * @param string expr - The expression to generate a truth table for.
+ *    For example: "and a b" or "or (not a) b".
+ *
+ * @return array - A 2d array representing the truth table.
+ *    For example:
+ *    [
+ *      ["a", "b", "and a b"],
+ *      [true, true, true],
+ *      [true, false, false],
+ *      [false, true, false],
+ *      [false, false, false],
+ *    ]
+ *    The first row is the header row.
+ */
+class TruthTable {
+  constructor(expr) {
+    const parsed = parsePrefix(expr)
+    const vars = parsed.getVars()
+    const combns = combinations(vars.length)
+    this.rows = [vars.concat([expr])]
+    for (let c of combns) {
+      const varMap = {}
+      for (let i = 0; i < vars.length; i++) {
+        varMap[vars[i]] = c[i]
+      }
+      const result = parsed.eval(varMap)
+      this.rows.push(c.concat([result]))
+    }
+  }
+
+  getRows() {
+    return this.rows
+  }
+
+  /** Make a DOM table element from a 2d array. */
+  toDOMTable(rows) {
+    const table = document.createElement("table")
+    for (let row of this.rows) {
+      var tr = document.createElement("tr")
+      for (let col of row) {
+        var td = document.createElement("td")
+        td.appendChild(document.createTextNode(col))
+        tr.appendChild(td)
+      }
+      table.appendChild(tr)
+    }
+    return table
+  }
+}
+
+/**
  * A BoolExpr represents a Boolean expression.
  */
 class BoolExpr {
@@ -46,24 +99,24 @@ class BoolExpr {
   /**
    * Return the value of a BoolExpr.
    */
-  eval(vars) {
+  eval(varMap) {
     if (this.type === "const") {
       return this.arg1
     } else if (this.type === "var") {
-      if (this.arg1 in vars) {
-        return vars[this.arg1]
+      if (this.arg1 in varMap) {
+        return varMap[this.arg1]
       } else {
         throw new Error("Undefined variable: " + this.arg1)
       }
     } else {
       const func = OPERATIONS[this.type]
       if (func.length === 1) {
-        return func(this.arg1.eval(vars))
+        return func(this.arg1.eval(varMap))
       }
       if (func.length === 2 && this.arg2 === undefined) {
         throw new Error("Missing second argument for " + this.type)
       }
-      return func(this.arg1.eval(vars), this.arg2.eval(vars))
+      return func(this.arg1.eval(varMap), this.arg2.eval(varMap))
     }
   }
 
@@ -91,10 +144,10 @@ class BoolExpr {
  * Parses a boolean expression expressed in prefix notation.
  *
  * Example input:
- *   "and or true false true)"
+ *   "and or true false true"
  */
 function parsePrefix(str) {
-  let tokens = str.split(/\s+/)
+  const tokens = str.split(/\s+/)
   return parsePrefixHelper(tokens)
 }
 
@@ -102,18 +155,19 @@ function parsePrefixHelper(tokens) {
   if (tokens.length === 0) {
     throw new Error("Unexpected end of input")
   }
-  let token = tokens.shift()
+  const token = tokens.shift()
   if (token === "true") {
     return new BoolExpr("const", true)
   } else if (token === "false") {
     return new BoolExpr("const", false)
   } else if (token in OPERATIONS) {
+    if (OPERATIONS[token].length === 1) {
+      let arg1 = parsePrefixHelper(tokens)
+      return new BoolExpr(token, arg1)
+    }
     let arg1 = parsePrefixHelper(tokens)
     let arg2 = parsePrefixHelper(tokens)
     return new BoolExpr(token, arg1, arg2)
-  } else if (token == "not") {
-    let arg1 = parsePrefixHelper(tokens)
-    return new BoolExpr(token, arg1)
   }
   return new BoolExpr("var", token)
 }
@@ -147,39 +201,11 @@ function prependToAll(x, arrs) {
   })
 }
 
-/**
- * Make a DOM table element from a 2d array.
- */
-function makeDOMTable(rows) {
-  var table = document.createElement("table")
-  for (let row of rows) {
-    var tr = document.createElement("tr")
-    for (let col of row) {
-      var td = document.createElement("td")
-      td.appendChild(document.createTextNode(col))
-      tr.appendChild(td)
-    }
-    table.appendChild(tr)
-  }
-  return table
-}
-
-/**
- * Class TruthTable
- *
- * Possile Functions to add:
- * to2DArray: convert to a 2d array
- * add: add a BoolExpr to the table
- * parse: parse a string to add a BoolExpr to the table
- * makeDOMTable: make a DOM table element from the table
- * makeDOMTableFromStr: parse a string and make a DOM table element from the table
- */
 
 module.exports = {
   BoolExpr: BoolExpr,
-  combinations: combinations,
-  dedupe: dedupe,
-  makeDOMTable: makeDOMTable,
-  prependToAll: prependToAll,
+  TruthTable: TruthTable,
   parsePrefix: parsePrefix,
+  combinations: combinations,
+  prependToAll: prependToAll,
 }

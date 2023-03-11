@@ -1,20 +1,4 @@
-// import { dedupe, combinations, prependToAll } from './truthtable';
-
 const tt = require("./truthtable")
-
-describe("dedupe", () => {
-  test("dedupe empty list", () => {
-    expect(tt.dedupe([])).toStrictEqual([])
-  })
-
-  test("simple case", () => {
-    expect(tt.dedupe([1, 1])).toStrictEqual([1])
-  })
-
-  test("multi out of order", () => {
-    expect(tt.dedupe([1, 4, 3, 3, 4, 1, 3, 1])).toStrictEqual([1, 3, 4])
-  })
-})
 
 describe("combinations", () => {
   test("empty", () => {
@@ -115,10 +99,6 @@ describe("BoolExpr", () => {
 })
 
 describe("parsePrefix", () => {
-  test("empty", () => {
-    //expect(() => tt.parsePrefix("")).toThrow()
-  })
-
   test("constant", () => {
     expect(tt.parsePrefix("true").eval()).toEqual(true)
     expect(tt.parsePrefix("false").eval()).toEqual(false)
@@ -129,5 +109,22 @@ describe("parsePrefix", () => {
     expect(tt.parsePrefix("and true true").eval()).toEqual(true)
     expect(tt.parsePrefix("or true false").eval()).toEqual(true)
     expect(tt.parsePrefix("or false false").eval()).toEqual(false)
+  })
+
+  test("not", () => {
+    expect(tt.parsePrefix("not true").eval()).toEqual(false)
+    expect(tt.parsePrefix("not false").eval()).toEqual(true)
+  })
+})
+
+describe("makeTable", () => {
+  test("simple and expression", () => {
+    expect(new tt.TruthTable("and a b").getRows()).toStrictEqual([
+      ["a", "b", "and a b"],
+      [false, false, false],
+      [false, true, false],
+      [true, false, false],
+      [true, true, true],
+    ])
   })
 })
