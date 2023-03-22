@@ -173,6 +173,104 @@ function parsePrefixHelper(tokens) {
 }
 
 /**
+ * Parse a boolean expression expressed in infix notation.
+ *
+ * The expression can have parentheses.
+ * Example input:
+ *  "a or not (b and c)"
+ * If parentheses are not balanced, an error is thrown.
+ * If parentheses are not used, earlier operators have higher precedence.
+ */
+function parseInfix(str) {
+  const tokens = tokenize(str)
+  if (tokens.length === 0) {
+    throw new Error("Empty expression")
+  }
+  const [expr, remaining] = parseInfixHelper(tokens)
+  if (remaining.length > 0) {
+    throw new Error("Unexpected tokens: " + remaining.join(" "))
+  }
+  return expr
+}
+
+/**
+ * Parse a boolean expression expressed in infix notation.
+ * Returns a tuple of the parsed expression and the remaining tokens.
+ */
+function parseInfixHelper(tokens) {
+  if (tokens.length === 0) {
+    throw new Error("Unexpected end of input")
+  }
+  const token = tokens.shift()
+  // Parenthetical group
+  if (token === "(") {
+    const [expr, remaining] = parseInfixHelper(tokens)
+    if (remaining[0] !== ")") {
+      throw new Error("Unbalanced parentheses")
+    }
+    return [expr, remaining.slice(1)]
+  }
+  // Single token
+  if (tokens.length === 0) {
+    if (token === "true") {
+      return [new BoolExpr("const", true), tokens]
+    }
+    if (token === "false") {
+      return [new BoolExpr("const", false), tokens]
+    }
+    if (token in OPERATIONS) {
+      throw new Error("Unexpected operator " + token)
+    }
+    return [new BoolExpr("var", token), tokens]
+  }
+  const nextToken = tokens.shift()
+  // Binary operators
+  if (nextToken in OPERATIONS) {
+    const [expr, remaining] = parseInfixHelper(tokens)
+    return [
+      new BoolExpr(nextToken, new BoolExpr("var", token), expr),
+      remaining
+    ]
+  }
+  // Unary operator
+  if (token in OPERATIONS && OPERATIONS[token].length === 1) {
+    const [expr, remaining] = parseInfixHelper(tokens)
+    return [new BoolExpr(token, expr), remaining]
+  }
+}
+
+
+/**
+ * Tokenize a string into an array of tokens.
+ *
+ * Tokens are either operators, parentheses, or variable names.
+ */
+function tokenize(str) {
+  const tokens = []
+  let token = ""
+  for (let c of str) {
+    if (c === " ") {
+      if (token !== "") {
+        tokens.push(token)
+        token = ""
+      }
+    } else if (c === "(" || c === ")") {
+      if (token !== "") {
+        tokens.push(token)
+        token = ""
+      }
+      tokens.push(c)
+    } else {
+      token += c
+    }
+  }
+  return tokens
+}
+
+
+
+
+/**
  * Remove duplicate items from an array and returns a sorted array.
  */
 function dedupe(arr) {
@@ -206,6 +304,9 @@ module.exports = {
   BoolExpr: BoolExpr,
   TruthTable: TruthTable,
   parsePrefix: parsePrefix,
+  parseInfix: parseInfix,
+  tokenize: tokenize,
   combinations: combinations,
   prependToAll: prependToAll,
+
 }
