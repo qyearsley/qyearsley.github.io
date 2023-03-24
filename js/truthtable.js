@@ -12,15 +12,32 @@
 /**
  * A list of operators and the functions that they correspond to.
  */
-const OPERATIONS = {
+const BINARY_OPERATORS = {
   and: (x, y) => x && y,
   eq: (x, y) => x == y,
   implies: (x, y) => !x || y,
   nand: (x, y) => !(x && y),
   or: (x, y) => x || y,
   xor: (x, y) => x != y,
+}
+
+const UNARY_OPERATORS = {
   not: x => !x,
 }
+
+/**
+ * A list of operators and their precedence.
+ */
+const PRECEDENCE = {
+  and: 1,
+  or: 1,
+  nand: 2,
+  implies: 2,
+  eq: 2,
+  xor: 2,
+  not: 3,
+}
+
 
 /**
  * Generate a truth table for a boolean expression.
@@ -41,7 +58,7 @@ const OPERATIONS = {
  */
 class TruthTable {
   constructor(expr) {
-    const parsed = parsePrefix(expr)
+    const parsed = parseInfix(expr)
     const vars = parsed.getVars()
     const combns = combinations(vars.length)
     this.rows = [vars.concat([expr])]
@@ -60,7 +77,7 @@ class TruthTable {
   }
 
   /** Make a DOM table element from a 2d array. */
-  toDOMTable(rows) {
+  toDOMTable() {
     const table = document.createElement("table")
     for (let row of this.rows) {
       var tr = document.createElement("tr")
@@ -83,7 +100,7 @@ class BoolExpr {
    * Construct a new BoolExpr.
    *
    * @param string type - The type of the BoolExpr. Either "const", "var" or a
-   * string in OPERATIONS. If type is "const", then arg1 is the value of the
+   * operator. If type is "const", then arg1 is the value of the
    * atom; if it's "var" then arg1 is the name of the variable.
    * @param mixed arg1 - The first argument for the expression; could be
    *     a BoolExpr, a variable name, or a constant value.
@@ -105,19 +122,21 @@ class BoolExpr {
     } else if (this.type === "var") {
       if (this.arg1 in varMap) {
         return varMap[this.arg1]
-      } else {
-        throw new Error("Undefined variable: " + this.arg1)
       }
-    } else {
-      const func = OPERATIONS[this.type]
-      if (func.length === 1) {
-        return func(this.arg1.eval(varMap))
-      }
-      if (func.length === 2 && this.arg2 === undefined) {
+      throw new Error("Undefined variable: " + this.arg1)
+    }
+    if (this.type in UNARY_OPERATORS) {
+      const func = UNARY_OPERATORS[this.type]
+      return func(this.arg1.eval(varMap))
+    }
+    if (this.type in BINARY_OPERATORS) {
+      const func = BINARY_OPERATORS[this.type]
+      if (this.arg2 === undefined) {
         throw new Error("Missing second argument for " + this.type)
       }
       return func(this.arg1.eval(varMap), this.arg2.eval(varMap))
     }
+    throw new Error("Invalid operator " + this.type)
   }
 
   /*
@@ -136,114 +155,136 @@ class BoolExpr {
     if (this.arg2 === undefined) {
       return this.arg1.getVars()
     }
-    return dedupe(this.arg1.getVars().concat(this.arg2.getVars()))
+    // Dedupe the list of variables from the two arguments.
+    const all = this.arg1.getVars().concat(this.arg2.getVars())
+    return [...new Set(all)].sort()
   }
-}
-
-/**
- * Parses a boolean expression expressed in prefix notation.
- *
- * Example input:
- *   "and or true false true"
- */
-function parsePrefix(str) {
-  const tokens = str.split(/\s+/)
-  return parsePrefixHelper(tokens)
-}
-
-function parsePrefixHelper(tokens) {
-  if (tokens.length === 0) {
-    throw new Error("Unexpected end of input")
-  }
-  const token = tokens.shift()
-  if (token === "true") {
-    return new BoolExpr("const", true)
-  } else if (token === "false") {
-    return new BoolExpr("const", false)
-  } else if (token in OPERATIONS) {
-    if (OPERATIONS[token].length === 1) {
-      let arg1 = parsePrefixHelper(tokens)
-      return new BoolExpr(token, arg1)
-    }
-    let arg1 = parsePrefixHelper(tokens)
-    let arg2 = parsePrefixHelper(tokens)
-    return new BoolExpr(token, arg1, arg2)
-  }
-  return new BoolExpr("var", token)
 }
 
 /**
  * Parse a boolean expression expressed in infix notation.
  *
- * The expression can have parentheses.
- * Example input:
- *  "a or not (b and c)"
- * If parentheses are not balanced, an error is thrown.
- * If parentheses are not used, earlier operators have higher precedence.
+ * This function uses the shunting yard algorithm. The expression can have
+ * parantheses, binary or unary operators, and variables or constants.
+ *
+ * @param string str - The expression to parse.
+ * @return BoolExpr - The parsed expression.
  */
 function parseInfix(str) {
   const tokens = tokenize(str)
   if (tokens.length === 0) {
     throw new Error("Empty expression")
   }
-  const [expr, remaining] = parseInfixHelper(tokens)
-  if (remaining.length > 0) {
-    throw new Error("Unexpected tokens: " + remaining.join(" "))
-  }
-  return expr
+  const postfix = shuntingYard(tokens)
+  return parsePostfix(postfix)
 }
 
 /**
- * Parse a boolean expression expressed in infix notation.
- * Returns a tuple of the parsed expression and the remaining tokens.
+ * Converts an infix expression to postfix,
+ * using the shunting yard algorithm.
+ *
+ * @param array tokens - An array of tokens.
+ * @return array - An array of tokens in postfix notation.
+ * @see https://en.wikipedia.org/wiki/Shunting_yard_algorithm
  */
-function parseInfixHelper(tokens) {
-  if (tokens.length === 0) {
-    throw new Error("Unexpected end of input")
+function shuntingYard(tokens) {
+  const output = [];
+  const stack = [];
+  for (const token of tokens) {
+    processToken(token, output, stack);
   }
-  const token = tokens.shift()
-  // Parenthetical group
-  if (token === "(") {
-    const [expr, remaining] = parseInfixHelper(tokens)
-    if (remaining[0] !== ")") {
-      throw new Error("Unbalanced parentheses")
+  while (stack.length > 0) {
+    const operator = stack.pop();
+    if (operator === "(" || operator === ")") {
+      throw new Error("Mismatched parentheses");
     }
-    return [expr, remaining.slice(1)]
+    output.push(operator);
   }
-  // Single token
-  if (tokens.length === 0) {
-    if (token === "true") {
-      return [new BoolExpr("const", true), tokens]
-    }
-    if (token === "false") {
-      return [new BoolExpr("const", false), tokens]
-    }
-    if (token in OPERATIONS) {
-      throw new Error("Unexpected operator " + token)
-    }
-    return [new BoolExpr("var", token), tokens]
-  }
-  const nextToken = tokens.shift()
-  // Binary operators
-  if (nextToken in OPERATIONS) {
-    const [expr, remaining] = parseInfixHelper(tokens)
-    return [
-      new BoolExpr(nextToken, new BoolExpr("var", token), expr),
-      remaining
-    ]
-  }
-  // Unary operator
-  if (token in OPERATIONS && OPERATIONS[token].length === 1) {
-    const [expr, remaining] = parseInfixHelper(tokens)
-    return [new BoolExpr(token, expr), remaining]
-  }
+  return output
 }
 
+/**
+ * Process a token in the shunting yard algorithm.
+ *
+ * @param string token - The token to process.
+ * @param array output - The output array.
+ * @param array stack - The operator stack.
+ */
+function processToken(token, output, stack) {
+  if (token in UNARY_OPERATORS) {
+    stack.push(token);
+    return
+  }
+  if (token in BINARY_OPERATORS) {
+    while (
+      stack.length > 0 &&
+      stack[stack.length - 1] !== "(" &&
+      PRECEDENCE[token] <= PRECEDENCE[stack[stack.length - 1]]
+    ) {
+      output.push(stack.pop());
+    }
+    stack.push(token);
+    return
+  }
+  if (token === "(") {
+    stack.push(token)
+    return
+  }
+  if (token === ")") {
+    while (stack.length > 0 && stack[stack.length - 1] !== "(") {
+      output.push(stack.pop())
+    }
+    if (stack.length === 0) {
+      throw new Error("Mismatched parentheses");
+    }
+    stack.pop()
+    return
+  }
+  // If we get here, it's a constant or a variable.
+  output.push(token)
+}
+
+/**
+ * Parse a postfix expression to a BoolExpr.
+ *
+ * For example, the postfix expression ["true", "false", "or", "not"]
+ * is interpreted as "not (true or false)".
+ *
+ * @param array tokens - An array of tokens in postfix notation.
+ * @return BoolExpr - The parsed expression.
+ * @see https://en.wikipedia.org/wiki/Reverse_Polish_notation
+ */
+function parsePostfix(tokens) {
+  const stack = [];
+  for (const token of tokens) {
+    if (token in UNARY_OPERATORS) {
+      const operand = stack.pop();
+      stack.push(new BoolExpr(token, operand))
+    } else if (token in BINARY_OPERATORS) {
+      const operand2 = stack.pop()
+      const operand1 = stack.pop()
+      stack.push(new BoolExpr(token, operand1, operand2))
+    } else if (token === "true" || token === "false") {
+      stack.push(new BoolExpr("const", token === "true"))
+    } else {
+      stack.push(new BoolExpr("var", token))
+    }
+  }
+  if (stack.length !== 1) {
+    throw new Error("Invalid expression");
+  }
+  return stack[0];
+}
 
 /**
  * Tokenize a string into an array of tokens.
  *
  * Tokens are either operators, parentheses, or variable names.
+ * Operators are either unary or binary and separated by operands
+ * by spaces.
+ *
+ * @param string str - The string to tokenize.
+ * @return array - An array of tokens.
  */
 function tokenize(str) {
   const tokens = []
@@ -264,17 +305,10 @@ function tokenize(str) {
       token += c
     }
   }
+  if (token !== "") {
+    tokens.push(token)
+  }
   return tokens
-}
-
-
-
-
-/**
- * Remove duplicate items from an array and returns a sorted array.
- */
-function dedupe(arr) {
-  return [...new Set(arr)].sort()
 }
 
 /**
@@ -299,14 +333,10 @@ function prependToAll(x, arrs) {
   })
 }
 
-
 module.exports = {
   BoolExpr: BoolExpr,
   TruthTable: TruthTable,
-  parsePrefix: parsePrefix,
   parseInfix: parseInfix,
   tokenize: tokenize,
   combinations: combinations,
-  prependToAll: prependToAll,
-
 }

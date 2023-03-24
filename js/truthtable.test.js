@@ -1,41 +1,5 @@
 const tt = require("./truthtable")
 
-describe("combinations", () => {
-  test("empty", () => {
-    expect(tt.combinations(0)).toStrictEqual([[]])
-  })
-
-  test("length one", () => {
-    expect(tt.combinations(1)).toStrictEqual([[false], [true]])
-  })
-
-  test("length two", () => {
-    expect(tt.combinations(2)).toStrictEqual([
-      [false, false],
-      [false, true],
-      [true, false],
-      [true, true],
-    ])
-  })
-})
-
-describe("prependToAll", () => {
-  test("empty", () => {
-    expect(tt.prependToAll(0, [])).toStrictEqual([])
-  })
-
-  test("one", () => {
-    expect(tt.prependToAll(0, [[1]])).toStrictEqual([[0, 1]])
-  })
-
-  test("two", () => {
-    expect(tt.prependToAll(0, [[1], [2]])).toStrictEqual([
-      [0, 1],
-      [0, 2],
-    ])
-  })
-})
-
 describe("BoolExpr", () => {
   const BE = tt.BoolExpr
 
@@ -98,25 +62,6 @@ describe("BoolExpr", () => {
   })
 })
 
-describe("parsePrefix", () => {
-  test("constant", () => {
-    expect(tt.parsePrefix("true").eval()).toEqual(true)
-    expect(tt.parsePrefix("false").eval()).toEqual(false)
-  })
-
-  test("simple", () => {
-    expect(tt.parsePrefix("and true false").eval()).toEqual(false)
-    expect(tt.parsePrefix("and true true").eval()).toEqual(true)
-    expect(tt.parsePrefix("or true false").eval()).toEqual(true)
-    expect(tt.parsePrefix("or false false").eval()).toEqual(false)
-  })
-
-  test("not", () => {
-    expect(tt.parsePrefix("not true").eval()).toEqual(false)
-    expect(tt.parsePrefix("not false").eval()).toEqual(true)
-  })
-})
-
 describe("parseInfix", () => {
   test("constant", () => {
     expect(tt.parseInfix("true").eval()).toEqual(true)
@@ -130,10 +75,15 @@ describe("parseInfix", () => {
     expect(tt.parseInfix("false or false").eval()).toEqual(false)   
   })
 
+  test("compound", () => {
+    expect(tt.parseInfix("(true and false) or true").eval()).toEqual(true)
+    expect(tt.parseInfix("not (true and false) and false").eval()).toEqual(false)
+  })
+
   test("not", () => {
     expect(tt.parseInfix("not true").eval()).toEqual(false)
     expect(tt.parseInfix("not false").eval()).toEqual(true)
-    expect(tt.parseInfix("not true and false").eval()).toEqual(false)
+    expect(tt.parseInfix("(not true) and false").eval()).toEqual(false)
     expect(tt.parseInfix("not (true and false)").eval()).toEqual(true)
   })
 
@@ -152,6 +102,7 @@ describe("tokenize", () => {
     expect(tt.tokenize("a ")).toStrictEqual(["a"])
     expect(tt.tokenize("(")).toStrictEqual(["("])
     expect(tt.tokenize("( ")).toStrictEqual(["("])
+    expect(tt.tokenize("true")).toStrictEqual(["true"])
   })
 
   test("parentheses", () => {
@@ -176,3 +127,23 @@ describe("makeTable", () => {
     ])
   })
 })
+
+describe("combinations", () => {
+  test("empty", () => {
+    expect(tt.combinations(0)).toStrictEqual([[]])
+  })
+
+  test("length one", () => {
+    expect(tt.combinations(1)).toStrictEqual([[false], [true]])
+  })
+
+  test("length two", () => {
+    expect(tt.combinations(2)).toStrictEqual([
+      [false, false],
+      [false, true],
+      [true, false],
+      [true, true],
+    ])
+  })
+})
+
