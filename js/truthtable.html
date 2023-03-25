@@ -8,10 +8,16 @@
       "use strict"
       function update() {
         const input = document.getElementById("input").value
-        const table = new TruthTable(input)
+        const error = document.getElementById("error")
         const output = document.getElementById("output")
         output.innerHTML = ""
-        output.appendChild(table.toDOMTable())
+        error.innerHTML = ""
+        try {
+          const table = new TruthTable(input)
+          output.appendChild(table.toDOMTable())
+        } catch (e) {
+          error.innerHTML = e
+        }
       }
     </script>
 <style>
@@ -25,10 +31,11 @@ border: 1px solid black;
 
     <form id="form" action="javascript:void(update())">
       <label for="input">Expression:</label>
-      <input id="input" type="text" value="and a b" />
+      <input id="input" type="text" value="a and not b" />
       <input type="submit" />
     </form>
 
+    <span id="error"></span>
     <div id="output"></div>
   </body>
 </html>
