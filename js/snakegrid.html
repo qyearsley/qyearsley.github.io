@@ -1,23 +1,61 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>Snake grid table</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Snake Grid Table - Quinten Yearsley</title>
+    <meta
+      name="description"
+      content="Generate snake pattern grids with alternating row directions."
+    />
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
-    <h1>Snake grid table</h1>
-    <time datetime="2017">2017</time>
-    <p>This was was an answer for a short puzzle.</p>
+    <div class="container">
+      <header class="header">
+        <h1>Snake Grid Table</h1>
+        <p>Generate snake pattern grids with alternating row directions</p>
+      </header>
 
-    <form action="javascript:void()" style="font-family: monospace">
-      Num Rows:
-      <input id="num-rows" type="number" min="1" , max="100" value="4" /><br />
-      Num Cols:
-      <input id="num-cols" type="number" min="1" , max="100" value="5" /><br />
-      <input id="submit" type="submit" />
-    </form>
+      <main class="main-content">
+        <section class="section">
+          <time datetime="2017">Created 2017</time>
+          <p>This was an answer for a short puzzle.</p>
 
-    <div id="out"></div>
+          <form action="javascript:void()" style="font-family: monospace">
+            Num Rows:
+            <input
+              id="num-rows"
+              type="number"
+              min="1"
+              ,
+              max="100"
+              value="4"
+            /><br />
+            Num Cols:
+            <input
+              id="num-cols"
+              type="number"
+              min="1"
+              ,
+              max="100"
+              value="5"
+            /><br />
+            <input id="submit" type="submit" />
+          </form>
+
+          <div id="out"></div>
+        </section>
+
+        <section class="section">
+          <h2>Navigation</h2>
+          <ul class="external-links">
+            <li><a href="/js/">← Back to JavaScript experiments</a></li>
+            <li><a href="/">← Back to main page</a></li>
+          </ul>
+        </section>
+      </main>
+    </div>
 
     <script>
       "use strict"

@@ -1,156 +1,170 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <title>Series tester</title>
-  <meta charset="utf8">
-  <link rel="stylesheet" href="/style.css">
-  <style>
-  #output {
-    margin: 1em;
-    border: 1px solid gray;
-  }
-  </style>
-</head>
-<body>
-<div>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Convergent Series Tester - Quinten Yearsley</title>
+    <meta
+      name="description"
+      content="Test the convergence of infinite series by computing partial sums."
+    />
+    <link rel="stylesheet" href="/style.css" />
+    <style>
+      #output {
+        margin: 1em;
+        border: 1px solid gray;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <h1>Convergent Series Tester</h1>
+        <p>Test the convergence of infinite series by computing partial sums</p>
+      </header>
 
-<h1>Series Tester</h1>
+      <main class="main-content">
+        <section class="section">
+          <p>
+            A <b>series</b> is the sum of the terms in a sequence. For some
+            sequences, the more terms are added, the closer the sum gets to some
+            finite number. Such series are set to <b>converge</b>.
+          </p>
 
-<p>A <b>series</b> is the sum of the terms in a sequence. For some
-sequences, the more terms are added, the closer the sum gets to some
-finite number. Such series are set to <b>converge</b>.</p>
+          <p>
+            Below, you can approximate the sum of an infinite sequence by
+            computing <i>&Sigma;(n=0, N)f(n)</i> for some large <i>N</i>.
+          </p>
 
-<p>Below, you can approximate the sum of an infinite sequence by computing
-<i>&Sigma;(n=0, N)f(n)</i> for some large <i>N</i>.</p>
+          <form id="form" action="javascript:void(update())">
+            <table>
+              <tr>
+                <td>f(n) =</td>
+                <td><input id="f" type="text" value="1 / Math.pow(2, n)" /></td>
+              </tr>
+              <tr>
+                <td>N =</td>
+                <td><input id="N" type="text" value="1000" /></td>
+                <td><input type="submit" /></td>
+              </tr>
+            </table>
+          </form>
 
-<!--
-<div lang="zh">
-<p><b>級數</b>是指一個序列裡面的因素的總和。</p>
-</div>
--->
+          <div id="output"></div>
 
-<form id="form" action="javascript:void(update())">
-  <table>
-  <tr>
-    <td>f(n) = </td>
-    <td><input id="f" type="text" value="1 / Math.pow(2, n)"></td>
-  </tr>
-  <tr>
-    <td>N = </td>
-    <td><input id="N" type="text" value="1000"></td>
-    <td><input type="submit"></td>
-  </tr>
-  </table>
-</form>
+          <h2>Some functions to try</h2>
+          <table border="1">
+            <thead>
+              <tr>
+                <th>English</th>
+                <th>中文</th>
+                <th>JavaScript</th>
+              </tr>
+            </thead>
+            <tr>
+              <td lang="en">Power N</td>
+              <td lang="zh">N次方</td>
+              <td><code>Math.pow(X,N)</code></td>
+            </tr>
+            <tr>
+              <td lang="en">Square root</td>
+              <td lang="zh">平方根</td>
+              <td><code>Math.sqrt(X)</code></td>
+            </tr>
+            <tr>
+              <td lang="en">Absolute value</td>
+              <td lang="zh">絕對值</td>
+              <td><code>Math.abs(X)</code></td>
+            </tr>
+            <tr>
+              <td lang="en">Rounding</td>
+              <td lang="zh">四捨五入</td>
+              <td><code>Math.round(X)</code></td>
+            </tr>
+            <tr>
+              <td lang="en">Sine</td>
+              <td lang="zh">正弦</td>
+              <td><code>Math.sin(X)</code></td>
+            </tr>
+            <tr>
+              <td lang="en">Cosine</td>
+              <td lang="zh">餘弦</td>
+              <td><code>Math.cos(X)</code></td>
+            </tr>
+            <tr>
+              <td lang="en">Tangent</td>
+              <td lang="zh">正切</td>
+              <td><code>Math.tan(X)</code></td>
+            </tr>
+            <tr>
+              <td lang="en">Natural log</td>
+              <td lang="zh">自然對數</td>
+              <td><code>Math.log(X)</code></td>
+            </tr>
+            <tr>
+              <td lang="en">Constant pi</td>
+              <td lang="zh">圓周率</td>
+              <td><code>Math.PI</code></td>
+            </tr>
+          </table>
+        </section>
 
-<div id="output"></div>
+        <section class="section">
+          <h2>Navigation</h2>
+          <ul class="external-links">
+            <li><a href="/js/">← Back to JavaScript experiments</a></li>
+            <li><a href="/">← Back to main page</a></li>
+          </ul>
+        </section>
+      </main>
+    </div>
 
-<h2>Some functions to try</h2>
-<table border="1">
-<thead>
-<tr>
-  <th>English</th>
-  <th>中文</th>
-  <th>JavaScript</th>
-</tr>
-</thead>
-<tr>
-  <td lang="en">Power N</td>
-  <td lang="zh">N次方</td>
-  <td><code>Math.pow(X,N)</code></td>
-</tr>
-<tr>
-  <td lang="en">Square root</td>
-  <td lang="zh">平方根</td>
-  <td><code>Math.sqrt(X)</code></td>
-</tr>
-<tr>
-  <td lang="en">Absolute value</td>
-  <td lang="zh">絕對值</td>
-  <td><code>Math.abs(X)</code></td>
-</tr>
-<tr>
-  <td lang="en">Rounding</td>
-  <td lang="zh">四捨五入</td>
-  <td><code>Math.round(X)</code></td>
-</tr>
-<tr>
-  <td lang="en">Sine</td>
-  <td lang="zh">正弦</td>
-  <td><code>Math.sin(X)</code></td>
-</tr>
-<tr>
-  <td lang="en">Cosine</td>
-  <td lang="zh">餘弦</td>
-  <td><code>Math.cos(X)</code></td>
-</tr>
-<tr>
-  <td lang="en">Tangent</td>
-  <td lang="zh">正切</td>
-  <td><code>Math.tan(X)</code></td>
-</tr>
-<tr>
-  <td lang="en">Natural log</td>
-  <td lang="zh">自然對數</td>
-  <td><code>Math.log(X)</code></td>
-</tr>
-<tr>
-  <td lang="en">Constant pi</td>
-  <td lang="zh">圓周率</td>
-  <td><code>Math.PI</code></td>
-</tr>
-<tr>
-  <td lang="en">Constant e</td>
-  <td lang="zh">歐拉數</td>
-  <td><code>Math.E</code></td>
-</tr>
-</table>
+    <script>
+      /**
+       * Quinten Yearsley
+       * Created 2008
+       * Rewritten 2013
+       */
 
-<script>
-/**
- * Quinten Yearsley
- * Created 2008
- * Rewritten 2013
-*/
+      /**
+       * Read the input and update the output contents.
+       */
+      function update() {
+        var f = new Function(
+          "n",
+          "return " + document.getElementById("f").value
+        )
+        var N = parseInt(document.getElementById("N").value)
+        var terms = outputs(f, N)
+        var terms_sum = sum(terms)
+        var output = "&Sigma;(n=0," + N + ")f(n) = " + terms_sum
+        output += "<br>&nbsp;&nbsp;&nbsp;&nbsp;"
+        output +=
+          " = sum([" + terms.slice(0, 3) + ",...," + terms.slice(-1) + ")]"
+        document.getElementById("output").innerHTML = output
+      }
 
-/**
- * Read the input and update the output contents.
-*/
-function update() {
-  var f = new Function("n", "return "+document.getElementById("f").value);
-  var N = parseInt(document.getElementById("N").value);
-  var terms = outputs(f, N);
-  var terms_sum = sum(terms);
-  var output = "&Sigma;(n=0," + N + ")f(n) = " + terms_sum;
-  output += "<br>&nbsp;&nbsp;&nbsp;&nbsp;"
-  output += " = sum([" + terms.slice(0, 3) + ",...," + terms.slice(-1) + ")]";
-  document.getElementById("output").innerHTML = output;
-}
+      /**
+       * Make a list of the outputs of function f for each index from 1 to n.
+       */
+      function outputs(f, n) {
+        var result = []
+        for (var i = 0; i <= n; i++) {
+          result.push(f(i))
+        }
+        return result
+      }
 
-/**
- * Make a list of the outputs of function f for each index from 1 to n.
-*/
-function outputs(f, n) {
-  var result = [];
-  for (var i = 0; i <= n; i++) {
-    result.push(f(i));
-  }
-  return result;
-}
-
-/**
- * Sum the items in an array.
-*/
-function sum(arr) {
-  var sum = 0;
-  for (var i = 0; i < arr.length; i++) {
-    sum += arr[i]
-  }
-  return sum;
-}
-
-</script>
-
-</body>
+      /**
+       * Sum the items in an array.
+       */
+      function sum(arr) {
+        var sum = 0
+        for (var i = 0; i < arr.length; i++) {
+          sum += arr[i]
+        }
+        return sum
+      }
+    </script>
+  </body>
 </html>
-
