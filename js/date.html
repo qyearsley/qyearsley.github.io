@@ -1,8 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Birthdays</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>How Long Have You Lived? - Quinten Yearsley</title>
+    <meta
+      name="description"
+      content="Calculate how long you've been alive in various time units."
+    />
     <link rel="stylesheet" href="/style.css" />
     <style>
       td {
@@ -12,37 +17,54 @@
   </head>
 
   <body onload="init()">
-    <h1>Birthdays</h1>
+    <div class="container">
+      <header class="header">
+        <h1>How Long Have You Lived?</h1>
+        <p>Calculate the time elapsed since your birth in various units</p>
+      </header>
 
-    <time datetime="2013-05-01">Created 2013-05-01.</time>
+      <main class="main-content">
+        <section class="section">
+          <time datetime="2013-05-01">Created 2013-05-01.</time>
 
-    <form id="form" action="javascript:void(submit())">
-      <span>When were you born?</span>
-      <input type="date" id="dateinput" /><input type="submit" />
-      <span id="error" style="color: red"></span>
-    </form>
+          <form id="form" action="javascript:void(submit())">
+            <span>When were you born?</span>
+            <input type="date" id="dateinput" /><input type="submit" />
+            <span id="error" style="color: red"></span>
+          </form>
 
-    <div id="output" style="display: none">
-      <hr />
-      <p>You have now been alive for:</p>
-      <table border="1">
-        <tr>
-          <td align="right" id="seconds"></td>
-          <td>seconds</td>
-        </tr>
-        <tr>
-          <td align="right" id="hours"></td>
-          <td>hours</td>
-        </tr>
-        <tr>
-          <td align="right" id="days"></td>
-          <td>days</td>
-        </tr>
-        <tr>
-          <td align="right" id="weeks"></td>
-          <td>weeks</td>
-        </tr>
-      </table>
+          <div id="output" style="display: none">
+            <hr />
+            <p>You have now been alive for:</p>
+            <table border="1">
+              <tr>
+                <td align="right" id="seconds"></td>
+                <td>seconds</td>
+              </tr>
+              <tr>
+                <td align="right" id="hours"></td>
+                <td>hours</td>
+              </tr>
+              <tr>
+                <td align="right" id="days"></td>
+                <td>days</td>
+              </tr>
+              <tr>
+                <td align="right" id="weeks"></td>
+                <td>weeks</td>
+              </tr>
+            </table>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>Navigation</h2>
+          <ul class="external-links">
+            <li><a href="/js/">← Back to JavaScript experiments</a></li>
+            <li><a href="/">← Back to main page</a></li>
+          </ul>
+        </section>
+      </main>
     </div>
 
     <script>

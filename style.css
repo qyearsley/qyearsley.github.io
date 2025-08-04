@@ -1,37 +1,213 @@
+/* Simple, clean CSS */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 html {
-  background-color: #ddd;
+  font-size: 16px;
 }
 
 body {
-  background-color: #fff;
-  border: 1px solid #888;
-  color: #111;
-  font-family: sans-serif;
-  line-height: 1.2em;
+  font-family: system-ui, sans-serif;
+  line-height: 1.6;
+  color: #333;
+  background: #f5f5f5;
+  padding: 2rem 1rem;
+}
+
+/* Container */
+.container {
+  max-width: 800px;
   margin: 0 auto;
-  max-width: 50em;
-  min-width: 20em;
-  padding: 10px 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+/* Header */
+.header {
+  background: #2d3748;
+  color: white;
+  padding: 2rem;
+  text-align: center;
+}
+
+.header h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.header p {
+  font-size: 1rem;
+  opacity: 0.9;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* Profile Image */
+.profile-image {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 3px solid white;
+  margin: 1.5rem auto 0;
+  display: block;
+}
+
+/* Main Content */
+.main-content {
+  padding: 2rem 3rem;
+}
+
+.section {
+  margin-bottom: 2rem;
+}
+
+.section h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 0.5rem;
+}
+
+/* Internal Links */
+.internal-links {
+  list-style: none;
+}
+
+.internal-links li {
+  margin-bottom: 1rem;
+}
+
+.internal-links a {
+  color: #3182ce;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.internal-links a:hover {
+  text-decoration: underline;
+}
+
+/* External Links */
+.external-links {
+  list-style: none;
+}
+
+.external-links li {
+  margin-bottom: 0.5rem;
+}
+
+.external-links a {
+  color: #3182ce;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.external-links a:hover {
+  text-decoration: underline;
+}
+
+/* Project Links */
+.links-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.link-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 1.5rem;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  transition: border-color 0.2s ease;
+}
+
+.link-card:hover {
+  border-color: #3182ce;
+}
+
+.link-card h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+
+.link-card p {
+  color: #718096;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Form Elements */
+input,
+textarea {
+  font-family: monospace;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: #3182ce;
 }
 
 input {
-  font-family: monospace;
   min-width: 3em;
 }
 
 textarea {
-  font-family: monospace;
   height: 100px;
-  width: 500px;
+  width: 100%;
+  max-width: 500px;
+  resize: vertical;
 }
 
+/* Tables */
 table {
   border-collapse: collapse;
-  max-width: 100%;
-  table-layout: fixed;
+  width: 100%;
+  background: white;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
 }
 
 td {
-  border-width: 1px solid #888;
-  padding: 0.25em;
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem;
+  text-align: left;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  body {
+    padding: 1rem 0.5rem;
+  }
+
+  .header {
+    padding: 1.5rem 1rem;
+  }
+
+  .main-content {
+    padding: 1.5rem 1.5rem;
+  }
+
+  .links-grid {
+    grid-template-columns: 1fr;
+  }
 }

@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>Truth tables</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Truth Table Generator - Quinten Yearsley</title>
     <link rel="stylesheet" href="/style.css" />
     <script src="truthtable.js"></script>
     <script>
@@ -28,15 +30,32 @@
     </style>
   </head>
   <body>
-    <h1>Truth Table Generator</h1>
+    <div class="container">
+      <header class="header">
+        <h1>Truth Table Generator</h1>
+        <p>Generate truth tables for logical expressions</p>
+      </header>
 
-    <form id="form" action="javascript:void(update())">
-      <label for="input">Expression:</label>
-      <input id="input" type="text" value="a and not b" />
-      <input type="submit" />
-    </form>
+      <main class="main-content">
+        <section class="section">
+          <form id="form" action="javascript:void(update())">
+            <label for="input">Expression:</label>
+            <input id="input" type="text" value="a and not b" />
+            <input type="submit" />
+          </form>
 
-    <span id="error"></span>
-    <div id="output"></div>
+          <span id="error"></span>
+          <div id="output"></div>
+        </section>
+
+        <section class="section">
+          <h2>Navigation</h2>
+          <ul class="external-links">
+            <li><a href="/js/">← Back to JavaScript experiments</a></li>
+            <li><a href="/">← Back to main page</a></li>
+          </ul>
+        </section>
+      </main>
+    </div>
   </body>
 </html>

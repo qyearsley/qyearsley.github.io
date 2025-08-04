@@ -1,37 +1,60 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>Password Generator</title>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Random Password Generator - Quinten Yearsley</title>
+    <meta
+      name="description"
+      content="Generate random passwords using custom character sets defined by JavaScript regular expressions."
+    />
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
-    <h1>Password Generator</h1>
+    <div class="container">
+      <header class="header">
+        <h1>Random Password Generator</h1>
+        <p>Generate secure random passwords with custom character sets</p>
+      </header>
 
-    <time datetime="2007">Created 2007, modified 2013.</time>
+      <main class="main-content">
+        <section class="section">
+          <time datetime="2007">Created 2007, modified 2013.</time>
 
-    <p>
-      Generates a random string of given length using a given set of characters.
-      The set of characters is described using JavaScript regular expressions.
-      For example, <code>[aeiou]</code> matches lowercase vowels,
-      <code>[0-9A-F]</code> matches digits and uppercase letters.
-    </p>
+          <p>
+            Generates a random string of given length using a given set of
+            characters. The set of characters is described using JavaScript
+            regular expressions. For example, <code>[aeiou]</code> matches
+            lowercase vowels, <code>[0-9A-F]</code> matches digits and uppercase
+            letters.
+          </p>
 
-    <form id="form" action="javascript:void(update())">
-      <table>
-        <tr>
-          <td>Length:</td>
-          <td><input id="length" type="text" value="10" /></td>
-        </tr>
-        <tr>
-          <td>Character set:</td>
-          <td><input id="regex" type="text" value="[a-z0-9_$]" /></td>
-          <td><input type="submit" /></td>
-        </tr>
-      </table>
-    </form>
+          <form id="form" action="javascript:void(update())">
+            <table>
+              <tr>
+                <td>Length:</td>
+                <td><input id="length" type="text" value="10" /></td>
+              </tr>
+              <tr>
+                <td>Character set:</td>
+                <td><input id="regex" type="text" value="[a-z0-9_$]" /></td>
+                <td><input type="submit" /></td>
+              </tr>
+            </table>
+          </form>
 
-    <pre id="output"></pre>
+          <pre id="output"></pre>
+        </section>
+
+        <section class="section">
+          <h2>Navigation</h2>
+          <ul class="external-links">
+            <li><a href="/js/">← Back to JavaScript experiments</a></li>
+            <li><a href="/">← Back to main page</a></li>
+          </ul>
+        </section>
+      </main>
+    </div>
 
     <script>
       "use strict"
