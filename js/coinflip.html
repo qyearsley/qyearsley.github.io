@@ -1,44 +1,70 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Coin Flips</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Coin Flips Experiment - Quinten Yearsley</title>
+    <meta
+      name="description"
+      content="Interactive experiment demonstrating how coin flip frequencies converge to 50% as the number of flips increases."
+    />
     <link rel="stylesheet" href="/style.css" />
     <script src="/third_party/graph.js"></script>
   </head>
 
   <body>
-    <h1>Coin Flips</h1>
+    <div class="container">
+      <header class="header">
+        <h1>Coin Flips Experiment</h1>
+        <p>
+          Demonstrating probability convergence through interactive coin
+          flipping
+        </p>
+      </header>
 
-    <time datetime="2013-03-21">Created 2013-03-21.</time>
+      <main class="main-content">
+        <section class="section">
+          <time datetime="2013-03-21">Created 2013-03-21.</time>
 
-    <p>
-      Today in biology class, when the professor was talking about genetic
-      drift, I learned an interesting fact about probability. If you flip a coin
-      a small number of times, the percentage of times that the coin turns up
-      heads tends not to be near 50%. For example, if you flip a coin ten times,
-      there's a significant chance that the frequency of head will be 3/10, or
-      6/10, or 8/10. However, if you flip a coin 10000 times, the frequency of
-      heads is almost certainly going to be very close to 50%.
-    </p>
+          <p>
+            Today in biology class, when the professor was talking about genetic
+            drift, I learned an interesting fact about probability. If you flip
+            a coin a small number of times, the percentage of times that the
+            coin turns up heads tends not to be near 50%. For example, if you
+            flip a coin ten times, there's a significant chance that the
+            frequency of head will be 3/10, or 6/10, or 8/10. However, if you
+            flip a coin 10000 times, the frequency of heads is almost certainly
+            going to be very close to 50%.
+          </p>
 
-    <p>
-      This program flips coins. It starts by flipping one coin and recording the
-      percentage of heads. Then two, then three, and so on, all the way up to
-      the maximum value that you input below. Then it graphs them. You can see
-      that as the number of coins flipped increases, the frequency converges to
-      50%.
-    </p>
+          <p>
+            This program flips coins. It starts by flipping one coin and
+            recording the percentage of heads. Then two, then three, and so on,
+            all the way up to the maximum value that you input below. Then it
+            graphs them. You can see that as the number of coins flipped
+            increases, the frequency converges to 50%.
+          </p>
 
-    <form id="form" action="javascript:void(update())">
-      <input type="text" id="numSamples" value="400" />
-      <input type="submit" />
-    </form>
+          <form id="form" action="javascript:void(update())">
+            <input type="text" id="numSamples" value="400" />
+            <input type="submit" />
+          </form>
 
-    <canvas id="myCanvas" width="800" height="300">
-      This text will be shown if your browser doesn't support the canvas
-      element.
-    </canvas>
+          <canvas id="myCanvas" width="800" height="300">
+            This text will be shown if your browser doesn't support the canvas
+            element.
+          </canvas>
+        </section>
+
+        <section class="section">
+          <h2>Navigation</h2>
+          <ul class="external-links">
+            <li><a href="/js/">← Back to JavaScript experiments</a></li>
+            <li><a href="/">← Back to main page</a></li>
+          </ul>
+        </section>
+      </main>
+    </div>
 
     <script>
       "use strict"
