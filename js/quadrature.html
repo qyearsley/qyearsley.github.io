@@ -1,11 +1,69 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>Numerical Integration</title>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Numerical Integration - Quinten Yearsley</title>
+    <meta
+      name="description"
+      content="Interactive numerical integration calculator with multiple quadrature methods."
+    />
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
+    <div class="container">
+      <header class="header">
+        <h1>Numerical Integration</h1>
+        <p>Calculate definite integrals using various numerical methods</p>
+      </header>
+
+      <main class="main-content">
+        <section class="section">
+          <h2>Integration Calculator</h2>
+          <p>
+            Enter a function and integration bounds to calculate the definite
+            integral using various numerical methods.
+          </p>
+
+          <form id="form" action="javascript:void(update())">
+            <table>
+              <tr>
+                <td>Function f(x):</td>
+                <td><input id="f" type="text" value="x*x" /></td>
+              </tr>
+              <tr>
+                <td>Lower bound a:</td>
+                <td><input id="a" type="text" value="0" /></td>
+              </tr>
+              <tr>
+                <td>Upper bound b:</td>
+                <td><input id="b" type="text" value="1" /></td>
+              </tr>
+              <tr>
+                <td>Number of subintervals n:</td>
+                <td><input id="n" type="text" value="100" /></td>
+              </tr>
+              <tr>
+                <td>Error tolerance:</td>
+                <td><input id="err" type="text" value="0.001" /></td>
+                <td><input type="submit" /></td>
+              </tr>
+            </table>
+          </form>
+
+          <div id="output"></div>
+        </section>
+
+        <section class="section">
+          <h2>Navigation</h2>
+          <ul class="external-links">
+            <li><a href="/js/">← Back to JavaScript experiments</a></li>
+            <li><a href="/">← Back to main page</a></li>
+          </ul>
+        </section>
+      </main>
+    </div>
+
     <script>
       "use strict"
 
@@ -129,46 +187,5 @@
         }
       }
     </script>
-
-    <h1>Numerical Integration</h1>
-
-    <p>
-      A <b>definite integral</b> over an interval [a,b] for a function f(x) can
-      be thought of as the total area between the y-axis and the curve within
-      that interval. This area can be estimated using numerical methods.
-    </p>
-
-    <form id="form" action="javascript:void(update())">
-      <table>
-        <tr>
-          <td>Function</td>
-          <td>f(x) =</td>
-          <td><input id="f" type="text" value="x * x" /></td>
-        </tr>
-        <tr>
-          <td>Lower bound</td>
-          <td>a =</td>
-          <td><input id="a" type="text" value="0" /></td>
-        </tr>
-        <tr>
-          <td>Upper bound</td>
-          <td>b =</td>
-          <td><input id="b" type="text" value="1" /></td>
-        </tr>
-        <tr>
-          <td>Divisions (for composite method)</td>
-          <td>n =</td>
-          <td><input id="n" type="text" value="100" /></td>
-        </tr>
-        <tr>
-          <td>Error threshold (for adaptive)</td>
-          <td>err =</td>
-          <td><input id="err" type="text" value="0.1" /></td>
-          <td><input type="submit" /></td>
-        </tr>
-      </table>
-    </form>
-
-    <div id="output"></div>
   </body>
 </html>
