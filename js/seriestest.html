@@ -26,14 +26,14 @@
       <main class="main-content">
         <section class="section">
           <p>
-            A <b>series</b> is the sum of the terms in a sequence. For some
-            sequences, the more terms are added, the closer the sum gets to some
-            finite number. Such series are set to <b>converge</b>.
+            A <b>series</b> is the sum of the terms in a sequence. For some sequences, the more
+            terms are added, the closer the sum gets to some finite number. Such series are set to
+            <b>converge</b>.
           </p>
 
           <p>
-            Below, you can approximate the sum of an infinite sequence by
-            computing <i>&Sigma;(n=0, N)f(n)</i> for some large <i>N</i>.
+            Below, you can approximate the sum of an infinite sequence by computing
+            <i>&Sigma;(n=0, N)f(n)</i> for some large <i>N</i>.
           </p>
 
           <form id="form" action="javascript:void(update())">
@@ -44,7 +44,7 @@
               </tr>
               <tr>
                 <td>N =</td>
-                <td><input id="N" type="text" value="1000" /></td>
+                <td><input id="N" type="text" value="100" /></td>
                 <td><input type="submit" /></td>
               </tr>
             </table>
@@ -52,61 +52,48 @@
 
           <div id="output"></div>
 
-          <h2>Some functions to try</h2>
+          <h2>Some convergent series to try</h2>
           <table border="1">
             <thead>
               <tr>
-                <th>English</th>
-                <th>中文</th>
+                <th>Series</th>
                 <th>JavaScript</th>
+                <th>Converges to</th>
               </tr>
             </thead>
             <tr>
-              <td lang="en">Power N</td>
-              <td lang="zh">N次方</td>
-              <td><code>Math.pow(X,N)</code></td>
+              <td>Geometric series (r=1/2)</td>
+              <td><code>1 / Math.pow(2, n)</code></td>
+              <td>2</td>
             </tr>
             <tr>
-              <td lang="en">Square root</td>
-              <td lang="zh">平方根</td>
-              <td><code>Math.sqrt(X)</code></td>
+              <td>Geometric series (r=1/3)</td>
+              <td><code>1 / Math.pow(3, n)</code></td>
+              <td>1.5</td>
             </tr>
             <tr>
-              <td lang="en">Absolute value</td>
-              <td lang="zh">絕對值</td>
-              <td><code>Math.abs(X)</code></td>
+              <td>1/n² series</td>
+              <td><code>1 / Math.pow(n + 1, 2)</code></td>
+              <td>π²/6 ≈ 1.645</td>
             </tr>
             <tr>
-              <td lang="en">Rounding</td>
-              <td lang="zh">四捨五入</td>
-              <td><code>Math.round(X)</code></td>
+              <td>1/n! series</td>
+              <td><code>1 / factorial(n)</code></td>
+              <td>e ≈ 2.718</td>
             </tr>
             <tr>
-              <td lang="en">Sine</td>
-              <td lang="zh">正弦</td>
-              <td><code>Math.sin(X)</code></td>
-            </tr>
-            <tr>
-              <td lang="en">Cosine</td>
-              <td lang="zh">餘弦</td>
-              <td><code>Math.cos(X)</code></td>
-            </tr>
-            <tr>
-              <td lang="en">Tangent</td>
-              <td lang="zh">正切</td>
-              <td><code>Math.tan(X)</code></td>
-            </tr>
-            <tr>
-              <td lang="en">Natural log</td>
-              <td lang="zh">自然對數</td>
-              <td><code>Math.log(X)</code></td>
-            </tr>
-            <tr>
-              <td lang="en">Constant pi</td>
-              <td lang="zh">圓周率</td>
-              <td><code>Math.PI</code></td>
+              <td>Alternating series</td>
+              <td><code>Math.pow(-1, n) / (n + 1)</code></td>
+              <td>ln(2) ≈ 0.693</td>
             </tr>
           </table>
+
+          <p>
+            <small
+              >Note: For the factorial function, you'll need to define it first:
+              <code>function factorial(n) { return n <= 1 ? 1 : n * factorial(n-1); }</code></small
+            >
+          </p>
         </section>
 
         <section class="section">
@@ -130,17 +117,13 @@
        * Read the input and update the output contents.
        */
       function update() {
-        var f = new Function(
-          "n",
-          "return " + document.getElementById("f").value
-        )
+        var f = new Function("n", "return " + document.getElementById("f").value)
         var N = parseInt(document.getElementById("N").value)
         var terms = outputs(f, N)
         var terms_sum = sum(terms)
         var output = "&Sigma;(n=0," + N + ")f(n) = " + terms_sum
         output += "<br>&nbsp;&nbsp;&nbsp;&nbsp;"
-        output +=
-          " = sum([" + terms.slice(0, 3) + ",...," + terms.slice(-1) + ")]"
+        output += " = sum([" + terms.slice(0, 3) + ",...," + terms.slice(-1) + ")]"
         document.getElementById("output").innerHTML = output
       }
 

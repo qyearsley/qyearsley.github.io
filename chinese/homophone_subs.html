@@ -1,715 +1,2448 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <title>Simplified-Traditional One-to-many Relationships</title>
-  <meta charset="utf-8">
-  <link rel="stylesheet" href="/style.css">
-  <style>
-  td {
-    padding-top: 0.5em;
-    padding-bottom: 0.5em;
-  }
-  .char {
-    font-size: 1.2em;
-    font-family: serif;
-  }
-  .trad {
-    color: #622;
-  }
-  .simp {
-    color: #226;
-  }
-  .pinyin {
-    color: #626;
-  }
-  </style>
-</head>
-<body>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Table of one-to-many relationships between simplified and traditional Chinese characters"
+    />
+    <title>Simplified-Traditional One-to-Many Relationships - Quinten Yearsley</title>
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <style>
+      .table-container {
+        overflow-x: auto;
+        margin: 2rem 0;
+      }
 
-<h1>Table of One-to-Many Relationships between Simplified and Traditional
-Characters</h1>
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+      }
 
-<p>When the official set of simplified characters was drawn up, several
-different methods were used to select simplified characters. One such
-method was to use one relatively simple character to write another more
-complicated character; for example, the character 后 (originally meaning
-'empress') is used to write '後' (meaning 'behind, after'). In other
-cases, two similarly pronounced characters were simplified with the
-same simplified character; for example, both 復 and 複 were simplified
-as 复.</p>
+      th,
+      td {
+        padding: 0.75em;
+        text-align: left;
+        border: 1px solid #ddd;
+        vertical-align: top;
+      }
 
-<p>The purpose of this kind of simplification was originally to decrease
-the total number of characters that students have to learn to be
-literate. However, it has created a problem for students who know how
-to write simplified who want to learn to use traditional characters:
-they must learn to make new distinctions between characters.</p>
+      th {
+        background-color: #f5f5f5;
+        font-weight: bold;
+      }
 
-<p>Sometimes, each of the traditional characters that corresponds to
-a given simplified character have distinct meanings thus it's easy
-to decide which one to use; at other times, two of the traditional
-characters may be interchangeable in certain situations. The table below
-shows simplified characters that correspond to multiple traditional
-characters, as well as the different meanings of each of the different
-traditional characters.</p>
+      .char {
+        font-size: 1.3em;
+        font-family: "SimSun", "Microsoft YaHei", serif;
+        font-weight: bold;
+      }
 
-<table border=1>
-<tr>
-  <th width="10%">simplified character</th>
-  <th width="30%">traditional character</th>
-  <th>examples</th>
-</tr>
-<tr><th rowspan=3><span class="simp char">板</span></th>
-  <td rowspan=2> <span class="trad char">板</span> [<span class="pinyin">bǎn</span>] board</td>
-   <td><span class="trad">黑板</span> [<span class="pinyin">hēibǎn</span>] blackboard</td></tr>
-   <td><span class="trad">木板</span> [<span class="pinyin">hēibǎn</span>] wooden plank</td></tr>
-  <td rowspan=1> <span class="trad char">闆</span> [<span class="pinyin">bǎn</span>] boss</td>
-   <td><span class="trad">老闆</span> [<span class="pinyin">lǎobǎn</span>] boss</td></tr>
-<tr><th rowspan=3><span class="simp char">杯</span></th>
-  <td rowspan=2> <span class="trad char">杯</span> [<span class="pinyin">bēi</span>] cup</td>
-   <td><span class="trad">杯子</span> [<span class="pinyin">bēizi</span>] a cup</td></tr>
-   <td><span class="trad">玻璃杯</span> [<span class="pinyin">bōlibēi</span>] a glass</td></tr>
-  <td rowspan=1> <span class="trad char">盃</span> [<span class="pinyin">bēi</span>] trophy</td>
-   <td><span class="trad">世界盃</span> [<span class="pinyin">shìjiè bēi</span>] World Cup</td></tr>
-<tr><th rowspan=4><span class="simp char">表</span></th>
-  <td rowspan=2> <span class="trad char">表</span> [<span class="pinyin">biǎo</span>] surface</td>
-   <td><span class="trad">表示</span> [<span class="pinyin">biǎoshì</span>] to show</td></tr>
-   <td><span class="trad">表面</span> [<span class="pinyin">biǎomiàn</span>] surface / appearance</td></tr>
-  <td rowspan=2> <span class="trad char">錶</span> [<span class="pinyin">biǎo</span>] clock</td>
-   <td><span class="trad">鐘錶</span> [<span class="pinyin">zhōngbiǎo</span>] clock</td></tr>
-   <td><span class="trad">手錶</span> [<span class="pinyin">shǒubiǎo</span>] wristwatch</td></tr>
-<tr><th rowspan=5><span class="simp char">别</span></th>
-  <td rowspan=4> <span class="trad char">別</span> [<span class="pinyin">bié</span>] other / to leave / to differentiate / do not</td>
-   <td><span class="trad">別人</span> [<span class="pinyin">biérén</span>] other people</td></tr>
-   <td><span class="trad">告別</span> [<span class="pinyin">gàobié</span>] to bid farewell</td></tr>
-   <td><span class="trad">識別</span> [<span class="pinyin">shíbié</span>] to discern</td></tr>
-   <td><span class="trad">別客氣</span> [<span class="pinyin">bié kèqi</span>] don't mention it</td></tr>
-  <td rowspan=1> <span class="trad char">彆</span> [<span class="pinyin">biè</span>] awkward</td>
-   <td><span class="trad">彆扭</span> [<span class="pinyin">bièniu</span>] awkward / difficult</td></tr>
-<tr><th rowspan=6><span class="simp char">并</span></th>
-  <td rowspan=3> <span class="trad char">並</span> [<span class="pinyin">bìng</span>] together / (emphasizes negatives)</td>
-   <td><span class="trad">並不</span> [<span class="pinyin">bìng bù</span>] not at all / not in fact</td></tr>
-   <td><span class="trad">並行</span> [<span class="pinyin">bìngxíng</span>] to proceed in parallel</td></tr>
-   <td><span class="trad">一並</span> [<span class="pinyin">yī bìng</span>] to lump together</td></tr>
-  <td rowspan=3> <span class="trad char">併</span> [<span class="pinyin">bìng</span>] to combine</td>
-   <td><span class="trad">合併</span> [<span class="pinyin">hébìng</span>] to merge</td></tr>
-   <td><span class="trad">併吞</span> [<span class="pinyin">bìngtūn</span>] swallow up / merge</td></tr>
-   <td><span class="trad">一併</span> [<span class="pinyin">yī bìng</span>] to lump together</td></tr>
-<tr><th rowspan=3><span class="simp char">卜</span></th>
-  <td rowspan=1> <span class="trad char">卜</span> [<span class="pinyin">bǔ</span>] divine</td>
-   <td><span class="trad">占卜</span> [<span class="pinyin">zhānbǔ</span>] to divine</td></tr>
-  <td rowspan=2> <span class="trad char">蔔</span> [<span class="pinyin">bo</span>] turnip / radish</td>
-   <td><span class="trad">蘿蔔</span> [<span class="pinyin">luóbo</span>] turnip</td></tr>
-   <td><span class="trad">胡蘿蔔</span> [<span class="pinyin">húluóbo</span>] carrots</td></tr>
-<tr><th rowspan=3><span class="simp char">布</span></th>
-  <td rowspan=2> <span class="trad char">佈</span> [<span class="pinyin">bù</span>] to declare</td>
-   <td><span class="trad">佈告</span> [<span class="pinyin">bùgào</span>] notice / bulletin</td></tr>
-   <td><span class="trad">分佈</span> [<span class="pinyin">fēnbù</span>] to distribute</td></tr>
-  <td rowspan=1> <span class="trad char">布</span> [<span class="pinyin">bù</span>] cloth, to declare</td>
-   <td><span class="trad">桌布</span> [<span class="pinyin">zhuōbù</span>] tablecloth</td></tr>
-<tr><th rowspan=3><span class="simp char">才</span></th>
-  <td rowspan=2> <span class="trad char">才</span> [<span class="pinyin">cái</span>] talent / only then</td>
-   <td><span class="trad">天才</span> [<span class="pinyin">tiāncái</span>] genius</td></tr>
-   <td><span class="trad">剛才</span> [<span class="pinyin">gāngcái</span>] just then</td></tr>
-  <td rowspan=1> <span class="trad char">纔</span> [<span class="pinyin">cái</span>] only then</td>
-   <td><span class="trad">剛纔</span> [<span class="pinyin">gāngcái</span>] just then</td></tr>
-<tr><th rowspan=4><span class="simp char">彩</span></th>
-  <td rowspan=2> <span class="trad char">彩</span> [<span class="pinyin">cǎi</span>] color / colorful</td>
-   <td><span class="trad">彩色</span> [<span class="pinyin">cǎisè</span>] multi-color</td></tr>
-   <td><span class="trad">精彩</span> [<span class="pinyin">jīngcǎi</span>] brilliant</td></tr>
-  <td rowspan=2> <span class="trad char">綵</span> [<span class="pinyin">cǎi</span>] colored ribbon or flag</td>
-   <td><span class="trad">綵旗</span> [<span class="pinyin">cǎiqí</span>] colored flag</td></tr>
-   <td><span class="trad">剪綵</span> [<span class="pinyin">jiǎncǎi</span>] to cut the ribbon</td></tr>
-<tr><th rowspan=4><span class="simp char">采</span></th>
-  <td rowspan=2> <span class="trad char">採</span> [<span class="pinyin">cǎi</span>] pick / pluck</td>
-   <td><span class="trad">採取</span> [<span class="pinyin">cǎiqǔ</span>] to adopt / to take</td></tr>
-   <td><span class="trad">採果</span> [<span class="pinyin">cǎiguǒ</span>] fruit picking / to pick fruit</td></tr>
-  <td rowspan=2> <span class="trad char">采</span> [<span class="pinyin">cǎi</span>] color</td>
-   <td><span class="trad">風采</span> [<span class="pinyin">fēngcǎi</span>] elegant manner</td></tr>
-   <td><span class="trad">神采</span> [<span class="pinyin">shéncǎi</span>] expression / bright</td></tr>
-<tr><th rowspan=7><span class="simp char">冲</span></th>
-  <td rowspan=3> <span class="trad char">沖</span> [<span class="pinyin">chōng</span>] surge / flush / deep</td>
-   <td><span class="trad">沖洗</span> [<span class="pinyin">chōngxǐ</span>] to rinse / to wash</td></tr>
-   <td><span class="trad">沖積</span> [<span class="pinyin">chōngjī</span>] alluvial</td></tr>
-   <td><span class="trad">沖刷</span> [<span class="pinyin">chōngshuā</span>] to scrub / to scour</td></tr>
-  <td rowspan=4> <span class="trad char">衝</span> [<span class="pinyin">chōng</span>] surge / charge / thoroughfare</td>
-   <td><span class="trad">衝擊</span> [<span class="pinyin">chōngjī</span>] attack / shock</td></tr>
-   <td><span class="trad">衝突</span> [<span class="pinyin">chōngtū</span>] conflict / clash</td></tr>
-   <td><span class="trad">衝刺</span> [<span class="pinyin">chōngcì</span>] to sprint</td></tr>
-   <td><span class="trad">要衝</span> [<span class="pinyin">yàochōng</span>] major crossroad</td></tr>
-<tr><th rowspan=4><span class="simp char">丑</span></th>
-  <td rowspan=2> <span class="trad char">丑</span> [<span class="pinyin">chǒu</span>] earthly branch / clown / (surname)</td>
-   <td><span class="trad">丑時</span> [<span class="pinyin">chǒushí</span>] 1-3 am</td></tr>
-   <td><span class="trad">小丑</span> [<span class="pinyin">xiǎochǒu</span>] clown</td></tr>
-  <td rowspan=2> <span class="trad char">醜</span> [<span class="pinyin">chǒu</span>] ugly</td>
-   <td><span class="trad">醜陋</span> [<span class="pinyin">chǒulòu</span>] ugly</td></tr>
-   <td><span class="trad">醜事</span> [<span class="pinyin">chǒushì</span>] scandal</td></tr>
-<tr><th rowspan=3><span class="simp char">出</span></th>
-  <td rowspan=2> <span class="trad char">出</span> [<span class="pinyin">chū</span>] to move outwards</td>
-   <td><span class="trad">出去</span> [<span class="pinyin">chū qù</span>] to go out</td></tr>
-   <td><span class="trad">出來</span> [<span class="pinyin">chū lái</span>] to come out</td></tr>
-  <td rowspan=1> <span class="trad char">齣</span> [<span class="pinyin">chū</span>] classifier for plays</td>
-   <td><span class="trad">一齣戲</span> [<span class="pinyin">yī chū xì</span>] one play</td></tr>
-<tr><th rowspan=3><span class="simp char">冬</span></th>
-  <td rowspan=2> <span class="trad char">冬</span> [<span class="pinyin">dōng</span>] winter</td>
-   <td><span class="trad">冬天</span> [<span class="pinyin">dōngtiān</span>] winter</td></tr>
-   <td><span class="trad">冬至</span> [<span class="pinyin">dōngzhì</span>] winter solstice</td></tr>
-  <td rowspan=1> <span class="trad char">鼕</span> [<span class="pinyin">dōng</span>] sound of a drum / (surname)</td>
-   <td><span class="trad">鼕</span> [<span class="pinyin">Dōng Xiānshēng</span>] Mr Dong</td></tr>
-<tr><th rowspan=4><span class="simp char">斗</span></th>
-  <td rowspan=2> <span class="trad char">斗</span> [<span class="pinyin">dǒu</span>] unit of measure</td>
-   <td><span class="trad">公斗</span> [<span class="pinyin">gōngdǒu</span>] decaliter</td></tr>
-   <td><span class="trad">星斗</span> [<span class="pinyin">xīngdǒu</span>] stars</td></tr>
-  <td rowspan=2> <span class="trad char">鬥{鬪}</span> [<span class="pinyin">dòu</span>] to fight</td>
-   <td><span class="trad">戰鬥</span> [<span class="pinyin">zhàndòu</span>] fight</td></tr>
-   <td><span class="trad">鬥爭</span> [<span class="pinyin">dòuzhēng</span>] struggle</td></tr>
-<tr><th rowspan=4><span class="simp char">发</span></th>
-  <td rowspan=2> <span class="trad char">發</span> [<span class="pinyin">fā</span>] launch / start</td>
-   <td><span class="trad">出發</span> [<span class="pinyin">chūfā</span>] to head off</td></tr>
-   <td><span class="trad">發生</span> [<span class="pinyin">fāshēng</span>] to happen</td></tr>
-  <td rowspan=2> <span class="trad char">髮</span> [<span class="pinyin">fà</span>] hair</td>
-   <td><span class="trad">髮型</span> [<span class="pinyin">fàxíng</span>] hairstyle</td></tr>
-   <td><span class="trad">頭髮</span> [<span class="pinyin">tóufa</span>] hair on the head</td></tr>
-<tr><th rowspan=3><span class="simp char">范</span></th>
-  <td rowspan=2> <span class="trad char">範</span> [<span class="pinyin">fàn</span>] pattern / model</td>
-   <td><span class="trad">規範</span> [<span class="pinyin">guīfàn</span>] standard / regulation</td></tr>
-   <td><span class="trad">範圍</span> [<span class="pinyin">fànwéi</span>] range / scope</td></tr>
-  <td rowspan=1> <span class="trad char">范</span> [<span class="pinyin">fàn</span>] surname Fan</td>
-   <td><span class="trad">范先生</span> [<span class="pinyin">Fàn xiānshēng</span>] Mr Fan</td></tr>
-<tr><th rowspan=5><span class="simp char">复</span></th>
-  <td rowspan=2> <span class="trad char">復</span> [<span class="pinyin">fù</span>] again / to recover</td>
-   <td><span class="trad">反復</span> [<span class="pinyin">fǎnfù</span>] repeatedly</td></tr>
-   <td><span class="trad">恢復</span> [<span class="pinyin">huīfù</span>] to recover</td></tr>
-  <td rowspan=3> <span class="trad char">複</span> [<span class="pinyin">fù</span>] complex / folded</td>
-   <td><span class="trad">複雜</span> [<span class="pinyin">fùzá</span>] complicated</td></tr>
-   <td><span class="trad">複合</span> [<span class="pinyin">fùhé</span>] compound</td></tr>
-   <td><span class="trad">重複</span> [<span class="pinyin">chóngfù</span>] to duplicate</td></tr>
-<tr><th rowspan=8><span class="simp char">干</span></th>
-  <td rowspan=2> <span class="trad char">乾</span> [<span class="pinyin">gān</span>] dry</td>
-   <td><span class="trad">乾燥</span> [<span class="pinyin">gānzào</span>] dry</td></tr>
-   <td><span class="trad">乾娘</span> [<span class="pinyin">gānniáng</span>] godmother</td></tr>
-  <td rowspan=2> <span class="trad char">干</span> [<span class="pinyin">gān</span>] intervene / shield</td>
-   <td><span class="trad">干涉</span> [<span class="pinyin">gānshè</span>] to interfere with</td></tr>
-   <td><span class="trad">干戈</span> [<span class="pinyin">gāngē</span>] weapons of war</td></tr>
-  <td rowspan=3> <span class="trad char">幹</span> [<span class="pinyin">gàn</span>] trunk / to do</td>
-   <td><span class="trad">主幹</span> [<span class="pinyin">zhǔgàn</span>] main / core</td></tr>
-   <td><span class="trad">樹幹</span> [<span class="pinyin">shùgàn</span>] tree trunk</td></tr>
-   <td><span class="trad">幹嘛</span> [<span class="pinyin">gàn má</span>] what are you doing?</td></tr>
-  <td rowspan=1> <span class="trad char">榦</span> [<span class="pinyin">gàn</span>] tree trunk</td>
-   <td><span class="trad">樹榦</span> [<span class="pinyin">shùgàn</span>] tree trunk</td></tr>
-<tr><th rowspan=5><span class="simp char">谷</span></th>
-  <td rowspan=2> <span class="trad char">穀</span> [<span class="pinyin">gǔ</span>] grain / cereal</td>
-   <td><span class="trad">穀物</span> [<span class="pinyin">gǔwù</span>] grain / cereal</td></tr>
-   <td><span class="trad">五穀</span> [<span class="pinyin">wǔgǔ</span>] the five crops</td></tr>
-  <td rowspan=1> <span class="trad char">谷</span> [<span class="pinyin">Yù</span>] (surname)</td>
-   <td><span class="trad">谷小姐</span> [<span class="pinyin">Yù xiǎojie</span>] Miss Yu</td></tr>
-  <td rowspan=2> <span class="trad char">谷</span> [<span class="pinyin">gǔ</span>] valley</td>
-   <td><span class="trad">低谷</span> [<span class="pinyin">dī gǔ</span>] valley / low point</td></tr>
-   <td><span class="trad">峽谷</span> [<span class="pinyin">xiágǔ</span>] canyon</td></tr>
-<tr><th rowspan=3><span class="simp char">刮</span></th>
-  <td rowspan=2> <span class="trad char">刮</span> [<span class="pinyin">guā</span>] to shave / to scrape</td>
-   <td><span class="trad">刮掉</span> [<span class="pinyin">guā diào</span>] to scrape off</td></tr>
-   <td><span class="trad">刮鏟</span> [<span class="pinyin">guāchǎn</span>] scraper</td></tr>
-  <td rowspan=1> <span class="trad char">颳</span> [<span class="pinyin">guā</span>] gust (wind)</td>
-   <td><span class="trad">颳風</span> [<span class="pinyin">guāfēng</span>] to be windy</td></tr>
-<tr><th rowspan=4><span class="simp char">后</span></th>
-  <td rowspan=2> <span class="trad char">后</span> [<span class="pinyin">hòu</span>] queen</td>
-   <td><span class="trad">皇后</span> [<span class="pinyin">huánghòu</span>] empress</td></tr>
-   <td><span class="trad">王后</span> [<span class="pinyin">wánghòu</span>] queen</td></tr>
-  <td rowspan=2> <span class="trad char">後</span> [<span class="pinyin">hòu</span>] behind / after</td>
-   <td><span class="trad">後面</span> [<span class="pinyin">hòumiàn</span>] behind</td></tr>
-   <td><span class="trad">以後</span> [<span class="pinyin">yǐhòu</span>] after</td></tr>
-<tr><th rowspan=5><span class="simp char">胡</span></th>
-  <td rowspan=2> <span class="trad char">胡</span> [<span class="pinyin">hú</span>] barbarian / wild / (surname)</td>
-   <td><span class="trad">胡說</span> [<span class="pinyin">húshuō</span>] nonsense</td></tr>
-   <td><span class="trad">胡錦濤</span> [<span class="pinyin">Hú Jǐntāo</span>] Hu Jintao</td></tr>
-  <td rowspan=1> <span class="trad char">衚</span> [<span class="pinyin">hú</span>] alley</td>
-   <td><span class="trad">衚衕</span> [<span class="pinyin">hútòng</span>] alley</td></tr>
-  <td rowspan=2> <span class="trad char">鬍</span> [<span class="pinyin">hú</span>] facial hair</td>
-   <td><span class="trad">鬍子</span> [<span class="pinyin">húzi</span>] facial hair</td></tr>
-   <td><span class="trad">鬍鬚</span> [<span class="pinyin">húxū</span>] beard</td></tr>
-<tr><th rowspan=6><span class="simp char">划</span></th>
-  <td rowspan=2> <span class="trad char">划</span> [<span class="pinyin">huá</span>] to scratch / to row / worth it</td>
-   <td><span class="trad">划子</span> [<span class="pinyin">huázi</span>] small row-boat</td></tr>
-   <td><span class="trad">划算</span> [<span class="pinyin">huásuàn</span>] worthwhile</td></tr>
-  <td rowspan=2> <span class="trad char">劃</span> [<span class="pinyin">huà</span>] to delimit / to draw / to plan</td>
-   <td><span class="trad">計劃</span> [<span class="pinyin">jìhuà</span>] plan</td></tr>
-   <td><span class="trad">劃線</span> [<span class="pinyin">huàxiàn</span>] to draw a line</td></tr>
-  <td rowspan=2> <span class="trad char">劃</span> [<span class="pinyin">huá</span>] to scratch / small boat</td>
-   <td><span class="trad">劃傷</span> [<span class="pinyin">huáshāng</span>] scratch injury</td></tr>
-   <td><span class="trad">皮劃艇</span> [<span class="pinyin">píhuátǐng</span>] canoe / kayak</td></tr>
-<tr><th rowspan=5><span class="simp char">回</span></th>
-  <td rowspan=3> <span class="trad char">回</span> [<span class="pinyin">huí</span>] return / turn</td>
-   <td><span class="trad">回來</span> [<span class="pinyin">huílai</span>] come back</td></tr>
-   <td><span class="trad">回頭</span> [<span class="pinyin">huítóu</span>] to turn one's head / later</td></tr>
-   <td><span class="trad">一回</span> [<span class="pinyin">yī huí</span>] one bout / one time</td></tr>
-  <td rowspan=2> <span class="trad char">迴</span> [<span class="pinyin">huí</span>] curve / avoid</td>
-   <td><span class="trad">迴轉</span> [<span class="pinyin">huízhuǎn</span>] to rotate</td></tr>
-   <td><span class="trad">迴避</span> [<span class="pinyin">huíbì</span>] to avoid</td></tr>
-<tr><th rowspan=2><span class="simp char">汇</span></th>
-  <td rowspan=1> <span class="trad char">匯{滙}</span> [<span class="pinyin">huì</span>] confluence</td>
-   <td><span class="trad">匯率</span> [<span class="pinyin">huìlǜ</span>] exchange rate</td></tr>
-  <td rowspan=1> <span class="trad char">彙</span> [<span class="pinyin">huì</span>] confluence</td>
-   <td><span class="trad">詞彙</span> [<span class="pinyin">cíhuì</span>] vocabulary</td></tr>
-<tr><th rowspan=4><span class="simp char">获</span></th>
-  <td rowspan=3> <span class="trad char">獲</span> [<span class="pinyin">huò</span>] quarry / gain</td>
-   <td><span class="trad">獲得</span> [<span class="pinyin">huòdé</span>] to obtain</td></tr>
-   <td><span class="trad">獲勝</span> [<span class="pinyin">huòshèng</span>] to win / to triumph</td></tr>
-   <td><span class="trad">捉獲</span> [<span class="pinyin">zhuōhuò</span>] to capture</td></tr>
-  <td rowspan=1> <span class="trad char">穫</span> [<span class="pinyin">huò</span>] harvest</td>
-   <td><span class="trad">收穫</span> [<span class="pinyin">shōuhuò</span>] harvest</td></tr>
-<tr><th rowspan=4><span class="simp char">几</span></th>
-  <td rowspan=1> <span class="trad char">几</span> [<span class="pinyin">jī</span>] small table</td>
-   <td><span class="trad">茶几</span> [<span class="pinyin">chájī</span>] tea table</td></tr>
-  <td rowspan=2> <span class="trad char">幾</span> [<span class="pinyin">jī</span>] almost</td>
-   <td><span class="trad">幾乎</span> [<span class="pinyin">jī hū</span>] almost / nearly</td></tr>
-   <td><span class="trad">幾率</span> [<span class="pinyin">jī lǜ</span>] probability</td></tr>
-  <td rowspan=1> <span class="trad char">幾</span> [<span class="pinyin">jǐ</span>] a few / how many?</td>
-   <td><span class="trad">幾個</span> [<span class="pinyin">jǐ gè</span>] a few / how many?</td></tr>
-<tr><th rowspan=3><span class="simp char">饥</span></th>
-  <td rowspan=2> <span class="trad char">飢</span> [<span class="pinyin">jī</span>] hunger</td>
-   <td><span class="trad">飢渴</span> [<span class="pinyin">jīkě</span>] hunger and thirst</td></tr>
-   <td><span class="trad">飢荒</span> [<span class="pinyin">jīhuāng</span>] famine</td></tr>
-  <td rowspan=1> <span class="trad char">饑</span> [<span class="pinyin">jī</span>] poor harvest / hunger</td>
-   <td><span class="trad">饑荒</span> [<span class="pinyin">jīhuāng</span>] famine</td></tr>
-<tr><th rowspan=4><span class="simp char">家</span></th>
-  <td rowspan=1> <span class="trad char">傢</span> [<span class="pinyin">jiā</span>] furniture</td>
-   <td><span class="trad">傢具</span> [<span class="pinyin">jiājù</span>] furniture</td></tr>
-  <td rowspan=3> <span class="trad char">家</span> [<span class="pinyin">jiā</span>] home / person</td>
-   <td><span class="trad">家庭</span> [<span class="pinyin">jiātíng</span>] family</td></tr>
-   <td><span class="trad">人家</span> [<span class="pinyin">rénjiā</span>] people / others / oneself</td></tr>
-   <td><span class="trad">家具</span> [<span class="pinyin">jiājù</span>] furniture</td></tr>
-<tr><th rowspan=4><span class="simp char">奸</span></th>
-  <td rowspan=2> <span class="trad char">奸</span> [<span class="pinyin">jiān</span>] sinister / traitor</td>
-   <td><span class="trad">內奸</span> [<span class="pinyin">nèijiān</span>] undiscovered traitor</td></tr>
-   <td><span class="trad">奸猾</span> [<span class="pinyin">jiānhuá</span>] treacherous</td></tr>
-  <td rowspan=2> <span class="trad char">姦</span> [<span class="pinyin">jiān</span>] rape / adultery</td>
-   <td><span class="trad">強姦</span> [<span class="pinyin">qiángjiān</span>] rape</td></tr>
-   <td><span class="trad">姦情</span> [<span class="pinyin">jiānqíng</span>] adultery</td></tr>
-<tr><th rowspan=4><span class="simp char">姜</span></th>
-  <td rowspan=1> <span class="trad char">姜</span> [<span class="pinyin">jiāng</span>] (surname)</td>
-   <td><span class="trad">姜先生</span> [<span class="pinyin">jiāng xiānshēng</span>] Mr Jiang</td></tr>
-  <td rowspan=3> <span class="trad char">薑</span> [<span class="pinyin">jiāng</span>] ginger / (surname)</td>
-   <td><span class="trad">薑先生</span> [<span class="pinyin">jiāng xiānshēng</span>] Mr Jiang</td></tr>
-   <td><span class="trad">薑餅</span> [<span class="pinyin">jiāngbǐng</span>] gingerbread</td></tr>
-   <td><span class="trad">黃薑</span> [<span class="pinyin">huángjiāng</span>] turmeric</td></tr>
-<tr><th rowspan=5><span class="simp char">借</span></th>
-  <td rowspan=1> <span class="trad char">借</span> [<span class="pinyin">jiè</span>] borrow or lend</td>
-   <td><span class="trad">借給</span> [<span class="pinyin">jiègěi</span>] to lend to</td></tr>
-  <td rowspan=2> <span class="trad char">藉</span> [<span class="pinyin">jiè</span>] pretext / by means of</td>
-   <td><span class="trad">藉口</span> [<span class="pinyin">jièkǒu</span>] excuse</td></tr>
-   <td><span class="trad">藉由</span> [<span class="pinyin">jièyóu</span>] by means of</td></tr>
-  <td rowspan=2> <span class="trad char">藉</span> [<span class="pinyin">jí</span>] disorder / (surname)</td>
-   <td><span class="trad">狼藉</span> [<span class="pinyin">lángjí</span>] in a mess</td></tr>
-   <td><span class="trad">藉先生</span> [<span class="pinyin">Jí xiānshēng</span>] Mr Ji</td></tr>
-<tr><th rowspan=5><span class="simp char">尽</span></th>
-  <td rowspan=3> <span class="trad char">儘</span> [<span class="pinyin">jǐn</span>] as much as possible</td>
-   <td><span class="trad">儘可能</span> [<span class="pinyin">jǐnkěnéng</span>] to do one's utmost</td></tr>
-   <td><span class="trad">儘管</span> [<span class="pinyin">jǐnguǎn</span>] despite / without hesitating</td></tr>
-   <td><span class="trad">儘量</span> [<span class="pinyin">jǐnliàng</span>] as much as possible / to the greatest extent</td></tr>
-  <td rowspan=2> <span class="trad char">盡</span> [<span class="pinyin">jìn</span>] end, use up</td>
-   <td><span class="trad">盡頭</span> [<span class="pinyin">jìntóu</span>] the very end</td></tr>
-   <td><span class="trad">盡量</span> [<span class="pinyin">jìnliàng</span>] as much as possible / to the greatest extent</td></tr>
-<tr><th rowspan=5><span class="simp char">卷</span></th>
-  <td rowspan=2> <span class="trad char">卷</span> [<span class="pinyin">juàn</span>] scroll or paper</td>
-   <td><span class="trad">考卷</span> [<span class="pinyin">kǎojuàn</span>] an exam paper</td></tr>
-   <td><span class="trad">書卷</span> [<span class="pinyin">shūjuàn</span>] volume / scroll</td></tr>
-  <td rowspan=1> <span class="trad char">卷</span> [<span class="pinyin">juǎn</span>] rolled thing / to roll up</td>
-   <td><span class="trad">卷子</span> [<span class="pinyin">juǎnzi</span>] steamed roll</td></tr>
-  <td rowspan=2> <span class="trad char">捲</span> [<span class="pinyin">juǎn</span>] to roll up / a rolled thing</td>
-   <td><span class="trad">卷起</span> [<span class="pinyin">juǎnqǐ</span>] to roll up</td></tr>
-   <td><span class="trad">捲餅</span> [<span class="pinyin">juǎnbǐng</span>] rolled up pastry</td></tr>
-<tr><th rowspan=4><span class="simp char">克</span></th>
-  <td rowspan=3> <span class="trad char">克</span> [<span class="pinyin">kè</span>] to overcome / (phonetic)</td>
-   <td><span class="trad">公克</span> [<span class="pinyin">gōngkè</span>] gram</td></tr>
-   <td><span class="trad">麥克風</span> [<span class="pinyin">màikèfēng</span>] microphone</td></tr>
-   <td><span class="trad">克己</span> [<span class="pinyin">kèjǐ</span>] self-restraint</td></tr>
-  <td rowspan=1> <span class="trad char">剋</span> [<span class="pinyin">kè</span>] to overcome</td>
-   <td><span class="trad">剋己</span> [<span class="pinyin">kèjǐ</span>] self-restraint</td></tr>
-<tr><th rowspan=3><span class="simp char">夸</span></th>
-  <td rowspan=1> <span class="trad char">夸</span> [<span class="pinyin">kuā</span>] (phonetic)</td>
-   <td><span class="trad">夸克</span> [<span class="pinyin">kuākè</span>] quark</td></tr>
-  <td rowspan=2> <span class="trad char">誇</span> [<span class="pinyin">kuā</span>] to boast / exaggerate</td>
-   <td><span class="trad">誇張</span> [<span class="pinyin">kuāzhāng</span>] exaggerated</td></tr>
-   <td><span class="trad">誇大</span> [<span class="pinyin">kuādà</span>] to exaggerate</td></tr>
-<tr><th rowspan=3><span class="simp char">昆</span></th>
-  <td rowspan=1> <span class="trad char">崑</span> [<span class="pinyin">kūn</span>] Kunlun</td>
-   <td><span class="trad">崑崙山</span> [<span class="pinyin">kūnlúnshān</span>] Mount Kunlun</td></tr>
-  <td rowspan=2> <span class="trad char">昆</span> [<span class="pinyin">kūn</span>] older brother / (phonetic)</td>
-   <td><span class="trad">昆蟲</span> [<span class="pinyin">kūnchóng</span>] insect</td></tr>
-   <td><span class="trad">昆明</span> [<span class="pinyin">kūnmíng</span>] Kunming (city in Yunnan)</td></tr>
-<tr><th rowspan=3><span class="simp char">困</span></th>
-  <td rowspan=2> <span class="trad char">困</span> [<span class="pinyin">kùn</span>] difficulty</td>
-   <td><span class="trad">困難</span> [<span class="pinyin">kùnnán</span>] difficult</td></tr>
-   <td><span class="trad">困境</span> [<span class="pinyin">kùnjìng</span>] predicament</td></tr>
-  <td rowspan=1> <span class="trad char">睏</span> [<span class="pinyin">kùn</span>] tired / sleepy</td>
-   <td><span class="trad">我很睏</span> [<span class="pinyin">wǒ hěn kùn</span>] I'm sleepy</td></tr>
-<tr><th rowspan=6><span class="simp char">累</span></th>
-  <td rowspan=2> <span class="trad char">累</span> [<span class="pinyin">lèi</span>] tired / exhausted</td>
-   <td><span class="trad">累垮</span> [<span class="pinyin">lèikuǎ</span>] to be worn out and collapse</td></tr>
-   <td><span class="trad">累累</span> [<span class="pinyin">lèilèi</span>] exhausted / dejected</td></tr>
-  <td rowspan=1> <span class="trad char">累</span> [<span class="pinyin">léi</span>] heaps</td>
-   <td><span class="trad">累累</span> [<span class="pinyin">léiléi</span>] heaps of</td></tr>
-  <td rowspan=2> <span class="trad char">累</span> [<span class="pinyin">lěi</span>] piled up / accumulated</td>
-   <td><span class="trad">積累</span> [<span class="pinyin">jīlěi</span>] to accumulate</td></tr>
-   <td><span class="trad">累累</span> [<span class="pinyin">lěilěi</span>] again and again</td></tr>
-  <td rowspan=1> <span class="trad char">纍</span> [<span class="pinyin">léi</span>] rope / (surname)</td>
-   <td><span class="trad">纍墜</span> [<span class="pinyin">léizhuì</span>] superfluous / cumbersome</td></tr>
-<tr><th rowspan=3><span class="simp char">厘</span></th>
-  <td rowspan=1> <span class="trad char">厘</span> [<span class="pinyin">lí</span>] (phonetic)</td>
-   <td><span class="trad">巴厘島</span> [<span class="pinyin">bālídǎo</span>] Bali (in Indonesia)</td></tr>
-  <td rowspan=2> <span class="trad char">釐</span> [<span class="pinyin">lí</span>] one hundredth</td>
-   <td><span class="trad">釐米</span> [<span class="pinyin">límǐ</span>] centimetre</td></tr>
-   <td><span class="trad">釐清</span> [<span class="pinyin">líqīng</span>] to clarify</td></tr>
-<tr><th rowspan=2><span class="simp char">漓</span></th>
-  <td rowspan=1> <span class="trad char">漓</span> [<span class="pinyin">lí</span>] pattering / to seep through</td>
-   <td><span class="trad">淋漓</span> [<span class="pinyin">línlí</span>] dripping wet</td></tr>
-  <td rowspan=1> <span class="trad char">灕</span> [<span class="pinyin">lí</span>] river name</td>
-   <td><span class="trad">灕江</span> [<span class="pinyin">Lí Jiāng</span>] River Li, Guangxi</td></tr>
-<tr><th rowspan=5><span class="simp char">里</span></th>
-  <td rowspan=2> <span class="trad char">裡{裏}</span> [<span class="pinyin">lǐ</span>] inside</td>
-   <td><span class="trad">裡面</span> [<span class="pinyin">lǐmiàn</span>] inside</td></tr>
-   <td><span class="trad">這裡</span> [<span class="pinyin">zhèlǐ</span>] here</td></tr>
-  <td rowspan=3> <span class="trad char">里</span> [<span class="pinyin">lǐ</span>] li (unit) / neighborhood / (phonetic)</td>
-   <td><span class="trad">公里</span> [<span class="pinyin">gōnglǐ</span>] kilometer</td></tr>
-   <td><span class="trad">鄰里</span> [<span class="pinyin">línlǐ</span>] neighbourhood</td></tr>
-   <td><span class="trad">阿里</span> [<span class="pinyin">ālǐ</span>] Ali (proper name)</td></tr>
-<tr><th rowspan=3><span class="simp char">历</span></th>
-  <td rowspan=1> <span class="trad char">曆</span> [<span class="pinyin">lì</span>] calendar</td>
-   <td><span class="trad">日曆</span> [<span class="pinyin">rìlì</span>] calendar</td></tr>
-  <td rowspan=2> <span class="trad char">歷</span> [<span class="pinyin">lì</span>] to experience / history</td>
-   <td><span class="trad">歷史</span> [<span class="pinyin">lìshǐ</span>] history</td></tr>
-   <td><span class="trad">經歷</span> [<span class="pinyin">jīnglì</span>]  experience</td></tr>
-<tr><th rowspan=7><span class="simp char">了</span></th>
-  <td rowspan=2> <span class="trad char">了</span> [<span class="pinyin">le</span>] perfective aspect particle</td>
-   <td><span class="trad">走了</span> [<span class="pinyin">zǒule</span>] to have gone</td></tr>
-   <td><span class="trad">殺了</span> [<span class="pinyin">shāle</span>] to have killed</td></tr>
-  <td rowspan=2> <span class="trad char">了</span> [<span class="pinyin">liǎo</span>] to finish</td>
-   <td><span class="trad">末了</span> [<span class="pinyin">mòliǎo</span>] in the end</td></tr>
-   <td><span class="trad">了解</span> [<span class="pinyin">liǎojiě</span>] to understand</td></tr>
-  <td rowspan=2> <span class="trad char">瞭</span> [<span class="pinyin">liào</span>] to watch</td>
-   <td><span class="trad">瞭哨</span> [<span class="pinyin">liàoshào</span>] to stand guard</td></tr>
-   <td><span class="trad">瞭望</span> [<span class="pinyin">liàowàng</span>] to keep a lookout</td></tr>
-  <td rowspan=1> <span class="trad char">瞭</span> [<span class="pinyin">liǎo</span>] clear</td>
-   <td><span class="trad">瞭解</span> [<span class="pinyin">liǎojiě</span>] to understand</td></tr>
-<tr><th rowspan=3><span class="simp char">卤</span></th>
-  <td rowspan=1> <span class="trad char">滷</span> [<span class="pinyin">lǔ</span>] gravy / marinade</td>
-   <td><span class="trad">滷汁</span> [<span class="pinyin">lǔzhī</span>] gravy / marinade</td></tr>
-  <td rowspan=2> <span class="trad char">鹵</span> [<span class="pinyin">lǔ</span>] salt / halogen</td>
-   <td><span class="trad">鹵水</span> [<span class="pinyin">lǔshuǐ</span>] brine / marinade</td></tr>
-   <td><span class="trad">鹵素</span> [<span class="pinyin">lǔsù</span>] halogen (chemistry)</td></tr>
-<tr><th rowspan=2><span class="simp char">仑</span></th>
-  <td rowspan=1> <span class="trad char">侖</span> [<span class="pinyin">lún</span>] (phonetic)</td>
-   <td><span class="trad">庫侖</span> [<span class="pinyin">kùlún</span>] Coulomb</td></tr>
-  <td rowspan=1> <span class="trad char">崙{崘}</span> [<span class="pinyin">lún</span>] mountain name</td>
-   <td><span class="trad">崑崙山</span> [<span class="pinyin">kūnlúnshān</span>] Mount Kunlun</td></tr>
-<tr><th rowspan=5><span class="simp char">面</span></th>
-  <td rowspan=3> <span class="trad char">面</span> [<span class="pinyin">miàn</span>] face / surface</td>
-   <td><span class="trad">表面</span> [<span class="pinyin">biǎomiàn</span>] surface</td></tr>
-   <td><span class="trad">面子</span> [<span class="pinyin">miànzi</span>] face</td></tr>
-   <td><span class="trad">裡面</span> [<span class="pinyin">lǐmiàn</span>] inside</td></tr>
-  <td rowspan=2> <span class="trad char">麵</span> [<span class="pinyin">miàn</span>] wheat food</td>
-   <td><span class="trad">麵條</span> [<span class="pinyin">miàntiáo</span>] noodle</td></tr>
-   <td><span class="trad">麵包</span> [<span class="pinyin">miànbāo</span>] bread</td></tr>
-<tr><th rowspan=5><span class="simp char">辟</span></th>
-  <td rowspan=2> <span class="trad char">辟</span> [<span class="pinyin">bì</span>] king / ward off</td>
-   <td><span class="trad">復辟</span> [<span class="pinyin">fù bì</span>] restoration of a past regime</td></tr>
-   <td><span class="trad">辟邪</span> [<span class="pinyin">bìxié</span>] to ward off evil spirits</td></tr>
-  <td rowspan=1> <span class="trad char">辟</span> [<span class="pinyin">pì</span>] law</td>
-   <td><span class="trad">大辟</span> [<span class="pinyin">dà pì</span>] death sentence</td></tr>
-  <td rowspan=2> <span class="trad char">闢</span> [<span class="pinyin">pì</span>] to refute / to open up</td>
-   <td><span class="trad">闢謠</span> [<span class="pinyin">pì yáo</span>] to refute a rumor</td></tr>
-   <td><span class="trad">開辟</span> [<span class="pinyin">kāi pì</span>] to open up</td></tr>
-<tr><th rowspan=3><span class="simp char">千</span></th>
-  <td rowspan=2> <span class="trad char">千</span> [<span class="pinyin">qiān</span>] thousand</td>
-   <td><span class="trad">一千</span> [<span class="pinyin">yī qiān</span>] one thousand</td></tr>
-   <td><span class="trad">千秋</span> [<span class="pinyin">qiānqiū</span>] a thousand years</td></tr>
-  <td rowspan=1> <span class="trad char">韆</span> [<span class="pinyin">qiān</span>] swing</td>
-   <td><span class="trad">韆鞦</span> [<span class="pinyin">qiūqiān</span>] swing</td></tr>
-<tr><th rowspan=4><span class="simp char">签</span></th>
-  <td rowspan=2> <span class="trad char">簽</span> [<span class="pinyin">qiān</span>] to sign / small wood sliver</td>
-   <td><span class="trad">簽署</span> [<span class="pinyin">qiānshǔ</span>] to sign</td></tr>
-   <td><span class="trad">牙簽</span> [<span class="pinyin">yáqiān</span>] toothpick</td></tr>
-  <td rowspan=2> <span class="trad char">籤</span> [<span class="pinyin">qiān</span>] label / small wood sliver</td>
-   <td><span class="trad">標籤</span> [<span class="pinyin">biāoqiān</span>] label / tag</td></tr>
-   <td><span class="trad">牙籤</span> [<span class="pinyin">yáqiān</span>] toothpick</td></tr>
-<tr><th rowspan=2><span class="simp char">纤</span></th>
-  <td rowspan=1> <span class="trad char">縴</span> [<span class="pinyin">qiàn</span>] boatman's tow rope</td>
-   <td><span class="trad">縴夫</span> [<span class="pinyin">qiànfū</span>] barge hauler</td></tr>
-  <td rowspan=1> <span class="trad char">纖</span> [<span class="pinyin">xiān</span>] delicate</td>
-   <td><span class="trad">纖維</span> [<span class="pinyin">xiānwéi</span>] fibre</td></tr>
-<tr><th rowspan=3><span class="simp char">秋</span></th>
-  <td rowspan=2> <span class="trad char">秋</span> [<span class="pinyin">qiū</span>] autumn</td>
-   <td><span class="trad">秋天</span> [<span class="pinyin">qiūtiān</span>] autumn</td></tr>
-   <td><span class="trad">千秋</span> [<span class="pinyin">qiānqiū</span>] a thousand years</td></tr>
-  <td rowspan=1> <span class="trad char">鞦</span> [<span class="pinyin">qiū</span>] swing</td>
-   <td><span class="trad">鞦韆</span> [<span class="pinyin">qiūqiān</span>] a swing</td></tr>
-<tr><th rowspan=4><span class="simp char">曲</span></th>
-  <td rowspan=2> <span class="trad char">曲</span> [<span class="pinyin">qū</span>] bent</td>
-   <td><span class="trad">曲折</span> [<span class="pinyin">qūzhé</span>] bent / twisted</td></tr>
-   <td><span class="trad">曲線</span> [<span class="pinyin">qūxiàn</span>] curved line / indirect</td></tr>
-  <td rowspan=2> <span class="trad char">曲</span> [<span class="pinyin">qǔ</span>] tune</td>
-   <td><span class="trad">歌曲</span> [<span class="pinyin">gēqǔ</span>] tune / song</td></tr>
-   <td><span class="trad">舞曲</span> [<span class="pinyin">wǔqǔ</span>] dance music</td></tr>
-<tr><th rowspan=4><span class="simp char">舍</span></th>
-  <td rowspan=2> <span class="trad char">捨</span> [<span class="pinyin">shě</span>] abandon</td>
-   <td><span class="trad">捨棄</span> [<span class="pinyin">shěqì</span>] to abandon</td></tr>
-   <td><span class="trad">捨不得</span> [<span class="pinyin">shěbude</span>] unwilling to give away</td></tr>
-  <td rowspan=2> <span class="trad char">舍</span> [<span class="pinyin">shè</span>] small dwelling</td>
-   <td><span class="trad">宿舍</span> [<span class="pinyin">sùshè</span>] dormitory</td></tr>
-   <td><span class="trad">旅舍</span> [<span class="pinyin">lǚshè</span>] inn / hostel</td></tr>
-<tr><th rowspan=3><span class="simp char">沈</span></th>
-  <td rowspan=2> <span class="trad char">沈</span> [<span class="pinyin">shěn</span>] place name / (surname)</td>
-   <td><span class="trad">沈丘</span> [<span class="pinyin">shěnqiū</span>] Shenqiu (county in Henan)</td></tr>
-   <td><span class="trad">沈從文</span> [<span class="pinyin">Shěn Cóngwén</span>] Shen Congwen (novelist)</td></tr>
-  <td rowspan=1> <span class="trad char">瀋</span> [<span class="pinyin">shěn</span>] place name</td>
-   <td><span class="trad">瀋陽</span> [<span class="pinyin">Shěnyáng</span>] Shenyang (city in Liaoning)</td></tr>
-<tr><th rowspan=3><span class="simp char">升</span></th>
-  <td rowspan=2> <span class="trad char">升</span> [<span class="pinyin">shēng</span>] to rise / litre</td>
-   <td><span class="trad">上升</span> [<span class="pinyin">shàngshēng</span>] to ascend</td></tr>
-   <td><span class="trad">公升</span> [<span class="pinyin">gōngshēng</span>] litre</td></tr>
-  <td rowspan=1> <span class="trad char">昇</span> [<span class="pinyin">shēng</span>] to rise</td>
-   <td><span class="trad">上昇</span> [<span class="pinyin">shàngshēng</span>] to ascend</td></tr>
-<tr><th rowspan=4><span class="simp char">松</span></th>
-  <td rowspan=2> <span class="trad char">松</span> [<span class="pinyin">sōng</span>] pine</td>
-   <td><span class="trad">松樹</span> [<span class="pinyin">sōngshù</span>] pine tree</td></tr>
-   <td><span class="trad">松鼠</span> [<span class="pinyin">sōngshǔ</span>] squirrel</td></tr>
-  <td rowspan=2> <span class="trad char">鬆</span> [<span class="pinyin">sōng</span>] relaxed</td>
-   <td><span class="trad">放鬆</span> [<span class="pinyin">fàngsōng</span>] to loosen</td></tr>
-   <td><span class="trad">輕鬆</span> [<span class="pinyin">qīngsōng</span>] relaxed</td></tr>
-<tr><th rowspan=5><span class="simp char">苏</span></th>
-  <td rowspan=1> <span class="trad char">甦</span> [<span class="pinyin">sū</span>] wake / recover</td>
-   <td><span class="trad">甦醒</span> [<span class="pinyin">sūxǐng</span>] awaken</td></tr>
-  <td rowspan=4> <span class="trad char">蘇</span> [<span class="pinyin">sū</span>] perilla (plant) / wake / (phonetic)</td>
-   <td><span class="trad">紫蘇</span> [<span class="pinyin">zǐsū</span>] basil</td></tr>
-   <td><span class="trad">江蘇</span> [<span class="pinyin">Jiāngsū</span>] Jiangsu province</td></tr>
-   <td><span class="trad">蘇軾</span> [<span class="pinyin">Sū Shì</span>] Su Shi (Song Dynastry writer)</td></tr>
-   <td><span class="trad">蘇醒</span> [<span class="pinyin">sūxǐng</span>] awaken</td></tr>
-<tr><th rowspan=9><span class="simp char">台</span></th>
-  <td rowspan=3> <span class="trad char">台</span> [<span class="pinyin">tái</span>] platform / (classical) you / (surname)</td>
-   <td><span class="trad">台灣</span> [<span class="pinyin">táiwān</span>] Taiwan (informal writing)</td></tr>
-   <td><span class="trad">電台</span> [<span class="pinyin">diàntái</span>] broadcasting station</td></tr>
-   <td><span class="trad">櫃台</span> [<span class="pinyin">guìtái</span>] counter / bar</td></tr>
-  <td rowspan=2> <span class="trad char">檯</span> [<span class="pinyin">tái</span>] desk / platform</td>
-   <td><span class="trad">檯燈</span> [<span class="pinyin">táidēng</span>] desk lamp</td></tr>
-   <td><span class="trad">櫃檯</span> [<span class="pinyin">guìtái</span>] counter / bar</td></tr>
-  <td rowspan=3> <span class="trad char">臺</span> [<span class="pinyin">tái</span>] platform / station</td>
-   <td><span class="trad">臺灣</span> [<span class="pinyin">táiwān</span>] Taiwan (formal writing)</td></tr>
-   <td><span class="trad">電臺</span> [<span class="pinyin">diàntái</span>] broadcasting station</td></tr>
-   <td><span class="trad">櫃臺</span> [<span class="pinyin">guìtái</span>] counter / bar</td></tr>
-  <td rowspan=1> <span class="trad char">颱</span> [<span class="pinyin">tái</span>] typhoon</td>
-   <td><span class="trad">颱風</span> [<span class="pinyin">táifēng</span>] typhoon / hurricane</td></tr>
-<tr><th rowspan=5><span class="simp char">托</span></th>
-  <td rowspan=3> <span class="trad char">托</span> [<span class="pinyin">tuō</span>] a rest / to entrust / (phonetic)</td>
-   <td><span class="trad">托架</span> [<span class="pinyin">tuōjià</span>] bracket</td></tr>
-   <td><span class="trad">委託</span> [<span class="pinyin">wěituō</span>] to entrust</td></tr>
-   <td><span class="trad">摩托</span> [<span class="pinyin">mótuō</span>] motor / motorbike</td></tr>
-  <td rowspan=2> <span class="trad char">託</span> [<span class="pinyin">tuō</span>] to entrust</td>
-   <td><span class="trad">委託</span> [<span class="pinyin">wěituō</span>] to entrust</td></tr>
-   <td><span class="trad">拜託</span> [<span class="pinyin">bàituō</span>] request sb to do sth</td></tr>
-<tr><th rowspan=7><span class="simp char">系</span></th>
-  <td rowspan=2> <span class="trad char">係</span> [<span class="pinyin">xì</span>] to connect / to be</td>
-   <td><span class="trad">關係</span> [<span class="pinyin">guānxi</span>] relationship</td></tr>
-   <td><span class="trad">聯係</span> [<span class="pinyin">liánxì</span>] to connect</td></tr>
-  <td rowspan=2> <span class="trad char">系</span> [<span class="pinyin">xì</span>] system / department</td>
-   <td><span class="trad">系統</span> [<span class="pinyin">xìtǒng</span>] system</td></tr>
-   <td><span class="trad">數學系</span> [<span class="pinyin">shùxué xì</span>] mathematics department</td></tr>
-  <td rowspan=3> <span class="trad char">繫</span> [<span class="pinyin">xì/jì</span>] to tie / to fasten / to connect</td>
-   <td><span class="trad">繫安全帶</span> [<span class="pinyin">jì ānquándài</span>] to fasten a seatbelt</td></tr>
-   <td><span class="trad">繫緊</span> [<span class="pinyin">jì jǐn</span>] to bind tightly</td></tr>
-   <td><span class="trad">聯繫</span> [<span class="pinyin">liánxì</span>] to connect</td></tr>
-<tr><th rowspan=3><span class="simp char">咸</span></th>
-  <td rowspan=1> <span class="trad char">咸</span> [<span class="pinyin">xián</span>] harmonious / all / (surname)</td>
-   <td><span class="trad">老少咸宜</span> [<span class="pinyin">lǎo shào xián yí</span>] appropriate for all ages</td></tr>
-  <td rowspan=2> <span class="trad char">鹹</span> [<span class="pinyin">xián</span>] salty</td>
-   <td><span class="trad">鹹水</span> [<span class="pinyin">xiánshuǐ</span>] saltwater / brine</td></tr>
-   <td><span class="trad">鹹肉</span> [<span class="pinyin">xiánròu</span>] bacon / salt-cured meat</td></tr>
-<tr><th rowspan=6><span class="simp char">向</span></th>
-  <td rowspan=3> <span class="trad char">向</span> [<span class="pinyin">xiàng</span>] towards / direction / (surname)</td>
-   <td><span class="trad">方向</span> [<span class="pinyin">fāngxiàng</span>] direction</td></tr>
-   <td><span class="trad">向上</span> [<span class="pinyin">xiàngshàng</span>] upward</td></tr>
-   <td><span class="trad">導向</span> [<span class="pinyin">dǎoxiàng</span>] orientation</td></tr>
-  <td rowspan=3> <span class="trad char">嚮</span> [<span class="pinyin">xiàng</span>] towards / guide / (surname)</td>
-   <td><span class="trad">嚮導</span> [<span class="pinyin">xiàngdǎo</span>] guide</td></tr>
-   <td><span class="trad">嚮往</span> [<span class="pinyin">xiàngwǎng</span>] to yearn for</td></tr>
-   <td><span class="trad">面嚮</span> [<span class="pinyin">miànxiàng</span>] to turn towards</td></tr>
-<tr><th rowspan=5><span class="simp char">须</span></th>
-  <td rowspan=3> <span class="trad char">須</span> [<span class="pinyin">xū</span>] must</td>
-   <td><span class="trad">必須</span> [<span class="pinyin">bìxū</span>] must</td></tr>
-   <td><span class="trad">須知</span> [<span class="pinyin">xūzhī</span>] rules that must be known</td></tr>
-   <td><span class="trad">莫須有</span> [<span class="pinyin">mòxūyǒu</span>] groundless</td></tr>
-  <td rowspan=2> <span class="trad char">鬚</span> [<span class="pinyin">xū</span>] beard</td>
-   <td><span class="trad">鬍鬚</span> [<span class="pinyin">húxū</span>] beard</td></tr>
-   <td><span class="trad">卷鬚</span> [<span class="pinyin">juǎnxū</span>] tendril</td></tr>
-<tr><th rowspan=5><span class="simp char">旋</span></th>
-  <td rowspan=1> <span class="trad char">旋</span> [<span class="pinyin">xuàn</span>] to whirl / immediately</td>
-   <td><span class="trad">旋風</span> [<span class="pinyin">xuànfēng</span>] whirlwind / tornado</td></tr>
-  <td rowspan=2> <span class="trad char">旋</span> [<span class="pinyin">xuán</span>] to turn</td>
-   <td><span class="trad">旋轉</span> [<span class="pinyin">xuánzhuǎn</span>] to rotate / to spin</td></tr>
-   <td><span class="trad">旋律</span> [<span class="pinyin">xuánlǜ</span>] melody / rhythm</td></tr>
-  <td rowspan=2> <span class="trad char">鏇</span> [<span class="pinyin">xuàn</span>] to turn on a lathe</td>
-   <td><span class="trad">鏇床</span> [<span class="pinyin">xuànchuáng</span>] lathe</td></tr>
-   <td><span class="trad">鏇木</span> [<span class="pinyin">xuànmù</span>] wood turning</td></tr>
-<tr><th rowspan=3><span class="simp char">叶</span></th>
-  <td rowspan=1> <span class="trad char">叶</span> [<span class="pinyin">xié</span>] to be in harmony</td>
-   <td><span class="trad">叶韻</span> [<span class="pinyin">xiéyùn</span>] to rhyme</td></tr>
-  <td rowspan=2> <span class="trad char">葉</span> [<span class="pinyin">yè</span>] leaf / (surname)</td>
-   <td><span class="trad">葉子</span> [<span class="pinyin">yèzi</span>] leaf</td></tr>
-   <td><span class="trad">葉問</span> [<span class="pinyin">Yè Wèn</span>] Yip Man</td></tr>
-<tr><th rowspan=3><span class="simp char">佣</span></th>
-  <td rowspan=1> <span class="trad char">佣</span> [<span class="pinyin">yòng</span>] commission</td>
-   <td><span class="trad">佣金</span> [<span class="pinyin">yòngjīn</span>] commission</td></tr>
-  <td rowspan=2> <span class="trad char">傭</span> [<span class="pinyin">yōng</span>] servant</td>
-   <td><span class="trad">傭人</span> [<span class="pinyin">yōngrén</span>] servant</td></tr>
-   <td><span class="trad">傭金</span> [<span class="pinyin">yōngjīn</span>] commission</td></tr>
-<tr><th rowspan=5><span class="simp char">游</span></th>
-  <td rowspan=2> <span class="trad char">游</span> [<span class="pinyin">yóu</span>] to wander / to swim</td>
-   <td><span class="trad">游泳</span> [<span class="pinyin">yóuyǒng</span>] swimming</td></tr>
-   <td><span class="trad">下游</span> [<span class="pinyin">xiàyóu</span>] downstream</td></tr>
-  <td rowspan=3> <span class="trad char">遊</span> [<span class="pinyin">yóu</span>] to wander</td>
-   <td><span class="trad">遊覽</span> [<span class="pinyin">yóulǎn</span>] to tour / to visit</td></tr>
-   <td><span class="trad">遊戲</span> [<span class="pinyin">yóuxì</span>] game</td></tr>
-   <td><span class="trad">下遊</span> [<span class="pinyin">xiàyóu</span>] downstream</td></tr>
-<tr><th rowspan=3><span class="simp char">余</span></th>
-  <td rowspan=1> <span class="trad char">余</span> [<span class="pinyin">yú</span>] I (archaic) / (surname)</td>
-   <td><span class="trad">余先生</span> [<span class="pinyin">yú xiānshēng</span>] Mr Yu</td></tr>
-  <td rowspan=2> <span class="trad char">餘</span> [<span class="pinyin">yú</span>] leftover / extra / (surname)</td>
-   <td><span class="trad">餘地</span> [<span class="pinyin">yúdì</span>] leeway / margin</td></tr>
-   <td><span class="trad">多餘</span> [<span class="pinyin">duōyú</span>] surplus / unnecessary</td></tr>
-<tr><th rowspan=2><span class="simp char">吁</span></th>
-  <td rowspan=1> <span class="trad char">吁</span> [<span class="pinyin">xū</span>] sh / hush</td>
-   <td><span class="trad">吁吁</span> [<span class="pinyin">xū xū</span>] to pant</td></tr>
-  <td rowspan=1> <span class="trad char">籲</span> [<span class="pinyin">yù</span>] to implore</td>
-   <td><span class="trad">呼籲</span> [<span class="pinyin">hū yù</span>] to appeal to sb</td></tr>
-<tr><th rowspan=4><span class="simp char">御</span></th>
-  <td rowspan=2> <span class="trad char">御</span> [<span class="pinyin">yù</span>] imperial / to govern</td>
-   <td><span class="trad">御賜</span> [<span class="pinyin">yùcì</span>] to be bestowed by the emperor</td></tr>
-   <td><span class="trad">御史</span> [<span class="pinyin">yùshǐ</span>] imperial censor</td></tr>
-  <td rowspan=2> <span class="trad char">禦</span> [<span class="pinyin">yù</span>] to resist</td>
-   <td><span class="trad">防禦</span> [<span class="pinyin">fángyù</span>] defense</td></tr>
-   <td><span class="trad">禦寒</span> [<span class="pinyin">yù hán</span>] cold resistant</td></tr>
-<tr><th rowspan=5><span class="simp char">郁</span></th>
-  <td rowspan=2> <span class="trad char">郁</span> [<span class="pinyin">yù</span>] (surname)</td>
-   <td><span class="trad">姓郁</span> [<span class="pinyin">xìng yù</span>] surname Yu</td></tr>
-   <td><span class="trad">郁達夫</span> [<span class="pinyin">Yù Dáfú</span>] Yu Dafu (writer)</td></tr>
-  <td rowspan=3> <span class="trad char">鬱</span> [<span class="pinyin">yù</span>] dense / melancholy / (surname)</td>
-   <td><span class="trad">濃鬱</span> [<span class="pinyin">nóngyù</span>] dense (e.g. forest)</td></tr>
-   <td><span class="trad">憂鬱</span> [<span class="pinyin">yōuyù</span>] depressed</td></tr>
-   <td><span class="trad">鬱昭敏</span> [<span class="pinyin">Yù Zhāomǐn</span>] Yu Zhaomin (Song dynasty official)</td></tr>
-<tr><th rowspan=4><span class="simp char">云</span></th>
-  <td rowspan=2> <span class="trad char">云</span> [<span class="pinyin">yún</span>] to say</td>
-   <td><span class="trad">語云</span> [<span class="pinyin">yǔ yún</span>] as the saying goes...</td></tr>
-   <td><span class="trad">云云</span> [<span class="pinyin">yúnyún</span>] and so on</td></tr>
-  <td rowspan=2> <span class="trad char">雲</span> [<span class="pinyin">yún</span>] cloud</td>
-   <td><span class="trad">白雲</span> [<span class="pinyin">bái yún</span>] white cloud</td></tr>
-   <td><span class="trad">多雲</span> [<span class="pinyin">dōuyún</span>] cloudy (meteorology)</td></tr>
-<tr><th rowspan=8><span class="simp char">扎</span></th>
-  <td rowspan=1> <span class="trad char">扎</span> [<span class="pinyin">zhá</span>] struggle</td>
-   <td><span class="trad">掙扎</span> [<span class="pinyin">zhēngzhá</span>] to struggle</td></tr>
-  <td rowspan=3> <span class="trad char">扎</span> [<span class="pinyin">zhā</span>] pierce / (phonetic)</td>
-   <td><span class="trad">扎針</span> [<span class="pinyin">zhāzhēn</span>] to prick with a needle</td></tr>
-   <td><span class="trad">扎堆</span> [<span class="pinyin">zhāduī</span>] to gather together</td></tr>
-   <td><span class="trad">扎啤</span> [<span class="pinyin">zhāpí</span>] draught beer</td></tr>
-  <td rowspan=2> <span class="trad char">紮</span> [<span class="pinyin">zhā</span>] military stationing</td>
-   <td><span class="trad">駐紮</span> [<span class="pinyin">zhùzhā</span>] to station troops</td></tr>
-   <td><span class="trad">紮營</span> [<span class="pinyin">zhāyíng, TW zháyíng</span>] to camp</td></tr>
-  <td rowspan=2> <span class="trad char">紮</span> [<span class="pinyin">zā, TW zhā</span>] to tie / to bind</td>
-   <td><span class="trad">捆紮</span> [<span class="pinyin">kǔnzā</span>] to bind together</td></tr>
-   <td><span class="trad">包紮</span> [<span class="pinyin">bāozā</span>] to package together</td></tr>
-<tr><th rowspan=4><span class="simp char">脏</span></th>
-  <td rowspan=2> <span class="trad char">臟</span> [<span class="pinyin">zàng</span>] organ</td>
-   <td><span class="trad">臟器</span> [<span class="pinyin">zàngqì</span>] internal organs</td></tr>
-   <td><span class="trad">心臟</span> [<span class="pinyin">xīnzàng</span>] heart (organ)</td></tr>
-  <td rowspan=2> <span class="trad char">髒</span> [<span class="pinyin">zāng</span>] dirty</td>
-   <td><span class="trad">骯髒</span> [<span class="pinyin">āngzāng</span>] dirty</td></tr>
-   <td><span class="trad">髒話</span> [<span class="pinyin">zānghuà</span>] profanity</td></tr>
-<tr><th rowspan=3><span class="simp char">占</span></th>
-  <td rowspan=1> <span class="trad char">佔</span> [<span class="pinyin">zhàn</span>] to occupy</td>
-   <td><span class="trad">佔有</span> [<span class="pinyin">zhàn yǒu</span>] to have / to hold</td></tr>
-  <td rowspan=2> <span class="trad char">占</span> [<span class="pinyin">zhān</span>] foretell</td>
-   <td><span class="trad">占卜</span> [<span class="pinyin">zhānbǔ</span>] to divine</td></tr>
-   <td><span class="trad">占星學</span> [<span class="pinyin">zhānxīngxué</span>] astrology</td></tr>
-<tr><th rowspan=7><span class="simp char">折</span></th>
-  <td rowspan=1> <span class="trad char">折</span> [<span class="pinyin">shé</span>] to break / loss</td>
-   <td><span class="trad">折本</span> [<span class="pinyin">shéběn</span>] to lose money</td></tr>
-  <td rowspan=4> <span class="trad char">折</span> [<span class="pinyin">zhé</span>] to bend</td>
-   <td><span class="trad">曲折</span> [<span class="pinyin">qūzhé</span>] complicated / winding</td></tr>
-   <td><span class="trad">折光</span> [<span class="pinyin">zhéguāng</span>] refraction</td></tr>
-   <td><span class="trad">折中</span> [<span class="pinyin">zhézhōng</span>] to compromise</td></tr>
-   <td><span class="trad">打折</span> [<span class="pinyin">dǎ zhé</span>] to give a discount</td></tr>
-  <td rowspan=2> <span class="trad char">摺</span> [<span class="pinyin">zhé</span>] to bend / to fold (narrow meaning)</td>
-   <td><span class="trad">摺光</span> [<span class="pinyin">zhéguāng</span>] refraction</td></tr>
-   <td><span class="trad">摺紙</span> [<span class="pinyin">zhézhǐ</span>] paper folding</td></tr>
-<tr><th rowspan=5><span class="simp char">征</span></th>
-  <td rowspan=2> <span class="trad char">征</span> [<span class="pinyin">zhēng</span>] journey / expedition</td>
-   <td><span class="trad">征途</span> [<span class="pinyin">zhēngtú</span>] long journey</td></tr>
-   <td><span class="trad">征服</span> [<span class="pinyin">zhēngfú</span>] to conquer</td></tr>
-  <td rowspan=3> <span class="trad char">徵</span> [<span class="pinyin">zhēng</span>] to solicit / to seek</td>
-   <td><span class="trad">徵召</span> [<span class="pinyin">zhēngzhào</span>] to enlist / to draft</td></tr>
-   <td><span class="trad">象徵</span> [<span class="pinyin">xiàngzhēng</span>] symbol / to symbolize</td></tr>
-   <td><span class="trad">特徵</span> [<span class="pinyin">tèzhēng</span>] characteristic</td></tr>
-<tr><th rowspan=4><span class="simp char">只</span></th>
-  <td rowspan=2> <span class="trad char">只{衹}</span> [<span class="pinyin">zhǐ</span>] but / only</td>
-   <td><span class="trad">只有</span> [<span class="pinyin">zhǐyǒu</span>] only</td></tr>
-   <td><span class="trad">只不過</span> [<span class="pinyin">zhǐ bùguò</span>] it's just that</td></tr>
-  <td rowspan=2> <span class="trad char">隻</span> [<span class="pinyin">zhī</span>] classifier for animals</td>
-   <td><span class="trad">一隻鳥</span> [<span class="pinyin">yī zhī niǎo</span>] one bird</td></tr>
-   <td><span class="trad">隻身</span> [<span class="pinyin">zhīshēn</span>] by oneself</td></tr>
-<tr><th rowspan=6><span class="simp char">制</span></th>
-  <td rowspan=3> <span class="trad char">制</span> [<span class="pinyin">zhì</span>] control / system</td>
-   <td><span class="trad">控制</span> [<span class="pinyin">kòngzhì</span>] control</td></tr>
-   <td><span class="trad">制度</span> [<span class="pinyin">zhìdù</span>] system</td></tr>
-   <td><span class="trad">抑制</span> [<span class="pinyin">yìzhì</span>] inhibition</td></tr>
-  <td rowspan=3> <span class="trad char">製</span> [<span class="pinyin">zhì</span>] to make</td>
-   <td><span class="trad">製造</span> [<span class="pinyin">zhìzào</span>] to manufacture</td></tr>
-   <td><span class="trad">製作</span> [<span class="pinyin">zhiìzuò</span>] make / manufacture</td></tr>
-   <td><span class="trad">複製</span> [<span class="pinyin">fùzhì</span>] to copy</td></tr>
-<tr><th rowspan=4><span class="simp char">志</span></th>
-  <td rowspan=2> <span class="trad char">志</span> [<span class="pinyin">zhì</span>] ambition</td>
-   <td><span class="trad">意志</span> [<span class="pinyin">yìzhì</span>] will / determination</td></tr>
-   <td><span class="trad">志願</span> [<span class="pinyin">zhìyuàn</span>] aspiration / volunteer</td></tr>
-  <td rowspan=2> <span class="trad char">誌</span> [<span class="pinyin">zhì</span>] records</td>
-   <td><span class="trad">雜誌</span> [<span class="pinyin">zázhì</span>] magazine</td></tr>
-   <td><span class="trad">標誌</span> [<span class="pinyin">biāozhì</span>] sign / symbol</td></tr>
-<tr><th rowspan=4><span class="simp char">致</span></th>
-  <td rowspan=2> <span class="trad char">緻</span> [<span class="pinyin">zhì</span>] fine / delicate</td>
-   <td><span class="trad">精緻</span> [<span class="pinyin">jīngzhì</span>] fine / delicate</td></tr>
-   <td><span class="trad">密緻</span> [<span class="pinyin">mìzhì</span>] closely-spaced / dense</td></tr>
-  <td rowspan=2> <span class="trad char">致</span> [<span class="pinyin">zhì</span>] to send / to convey</td>
-   <td><span class="trad">一致</span> [<span class="pinyin">yīzhì</span>] unanimous</td></tr>
-   <td><span class="trad">導致</span> [<span class="pinyin">dǎozhì</span>] to lead to</td></tr>
-<tr><th rowspan=4><span class="simp char">钟</span></th>
-  <td rowspan=2> <span class="trad char">鍾</span> [<span class="pinyin">zhōng</span>] goblet / (surname)</td>
-   <td><span class="trad">鍾情</span> [<span class="pinyin">zhōngqíng</span>] madly in love</td></tr>
-   <td><span class="trad">龍鍾</span> [<span class="pinyin">lóngzhōng</span>] decrepit / senile</td></tr>
-  <td rowspan=2> <span class="trad char">鐘</span> [<span class="pinyin">zhōng</span>] clock / (surname)</td>
-   <td><span class="trad">鐘頭</span> [<span class="pinyin">zhōngtóu</span>] hour</td></tr>
-   <td><span class="trad">時鐘</span> [<span class="pinyin">shízhōng</span>] clock</td></tr>
-<tr><th rowspan=5><span class="simp char">周</span></th>
-  <td rowspan=2> <span class="trad char">周</span> [<span class="pinyin">zhōu</span>] surround / Zhou Dynasty / surname</td>
-   <td><span class="trad">周朝</span> [<span class="pinyin">zhōucháo</span>] Zhou Dynasty</td></tr>
-   <td><span class="trad">周圍</span> [<span class="pinyin">zhōuwéi</span>] surroundings</td></tr>
-  <td rowspan=3> <span class="trad char">週</span> [<span class="pinyin">zhōu</span>] surround / week</td>
-   <td><span class="trad">週末</span> [<span class="pinyin">zhōumò</span>] weekend</td></tr>
-   <td><span class="trad">週圍</span> [<span class="pinyin">zhōuwéi</span>] surroundings</td></tr>
-   <td><span class="trad">週年</span> [<span class="pinyin">zhōunián</span>] (yearly) anniversary</td></tr>
-<tr><th rowspan=5><span class="simp char">注</span></th>
-  <td rowspan=2> <span class="trad char">注</span> [<span class="pinyin">zhù</span>] to pour into / to pay attention to</td>
-   <td><span class="trad">注意</span> [<span class="pinyin">zhùyì</span>] to pay attention to</td></tr>
-   <td><span class="trad">注射</span> [<span class="pinyin">zhùshè</span>] to inject</td></tr>
-  <td rowspan=3> <span class="trad char">註</span> [<span class="pinyin">zhù</span>] to note down / to annotate</td>
-   <td><span class="trad">註冊</span> [<span class="pinyin">zhùcè</span>] to register</td></tr>
-   <td><span class="trad">註定</span> [<span class="pinyin">zhùdìng</span>] be doomed</td></tr>
-   <td><span class="trad">註腳</span> [<span class="pinyin">zhùjiǎo</span>] footnote</td></tr>
-<tr><th rowspan=7><span class="simp char">准</span></th>
-  <td rowspan=2> <span class="trad char">准</span> [<span class="pinyin">zhǔn</span>] to allow</td>
-   <td><span class="trad">不准</span> [<span class="pinyin">bù zhǔn</span>] not allowed</td></tr>
-   <td><span class="trad">批准</span> [<span class="pinyin">pī zhǔn</span>] to ratify</td></tr>
-  <td rowspan=5> <span class="trad char">準</span> [<span class="pinyin">zhǔn</span>] accurate</td>
-   <td><span class="trad">標準</span> [<span class="pinyin">biāozhǔn</span>] standard</td></tr>
-   <td><span class="trad">準備</span> [<span class="pinyin">zhǔnbèi</span>] prepare</td></tr>
-   <td><span class="trad">準確</span> [<span class="pinyin">zhǔnquè</span>] accurate</td></tr>
-   <td><span class="trad">沒準兒</span> [<span class="pinyin">méi zhǔnr</span>] not sure</td></tr>
-   <td><span class="trad">水準</span> [<span class="pinyin">shuǐzhǔn</span>] horizontal / level</td></tr>
-</table>
-</body>
+      .trad {
+        color: #8b4513;
+      }
+
+      .simp {
+        color: #2e8b57;
+      }
+
+      .pinyin {
+        color: #8a2be2;
+        font-style: italic;
+      }
+
+      .meaning {
+        color: #333;
+      }
+
+      .example {
+        margin: 0.25em 0;
+      }
+
+      .intro {
+        margin: 2rem 0;
+        line-height: 1.6;
+      }
+
+      @media (max-width: 768px) {
+        .table-container {
+          font-size: 0.9em;
+        }
+
+        th,
+        td {
+          padding: 0.5em;
+        }
+
+        .char {
+          font-size: 1.1em;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <h1>Simplified-Traditional One-to-Many Relationships</h1>
+        <p>Traditional characters that were merged during simplification</p>
+      </header>
+
+      <main class="main-content">
+        <section class="section">
+          <div class="intro">
+            <p>
+              When the official set of simplified characters was drawn up, several different methods
+              were used to select simplified characters. One such method was to use one relatively
+              simple character to write another more complicated character; for example, the
+              character 后 (originally meaning 'empress') is used to write '後' (meaning 'behind,
+              after'). In other cases, two similarly pronounced characters were simplified with the
+              same simplified character; for example, both 復 and 複 were simplified as 复.
+            </p>
+
+            <p>
+              The purpose of this kind of simplification was originally to decrease the total number
+              of characters that students have to learn to be literate. However, it has created a
+              problem for students who know how to write simplified who want to learn to use
+              traditional characters: they must learn to make new distinctions between characters.
+            </p>
+
+            <p>
+              Sometimes, each of the traditional characters that corresponds to a given simplified
+              character have distinct meanings thus it's easy to decide which one to use; at other
+              times, two of the traditional characters may be interchangeable in certain situations.
+              The table below shows simplified characters that correspond to multiple traditional
+              characters, as well as the different meanings of each of the different traditional
+              characters.
+            </p>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>Character Relationships</h2>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th width="10%">Simplified Character</th>
+                  <th width="30%">Traditional Character</th>
+                  <th>Examples</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th rowspan="3"><span class="simp char">板</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">板</span> [<span class="pinyin">ban3</span>]
+                  </td>
+                  <td>
+                    <span class="trad">黑板</span> [<span class="pinyin">ban3</span>] blackboard
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">木板</span> [<span class="pinyin">ban3</span>] wooden plank
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="1">
+                    <span class="trad char">闆</span> [<span class="pinyin">ban3</span>]
+                  </td>
+                  <td><span class="trad">老闆</span> [<span class="pinyin">ban3</span>] boss</td>
+                </tr>
+                <tr>
+                  <th rowspan="7"><span class="simp char">杯</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">杯</span> [<span class="pinyin">bei1</span>]
+                  </td>
+                  <td><span class="trad">杯子</span> [<span class="pinyin">bei1</span>] a cup</td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">玻璃杯</span> [<span class="pinyin">bei1</span>] a glass
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="1">
+                    <span class="trad char">盃</span> [<span class="pinyin">bei1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">世界盃</span> [<span class="pinyin">bei1</span>] World Cup
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">讚</span> [<span class="pinyin">bei1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">稱讚 称赞</span> [<span class="pinyin">bei1</span>] to praise
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">讚美 赞美</span> [<span class="pinyin">bei1</span>] to praise
+                    / to admire
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">贊</span> [<span class="pinyin">bei1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">贊成</span> [<span class="pinyin">bei1</span>]
+                    /approve/endorse/
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">贊助</span> [<span class="pinyin">bei1</span>] /to support/to
+                    assist/sponsor/
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="4"><span class="simp char">表</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">表</span> [<span class="pinyin">biao3</span>]
+                  </td>
+                  <td>
+                    <span class="trad">表示</span> [<span class="pinyin">biao3</span>] to show
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">表面</span> [<span class="pinyin">biao3</span>] surface /
+                    appearance
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">錶</span> [<span class="pinyin">biao3</span>]
+                  </td>
+                  <td><span class="trad">鐘錶</span> [<span class="pinyin">biao3</span>] clock</td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">手錶</span> [<span class="pinyin">biao3</span>] wristwatch
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="8"><span class="simp char">别</span></th>
+                  <td rowspan="4">
+                    <span class="trad char">別</span> [<span class="pinyin">bie2</span>]
+                  </td>
+                  <td>
+                    <span class="trad">別人</span> [<span class="pinyin">bie2</span>] other people
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">告別</span> [<span class="pinyin">bie2</span>] to bid
+                    farewell
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">識別</span> [<span class="pinyin">bie2</span>] to discern
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">別客氣</span> [<span class="pinyin">bie2</span>] don't
+                    mention it
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="1">
+                    <span class="trad char">卜</span> [<span class="pinyin">bie2</span>]
+                  </td>
+                  <td>
+                    <span class="trad">占卜</span> [<span class="pinyin">bie2</span>] to divine
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="1">
+                    <span class="trad char">彆</span> [<span class="pinyin">bie2</span>]
+                  </td>
+                  <td>
+                    <span class="trad">彆扭</span> [<span class="pinyin">bie2</span>] awkward /
+                    difficult
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">蔔</span> [<span class="pinyin">bie2</span>]
+                  </td>
+                  <td><span class="trad">蘿蔔</span> [<span class="pinyin">bie2</span>] turnip</td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">胡蘿蔔</span> [<span class="pinyin">bie2</span>] carrots
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="4"><span class="simp char">并</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">並{并}</span> [<span class="pinyin">bing4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">並不</span> [<span class="pinyin">bing4</span>] not at all /
+                    not in fact
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">一並</span> [<span class="pinyin">bing4</span>] to lump
+                    together
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">併</span> [<span class="pinyin">bing4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">合併</span> [<span class="pinyin">bing4</span>] to merge
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">一併</span> [<span class="pinyin">bing4</span>] to lump
+                    together
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="3"><span class="simp char">布</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">佈</span> [<span class="pinyin">bu4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">佈告</span> [<span class="pinyin">bu4</span>] notice /
+                    bulletin
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">分佈</span> [<span class="pinyin">bu4</span>] to distribute
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="1">
+                    <span class="trad char">布</span> [<span class="pinyin">bu4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">桌布</span> [<span class="pinyin">bu4</span>] tablecloth
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="3"><span class="simp char">才</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">才</span> [<span class="pinyin">cai2</span>]
+                  </td>
+                  <td><span class="trad">天才</span> [<span class="pinyin">cai2</span>] genius</td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">剛才</span> [<span class="pinyin">cai2</span>] just then
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="1">
+                    <span class="trad char">纔</span> [<span class="pinyin">cai2</span>]
+                  </td>
+                  <td>
+                    <span class="trad">剛纔</span> [<span class="pinyin">cai2</span>] just then
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="4"><span class="simp char">彩</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">彩</span> [<span class="pinyin">cai3</span>]
+                  </td>
+                  <td>
+                    <span class="trad">彩色</span> [<span class="pinyin">cai3</span>] multi-color
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">精彩</span> [<span class="pinyin">cai3</span>] brilliant
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">綵</span> [<span class="pinyin">cai3</span>]
+                  </td>
+                  <td>
+                    <span class="trad">綵旗</span> [<span class="pinyin">cai3</span>] colored flag
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">剪綵</span> [<span class="pinyin">cai3</span>] to cut the
+                    ribbon
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="4"><span class="simp char">采</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">採</span> [<span class="pinyin">cai3</span>]
+                  </td>
+                  <td>
+                    <span class="trad">採取</span> [<span class="pinyin">cai3</span>] to adopt / to
+                    take
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">採果</span> [<span class="pinyin">cai3</span>] fruit picking
+                    / to pick fruit
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">采</span> [<span class="pinyin">cai3</span>]
+                  </td>
+                  <td>
+                    <span class="trad">風采</span> [<span class="pinyin">cai3</span>] elegant manner
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">神采</span> [<span class="pinyin">cai3</span>] expression /
+                    bright
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="5"><span class="simp char">冲</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">沖</span> [<span class="pinyin">chong1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">沖洗</span> [<span class="pinyin">chong1</span>] to rinse /
+                    to wash
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">沖刷</span> [<span class="pinyin">chong1</span>] to scrub /
+                    to scour
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="3">
+                    <span class="trad char">衝</span> [<span class="pinyin">chong1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">衝突</span> [<span class="pinyin">chong1</span>] conflict /
+                    clash
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">衝刺</span> [<span class="pinyin">chong1</span>] to sprint
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">要衝</span> [<span class="pinyin">chong1</span>] major
+                    crossroad
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="4"><span class="simp char">丑</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">丑</span> [<span class="pinyin">chou3</span>]
+                  </td>
+                  <td><span class="trad">丑時</span> [<span class="pinyin">chou3</span>] 1-3 am</td>
+                </tr>
+                <tr>
+                  <td><span class="trad">小丑</span> [<span class="pinyin">chou3</span>] clown</td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">醜</span> [<span class="pinyin">chou3</span>]
+                  </td>
+                  <td><span class="trad">醜陋</span> [<span class="pinyin">chou3</span>] ugly</td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">醜事</span> [<span class="pinyin">chou3</span>] scandal
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="3"><span class="simp char">出</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">出</span> [<span class="pinyin">chu1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">出去</span> [<span class="pinyin">chu1</span>] to go out
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">出來</span> [<span class="pinyin">chu1</span>] to come out
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="1">
+                    <span class="trad char">齣</span> [<span class="pinyin">chu1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">一齣戲</span> [<span class="pinyin">chu1</span>] one play
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="3"><span class="simp char">冬</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">冬</span> [<span class="pinyin">dong1</span>]
+                  </td>
+                  <td><span class="trad">冬天</span> [<span class="pinyin">dong1</span>] winter</td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">冬至</span> [<span class="pinyin">dong1</span>] winter
+                    solstice
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="1">
+                    <span class="trad char">鼕</span> [<span class="pinyin">dong1</span>]
+                  </td>
+                  <td><span class="trad">鼕</span> [<span class="pinyin">dong1</span>] Mr Dong</td>
+                </tr>
+                <tr>
+                  <th rowspan="4"><span class="simp char">斗</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">斗</span> [<span class="pinyin">dou3</span>]
+                  </td>
+                  <td>
+                    <span class="trad">公斗</span> [<span class="pinyin">dou3</span>] decaliter
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="trad">星斗</span> [<span class="pinyin">dou3</span>] stars</td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">鬥{鬪}</span> [<span class="pinyin">dou3</span>]
+                  </td>
+                  <td><span class="trad">戰鬥</span> [<span class="pinyin">dou3</span>] fight</td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">鬥爭</span> [<span class="pinyin">dou3</span>] struggle
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="4"><span class="simp char">发</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">發</span> [<span class="pinyin">fa1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">出發</span> [<span class="pinyin">fa1</span>] to head off
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">發生</span> [<span class="pinyin">fa1</span>] to happen
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">髮</span> [<span class="pinyin">fa1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">髮型</span> [<span class="pinyin">fa1</span>] hairstyle
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">頭髮</span> [<span class="pinyin">fa1</span>] hair on the
+                    head
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="3"><span class="simp char">范</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">範</span> [<span class="pinyin">fan4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">規範</span> [<span class="pinyin">fan4</span>] standard /
+                    regulation
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">範圍</span> [<span class="pinyin">fan4</span>] range / scope
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="1">
+                    <span class="trad char">范</span> [<span class="pinyin">fan4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">范先生</span> [<span class="pinyin">fan4</span>] Mr Fan
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="5"><span class="simp char">复</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">復</span> [<span class="pinyin">fu4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">反復</span> [<span class="pinyin">fu4</span>] repeatedly
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">恢復</span> [<span class="pinyin">fu4</span>] to recover
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="3">
+                    <span class="trad char">複</span> [<span class="pinyin">fu4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">複雜</span> [<span class="pinyin">fu4</span>] complicated
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="trad">複合</span> [<span class="pinyin">fu4</span>] compound</td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">重複</span> [<span class="pinyin">fu4</span>] to duplicate
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="8"><span class="simp char">干</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">乾</span> [<span class="pinyin">gan1</span>]
+                  </td>
+                  <td><span class="trad">乾燥</span> [<span class="pinyin">gan1</span>] dry</td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">乾娘</span> [<span class="pinyin">gan1</span>] godmother
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">干</span> [<span class="pinyin">gan1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">干涉</span> [<span class="pinyin">gan1</span>] to interfere
+                    with
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">干戈</span> [<span class="pinyin">gan1</span>] weapons of war
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="3">
+                    <span class="trad char">幹</span> [<span class="pinyin">gan1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">主幹</span> [<span class="pinyin">gan1</span>] main / core
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">樹幹</span> [<span class="pinyin">gan1</span>] tree trunk
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">幹嘛</span> [<span class="pinyin">gan1</span>] what are you
+                    doing?
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="1">
+                    <span class="trad char">榦</span> [<span class="pinyin">gan1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">樹榦</span> [<span class="pinyin">gan1</span>] tree trunk
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="4"><span class="simp char">谷</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">穀</span> [<span class="pinyin">gu3</span>]
+                  </td>
+                  <td>
+                    <span class="trad">穀物</span> [<span class="pinyin">gu3</span>] grain / cereal
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">五穀</span> [<span class="pinyin">gu3</span>] the five crops
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">谷</span> [<span class="pinyin">gu3</span>]
+                  </td>
+                  <td>
+                    <span class="trad">低谷</span> [<span class="pinyin">gu3</span>] valley / low
+                    point
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="trad">峽谷</span> [<span class="pinyin">gu3</span>] canyon</td>
+                </tr>
+                <tr>
+                  <th rowspan="3"><span class="simp char">刮</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">刮</span> [<span class="pinyin">gua1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">刮掉</span> [<span class="pinyin">gua1</span>] to scrape off
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="trad">刮鏟</span> [<span class="pinyin">gua1</span>] scraper</td>
+                </tr>
+                <tr>
+                  <td rowspan="1">
+                    <span class="trad char">颳</span> [<span class="pinyin">gua1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">颳風</span> [<span class="pinyin">gua1</span>] to be windy
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="4"><span class="simp char">后</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">后</span> [<span class="pinyin">hou4</span>]
+                  </td>
+                  <td><span class="trad">皇后</span> [<span class="pinyin">hou4</span>] empress</td>
+                </tr>
+                <tr>
+                  <td><span class="trad">王后</span> [<span class="pinyin">hou4</span>] queen</td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">後</span> [<span class="pinyin">hou4</span>]
+                  </td>
+                  <td><span class="trad">後面</span> [<span class="pinyin">hou4</span>] behind</td>
+                </tr>
+                <tr>
+                  <td><span class="trad">以後</span> [<span class="pinyin">hou4</span>] after</td>
+                </tr>
+                <tr>
+                  <th rowspan="5"><span class="simp char">胡</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">胡</span> [<span class="pinyin">hu2</span>]
+                  </td>
+                  <td><span class="trad">胡說</span> [<span class="pinyin">hu2</span>] nonsense</td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">胡錦濤</span> [<span class="pinyin">hu2</span>] Hu Jintao
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="1">
+                    <span class="trad char">衚</span> [<span class="pinyin">hu2</span>]
+                  </td>
+                  <td><span class="trad">衚衕</span> [<span class="pinyin">hu2</span>] alley</td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">鬍</span> [<span class="pinyin">hu2</span>]
+                  </td>
+                  <td>
+                    <span class="trad">鬍子</span> [<span class="pinyin">hu2</span>] facial hair
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="trad">鬍鬚</span> [<span class="pinyin">hu2</span>] beard</td>
+                </tr>
+                <tr>
+                  <th rowspan="4"><span class="simp char">划</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">划</span> [<span class="pinyin">hua2</span>]
+                  </td>
+                  <td>
+                    <span class="trad">划子</span> [<span class="pinyin">hua2</span>] small row-boat
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">划算</span> [<span class="pinyin">hua2</span>] worthwhile
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">劃</span> [<span class="pinyin">hua2</span>]
+                  </td>
+                  <td><span class="trad">計劃</span> [<span class="pinyin">hua2</span>] plan</td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">劃線</span> [<span class="pinyin">hua2</span>] to draw a line
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="5"><span class="simp char">回</span></th>
+                  <td rowspan="3">
+                    <span class="trad char">回</span> [<span class="pinyin">hui2</span>]
+                  </td>
+                  <td>
+                    <span class="trad">回來</span> [<span class="pinyin">hui2</span>] come back
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">回頭</span> [<span class="pinyin">hui2</span>] to turn one's
+                    head / later
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">一回</span> [<span class="pinyin">hui2</span>] one bout / one
+                    time
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">迴</span> [<span class="pinyin">hui2</span>]
+                  </td>
+                  <td>
+                    <span class="trad">迴轉</span> [<span class="pinyin">hui2</span>] to rotate
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">迴避</span> [<span class="pinyin">hui2</span>] to avoid
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="2"><span class="simp char">汇</span></th>
+                  <td rowspan="1">
+                    <span class="trad char">匯{滙}</span> [<span class="pinyin">hui4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">匯率</span> [<span class="pinyin">hui4</span>] exchange rate
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="1">
+                    <span class="trad char">彙</span> [<span class="pinyin">hui4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">詞彙</span> [<span class="pinyin">hui4</span>] vocabulary
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="4"><span class="simp char">获</span></th>
+                  <td rowspan="3">
+                    <span class="trad char">獲</span> [<span class="pinyin">huo4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">獲得</span> [<span class="pinyin">huo4</span>] to obtain
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">獲勝</span> [<span class="pinyin">huo4</span>] to win / to
+                    triumph
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">捉獲</span> [<span class="pinyin">huo4</span>] to capture
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="1">
+                    <span class="trad char">穫</span> [<span class="pinyin">huo4</span>]
+                  </td>
+                  <td><span class="trad">收穫</span> [<span class="pinyin">huo4</span>] harvest</td>
+                </tr>
+                <tr>
+                  <th rowspan="2"><span class="simp char">几</span></th>
+                  <td rowspan="1">
+                    <span class="trad char">几</span> [<span class="pinyin">ji1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">茶几</span> [<span class="pinyin">ji1</span>] tea table
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="1">
+                    <span class="trad char">幾</span> [<span class="pinyin">ji1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">幾個</span> [<span class="pinyin">ji1</span>] a few / how
+                    many?
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="3"><span class="simp char">饥</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">飢</span> [<span class="pinyin">ji1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">飢渴</span> [<span class="pinyin">ji1</span>] hunger and
+                    thirst
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="trad">飢荒</span> [<span class="pinyin">ji1</span>] famine</td>
+                </tr>
+                <tr>
+                  <td rowspan="1">
+                    <span class="trad char">饑</span> [<span class="pinyin">ji1</span>]
+                  </td>
+                  <td><span class="trad">饑荒</span> [<span class="pinyin">ji1</span>] famine</td>
+                </tr>
+                <tr>
+                  <th rowspan="4"><span class="simp char">家</span></th>
+                  <td rowspan="1">
+                    <span class="trad char">傢</span> [<span class="pinyin">jia1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">傢具</span> [<span class="pinyin">jia1</span>] furniture
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="3">
+                    <span class="trad char">家</span> [<span class="pinyin">jia1</span>]
+                  </td>
+                  <td><span class="trad">家庭</span> [<span class="pinyin">jia1</span>] family</td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">人家</span> [<span class="pinyin">jia1</span>] people /
+                    others / oneself
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">家具</span> [<span class="pinyin">jia1</span>] furniture
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="4"><span class="simp char">奸</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">奸</span> [<span class="pinyin">jian1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">內奸</span> [<span class="pinyin">jian1</span>] undiscovered
+                    traitor
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">奸猾</span> [<span class="pinyin">jian1</span>] treacherous
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">姦</span> [<span class="pinyin">jian1</span>]
+                  </td>
+                  <td><span class="trad">強姦</span> [<span class="pinyin">jian1</span>] rape</td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">姦情</span> [<span class="pinyin">jian1</span>] adultery
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="4"><span class="simp char">姜</span></th>
+                  <td rowspan="1">
+                    <span class="trad char">姜</span> [<span class="pinyin">jiang1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">姜先生</span> [<span class="pinyin">jiang1</span>] Mr Jiang
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="3">
+                    <span class="trad char">薑</span> [<span class="pinyin">jiang1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">薑先生</span> [<span class="pinyin">jiang1</span>] Mr Jiang
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">薑餅</span> [<span class="pinyin">jiang1</span>] gingerbread
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">黃薑</span> [<span class="pinyin">jiang1</span>] turmeric
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="3"><span class="simp char">借</span></th>
+                  <td rowspan="1">
+                    <span class="trad char">借</span> [<span class="pinyin">jie4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">借給</span> [<span class="pinyin">jie4</span>] to lend to
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">藉</span> [<span class="pinyin">jie4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">狼藉</span> [<span class="pinyin">jie4</span>] in a mess
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="trad">藉先生</span> [<span class="pinyin">jie4</span>] Mr Ji</td>
+                </tr>
+                <tr>
+                  <th rowspan="5"><span class="simp char">尽</span></th>
+                  <td rowspan="3">
+                    <span class="trad char">儘</span> [<span class="pinyin">jin3</span>]
+                  </td>
+                  <td>
+                    <span class="trad">儘可能</span> [<span class="pinyin">jin3</span>] to do one's
+                    utmost
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">儘管</span> [<span class="pinyin">jin3</span>] despite /
+                    without hesitating
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">儘量</span> [<span class="pinyin">jin3</span>] as much as
+                    possible / to the greatest extent
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">盡</span> [<span class="pinyin">jin3</span>]
+                  </td>
+                  <td>
+                    <span class="trad">盡頭</span> [<span class="pinyin">jin3</span>] the very end
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">盡量</span> [<span class="pinyin">jin3</span>] as much as
+                    possible / to the greatest extent
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="3"><span class="simp char">卷</span></th>
+                  <td rowspan="1">
+                    <span class="trad char">卷</span> [<span class="pinyin">juan3</span>]
+                  </td>
+                  <td>
+                    <span class="trad">卷子</span> [<span class="pinyin">juan3</span>] steamed roll
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">捲</span> [<span class="pinyin">juan3</span>]
+                  </td>
+                  <td>
+                    <span class="trad">捲起</span> [<span class="pinyin">juan3</span>] to roll up
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">捲餅</span> [<span class="pinyin">juan3</span>] rolled up
+                    pastry
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="4"><span class="simp char">克</span></th>
+                  <td rowspan="3">
+                    <span class="trad char">克</span> [<span class="pinyin">ke4</span>]
+                  </td>
+                  <td><span class="trad">公克</span> [<span class="pinyin">ke4</span>] gram</td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">麥克風</span> [<span class="pinyin">ke4</span>] microphone
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">克己</span> [<span class="pinyin">ke4</span>] self-restraint
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="1">
+                    <span class="trad char">剋</span> [<span class="pinyin">ke4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">剋己</span> [<span class="pinyin">ke4</span>] self-restraint
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="3"><span class="simp char">夸</span></th>
+                  <td rowspan="1">
+                    <span class="trad char">夸</span> [<span class="pinyin">kua1</span>]
+                  </td>
+                  <td><span class="trad">夸克</span> [<span class="pinyin">kua1</span>] quark</td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">誇</span> [<span class="pinyin">kua1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">誇張</span> [<span class="pinyin">kua1</span>] exaggerated
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">誇大</span> [<span class="pinyin">kua1</span>] to exaggerate
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="3"><span class="simp char">昆</span></th>
+                  <td rowspan="1">
+                    <span class="trad char">崑</span> [<span class="pinyin">kun1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">崑崙山</span> [<span class="pinyin">kun1</span>] Mount Kunlun
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">昆</span> [<span class="pinyin">kun1</span>]
+                  </td>
+                  <td><span class="trad">昆蟲</span> [<span class="pinyin">kun1</span>] insect</td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">昆明</span> [<span class="pinyin">kun1</span>] Kunming (city
+                    in Yunnan)
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="3"><span class="simp char">困</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">困</span> [<span class="pinyin">kun4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">困難</span> [<span class="pinyin">kun4</span>] difficult
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">困境</span> [<span class="pinyin">kun4</span>] predicament
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="1">
+                    <span class="trad char">睏</span> [<span class="pinyin">kun4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">我很睏</span> [<span class="pinyin">kun4</span>] I'm sleepy
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="2"><span class="simp char">累</span></th>
+                  <td rowspan="1">
+                    <span class="trad char">累</span> [<span class="pinyin">lei2</span>]
+                  </td>
+                  <td>
+                    <span class="trad">累累</span> [<span class="pinyin">lei2</span>] heaps of
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="1">
+                    <span class="trad char">纍</span> [<span class="pinyin">lei2</span>]
+                  </td>
+                  <td>
+                    <span class="trad">纍墜</span> [<span class="pinyin">lei2</span>] superfluous /
+                    cumbersome
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="3"><span class="simp char">厘</span></th>
+                  <td rowspan="1">
+                    <span class="trad char">厘</span> [<span class="pinyin">li2</span>]
+                  </td>
+                  <td>
+                    <span class="trad">巴厘島</span> [<span class="pinyin">li2</span>] Bali (in
+                    Indonesia)
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">釐</span> [<span class="pinyin">li2</span>]
+                  </td>
+                  <td>
+                    <span class="trad">釐米</span> [<span class="pinyin">li2</span>] centimetre
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">釐清</span> [<span class="pinyin">li2</span>] to clarify
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="2"><span class="simp char">漓</span></th>
+                  <td rowspan="1">
+                    <span class="trad char">漓</span> [<span class="pinyin">li2</span>]
+                  </td>
+                  <td>
+                    <span class="trad">淋漓</span> [<span class="pinyin">li2</span>] dripping wet
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="1">
+                    <span class="trad char">灕</span> [<span class="pinyin">li2</span>]
+                  </td>
+                  <td>
+                    <span class="trad">灕江</span> [<span class="pinyin">li2</span>] River Li,
+                    Guangxi
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="5"><span class="simp char">里</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">裡{裏}</span> [<span class="pinyin">li3</span>]
+                  </td>
+                  <td><span class="trad">裡面</span> [<span class="pinyin">li3</span>] inside</td>
+                </tr>
+                <tr>
+                  <td><span class="trad">這裡</span> [<span class="pinyin">li3</span>] here</td>
+                </tr>
+                <tr>
+                  <td rowspan="3">
+                    <span class="trad char">里</span> [<span class="pinyin">li3</span>]
+                  </td>
+                  <td>
+                    <span class="trad">公里</span> [<span class="pinyin">li3</span>] kilometer
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">鄰里</span> [<span class="pinyin">li3</span>] neighbourhood
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">阿里</span> [<span class="pinyin">li3</span>] Ali (proper
+                    name)
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="3"><span class="simp char">历</span></th>
+                  <td rowspan="1">
+                    <span class="trad char">曆</span> [<span class="pinyin">li4</span>]
+                  </td>
+                  <td><span class="trad">日曆</span> [<span class="pinyin">li4</span>] calendar</td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">歷</span> [<span class="pinyin">li4</span>]
+                  </td>
+                  <td><span class="trad">歷史</span> [<span class="pinyin">li4</span>] history</td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">經歷</span> [<span class="pinyin">li4</span>] experience
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="4"><span class="simp char">了</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">了</span> [<span class="pinyin">liao3</span>]
+                  </td>
+                  <td>
+                    <span class="trad">走了</span> [<span class="pinyin">liao3</span>] to have gone
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">殺了</span> [<span class="pinyin">liao3</span>] to have
+                    killed
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">瞭</span> [<span class="pinyin">liao3</span>]
+                  </td>
+                  <td>
+                    <span class="trad">瞭哨</span> [<span class="pinyin">liao3</span>] to stand
+                    guard
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">瞭望</span> [<span class="pinyin">liao3</span>] to keep a
+                    lookout
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="3"><span class="simp char">卤</span></th>
+                  <td rowspan="1">
+                    <span class="trad char">滷</span> [<span class="pinyin">lu3</span>]
+                  </td>
+                  <td>
+                    <span class="trad">滷汁</span> [<span class="pinyin">lu3</span>] gravy /
+                    marinade
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">鹵</span> [<span class="pinyin">lu3</span>]
+                  </td>
+                  <td>
+                    <span class="trad">鹵水</span> [<span class="pinyin">lu3</span>] brine /
+                    marinade
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">鹵素</span> [<span class="pinyin">lu3</span>] halogen
+                    (chemistry)
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="2"><span class="simp char">仑</span></th>
+                  <td rowspan="1">
+                    <span class="trad char">侖</span> [<span class="pinyin">lun2</span>]
+                  </td>
+                  <td><span class="trad">庫侖</span> [<span class="pinyin">lun2</span>] Coulomb</td>
+                </tr>
+                <tr>
+                  <td rowspan="1">
+                    <span class="trad char">崙{崘}</span> [<span class="pinyin">lun2</span>]
+                  </td>
+                  <td>
+                    <span class="trad">崑崙山</span> [<span class="pinyin">lun2</span>] Mount Kunlun
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="5"><span class="simp char">面</span></th>
+                  <td rowspan="3">
+                    <span class="trad char">面</span> [<span class="pinyin">mian4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">表面</span> [<span class="pinyin">mian4</span>] surface
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="trad">面子</span> [<span class="pinyin">mian4</span>] face</td>
+                </tr>
+                <tr>
+                  <td><span class="trad">裡面</span> [<span class="pinyin">mian4</span>] inside</td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">麵</span> [<span class="pinyin">mian4</span>]
+                  </td>
+                  <td><span class="trad">麵條</span> [<span class="pinyin">mian4</span>] noodle</td>
+                </tr>
+                <tr>
+                  <td><span class="trad">麵包</span> [<span class="pinyin">mian4</span>] bread</td>
+                </tr>
+                <tr>
+                  <th rowspan="3"><span class="simp char">辟</span></th>
+                  <td rowspan="1">
+                    <span class="trad char">辟</span> [<span class="pinyin">pi4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">大辟</span> [<span class="pinyin">pi4</span>] death sentence
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">闢</span> [<span class="pinyin">pi4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">闢謠</span> [<span class="pinyin">pi4</span>] to refute a
+                    rumor
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">開辟</span> [<span class="pinyin">pi4</span>] to open up
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="3"><span class="simp char">千</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">千</span> [<span class="pinyin">qian1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">一千</span> [<span class="pinyin">qian1</span>] one thousand
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">千秋</span> [<span class="pinyin">qian1</span>] a thousand
+                    years
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="1">
+                    <span class="trad char">韆</span> [<span class="pinyin">qian1</span>]
+                  </td>
+                  <td><span class="trad">韆鞦</span> [<span class="pinyin">qian1</span>] swing</td>
+                </tr>
+                <tr>
+                  <th rowspan="4"><span class="simp char">签</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">簽</span> [<span class="pinyin">qian1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">簽署</span> [<span class="pinyin">qian1</span>] to sign
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">牙簽</span> [<span class="pinyin">qian1</span>] toothpick
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">籤</span> [<span class="pinyin">qian1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">標籤</span> [<span class="pinyin">qian1</span>] label / tag
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">牙籤</span> [<span class="pinyin">qian1</span>] toothpick
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="2"><span class="simp char">纤</span></th>
+                  <td rowspan="1">
+                    <span class="trad char">縴</span> [<span class="pinyin">qian4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">縴夫</span> [<span class="pinyin">qian4</span>] barge hauler
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="1">
+                    <span class="trad char">纖</span> [<span class="pinyin">qian4</span>]
+                  </td>
+                  <td><span class="trad">纖維</span> [<span class="pinyin">qian4</span>] fibre</td>
+                </tr>
+                <tr>
+                  <th rowspan="3"><span class="simp char">秋</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">秋</span> [<span class="pinyin">qiu1</span>]
+                  </td>
+                  <td><span class="trad">秋天</span> [<span class="pinyin">qiu1</span>] autumn</td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">千秋</span> [<span class="pinyin">qiu1</span>] a thousand
+                    years
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="1">
+                    <span class="trad char">鞦</span> [<span class="pinyin">qiu1</span>]
+                  </td>
+                  <td><span class="trad">鞦韆</span> [<span class="pinyin">qiu1</span>] a swing</td>
+                </tr>
+                <tr>
+                  <th rowspan="3"><span class="simp char">曲</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">曲</span> [<span class="pinyin">qu1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">歌曲</span> [<span class="pinyin">qu1</span>] tune / song
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">舞曲</span> [<span class="pinyin">qu1</span>] dance music
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="1">
+                    <span class="trad char">麴</span> [<span class="pinyin">qu1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">麴</span> [<span class="pinyin">qu1</span>] yeast / (surname)
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="4"><span class="simp char">舍</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">捨</span> [<span class="pinyin">she4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">捨棄</span> [<span class="pinyin">she4</span>] to abandon
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">捨不得</span> [<span class="pinyin">she4</span>] unwilling to
+                    give away
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">舍</span> [<span class="pinyin">she4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">宿舍</span> [<span class="pinyin">she4</span>] dormitory
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">旅舍</span> [<span class="pinyin">she4</span>] inn / hostel
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="3"><span class="simp char">沈</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">沈</span> [<span class="pinyin">shen3</span>]
+                  </td>
+                  <td>
+                    <span class="trad">沈丘</span> [<span class="pinyin">shen3</span>] Shenqiu
+                    (county in Henan)
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">沈從文</span> [<span class="pinyin">shen3</span>] Shen
+                    Congwen (novelist)
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="1">
+                    <span class="trad char">瀋</span> [<span class="pinyin">shen3</span>]
+                  </td>
+                  <td>
+                    <span class="trad">瀋陽</span> [<span class="pinyin">shen3</span>] Shenyang
+                    (city in Liaoning)
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="4"><span class="simp char">升</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">升</span> [<span class="pinyin">sheng1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">上升</span> [<span class="pinyin">sheng1</span>] to ascend
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="trad">公升</span> [<span class="pinyin">sheng1</span>] litre</td>
+                </tr>
+                <tr>
+                  <td rowspan="1">
+                    <span class="trad char">昇</span> [<span class="pinyin">sheng1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">上昇</span> [<span class="pinyin">sheng1</span>] to ascend
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="1">
+                    <span class="trad char">陞</span> [<span class="pinyin">sheng1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">陞任</span> [<span class="pinyin">sheng1</span>] /promotion/
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="4"><span class="simp char">松</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">松</span> [<span class="pinyin">song1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">松樹</span> [<span class="pinyin">song1</span>] pine tree
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">松鼠</span> [<span class="pinyin">song1</span>] squirrel
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">鬆</span> [<span class="pinyin">song1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">放鬆</span> [<span class="pinyin">song1</span>] to loosen
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">輕鬆</span> [<span class="pinyin">song1</span>] relaxed
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="5"><span class="simp char">苏</span></th>
+                  <td rowspan="1">
+                    <span class="trad char">甦</span> [<span class="pinyin">su1</span>]
+                  </td>
+                  <td><span class="trad">甦醒</span> [<span class="pinyin">su1</span>] awaken</td>
+                </tr>
+                <tr>
+                  <td rowspan="4">
+                    <span class="trad char">蘇</span> [<span class="pinyin">su1</span>]
+                  </td>
+                  <td><span class="trad">紫蘇</span> [<span class="pinyin">su1</span>] basil</td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">江蘇</span> [<span class="pinyin">su1</span>] Jiangsu
+                    province
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">蘇軾</span> [<span class="pinyin">su1</span>] Su Shi (Song
+                    Dynasty writer)
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="trad">蘇醒</span> [<span class="pinyin">su1</span>] awaken</td>
+                </tr>
+                <tr>
+                  <th rowspan="9"><span class="simp char">台</span></th>
+                  <td rowspan="3">
+                    <span class="trad char">台</span> [<span class="pinyin">tai2</span>]
+                  </td>
+                  <td>
+                    <span class="trad">台灣</span> [<span class="pinyin">tai2</span>] Taiwan
+                    (informal writing)
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">電台</span> [<span class="pinyin">tai2</span>] broadcasting
+                    station
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">櫃台</span> [<span class="pinyin">tai2</span>] counter / bar
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">檯</span> [<span class="pinyin">tai2</span>]
+                  </td>
+                  <td>
+                    <span class="trad">檯燈</span> [<span class="pinyin">tai2</span>] desk lamp
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">櫃檯</span> [<span class="pinyin">tai2</span>] counter / bar
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="3">
+                    <span class="trad char">臺</span> [<span class="pinyin">tai2</span>]
+                  </td>
+                  <td>
+                    <span class="trad">臺灣</span> [<span class="pinyin">tai2</span>] Taiwan (formal
+                    writing)
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">電臺</span> [<span class="pinyin">tai2</span>] broadcasting
+                    station
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">櫃臺</span> [<span class="pinyin">tai2</span>] counter / bar
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="1">
+                    <span class="trad char">颱</span> [<span class="pinyin">tai2</span>]
+                  </td>
+                  <td>
+                    <span class="trad">颱風</span> [<span class="pinyin">tai2</span>] typhoon /
+                    hurricane
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="5"><span class="simp char">托</span></th>
+                  <td rowspan="3">
+                    <span class="trad char">托</span> [<span class="pinyin">tuo1</span>]
+                  </td>
+                  <td><span class="trad">托架</span> [<span class="pinyin">tuo1</span>] bracket</td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">委託</span> [<span class="pinyin">tuo1</span>] to entrust
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">摩托</span> [<span class="pinyin">tuo1</span>] motor /
+                    motorbike
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">託</span> [<span class="pinyin">tuo1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">委託</span> [<span class="pinyin">tuo1</span>] to entrust
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">拜託</span> [<span class="pinyin">tuo1</span>] request sb to
+                    do sth
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="7"><span class="simp char">系</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">係</span> [<span class="pinyin">xi4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">關係</span> [<span class="pinyin">xi4</span>] relationship
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">聯係</span> [<span class="pinyin">xi4</span>] to connect
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">系</span> [<span class="pinyin">xi4</span>]
+                  </td>
+                  <td><span class="trad">系統</span> [<span class="pinyin">xi4</span>] system</td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">數學系</span> [<span class="pinyin">xi4</span>] mathematics
+                    department
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="3">
+                    <span class="trad char">繫</span> [<span class="pinyin">xi4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">繫安全帶</span> [<span class="pinyin">xi4</span>] to fasten a
+                    seatbelt
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">繫緊</span> [<span class="pinyin">xi4</span>] to bind tightly
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">聯繫</span> [<span class="pinyin">xi4</span>] to connect
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="3"><span class="simp char">咸</span></th>
+                  <td rowspan="1">
+                    <span class="trad char">咸</span> [<span class="pinyin">xian2</span>]
+                  </td>
+                  <td>
+                    <span class="trad">老少咸宜</span> [<span class="pinyin">xian2</span>]
+                    appropriate for all ages
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">鹹</span> [<span class="pinyin">xian2</span>]
+                  </td>
+                  <td>
+                    <span class="trad">鹹水</span> [<span class="pinyin">xian2</span>] saltwater /
+                    brine
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">鹹肉</span> [<span class="pinyin">xian2</span>] bacon /
+                    salt-cured meat
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="6"><span class="simp char">向</span></th>
+                  <td rowspan="3">
+                    <span class="trad char">向</span> [<span class="pinyin">xiang4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">方向</span> [<span class="pinyin">xiang4</span>] direction
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">向上</span> [<span class="pinyin">xiang4</span>] upward
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">導向</span> [<span class="pinyin">xiang4</span>] orientation
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="3">
+                    <span class="trad char">嚮</span> [<span class="pinyin">xiang4</span>]
+                  </td>
+                  <td><span class="trad">嚮導</span> [<span class="pinyin">xiang4</span>] guide</td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">嚮往</span> [<span class="pinyin">xiang4</span>] to yearn for
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">面嚮</span> [<span class="pinyin">xiang4</span>] to turn
+                    towards
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="5"><span class="simp char">须</span></th>
+                  <td rowspan="3">
+                    <span class="trad char">須</span> [<span class="pinyin">xu1</span>]
+                  </td>
+                  <td><span class="trad">必須</span> [<span class="pinyin">xu1</span>] must</td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">須知</span> [<span class="pinyin">xu1</span>] rules that must
+                    be known
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">莫須有</span> [<span class="pinyin">xu1</span>] groundless
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">鬚</span> [<span class="pinyin">xu1</span>]
+                  </td>
+                  <td><span class="trad">鬍鬚</span> [<span class="pinyin">xu1</span>] beard</td>
+                </tr>
+                <tr>
+                  <td><span class="trad">卷鬚</span> [<span class="pinyin">xu1</span>] tendril</td>
+                </tr>
+                <tr>
+                  <th rowspan="3"><span class="simp char">旋</span></th>
+                  <td rowspan="1">
+                    <span class="trad char">旋</span> [<span class="pinyin">xuan2</span>]
+                  </td>
+                  <td>
+                    <span class="trad">旋風</span> [<span class="pinyin">xuan2</span>] whirlwind /
+                    tornado
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">鏇</span> [<span class="pinyin">xuan2</span>]
+                  </td>
+                  <td><span class="trad">鏇床</span> [<span class="pinyin">xuan2</span>] lathe</td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">鏇木</span> [<span class="pinyin">xuan2</span>] wood turning
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="3"><span class="simp char">叶</span></th>
+                  <td rowspan="1">
+                    <span class="trad char">叶</span> [<span class="pinyin">ye4</span>]
+                  </td>
+                  <td><span class="trad">叶韻</span> [<span class="pinyin">ye4</span>] to rhyme</td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">葉</span> [<span class="pinyin">ye4</span>]
+                  </td>
+                  <td><span class="trad">葉子</span> [<span class="pinyin">ye4</span>] leaf</td>
+                </tr>
+                <tr>
+                  <td><span class="trad">葉問</span> [<span class="pinyin">ye4</span>] Yip Man</td>
+                </tr>
+                <tr>
+                  <th rowspan="3"><span class="simp char">佣</span></th>
+                  <td rowspan="1">
+                    <span class="trad char">佣</span> [<span class="pinyin">yong1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">佣金</span> [<span class="pinyin">yong1</span>] commission
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">傭</span> [<span class="pinyin">yong1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">傭人</span> [<span class="pinyin">yong1</span>] servant
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">傭金</span> [<span class="pinyin">yong1</span>] commission
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="5"><span class="simp char">游</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">游</span> [<span class="pinyin">you2</span>]
+                  </td>
+                  <td>
+                    <span class="trad">游泳</span> [<span class="pinyin">you2</span>] swimming
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">下游</span> [<span class="pinyin">you2</span>] downstream
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="3">
+                    <span class="trad char">遊</span> [<span class="pinyin">you2</span>]
+                  </td>
+                  <td>
+                    <span class="trad">遊覽</span> [<span class="pinyin">you2</span>] to tour / to
+                    visit
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="trad">遊戲</span> [<span class="pinyin">you2</span>] game</td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">下遊</span> [<span class="pinyin">you2</span>] downstream
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="3"><span class="simp char">余</span></th>
+                  <td rowspan="1">
+                    <span class="trad char">余</span> [<span class="pinyin">yu2</span>]
+                  </td>
+                  <td><span class="trad">余先生</span> [<span class="pinyin">yu2</span>] Mr Yu</td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">餘</span> [<span class="pinyin">yu2</span>]
+                  </td>
+                  <td>
+                    <span class="trad">餘地</span> [<span class="pinyin">yu2</span>] leeway / margin
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">多餘</span> [<span class="pinyin">yu2</span>] surplus /
+                    unnecessary
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="2"><span class="simp char">吁</span></th>
+                  <td rowspan="1">
+                    <span class="trad char">吁</span> [<span class="pinyin">yu4</span>]
+                  </td>
+                  <td><span class="trad">吁吁</span> [<span class="pinyin">yu4</span>] to pant</td>
+                </tr>
+                <tr>
+                  <td rowspan="1">
+                    <span class="trad char">籲</span> [<span class="pinyin">yu4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">呼籲</span> [<span class="pinyin">yu4</span>] to appeal to sb
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="4"><span class="simp char">御</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">御</span> [<span class="pinyin">yu4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">御賜</span> [<span class="pinyin">yu4</span>] to be bestowed
+                    by the emperor
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">御史</span> [<span class="pinyin">yu4</span>] imperial censor
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">禦</span> [<span class="pinyin">yu4</span>]
+                  </td>
+                  <td><span class="trad">防禦</span> [<span class="pinyin">yu4</span>] defense</td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">禦寒</span> [<span class="pinyin">yu4</span>] cold resistant
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="5"><span class="simp char">郁</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">郁</span> [<span class="pinyin">yu4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">姓郁</span> [<span class="pinyin">yu4</span>] surname Yu
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">郁達夫</span> [<span class="pinyin">yu4</span>] Yu Dafu
+                    (writer)
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="3">
+                    <span class="trad char">鬱</span> [<span class="pinyin">yu4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">濃鬱</span> [<span class="pinyin">yu4</span>] dense (e.g.
+                    forest)
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">憂鬱</span> [<span class="pinyin">yu4</span>] depressed
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">鬱昭敏</span> [<span class="pinyin">yu4</span>] Yu Zhaomin
+                    (Song dynasty official)
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="4"><span class="simp char">云</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">云</span> [<span class="pinyin">yun2</span>]
+                  </td>
+                  <td>
+                    <span class="trad">語云</span> [<span class="pinyin">yun2</span>] as the saying
+                    goes...
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">云云</span> [<span class="pinyin">yun2</span>] and so on
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">雲</span> [<span class="pinyin">yun2</span>]
+                  </td>
+                  <td>
+                    <span class="trad">白雲</span> [<span class="pinyin">yun2</span>] white cloud
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">多雲</span> [<span class="pinyin">yun2</span>] cloudy
+                    (meteorology)
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="3"><span class="simp char">扎</span></th>
+                  <td rowspan="1">
+                    <span class="trad char">扎</span> [<span class="pinyin">za1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">掙扎</span> [<span class="pinyin">za1</span>] to struggle
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">紮</span> [<span class="pinyin">za1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">駐紮</span> [<span class="pinyin">za1</span>] to station
+                    troops
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="trad">紮營</span> [<span class="pinyin">za1</span>] to camp</td>
+                </tr>
+                <tr>
+                  <th rowspan="4"><span class="simp char">脏</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">臟</span> [<span class="pinyin">zang1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">臟器</span> [<span class="pinyin">zang1</span>] internal
+                    organs
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">心臟</span> [<span class="pinyin">zang1</span>] heart (organ)
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">髒</span> [<span class="pinyin">zang1</span>]
+                  </td>
+                  <td><span class="trad">骯髒</span> [<span class="pinyin">zang1</span>] dirty</td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">髒話</span> [<span class="pinyin">zang1</span>] profanity
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="3"><span class="simp char">占</span></th>
+                  <td rowspan="1">
+                    <span class="trad char">佔</span> [<span class="pinyin">zhan1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">佔有</span> [<span class="pinyin">zhan1</span>] to have / to
+                    hold
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">占</span> [<span class="pinyin">zhan1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">占卜</span> [<span class="pinyin">zhan1</span>] to divine
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">占星學</span> [<span class="pinyin">zhan1</span>] astrology
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="3"><span class="simp char">折</span></th>
+                  <td rowspan="1">
+                    <span class="trad char">折</span> [<span class="pinyin">zhe2</span>]
+                  </td>
+                  <td>
+                    <span class="trad">折本</span> [<span class="pinyin">zhe2</span>] to lose money
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">摺</span> [<span class="pinyin">zhe2</span>]
+                  </td>
+                  <td>
+                    <span class="trad">摺光</span> [<span class="pinyin">zhe2</span>] refraction
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">摺紙</span> [<span class="pinyin">zhe2</span>] paper folding
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="5"><span class="simp char">征</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">征</span> [<span class="pinyin">zheng1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">征途</span> [<span class="pinyin">zheng1</span>] long journey
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">征服</span> [<span class="pinyin">zheng1</span>] to conquer
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="3">
+                    <span class="trad char">徵</span> [<span class="pinyin">zheng1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">徵召</span> [<span class="pinyin">zheng1</span>] to enlist /
+                    to draft
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">象徵</span> [<span class="pinyin">zheng1</span>] symbol / to
+                    symbolize
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">特徵</span> [<span class="pinyin">zheng1</span>]
+                    characteristic
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="4"><span class="simp char">只</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">只{衹}</span> [<span class="pinyin">zhi3</span>]
+                  </td>
+                  <td><span class="trad">只有</span> [<span class="pinyin">zhi3</span>] only</td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">只不過</span> [<span class="pinyin">zhi3</span>] it's just
+                    that
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">隻</span> [<span class="pinyin">zhi3</span>]
+                  </td>
+                  <td>
+                    <span class="trad">一隻鳥</span> [<span class="pinyin">zhi3</span>] one bird
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">隻身</span> [<span class="pinyin">zhi3</span>] by oneself
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="6"><span class="simp char">制</span></th>
+                  <td rowspan="3">
+                    <span class="trad char">制</span> [<span class="pinyin">zhi4</span>]
+                  </td>
+                  <td><span class="trad">控制</span> [<span class="pinyin">zhi4</span>] control</td>
+                </tr>
+                <tr>
+                  <td><span class="trad">制度</span> [<span class="pinyin">zhi4</span>] system</td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">抑制</span> [<span class="pinyin">zhi4</span>] inhibition
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="3">
+                    <span class="trad char">製</span> [<span class="pinyin">zhi4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">製造</span> [<span class="pinyin">zhi4</span>] to manufacture
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">製作</span> [<span class="pinyin">zhi4</span>] make /
+                    manufacture
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="trad">複製</span> [<span class="pinyin">zhi4</span>] to copy</td>
+                </tr>
+                <tr>
+                  <th rowspan="4"><span class="simp char">志</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">志</span> [<span class="pinyin">zhi4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">意志</span> [<span class="pinyin">zhi4</span>] will /
+                    determination
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">志願</span> [<span class="pinyin">zhi4</span>] aspiration /
+                    volunteer
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">誌</span> [<span class="pinyin">zhi4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">雜誌</span> [<span class="pinyin">zhi4</span>] magazine
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">標誌</span> [<span class="pinyin">zhi4</span>] sign / symbol
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="4"><span class="simp char">致</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">緻</span> [<span class="pinyin">zhi4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">精緻</span> [<span class="pinyin">zhi4</span>] fine /
+                    delicate
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">密緻</span> [<span class="pinyin">zhi4</span>] closely-spaced
+                    / dense
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">致</span> [<span class="pinyin">zhi4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">一致</span> [<span class="pinyin">zhi4</span>] unanimous
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">導致</span> [<span class="pinyin">zhi4</span>] to lead to
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="4"><span class="simp char">钟</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">鍾</span> [<span class="pinyin">zhong1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">鍾情</span> [<span class="pinyin">zhong1</span>] madly in
+                    love
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">龍鍾</span> [<span class="pinyin">zhong1</span>] decrepit /
+                    senile
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                    <span class="trad char">鐘</span> [<span class="pinyin">zhong1</span>]
+                  </td>
+                  <td><span class="trad">鐘頭</span> [<span class="pinyin">zhong1</span>] hour</td>
+                </tr>
+                <tr>
+                  <td><span class="trad">時鐘</span> [<span class="pinyin">zhong1</span>] clock</td>
+                </tr>
+                <tr>
+                  <th rowspan="5"><span class="simp char">周</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">周</span> [<span class="pinyin">zhou1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">周朝</span> [<span class="pinyin">zhou1</span>] Zhou Dynasty
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">周圍</span> [<span class="pinyin">zhou1</span>] surroundings
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="3">
+                    <span class="trad char">週</span> [<span class="pinyin">zhou1</span>]
+                  </td>
+                  <td>
+                    <span class="trad">週末</span> [<span class="pinyin">zhou1</span>] weekend
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">週圍</span> [<span class="pinyin">zhou1</span>] surroundings
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">週年</span> [<span class="pinyin">zhou1</span>] (yearly)
+                    anniversary
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="5"><span class="simp char">注</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">注</span> [<span class="pinyin">zhu4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">注意</span> [<span class="pinyin">zhu4</span>] to pay
+                    attention to
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">注射</span> [<span class="pinyin">zhu4</span>] to inject
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="3">
+                    <span class="trad char">註</span> [<span class="pinyin">zhu4</span>]
+                  </td>
+                  <td>
+                    <span class="trad">註冊</span> [<span class="pinyin">zhu4</span>] to register
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">註定</span> [<span class="pinyin">zhu4</span>] be doomed
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">註腳</span> [<span class="pinyin">zhu4</span>] footnote
+                  </td>
+                </tr>
+                <tr>
+                  <th rowspan="7"><span class="simp char">准</span></th>
+                  <td rowspan="2">
+                    <span class="trad char">准</span> [<span class="pinyin">zhun3</span>]
+                  </td>
+                  <td>
+                    <span class="trad">不准</span> [<span class="pinyin">zhun3</span>] not allowed
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">批准</span> [<span class="pinyin">zhun3</span>] to ratify
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="5">
+                    <span class="trad char">準</span> [<span class="pinyin">zhun3</span>]
+                  </td>
+                  <td>
+                    <span class="trad">標準</span> [<span class="pinyin">zhun3</span>] standard
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">準備</span> [<span class="pinyin">zhun3</span>] prepare
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">準確</span> [<span class="pinyin">zhun3</span>] accurate
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">沒準兒</span> [<span class="pinyin">zhun3</span>] not sure
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="trad">水準</span> [<span class="pinyin">zhun3</span>] horizontal /
+                    level
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>Navigation</h2>
+          <ul class="external-links">
+            <li><a href="index.html">← Chinese language notes</a></li>
+            <li><a href="/">← Main page</a></li>
+          </ul>
+        </section>
+      </main>
+    </div>
+  </body>
 </html>

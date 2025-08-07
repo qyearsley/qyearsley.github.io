@@ -9,40 +9,28 @@
       content="Interactive experiment demonstrating how coin flip frequencies converge to 50% as the number of flips increases."
     />
     <link rel="stylesheet" href="/style.css" />
-    <script src="/third_party/graph.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
 
   <body>
     <div class="container">
       <header class="header">
         <h1>Coin Flips Experiment</h1>
-        <p>
-          Demonstrating probability convergence through interactive coin
-          flipping
-        </p>
+        <p>Demonstrating probability convergence through interactive coin flipping</p>
       </header>
 
       <main class="main-content">
         <section class="section">
-          <time datetime="2013-03-21">Created 2013-03-21.</time>
-
           <p>
-            Today in biology class, when the professor was talking about genetic
-            drift, I learned an interesting fact about probability. If you flip
-            a coin a small number of times, the percentage of times that the
-            coin turns up heads tends not to be near 50%. For example, if you
-            flip a coin ten times, there's a significant chance that the
-            frequency of head will be 3/10, or 6/10, or 8/10. However, if you
-            flip a coin 10000 times, the frequency of heads is almost certainly
-            going to be very close to 50%.
+            In probability theory, small sample sizes can be misleading. Flip a coin 10 times and
+            you might get 30% or 80% heads. But flip it 10,000 times and the frequency will almost
+            certainly be very close to 50%.
           </p>
 
           <p>
-            This program flips coins. It starts by flipping one coin and
-            recording the percentage of heads. Then two, then three, and so on,
-            all the way up to the maximum value that you input below. Then it
-            graphs them. You can see that as the number of coins flipped
-            increases, the frequency converges to 50%.
+            This experiment demonstrates this convergence. It flips coins from 1 to your chosen
+            maximum, recording the percentage of heads at each step. The graph shows how the
+            frequency approaches 50% as the number of flips increases.
           </p>
 
           <form id="form" action="javascript:void(update())">
@@ -50,10 +38,9 @@
             <input type="submit" />
           </form>
 
-          <canvas id="myCanvas" width="800" height="300">
-            This text will be shown if your browser doesn't support the canvas
-            element.
-          </canvas>
+          <div style="position: relative; height: 300px; width: 800px">
+            <canvas id="myCanvas"></canvas>
+          </div>
         </section>
 
         <section class="section">
@@ -69,6 +56,8 @@
     <script>
       "use strict"
 
+      let chart = null
+
       /*
        * Graph the visualization given the input from the form.
        */
@@ -76,16 +65,77 @@
         var canvas = document.getElementById("myCanvas")
         var numSamples = parseInt(document.getElementById("numSamples").value)
         var frequencies = flip(numSamples)
-        var graph = new Graph(canvas, frequencies)
-        graph.options["minValue"] = 0.15
-        graph.options["maxValue"] = 0.85
-        graph.options["lineCurve"] = false
-        graph.options["lineSize"] = 1
-        graph.options["fill"] = false
-        graph.options["bullets"] = false
-        graph.options["gridX"] = false
-        graph.options["gridYCount"] = 1
-        graph.draw()
+
+        // Create labels for x-axis (1 to numSamples)
+        var labels = Array.from({ length: numSamples }, (_, i) => i + 1)
+
+        // Destroy existing chart if it exists
+        if (chart) {
+          chart.destroy()
+        }
+
+        // Create new chart
+        chart = new Chart(canvas, {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Frequency of Heads",
+                data: frequencies,
+                borderColor: "#8AB87D",
+                backgroundColor: "rgba(138, 184, 125, 0.1)",
+                borderWidth: 2,
+                fill: false,
+                tension: 0,
+                pointRadius: 0,
+                pointHoverRadius: 3,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: false,
+                min: 0.15,
+                max: 0.85,
+                grid: {
+                  color: "rgba(150, 150, 150, 0.3)",
+                  drawBorder: false,
+                },
+                ticks: {
+                  callback: function (value) {
+                    return (value * 100).toFixed(0) + "%"
+                  },
+                },
+              },
+              x: {
+                grid: {
+                  display: false,
+                },
+                title: {
+                  display: true,
+                  text: "Number of Coin Flips",
+                },
+              },
+            },
+            plugins: {
+              title: {
+                display: true,
+                text: "Coin Flip Frequency Convergence",
+              },
+              legend: {
+                display: false,
+              },
+            },
+            interaction: {
+              intersect: false,
+              mode: "index",
+            },
+          },
+        })
       }
 
       /*
@@ -107,6 +157,11 @@
         frequencies.shift()
         return frequencies
       }
+
+      // Initialize chart on page load
+      document.addEventListener("DOMContentLoaded", function () {
+        update()
+      })
     </script>
   </body>
 </html>

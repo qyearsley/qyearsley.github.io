@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Traditional to Simplified Chinese Converter - Quinten Yearsley</title>
+    <meta
+      name="description"
+      content="Convert traditional Chinese characters to simplified Chinese using the tradsimp.js library."
+    />
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <script src="tradsimp.js"></script>
+    <script>
+      "use strict"
+
+      // Fix the module export issue
+      if (typeof module !== "undefined" && module.exports) {
+        module.exports = simplify
+      }
+
+      function updateConversion() {
+        const input = document.getElementById("input").value
+        const output = document.getElementById("output")
+
+        if (!input.trim()) {
+          output.innerHTML = '<span class="placeholder">Simplified text will appear here...</span>'
+          return
+        }
+
+        try {
+          const simplified = simplify(input)
+          output.innerHTML = simplified
+        } catch (e) {
+          output.innerHTML = '<span class="error">Error: ' + e + "</span>"
+        }
+      }
+
+      function loadExamples() {
+        const examples = [
+          {
+            traditional: "學習",
+            simplified: "学习",
+            english: "to study/learn",
+          },
+          { traditional: "電腦", simplified: "电脑", english: "computer" },
+          { traditional: "電話", simplified: "电话", english: "telephone" },
+          {
+            traditional: "國家",
+            simplified: "国家",
+            english: "country/nation",
+          },
+          { traditional: "學校", simplified: "学校", english: "school" },
+          { traditional: "時間", simplified: "时间", english: "time" },
+          {
+            traditional: "問題",
+            simplified: "问题",
+            english: "question/problem",
+          },
+          { traditional: "謝謝", simplified: "谢谢", english: "thank you" },
+          { traditional: "請", simplified: "请", english: "please" },
+          { traditional: "對不起", simplified: "对不起", english: "sorry" },
+          { traditional: "沒有", simplified: "没有", english: "don't have" },
+          { traditional: "現在", simplified: "现在", english: "now" },
+          { traditional: "這個", simplified: "这个", english: "this" },
+          { traditional: "什麼", simplified: "什么", english: "what" },
+          { traditional: "中國", simplified: "中国", english: "China" },
+          { traditional: "台灣", simplified: "台湾", english: "Taiwan" },
+          { traditional: "美國", simplified: "美国", english: "America" },
+          { traditional: "愛", simplified: "爱", english: "love" },
+          { traditional: "喜歡", simplified: "喜欢", english: "to like" },
+          { traditional: "高興", simplified: "高兴", english: "happy" },
+          { traditional: "工作", simplified: "工作", english: "work" },
+          { traditional: "公司", simplified: "公司", english: "company" },
+          { traditional: "軟件", simplified: "软件", english: "software" },
+          { traditional: "技術", simplified: "技术", english: "technology" },
+          { traditional: "文化", simplified: "文化", english: "culture" },
+          { traditional: "歷史", simplified: "历史", english: "history" },
+          { traditional: "今天", simplified: "今天", english: "today" },
+          { traditional: "明天", simplified: "明天", english: "tomorrow" },
+        ]
+
+        const container = document.getElementById("examples")
+
+        examples.forEach((example) => {
+          const div = document.createElement("div")
+          div.className = "example-item"
+          div.innerHTML = `
+            <div class="traditional">${example.traditional}</div>
+            <div class="arrow">→</div>
+            <div class="simplified">${example.simplified}</div>
+            <div class="english">${example.english}</div>
+          `
+          div.onclick = () => {
+            document.getElementById("input").value = example.traditional
+            updateConversion()
+          }
+          container.appendChild(div)
+        })
+      }
+
+      // Initialize when page loads
+      document.addEventListener("DOMContentLoaded", () => {
+        loadExamples()
+        updateConversion()
+      })
+    </script>
+    <style>
+      .converter-form {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin: 1.5rem 0;
+        border: 1px solid #e9ecef;
+      }
+
+      .form-group {
+        margin-bottom: 1rem;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #495057;
+      }
+
+      .form-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 1.2rem;
+        font-family: "Microsoft YaHei", "SimSun", serif;
+      }
+
+      .form-input:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+      }
+
+      .conversion-output {
+        margin: 1.5rem 0;
+        padding: 1rem;
+        background: #e9ecef;
+        border-radius: 4px;
+        font-size: 1.2rem;
+        font-family: "Microsoft YaHei", "SimSun", serif;
+        text-align: center;
+        border: 2px dashed #6c757d;
+        min-height: 3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .placeholder {
+        color: #6c757d;
+        font-style: italic;
+      }
+
+      .error {
+        color: #dc3545;
+        font-weight: 600;
+      }
+
+      .examples {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+
+      .example-item {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 4px;
+        border: 1px solid #dee2e6;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .example-item:hover {
+        background: #e9ecef;
+      }
+
+      .traditional {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #495057;
+      }
+
+      .arrow {
+        color: #6c757d;
+        font-weight: bold;
+      }
+
+      .simplified {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #007bff;
+      }
+
+      .english {
+        font-size: 0.9rem;
+        color: #6c757d;
+        font-style: italic;
+        margin-left: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <h1>Traditional to Simplified Chinese Converter</h1>
+        <p>
+          Convert traditional Chinese characters to simplified Chinese using the tradsimp.js library
+        </p>
+      </header>
+
+      <main class="main-content">
+        <section class="section">
+          <h2>How It Works</h2>
+          <p>
+            Convert traditional Chinese characters to simplified Chinese using a dictionary of
+            common character mappings.
+          </p>
+
+          <h2>Convert Text</h2>
+          <form class="converter-form">
+            <div class="form-group">
+              <label for="input">Traditional Chinese Text:</label>
+              <input
+                id="input"
+                type="text"
+                class="form-input"
+                placeholder="輸入繁體中文..."
+                oninput="updateConversion()"
+              />
+            </div>
+          </form>
+
+          <div id="output" class="conversion-output">
+            <span class="placeholder">Simplified text will appear here...</span>
+          </div>
+
+          <h2>Example Conversions</h2>
+          <p>Click any example to try it:</p>
+          <div id="examples" class="examples"></div>
+        </section>
+
+        <section class="section">
+          <h2>Navigation</h2>
+          <ul class="external-links">
+            <li><a href="/js/">← Back to JavaScript experiments</a></li>
+            <li><a href="/">← Back to main page</a></li>
+          </ul>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

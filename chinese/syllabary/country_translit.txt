@@ -49,7 +49,7 @@ Côte d'Ivoire Ivory Coast	科特迪瓦	ke1 te4 di2 wa3	Cote d'Ivoire
 Croatia	克罗地亚	ke4 luo2 di4 ya4	Hrvatska
 Cuba	古巴	gu3 ba1	Cuba
 Cyprus	塞浦路斯	se4 pu3 lu4 si1	Kibris, Kypros
-Czech Republic	捷克共和国	jie2 ke4 gong4 he2 guo2	Ceska Republika	
+Czech Republic	捷克共和国	jie2 ke4 gong4 he2 guo2	Ceska Republika
 Denmark	丹麦	dan1 mai4	Danmark
 Djibouti	吉布提	ji2 bu4 ti2	Djibouti
 Dominica	多米尼克	duo1 ming2 ni2 jia1	Dominica
@@ -77,7 +77,7 @@ Greece	希腊	xi1 la4	Ellas, Ellada
 Greenland	格陵兰	ge2 ling2 lan2	Kalaallit Nunaat, Grønland
 Guatemala	危地马拉 (瓜地馬拉)	gua1 di4 ma3 la1	Guatemala
 Guinea	几内亚	ji1 nei4 ya4	Guinee
-Guyana	圭亚那	gui1 ya4 na4	Guyana	
+Guyana	圭亚那	gui1 ya4 na4	Guyana
 Haiti	海地	hai3 di4	Haiti
 Holy See	梵帝冈	fan4 di4 gang1	Citta del Vaticano
 Honduras	洪都拉斯	hong2 du1 la1 si1	Honduras
@@ -130,7 +130,7 @@ Mongolia	蒙古	meng3 gu3	Mongol Uls
 Montenegro	黑山	hei1 shan1	Crna Gora
 Morocco	摩洛哥	mo2 luo4 ge1	Al Maghrib
 Mozambique	莫桑比克	mo4 sang1 bi3 ke4	Mocambique
-Myanmar, Burma	缅甸	mian3 dian4	Myanma Naingngandaw	
+Myanmar, Burma	缅甸	mian3 dian4	Myanma Naingngandaw
 Namibia	纳米比亚	na4 mi3 bi3 ya4	Namibia
 Nauru	瑙鲁	nao4 lu3	Nauru
 Nepal	尼泊尔	ni2 bo2 er3	Nepal
@@ -162,8 +162,7 @@ Saint Lucia	圣卢西亚	sheng4 lu2 xi1 ya4	Saint Lucia
 Saint Vincent and the Grenadines	圣文森特和格林纳丁斯	sheng4 wen2 sen1 te4 he2 ge2 lin2 na4 ding1 si1	Saint Vincent and the Grenadines
 Samoa	萨摩亚	sa4 mo2 ya4	Samoa
 San Marino	圣马力诺	sheng4 ma3 li4 nuo4	San Marino
-São Tomé and Príncipe	圣多美普林西比	sheng4 duo1 mei3
-pu3 lin2 xi1 bi3	São Tomé e Príncipe
+São Tomé and Príncipe	圣多美普林西比	sheng4 duo1 mei3 pu3 lin2 xi1 bi3	São Tomé e Príncipe
 Saudi Arabia	沙特阿拉伯	sha1 te4 a1 la1 bo2	Al Arabiyah as Suudiyah
 Senegal	塞内加尔	se4 nei4 jia1 er3	Senegal
 Serbia	塞尔维亚	sai1 er3 wei2 ya4	Srbija
@@ -181,19 +180,18 @@ Suriname	苏里南	su1 li3 nan2	Suriname
 Swaziland	史瓦济兰	shi3 wa3 ji4 lan2	Swaziland
 Sweden	瑞典	rui4 dian3	Sverige
 Switzerland	瑞士	rui4 shi4	Schweiz (German), Suisse (French), Svizzera (Italian)
-Syria	叙利亚	xu4 li4 ya4	Suriyah	
+Syria	叙利亚	xu4 li4 ya4	Suriyah
 Taiwan	台湾	tai2 wan1	T'ai-wan
 Tajikistan	塔吉克斯坦	ta3 ji2 ke4 si1 tan3	Jumhurii Tojikiston
 Tanzania	坦桑尼亚	tan3 sang1 ni2 ya4	Tanzania
 Thailand	泰国	tai4 guo2	Prathet Thai
 Timor-Leste	东帝汶	dong1 di4 wen4	Timor
 Togo	多哥	duo1 ge1	Republique Togolaise
-Trinidad and Tobago	特立尼达和多巴哥	te4 li4 ni2 da2 he2
-duo1 ba1 ge1	Trinidad and Tobago
+Trinidad and Tobago	特立尼达和多巴哥	te4 li4 ni2 da2 he2 duo1 ba1 ge1	Trinidad and Tobago
 Tunisia	突尼斯	tu1 ni2 si1	Tunis
 Turkey	土耳其	tu3 er3 qi2	Turkiye
 Turkmenistan	土库曼	tu3 ku4 man4	Turkmenistan
-Tuvalu	吐瓦鲁	tu3 wa3 lu3	
+Tuvalu	吐瓦鲁	tu3 wa3 lu3
 Uganda	乌干达	wu1 gan1 da2	Uganda
 Ukraine	乌克兰	wu1 ke4 lan2	Ukrayina
 United Arab Emirates	阿拉伯联合酋长国	A1 la1 bo2 lian2 he2 qiu2 chang2 guo2	Al Imarat al Arabiyah al Muttahidah

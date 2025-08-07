@@ -28,19 +28,19 @@ Abigail	阿比盖尔	Ā bǐ gài ěr
 Abílio	阿比利奥	Ā bǐ lì ào
 Abraham	亚伯拉罕	Yà bó lā hǎn
 Abrahan	亚伯拉罕	Yà bó lā hǎn
-Abril	阿夫里尔	Ā fū lǐ r
+Abril	阿夫里尔	Ā fū lǐ ěr
 Absalón	阿夫萨隆	Ā fū sà lóng
 Abyssinia	阿比西尼亚	Ā bǐ xī ní yà
 Acedo	阿塞多	Ā sài duō
 Acero	阿塞罗	Ā sài luó
 Acevedo	阿塞维多	Ā sài wéi duō
-Acher	阿切尔	Ā qiēr
+Acher	阿切尔	Ā qiē ěr
 Achille	阿希尔	Ā xī ěr
 Achraf	阿什哈弗	Ā shí hā fú
 Acoran	阿克兰	Ā kè lán
 Acorayda	阿科蕾达	Ā kē lěi dá
 Ada	阿达	Ā dá
-Adaberto	阿达尔维托	Ā dá rwéi tuō
+Adaberto	阿达尔维托	Ā dá ěr wéi tuō
 Adalbert	阿达贝	Ā dá bèi
 Adaluz	阿达鲁斯	Ā dá lǔ sī
 Adam	亚当	Yà dāng
@@ -162,7 +162,7 @@ Albert	阿尔贝	Ā ěr bèi
 Alberta	阿尔伯塔	Ā ěr bó tǎ
 Alberta	阿尔贝塔	Ā ěr bèi tǎ
 Alberte	阿尔贝特	Ā ěr bèi té
-Alberto	阿尔维托	Ā rwéi tuō
+Alberto	阿尔维托	Ā ěr wéi tuō
 Albina	阿尔碧娜	Ā ěr bì nà
 Albrecht	阿尔伯特	Ā ěr bó tè
 Alcida	阿尔希达	Ā ěr xī dá
@@ -261,7 +261,7 @@ Ama	阿玛	Ā Mǎ
 Amadeo	阿马德奥	Ā mǎ dé ào
 Amadeus	阿马德乌斯	Ā mǎ dé wū sī
 Amado	阿马多	Ā mǎ duō
-Amador	阿马多尔	Ā mǎ duō r
+Amador	阿马多尔	Ā mǎ duō ěr
 Amal	阿马尔	Ā Mǎ ěr
 Amalia	阿马丽亚	Ā mǎ lì yà
 Amance	阿芒丝	Ā máng sī
@@ -302,11 +302,11 @@ Amor	阿莫尔	Ā mò ěr
 Amor	eterno	永恒恋爱 Yǒng héng liàn Aì
 Amory	阿毛利	Ā Máo lì
 Amour	阿穆尔	Ā mù ěr
-Amparo	安吧罗	Ān baluó
+Amparo	安吧罗	Ān bā luó
 Amy	艾美	Aì měi
 Ana	安娜	Ān nà
 Ana-Maria	安娜玛丽亚	Ān nà Mǎ lì yà
-Anabel	安娜佩尔	Ān nà pèi r
+Anabel	安娜佩尔	Ān nà pèi ěr
 Anabela	安娜被拉	Ān nà bèi lā
 Anabelle	阿娜贝	Ā nà Bèi
 Anaé	安娜伊	Ān nà yī
@@ -370,7 +370,7 @@ Angelo	安吉洛	Ān jí luò
 Angharad	安哈蕾德	Ān hā lěi dé
 Angie	安吉	Ān jí
 Aniara	安妮娅拉	Ān nī yà lā
-Aníbal	阿尼瓦尔	Ā ní wǎ r
+Aníbal	阿尼瓦尔	Ā ní wǎ ěr
 Anica	阿妮卡	Ā nī kǎ
 Aniceto	阿尼塞托	Ā ní sài tuō
 Anik	阿妮克	Ā nī kè
@@ -593,7 +593,7 @@ Badria	芭德丽亚	Bā dé lì yà
 Badys	芭迪斯	Bā dí sī
 Bahar	巴哈	Bā hā
 Bailey	贝莉	Bèi lì
-Balbino	巴尔维诺	Bā rwéi nuò
+Balbino	巴尔维诺	Bā ěr wéi nuò
 Baldomero	巴尔多梅罗	Bā rduō méi luó
 Balduíno	巴尔杜伊诺	Bā ěr dù yī nuò
 Baldwin	巴尔塔温	Bā ěr tǎ wēn
@@ -819,7 +819,7 @@ Calista	卡莉丝塔	Kǎ lì sī tǎ
 Calixto	卡利斯托	Kǎ lì sī tuō
 Callum	卡卢姆	Kǎ Lú mǔ
 Calvin	卡尔文	Kǎ ěr wén
-Calvino	卡尔维诺	Kǎ rwéi nuò
+Calvino	卡尔维诺	Kǎ ěr wéi nuò
 Caly	卡里	Kǎ lǐ
 Calypso	卡丽布索	Kǎ lì Bù suǒ
 Camargo	卡马尔格	Kǎ Mǎ ěr gé
@@ -1115,7 +1115,7 @@ Constanze	孔丝唐丝	Kǒng sī Táng sī
 Consuelo	孔苏埃洛	Kǒng sū āi luò
 Conswala	孔斯瓦拉	Kǒng sī wǎ lā
 Cooper	库珀	Kù pò
-Coral	科拉尔	Kē lā r
+Coral	科拉尔	Kē lā ěr
 Coralia	柯拉莉娅	Kē lā lì yà
 Coralie	柯拉莉	Kē lā lì
 Coraline	柯拉琳	Kē lā lín
@@ -1150,7 +1150,7 @@ Cristina	克里斯蒂娜	Kè lǐ sī dì nà
 Cristine	克莉斯汀	Kè lì sī tīng
 Cristino	克里斯蒂诺	Kè lǐ sī dì nuò
 Cristo	克里斯托	Kè lǐ sī tuō
-Cristóbal	克里斯托瓦尔	Kè lǐ sī tuō wǎ r
+Cristóbal	克里斯托瓦尔	Kè lǐ sī tuō wǎ ěr
 Cristofol	克里斯托佛	Kè lǐ sī tuō Fó
 Cristofor	克里斯托佛	Kè lǐ sī tuō Fó
 Cristóvão	科里斯托瓦奥	Kē lǐ sī tuō wǎ ào
@@ -1391,7 +1391,7 @@ Eden	伊甸	Yī diàn
 Ederson	埃德森	Aī dé sēn
 Edgar	埃德加	Aī dé jiā
 Edgardo	埃德加多	Aī dé jiā duō
-Edilberto	埃迪尔韦托	Aī dí rwéi tuō
+Edilberto	埃迪尔韦托	Aī dí ěr wéi tuō
 Edilmar	艾迪马	Aì dí Mǎ
 Edimilson	埃迪米森	Aī dí mǐ sēn
 Edinton	阿丁屯	Ā dīng tún
@@ -1412,7 +1412,6 @@ Edson	埃德森	Aī dé sēn
 Eduard	埃杜瓦尔	Aī dù wǎ ěr
 Eduarda	艾杜阿尔达	Aì dù ā ěr dá
 Eduardo	埃德华多	Aī dé huá duō
-Edurne	诶杜尔内	
 Edward	爱德华	Aì dé huā
 Edwige	艾德薇日	Aì dé wēi rì
 Edwin	埃德温	Aī dé wēn
@@ -1502,9 +1501,9 @@ Elseline	艾尔斯琳	Aì ěr sī lín
 Elson	埃尔孙	Aī ěr sūn
 Elton	埃尔顿	Aī ěr dùn
 Elvin	埃尔温	Aī ěr wēn
-Elvira	埃尔维拉	Aī rwéi lā
+Elvira	埃尔维拉	Aī ěr wéi lā
 Elvira	艾玮拉	Aì wěi lā
-Elvire	艾尔维	Aì erwéi
+Elvire	艾尔维	Aì eěr wéi
 Elvis	埃尔维斯	Aī ěr wéi sī
 Elwyn	艾尔雯	Aì ěr wén
 Elyès	伊莉艾丝	Yī lì ài sī
@@ -1799,10 +1798,10 @@ Flavio	弗拉维奥	Fú lā wéi ào
 Flávio	弗拉维奥	Fú lā wéi ào
 Fleur	弗璐尔	Fú Lù ěr
 Flo	弗罗	Fú luó
-Flor	弗落尔	Fú luò r
+Flor	弗落尔	Fú luò ěr
 Flora	弗罗拉	Fú luō lā
 Florane	弗罗兰	Fú luó lán
-Flore	弗落尔	Fú luò r
+Flore	弗落尔	Fú luò ěr
 Floréla	弗洛蕾娅	Fú luò lěi yà
 Florelle	弗落蕾勒	Fú luò lěi lè
 Florence	佛罗伦丝	Fó luó lén sī
@@ -1911,7 +1910,7 @@ Gareth	伽雷特	Jiā léi tè
 Garin	加林	Jiā lín
 Garry	加里	Jiā lǐ
 Gary	加里	Jiā lǐ
-Gaspar	加斯帕尔	Jiā sī pà r
+Gaspar	加斯帕尔	Jiā sī pà ěr
 Gaspard	加斯帕德	Jiā sī pà dé
 Gaspard	嘉斯帕	Jiā sī pà
 Gaston	卡斯桐	Kǎ sī tóng
@@ -1980,7 +1979,7 @@ Gian-Carlo	江·卡罗	Jiāng kǎ luó
 Giancarlo	江卡罗	Jiāng kǎ luó
 Gianni	吉安尼	Jí ān ní
 Gihen	吉恩	Jí ēn
-Gil	希尔	Xī r
+Gil	希尔	Xī ěr
 Gilbert	吉尔伯特	Jí ěr bó té
 Gilbert	吉尔贝	Jí ěr bèi
 Gilberte	吉尔贝特	Jí ěr bèi té
@@ -2083,7 +2082,7 @@ Guillemette	吉耶梅特	Jí yē méi tè
 Guillermina	吉列米娜	Jí liè mǐ nà
 Guillermo	吉列尔莫	Jí lièr mò
 Guillian	格林	Gé lín
-Guiomar	吉奥马尔	Jí ào mǎ r
+Guiomar	吉奥马尔	Jí ào mǎ ěr
 Gülümser	古卢穆塞	Gǔ Lú Mù Sāi
 Gumersindo	古梅辛多	Gǔ méi xīn duō
 Gunnar	古纳尔	Gǔ nà ěr
@@ -2338,7 +2337,7 @@ Irmi	伊尔米	Yī ěr mǐ
 Isa	伊莎	Yī shā
 Isaac	艾萨克	Aì sà kè
 Isaac	伊萨克	Yī sà kè
-Isabel	伊莎贝尔	Yī shā bèi r
+Isabel	伊莎贝尔	Yī shā bèi ěr
 Isabel	伊萨贝	Yī sà Bèi
 Isabell	伊萨贝	Yī sà bèi
 Isabella	伊萨贝拉	Yī sà bèi lā
@@ -2351,13 +2350,13 @@ Isidro	伊西德罗	Yī xī dé luó
 Isidro	依西德罗	Yī xī dé luó
 Isis	伊西丝	Yī xī sī
 Isla	伊拉	Yī lā
-Ismael	意斯梅尔	Yì sī méi r
+Ismael	意斯梅尔	Yì sī méi ěr
 Ismahane	伊斯马安	Yī sī mǎ ān
 Ismail	伊斯马伊	Yī sī mǎ yī
-Israel	伊斯雷尔	Yī sī léi r
+Israel	伊斯雷尔	Yī sī léi ěr
 Ítalo	意大罗	Yì dà luó
 Itzcóatl	依瓷克	Yī cí kè
-Itziar	意弛尔	Yì chí r
+Itziar	意弛尔	Yì chí ěr
 Iulia	友丽娅	Yǒu lì yà
 Iuri	友利	Yǒu lì
 Iva	伊瓦	Yī wǎ
@@ -2449,7 +2448,7 @@ Jasmine	詹斯敏	Zhān sī mǐn
 Jason	杰森	Jié sēn
 Jaume	豪梅	Háo méi
 Javi	哈韦	Hā wéi
-Javier	哈韦尔	Hā wéi r
+Javier	哈韦尔	Hā wéi ěr
 Javiera	哈韦拉	Hā wéi lā
 Jawaad	贾华德	Jiǎ Huá dé
 Jawad	贾瓦德	Jiǎ wǎ dé
@@ -2487,7 +2486,7 @@ Jeffrey	杰佛瑞	Jié fó ruì
 Jeimmy	黑米	Hēi mǐ
 Jelves	赫尔维斯	Hè ěr wéi sī
 Jemima	杰米玛	Jié mǐ Mǎ
-Jenifer	赫尼费尔	Hè ní fèi r
+Jenifer	赫尼费尔	Hè ní fèi ěr
 Jenna	珍娜	Zhēn nà
 Jenni	珍妮	Zhēn nī
 Jennifer	珍尼弗	Zhēn ní fú
@@ -2972,7 +2971,7 @@ Léone	蕾安	Lěi ān
 Leonel	莱奥耐	Lái ào nài
 Leonie	蕾奥妮	Lěi ào nī
 Léonie	蕾奥妮	Lěi ào nī
-Leonor	莱昂诺尔	Lái áng nuò r
+Leonor	莱昂诺尔	Lái áng nuò ěr
 Léonore	莱奥诺	Lái ào nuò
 Léopold	利奥波德	Lì ào bō dé
 Leopold	利奥波德	Lì ào bō dé
@@ -3326,7 +3325,7 @@ Manuel	曼努埃尔	Màn nǔ āi ěr
 Manuela	玛努薇拉	Mǎ nǔ wēi lā
 Manuela	玛努薇拉	Mǎ nǔ wēi lā
 Maoline	猫琳	Māo lín
-Mar	马尔	Mǎ r
+Mar	马尔	Mǎ ěr
 Mara	玛拉	Mǎ lā
 Marc	马克	Mǎ kè
 Marc-Antoine	马尔康托万	Mǎ ěr kāng tuō wàn
@@ -3953,7 +3952,7 @@ Oriana	欧莉雅娜	Oū lì yǎ nà
 Oriane	欧莉安	Oū lì ān
 Orianna	欧莉安娜	Oū lì ān nà
 Orietta	奥列塔	Aò liè tǎ
-Oriol	奥里奥尔	Aò lǐ ào r
+Oriol	奥里奥尔	Aò lǐ ào ěr
 Oriol	奥六	Aò liù
 Orlanda	奥兰达	Aò lán dá
 Orlando	奥兰多	Aò lán duō
@@ -4085,7 +4084,7 @@ Pierrette	皮埃蕾特	Pí āi lěi tè
 Pierrick	皮埃里克	Pí āi lǐ kè
 Pierrot	皮埃罗	Pí Aī luó
 Pietro	皮埃特罗	Pí Aī tè luó
-Pilar	皮拉尔	Pí lā r
+Pilar	皮拉尔	Pí lā ěr
 Pilar	皮拉尔	Pí lā ěr
 Pinheiro	皮内罗	Pí nèi luó
 Pinho	皮诺	Pí nuò
@@ -4099,7 +4098,7 @@ Pius	皮武斯	Pí wǔ sī
 Plácido	普拉西多	Pǔ lā xī duō
 Plinio	普里尼奥	Pǔ lǐ ní ào
 Poca	波卡	Bō kǎ
-Pol	波尔	Bō r
+Pol	波尔	Bō ěr
 Pol	包尔	Bāo ěr
 Pola	宝拉	Bǎo lā
 Polyana	宝莉安娜	Bǎo lì ān nà
@@ -4177,7 +4176,7 @@ Raphaël	拉斐尔	Lā fēi er
 Raphaelle	拉斐尔	Lā fēi er
 Raquel	拉克尔	Lā kèr
 Rasandja	拉叁贾	Lā sān Jiǎ
-Raul	劳尔	Láo r
+Raul	劳尔	Láo ěr
 Raül	劳尔	Láo ěr
 Raven	拉文	Lā wén
 Ravina	拉薇娜	Lā wēi nà
@@ -4568,9 +4567,9 @@ Silas	希拉斯	Xī lā sī
 Silke	西尔克	Xī ěr kè
 Silvan	希尔文	Xī ěr wén
 Silvana	茜尔瓦娜	Xī ěr wǎ nà
-Silvia	西尔维亚	Xī rwéi yà
+Silvia	西尔维亚	Xī ěr wéi yà
 Sílvia	茜尔薇芽	Xī ěr wēi yá
-Silvina	西尔维纳	Xī rwéi nà
+Silvina	西尔维纳	Xī ěr wéi nà
 Silvio	西尔维奥	Xī ěr wéi ào
 Simão	西蒙	Xī mēng
 Simara	希玛拉	Xī Mǎ lā
@@ -4621,7 +4620,7 @@ Sofiane	苏菲安	Sū fēi ān
 Soizic	斯瓦兹克	Sī wǎ zī kè
 Sokhna	索克娜	Suǒ kè nà
 Sokoli	苏科利	Sū Kē lì
-Sol	索尔	Suǒ r
+Sol	索尔	Suǒ ěr
 Solane	苏兰	Sū lán
 Solange	苏朗诗	Sū lǎng shī
 Soledad	索雷达	Suǒ léi dá
@@ -5061,7 +5060,7 @@ Victoria	维多利亚	Wéi duō lì yà
 Victòria	维多利亚	Wéi duō lì yà
 Victorien	维克托连	Wéi kè tuō lián
 Victorino	维多里诺	Wéi duō lǐ nuò
-Vidal	比达尔	Bǐ dá r
+Vidal	比达尔	Bǐ dá ěr
 Vidyashree	维蒂亚诗丽	Wéi dì yà shī lì
 Vikas	维卡斯	Wéi Kǎ sī
 Vince	文丝	Wén sī

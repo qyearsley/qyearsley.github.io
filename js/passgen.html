@@ -9,6 +9,97 @@
       content="Generate random passwords using custom character sets defined by JavaScript regular expressions."
     />
     <link rel="stylesheet" href="/style.css" />
+    <style>
+      .password-form {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin: 1.5rem 0;
+        border: 1px solid #e9ecef;
+      }
+
+      .form-group {
+        margin-bottom: 1rem;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #495057;
+      }
+
+      .form-input {
+        width: 100%;
+        max-width: 300px;
+        padding: 0.5rem;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-family: monospace;
+      }
+
+      .form-input:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+      }
+
+      .form-group small {
+        display: block;
+        margin-top: 0.25rem;
+        color: #6c757d;
+        font-size: 0.875rem;
+      }
+
+      .submit-btn {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .submit-btn:hover {
+        background: #0056b3;
+      }
+
+      .password-output {
+        margin: 1.5rem 0;
+        padding: 1rem;
+        background: #e9ecef;
+        border: 2px dashed #6c757d;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 1.2rem;
+        font-weight: 600;
+        text-align: center;
+        min-height: 3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .examples {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+
+      .example-item {
+        background: #f8f9fa;
+        padding: 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+      }
+
+      .example-item code {
+        background: #e9ecef;
+        padding: 0.25rem 0.5rem;
+        border-radius: 3px;
+      }
+    </style>
   </head>
   <body>
     <div class="container">
@@ -19,31 +110,47 @@
 
       <main class="main-content">
         <section class="section">
-          <time datetime="2007">Created 2007, modified 2013.</time>
-
+          <h2>How It Works</h2>
           <p>
-            Generates a random string of given length using a given set of
-            characters. The set of characters is described using JavaScript
-            regular expressions. For example, <code>[aeiou]</code> matches
-            lowercase vowels, <code>[0-9A-F]</code> matches digits and uppercase
-            letters.
+            This password generator creates random strings using JavaScript regular expressions to
+            define character sets. You can specify exactly which characters to include, making it
+            easy to create passwords that meet specific requirements.
           </p>
 
-          <form id="form" action="javascript:void(update())">
-            <table>
-              <tr>
-                <td>Length:</td>
-                <td><input id="length" type="text" value="10" /></td>
-              </tr>
-              <tr>
-                <td>Character set:</td>
-                <td><input id="regex" type="text" value="[a-z0-9_$]" /></td>
-                <td><input type="submit" /></td>
-              </tr>
-            </table>
+          <h2>Generate Password</h2>
+          <form id="form" action="javascript:void(update())" class="password-form">
+            <div class="form-group">
+              <label for="length">Password Length:</label>
+              <input id="length" type="number" min="1" max="100" value="12" class="form-input" />
+            </div>
+
+            <div class="form-group">
+              <label for="regex">Character Set (RegEx):</label>
+              <input id="regex" type="text" value="[A-Za-z0-9!@#$%^&*]" class="form-input" />
+              <small>Use JavaScript regular expressions to define allowed characters</small>
+            </div>
+
+            <button type="submit" class="submit-btn">Generate Password</button>
           </form>
 
-          <pre id="output"></pre>
+          <div id="output" class="password-output"></div>
+
+          <h2>Common Character Sets</h2>
+          <div class="examples">
+            <div class="example-item">
+              <strong>Letters & Numbers:</strong> <code>[A-Za-z0-9]</code>
+            </div>
+            <div class="example-item"><strong>Lowercase Only:</strong> <code>[a-z]</code></div>
+            <div class="example-item"><strong>Uppercase Only:</strong> <code>[A-Z]</code></div>
+            <div class="example-item"><strong>Numbers Only:</strong> <code>[0-9]</code></div>
+            <div class="example-item">
+              <strong>With Special Characters:</strong>
+              <code>[A-Za-z0-9!@#$%^&*]</code>
+            </div>
+            <div class="example-item">
+              <strong>Hex Characters:</strong> <code>[0-9A-Fa-f]</code>
+            </div>
+          </div>
         </section>
 
         <section class="section">
@@ -66,8 +173,16 @@
         var len = parseInt(document.getElementById("length").value)
         var regex = new RegExp(document.getElementById("regex").value)
         var chars = charset(regex)
-        var passwords = randomString(len, chars)
-        document.getElementById("output").innerText = passwords
+
+        if (chars.length === 0) {
+          document.getElementById("output").innerHTML =
+            '<span style="color: #dc3545;">Error: No characters match the regex pattern</span>'
+          return
+        }
+
+        var password = randomString(len, chars)
+        document.getElementById("output").innerHTML =
+          '<span style="font-size: 1.5rem; letter-spacing: 2px;">' + password + "</span>"
       }
 
       /**
@@ -102,6 +217,9 @@
       function randomElement(array) {
         return array[Math.floor(Math.random() * array.length)]
       }
+
+      // Generate initial password when page loads
+      document.addEventListener("DOMContentLoaded", update)
     </script>
   </body>
 </html>

@@ -9,6 +9,88 @@
       content="Generate snake pattern grids with alternating row directions."
     />
     <link rel="stylesheet" href="/style.css" />
+    <style>
+      .grid-form {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin: 1.5rem 0;
+        border: 1px solid #e9ecef;
+      }
+
+      .form-group {
+        margin-bottom: 1rem;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #495057;
+      }
+
+      .form-input {
+        width: 100%;
+        max-width: 200px;
+        padding: 0.5rem;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 1rem;
+      }
+
+      .form-input:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+      }
+
+      .submit-btn {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 4px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .submit-btn:hover {
+        background: #0056b3;
+      }
+
+      .grid-output {
+        margin-top: 2rem;
+        text-align: center;
+      }
+
+      .grid-output table {
+        border-collapse: collapse;
+        margin: 0 auto;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .grid-output td {
+        border: 1px solid #dee2e6;
+        padding: 0.75rem;
+        text-align: center;
+        font-weight: 600;
+        min-width: 3rem;
+        background: white;
+      }
+
+      .grid-output tr:nth-child(even) td:nth-child(even),
+      .grid-output tr:nth-child(odd) td:nth-child(odd) {
+        background: #f8f9fa;
+      }
+
+      .grid-output tr:nth-child(even) td:nth-child(odd),
+      .grid-output tr:nth-child(odd) td:nth-child(even) {
+        background: #e9ecef;
+      }
+    </style>
   </head>
   <body>
     <div class="container">
@@ -19,32 +101,31 @@
 
       <main class="main-content">
         <section class="section">
-          <time datetime="2017">Created 2017</time>
-          <p>This was an answer for a short puzzle.</p>
+          <h2>What is a Snake Grid?</h2>
+          <p>
+            This was an answer for a short puzzle. The numbers are arranged in a table following a
+            snake-like path. Starting from the top-left corner, numbers flow from left to right in
+            the first column, then right to left in the second column, and so on, alternating
+            direction with each column.
+          </p>
 
-          <form action="javascript:void()" style="font-family: monospace">
-            Num Rows:
-            <input
-              id="num-rows"
-              type="number"
-              min="1"
-              ,
-              max="100"
-              value="4"
-            /><br />
-            Num Cols:
-            <input
-              id="num-cols"
-              type="number"
-              min="1"
-              ,
-              max="100"
-              value="5"
-            /><br />
-            <input id="submit" type="submit" />
+          <p>Enter the number of rows and columns to create a custom snake grid:</p>
+
+          <form action="javascript:void(0)" class="grid-form">
+            <div class="form-group">
+              <label for="num-rows">Number of Rows:</label>
+              <input id="num-rows" type="number" min="1" max="100" value="10" class="form-input" />
+            </div>
+
+            <div class="form-group">
+              <label for="num-cols">Number of Columns:</label>
+              <input id="num-cols" type="number" min="1" max="100" value="10" class="form-input" />
+            </div>
+
+            <button type="submit" class="submit-btn">Generate Grid</button>
           </form>
 
-          <div id="out"></div>
+          <div id="out" class="grid-output"></div>
         </section>
 
         <section class="section">
@@ -105,7 +186,10 @@
         return grid
       }
 
-      document.getElementById("submit").addEventListener("click", refreshTable)
+      document.querySelector(".submit-btn").addEventListener("click", refreshTable)
+
+      // Generate initial table when page loads
+      document.addEventListener("DOMContentLoaded", refreshTable)
     </script>
   </body>
 </html>

@@ -650,41 +650,16 @@ x-020 杯 bei1
 		玻璃杯 [bōlibēi] a glass
 	盃 [bēi] trophy
 		世界盃 [shìjiè bēi] World Cup
-
-仆 [pū] to fall forward
-僕 [pú] servant
-	僕人 [púrén] servant
-
-喂 [wéi] hello (interjection)
-餵 [wéi] to feed
-	餵母乳 wèi mǔrǔ] breast feeding
-	餵養 [wèiyǎng] feeding / nutrition
-
-伙 [huǒ] partner / group / group meals
-	伙食 [huǒshí] communal meals
-	伙伴 [huǒbàn] partner / companion
-	伙計 [huǒjì] fellow / shop assistant
-夥 [huǒ] partner / group
-	夥伴 [huǒbàn] partner / companion
-	夥計 [huǒjì] fellow / shop assistant
-
-背 [bèi] back / memorize / recite
-揹 [bēi] carry on one's back
-
-'岳':['岳','嶽'],
-
-赞
+x-023 伙
+    伙 [huǒ] partner / group / group meals
+    	伙食 [huǒshí] communal meals
+    	伙伴 [huǒbàn] partner / companion
+    夥 [huǒ] partner / group
+    	夥伴 [huǒbàn] partner / companion
+x-025 赞
 	讚 [zan4] /to praise/
 		稱讚 称赞 [cheng1 zan4] to praise
 		讚美 赞美 [zan4 mei3] to praise / to admire
-		讚同 赞同 [zan4 tong2] to approve of
 	贊 [zan4] to support / to praise / (phonetic)
 		贊成 [zan4 cheng2] /approve/endorse/
 		贊助 [zan4 zhu4] /to support/to assist/sponsor/
-		贊比亞 赞比亚 [Zan4 bi3 ya4] /Zambia/
-		贊同 [zan4 tong2] /to approve of/to endorse/(vote) in favor/
-
-'熏':['熏','燻'],
-'腌':['醃','腌'],
-'曲':['曲','麴'],
-
