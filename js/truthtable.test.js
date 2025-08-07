@@ -8,32 +8,16 @@ describe("BoolExpr", () => {
 
   test("eval simple", () => {
     expect(
-      new tt.BoolExprBinary(
-        "and",
-        new tt.BoolExprConst(true),
-        new tt.BoolExprConst(true)
-      ).eval()
+      new tt.BoolExprBinary("and", new tt.BoolExprConst(true), new tt.BoolExprConst(true)).eval()
     ).toEqual(true)
     expect(
-      new tt.BoolExprBinary(
-        "and",
-        new tt.BoolExprConst(false),
-        new tt.BoolExprConst(true)
-      ).eval()
+      new tt.BoolExprBinary("and", new tt.BoolExprConst(false), new tt.BoolExprConst(true)).eval()
     ).toEqual(false)
     expect(
-      new tt.BoolExprBinary(
-        "or",
-        new tt.BoolExprConst(true),
-        new tt.BoolExprConst(false)
-      ).eval()
+      new tt.BoolExprBinary("or", new tt.BoolExprConst(true), new tt.BoolExprConst(false)).eval()
     ).toEqual(true)
     expect(
-      new tt.BoolExprBinary(
-        "or",
-        new tt.BoolExprConst(false),
-        new tt.BoolExprConst(false)
-      ).eval()
+      new tt.BoolExprBinary("or", new tt.BoolExprConst(false), new tt.BoolExprConst(false)).eval()
     ).toEqual(false)
   })
 
@@ -42,22 +26,14 @@ describe("BoolExpr", () => {
       new tt.BoolExprBinary(
         "and",
         new tt.BoolExprConst(true),
-        new tt.BoolExprBinary(
-          "or",
-          new tt.BoolExprConst(false),
-          new tt.BoolExprConst(false)
-        )
+        new tt.BoolExprBinary("or", new tt.BoolExprConst(false), new tt.BoolExprConst(false))
       ).eval()
     ).toEqual(false)
     expect(
       new tt.BoolExprBinary(
         "and",
         new tt.BoolExprConst(true),
-        new tt.BoolExprBinary(
-          "or",
-          new tt.BoolExprConst(true),
-          new tt.BoolExprConst(false)
-        )
+        new tt.BoolExprBinary("or", new tt.BoolExprConst(true), new tt.BoolExprConst(false))
       ).eval()
     ).toEqual(true)
   })
@@ -68,21 +44,13 @@ describe("BoolExpr", () => {
 
   test("vars with repetition", () => {
     expect(
-      new tt.BoolExprBinary(
-        "and",
-        new tt.BoolExprVar("a"),
-        new tt.BoolExprVar("a")
-      ).vars()
+      new tt.BoolExprBinary("and", new tt.BoolExprVar("a"), new tt.BoolExprVar("a")).vars()
     ).toEqual(["a"])
   })
 
   test("vas with two vars", () => {
     expect(
-      new tt.BoolExprBinary(
-        "and",
-        new tt.BoolExprVar("a"),
-        new tt.BoolExprVar("b")
-      ).vars()
+      new tt.BoolExprBinary("and", new tt.BoolExprVar("a"), new tt.BoolExprVar("b")).vars()
     ).toEqual(["a", "b"])
   })
 })
@@ -100,11 +68,15 @@ describe("parseInfix", () => {
     expect(tt.parseInfix("false or false").eval()).toEqual(false)
   })
 
+  test("equivalence", () => {
+    expect(tt.parseInfix("true eq true").eval()).toEqual(true)
+    expect(tt.parseInfix("true eq false").eval()).toEqual(false)
+    expect(tt.parseInfix("false eq false").eval()).toEqual(true)
+  })
+
   test("compound", () => {
     expect(tt.parseInfix("(true and false) or true").eval()).toEqual(true)
-    expect(tt.parseInfix("not (true and false) and false").eval()).toEqual(
-      false
-    )
+    expect(tt.parseInfix("not (true and false) and false").eval()).toEqual(false)
   })
 
   test("not", () => {
@@ -133,27 +105,11 @@ describe("tokenize", () => {
   })
 
   test("parentheses", () => {
-    expect(tt.tokenize("a and (b or c)")).toStrictEqual([
-      "a",
-      "and",
-      "(",
-      "b",
-      "or",
-      "c",
-      ")",
-    ])
+    expect(tt.tokenize("a and (b or c)")).toStrictEqual(["a", "and", "(", "b", "or", "c", ")"])
   })
 
   test("extra spaces", () => {
-    expect(tt.tokenize(" a and ( b or c ) ")).toStrictEqual([
-      "a",
-      "and",
-      "(",
-      "b",
-      "or",
-      "c",
-      ")",
-    ])
+    expect(tt.tokenize(" a and ( b or c ) ")).toStrictEqual(["a", "and", "(", "b", "or", "c", ")"])
   })
 })
 

@@ -1,24 +1,26 @@
-"use strict"
 /**
  * truthtable.js
  */
+
 /**
  * Binary operators, which take two arguments.
  */
 const BINARY_OPERATORS = {
   and: (x, y) => x && y,
-  eq: (x, y) => x == y,
+  eq: (x, y) => x === y,
   implies: (x, y) => !x || y,
   nand: (x, y) => !(x && y),
   or: (x, y) => x || y,
-  xor: (x, y) => x != y,
+  xor: (x, y) => x !== y,
 }
+
 /**
  * Unary operators, which take a single argument.
  */
 const UNARY_OPERATORS = {
   not: (x) => !x,
 }
+
 /**
  * Operators and their precedence.
  * Higher precedence means the operator binds more tightly,
@@ -92,13 +94,9 @@ class BoolExprBinary extends BoolExpr {
   }
   vars() {
     // Get variables from both arguments and de-dupe.
-    const all = this.left.vars()
-    for (let v of this.right.vars()) {
-      if (!all.includes(v)) {
-        all.push(v)
-      }
-    }
-    return all
+    const leftVars = this.left.vars()
+    const rightVars = this.right.vars()
+    return [...new Set([...leftVars, ...rightVars])]
   }
 }
 /**
@@ -124,9 +122,11 @@ function parseInfix(str) {
 function shuntingYard(tokens) {
   const output = []
   const stack = []
-  for (let token of tokens) {
+
+  for (const token of tokens) {
     processToken(token, output, stack)
   }
+
   while (stack.length > 0) {
     const operator = stack.pop()
     if (operator === "(" || operator === ")") {
@@ -136,6 +136,7 @@ function shuntingYard(tokens) {
       output.push(operator)
     }
   }
+
   return output
 }
 /**
@@ -146,6 +147,7 @@ function processToken(token, output, stack) {
     stack.push(token)
     return
   }
+
   if (token in BINARY_OPERATORS) {
     while (
       stack.length > 0 &&
@@ -160,10 +162,12 @@ function processToken(token, output, stack) {
     stack.push(token)
     return
   }
+
   if (token === "(") {
     stack.push(token)
     return
   }
+
   if (token === ")") {
     while (stack.length > 0 && stack[stack.length - 1] !== "(") {
       const item = stack.pop()
@@ -177,6 +181,7 @@ function processToken(token, output, stack) {
     stack.pop()
     return
   }
+
   // If we get here, it's a constant or a variable.
   output.push(token)
 }
@@ -188,6 +193,7 @@ function processToken(token, output, stack) {
  */
 function parsePostfix(tokens) {
   const stack = []
+
   for (const token of tokens) {
     if (token in UNARY_OPERATORS) {
       const operand = stack.pop()
@@ -206,9 +212,11 @@ function parsePostfix(tokens) {
       stack.push(new BoolExprVar(token))
     }
   }
+
   if (stack.length !== 1) {
     throw new Error("Invalid expression")
   }
+
   return stack[0]
 }
 /**
@@ -221,7 +229,8 @@ function parsePostfix(tokens) {
 function tokenize(str) {
   const tokens = []
   let token = ""
-  for (let c of str) {
+
+  for (const c of str) {
     if (c === " ") {
       if (token !== "") {
         tokens.push(token)
@@ -237,16 +246,18 @@ function tokenize(str) {
       token += c
     }
   }
+
   if (token !== "") {
     tokens.push(token)
   }
+
   return tokens
 }
 /**
  * Return an array of all combinations of false and true of length n.
  */
 function listCombinations(n) {
-  if (n == 0) {
+  if (n === 0) {
     return [[]]
   } else {
     return prependToAll(false, listCombinations(n - 1)).concat(
@@ -254,13 +265,12 @@ function listCombinations(n) {
     )
   }
 }
+
 /**
  * Prepend something to each array in a 2d array.
  */
 function prependToAll(x, arrs) {
-  return arrs.map(function (subarr) {
-    return [x].concat(subarr)
-  })
+  return arrs.map((subarr) => [x, ...subarr])
 }
 /**
  * TruthTable represents a truth table which can be displayed on a page.
@@ -278,31 +288,37 @@ class TruthTable {
     const expr = parseInfix(str)
     const vars = expr.vars()
     const combinations = listCombinations(vars.length)
+
     this._rows = [vars.concat([str])]
-    for (let c of combinations) {
+
+    for (const combination of combinations) {
       const map = {}
       for (let i = 0; i < vars.length; i++) {
-        map[vars[i]] = c[i]
+        map[vars[i]] = combination[i]
       }
       const result = expr.eval(map)
-      const values = c.concat([result])
+      const values = combination.concat([result])
       this.rows.push(values.map((b) => b.toString()))
     }
   }
+
   get rows() {
     return this._rows
   }
+
   toDOMTable() {
     const table = document.createElement("table")
-    for (let row of this._rows) {
-      var tr = document.createElement("tr")
-      for (let col of row) {
-        var td = document.createElement("td")
+
+    for (const row of this._rows) {
+      const tr = document.createElement("tr")
+      for (const col of row) {
+        const td = document.createElement("td")
         td.appendChild(document.createTextNode(col))
         tr.appendChild(td)
       }
       table.appendChild(tr)
     }
+
     return table
   }
 }
