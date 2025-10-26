@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -131,7 +131,7 @@
         <section class="section">
           <h2>Navigation</h2>
           <ul class="external-links">
-            <li><a href="/js/">← Back to JavaScript experiments</a></li>
+            <li><a href="/javascript/">← Back to JavaScript experiments</a></li>
             <li><a href="/">← Back to main page</a></li>
           </ul>
         </section>
@@ -141,21 +141,30 @@
     <script>
       "use strict"
 
+      /**
+       * Refreshes the table display based on current form inputs.
+       */
       function refreshTable() {
         const out = document.getElementById("out")
         out.innerHTML = ""
-        const numRows = document.getElementById("num-rows").value
-        const numCols = document.getElementById("num-cols").value
-        out.appendChild(tableElement(snake(numRows, numCols)))
+        const numRows = parseInt(document.getElementById("num-rows").value, 10)
+        const numCols = parseInt(document.getElementById("num-cols").value, 10)
+        out.appendChild(createTableElement(generateSnakeGrid(numRows, numCols)))
       }
 
-      function tableElement(rows) {
+      /**
+       * Creates a DOM table element from a 2D array of values.
+       *
+       * @param {number[][]} rows - 2D array representing table data.
+       * @returns {HTMLTableElement} The created table element.
+       */
+      function createTableElement(rows) {
         const table = document.createElement("table")
-        for (let row of rows) {
-          let tr = document.createElement("tr")
-          for (let value of row) {
-            let td = document.createElement("td")
-            td.appendChild(document.createTextNode(value))
+        for (const row of rows) {
+          const tr = document.createElement("tr")
+          for (const value of row) {
+            const td = document.createElement("td")
+            td.textContent = value
             tr.appendChild(td)
           }
           table.appendChild(tr)
@@ -163,21 +172,28 @@
         return table
       }
 
-      function snake(numRows, numCols) {
-        // Make a 2d array of size numRows x numCols.
-        const grid = []
-        for (let row = 0; row < numRows; row++) {
-          grid.push(new Array(numCols))
-        }
+      /**
+       * Generates a snake-pattern grid.
+       * Numbers flow top-to-bottom in even columns, bottom-to-top in odd columns.
+       *
+       * @param {number} numRows - Number of rows in the grid.
+       * @param {number} numCols - Number of columns in the grid.
+       * @returns {number[][]} 2D array with snake pattern numbering.
+       */
+      function generateSnakeGrid(numRows, numCols) {
+        // Create 2D array of size numRows x numCols.
+        const grid = Array.from({ length: numRows }, () => new Array(numCols))
 
-        // Snake pattern: Left to right, alternating down and up.
+        // Fill with snake pattern: alternating down and up per column.
         let n = 1
         for (let col = 0; col < numCols; col++) {
-          if (col % 2 == 0) {
+          if (col % 2 === 0) {
+            // Even columns: top to bottom.
             for (let row = 0; row < numRows; row++) {
               grid[row][col] = n++
             }
           } else {
+            // Odd columns: bottom to top.
             for (let row = numRows - 1; row >= 0; row--) {
               grid[row][col] = n++
             }
@@ -186,9 +202,10 @@
         return grid
       }
 
+      // Set up event listeners.
       document.querySelector(".submit-btn").addEventListener("click", refreshTable)
 
-      // Generate initial table when page loads
+      // Generate initial table when page loads.
       document.addEventListener("DOMContentLoaded", refreshTable)
     </script>
   </body>

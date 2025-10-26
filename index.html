@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -12,11 +12,12 @@
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
   </head>
   <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <div class="container">
-      <header class="header">
+      <header class="header" role="banner">
         <img
           class="profile-image"
-          src="https://avatars2.githubusercontent.com/u/3926653?v=3&s=140"
+          src="https://avatars.githubusercontent.com/u/3926653?v=4&s=200&r=g"
           alt="Quinten Yearsley"
         />
         <h1>Quinten Yearsley</h1>
@@ -27,14 +28,23 @@
         </p>
       </header>
 
-      <main class="main-content">
-        <section class="section">
-          <h2>Projects & Experiments</h2>
+      <main id="main-content" class="main-content" role="main">
+        <section class="section" aria-labelledby="about-heading">
+          <h2 id="about-heading">About</h2>
+          <p>
+            Software engineer with experience in JavaScript, Python, and developer tools. Previously
+            worked on code quality and testing infrastructure at Google. Interested in programming,
+            languages, and building useful tools.
+          </p>
+        </section>
+
+        <section class="section" aria-labelledby="projects-heading">
+          <h2 id="projects-heading">Projects & Experiments</h2>
           <ul class="internal-links">
             <li>
-              <a href="/js/index.html">JavaScript Experiments</a>: A collection of interactive tools
-              and experiments built with JavaScript, including games, utilities, and learning
-              projects.
+              <a href="/javascript/index.html">JavaScript Experiments</a>: A collection of
+              interactive tools and experiments built with JavaScript, including games, utilities,
+              and learning projects.
             </li>
             <li>
               <a href="/chinese/index.html">Chinese Language Notes</a>: Resources and tools related
@@ -44,8 +54,8 @@
           </ul>
         </section>
 
-        <section class="section">
-          <h2>Connect With Me</h2>
+        <section class="section" aria-labelledby="connect-heading">
+          <h2 id="connect-heading">Connect With Me</h2>
           <ul class="external-links">
             <li><a href="https://github.com/qyearsley/">GitHub: github.com/qyearsley</a></li>
             <li>

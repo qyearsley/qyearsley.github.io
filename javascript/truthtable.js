@@ -1,9 +1,14 @@
 /**
  * truthtable.js
+ *
+ * A truth table generator for boolean logic expressions.
+ * Parses infix expressions (e.g., "a and b") and generates truth tables
+ * showing all possible input combinations and their results.
  */
 
 /**
- * Binary operators, which take two arguments.
+ * Binary operators that take two boolean arguments.
+ * Each operator is implemented as a function returning a boolean.
  */
 const BINARY_OPERATORS = {
   and: (x, y) => x && y,
@@ -15,16 +20,16 @@ const BINARY_OPERATORS = {
 }
 
 /**
- * Unary operators, which take a single argument.
+ * Unary operators that take a single boolean argument.
  */
 const UNARY_OPERATORS = {
   not: (x) => !x,
 }
 
 /**
- * Operators and their precedence.
- * Higher precedence means the operator binds more tightly,
- * so it is evaluated first.
+ * Operator precedence levels.
+ * Higher precedence means the operator binds more tightly and is evaluated first.
+ * Used during parsing to determine evaluation order.
  */
 const PRECEDENCE = {
   and: 1,
@@ -36,8 +41,8 @@ const PRECEDENCE = {
   not: 3,
 }
 /**
- * A BoolExpr is an expression that can be evaluated to
- * a boolean value.
+ * Base class for boolean expressions.
+ * Subclasses represent constants, variables, and operations.
  */
 class BoolExpr {}
 class BoolExprConst extends BoolExpr {
@@ -100,13 +105,14 @@ class BoolExprBinary extends BoolExpr {
   }
 }
 /**
- * Parse a boolean expression expressed in infix notation.
+ * Parses a boolean expression in infix notation.
  *
- * This function uses the shunting yard algorithm. The expression can have
- * parantheses, binary or unary operators, and variables or constants.
+ * Uses the shunting yard algorithm to convert infix to postfix, then builds
+ * an expression tree. Supports parentheses, operators, variables, and constants.
  *
- * @param string str - The expression to parse.
- * @return BoolExpr - The parsed expression.
+ * @param {string} str - The expression to parse (e.g., "a and not b").
+ * @returns {BoolExpr} The parsed expression tree.
+ * @throws {Error} If the expression is invalid or has mismatched parentheses.
  */
 function parseInfix(str) {
   const tokens = tokenize(str)
@@ -117,7 +123,12 @@ function parseInfix(str) {
   return parsePostfix(postfix)
 }
 /**
- * Converts an infix expression to postfix, using the shunting yard algorithm.
+ * Converts an infix expression to postfix using the shunting yard algorithm.
+ * This simplifies evaluation by eliminating the need to handle precedence later.
+ *
+ * @param {string[]} tokens - Array of tokens from the tokenizer.
+ * @returns {string[]} Tokens in postfix (Reverse Polish) notation.
+ * @throws {Error} If parentheses are mismatched.
  */
 function shuntingYard(tokens) {
   const output = []
@@ -220,11 +231,13 @@ function parsePostfix(tokens) {
   return stack[0]
 }
 /**
- * Tokenize a string into an array of tokens.
+ * Tokenizes a string into an array of tokens.
  *
- * Tokens are either operators, parentheses, or variable names.
- * Operators are either unary or binary and separated by operands
- * by spaces.
+ * Splits on spaces and parentheses. Tokens can be operators, parentheses,
+ * variables, or constants (true/false).
+ *
+ * @param {string} str - The expression string to tokenize.
+ * @returns {string[]} Array of tokens.
  */
 function tokenize(str) {
   const tokens = []
@@ -254,14 +267,20 @@ function tokenize(str) {
   return tokens
 }
 /**
- * Return an array of all combinations of false and true of length n.
+ * Generates all possible boolean combinations of length n.
+ *
+ * For n=2, returns: [[false, false], [true, false], [false, true], [true, true]]
+ * Used to generate all rows of the truth table.
+ *
+ * @param {number} n - Number of boolean variables.
+ * @returns {boolean[][]} Array of all possible boolean combinations.
  */
 function listCombinations(n) {
   if (n === 0) {
     return [[]]
   } else {
     return prependToAll(false, listCombinations(n - 1)).concat(
-      prependToAll(true, listCombinations(n - 1))
+      prependToAll(true, listCombinations(n - 1)),
     )
   }
 }

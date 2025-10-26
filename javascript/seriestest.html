@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Convergent Series Tester - Quinten Yearsley</title>
+    <meta
+      name="description"
+      content="Test the convergence of infinite series by computing partial sums."
+    />
+    <link rel="stylesheet" href="/style.css" />
+    <style>
+      #output {
+        margin: 1em;
+        border: 1px solid gray;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <h1>Convergent Series Tester</h1>
+        <p>Test the convergence of infinite series by computing partial sums</p>
+      </header>
+
+      <main class="main-content">
+        <section class="section">
+          <p>
+            A <b>series</b> is the sum of the terms in a sequence. For some sequences, the more
+            terms are added, the closer the sum gets to some finite number. Such series are set to
+            <b>converge</b>.
+          </p>
+
+          <p>
+            Below, you can approximate the sum of an infinite sequence by computing
+            <i>&Sigma;(n=0, N)f(n)</i> for some large <i>N</i>.
+          </p>
+
+          <form id="form" class="form-container">
+            <div class="form-group">
+              <label for="f">f(n) =</label>
+              <input
+                id="f"
+                type="text"
+                value="1 / Math.pow(2, n)"
+                class="form-input"
+                required
+                placeholder="e.g., 1 / Math.pow(2, n)"
+              />
+            </div>
+            <div class="form-group">
+              <label for="N">N =</label>
+              <input
+                id="N"
+                type="number"
+                value="100"
+                min="1"
+                max="10000"
+                class="form-input"
+                required
+              />
+              <small>Number of terms to sum (1-10000)</small>
+            </div>
+            <button type="submit" class="submit-btn">Calculate Series Sum</button>
+          </form>
+
+          <div id="error" class="error-message" style="display: none"></div>
+          <div id="output"></div>
+
+          <h2>Some convergent series to try</h2>
+          <table border="1">
+            <thead>
+              <tr>
+                <th>Series</th>
+                <th>JavaScript</th>
+                <th>Converges to</th>
+              </tr>
+            </thead>
+            <tr>
+              <td>Geometric series (r=1/2)</td>
+              <td><code>1 / Math.pow(2, n)</code></td>
+              <td>2</td>
+            </tr>
+            <tr>
+              <td>Geometric series (r=1/3)</td>
+              <td><code>1 / Math.pow(3, n)</code></td>
+              <td>1.5</td>
+            </tr>
+            <tr>
+              <td>1/n² series</td>
+              <td><code>1 / Math.pow(n + 1, 2)</code></td>
+              <td>π²/6 ≈ 1.645</td>
+            </tr>
+            <tr>
+              <td>1/n! series</td>
+              <td><code>1 / factorial(n)</code></td>
+              <td>e ≈ 2.718</td>
+            </tr>
+            <tr>
+              <td>Alternating series</td>
+              <td><code>Math.pow(-1, n) / (n + 1)</code></td>
+              <td>ln(2) ≈ 0.693</td>
+            </tr>
+          </table>
+
+          <p>
+            <small
+              >Note: For the factorial function, you'll need to define it first:
+              <code>function factorial(n) { return n <= 1 ? 1 : n * factorial(n-1); }</code></small
+            >
+          </p>
+        </section>
+
+        <section class="section">
+          <h2>Navigation</h2>
+          <ul class="external-links">
+            <li><a href="/javascript/">← Back to JavaScript experiments</a></li>
+            <li><a href="/">← Back to main page</a></li>
+          </ul>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      "use strict"
+
+      /**
+       * Convergent Series Tester
+       * Quinten Yearsley
+       * Created 2008, Rewritten 2013, Modernized 2025
+       */
+
+      /**
+       * Reads the input and updates the output contents.
+       * Note: Uses new Function() which evaluates user input as code.
+       */
+      function update() {
+        const fInput = document.getElementById("f").value
+        const N = parseInt(document.getElementById("N").value, 10)
+        const outputElement = document.getElementById("output")
+        const errorElement = document.getElementById("error")
+
+        // Clear previous errors.
+        errorElement.style.display = "none"
+        outputElement.innerHTML = ""
+
+        // Validate N.
+        if (isNaN(N) || N < 1 || N > 10000) {
+          errorElement.textContent = "N must be between 1 and 10000"
+          errorElement.style.display = "block"
+          return
+        }
+
+        // Try to create and execute the function.
+        try {
+          const f = new Function("n", `return ${fInput}`)
+          const terms = computeTerms(f, N)
+          const termsSum = sum(terms)
+
+          const output = `
+            &Sigma;(n=0,${N})f(n) = ${termsSum}
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;
+            = sum([${terms.slice(0, 3)},...,${terms.slice(-1)}])
+          `
+          outputElement.innerHTML = output
+        } catch (e) {
+          errorElement.textContent = `Error evaluating function: ${e.message}`
+          errorElement.style.display = "block"
+        }
+      }
+
+      /**
+       * Handles form submission.
+       *
+       * @param {Event} event - Form submit event.
+       */
+      function handleSubmit(event) {
+        event.preventDefault()
+        update()
+      }
+
+      /**
+       * Generates a list of function outputs for each index from 0 to n.
+       *
+       * @param {Function} f - Function to evaluate at each index.
+       * @param {number} n - Maximum index (inclusive).
+       * @returns {number[]} Array of function outputs.
+       */
+      function computeTerms(f, n) {
+        return Array.from({ length: n + 1 }, (_, i) => f(i))
+      }
+
+      /**
+       * Sums the items in an array.
+       *
+       * @param {number[]} arr - Array of numbers to sum.
+       * @returns {number} Sum of all array elements.
+       */
+      function sum(arr) {
+        return arr.reduce((acc, val) => acc + val, 0)
+      }
+
+      // Set up event listeners on page load.
+      document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("form").addEventListener("submit", handleSubmit)
+      })
+    </script>
+  </body>
+</html>
