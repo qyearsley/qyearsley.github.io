@@ -8,16 +8,16 @@ describe("BoolExpr", () => {
 
   test("eval simple", () => {
     expect(
-      new tt.BoolExprBinary("and", new tt.BoolExprConst(true), new tt.BoolExprConst(true)).eval()
+      new tt.BoolExprBinary("and", new tt.BoolExprConst(true), new tt.BoolExprConst(true)).eval(),
     ).toEqual(true)
     expect(
-      new tt.BoolExprBinary("and", new tt.BoolExprConst(false), new tt.BoolExprConst(true)).eval()
+      new tt.BoolExprBinary("and", new tt.BoolExprConst(false), new tt.BoolExprConst(true)).eval(),
     ).toEqual(false)
     expect(
-      new tt.BoolExprBinary("or", new tt.BoolExprConst(true), new tt.BoolExprConst(false)).eval()
+      new tt.BoolExprBinary("or", new tt.BoolExprConst(true), new tt.BoolExprConst(false)).eval(),
     ).toEqual(true)
     expect(
-      new tt.BoolExprBinary("or", new tt.BoolExprConst(false), new tt.BoolExprConst(false)).eval()
+      new tt.BoolExprBinary("or", new tt.BoolExprConst(false), new tt.BoolExprConst(false)).eval(),
     ).toEqual(false)
   })
 
@@ -26,15 +26,15 @@ describe("BoolExpr", () => {
       new tt.BoolExprBinary(
         "and",
         new tt.BoolExprConst(true),
-        new tt.BoolExprBinary("or", new tt.BoolExprConst(false), new tt.BoolExprConst(false))
-      ).eval()
+        new tt.BoolExprBinary("or", new tt.BoolExprConst(false), new tt.BoolExprConst(false)),
+      ).eval(),
     ).toEqual(false)
     expect(
       new tt.BoolExprBinary(
         "and",
         new tt.BoolExprConst(true),
-        new tt.BoolExprBinary("or", new tt.BoolExprConst(true), new tt.BoolExprConst(false))
-      ).eval()
+        new tt.BoolExprBinary("or", new tt.BoolExprConst(true), new tt.BoolExprConst(false)),
+      ).eval(),
     ).toEqual(true)
   })
 
@@ -44,13 +44,13 @@ describe("BoolExpr", () => {
 
   test("vars with repetition", () => {
     expect(
-      new tt.BoolExprBinary("and", new tt.BoolExprVar("a"), new tt.BoolExprVar("a")).vars()
+      new tt.BoolExprBinary("and", new tt.BoolExprVar("a"), new tt.BoolExprVar("a")).vars(),
     ).toEqual(["a"])
   })
 
   test("vas with two vars", () => {
     expect(
-      new tt.BoolExprBinary("and", new tt.BoolExprVar("a"), new tt.BoolExprVar("b")).vars()
+      new tt.BoolExprBinary("and", new tt.BoolExprVar("a"), new tt.BoolExprVar("b")).vars(),
     ).toEqual(["a", "b"])
   })
 })

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -13,11 +13,6 @@
     <script src="tradsimp.js"></script>
     <script>
       "use strict"
-
-      // Fix the module export issue
-      if (typeof module !== "undefined" && module.exports) {
-        module.exports = simplify
-      }
 
       function updateConversion() {
         const input = document.getElementById("input").value
@@ -257,7 +252,7 @@
         <section class="section">
           <h2>Navigation</h2>
           <ul class="external-links">
-            <li><a href="/js/">← Back to JavaScript experiments</a></li>
+            <li><a href="/javascript/">← Back to JavaScript experiments</a></li>
             <li><a href="/">← Back to main page</a></li>
           </ul>
         </section>

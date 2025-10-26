@@ -1,17 +1,32 @@
 /**
  * tradsimp.js
  *
+ * Converts Traditional Chinese characters to Simplified Chinese.
+ * Covers ~1000 most common traditional characters with different simplified equivalents.
+ *
  * Quinten Yearsley
  * Created 2010, modified 2013
  */
 
 "use strict"
 
-/** Build a simplified version by looking up one character at a time. */
+/**
+ * Converts Traditional Chinese characters to Simplified Chinese.
+ *
+ * Characters not in the mapping dictionary are left unchanged.
+ * This allows the function to handle mixed text and non-Chinese characters gracefully.
+ *
+ * @param {string} str - The text to convert.
+ * @returns {string} Text with traditional characters replaced by their simplified equivalents.
+ *
+ * @example
+ * simplify("電腦") // Returns "电脑"
+ * simplify("Hello 世界") // Returns "Hello 世界" (already simplified)
+ */
 function simplify(str) {
   let result = ""
-  for (let c of str) {
-    let simp = simplified[c]
+  for (const c of str) {
+    const simp = simplified[c]
     result += simp ? simp : c
   }
   return result
@@ -223,4 +238,4 @@ const simplified = {
   "繩": "绳", "暱": "昵", "瞞": "瞒",
 }
 
-module.export = simplify
+module.exports = { simplify }
