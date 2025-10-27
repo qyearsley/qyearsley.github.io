@@ -210,14 +210,14 @@ td {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
-  color: #495057;
+  color: #2d3748;
 }
 
 .form-input {
   width: 100%;
   max-width: 500px;
   padding: 0.75rem;
-  border: 1px solid #ced4da;
+  border: 1px solid #e2e8f0;
   border-radius: 4px;
   font-size: 1rem;
   font-family: monospace;
@@ -225,8 +225,7 @@ td {
 
 .form-input:focus {
   outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+  border-color: #3182ce;
 }
 
 .form-group small {
@@ -237,18 +236,22 @@ td {
 }
 
 .submit-btn {
-  background: #007bff;
+  background: #3182ce;
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 4px;
   font-size: 1rem;
   cursor: pointer;
-  transition: background-color 0.2s;
 }
 
 .submit-btn:hover {
-  background: #0056b3;
+  background: #2c5aa0;
+}
+
+.submit-btn:focus {
+  outline: 2px solid #3182ce;
+  outline-offset: 2px;
 }
 
 /* Output Displays */
@@ -293,16 +296,16 @@ td {
 }
 
 .example-item {
-  background: #f8f9fa;
+  background: #f8fafc;
   padding: 1rem;
   border-radius: 4px;
-  border: 1px solid #dee2e6;
+  border: 1px solid #e2e8f0;
   cursor: pointer;
-  transition: background-color 0.2s;
 }
 
 .example-item:hover {
-  background: #e9ecef;
+  background: #e2e8f0;
+  border-color: #3182ce;
 }
 
 .example-item code {

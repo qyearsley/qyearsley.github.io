@@ -27,13 +27,13 @@ Consider doing this if:
 
 ## Project Structure for Complex Experiments
 
-Current state is a flat structure in `/javascsript/` directory, works for simple
+Current state is a flat structure in `/javascript/` directory, works for simple
 experiments.
 
 ### Proposed Structure for Complex Projects
 
 ```
-/js/
+/javascript/
   index.html              (directory listing - keep as is)
 
   # Simple experiments stay flat
