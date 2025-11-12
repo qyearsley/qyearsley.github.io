@@ -10,9 +10,10 @@
     />
     <link rel="stylesheet" href="/style.css" />
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
-    <script src="truthtable.js"></script>
-    <script>
+    <script type="module">
       "use strict"
+
+      import { TruthTable } from "./truthtable.js"
 
       /**
        * Updates the truth table output based on the input expression.
@@ -51,6 +52,14 @@
       document.addEventListener("DOMContentLoaded", () => {
         update()
         document.getElementById("form").addEventListener("submit", handleSubmit)
+
+        // Add click handlers for example items
+        document.querySelectorAll(".example-item[data-example]").forEach((item) => {
+          item.addEventListener("click", () => {
+            document.getElementById("input").value = item.getAttribute("data-example")
+            update()
+          })
+        })
       })
     </script>
     <style>
@@ -174,42 +183,42 @@
           <div class="examples">
             <div
               class="example-item"
-              onclick="document.getElementById('input').value='a and b'; update()"
+              data-example="a and b"
             >
               <strong>AND Gate</strong>
               <code>a and b</code>
             </div>
             <div
               class="example-item"
-              onclick="document.getElementById('input').value='a or b'; update()"
+              data-example="a or b"
             >
               <strong>OR Gate</strong>
               <code>a or b</code>
             </div>
             <div
               class="example-item"
-              onclick="document.getElementById('input').value='not a'; update()"
+              data-example="not a"
             >
               <strong>NOT Gate</strong>
               <code>not a</code>
             </div>
             <div
               class="example-item"
-              onclick="document.getElementById('input').value='a xor b'; update()"
+              data-example="a xor b"
             >
               <strong>XOR Gate</strong>
               <code>a xor b</code>
             </div>
             <div
               class="example-item"
-              onclick="document.getElementById('input').value='(a and b) or (not a and not b)'; update()"
+              data-example="(a and b) or (not a and not b)"
             >
               <strong>XNOR (Equivalence)</strong>
               <code>(a and b) or (not a and not b)</code>
             </div>
             <div
               class="example-item"
-              onclick="document.getElementById('input').value='a implies b'; update()"
+              data-example="a implies b"
             >
               <strong>Implication</strong>
               <code>a implies b</code>

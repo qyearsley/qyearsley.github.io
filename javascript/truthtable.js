@@ -341,14 +341,15 @@ class TruthTable {
     return table
   }
 }
-module.exports = {
-  BoolExpr: BoolExpr,
-  BoolExprConst: BoolExprConst,
-  BoolExprVar: BoolExprVar,
-  BoolExprUnary: BoolExprUnary,
-  BoolExprBinary: BoolExprBinary,
-  TruthTable: TruthTable,
-  parseInfix: parseInfix,
-  tokenize: tokenize,
-  listCombinations: listCombinations,
-}
+
+export {
+  BoolExpr,
+  BoolExprConst,
+  BoolExprVar,
+  BoolExprUnary,
+  BoolExprBinary,
+  TruthTable,
+  parseInfix,
+  tokenize,
+  listCombinations,
+};
