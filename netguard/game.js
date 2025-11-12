@@ -1,4 +1,4 @@
-/* global localStorage, confirm */
+/* global confirm */
 import { LEVELS, LEVEL_ORDER } from "./levels.js";
 import { getNetworkForLevel } from "./networks.js";
 import {
