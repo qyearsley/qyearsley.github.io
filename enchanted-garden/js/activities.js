@@ -33,7 +33,7 @@ class ActivityGenerator {
     }
 
     generateAddition(difficulty) {
-        let num1, num2, max;
+        let max;
 
         switch (difficulty) {
             case 'easy':
@@ -47,8 +47,8 @@ class ActivityGenerator {
                 break;
         }
 
-        num1 = Math.floor(Math.random() * max) + 1;
-        num2 = Math.floor(Math.random() * max) + 1;
+        const num1 = Math.floor(Math.random() * max) + 1;
+        const num2 = Math.floor(Math.random() * max) + 1;
         const answer = num1 + num2;
 
         // Generate visual representation
@@ -71,7 +71,7 @@ class ActivityGenerator {
     }
 
     generateSubtraction(difficulty) {
-        let num1, num2, max;
+        let max;
 
         switch (difficulty) {
             case 'easy':
@@ -85,8 +85,8 @@ class ActivityGenerator {
                 break;
         }
 
-        num1 = Math.floor(Math.random() * max) + Math.floor(max / 2) + 1;
-        num2 = Math.floor(Math.random() * (num1 - 1)) + 1;
+        const num1 = Math.floor(Math.random() * max) + Math.floor(max / 2) + 1;
+        const num2 = Math.floor(Math.random() * (num1 - 1)) + 1;
         const answer = num1 - num2;
 
         // Generate visual representation (showing items with some crossed out)
@@ -185,5 +185,10 @@ class ActivityGenerator {
     }
 }
 
-// Initialize activity generator
-window.activityGenerator = new ActivityGenerator();
+// Initialize activity generator for browser
+if (typeof window !== 'undefined') {
+    window.activityGenerator = new ActivityGenerator();
+}
+
+// Export for tests
+export { ActivityGenerator };
