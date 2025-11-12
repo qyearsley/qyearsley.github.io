@@ -4,10 +4,10 @@
   "description": "Github Pages Site",
   "type": "module",
   "scripts": {
-    "lint": "eslint javascript/",
+    "lint": "eslint javascript/ netguard/ enchanted-garden/",
     "format": "npx prettier --write .",
     "start": "http-server -p 8000",
-    "test": "jest"
+    "test": "NODE_OPTIONS='--experimental-vm-modules' jest"
   },
   "repository": {
     "type": "git",

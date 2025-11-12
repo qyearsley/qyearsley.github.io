@@ -10,9 +10,10 @@
     />
     <link rel="stylesheet" href="/style.css" />
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
-    <script src="tradsimp.js"></script>
-    <script>
+    <script type="module">
       "use strict"
+
+      import { simplify } from "./tradsimp.js"
 
       function updateConversion() {
         const input = document.getElementById("input").value
@@ -98,6 +99,9 @@
       document.addEventListener("DOMContentLoaded", () => {
         loadExamples()
         updateConversion()
+
+        // Add input listener for real-time conversion
+        document.getElementById("input").addEventListener("input", updateConversion)
       })
     </script>
     <style>
@@ -235,7 +239,6 @@
                 type="text"
                 class="form-input"
                 placeholder="輸入繁體中文..."
-                oninput="updateConversion()"
               />
             </div>
           </form>

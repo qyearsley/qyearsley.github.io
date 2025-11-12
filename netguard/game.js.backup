@@ -1,0 +1,615 @@
+// Game State
+const gameState = {
+    currentNode: null,
+    scannedNodes: new Set(),
+    examinedDetails: new Set(),
+    cluesFound: new Set(), // Track which clues have been discovered
+    vulnerabilityFound: false,
+    vulnerabilityFixed: false,
+    gameWon: false
+};
+
+// Clues needed to find vulnerability
+const REQUIRED_CLUES = ['suspicious_user', 'expired_contractor', 'auth_config'];
+const CLUE_DESCRIPTIONS = {
+    'suspicious_user': 'Found suspicious user "contractor_mike_2024" in logs',
+    'expired_contractor': 'Discovered contractor left in March 2024',
+    'auth_config': 'Found JWT expiration validation is disabled'
+};
+
+// Network Data
+const networkNodes = [
+    {
+        id: 'gateway',
+        name: 'API Gateway',
+        hostname: 'api-gateway-01.techcorp.local',
+        type: 'gateway',
+        description: 'Main entry point for all requests',
+        status: 'unexamined',
+        scanResult: 'Gateway appears normal. Routes traffic to auth service and web server.',
+        logs: 'Recent requests from various IPs. Some unusual patterns detected after hours.',
+        npc: {
+            name: '💻 DevOps Engineer',
+            dialog: "The gateway's been seeing weird traffic patterns lately. Requests coming in at odd hours, but they all authenticate successfully, so I figured it was just someone working late..."
+        }
+    },
+    {
+        id: 'auth',
+        name: 'Auth Service',
+        hostname: 'auth-service-01.techcorp.local',
+        type: 'auth',
+        description: 'JWT token issuer',
+        status: 'unexamined',
+        scanResult: 'Auth service running. Issues JWT tokens for authenticated users.',
+        logs: `JWT middleware logs:
+[INFO] Token validation enabled
+[INFO] Signature verification: ENABLED
+[WARN] Expiration check: DISABLED (see jwt.config.js)
+[INFO] Issuer validation: ENABLED
+
+Recent token validations: 2,847 successful
+Failed validations (bad signature): 12`,
+        clue: 'auth_config',
+        tokenData: {
+            requiresClues: ['suspicious_user', 'auth_config'],
+            details: `Analyzing recent JWT tokens...
+
+Found active token:
+Header: {"alg":"HS256","typ":"JWT"}
+Payload: {
+  "sub": "contractor_mike_2024",
+  "name": "Mike Johnson",
+  "role": "admin",
+  "iat": 1704067200,  // Issued: Jan 1, 2024
+  "exp": 1709251200   // Expires: Mar 1, 2024
+}
+Signature: Valid
+
+Current date: November 11, 2024
+
+⚠️ This token expired 8 months ago!
+⚠️ But it's still being accepted because expiration checking is disabled.`,
+            solution: 'JWT tokens MUST be validated for expiration. The "exp" claim should be checked against current time. Accepting expired tokens allows former employees unauthorized access.'
+        },
+        vulnerability: true,
+        npc: {
+            name: '👨‍💼 Backend Developer',
+            dialog: "We had some clock skew issues between servers a few months back. I temporarily disabled JWT expiration checking to debug it. Did I forget to re-enable it? Let me check the config... oh no."
+        }
+    },
+    {
+        id: 'web',
+        name: 'Web Server',
+        hostname: 'web-server-01.techcorp.local',
+        type: 'webserver',
+        description: 'Main application server',
+        status: 'unexamined',
+        scanResult: 'Web server handling requests. Accepts tokens from auth service.',
+        logs: 'Serving requests normally. All incoming requests have valid JWT signatures.',
+        npc: {
+            name: '👩‍💻 Frontend Developer',
+            dialog: "I haven't noticed anything wrong with the web server itself. All requests seem properly authenticated. Maybe check the auth service?"
+        }
+    },
+    {
+        id: 'database',
+        name: 'Database',
+        hostname: 'db-primary-01.techcorp.local',
+        type: 'database',
+        description: 'User data storage',
+        status: 'unexamined',
+        scanResult: 'Database running normally. Recent queries show data access patterns.',
+        logs: `PostgreSQL Query Log (last 7 days):
+
+SELECT * FROM users WHERE role='admin' LIMIT 1000;
+-- Executed by: contractor_mike_2024 (11/09 23:42)
+
+SELECT * FROM customer_data WHERE created > '2024-01-01';
+-- Executed by: contractor_mike_2024 (11/08 02:15)
+
+COPY (SELECT * FROM financial_transactions) TO '/tmp/export.csv';
+-- Executed by: contractor_mike_2024 (11/07 03:22)
+
+⚠️ Large data exports detected from user: contractor_mike_2024`,
+        clue: 'suspicious_user',
+        npc: {
+            name: '🗄️ DBA',
+            dialog: "I've been seeing large data exports from an account called 'contractor_mike_2024'. The user has admin privileges so I assumed it was legitimate. But now that you mention it, the timing is weird - always after midnight. Is that normal?"
+        }
+    },
+    {
+        id: 'admin',
+        name: 'Admin Workstation',
+        hostname: 'admin-ws-contractor-01.techcorp.local',
+        type: 'workstation',
+        description: 'Management workstation',
+        status: 'unexamined',
+        scanResult: 'Workstation offline. Last used 7 months ago by contractor Mike Johnson.',
+        logs: `System logs:
+Last login: Apr 15, 2024 at 14:32 by mike.johnson
+Status: DECOMMISSIONED
+Reason: Contractor end date reached
+
+Active Directory sync:
+- User account: contractor_mike_2024
+- Contract end date: March 1, 2024
+- Access revocation: FAILED - tokens still valid
+- Status: ⚠️ SHOULD HAVE BEEN DISABLED`,
+        clue: 'expired_contractor',
+        npc: {
+            name: '👤 HR Manager',
+            dialog: "Mike Johnson worked here as a contractor from January through March 2024. Really talented backend developer, worked on our auth system. His contract ended March 1st and we didn't renew. Why are you asking about him?"
+        }
+    },
+    {
+        id: 'logging',
+        name: 'Logging Service',
+        hostname: 'logs-aggregator-01.techcorp.local',
+        type: 'logging',
+        description: 'Centralized logging',
+        status: 'unexamined',
+        scanResult: 'Logging service collecting events from all systems.',
+        logs: 'Aggregated logs show pattern of late-night access using token "eyJhbG...". Same token used repeatedly.',
+        npc: {
+            name: '📊 Security Analyst',
+            dialog: "I've been reviewing the logs and something feels off. We have consistent access from the same token, but the user isn't in our current employee roster. I was about to escalate when you got assigned to this investigation."
+        }
+    }
+];
+
+// Available Commands
+const commands = [
+    {
+        id: 'scan',
+        name: 'scan',
+        description: 'Scan the current system for basic information',
+        requiresNode: true
+    },
+    {
+        id: 'logs',
+        name: 'tail -f /var/log/system.log',
+        description: 'Review system logs',
+        requiresNode: true
+    },
+    {
+        id: 'token',
+        name: './analyze-tokens.sh',
+        description: 'Analyze JWT tokens (only works on Auth Service)',
+        requiresNode: true
+    },
+    {
+        id: 'fix',
+        name: 'enable-jwt-expiration',
+        description: 'Enable JWT expiration validation',
+        requiresNode: false
+    },
+    {
+        id: 'disconnect',
+        name: 'exit',
+        description: 'Disconnect from current host',
+        requiresNode: true
+    }
+];
+
+// DOM Elements
+let networkMapEl, terminalOutputEl, availableCommandsEl, terminalPromptEl, connectionInfoEl;
+let npcInfoEl, talkButtonEl;
+let dialogModal, dialogNPC, dialogBody, dialogClose, dialogContinue;
+let victoryModal, victoryMessage, playAgainBtn;
+
+// Initialize Game
+function init() {
+    // Get DOM elements
+    networkMapEl = document.getElementById('networkMap');
+    terminalOutputEl = document.getElementById('terminalOutput');
+    availableCommandsEl = document.getElementById('availableCommands');
+    terminalPromptEl = document.getElementById('terminalPrompt');
+    connectionInfoEl = document.getElementById('connectionInfo');
+    npcInfoEl = document.getElementById('npcInfo');
+    talkButtonEl = document.getElementById('talkButton');
+
+    dialogModal = document.getElementById('dialogModal');
+    dialogNPC = document.getElementById('dialogNPC');
+    dialogBody = document.getElementById('dialogBody');
+    dialogClose = document.getElementById('dialogClose');
+    dialogContinue = document.getElementById('dialogContinue');
+
+    victoryModal = document.getElementById('victoryModal');
+    victoryMessage = document.getElementById('victoryMessage');
+    playAgainBtn = document.getElementById('playAgain');
+
+    // Setup event listeners
+    dialogClose.addEventListener('click', () => closeDialog());
+    dialogContinue.addEventListener('click', () => closeDialog());
+    playAgainBtn.addEventListener('click', () => location.reload());
+    talkButtonEl.addEventListener('click', () => talkToNPC());
+
+    // Render initial state
+    renderNetworkMap();
+    renderCommands();
+    updateConnectionStatus();
+}
+
+// Render Network Map
+function renderNetworkMap() {
+    networkMapEl.innerHTML = '';
+
+    networkNodes.forEach(node => {
+        const nodeEl = document.createElement('div');
+        nodeEl.className = `network-node ${node.status}`;
+        if (gameState.currentNode === node.id) {
+            nodeEl.classList.add('selected');
+        }
+
+        nodeEl.innerHTML = `
+            <div class="node-header">
+                <div class="node-name">${node.name}</div>
+                <div class="status-indicator">${getStatusEmoji(node.status)}</div>
+            </div>
+            <div class="node-type">${node.type}</div>
+            <div class="node-description">${node.description}</div>
+        `;
+
+        nodeEl.addEventListener('click', () => selectNode(node.id));
+        networkMapEl.appendChild(nodeEl);
+    });
+}
+
+// Get Status Emoji
+function getStatusEmoji(status) {
+    const statusMap = {
+        'healthy': '🟢',
+        'suspicious': '🟡',
+        'compromised': '🔴',
+        'unexamined': '🔵'
+    };
+    return statusMap[status] || '🔵';
+}
+
+// Select Node (SSH into it)
+function selectNode(nodeId) {
+    const node = networkNodes.find(n => n.id === nodeId);
+    const wasConnected = gameState.currentNode !== null;
+
+    // If already connected to a different node, disconnect first
+    if (wasConnected && gameState.currentNode !== nodeId) {
+        addTerminalLine('', '');
+        addTerminalLine('Connection closed.', 'info');
+        addTerminalLine('---', '');
+    }
+
+    gameState.currentNode = nodeId;
+
+    // SSH connection message
+    addTerminalLine(`ssh user@${node.hostname}`, 'command');
+    addTerminalLine(`Connecting to ${node.hostname}...`, 'info');
+    addTerminalLine(`Warning: Permanently added '${node.hostname}' (ED25519) to the list of known hosts.`, 'info');
+    addTerminalLine(`user@${node.hostname}'s password: ********`, '');
+    addTerminalLine(`Last login: ${getLastLoginDate()}`, '');
+    addTerminalLine(`Welcome to ${node.name}`, 'success');
+    addTerminalLine('---', '');
+
+    updateConnectionStatus();
+    updateNPCPanel(node);
+    renderNetworkMap();
+    renderCommands();
+    scrollTerminalToBottom();
+}
+
+// Get a realistic last login date
+function getLastLoginDate() {
+    const dates = [
+        'Mon Nov 11 08:42:33 2024',
+        'Fri Nov  8 14:23:11 2024',
+        'Thu Nov  7 09:15:47 2024',
+        'Wed Nov  6 16:32:09 2024'
+    ];
+    return dates[Math.floor(Math.random() * dates.length)];
+}
+
+// Update Connection Status
+function updateConnectionStatus() {
+    if (!gameState.currentNode) {
+        terminalPromptEl.textContent = 'user@security-workstation:~$';
+        connectionInfoEl.textContent = 'Not connected';
+    } else {
+        const node = networkNodes.find(n => n.id === gameState.currentNode);
+        terminalPromptEl.textContent = `user@${node.hostname}:~$`;
+        connectionInfoEl.textContent = `Connected to ${node.name}`;
+    }
+}
+
+// Update NPC Panel
+function updateNPCPanel(node) {
+    if (node && node.npc) {
+        npcInfoEl.textContent = node.npc.name;
+        talkButtonEl.disabled = false;
+        talkButtonEl.textContent = 'Talk to Personnel';
+    } else {
+        npcInfoEl.textContent = 'No personnel available at this location';
+        talkButtonEl.disabled = true;
+    }
+}
+
+// Render Commands
+function renderCommands() {
+    availableCommandsEl.innerHTML = '';
+
+    commands.forEach(cmd => {
+        const button = document.createElement('button');
+        button.className = 'command-button';
+        button.textContent = cmd.name;
+        button.title = cmd.description;
+
+        // Disable commands that require a node selection
+        if (cmd.requiresNode && !gameState.currentNode) {
+            button.disabled = true;
+        }
+
+        // Disable fix-token until vulnerability is found
+        if (cmd.id === 'fix' && !gameState.vulnerabilityFound) {
+            button.disabled = true;
+        }
+
+        // Disable commands after game is won
+        if (gameState.gameWon) {
+            button.disabled = true;
+        }
+
+        button.addEventListener('click', () => executeCommand(cmd.id));
+        availableCommandsEl.appendChild(button);
+    });
+}
+
+// Execute Command
+function executeCommand(commandId) {
+    if (!gameState.currentNode && commandId !== 'fix') {
+        addTerminalLine('Please connect to a host first (click a node on the map)', 'error');
+        return;
+    }
+
+    const node = networkNodes.find(n => n.id === gameState.currentNode);
+    const cmd = commands.find(c => c.id === commandId);
+
+    addTerminalLine(`${cmd.name}`, 'command');
+
+    switch (commandId) {
+        case 'scan':
+            scanNode(node);
+            break;
+        case 'logs':
+            checkLogs(node);
+            break;
+        case 'token':
+            inspectToken(node);
+            break;
+        case 'fix':
+            fixToken();
+            break;
+        case 'disconnect':
+            disconnectNode();
+            break;
+    }
+
+    scrollTerminalToBottom();
+}
+
+// Scan Node
+function scanNode(node) {
+    if (gameState.scannedNodes.has(node.id)) {
+        addTerminalLine('System already scanned. Use other commands for details.', 'info');
+        return;
+    }
+
+    gameState.scannedNodes.add(node.id);
+    addTerminalLine(`Running system scan on ${node.hostname}...`, 'info');
+    addTerminalLine('---', '');
+    addTerminalLine(node.scanResult);
+    addTerminalLine('---', '');
+
+    // Update node status
+    if (node.status === 'unexamined') {
+        node.status = 'healthy';
+    }
+
+    renderNetworkMap();
+}
+
+// Check Logs
+function checkLogs(node) {
+    addTerminalLine(`Reading logs from ${node.hostname}...`, 'info');
+    addTerminalLine('---', '');
+    addTerminalLine(node.logs, node.clue ? 'warning' : '');
+    addTerminalLine('---', '');
+
+    // Add clue if this node has one
+    if (node.clue && !gameState.cluesFound.has(node.clue)) {
+        gameState.cluesFound.add(node.clue);
+        addTerminalLine(`🔍 CLUE FOUND: ${CLUE_DESCRIPTIONS[node.clue]}`, 'success');
+        addTerminalLine(`Clues discovered: ${gameState.cluesFound.size}/${REQUIRED_CLUES.length}`, 'info');
+
+        if (node.id === 'auth') {
+            addTerminalLine('Try running ./analyze-tokens.sh to investigate further', 'info');
+            node.status = 'suspicious';
+            renderNetworkMap();
+        }
+    }
+}
+
+// Inspect Token
+function inspectToken(node) {
+    if (node.id !== 'auth') {
+        addTerminalLine('Error: analyze-tokens.sh not found', 'error');
+        addTerminalLine('This script only exists on the Auth Service.', 'info');
+        return;
+    }
+
+    if (!node.tokenData) {
+        addTerminalLine('No token data available on this system.', 'info');
+        return;
+    }
+
+    // Check if player has found enough clues
+    const hasRequiredClues = node.tokenData.requiresClues.every(clue =>
+        gameState.cluesFound.has(clue)
+    );
+
+    if (!hasRequiredClues) {
+        const missingClues = node.tokenData.requiresClues.filter(clue =>
+            !gameState.cluesFound.has(clue)
+        );
+        addTerminalLine('Running token analysis...', 'info');
+        addTerminalLine('---', '');
+        addTerminalLine('Found several active JWT tokens with valid signatures.', '');
+        addTerminalLine('Token claims include standard fields: sub, iat, exp, role.', '');
+        addTerminalLine('---', '');
+        addTerminalLine('⚠️ Need more context to identify issues.', 'warning');
+        addTerminalLine('Hint: Investigate other systems to gather clues about suspicious activity.', 'info');
+        addTerminalLine(`Missing clues: ${missingClues.map(c => CLUE_DESCRIPTIONS[c]).join(', ')}`, 'info');
+        return;
+    }
+
+    addTerminalLine('Running comprehensive token analysis...', 'info');
+    addTerminalLine('---', '');
+    addTerminalLine(node.tokenData.details, 'error');
+    addTerminalLine('---', '');
+    addTerminalLine('🔴 VULNERABILITY IDENTIFIED!', 'error');
+    addTerminalLine('An expired contractor token is still being accepted.', 'error');
+    addTerminalLine('---', '');
+    addTerminalLine('SECURITY LESSON:', 'info');
+    addTerminalLine(node.tokenData.solution, 'info');
+    addTerminalLine('---', '');
+    addTerminalLine('Run enable-jwt-expiration to fix this vulnerability.', 'warning');
+
+    gameState.vulnerabilityFound = true;
+    node.status = 'compromised';
+
+    renderNetworkMap();
+    renderCommands();
+}
+
+// Fix Token
+function fixToken() {
+    if (!gameState.vulnerabilityFound) {
+        addTerminalLine('enable-jwt-expiration: command not found', 'error');
+        addTerminalLine('Hint: You need to identify a vulnerability first.', 'info');
+        return;
+    }
+
+    if (gameState.vulnerabilityFixed) {
+        addTerminalLine('JWT expiration validation is already enabled.', 'info');
+        return;
+    }
+
+    const authNode = networkNodes.find(n => n.id === 'auth');
+
+    addTerminalLine('Connecting to auth-service-01.techcorp.local...', 'info');
+    addTerminalLine('Updating JWT middleware configuration...', 'info');
+    addTerminalLine('---', '');
+    addTerminalLine('✅ Enabled expiration validation in jwt.config.js', 'success');
+    addTerminalLine('✅ Restarted authentication service', 'success');
+    addTerminalLine('✅ Testing token validation...', 'success');
+    addTerminalLine('✅ Expired tokens now rejected', 'success');
+    addTerminalLine('✅ Contractor access revoked', 'success');
+    addTerminalLine('---', '');
+    addTerminalLine('🛡️ Vulnerability patched successfully!', 'success');
+
+    gameState.vulnerabilityFixed = true;
+
+    // Update auth node status
+    authNode.status = 'healthy';
+
+    renderNetworkMap();
+
+    // Check win condition
+    checkWinCondition();
+}
+
+// Disconnect from Node
+function disconnectNode() {
+    const node = networkNodes.find(n => n.id === gameState.currentNode);
+    addTerminalLine('logout', '');
+    addTerminalLine(`Disconnected from ${node.hostname}`, 'info');
+    addTerminalLine('---', '');
+
+    gameState.currentNode = null;
+    updateConnectionStatus();
+    updateNPCPanel(null);
+    renderNetworkMap();
+    renderCommands();
+}
+
+// Talk to NPC
+function talkToNPC() {
+    const node = networkNodes.find(n => n.id === gameState.currentNode);
+
+    if (!node || !node.npc) {
+        return;
+    }
+
+    showDialog(node.npc.name, node.npc.dialog);
+}
+
+// Show Dialog
+function showDialog(npcName, message) {
+    dialogNPC.textContent = npcName;
+    dialogBody.textContent = message;
+    dialogModal.classList.add('show');
+}
+
+// Close Dialog
+function closeDialog() {
+    dialogModal.classList.remove('show');
+}
+
+// Check Win Condition
+function checkWinCondition() {
+    if (gameState.vulnerabilityFixed && !gameState.gameWon) {
+        gameState.gameWon = true;
+
+        setTimeout(() => {
+            showVictory();
+        }, 1000);
+    }
+}
+
+// Show Victory
+function showVictory() {
+    const message = `
+        <p><strong>Excellent work, Security Engineer!</strong></p>
+
+        <p>You successfully identified and fixed the JWT expiration vulnerability.</p>
+
+        <p><strong>What you learned:</strong></p>
+        <ul style="text-align: left; display: inline-block;">
+            <li>JWT tokens contain claims including expiration (exp)</li>
+            <li>Token validation MUST check expiration timestamps</li>
+            <li>Expired credentials should be rejected automatically</li>
+            <li>Security configurations require thorough code review</li>
+            <li>Access should be revoked when employees/contractors leave</li>
+        </ul>
+
+        <p><strong>The story:</strong> A contractor's token continued working months after their contract ended because the JWT expiration check was disabled during debugging and never re-enabled.</p>
+
+        <p>Thanks for playing this prototype!</p>
+    `;
+
+    victoryMessage.innerHTML = message;
+    victoryModal.classList.add('show');
+}
+
+// Add Terminal Line
+function addTerminalLine(text, className = '') {
+    const line = document.createElement('div');
+    line.className = `terminal-line ${className}`;
+    line.textContent = text;
+    terminalOutputEl.appendChild(line);
+}
+
+// Scroll Terminal to Bottom
+function scrollTerminalToBottom() {
+    terminalOutputEl.scrollTop = terminalOutputEl.scrollHeight;
+}
+
+// Start the game
+init();

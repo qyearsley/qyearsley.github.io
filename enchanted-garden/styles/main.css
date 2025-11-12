@@ -1,0 +1,461 @@
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Comic Sans MS', 'Chalkboard SE', 'Arial Rounded MT Bold', cursive, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    overflow-x: hidden;
+}
+
+#game-container {
+    width: 100%;
+    max-width: 900px;
+    min-height: 600px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 30px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    position: relative;
+}
+
+/* Screen Management */
+.screen {
+    display: none;
+    padding: 30px;
+    min-height: 600px;
+}
+
+.screen.active {
+    display: block;
+}
+
+/* Header Styles */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 3px solid #e0e0e0;
+}
+
+.header h2 {
+    font-size: 28px;
+    color: #667eea;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.stats {
+    display: flex;
+    gap: 20px;
+}
+
+.stat {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    background: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Title Screen */
+#title-screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+}
+
+.game-title {
+    font-size: 48px;
+    color: #764ba2;
+    margin-bottom: 20px;
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+.subtitle {
+    font-size: 24px;
+    color: #667eea;
+    margin-bottom: 40px;
+}
+
+/* Buttons */
+.big-button {
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    padding: 20px 50px;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.big-button:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+}
+
+.big-button:active {
+    transform: translateY(-1px) scale(1.02);
+}
+
+.nav-button {
+    font-size: 18px;
+    color: #667eea;
+    background: white;
+    border: 2px solid #667eea;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    font-weight: bold;
+}
+
+.nav-button:hover {
+    background: #667eea;
+    color: white;
+    transform: translateX(-3px);
+}
+
+/* Garden Hub */
+.garden-areas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.garden-area {
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    border-radius: 20px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.garden-area.unlocked:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.garden-area.locked {
+    background: #e0e0e0;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.area-icon {
+    font-size: 64px;
+    margin-bottom: 15px;
+    animation: bounce 2s ease-in-out infinite;
+}
+
+.garden-area h3 {
+    font-size: 24px;
+    color: #764ba2;
+    margin-bottom: 10px;
+}
+
+.garden-area p {
+    font-size: 16px;
+    color: #666;
+}
+
+/* Activity Screen */
+.activity-container {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.creature-guide {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    padding: 20px;
+    border-radius: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.creature-image {
+    font-size: 80px;
+    animation: wiggle 2s ease-in-out infinite;
+}
+
+.creature-speech {
+    flex: 1;
+    background: white;
+    padding: 15px 20px;
+    border-radius: 15px;
+    position: relative;
+}
+
+.creature-speech::before {
+    content: '';
+    position: absolute;
+    left: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-right: 10px solid white;
+}
+
+.creature-speech p {
+    font-size: 18px;
+    color: #333;
+    line-height: 1.4;
+}
+
+/* Question Area */
+.question-area {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.question {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.visual-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    min-height: 100px;
+    flex-wrap: wrap;
+}
+
+.visual-item {
+    font-size: 48px;
+    animation: pop-in 0.3s ease-out;
+}
+
+.visual-item.crossed-out {
+    opacity: 0.4;
+    position: relative;
+}
+
+.visual-item.crossed-out::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 3px;
+    background: #ef4444;
+    transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+/* Answer Options */
+.answer-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+}
+
+.answer-button {
+    font-size: 36px;
+    font-weight: bold;
+    color: #764ba2;
+    background: white;
+    border: 4px solid #764ba2;
+    padding: 30px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.answer-button:hover {
+    background: #764ba2;
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(118, 75, 162, 0.4);
+}
+
+.answer-button.correct {
+    background: #4ade80;
+    border-color: #16a34a;
+    color: white;
+    animation: pulse-correct 0.5s ease;
+}
+
+.answer-button.disabled {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+/* Feedback Area */
+.feedback-area {
+    margin-top: 30px;
+    padding: 20px;
+    border-radius: 20px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.feedback-area.hidden {
+    display: none;
+}
+
+.feedback-area.correct {
+    background: #4ade80;
+    color: white;
+}
+
+/* Garden Preview */
+.garden-preview {
+    margin-top: 30px;
+    padding: 20px;
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    border-radius: 20px;
+    min-height: 150px;
+}
+
+.garden-canvas {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 10px;
+    min-height: 120px;
+    flex-wrap: wrap;
+}
+
+.garden-item {
+    font-size: 48px;
+    animation: grow-in 0.5s ease-out;
+}
+
+/* Reward Screen */
+#reward-screen {
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.reward-content {
+    text-align: center;
+}
+
+.celebration {
+    font-size: 48px;
+    color: #764ba2;
+    margin-bottom: 30px;
+    animation: bounce-in 0.6s ease-out;
+}
+
+.reward-display {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+#reward-message {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.reward-visual {
+    font-size: 120px;
+    animation: spin-grow 1s ease-out;
+}
+
+/* Particles */
+#particles-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+.particle {
+    position: absolute;
+    font-size: 24px;
+    animation: float-up 2s ease-out forwards;
+    pointer-events: none;
+}
+
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .game-title {
+        font-size: 36px;
+    }
+
+    .subtitle {
+        font-size: 18px;
+    }
+
+    .big-button {
+        font-size: 20px;
+        padding: 15px 40px;
+    }
+
+    .header h2 {
+        font-size: 22px;
+    }
+
+    .stat {
+        font-size: 16px;
+        padding: 6px 12px;
+    }
+
+    .creature-image {
+        font-size: 60px;
+    }
+
+    .question {
+        font-size: 20px;
+    }
+
+    .answer-button {
+        font-size: 28px;
+        padding: 20px;
+    }
+}

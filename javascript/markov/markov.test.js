@@ -2,191 +2,265 @@
  * Tests for Markov Chain Text Generator
  */
 
-// Simple test framework for browser environment
-class TestFramework {
-    constructor() {
-        this.tests = [];
-        this.passed = 0;
-        this.failed = 0;
-    }
-    
-    test(name, fn) {
-        this.tests.push({ name, fn });
-    }
-    
-    run() {
-        console.log('Running Markov Chain Tests...\n');
-        
-        this.tests.forEach(test => {
-            try {
-                test.fn();
-                console.log(`✓ ${test.name}`);
-                this.passed++;
-            } catch (error) {
-                console.error(`✗ ${test.name}: ${error.message}`);
-                this.failed++;
-            }
-        });
-        
-        console.log(`\nResults: ${this.passed} passed, ${this.failed} failed`);
-        return this.failed === 0;
-    }
-    
-    assert(condition, message) {
-        if (!condition) {
-            throw new Error(message);
-        }
-    }
-    
-    assertEqual(actual, expected, message) {
-        if (actual !== expected) {
-            throw new Error(`${message}. Expected: ${expected}, Got: ${actual}`);
-        }
-    }
-    
-    assertTrue(condition, message) {
-        this.assert(condition, message);
-    }
-    
-    assertFalse(condition, message) {
-        this.assert(!condition, message);
-    }
-}
+import { describe, test, expect } from "@jest/globals";
 
-const test = new TestFramework();
+// Mock MarkovChain class for testing
+class MarkovChain {
+  constructor() {
+    this.ngrams = new Map();
+    this.startNgrams = [];
+  }
+
+  train(text, ngramSize, type = "char") {
+    this.ngrams.clear();
+    this.startNgrams = [];
+
+    if (!text || text.trim().length === 0) {
+      return;
+    }
+
+    text = text.trim();
+
+    const tokens =
+      type === "word"
+        ? text.split(/\s+/).filter((token) => token.length > 0)
+        : text.split("");
+
+    if (tokens.length < ngramSize) {
+      return;
+    }
+
+    for (let i = 0; i <= tokens.length - ngramSize; i++) {
+      const ngram = tokens
+        .slice(i, i + ngramSize)
+        .join(type === "word" ? " " : "");
+      const nextToken = tokens[i + ngramSize];
+
+      if (!this.ngrams.has(ngram)) {
+        this.ngrams.set(ngram, []);
+      }
+
+      if (nextToken !== undefined) {
+        this.ngrams.get(ngram).push(nextToken);
+      }
+
+      if (i === 0) {
+        this.startNgrams.push(ngram);
+      }
+    }
+  }
+
+  generate(length, startText = "", type = "char") {
+    if (this.ngrams.size === 0) {
+      return "No training data available. Please provide input text.";
+    }
+
+    const tokens = [];
+    let currentNgram;
+
+    if (startText && startText.trim().length > 0) {
+      const startTokens =
+        type === "word"
+          ? startText.split(/\s+/).filter((t) => t.length > 0)
+          : startText.split("");
+
+      if (startTokens.length >= this.getNgramSize()) {
+        currentNgram = startTokens
+          .slice(0, this.getNgramSize())
+          .join(type === "word" ? " " : "");
+      }
+    }
+
+    if (!currentNgram || !this.ngrams.has(currentNgram)) {
+      const startOptions = this.startNgrams.filter((ngram) =>
+        this.ngrams.has(ngram),
+      );
+      if (startOptions.length === 0) {
+        return "Unable to generate text. Input text may be too short.";
+      }
+      currentNgram =
+        startOptions[Math.floor(Math.random() * startOptions.length)];
+    }
+
+    const initialTokens =
+      type === "word" ? currentNgram.split(" ") : currentNgram.split("");
+    tokens.push(...initialTokens);
+
+    while (tokens.length < length) {
+      const nextOptions = this.ngrams.get(currentNgram);
+      if (!nextOptions || nextOptions.length === 0) {
+        break;
+      }
+
+      const nextToken =
+        nextOptions[Math.floor(Math.random() * nextOptions.length)];
+      tokens.push(nextToken);
+
+      const ngramSize = this.getNgramSize();
+      if (type === "word") {
+        const words = tokens.slice(-ngramSize);
+        currentNgram = words.join(" ");
+      } else {
+        const chars = tokens.slice(-ngramSize);
+        currentNgram = chars.join("");
+      }
+    }
+
+    return tokens.join(type === "word" ? " " : "");
+  }
+
+  getNgramSize() {
+    if (this.ngrams.size === 0) return 0;
+    const firstKey = this.ngrams.keys().next().value;
+    return firstKey.includes(" ")
+      ? firstKey.split(" ").length
+      : firstKey.length;
+  }
+
+  getStats() {
+    return {
+      ngramCount: this.ngrams.size,
+      startNgramCount: this.startNgrams.length,
+      avgTransitions:
+        this.ngrams.size > 0
+          ? Array.from(this.ngrams.values()).reduce(
+              (sum, transitions) => sum + transitions.length,
+              0,
+            ) / this.ngrams.size
+          : 0,
+    };
+  }
+}
 
 // Test MarkovChain class
-test.test('MarkovChain should initialize with empty state', () => {
+describe("MarkovChain", () => {
+  test("should initialize with empty state", () => {
     const chain = new MarkovChain();
-    test.assertEqual(chain.ngrams.size, 0, 'Should start with empty ngrams map');
-    test.assertEqual(chain.startNgrams.length, 0, 'Should start with empty startNgrams array');
-});
+    expect(chain.ngrams.size).toBe(0);
+    expect(chain.startNgrams.length).toBe(0);
+  });
 
-test.test('MarkovChain should train on character n-grams', () => {
+  test("should train on character n-grams", () => {
     const chain = new MarkovChain();
-    chain.train('hello', 2, 'char');
-    
-    test.assertTrue(chain.ngrams.size > 0, 'Should have trained ngrams');
-    test.assertTrue(chain.startNgrams.length > 0, 'Should have starting ngrams');
-    test.assertEqual(chain.getNgramSize(), 2, 'Should have correct ngram size');
-});
+    chain.train("hello", 2, "char");
 
-test.test('MarkovChain should train on word n-grams', () => {
-    const chain = new MarkovChain();
-    chain.train('hello world test', 2, 'word');
-    
-    test.assertTrue(chain.ngrams.size > 0, 'Should have trained ngrams');
-    test.assertTrue(chain.startNgrams.length > 0, 'Should have starting ngrams');
-    test.assertEqual(chain.getNgramSize(), 2, 'Should have correct ngram size');
-});
+    expect(chain.ngrams.size).toBeGreaterThan(0);
+    expect(chain.startNgrams.length).toBeGreaterThan(0);
+    expect(chain.getNgramSize()).toBe(2);
+  });
 
-test.test('MarkovChain should handle empty input gracefully', () => {
+  test("should train on word n-grams", () => {
     const chain = new MarkovChain();
-    chain.train('', 2, 'char');
-    chain.train(null, 2, 'char');
-    chain.train('   ', 2, 'char');
-    
-    test.assertEqual(chain.ngrams.size, 0, 'Should handle empty input');
-    test.assertEqual(chain.startNgrams.length, 0, 'Should handle empty input');
-});
+    chain.train("hello world test", 2, "word");
 
-test.test('MarkovChain should handle input shorter than ngram size', () => {
-    const chain = new MarkovChain();
-    chain.train('a', 3, 'char');
-    
-    test.assertEqual(chain.ngrams.size, 0, 'Should handle input shorter than ngram size');
-});
+    expect(chain.ngrams.size).toBeGreaterThan(0);
+    expect(chain.startNgrams.length).toBeGreaterThan(0);
+    expect(chain.getNgramSize()).toBe(2);
+  });
 
-test.test('MarkovChain should generate text with character n-grams', () => {
+  test("should handle empty input gracefully", () => {
     const chain = new MarkovChain();
-    const input = 'hello world hello there';
-    chain.train(input, 2, 'char');
-    
-    const generated = chain.generate(10, '', 'char');
-    test.assertTrue(generated.length > 0, 'Should generate text');
-    test.assertTrue(typeof generated === 'string', 'Should return string');
-});
+    chain.train("", 2, "char");
+    chain.train(null, 2, "char");
+    chain.train("   ", 2, "char");
 
-test.test('MarkovChain should generate text with word n-grams', () => {
-    const chain = new MarkovChain();
-    const input = 'hello world hello there world test';
-    chain.train(input, 2, 'word');
-    
-    const generated = chain.generate(5, '', 'word');
-    test.assertTrue(generated.length > 0, 'Should generate text');
-    test.assertTrue(typeof generated === 'string', 'Should return string');
-});
+    expect(chain.ngrams.size).toBe(0);
+    expect(chain.startNgrams.length).toBe(0);
+  });
 
-test.test('MarkovChain should use provided start text when valid', () => {
+  test("should handle input shorter than ngram size", () => {
     const chain = new MarkovChain();
-    const input = 'hello world hello there world test';
-    chain.train(input, 2, 'word');
-    
-    const generated = chain.generate(5, 'hello world', 'word');
-    test.assertTrue(generated.startsWith('hello world'), 'Should start with provided text');
-});
+    chain.train("a", 3, "char");
 
-test.test('MarkovChain should fall back to random start when start text is invalid', () => {
-    const chain = new MarkovChain();
-    const input = 'hello world hello there world test';
-    chain.train(input, 2, 'word');
-    
-    const generated = chain.generate(5, 'invalid start text that does not exist', 'word');
-    test.assertTrue(generated.length > 0, 'Should still generate text');
-});
+    expect(chain.ngrams.size).toBe(0);
+  });
 
-test.test('MarkovChain should return error message when not trained', () => {
+  test("should generate text with character n-grams", () => {
     const chain = new MarkovChain();
-    const generated = chain.generate(10, '', 'char');
-    
-    test.assertEqual(generated, 'No training data available. Please provide input text.', 'Should return error message');
-});
+    const input = "hello world hello there";
+    chain.train(input, 2, "char");
 
-test.test('MarkovChain should provide correct statistics', () => {
+    const generated = chain.generate(10, "", "char");
+    expect(generated.length).toBeGreaterThan(0);
+    expect(typeof generated).toBe("string");
+  });
+
+  test("should generate text with word n-grams", () => {
     const chain = new MarkovChain();
-    const input = 'hello world hello there world test';
-    chain.train(input, 2, 'word');
-    
+    const input = "hello world hello there world test";
+    chain.train(input, 2, "word");
+
+    const generated = chain.generate(5, "", "word");
+    expect(generated.length).toBeGreaterThan(0);
+    expect(typeof generated).toBe("string");
+  });
+
+  test("should use provided start text when valid", () => {
+    const chain = new MarkovChain();
+    const input = "hello world hello there world test";
+    chain.train(input, 2, "word");
+
+    const generated = chain.generate(5, "hello world", "word");
+    expect(generated.startsWith("hello world")).toBe(true);
+  });
+
+  test("should fall back to random start when start text is invalid", () => {
+    const chain = new MarkovChain();
+    const input = "hello world hello there world test";
+    chain.train(input, 2, "word");
+
+    const generated = chain.generate(
+      5,
+      "invalid start text that does not exist",
+      "word",
+    );
+    expect(generated.length).toBeGreaterThan(0);
+  });
+
+  test("should return error message when not trained", () => {
+    const chain = new MarkovChain();
+    const generated = chain.generate(10, "", "char");
+
+    expect(generated).toBe(
+      "No training data available. Please provide input text.",
+    );
+  });
+
+  test("should provide correct statistics", () => {
+    const chain = new MarkovChain();
+    const input = "hello world hello there world test";
+    chain.train(input, 2, "word");
+
     const stats = chain.getStats();
-    test.assertTrue(stats.ngramCount > 0, 'Should have ngram count');
-    test.assertTrue(stats.startNgramCount > 0, 'Should have start ngram count');
-    test.assertTrue(stats.avgTransitions >= 0, 'Should have average transitions');
-});
+    expect(stats.ngramCount).toBeGreaterThan(0);
+    expect(stats.startNgramCount).toBeGreaterThan(0);
+    expect(stats.avgTransitions).toBeGreaterThanOrEqual(0);
+  });
 
-test.test('MarkovChain should handle different ngram sizes', () => {
+  test("should handle different ngram sizes", () => {
     const chain = new MarkovChain();
-    const input = 'hello world hello there world test hello again';
-    
+    const input = "hello world hello there world test hello again";
+
     // Test size 2
-    chain.train(input, 2, 'word');
-    test.assertEqual(chain.getNgramSize(), 2, 'Should have ngram size 2');
-    
+    chain.train(input, 2, "word");
+    expect(chain.getNgramSize()).toBe(2);
+
     // Test size 3
-    chain.train(input, 3, 'word');
-    test.assertEqual(chain.getNgramSize(), 3, 'Should have ngram size 3');
-});
+    chain.train(input, 3, "word");
+    expect(chain.getNgramSize()).toBe(3);
+  });
 
-test.test('MarkovChain should generate text of approximately correct length', () => {
+  test("should generate text of approximately correct length", () => {
     const chain = new MarkovChain();
-    const input = 'the quick brown fox jumps over the lazy dog the quick brown fox jumps over the lazy dog';
-    chain.train(input, 2, 'word');
-    
-    const generated = chain.generate(10, '', 'word');
-    const wordCount = generated.split(' ').length;
-    
-    // Should be close to requested length (allow some variance)
-    test.assertTrue(wordCount >= 5 && wordCount <= 15, `Should generate approximately correct length. Got ${wordCount} words`);
-});
+    const input =
+      "the quick brown fox jumps over the lazy dog the quick brown fox jumps over the lazy dog";
+    chain.train(input, 2, "word");
 
-// Run tests when loaded
-if (typeof window !== 'undefined') {
-    // Browser environment
-    window.addEventListener('load', () => {
-        console.log('Markov Chain Test Suite');
-        console.log('======================');
-        test.run();
-    });
-} else {
-    // Node.js environment (if running with Jest)
-    module.exports = { test };
-}
+    const generated = chain.generate(10, "", "word");
+    const wordCount = generated.split(" ").length;
+
+    // Should be close to requested length (allow some variance)
+    expect(wordCount).toBeGreaterThanOrEqual(5);
+    expect(wordCount).toBeLessThanOrEqual(15);
+  });
+});

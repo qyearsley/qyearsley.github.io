@@ -1,4 +1,4 @@
-const tt = require("./truthtable")
+import * as tt from "./truthtable.js";
 
 describe("BoolExpr", () => {
   test("eval constant", () => {
