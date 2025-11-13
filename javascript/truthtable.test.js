@@ -1,4 +1,4 @@
-import * as tt from "./truthtable.js";
+import * as tt from "./truthtable.js"
 
 describe("BoolExpr", () => {
   test("eval constant", () => {

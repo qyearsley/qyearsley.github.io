@@ -7,7 +7,12 @@ export default [
   js.configs.recommended,
   prettier,
   {
-    files: ["javascript/**/*.js", "javascript/**/*.html", "netguard/**/*.js", "netguard/**/*.html", "enchanted-garden/**/*.js", "enchanted-garden/**/*.html"],
+    files: [
+      "javascript/**/*.js",
+      "javascript/**/*.html",
+      "games/**/*.js",
+      "games/**/*.html",
+    ],
     plugins: {
       import: importPlugin,
     },
@@ -22,6 +27,9 @@ export default [
         location: "readonly",
         atob: "readonly",
         btoa: "readonly",
+        confirm: "readonly",
+        alert: "readonly",
+        prompt: "readonly",
         URLSearchParams: "readonly",
         setInterval: "readonly",
         setTimeout: "readonly",
@@ -62,7 +70,7 @@ export default [
     },
   },
   {
-    files: ["javascript/**/*.html", "netguard/**/*.html", "enchanted-garden/**/*.html"],
+    files: ["javascript/**/*.html", "games/**/*.html"],
     plugins: {
       html,
     },

@@ -4,7 +4,7 @@
   "description": "Github Pages Site",
   "type": "module",
   "scripts": {
-    "lint": "eslint javascript/ netguard/ enchanted-garden/",
+    "lint": "eslint javascript/ games/",
     "format": "npx prettier --write .",
     "start": "http-server -p 8000",
     "test": "NODE_OPTIONS='--experimental-vm-modules' jest"

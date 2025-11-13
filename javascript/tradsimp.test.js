@@ -2,7 +2,7 @@
  * Tests for tradsimp.js - Traditional to Simplified Chinese converter.
  */
 
-import { simplify } from "./tradsimp.js";
+import { simplify } from "./tradsimp.js"
 
 describe("simplify", () => {
   test("converts traditional characters to simplified", () => {

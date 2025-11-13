@@ -3,12 +3,15 @@ module.exports = {
   testMatch: ["**/*.test.js"],
   collectCoverageFrom: [
     "javascript/**/*.js",
-    "netguard/**/*.js",
+    "games/netguard/**/*.js",
+    "games/enchanted-garden/**/*.js",
     "!javascript/**/*.test.js",
-    "!netguard/**/*.test.js",
+    "!games/netguard/**/*.test.js",
+    "!games/enchanted-garden/**/*.test.js",
     "!javascript/**/*.html",
-    "!netguard/**/*.html",
-    "!netguard/game.js.backup",
+    "!games/netguard/**/*.html",
+    "!games/enchanted-garden/**/*.html",
+    "!games/netguard/game.js.backup",
   ],
   coverageDirectory: "coverage",
   coverageReporters: ["text", "lcov", "html"],
@@ -17,5 +20,3 @@ module.exports = {
     "^(\\.{1,2}/.*)\\.js$": "$1",
   },
 }
-
-

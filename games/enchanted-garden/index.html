@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Enchanted Garden</title>
+    <link rel="stylesheet" href="styles/main.css" />
+    <link rel="stylesheet" href="styles/garden.css" />
+    <link rel="stylesheet" href="styles/animations.css" />
+  </head>
+  <body>
+    <div id="game-container">
+      <!-- Title Screen -->
+      <div id="title-screen" class="screen active">
+        <h1 class="game-title">🌸 Enchanted Garden 🌸</h1>
+        <p class="subtitle">Help the magic garden!</p>
+        <div class="title-buttons">
+          <button id="start-button" class="big-button">Start</button>
+          <button id="continue-button" class="big-button hidden">Continue</button>
+          <button id="start-fresh-button" class="secondary-button hidden">Start Fresh</button>
+        </div>
+      </div>
+
+      <!-- Garden Hub -->
+      <div id="garden-hub" class="screen">
+        <div class="header">
+          <h2>Enchanted Garden</h2>
+          <div class="stats">
+            <span class="stat">🌟 <span id="star-count">0</span></span>
+            <span class="stat">🌺 <span id="flower-count">0</span></span>
+          </div>
+        </div>
+
+        <div class="garden-areas">
+          <div class="garden-area unlocked" data-area="flower-meadow">
+            <div class="area-icon">🦄</div>
+            <h3>Flower Meadow</h3>
+            <p>Visit Unicorn</p>
+          </div>
+
+          <div class="garden-area locked" data-area="crystal-cave">
+            <div class="area-icon">🔮</div>
+            <h3>Crystal Cave</h3>
+            <p>Complete Flower Meadow</p>
+          </div>
+
+          <div class="garden-area locked" data-area="enchanted-forest">
+            <div class="area-icon">🌲</div>
+            <h3>Enchanted Forest</h3>
+            <p>Complete Crystal Cave</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activity Screen -->
+      <div id="activity-screen" class="screen">
+        <div class="header">
+          <button id="back-button" class="nav-button">← Back</button>
+          <div class="stats">
+            <span class="stat" id="level-display">Level 1</span>
+            <span class="stat">🌟 <span id="activity-star-count">0</span></span>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+          <div class="progress-bar-bg">
+            <div id="progress-bar" class="progress-bar"></div>
+          </div>
+          <div id="progress-text" class="progress-text">0/10</div>
+        </div>
+
+        <div class="activity-container">
+          <!-- Creature Guide -->
+          <div class="creature-guide">
+            <div class="creature-image">🦄</div>
+            <div class="creature-speech">
+              <p id="creature-message">Help me solve this!</p>
+            </div>
+          </div>
+
+          <!-- Question Area -->
+          <div class="question-area">
+            <p id="question-text" class="question"></p>
+            <div id="visual-area" class="visual-area"></div>
+          </div>
+
+          <!-- Answer Options -->
+          <div id="answer-options" class="answer-options"></div>
+
+          <!-- Feedback Area -->
+          <div id="feedback-area" class="feedback-area hidden"></div>
+        </div>
+
+        <!-- Garden Preview (shows progress) -->
+        <div class="garden-preview">
+          <div id="garden-canvas" class="garden-canvas"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Particle effects container -->
+    <div id="particles-container"></div>
+
+    <script type="module" src="js/game.js?v=7"></script>
+  </body>
+</html>

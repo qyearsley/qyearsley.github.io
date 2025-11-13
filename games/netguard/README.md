@@ -40,12 +40,14 @@ npm run lint -- netguard/    # Run linter
 ## Development
 
 **File Structure:**
+
 - `levels.js` - Level definitions
 - `networks.js` - Network topologies
 - `tools.js` - Interactive tools (22 unit tests)
 - `game.js` - Main game logic
 
 **Adding Levels:**
+
 1. Define in `levels.js`
 2. Create network in `networks.js`
 3. Add commands in `game.js`
