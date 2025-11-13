@@ -1,4 +1,3 @@
-/* global confirm */
 import { LEVELS, LEVEL_ORDER } from "./levels.js";
 import { getNetworkForLevel } from "./networks.js";
 import {
@@ -831,10 +830,10 @@ function openTool(toolName) {
   const node = gameState.networkNodes.find((n) => n.id === gameState.currentNode);
 
   if (toolName.includes("base64") && node?.sampleToken) {
-    toolInputLabel.textContent = "JWT Token (paste parts separated by dots):";
-    toolInput.placeholder = "Paste JWT header or payload (base64 encoded)...";
-    toolInput.value = node.sampleToken.split(".")[1]; // Payload part
-    toolOutput.textContent = "Hint: JWT tokens have 3 parts (header.payload.signature). Paste the middle part to see the payload.";
+    toolInputLabel.textContent = "JWT Token or Payload:";
+    toolInput.placeholder = "Paste full JWT token or just the payload (middle part between dots)...";
+    toolInput.value = node.sampleToken; // Full token
+    toolOutput.textContent = "Hint: JWT tokens have 3 parts (header.payload.signature). Paste the full token or just the middle part to see the payload.";
   } else if (toolName.includes("psql")) {
     toolInputLabel.textContent = "SQL Query:";
     toolInput.placeholder = "e.g., SELECT * FROM users WHERE id = '1' OR '1'='1'";
@@ -872,7 +871,25 @@ function executeTool() {
   setTimeout(() => {
     try {
       if (toolName.includes("base64")) {
-        const decoded = JWTDecoder.decode("header." + input + ".signature");
+        // Check if input is a full JWT (3 parts) or just the payload
+        const parts = input.split(".");
+        let decoded;
+        if (parts.length === 3) {
+          // Full JWT token
+          decoded = JWTDecoder.decode(input);
+        } else {
+          // Just the payload part - decode it directly
+          try {
+            const payloadData = JSON.parse(atob(input));
+            decoded = {
+              header: { note: "Header not provided - only payload decoded" },
+              payload: payloadData,
+              signature: "Not provided"
+            };
+          } catch (e) {
+            decoded = { error: "Invalid base64 or JSON in payload: " + e.message };
+          }
+        }
         toolOutput.textContent = JWTDecoder.formatDecoded(decoded);
       } else if (toolName.includes("psql")) {
         const originalQuery = "SELECT * FROM users WHERE id = '?'";

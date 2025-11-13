@@ -352,4 +352,4 @@ export {
   parseInfix,
   tokenize,
   listCombinations,
-};
+}

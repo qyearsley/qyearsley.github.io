@@ -238,5 +238,4 @@ const simplified = {
   "繩": "绳", "暱": "昵", "瞞": "瞒",
 }
 
-
-export { simplify };
+export { simplify }

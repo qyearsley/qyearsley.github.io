@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Games - Quinten Yearsley</title>
+    <meta name="description" content="Educational games and interactive experiences" />
+    <link rel="stylesheet" href="/style.css" />
+    <style>
+      .game-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .game-list li {
+        margin-bottom: 12px;
+      }
+
+      .game-list a {
+        display: block;
+        padding: 16px;
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+        text-decoration: none;
+        color: #495057;
+        transition: all 0.2s ease;
+      }
+
+      .game-list a:hover {
+        background: #e9ecef;
+        border-color: #007bff;
+        color: #007bff;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .game-list a:active {
+        transform: translateY(0);
+      }
+
+      .game-list .game-title {
+        font-size: 1.2em;
+        font-weight: 600;
+        margin-bottom: 6px;
+      }
+
+      .game-list .game-description {
+        font-size: 0.95em;
+        line-height: 1.5;
+        color: #6c757d;
+      }
+
+      .game-list a:hover .game-description {
+        color: #495057;
+      }
+    </style>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="container">
+      <header class="header">
+        <h1>Games</h1>
+        <p class="subtitle">Educational games and interactive experiences</p>
+      </header>
+
+      <main id="main-content" class="main-content">
+        <section class="section">
+          <h2>Available Games</h2>
+          <ul class="game-list">
+            <li>
+              <a href="/games/netguard/index.html">
+                <div class="game-title">🛡️ NetGuard</div>
+                <div class="game-description">
+                  Investigate and fix security vulnerabilities through interactive terminal gameplay. Covers JWT, SQL injection, TLS, CSRF, XSS, and API security.
+                </div>
+              </a>
+            </li>
+
+            <li>
+              <a href="/games/enchanted-garden/index.html">
+                <div class="game-title">🌸 Enchanted Garden</div>
+                <div class="game-description">
+                  Help magical creatures by solving math problems in this colorful adventure for young learners.
+                </div>
+              </a>
+            </li>
+          </ul>
+        </section>
+
+        <section class="section">
+          <a href="/" class="back-link">← Back to Home</a>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

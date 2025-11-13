@@ -1,13 +1,16 @@
 # Enchanted Garden - Game Design Document
 
 ## Overview
+
 A click-based educational game for children (primarily ages 6-8) where players help magical creatures restore an enchanted garden by completing math and reading activities.
 
 ## Target Audience
+
 - **Primary**: 7-year-old (simple addition/subtraction, reading short sentences)
 - **Secondary**: 4-year-old (letter recognition, counting)
 
 ## Core Design Principles
+
 - Click/tap only - no arrow keys or fast reflexes needed
 - No time pressure - learn at own pace
 - Visual rewards for motivation
@@ -19,9 +22,11 @@ A click-based educational game for children (primarily ages 6-8) where players h
 ## Game Concept
 
 ### Story
+
 The Enchanted Garden has lost its magic. Magical creatures from around the world need the player's help to restore different areas of the garden by solving puzzles and completing learning activities.
 
 ### Win Condition
+
 Restore all areas of the garden to their full magical beauty. The game is designed for ongoing play rather than a definitive "end."
 
 ---
@@ -75,13 +80,16 @@ Each creature has a distinct personality and guards/helps with a specific garden
 ## Garden Areas
 
 ### Phase 1 (MVP - Prototype)
+
 **Flower Meadow** - Starting area
+
 - Colorful flowers that bloom
 - Simple, open space
 - Introduces basic mechanics
 - Home to Unicorn
 
 ### Phase 2 (Future)
+
 - **Crystal Cave** - Glowing crystals, darker background
 - **Enchanted Forest** - Trees that grow and change
 - **Sky Garden** - Floating islands, clouds, stars
@@ -89,6 +97,7 @@ Each creature has a distinct personality and guards/helps with a specific garden
 - **Fruit Orchard** - Trees with magical fruits
 
 ### Phase 3 (Advanced)
+
 - **Rock Garden** - Zen-like space with stones and moss
 - **Treasure Garden** - Central hub, achievement display
 
@@ -97,6 +106,7 @@ Each creature has a distinct personality and guards/helps with a specific garden
 ## Game Mechanics
 
 ### Navigation
+
 - **Hub Screen**: Garden overview where player clicks on different areas
 - **Activity Screen**: Where learning activities take place
 - **Reward Screen**: Shows what was earned
@@ -138,6 +148,7 @@ Each creature has a distinct personality and guards/helps with a specific garden
    - Vocabulary building with garden/nature words
 
 #### Pattern Activities (Both Kids)
+
 1. **Sequence Completion**
    - Visual patterns (colors, shapes)
    - Good for both age levels
@@ -150,18 +161,21 @@ Each creature has a distinct personality and guards/helps with a specific garden
 ### Difficulty Progression
 
 **Easy (Levels 1-5)**
+
 - Addition/subtraction 1-10
 - 3-5 word sentences
 - Visual support for all problems
 - Multiple choice with 2-3 options
 
 **Medium (Levels 6-10)**
+
 - Numbers 1-20
 - 6-10 word sentences
 - Less visual support
 - 3-4 answer choices
 
 **Advanced (Levels 11+)**
+
 - Numbers up to 30 (optional)
 - Two-step problems
 - Longer reading passages
@@ -172,6 +186,7 @@ Each creature has a distinct personality and guards/helps with a specific garden
 ## Reward Systems
 
 ### Immediate Rewards (After Each Correct Answer)
+
 - ✨ Sparkle particle effects
 - 🎵 Pleasant chime sound
 - Positive text message from creature
@@ -201,6 +216,7 @@ Each creature has a distinct personality and guards/helps with a specific garden
    - Rare magical items (rainbow, shooting star, etc.)
 
 ### Progress Tracking
+
 - Current level displayed
 - Total activities completed
 - Gardens restored (percentage)
@@ -211,6 +227,7 @@ Each creature has a distinct personality and guards/helps with a specific garden
 ## Visual Style
 
 ### Art Direction
+
 - Soft, watercolor-inspired backgrounds
 - Bright, magical color palette
   - Purples, blues, pinks, teals, golds
@@ -220,6 +237,7 @@ Each creature has a distinct personality and guards/helps with a specific garden
 - Nature-focused with magical elements
 
 ### UI Design
+
 - Large, clear buttons
 - High contrast text
 - Simple, uncluttered layouts
@@ -227,6 +245,7 @@ Each creature has a distinct personality and guards/helps with a specific garden
 - Touch-friendly (50+ pixel targets)
 
 ### Animation Principles
+
 - Smooth, slow animations (nothing jarring)
 - Positive reinforcement animations
 - Growing/blooming effects for rewards
@@ -237,6 +256,7 @@ Each creature has a distinct personality and guards/helps with a specific garden
 ## Technical Architecture
 
 ### Technology Stack
+
 - HTML5
 - CSS3 (with animations)
 - Vanilla JavaScript (ES6+)
@@ -244,6 +264,7 @@ Each creature has a distinct personality and guards/helps with a specific garden
 - No external dependencies initially
 
 ### File Structure
+
 ```
 enchanted-garden/
 ├── index.html
@@ -300,6 +321,7 @@ enchanted-garden/
 ## MVP Features (Prototype - Phase 1)
 
 ### Must Have
+
 - [ ] One garden area (Flower Meadow)
 - [ ] One creature (Unicorn)
 - [ ] Basic math activities (addition 1-10)
@@ -309,12 +331,14 @@ enchanted-garden/
 - [ ] Mobile-friendly layout
 
 ### Nice to Have
+
 - [ ] Sound effects
 - [ ] Multiple activity types
 - [ ] Sticker collection
 - [ ] Achievement system
 
 ### Future Phases
+
 - [ ] Additional garden areas
 - [ ] More creatures
 - [ ] Reading activities
@@ -327,16 +351,19 @@ enchanted-garden/
 ## Success Metrics
 
 ### Educational Goals
+
 - Player completes activities with 70%+ accuracy
 - Shows improvement over time
 - Engages for 15+ minutes per session
 
 ### Engagement Goals
+
 - Returns to game multiple times per week
 - Explores reward systems
 - Shows excitement about unlocks
 
 ### User Experience Goals
+
 - No frustration or confusion
 - Can play independently
 - Positive emotional response
@@ -357,18 +384,21 @@ enchanted-garden/
 ## Development Phases
 
 ### Phase 1: MVP Prototype (Current)
+
 - Prove core gameplay loop
 - Test with target audience
 - Validate educational approach
 - Get feedback on visual style
 
 ### Phase 2: Content Expansion
+
 - Add 2-3 more garden areas
 - Add 2-3 more creatures
 - Expand activity types
 - Polish animations and rewards
 
 ### Phase 3: Feature Complete
+
 - All planned areas and creatures
 - Full achievement system
 - Comprehensive reward catalog
@@ -376,6 +406,7 @@ enchanted-garden/
 - Parental features
 
 ### Phase 4: Polish & Launch
+
 - Performance optimization
 - Cross-browser testing
 - Accessibility features
@@ -384,6 +415,7 @@ enchanted-garden/
 ---
 
 ## Notes
+
 - Keep everything gentle and encouraging
 - No ads or external links
 - Privacy-focused (no data collection)
