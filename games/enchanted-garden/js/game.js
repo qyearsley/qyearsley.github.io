@@ -35,12 +35,19 @@ class EnchantedGarden {
       onContinue: () => this.showScreen("garden-hub"),
       onStartFresh: () => this.startFresh(),
       onBack: () => this.showScreen("garden-hub"),
+      onHome: () => this.showScreen("title-screen"),
       onAreaEnter: (areaId) => this.enterArea(areaId),
       onAnswerSelected: (answer, isCorrect, button) => this.checkAnswer(isCorrect, button),
+      onSettingsOpen: () => this.openSettings(),
+      onSettingsClose: () => this.closeSettings(),
+      onSettingChange: (key, value) => this.updateSetting(key, value),
+      onCastleView: () => this.viewCastle(),
+      onCastleBack: () => this.showScreen("garden-hub"),
     })
 
     this.events.initializeEventListeners()
     this.ui.updateStats(this.state.stats)
+    this.ui.updateSettingsUI(this.state.settings)
 
     // Update title screen based on saved progress
     this.updateTitleScreen()
@@ -82,12 +89,133 @@ class EnchantedGarden {
       if (unlockParam === "all") {
         this.state.unlockArea("crystal-cave")
         this.state.unlockArea("enchanted-forest")
+        this.state.unlockArea("time-temple")
+        this.state.unlockArea("measurement-market")
+        this.state.unlockArea("pattern-path")
         console.log("🔓 All areas unlocked for testing")
       } else {
         this.state.unlockArea(unlockParam)
         console.log(`🔓 Unlocked ${unlockParam} for testing`)
       }
     }
+  }
+
+  /**
+   * Open settings modal
+   */
+  openSettings() {
+    this.ui.updateSettingsUI(this.state.settings)
+    this.ui.showSettings()
+  }
+
+  /**
+   * Close settings modal
+   */
+  closeSettings() {
+    this.ui.hideSettings()
+  }
+
+  /**
+   * Update a setting
+   * @param {string} key - Setting key
+   * @param {*} value - Setting value
+   */
+  updateSetting(key, value) {
+    this.state.updateSetting(key, value)
+  }
+
+  /**
+   * View castle screen
+   */
+  viewCastle() {
+    this.showScreen("castle-screen")
+    this.ui.updateCastleProgress(this.state.getCompletedAreasCount(), 6)
+    this.ui.displayCastlePieces(this.state.completedAreas)
+    this.renderCastle()
+  }
+
+  /**
+   * Render the castle SVG based on progress
+   */
+  renderCastle() {
+    const container = this.ui.elements.castleSvgContainer
+    if (!container) return
+
+    const completed = this.state.getCompletedAreasCount()
+    const castleSvg = this.createCastleSVG(completed)
+    container.innerHTML = castleSvg
+  }
+
+  /**
+   * Create castle SVG with progressive building
+   * @param {number} pieces - Number of completed pieces (0-6)
+   * @returns {string} SVG markup
+   */
+  createCastleSVG(pieces) {
+    // Castle SVG that builds piece by piece (6 total pieces)
+    return `
+      <svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <!-- Sky background -->
+        <rect width="400" height="400" fill="${pieces >= 6 ? "#87CEEB" : "#e0e0e0"}" />
+
+        ${pieces >= 1 ? `
+        <!-- Foundation -->
+        <rect x="100" y="320" width="200" height="60" fill="#8B7355" stroke="#654321" stroke-width="2"/>
+        ` : ""}
+
+        ${pieces >= 2 ? `
+        <!-- Main walls -->
+        <rect x="120" y="220" width="160" height="100" fill="#D3D3D3" stroke="#808080" stroke-width="2"/>
+        ` : ""}
+
+        ${pieces >= 3 ? `
+        <!-- Towers -->
+        <rect x="80" y="180" width="60" height="140" fill="#C0C0C0" stroke="#808080" stroke-width="2"/>
+        <polygon points="80,180 110,140 140,180" fill="#8B0000" stroke="#654321" stroke-width="2"/>
+        <rect x="260" y="180" width="60" height="140" fill="#C0C0C0" stroke="#808080" stroke-width="2"/>
+        <polygon points="260,180 290,140 320,180" fill="#8B0000" stroke="#654321" stroke-width="2"/>
+        ` : ""}
+
+        ${pieces >= 4 ? `
+        <!-- Door and windows -->
+        <rect x="175" y="260" width="50" height="60" fill="#654321" stroke="#4a2f1a" stroke-width="2"/>
+        <circle cx="150" cy="250" r="12" fill="#FFD700" stroke="#DAA520" stroke-width="2"/>
+        <circle cx="250" cy="250" r="12" fill="#FFD700" stroke="#DAA520" stroke-width="2"/>
+        ` : ""}
+
+        ${pieces >= 5 ? `
+        <!-- Center tower -->
+        <rect x="180" y="120" width="40" height="100" fill="#B8B8B8" stroke="#808080" stroke-width="2"/>
+        <polygon points="180,120 200,80 220,120" fill="#8B0000" stroke="#654321" stroke-width="2"/>
+        ` : ""}
+
+        ${pieces >= 6 ? `
+        <!-- Victory flag and sparkles -->
+        <line x1="200" y1="80" x2="200" y2="50" stroke="#654321" stroke-width="3"/>
+        <polygon points="200,50 240,60 200,70" fill="#FFD700" stroke="#DAA520" stroke-width="1"/>
+        <text x="210" y="65" font-size="20">🏆</text>
+
+        <!-- Sparkles all around -->
+        <text x="50" y="100" font-size="30">✨</text>
+        <text x="330" y="100" font-size="30">✨</text>
+        <text x="70" y="300" font-size="30">⭐</text>
+        <text x="310" y="300" font-size="30">⭐</text>
+        <text x="200" y="30" font-size="25">🎉</text>
+        ` : ""}
+
+        ${pieces < 6 ? `
+        <!-- Construction message -->
+        <text x="200" y="390" text-anchor="middle" font-size="16" fill="#666" font-family="Arial">
+          ${pieces}/6 pieces complete
+        </text>
+        ` : `
+        <!-- Completion message -->
+        <text x="200" y="390" text-anchor="middle" font-size="18" fill="#FFD700" font-family="Arial" font-weight="bold">
+          Castle Complete! 🎊
+        </text>
+        `}
+      </svg>
+    `
   }
 
   /**
@@ -111,7 +239,7 @@ class EnchantedGarden {
   enterArea(areaId) {
     this.state.enterArea(areaId)
     this.showScreen("activity-screen")
-    this.ui.updateProgressBar(this.state.stats.currentLevelProgress, this.state.QUESTIONS_PER_LEVEL)
+    this.ui.updateProgressBar(this.state.stats.currentLevelProgress, this.state.settings.questionsPerLevel)
     this.generateActivity()
     this.ui.renderGarden(this.state.garden)
   }
@@ -125,7 +253,7 @@ class EnchantedGarden {
       this.state.currentArea
     )
     this.state.setActivity(activity)
-    this.ui.displayActivity(activity)
+    this.ui.displayActivity(activity, this.state.settings.inputMode, this.state.settings.visualHints)
   }
 
   /**
@@ -188,7 +316,7 @@ class EnchantedGarden {
    */
   updateAllDisplays() {
     this.ui.updateStats(this.state.stats)
-    this.ui.updateProgressBar(this.state.stats.currentLevelProgress, this.state.QUESTIONS_PER_LEVEL)
+    this.ui.updateProgressBar(this.state.stats.currentLevelProgress, this.state.settings.questionsPerLevel)
     this.ui.updateVisualProgression(
       this.state.currentArea,
       this.progression.getAreaThemes(),

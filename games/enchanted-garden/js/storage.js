@@ -4,15 +4,17 @@
 export class StorageManager {
   constructor() {
     this.storageKey = "enchantedGardenProgress"
-    this.currentVersion = "2.0" // Updated version
+    this.currentVersion = "3.0" // Updated version for new features
   }
 
-  saveProgress(stats, garden, unlockedAreas) {
+  saveProgress(stats, garden, unlockedAreas, completedAreas = [], settings = {}) {
     try {
       const data = {
         stats: stats,
         garden: garden,
         unlockedAreas: unlockedAreas || ["flower-meadow"],
+        completedAreas: completedAreas || [],
+        settings: settings || { inputMode: "multipleChoice", visualHints: "always" },
         lastPlayed: Date.now(),
         version: this.currentVersion,
       }

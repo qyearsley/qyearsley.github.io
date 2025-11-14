@@ -24,7 +24,6 @@ export class GameState {
    */
   constructor(storageManager) {
     this.storageManager = storageManager
-    this.QUESTIONS_PER_LEVEL = 6
 
     /** @type {string} */
     this.currentScreen = "title"
@@ -49,6 +48,16 @@ export class GameState {
 
     /** @type {Flower[]} */
     this.garden = []
+
+    /** @type {Object} */
+    this.settings = {
+      inputMode: "multipleChoice", // "multipleChoice" or "keyboard"
+      visualHints: "always", // "always", "sometimes", "never"
+      questionsPerLevel: 5, // number of questions per level
+    }
+
+    /** @type {Set<string>} */
+    this.completedAreas = new Set()
 
     this.loadProgress()
   }
@@ -82,7 +91,7 @@ export class GameState {
     this.stats.currentLevelProgress += 1
     this.garden.push(flower)
 
-    return this.stats.currentLevelProgress >= this.QUESTIONS_PER_LEVEL
+    return this.stats.currentLevelProgress >= this.settings.questionsPerLevel
   }
 
   /**
@@ -92,11 +101,22 @@ export class GameState {
     this.stats.currentLevel += 1
     this.stats.currentLevelProgress = 0
 
+    // Mark current area as complete (for castle pieces)
+    if (this.currentArea) {
+      this.completedAreas.add(this.currentArea)
+    }
+
     // Unlock next area based on level
     if (this.stats.currentLevel === 2) {
       this.unlockedAreas.add("crystal-cave")
     } else if (this.stats.currentLevel === 3) {
       this.unlockedAreas.add("enchanted-forest")
+    } else if (this.stats.currentLevel === 4) {
+      this.unlockedAreas.add("time-temple")
+    } else if (this.stats.currentLevel === 5) {
+      this.unlockedAreas.add("measurement-market")
+    } else if (this.stats.currentLevel === 6) {
+      this.unlockedAreas.add("pattern-path")
     }
   }
 
@@ -130,9 +150,36 @@ export class GameState {
     }
     this.garden = []
     this.unlockedAreas = new Set(["flower-meadow"])
+    this.completedAreas = new Set()
     this.currentArea = null
     this.currentActivity = null
     this.storageManager.clearProgress()
+  }
+
+  /**
+   * Update a setting
+   * @param {string} key - Setting key
+   * @param {*} value - Setting value
+   */
+  updateSetting(key, value) {
+    this.settings[key] = value
+    this.saveProgress()
+  }
+
+  /**
+   * Get number of completed areas (for castle pieces)
+   * @returns {number} Number of completed areas
+   */
+  getCompletedAreasCount() {
+    return this.completedAreas.size
+  }
+
+  /**
+   * Check if castle is complete (all 6 areas done)
+   * @returns {boolean} True if all areas completed
+   */
+  isCastleComplete() {
+    return this.completedAreas.size >= 6
   }
 
   /**
@@ -147,7 +194,13 @@ export class GameState {
    * Save progress to storage
    */
   saveProgress() {
-    this.storageManager.saveProgress(this.stats, this.garden, Array.from(this.unlockedAreas))
+    this.storageManager.saveProgress(
+      this.stats,
+      this.garden,
+      Array.from(this.unlockedAreas),
+      Array.from(this.completedAreas),
+      this.settings
+    )
   }
 
   /**
@@ -165,6 +218,14 @@ export class GameState {
       }
       this.garden = saved.garden || []
       this.unlockedAreas = new Set(saved.unlockedAreas || ["flower-meadow"])
+      this.completedAreas = new Set(saved.completedAreas || [])
+      if (saved.settings) {
+        this.settings = {
+          inputMode: saved.settings.inputMode || "multipleChoice",
+          visualHints: saved.settings.visualHints || "always",
+          questionsPerLevel: saved.settings.questionsPerLevel || 5,
+        }
+      }
     }
   }
 

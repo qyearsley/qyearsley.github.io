@@ -41,6 +41,42 @@ export class ActivityGenerator {
         visualEmojis1: ["🌲", "🌳", "🌴", "🎄", "🌿"],
         visualEmojis2: ["🍄", "🍃", "🌾", "🌱", "🪵"],
       },
+      "time-temple": {
+        creature: "🕰️",
+        messages: [
+          "What time is it?",
+          "You can read clocks!",
+          "Time is flowing!",
+          "Great timing!",
+          "Keep going!",
+        ],
+        visualEmojis1: ["⏰", "⏱️", "⌚", "🕐", "🕑"],
+        visualEmojis2: ["🕒", "🕓", "🕔", "🕕", "🕖"],
+      },
+      "measurement-market": {
+        creature: "🦊",
+        messages: [
+          "Let's measure!",
+          "Good work!",
+          "You're learning!",
+          "Try this one!",
+          "Keep measuring!",
+        ],
+        visualEmojis1: ["📏", "📐", "⚖️", "🧪", "🧴"],
+        visualEmojis2: ["📦", "🎁", "🍎", "🍊", "🥕"],
+      },
+      "pattern-path": {
+        creature: "🦋",
+        messages: [
+          "Find the pattern!",
+          "You see it!",
+          "Keep going!",
+          "Great pattern work!",
+          "Smart thinking!",
+        ],
+        visualEmojis1: ["🔵", "🔴", "🟡", "🟢", "🟣"],
+        visualEmojis2: ["⭐", "💠", "🔷", "🔶", "💎"],
+      },
     }
   }
 
@@ -60,16 +96,35 @@ export class ActivityGenerator {
       case "enchanted-forest":
         activityType = "multiplication"
         break
+      case "time-temple":
+        activityType = "time"
+        break
+      case "measurement-market":
+        activityType = "measurement"
+        break
+      case "pattern-path":
+        activityType = "pattern"
+        break
       default:
         activityType = "addition"
     }
 
-    if (activityType === "addition") {
-      return this.generateAddition(difficulty, areaId)
-    } else if (activityType === "subtraction") {
-      return this.generateSubtraction(difficulty, areaId)
-    } else {
-      return this.generateMultiplication(difficulty, areaId)
+    // Route to appropriate generator
+    switch (activityType) {
+      case "addition":
+        return this.generateAddition(difficulty, areaId)
+      case "subtraction":
+        return this.generateSubtraction(difficulty, areaId)
+      case "multiplication":
+        return this.generateMultiplication(difficulty, areaId)
+      case "time":
+        return this.generateTime(difficulty, areaId)
+      case "measurement":
+        return this.generateMeasurement(difficulty, areaId)
+      case "pattern":
+        return this.generatePattern(difficulty, areaId)
+      default:
+        return this.generateAddition(difficulty, areaId)
     }
   }
 
@@ -301,5 +356,337 @@ export class ActivityGenerator {
       ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
     }
     return shuffled
+  }
+
+  /**
+   * Generate time-telling questions
+   */
+  generateTime(difficulty, areaId) {
+    // Mix between clock reading and time word problems
+    const questionType = Math.random() < 0.7 ? "clock" : "elapsed"
+
+    if (questionType === "elapsed") {
+      // Time elapsed questions
+      return this.generateTimeElapsed(difficulty, areaId)
+    }
+
+    // Clock reading questions
+    let hourOptions, minuteOptions
+
+    switch (difficulty) {
+      case "easy":
+        // Hour and half-hour only
+        hourOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+        minuteOptions = [0, 30]
+        break
+      case "medium":
+        // Add quarter hours
+        hourOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+        minuteOptions = [0, 15, 30, 45]
+        break
+      case "hard":
+        // 5-minute intervals
+        hourOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+        minuteOptions = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
+        break
+    }
+
+    const hour = hourOptions[Math.floor(Math.random() * hourOptions.length)]
+    const minute = minuteOptions[Math.floor(Math.random() * minuteOptions.length)]
+
+    // Create question
+    const minuteStr = minute === 0 ? "00" : minute
+    const question = `What time does the clock show?`
+
+    // Create SVG clock visual
+    const clockSvg = this.createClockSVG(hour, minute)
+    const visual = [{ html: clockSvg }]
+
+    // Format answer (e.g., "3:00", "4:30")
+    const answer = `${hour}:${minuteStr}`
+
+    // Generate wrong answer options
+    const options = this.generateTimeOptions(hour, minute)
+
+    return {
+      type: "time",
+      question: question,
+      correctAnswer: answer,
+      options: options,
+      visual: visual,
+      creature: this.areaThemes[areaId]?.creature || "🕰️",
+      creatureMessage: this.getRandomMessage(areaId),
+    }
+  }
+
+  generateTimeElapsed(difficulty, areaId) {
+    const startHour = Math.floor(Math.random() * 11) + 1 // 1-11
+    let hoursToAdd
+
+    switch (difficulty) {
+      case "easy":
+        hoursToAdd = [1, 2][Math.floor(Math.random() * 2)]
+        break
+      case "medium":
+        hoursToAdd = [2, 3][Math.floor(Math.random() * 2)]
+        break
+      case "hard":
+        hoursToAdd = [3, 4, 5][Math.floor(Math.random() * 3)]
+        break
+    }
+
+    const endHour = (startHour + hoursToAdd > 12) ? (startHour + hoursToAdd - 12) : (startHour + hoursToAdd)
+
+    const question = `It is ${startHour}:00. What time is it ${hoursToAdd} hours later?`
+    const answer = `${endHour}:00`
+
+    const options = this.generateTimeOptions(endHour, 0)
+
+    return {
+      type: "time",
+      question: question,
+      correctAnswer: answer,
+      options: options,
+      visual: [], // No visual for word problems
+      creature: this.areaThemes[areaId]?.creature || "🕰️",
+      creatureMessage: this.getRandomMessage(areaId),
+    }
+  }
+
+  createClockSVG(hour, minute) {
+    const hourAngle = ((hour % 12) * 30 + minute * 0.5) - 90
+    const minuteAngle = minute * 6 - 90
+
+    // Generate all 12 hour numbers
+    const hourNumbers = Array.from({ length: 12 }, (_, i) => {
+      const num = i === 0 ? 12 : i
+      const angle = (i * 30 - 90) * Math.PI / 180
+      const x = 60 + 40 * Math.cos(angle)
+      const y = 60 + 40 * Math.sin(angle) + 5 // +5 to center text vertically
+      return `<text x="${x}" y="${y}" text-anchor="middle" font-size="12" fill="#333" font-weight="bold">${num}</text>`
+    }).join('')
+
+    // Generate minute tick marks
+    const tickMarks = Array.from({ length: 60 }, (_, i) => {
+      const angle = (i * 6 - 90) * Math.PI / 180
+      const isHourMark = i % 5 === 0
+      const innerRadius = isHourMark ? 48 : 50
+      const outerRadius = 52
+      const x1 = 60 + innerRadius * Math.cos(angle)
+      const y1 = 60 + innerRadius * Math.sin(angle)
+      const x2 = 60 + outerRadius * Math.cos(angle)
+      const y2 = 60 + outerRadius * Math.sin(angle)
+      const width = isHourMark ? 2 : 1
+      return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#333" stroke-width="${width}"/>`
+    }).join('')
+
+    return `
+      <svg width="140" height="140" viewBox="0 0 120 120" style="display:inline-block">
+        <circle cx="60" cy="60" r="55" fill="white" stroke="#333" stroke-width="3"/>
+        ${tickMarks}
+        ${hourNumbers}
+        <!-- Hour hand -->
+        <line x1="60" y1="60" x2="${60 + 30 * Math.cos(hourAngle * Math.PI / 180)}" y2="${60 + 30 * Math.sin(hourAngle * Math.PI / 180)}" stroke="#333" stroke-width="6" stroke-linecap="round"/>
+        <!-- Minute hand -->
+        <line x1="60" y1="60" x2="${60 + 45 * Math.cos(minuteAngle * Math.PI / 180)}" y2="${60 + 45 * Math.sin(minuteAngle * Math.PI / 180)}" stroke="#666" stroke-width="4" stroke-linecap="round"/>
+        <!-- Center dot -->
+        <circle cx="60" cy="60" r="4" fill="#333"/>
+      </svg>
+    `
+  }
+
+  generateTimeOptions(correctHour, correctMinute) {
+    const minuteStr = correctMinute === 0 ? "00" : correctMinute
+    const correctAnswer = `${correctHour}:${minuteStr}`
+    const options = new Set([correctAnswer])
+
+    while (options.size < 4) {
+      // Generate plausible wrong answers
+      let wrongHour = correctHour
+      let wrongMinute = correctMinute
+
+      if (Math.random() < 0.5) {
+        // Change hour
+        wrongHour = correctHour + (Math.random() < 0.5 ? 1 : -1)
+        if (wrongHour < 1) wrongHour = 12
+        if (wrongHour > 12) wrongHour = 1
+      } else {
+        // Change minute
+        const minuteOptions = [0, 15, 30, 45]
+        wrongMinute = minuteOptions[Math.floor(Math.random() * minuteOptions.length)]
+      }
+
+      const wrongMinuteStr = wrongMinute === 0 ? "00" : wrongMinute
+      const wrongAnswer = `${wrongHour}:${wrongMinuteStr}`
+
+      if (wrongAnswer !== correctAnswer) {
+        options.add(wrongAnswer)
+      }
+    }
+
+    return this.shuffleArray(Array.from(options))
+  }
+
+  /**
+   * Generate measurement questions
+   */
+  generateMeasurement(difficulty, areaId) {
+    const measurementTypes = ["length", "weight"]
+    const type = measurementTypes[Math.floor(Math.random() * measurementTypes.length)]
+
+    let question, answer, options, visual
+
+    switch (type) {
+      case "length":
+        // Simple length comparison or addition/subtraction
+        const length1 = Math.floor(Math.random() * 8) + 2 // 2-9 inches
+        const length2 = Math.floor(Math.random() * 8) + 2 // 2-9 inches
+
+        const opType = Math.floor(Math.random() * 3) // 0=single, 1=add, 2=subtract
+
+        if (opType === 0) {
+          // Single measurement
+          question = `How many inches long is the line?`
+          answer = length1
+          visual = [{ html: this.createRulerSVG(length1) }]
+        } else if (opType === 1) {
+          // Addition
+          question = `One stick is ${length1} inches. Another is ${length2} inches. Total length?`
+          answer = length1 + length2
+          visual = [
+            { html: this.createRulerSVG(length1) },
+            { html: this.createRulerSVG(length2) }
+          ]
+        } else {
+          // Subtraction (difference)
+          const longer = Math.max(length1, length2)
+          const shorter = Math.min(length1, length2)
+          question = `One rope is ${longer} inches. Another is ${shorter} inches. What's the difference?`
+          answer = longer - shorter
+          visual = [
+            { html: this.createRulerSVG(longer) },
+            { html: this.createRulerSVG(shorter) }
+          ]
+        }
+        break
+
+      case "weight":
+        const numItems1 = Math.floor(Math.random() * 4) + 2 // 2-5 items
+        const weightPer1 = difficulty === "easy" ? 1 : Math.floor(Math.random() * 2) + 1 // 1-2 pounds
+
+        const weightOpType = Math.floor(Math.random() * 2) // 0=single, 1=add
+
+        if (weightOpType === 0 || difficulty === "easy") {
+          // Single weight multiplication
+          const totalWeight = numItems1 * weightPer1
+          question = `${numItems1} apples weigh ${weightPer1} pound${weightPer1 > 1 ? 's' : ''} each. Total pounds?`
+          answer = totalWeight
+          visual = [{ html: this.createScaleSVG(numItems1) }]
+        } else {
+          // Adding two weights
+          const numItems2 = Math.floor(Math.random() * 4) + 2
+          const totalWeight1 = numItems1 * weightPer1
+          const totalWeight2 = numItems2 * weightPer1
+          question = `${numItems1} apples weigh ${totalWeight1} pounds. ${numItems2} oranges weigh ${totalWeight2} pounds. Total?`
+          answer = totalWeight1 + totalWeight2
+          visual = []  // Too complex for visualization
+        }
+        break
+    }
+
+    options = this.generateOptions(answer, 50)
+
+    return {
+      type: "measurement",
+      question: question,
+      correctAnswer: answer,
+      options: options,
+      visual: visual,
+      creature: this.areaThemes[areaId]?.creature || "🦊",
+      creatureMessage: this.getRandomMessage(areaId),
+    }
+  }
+
+  createRulerSVG(length) {
+    return `
+      <svg width="300" height="60" viewBox="0 0 300 60" style="display:inline-block">
+        <rect x="0" y="20" width="${length * 25}" height="30" fill="none" stroke="#333" stroke-width="2"/>
+        ${Array.from({ length: length + 1 }, (_, i) => `
+          <line x1="${i * 25}" y1="20" x2="${i * 25}" y2="50" stroke="#333" stroke-width="2"/>
+          <text x="${i * 25}" y="15" text-anchor="middle" font-size="10">${i}</text>
+        `).join('')}
+      </svg>
+    `
+  }
+
+  createScaleSVG(numItems) {
+    const apples = Array.from({ length: numItems }, (_, i) =>
+      `<text x="${20 + i * 25}" y="50" font-size="30">🍎</text>`
+    ).join('')
+
+    return `
+      <svg width="200" height="80" viewBox="0 0 200 80" style="display:inline-block">
+        <text x="10" y="30" font-size="24">⚖️</text>
+        ${apples}
+      </svg>
+    `
+  }
+
+  createCupsSVG(numCups) {
+    const cups = Array.from({ length: numCups }, (_, i) =>
+      `<text x="${20 + i * 35}" y="40" font-size="35">🧪</text>`
+    ).join('')
+
+    return `
+      <svg width="250" height="60" viewBox="0 0 250 60" style="display:inline-block">
+        ${cups}
+      </svg>
+    `
+  }
+
+  /**
+   * Generate pattern/sequence questions
+   */
+  generatePattern(difficulty, areaId) {
+    const patternTypes = ["skipCount", "sequence"]
+    const type = patternTypes[Math.floor(Math.random() * patternTypes.length)]
+
+    let question, answer, options, visual
+
+    switch (type) {
+      case "skipCount":
+        const skipBy = difficulty === "easy" ? [2, 5, 10][Math.floor(Math.random() * 3)] : [3, 4][Math.floor(Math.random() * 2)]
+        const start = Math.floor(Math.random() * 10) + 1
+        const sequence = [start, start + skipBy, start + skipBy * 2]
+        answer = start + skipBy * 3
+
+        question = `What number comes next?`
+        // Format with spaces between numbers
+        visual = [sequence.join("  ,  ") + "  ,  ?"]
+        break
+
+      case "sequence":
+        const num1 = Math.floor(Math.random() * 20) + 1
+        const diff = Math.floor(Math.random() * 5) + 1
+        const seq = [num1, num1 + diff, num1 + diff * 2]
+        answer = num1 + diff * 3
+
+        question = `What number comes next?`
+        // Format with spaces between numbers
+        visual = [seq.join("  ,  ") + "  ,  ?"]
+        break
+    }
+
+    options = this.generateOptions(answer, 100)
+
+    return {
+      type: "pattern",
+      question: question,
+      correctAnswer: answer,
+      options: options,
+      visual: visual,
+      creature: this.areaThemes[areaId]?.creature || "🦋",
+      creatureMessage: this.getRandomMessage(areaId),
+    }
   }
 }
