@@ -35,6 +35,36 @@ export class RewardSystem {
         { color: "green", emoji: "🍃", name: "Leaf" },
         { color: "brown", emoji: "🪵", name: "Wood" },
       ],
+      "time-temple": [
+        { color: "gold", emoji: "⏰", name: "Alarm Clock" },
+        { color: "gold", emoji: "⌚", name: "Watch" },
+        { color: "gold", emoji: "⏱️", name: "Stopwatch" },
+        { color: "gold", emoji: "🕐", name: "One O'Clock" },
+        { color: "yellow", emoji: "⏳", name: "Hourglass" },
+        { color: "gold", emoji: "🕰️", name: "Mantle Clock" },
+        { color: "yellow", emoji: "⭐", name: "Time Star" },
+        { color: "white", emoji: "✨", name: "Sparkles" },
+      ],
+      "measurement-market": [
+        { color: "orange", emoji: "📏", name: "Ruler" },
+        { color: "orange", emoji: "📐", name: "Triangle" },
+        { color: "orange", emoji: "⚖️", name: "Scale" },
+        { color: "orange", emoji: "🧪", name: "Beaker" },
+        { color: "red", emoji: "🍎", name: "Apple" },
+        { color: "orange", emoji: "🍊", name: "Orange" },
+        { color: "orange", emoji: "🦊", name: "Fox" },
+        { color: "orange", emoji: "📦", name: "Box" },
+      ],
+      "pattern-path": [
+        { color: "purple", emoji: "🦋", name: "Butterfly" },
+        { color: "blue", emoji: "🔵", name: "Blue Circle" },
+        { color: "red", emoji: "🔴", name: "Red Circle" },
+        { color: "yellow", emoji: "🟡", name: "Yellow Circle" },
+        { color: "purple", emoji: "🟣", name: "Purple Circle" },
+        { color: "purple", emoji: "💠", name: "Diamond" },
+        { color: "yellow", emoji: "⭐", name: "Star" },
+        { color: "white", emoji: "✨", name: "Sparkles" },
+      ],
     }
 
     // Keep legacy flowerTypes for backward compatibility

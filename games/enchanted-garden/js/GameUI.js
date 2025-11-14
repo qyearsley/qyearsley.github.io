@@ -26,12 +26,22 @@ export class GameUI {
       feedbackArea: document.getElementById("feedback-area"),
       gardenCanvas: document.getElementById("garden-canvas"),
       starCounts: document.querySelectorAll("#star-count, #activity-star-count"),
-      flowerCount: document.getElementById("flower-count"),
       levelDisplay: document.getElementById("level-display"),
       progressBar: document.getElementById("progress-bar"),
       progressText: document.getElementById("progress-text"),
       gardenPreview: document.querySelector(".garden-preview"),
       particlesContainer: document.getElementById("particles-container"),
+      settingsButton: document.getElementById("settings-button"),
+      castleButton: document.getElementById("castle-button"),
+      settingsModal: document.getElementById("settings-modal"),
+      closeSettings: document.getElementById("close-settings"),
+      inputModeSelect: document.getElementById("input-mode-select"),
+      visualHintsSelect: document.getElementById("visual-hints-select"),
+      questionsPerLevelSelect: document.getElementById("questions-per-level-select"),
+      castleBackButton: document.getElementById("castle-back-button"),
+      castleProgressText: document.getElementById("castle-progress-text"),
+      castleSvgContainer: document.getElementById("castle-svg-container"),
+      castlePiecesDisplay: document.getElementById("castle-pieces-display"),
     }
   }
 
@@ -55,9 +65,6 @@ export class GameUI {
     this.elements.starCounts.forEach((el) => {
       el.textContent = stats.stars
     })
-    if (this.elements.flowerCount) {
-      this.elements.flowerCount.textContent = stats.flowers
-    }
     if (this.elements.levelDisplay) {
       this.elements.levelDisplay.textContent = `Level ${stats.currentLevel}`
     }
@@ -81,8 +88,10 @@ export class GameUI {
   /**
    * Display an activity
    * @param {Object} activity - Activity object
+   * @param {string} inputMode - Input mode ("multipleChoice" or "keyboard")
+   * @param {string} visualHints - Visual hints setting
    */
-  displayActivity(activity) {
+  displayActivity(activity, inputMode = "multipleChoice", visualHints = "always") {
     // Update creature image if provided
     if (activity.creature && this.elements.creatureImage) {
       this.elements.creatureImage.textContent = activity.creature
@@ -91,8 +100,23 @@ export class GameUI {
     this.elements.creatureMessage.textContent = activity.creatureMessage
     this.elements.questionText.textContent = activity.question
 
-    this.displayVisualItems(activity.visual)
-    this.displayAnswerOptions(activity.options, activity.correctAnswer)
+    // Display visual items based on hints setting
+    const shouldShowVisual = visualHints === "always" ||
+      (visualHints === "sometimes" && Math.random() < 0.5)
+
+    if (shouldShowVisual) {
+      this.displayVisualItems(activity.visual)
+    } else {
+      this.elements.visualArea.innerHTML = ""
+    }
+
+    // Display answer input based on mode
+    if (inputMode === "keyboard") {
+      this.displayKeyboardInput(activity.correctAnswer)
+    } else {
+      this.displayAnswerOptions(activity.options, activity.correctAnswer)
+    }
+
     this.elements.feedbackArea.classList.add("hidden")
   }
 
@@ -110,7 +134,11 @@ export class GameUI {
           visualItem.className = "visual-item"
 
           if (typeof item === "object") {
-            if (item.crossed) {
+            if (item.html) {
+              // Handle HTML/SVG content
+              visualItem.innerHTML = item.html
+              visualItem.style.display = "inline-block"
+            } else if (item.crossed) {
               visualItem.classList.add("crossed-out")
               visualItem.textContent = item.emoji
             } else if (item.separator) {
@@ -129,20 +157,59 @@ export class GameUI {
 
   /**
    * Display answer option buttons
-   * @param {Array<number>} options - Answer options
-   * @param {number} correctAnswer - The correct answer
+   * @param {Array<number|string>} options - Answer options
+   * @param {number|string} correctAnswer - The correct answer
    */
   displayAnswerOptions(options, correctAnswer) {
     this.elements.answerOptions.innerHTML = ""
 
-    options.forEach((option) => {
+    options.forEach((option, index) => {
       const button = document.createElement("button")
       button.className = "answer-button"
       button.textContent = option
       button.dataset.answer = option
-      button.dataset.correct = option === correctAnswer ? "true" : "false"
+      button.dataset.correct = (option == correctAnswer) ? "true" : "false"
+      button.dataset.keyboardHint = `${index + 1}`
+      button.setAttribute("aria-label", `Answer ${index + 1}: ${option}`)
+      button.setAttribute("tabindex", "0")
       this.elements.answerOptions.appendChild(button)
     })
+  }
+
+  /**
+   * Display keyboard input for answer
+   * @param {number|string} correctAnswer - The correct answer
+   */
+  displayKeyboardInput(correctAnswer) {
+    this.elements.answerOptions.innerHTML = ""
+
+    const container = document.createElement("div")
+    container.className = "answer-input-container"
+
+    const input = document.createElement("input")
+    // Check if answer is time format or number
+    if (typeof correctAnswer === "string" && correctAnswer.includes(":")) {
+      input.type = "text"
+      input.placeholder = "0:00"
+    } else {
+      input.type = "number"
+      input.placeholder = "?"
+    }
+    input.className = "answer-input"
+    input.id = "answer-input-field"
+    input.dataset.correct = correctAnswer
+
+    const submitButton = document.createElement("button")
+    submitButton.className = "submit-answer-button"
+    submitButton.textContent = "Submit Answer"
+    submitButton.id = "submit-answer-btn"
+
+    container.appendChild(input)
+    container.appendChild(submitButton)
+    this.elements.answerOptions.appendChild(container)
+
+    // Auto-focus the input
+    setTimeout(() => input.focus(), 100)
   }
 
   /**
@@ -232,14 +299,22 @@ export class GameUI {
 
     // Apply the background color and image to garden preview
     this.elements.gardenPreview.style.backgroundColor = currentStage.background
+    this.elements.gardenPreview.style.backgroundSize = "auto"
+    this.elements.gardenPreview.style.backgroundRepeat = "repeat"
     if (currentStage.backgroundImage) {
       this.elements.gardenPreview.style.backgroundImage = currentStage.backgroundImage
+    } else {
+      this.elements.gardenPreview.style.backgroundImage = "none"
     }
 
     // Apply theme to body background
     document.body.style.backgroundColor = currentStage.background
+    document.body.style.backgroundSize = "auto"
+    document.body.style.backgroundRepeat = "repeat"
     if (currentStage.backgroundImage) {
       document.body.style.backgroundImage = currentStage.backgroundImage
+    } else {
+      document.body.style.backgroundImage = "none"
     }
 
     // Set CSS custom properties for theme colors
@@ -316,5 +391,83 @@ export class GameUI {
       this.elements.continueButton.classList.add("hidden")
       this.elements.startFreshButton.classList.add("hidden")
     }
+  }
+
+  /**
+   * Update settings UI with current values
+   * @param {Object} settings - Settings object
+   */
+  updateSettingsUI(settings) {
+    if (this.elements.inputModeSelect) {
+      this.elements.inputModeSelect.value = settings.inputMode || "multipleChoice"
+    }
+    if (this.elements.visualHintsSelect) {
+      this.elements.visualHintsSelect.value = settings.visualHints || "always"
+    }
+    if (this.elements.questionsPerLevelSelect) {
+      this.elements.questionsPerLevelSelect.value = settings.questionsPerLevel || 5
+    }
+  }
+
+  /**
+   * Show settings modal
+   */
+  showSettings() {
+    if (this.elements.settingsModal) {
+      this.elements.settingsModal.classList.remove("hidden")
+    }
+  }
+
+  /**
+   * Hide settings modal
+   */
+  hideSettings() {
+    if (this.elements.settingsModal) {
+      this.elements.settingsModal.classList.add("hidden")
+    }
+  }
+
+  /**
+   * Update castle progress display
+   * @param {number} completed - Number of completed areas
+   * @param {number} total - Total number of areas
+   */
+  updateCastleProgress(completed, total) {
+    if (this.elements.castleProgressText) {
+      this.elements.castleProgressText.textContent = `Pieces: ${completed}/${total}`
+    }
+  }
+
+  /**
+   * Display castle pieces indicators
+   * @param {Set<string>} completedAreas - Set of completed area IDs
+   */
+  displayCastlePieces(completedAreas) {
+    if (!this.elements.castlePiecesDisplay) return
+
+    const areaNames = {
+      "flower-meadow": "🦄",
+      "crystal-cave": "🔮",
+      "enchanted-forest": "🧚",
+      "time-temple": "🕰️",
+      "measurement-market": "🦊",
+      "pattern-path": "🦋",
+    }
+
+    this.elements.castlePiecesDisplay.innerHTML = ""
+
+    Object.entries(areaNames).forEach(([areaId, emoji]) => {
+      const piece = document.createElement("div")
+      piece.className = "castle-piece"
+      piece.textContent = emoji
+
+      if (completedAreas.has(areaId)) {
+        piece.classList.add("completed")
+      } else {
+        piece.classList.add("locked")
+      }
+
+      this.elements.castlePiecesDisplay.appendChild(piece)
+    })
   }
 }

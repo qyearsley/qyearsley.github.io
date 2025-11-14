@@ -119,6 +119,120 @@ export class ProgressionManager {
         ],
         decorations: ["🌿", "🍄", "🦋", "✨", "🧚"],
       },
+      "time-temple": {
+        progressionType: "light",
+        primaryColor: "#c9a227",
+        accentColor: "#f4d03f",
+        stages: [
+          {
+            percent: 0,
+            background: "#5a5a6e",
+            backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%233a3a4e' fill-opacity='0.2'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")",
+            description: "frozen",
+          },
+          {
+            percent: 25,
+            background: "#6a6a7e",
+            backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%234a4a6e' fill-opacity='0.25'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")",
+            description: "ticking",
+          },
+          {
+            percent: 50,
+            background: "#8a7a3e",
+            backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%236a5a2e' fill-opacity='0.3'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")",
+            description: "flowing",
+          },
+          {
+            percent: 75,
+            background: "#c9a227",
+            backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23a98217' fill-opacity='0.35'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")",
+            description: "golden",
+          },
+          {
+            percent: 100,
+            background: "#f4d03f",
+            backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4b02f' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")",
+            description: "timeless",
+          },
+        ],
+        decorations: ["⏰", "⌚", "✨", "⭐", "💫"],
+      },
+      "measurement-market": {
+        progressionType: "organized",
+        primaryColor: "#e67e22",
+        accentColor: "#f39c12",
+        stages: [
+          {
+            percent: 0,
+            background: "#d4c5b9",
+            backgroundImage: "linear-gradient(135deg, #d4c5b9 25%, transparent 25%), linear-gradient(225deg, #d4c5b9 25%, transparent 25%), linear-gradient(45deg, #d4c5b9 25%, transparent 25%), linear-gradient(315deg, #d4c5b9 25%, #e8ded3 25%)",
+            description: "empty",
+          },
+          {
+            percent: 25,
+            background: "#dab89f",
+            backgroundImage: "linear-gradient(135deg, #dab89f 25%, transparent 25%), linear-gradient(225deg, #dab89f 25%, transparent 25%), linear-gradient(45deg, #dab89f 25%, transparent 25%), linear-gradient(315deg, #dab89f 25%, #e8d4c3 25%)",
+            description: "stocking",
+          },
+          {
+            percent: 50,
+            background: "#d39e6f",
+            backgroundImage: "linear-gradient(135deg, #d39e6f 25%, transparent 25%), linear-gradient(225deg, #d39e6f 25%, transparent 25%), linear-gradient(45deg, #d39e6f 25%, transparent 25%), linear-gradient(315deg, #d39e6f 25%, #e8c4a3 25%)",
+            description: "busy",
+          },
+          {
+            percent: 75,
+            background: "#e67e22",
+            backgroundImage: "linear-gradient(135deg, #e67e22 25%, transparent 25%), linear-gradient(225deg, #e67e22 25%, transparent 25%), linear-gradient(45deg, #e67e22 25%, transparent 25%), linear-gradient(315deg, #e67e22 25%, #f39c12 25%)",
+            description: "thriving",
+          },
+          {
+            percent: 100,
+            background: "#f39c12",
+            backgroundImage: "linear-gradient(135deg, #f39c12 25%, transparent 25%), linear-gradient(225deg, #f39c12 25%, transparent 25%), linear-gradient(45deg, #f39c12 25%, transparent 25%), linear-gradient(315deg, #f39c12 25%, #ffb142 25%)",
+            description: "flourishing",
+          },
+        ],
+        decorations: ["📏", "⚖️", "📦", "🍎", "🦊"],
+      },
+      "pattern-path": {
+        progressionType: "reveal",
+        primaryColor: "#9b59b6",
+        accentColor: "#c27ba0",
+        stages: [
+          {
+            percent: 0,
+            background: "#b8b8c8",
+            backgroundImage: "radial-gradient(circle at 100% 150%, #b8b8c8 24%, #c8c8d8 24%, #c8c8d8 28%, #b8b8c8 28%, #b8b8c8 36%, #c8c8d8 36%, #c8c8d8 40%, transparent 40%, transparent), radial-gradient(circle at 0 150%, #b8b8c8 24%, #c8c8d8 24%, #c8c8d8 28%, #b8b8c8 28%, #b8b8c8 36%, #c8c8d8 36%, #c8c8d8 40%, transparent 40%, transparent)",
+            description: "hidden",
+          },
+          {
+            percent: 25,
+            background: "#a89bc8",
+            backgroundImage: "radial-gradient(circle at 100% 150%, #a89bc8 24%, #b8abd8 24%, #b8abd8 28%, #a89bc8 28%, #a89bc8 36%, #b8abd8 36%, #b8abd8 40%, transparent 40%, transparent), radial-gradient(circle at 0 150%, #a89bc8 24%, #b8abd8 24%, #b8abd8 28%, #a89bc8 28%, #a89bc8 36%, #b8abd8 36%, #b8abd8 40%, transparent 40%, transparent)",
+            description: "emerging",
+          },
+          {
+            percent: 50,
+            background: "#9b7bc8",
+            backgroundImage: "radial-gradient(circle at 100% 150%, #9b7bc8 24%, #ab8bd8 24%, #ab8bd8 28%, #9b7bc8 28%, #9b7bc8 36%, #ab8bd8 36%, #ab8bd8 40%, transparent 40%, transparent), radial-gradient(circle at 0 150%, #9b7bc8 24%, #ab8bd8 24%, #ab8bd8 28%, #9b7bc8 28%, #9b7bc8 36%, #ab8bd8 36%, #ab8bd8 40%, transparent 40%, transparent)",
+            description: "forming",
+          },
+          {
+            percent: 75,
+            background: "#9b59b6",
+            backgroundImage: "radial-gradient(circle at 100% 150%, #9b59b6 24%, #ab69c6 24%, #ab69c6 28%, #9b59b6 28%, #9b59b6 36%, #ab69c6 36%, #ab69c6 40%, transparent 40%, transparent), radial-gradient(circle at 0 150%, #9b59b6 24%, #ab69c6 24%, #ab69c6 28%, #9b59b6 28%, #9b59b6 36%, #ab69c6 36%, #ab69c6 40%, transparent 40%, transparent)",
+            description: "clear",
+          },
+          {
+            percent: 100,
+            background: "#c27ba0",
+            backgroundImage: "radial-gradient(circle at 100% 150%, #c27ba0 24%, #d28bb0 24%, #d28bb0 28%, #c27ba0 28%, #c27ba0 36%, #d28bb0 36%, #d28bb0 40%, transparent 40%, transparent), radial-gradient(circle at 0 150%, #c27ba0 24%, #d28bb0 24%, #d28bb0 28%, #c27ba0 28%, #c27ba0 36%, #d28bb0 36%, #d28bb0 40%, transparent 40%, transparent)",
+            description: "radiant",
+          },
+        ],
+        decorations: ["🦋", "⭐", "💠", "✨", "🔷"],
+      },
     }
   }
 
