@@ -395,7 +395,7 @@ export class ActivityGenerator {
     const minute = minuteOptions[Math.floor(Math.random() * minuteOptions.length)]
 
     // Create question
-    const minuteStr = minute === 0 ? "00" : minute
+    const minuteStr = minute < 10 ? `0${minute}` : `${minute}`
     const question = `What time does the clock show?`
 
     // Create SVG clock visual
@@ -421,7 +421,9 @@ export class ActivityGenerator {
 
   generateTimeElapsed(difficulty, areaId) {
     const startHour = Math.floor(Math.random() * 11) + 1 // 1-11
-    let hoursToAdd
+    let startMinute = 0
+    let hoursToAdd = 0
+    let minutesToAdd = 0
 
     switch (difficulty) {
       case "easy":
@@ -430,17 +432,51 @@ export class ActivityGenerator {
       case "medium":
         hoursToAdd = [2, 3][Math.floor(Math.random() * 2)]
         break
-      case "hard":
-        hoursToAdd = [3, 4, 5][Math.floor(Math.random() * 3)]
+      case "hard": {
+        // For hard mode, include half-hour intervals
+        const useHalfHour = Math.random() < 0.5
+        if (useHalfHour) {
+          startMinute = [0, 30][Math.floor(Math.random() * 2)]
+          minutesToAdd = 30
+          hoursToAdd = [1, 2, 3][Math.floor(Math.random() * 3)]
+        } else {
+          hoursToAdd = [3, 4, 5][Math.floor(Math.random() * 3)]
+        }
         break
+      }
     }
 
-    const endHour = (startHour + hoursToAdd > 12) ? (startHour + hoursToAdd - 12) : (startHour + hoursToAdd)
+    // Calculate end time
+    let endMinute = startMinute + minutesToAdd
+    let endHour = startHour + hoursToAdd
 
-    const question = `It is ${startHour}:00. What time is it ${hoursToAdd} hours later?`
-    const answer = `${endHour}:00`
+    if (endMinute >= 60) {
+      endMinute -= 60
+      endHour += 1
+    }
 
-    const options = this.generateTimeOptions(endHour, 0)
+    if (endHour > 12) {
+      endHour -= 12
+    }
+
+    // Format time strings
+    const startMinuteStr = startMinute < 10 ? `0${startMinute}` : `${startMinute}`
+    const endMinuteStr = endMinute < 10 ? `0${endMinute}` : `${endMinute}`
+
+    // Build question based on whether we have half hours
+    let timeDescription
+    if (hoursToAdd > 0 && minutesToAdd > 0) {
+      timeDescription = `${hoursToAdd} hour${hoursToAdd > 1 ? 's' : ''} and ${minutesToAdd} minutes`
+    } else if (minutesToAdd > 0) {
+      timeDescription = `${minutesToAdd} minutes`
+    } else {
+      timeDescription = `${hoursToAdd} hour${hoursToAdd > 1 ? 's' : ''}`
+    }
+
+    const question = `It is ${startHour}:${startMinuteStr}. What time is it ${timeDescription} later?`
+    const answer = `${endHour}:${endMinuteStr}`
+
+    const options = this.generateTimeOptions(endHour, endMinute)
 
     return {
       type: "time",
@@ -496,7 +532,7 @@ export class ActivityGenerator {
   }
 
   generateTimeOptions(correctHour, correctMinute) {
-    const minuteStr = correctMinute === 0 ? "00" : correctMinute
+    const minuteStr = correctMinute < 10 ? `0${correctMinute}` : `${correctMinute}`
     const correctAnswer = `${correctHour}:${minuteStr}`
     const options = new Set([correctAnswer])
 
@@ -516,7 +552,7 @@ export class ActivityGenerator {
         wrongMinute = minuteOptions[Math.floor(Math.random() * minuteOptions.length)]
       }
 
-      const wrongMinuteStr = wrongMinute === 0 ? "00" : wrongMinute
+      const wrongMinuteStr = wrongMinute < 10 ? `0${wrongMinute}` : `${wrongMinute}`
       const wrongAnswer = `${wrongHour}:${wrongMinuteStr}`
 
       if (wrongAnswer !== correctAnswer) {
@@ -537,7 +573,7 @@ export class ActivityGenerator {
     let question, answer, options, visual
 
     switch (type) {
-      case "length":
+      case "length": {
         // Simple length comparison or addition/subtraction
         const length1 = Math.floor(Math.random() * 8) + 2 // 2-9 inches
         const length2 = Math.floor(Math.random() * 8) + 2 // 2-9 inches
@@ -569,8 +605,9 @@ export class ActivityGenerator {
           ]
         }
         break
+      }
 
-      case "weight":
+      case "weight": {
         const numItems1 = Math.floor(Math.random() * 4) + 2 // 2-5 items
         const weightPer1 = difficulty === "easy" ? 1 : Math.floor(Math.random() * 2) + 1 // 1-2 pounds
 
@@ -592,6 +629,7 @@ export class ActivityGenerator {
           visual = []  // Too complex for visualization
         }
         break
+      }
     }
 
     options = this.generateOptions(answer, 50)
@@ -648,33 +686,50 @@ export class ActivityGenerator {
    * Generate pattern/sequence questions
    */
   generatePattern(difficulty, areaId) {
-    const patternTypes = ["skipCount", "sequence"]
+    const patternTypes = ["skipCount", "whatsMissing"]
     const type = patternTypes[Math.floor(Math.random() * patternTypes.length)]
 
     let question, answer, options, visual
 
     switch (type) {
-      case "skipCount":
-        const skipBy = difficulty === "easy" ? [2, 5, 10][Math.floor(Math.random() * 3)] : [3, 4][Math.floor(Math.random() * 2)]
-        const start = Math.floor(Math.random() * 10) + 1
+      case "skipCount": {
+        // Skip counting using actual multiples
+        const skipBy = difficulty === "easy" ? [2, 5, 10][Math.floor(Math.random() * 3)] : [3, 4, 6][Math.floor(Math.random() * 3)]
+
+        // Start from a multiple of skipBy (between 1x and 3x)
+        const startMultiplier = Math.floor(Math.random() * 3) + 1
+        const start = skipBy * startMultiplier
+
         const sequence = [start, start + skipBy, start + skipBy * 2]
         answer = start + skipBy * 3
 
         question = `What number comes next?`
-        // Format with spaces between numbers
         visual = [sequence.join("  ,  ") + "  ,  ?"]
         break
+      }
 
-      case "sequence":
-        const num1 = Math.floor(Math.random() * 20) + 1
-        const diff = Math.floor(Math.random() * 5) + 1
-        const seq = [num1, num1 + diff, num1 + diff * 2]
-        answer = num1 + diff * 3
+      case "whatsMissing": {
+        // What's missing - show a sequence with one number missing
+        const diff = difficulty === "easy" ?
+          [1, 2, 5, 10][Math.floor(Math.random() * 4)] :
+          [3, 4, 6, 7][Math.floor(Math.random() * 4)]
 
-        question = `What number comes next?`
-        // Format with spaces between numbers
-        visual = [seq.join("  ,  ") + "  ,  ?"]
+        const firstNum = Math.floor(Math.random() * 10) + 1
+        const fullSequence = [firstNum, firstNum + diff, firstNum + diff * 2, firstNum + diff * 3]
+
+        // Pick which position is missing (1 or 2, not first or last)
+        const missingIndex = Math.floor(Math.random() * 2) + 1
+        answer = fullSequence[missingIndex]
+
+        // Build the visual sequence with a blank
+        const displaySequence = fullSequence.map((num, idx) =>
+          idx === missingIndex ? "__" : num.toString()
+        )
+
+        question = `What number is missing?`
+        visual = [displaySequence.join("  ,  ")]
         break
+      }
     }
 
     options = this.generateOptions(answer, 100)

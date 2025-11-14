@@ -13,7 +13,7 @@ import {
 
 describe('Settings Configuration', () => {
   test('should have all required setting fields', () => {
-    for (const [key, config] of Object.entries(SETTINGS_CONFIG)) {
+    for (const config of Object.values(SETTINGS_CONFIG)) {
       expect(config).toHaveProperty('default')
       expect(config).toHaveProperty('options')
       expect(config).toHaveProperty('label')

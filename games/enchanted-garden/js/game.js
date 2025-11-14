@@ -48,6 +48,7 @@ class EnchantedGarden {
     this.events.initializeEventListeners()
     this.ui.updateStats(this.state.stats)
     this.ui.updateSettingsUI(this.state.settings)
+    this.ui.updateCastleBadge(this.state.getCompletedAreasCount())
 
     // Update title screen based on saved progress
     this.updateTitleScreen()
@@ -155,62 +156,116 @@ class EnchantedGarden {
     // Castle SVG that builds piece by piece (6 total pieces)
     return `
       <svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-        <!-- Sky background -->
-        <rect width="400" height="400" fill="${pieces >= 6 ? "#87CEEB" : "#e0e0e0"}" />
+        <!-- Sky background with gradient -->
+        <defs>
+          <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:${pieces >= 6 ? "#87CEEB" : "#e8e8e8"};stop-opacity:1" />
+            <stop offset="100%" style="stop-color:${pieces >= 6 ? "#B0E0E6" : "#f0f0f0"};stop-opacity:1" />
+          </linearGradient>
+          <linearGradient id="stoneGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#E8E8E8;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#C0C0C0;stop-opacity:1" />
+          </linearGradient>
+          <linearGradient id="roofGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#DC143C;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#8B0000;stop-opacity:1" />
+          </linearGradient>
+          <filter id="shadow">
+            <feDropShadow dx="2" dy="4" stdDeviation="3" flood-opacity="0.3"/>
+          </filter>
+        </defs>
+
+        <rect width="400" height="400" fill="url(#skyGradient)" />
 
         ${pieces >= 1 ? `
-        <!-- Foundation -->
-        <rect x="100" y="320" width="200" height="60" fill="#8B7355" stroke="#654321" stroke-width="2"/>
+        <!-- Foundation with texture -->
+        <rect x="100" y="320" width="200" height="60" fill="#8B7355" stroke="#654321" stroke-width="3" filter="url(#shadow)"/>
+        <line x1="100" y1="340" x2="300" y2="340" stroke="#654321" stroke-width="1" opacity="0.3"/>
+        <line x1="100" y1="360" x2="300" y2="360" stroke="#654321" stroke-width="1" opacity="0.3"/>
         ` : ""}
 
         ${pieces >= 2 ? `
-        <!-- Main walls -->
-        <rect x="120" y="220" width="160" height="100" fill="#D3D3D3" stroke="#808080" stroke-width="2"/>
+        <!-- Main walls with stone texture -->
+        <rect x="120" y="220" width="160" height="100" fill="url(#stoneGradient)" stroke="#808080" stroke-width="3" filter="url(#shadow)"/>
+        <!-- Stone blocks -->
+        <line x1="120" y1="245" x2="280" y2="245" stroke="#A0A0A0" stroke-width="1" opacity="0.4"/>
+        <line x1="120" y1="270" x2="280" y2="270" stroke="#A0A0A0" stroke-width="1" opacity="0.4"/>
+        <line x1="120" y1="295" x2="280" y2="295" stroke="#A0A0A0" stroke-width="1" opacity="0.4"/>
         ` : ""}
 
         ${pieces >= 3 ? `
-        <!-- Towers -->
-        <rect x="80" y="180" width="60" height="140" fill="#C0C0C0" stroke="#808080" stroke-width="2"/>
-        <polygon points="80,180 110,140 140,180" fill="#8B0000" stroke="#654321" stroke-width="2"/>
-        <rect x="260" y="180" width="60" height="140" fill="#C0C0C0" stroke="#808080" stroke-width="2"/>
-        <polygon points="260,180 290,140 320,180" fill="#8B0000" stroke="#654321" stroke-width="2"/>
+        <!-- Left tower -->
+        <rect x="80" y="180" width="60" height="140" fill="url(#stoneGradient)" stroke="#808080" stroke-width="3" filter="url(#shadow)"/>
+        <polygon points="80,180 110,140 140,180" fill="url(#roofGradient)" stroke="#654321" stroke-width="2" filter="url(#shadow)"/>
+        <!-- Battlements -->
+        <rect x="85" y="175" width="10" height="10" fill="#A0A0A0"/>
+        <rect x="105" y="175" width="10" height="10" fill="#A0A0A0"/>
+        <rect x="125" y="175" width="10" height="10" fill="#A0A0A0"/>
+
+        <!-- Right tower -->
+        <rect x="260" y="180" width="60" height="140" fill="url(#stoneGradient)" stroke="#808080" stroke-width="3" filter="url(#shadow)"/>
+        <polygon points="260,180 290,140 320,180" fill="url(#roofGradient)" stroke="#654321" stroke-width="2" filter="url(#shadow)"/>
+        <!-- Battlements -->
+        <rect x="265" y="175" width="10" height="10" fill="#A0A0A0"/>
+        <rect x="285" y="175" width="10" height="10" fill="#A0A0A0"/>
+        <rect x="305" y="175" width="10" height="10" fill="#A0A0A0"/>
         ` : ""}
 
         ${pieces >= 4 ? `
-        <!-- Door and windows -->
-        <rect x="175" y="260" width="50" height="60" fill="#654321" stroke="#4a2f1a" stroke-width="2"/>
-        <circle cx="150" cy="250" r="12" fill="#FFD700" stroke="#DAA520" stroke-width="2"/>
-        <circle cx="250" cy="250" r="12" fill="#FFD700" stroke="#DAA520" stroke-width="2"/>
+        <!-- Door with arch -->
+        <rect x="175" y="260" width="50" height="60" fill="#654321" stroke="#4a2f1a" stroke-width="3" rx="5" filter="url(#shadow)"/>
+        <circle cx="200" cy="255" r="25" fill="#654321" stroke="#4a2f1a" stroke-width="3"/>
+        <rect x="175" y="255" width="50" height="30" fill="#654321"/>
+        <!-- Door details -->
+        <circle cx="215" cy="285" r="3" fill="#8B7355"/>
+        <line x1="200" y1="260" x2="200" y2="320" stroke="#4a2f1a" stroke-width="2"/>
+
+        <!-- Windows with glow -->
+        <circle cx="150" cy="250" r="14" fill="#FFD700" stroke="#DAA520" stroke-width="2" filter="url(#shadow)"/>
+        <circle cx="150" cy="250" r="10" fill="#FFED4E" opacity="0.8"/>
+        <circle cx="250" cy="250" r="14" fill="#FFD700" stroke="#DAA520" stroke-width="2" filter="url(#shadow)"/>
+        <circle cx="250" cy="250" r="10" fill="#FFED4E" opacity="0.8"/>
         ` : ""}
 
         ${pieces >= 5 ? `
-        <!-- Center tower -->
-        <rect x="180" y="120" width="40" height="100" fill="#B8B8B8" stroke="#808080" stroke-width="2"/>
-        <polygon points="180,120 200,80 220,120" fill="#8B0000" stroke="#654321" stroke-width="2"/>
+        <!-- Center tower (taller) -->
+        <rect x="175" y="120" width="50" height="100" fill="url(#stoneGradient)" stroke="#808080" stroke-width="3" filter="url(#shadow)"/>
+        <polygon points="175,120 200,75 225,120" fill="url(#roofGradient)" stroke="#654321" stroke-width="2" filter="url(#shadow)"/>
+        <!-- Battlements -->
+        <rect x="180" y="115" width="8" height="8" fill="#A0A0A0"/>
+        <rect x="196" y="115" width="8" height="8" fill="#A0A0A0"/>
+        <rect x="212" y="115" width="8" height="8" fill="#A0A0A0"/>
+        <!-- Window -->
+        <circle cx="200" cy="165" r="8" fill="#4A5568" stroke="#2D3748" stroke-width="2"/>
         ` : ""}
 
         ${pieces >= 6 ? `
-        <!-- Victory flag and sparkles -->
-        <line x1="200" y1="80" x2="200" y2="50" stroke="#654321" stroke-width="3"/>
-        <polygon points="200,50 240,60 200,70" fill="#FFD700" stroke="#DAA520" stroke-width="1"/>
-        <text x="210" y="65" font-size="20">🏆</text>
+        <!-- Victory flag with wave effect -->
+        <line x1="200" y1="75" x2="200" y2="45" stroke="#654321" stroke-width="4" filter="url(#shadow)"/>
+        <path d="M 200 45 Q 220 50, 240 48 Q 235 53, 240 57 Q 220 59, 200 55 Z" fill="#FFD700" stroke="#DAA520" stroke-width="2"/>
+        <text x="210" y="58" font-size="16">🏆</text>
 
-        <!-- Sparkles all around -->
-        <text x="50" y="100" font-size="30">✨</text>
-        <text x="330" y="100" font-size="30">✨</text>
-        <text x="70" y="300" font-size="30">⭐</text>
-        <text x="310" y="300" font-size="30">⭐</text>
-        <text x="200" y="30" font-size="25">🎉</text>
+        <!-- Sparkles with glow -->
+        <text x="50" y="100" font-size="35" filter="url(#shadow)">✨</text>
+        <text x="330" y="100" font-size="35" filter="url(#shadow)">✨</text>
+        <text x="70" y="300" font-size="35" filter="url(#shadow)">⭐</text>
+        <text x="310" y="300" font-size="35" filter="url(#shadow)">⭐</text>
+        <text x="190" y="25" font-size="30" filter="url(#shadow)">🎉</text>
+
+        <!-- Rays of light -->
+        <line x1="200" y1="50" x2="150" y2="20" stroke="#FFD700" stroke-width="2" opacity="0.6"/>
+        <line x1="200" y1="50" x2="250" y2="20" stroke="#FFD700" stroke-width="2" opacity="0.6"/>
+        <line x1="200" y1="50" x2="200" y2="10" stroke="#FFD700" stroke-width="3" opacity="0.6"/>
         ` : ""}
 
         ${pieces < 6 ? `
         <!-- Construction message -->
-        <text x="200" y="390" text-anchor="middle" font-size="16" fill="#666" font-family="Arial">
+        <text x="200" y="390" text-anchor="middle" font-size="18" fill="#666" font-family="Arial" font-weight="bold">
           ${pieces}/6 pieces complete
         </text>
         ` : `
         <!-- Completion message -->
-        <text x="200" y="390" text-anchor="middle" font-size="18" fill="#FFD700" font-family="Arial" font-weight="bold">
+        <text x="200" y="390" text-anchor="middle" font-size="20" fill="#FFD700" font-family="Arial" font-weight="bold" filter="url(#shadow)">
           Castle Complete! 🎊
         </text>
         `}
@@ -229,6 +284,7 @@ class EnchantedGarden {
     // Update area locks when showing garden hub
     if (screenId === "garden-hub") {
       this.ui.updateAreaLocks(this.state.unlockedAreas)
+      this.ui.updateCastleBadge(this.state.getCompletedAreasCount())
     }
   }
 
@@ -330,15 +386,52 @@ class EnchantedGarden {
    * Show level complete celebration
    */
   showLevelComplete() {
+    const wasAreaJustCompleted = this.state.currentArea && !this.state.completedAreas.has(this.state.currentArea)
+    const areaName = this.getAreaName(this.state.currentArea)
+
     this.ui.showFeedback(`🎉 Level ${this.state.stats.currentLevel} Complete! 🎉`, "correct")
 
     this.state.completeLevel()
-    this.updateAllDisplays()
+
+    // Update displays but skip progress bar to avoid reset animation
+    this.ui.updateStats(this.state.stats)
+    this.ui.updateVisualProgression(
+      this.state.currentArea,
+      this.progression.getAreaThemes(),
+      this.state.getProgressPercent(),
+    )
+    this.ui.renderGarden(this.state.garden)
+    this.state.saveProgress()
+
+    // Show castle piece notification if area was just completed
+    if (wasAreaJustCompleted) {
+      setTimeout(() => {
+        this.ui.showCastleNotification(areaName, this.state.getCompletedAreasCount())
+        this.ui.updateCastleBadge(this.state.getCompletedAreasCount())
+      }, 1500)
+    }
 
     // Return to garden hub after completing a level
     setTimeout(() => {
       this.showScreen("garden-hub")
-    }, 2500)
+    }, wasAreaJustCompleted ? 4000 : 2500)
+  }
+
+  /**
+   * Get readable area name
+   * @param {string} areaId - Area identifier
+   * @returns {string} Area name
+   */
+  getAreaName(areaId) {
+    const names = {
+      "flower-meadow": "Flower Meadow",
+      "crystal-cave": "Crystal Cave",
+      "enchanted-forest": "Enchanted Forest",
+      "time-temple": "Time Temple",
+      "measurement-market": "Measurement Market",
+      "pattern-path": "Pattern Path"
+    }
+    return names[areaId] || areaId
   }
 }
 
