@@ -7,14 +7,45 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css" />
     <link rel="stylesheet" href="styles/main.css" />
     <link rel="stylesheet" href="styles/garden.css" />
     <link rel="stylesheet" href="styles/animations.css" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <style>
+      /* Override breadcrumb styling for colorful theme */
+      #title-screen .breadcrumbs {
+        margin-bottom: 1rem;
+        justify-content: center;
+      }
+      #title-screen .breadcrumbs a {
+        color: #764ba2;
+        font-weight: 600;
+      }
+      #title-screen .breadcrumbs a:hover {
+        color: #667eea;
+      }
+      #title-screen .breadcrumbs .separator {
+        color: #b8a9d6;
+      }
+      #title-screen .breadcrumbs .current {
+        color: #5a3d7a;
+        font-weight: 600;
+      }
+    </style>
   </head>
   <body>
+    <a href="#title-screen" class="skip-link">Skip to game</a>
     <div id="game-container">
       <!-- Title Screen -->
       <div id="title-screen" class="screen active">
+        <nav class="breadcrumbs">
+          <a href="/">Home</a>
+          <span class="separator">/</span>
+          <a href="/games/">Games</a>
+          <span class="separator">/</span>
+          <span class="current">Enchanted Garden</span>
+        </nav>
         <h1 class="game-title">🌸 Enchanted Garden 🌸</h1>
         <p class="subtitle">Help the magic garden!</p>
         <div class="title-buttons">
@@ -181,6 +212,9 @@
 
     <!-- Particle effects container -->
     <div id="particles-container"></div>
+
+    <!-- Castle notification -->
+    <div id="castle-notification" class="castle-notification"></div>
 
     <script type="module" src="js/game.js?v=7"></script>
   </body>

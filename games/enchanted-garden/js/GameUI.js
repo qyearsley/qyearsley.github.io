@@ -42,6 +42,7 @@ export class GameUI {
       castleProgressText: document.getElementById("castle-progress-text"),
       castleSvgContainer: document.getElementById("castle-svg-container"),
       castlePiecesDisplay: document.getElementById("castle-pieces-display"),
+      castleNotification: document.getElementById("castle-notification"),
     }
   }
 
@@ -92,6 +93,11 @@ export class GameUI {
    * @param {string} visualHints - Visual hints setting
    */
   displayActivity(activity, inputMode = "multipleChoice", visualHints = "always") {
+    // Blur any focused element to prevent focus issues on mobile
+    if (document.activeElement) {
+      document.activeElement.blur()
+    }
+
     // Update creature image if provided
     if (activity.creature && this.elements.creatureImage) {
       this.elements.creatureImage.textContent = activity.creature
@@ -100,8 +106,14 @@ export class GameUI {
     this.elements.creatureMessage.textContent = activity.creatureMessage
     this.elements.questionText.textContent = activity.question
 
+    // Determine if visual is essential (required to answer the question)
+    const isEssentialVisual = activity.visual && activity.visual.length > 0 &&
+      activity.visual.some(item => item && item.html) // Clock, ruler, scale visuals are HTML
+
     // Display visual items based on hints setting
-    const shouldShowVisual = visualHints === "always" ||
+    // Essential visuals (like clock faces, rulers) are always shown
+    const shouldShowVisual = isEssentialVisual ||
+      visualHints === "always" ||
       (visualHints === "sometimes" && Math.random() < 0.5)
 
     if (shouldShowVisual) {
@@ -469,5 +481,53 @@ export class GameUI {
 
       this.elements.castlePiecesDisplay.appendChild(piece)
     })
+  }
+
+  /**
+   * Update castle badge on castle button
+   * @param {number} completedCount - Number of completed areas
+   */
+  updateCastleBadge(completedCount) {
+    if (!this.elements.castleButton) return
+
+    // Remove existing badge if any
+    const existingBadge = this.elements.castleButton.querySelector('.castle-badge')
+    if (existingBadge) {
+      existingBadge.remove()
+    }
+
+    // Add badge if any areas completed
+    if (completedCount > 0) {
+      const badge = document.createElement('span')
+      badge.className = 'castle-badge'
+      badge.textContent = completedCount
+      this.elements.castleButton.appendChild(badge)
+    }
+  }
+
+  /**
+   * Show castle piece notification
+   * @param {string} areaName - Name of completed area
+   * @param {number} totalPieces - Total pieces collected
+   */
+  showCastleNotification(areaName, totalPieces) {
+    if (!this.elements.castleNotification) return
+
+    this.elements.castleNotification.innerHTML = `
+      <div class="castle-notification-content">
+        <div class="castle-notification-icon">🏰</div>
+        <div class="castle-notification-text">
+          <strong>${areaName} Complete!</strong>
+          <span>Castle Piece ${totalPieces}/6 collected!</span>
+        </div>
+      </div>
+    `
+
+    this.elements.castleNotification.classList.add('show')
+
+    // Hide after 3 seconds
+    setTimeout(() => {
+      this.elements.castleNotification.classList.remove('show')
+    }, 2500)
   }
 }
