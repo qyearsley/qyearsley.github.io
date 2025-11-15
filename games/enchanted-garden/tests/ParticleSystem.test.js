@@ -1,4 +1,4 @@
-import { ParticleSystem } from "../enchanted-garden/js/ParticleSystem.js"
+import { ParticleSystem } from "../js/ParticleSystem.js"
 
 describe("ParticleSystem", () => {
   let particleSystem
@@ -56,18 +56,21 @@ describe("ParticleSystem", () => {
 
     test("particles are removed after lifetime", (done) => {
       particleSystem.particleLifetime = 100
+      particleSystem.particleCount = 2 // Fewer particles for faster test
+      particleSystem.spawnDelay = 20 // Faster spawn for testing
       particleSystem.createParticles(150, 150, container)
 
       // Check particles exist initially
       setTimeout(() => {
         expect(container.querySelectorAll(".particle").length).toBeGreaterThan(0)
-      }, 50)
+      }, 30)
 
       // Check particles are removed after lifetime
+      // Wait for: spawn time (2 particles * 20ms = 40ms) + lifetime (100ms) + buffer (100ms)
       setTimeout(() => {
         expect(container.querySelectorAll(".particle").length).toBe(0)
         done()
-      }, 150)
-    })
+      }, 250)
+    }, 10000) // Increase test timeout
   })
 })

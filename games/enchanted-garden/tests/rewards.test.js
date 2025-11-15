@@ -1,4 +1,4 @@
-import { RewardSystem } from "./js/rewards.js"
+import { RewardSystem } from "../js/rewards.js"
 
 describe("RewardSystem", () => {
   let rewardSystem

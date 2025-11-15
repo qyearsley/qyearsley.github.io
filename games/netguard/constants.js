@@ -9,7 +9,7 @@ export const LEVEL_IDS = {
   XSS_VULNERABILITY: 5,
   AUTH_BYPASS: 6,
   API_SECURITY: 7,
-};
+}
 
 // Node IDs for Level 1 (JWT Expiration)
 export const LEVEL_1_NODES = {
@@ -17,7 +17,7 @@ export const LEVEL_1_NODES = {
   AUTH: "auth",
   DATABASE: "database",
   WEB_SERVER: "webserver",
-};
+}
 
 // Node IDs for Level 2 (SQL Injection)
 export const LEVEL_2_NODES = {
@@ -25,7 +25,7 @@ export const LEVEL_2_NODES = {
   API_SERVER: "api-server",
   DATABASE: "database",
   REPO: "repo",
-};
+}
 
 // Node IDs for Level 3 (Certificate Validation)
 export const LEVEL_3_NODES = {
@@ -33,7 +33,7 @@ export const LEVEL_3_NODES = {
   WEB_APP: "web-app",
   PAYMENT_PROXY: "payment-proxy",
   EXTERNAL_API: "external-api",
-};
+}
 
 // Node IDs for Level 4 (CSRF Attack)
 export const LEVEL_4_NODES = {
@@ -41,7 +41,7 @@ export const LEVEL_4_NODES = {
   API_BACKEND: "api-backend",
   USER_BROWSER: "user-browser",
   SECURITY_LOGS: "security-logs",
-};
+}
 
 // Node IDs for Level 5 (XSS Vulnerability)
 export const LEVEL_5_NODES = {
@@ -50,7 +50,7 @@ export const LEVEL_5_NODES = {
   DATABASE: "database",
   VICTIM_BROWSER: "victim-browser",
   ATTACKER_SERVER: "attacker-server",
-};
+}
 
 // Node IDs for Level 6 (Authentication Bypass)
 export const LEVEL_6_NODES = {
@@ -58,7 +58,7 @@ export const LEVEL_6_NODES = {
   API_SERVER: "api-server",
   SESSION_STORE: "session-store",
   AUDIT_LOG: "audit-log",
-};
+}
 
 // Node IDs for Level 7 (API Security)
 export const LEVEL_7_NODES = {
@@ -67,13 +67,10 @@ export const LEVEL_7_NODES = {
   AUTHORIZATION: "authorization",
   API_DOCS: "api-docs",
   MONITORING: "monitoring",
-};
+}
 
 // Command IDs
 export const COMMAND_IDS = {
-  LS: "ls",
-  PWD: "pwd",
-  WHOAMI: "whoami",
   SCAN: "scan",
   LOGS: "logs",
   EXIT: "exit",
@@ -106,7 +103,7 @@ export const COMMAND_IDS = {
   ADD_RATE_LIMIT: "add-rate-limit",
   FIX_IDOR: "fix-idor",
   FIX_DATA_EXPOSURE: "fix-data-exposure",
-};
+}
 
 // Clue IDs
 export const CLUE_IDS = {
@@ -144,9 +141,9 @@ export const CLUE_IDS = {
   SENSITIVE_DATA_LEAK: "sensitive_data_leak",
   NO_RATE_LIMITS: "no_rate_limits",
   IDOR_VULNERABILITY: "idor_vulnerability",
-};
+}
 
 // Game state keys for localStorage
 export const STORAGE_KEYS = {
   GAME_SAVE: "netguard_save",
-};
+}

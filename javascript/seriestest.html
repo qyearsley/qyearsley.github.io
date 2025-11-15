@@ -50,9 +50,9 @@
               />
             </div>
             <div class="form-group">
-              <label for="N">N =</label>
+              <label for="n">N =</label>
               <input
-                id="N"
+                id="n"
                 type="number"
                 value="100"
                 min="1"
@@ -107,7 +107,9 @@
           <p>
             <small
               >Note: For the factorial function, you'll need to define it first:
-              <code>function factorial(n) { return n &lt;= 1 ? 1 : n * factorial(n-1); }</code></small
+              <code
+                >function factorial(n) { return n &lt;= 1 ? 1 : n * factorial(n-1); }</code
+              ></small
             >
           </p>
         </section>
@@ -137,7 +139,7 @@
        */
       function update() {
         const fInput = document.getElementById("f").value
-        const N = parseInt(document.getElementById("N").value, 10)
+        const N = parseInt(document.getElementById("n").value, 10)
         const outputElement = document.getElementById("output")
         const errorElement = document.getElementById("error")
 

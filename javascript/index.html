@@ -8,44 +8,10 @@
       content="A collection of JavaScript experiments and interactive tools created by Quinten Yearsley."
     />
     <link rel="stylesheet" href="/style.css" />
-    <style>
-      .internal-links {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-      }
-
-      .internal-links li {
-        margin-bottom: 12px;
-      }
-
-      .internal-links a {
-        display: block;
-        padding: 12px 16px;
-        background: #f8f9fa;
-        border: 1px solid #e9ecef;
-        border-radius: 6px;
-        text-decoration: none;
-        color: #495057;
-        font-weight: 500;
-        transition: all 0.2s ease;
-      }
-
-      .internal-links a:hover {
-        background: #e9ecef;
-        border-color: #007bff;
-        color: #007bff;
-        transform: translateY(-1px);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-
-      .internal-links a:active {
-        transform: translateY(0);
-      }
-    </style>
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
   </head>
   <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <div class="container">
       <header class="header">
         <h1>JavaScript Experiments</h1>
@@ -55,7 +21,7 @@
         </p>
       </header>
 
-      <main class="main-content">
+      <main id="main-content" class="main-content">
         <nav class="breadcrumbs">
           <a href="/">Home</a>
           <span class="separator">/</span>
@@ -79,5 +45,6 @@
         </section>
       </main>
     </div>
+    <script src="/shared/nav.js"></script>
   </body>
 </html>

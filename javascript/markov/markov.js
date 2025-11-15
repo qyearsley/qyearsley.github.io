@@ -198,11 +198,11 @@ const markovChain = new MarkovChain()
  * Generate text using the current UI settings
  */
 function generateText() {
-  const inputText = document.getElementById("inputText").value
-  const ngramType = document.getElementById("ngramType").value
-  const ngramSize = parseInt(document.getElementById("ngramSize").value)
-  const outputLength = parseInt(document.getElementById("outputLength").value)
-  const startText = document.getElementById("startText").value
+  const inputText = document.getElementById("input-text").value
+  const ngramType = document.getElementById("ngram-type").value
+  const ngramSize = parseInt(document.getElementById("ngram-size").value)
+  const outputLength = parseInt(document.getElementById("output-length").value)
+  const startText = document.getElementById("start-text").value
 
   // Validate input
   if (!inputText.trim()) {
@@ -288,13 +288,13 @@ That I was of hir felaweshipe anon,
 And made forward erly for to ryse,
 To take oure wey ther as I yow devyse.`
 
-  document.getElementById("inputText").value = sampleText
+  document.getElementById("input-text").value = sampleText
 }
 
 // Add event listeners for real-time updates
 document.addEventListener("DOMContentLoaded", function () {
   // Add a sample text button
-  const generateBtn = document.getElementById("generateBtn")
+  const generateBtn = document.getElementById("generate-btn")
   const sampleBtn = document.createElement("button")
   sampleBtn.textContent = "Load Sample Text"
   sampleBtn.style.marginLeft = "10px"
@@ -303,11 +303,11 @@ document.addEventListener("DOMContentLoaded", function () {
   generateBtn.parentNode.appendChild(sampleBtn)
 
   // Set character n-grams as default
-  document.getElementById("ngramType").value = "char"
+  document.getElementById("ngram-type").value = "char"
 
   // Auto-generate when input changes (with debouncing)
   let timeoutId
-  const inputText = document.getElementById("inputText")
+  const inputText = document.getElementById("input-text")
   inputText.addEventListener("input", function () {
     clearTimeout(timeoutId)
     timeoutId = setTimeout(() => {

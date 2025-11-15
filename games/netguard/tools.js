@@ -3,31 +3,31 @@
 export class JWTDecoder {
   static decode(token) {
     try {
-      const parts = token.split(".");
+      const parts = token.split(".")
       if (parts.length !== 3) {
-        return { error: "Invalid JWT format. Expected 3 parts separated by dots." };
+        return { error: "Invalid JWT format. Expected 3 parts separated by dots." }
       }
 
-      const header = JSON.parse(atob(parts[0]));
-      const payload = JSON.parse(atob(parts[1]));
-      const signature = parts[2];
+      const header = JSON.parse(atob(parts[0]))
+      const payload = JSON.parse(atob(parts[1]))
+      const signature = parts[2]
 
       return {
         header,
         payload,
         signature,
         raw: { header: parts[0], payload: parts[1], signature },
-      };
+      }
     } catch (e) {
-      return { error: "Failed to decode JWT: " + e.message };
+      return { error: "Failed to decode JWT: " + e.message }
     }
   }
 
   static isExpired(payload) {
-    if (!payload.exp) return { expired: false, reason: "No expiration claim" };
+    if (!payload.exp) return { expired: false, reason: "No expiration claim" }
 
-    const now = Math.floor(Date.now() / 1000);
-    const expired = now > payload.exp;
+    const now = Math.floor(Date.now() / 1000)
+    const expired = now > payload.exp
 
     return {
       expired,
@@ -36,13 +36,13 @@ export class JWTDecoder {
       diff: now - payload.exp,
       expDate: new Date(payload.exp * 1000).toISOString(),
       nowDate: new Date(now * 1000).toISOString(),
-    };
+    }
   }
 
   static formatDecoded(decoded) {
-    if (decoded.error) return decoded.error;
+    if (decoded.error) return decoded.error
 
-    const expInfo = this.isExpired(decoded.payload);
+    const expInfo = this.isExpired(decoded.payload)
 
     return `JWT Token Analysis:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -61,22 +61,16 @@ ${expInfo.expired ? "❌ EXPIRED" : "✅ VALID"}
 ${expInfo.exp ? `Expiration: ${expInfo.expDate}` : "No expiration claim"}
 Current time: ${expInfo.nowDate}
 ${expInfo.expired ? `Expired ${Math.floor(expInfo.diff / 86400)} days ago` : ""}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`
   }
 }
 
 export class SQLInjectionTester {
   static testPayload(payload, originalQuery) {
     // Educational SQL injection testing
-    const dangerous = [
-      "' OR '1'='1",
-      "' OR 1=1--",
-      "'; DROP TABLE",
-      "' UNION SELECT",
-      "admin'--",
-    ];
+    const dangerous = ["' OR '1'='1", "' OR 1=1--", "'; DROP TABLE", "' UNION SELECT", "admin'--"]
 
-    const isDangerous = dangerous.some((d) => payload.includes(d));
+    const isDangerous = dangerous.some((d) => payload.includes(d))
 
     if (isDangerous) {
       return {
@@ -95,13 +89,13 @@ The attacker's input breaks out of the string and adds their own SQL logic.`,
 ❌ BAD:  query = "SELECT * FROM users WHERE username = '" + input + "'";
 ✅ GOOD: query = "SELECT * FROM users WHERE username = ?";
          db.execute(query, [input]);`,
-      };
+      }
     }
 
     return {
       vulnerable: false,
       message: "This payload doesn't exploit the vulnerability.",
-    };
+    }
   }
 
   static generateExamples() {
@@ -113,13 +107,13 @@ The attacker's input breaks out of the string and adds their own SQL logic.`,
         payload: "' UNION SELECT password FROM users--",
         description: "Extract data",
       },
-    ];
+    ]
   }
 }
 
 export class CertificateValidator {
   static validate(certData) {
-    const issues = [];
+    const issues = []
 
     // Check if self-signed
     if (certData.issuer === certData.subject) {
@@ -129,20 +123,20 @@ export class CertificateValidator {
         explanation:
           "Certificate is self-signed (issuer equals subject). This bypasses the trust chain.",
         risk: "Man-in-the-middle attacks cannot be detected.",
-      });
+      })
     }
 
     // Check expiration
-    const now = new Date();
-    const notBefore = new Date(certData.notBefore);
-    const notAfter = new Date(certData.notAfter);
+    const now = new Date()
+    const notBefore = new Date(certData.notBefore)
+    const notAfter = new Date(certData.notAfter)
 
     if (now < notBefore) {
       issues.push({
         severity: "HIGH",
         issue: "Certificate not yet valid",
         explanation: `Certificate validity starts ${notBefore.toISOString()}, but current time is ${now.toISOString()}`,
-      });
+      })
     }
 
     if (now > notAfter) {
@@ -151,7 +145,7 @@ export class CertificateValidator {
         issue: "Certificate expired",
         explanation: `Certificate expired on ${notAfter.toISOString()}`,
         risk: "Expired certificates should not be trusted.",
-      });
+      })
     }
 
     // Check hostname
@@ -161,14 +155,14 @@ export class CertificateValidator {
         issue: "Hostname mismatch",
         explanation: `Certificate is for '${certData.certHost}' but connecting to '${certData.requestedHost}'`,
         risk: "Possible man-in-the-middle attack.",
-      });
+      })
     }
 
     return {
       valid: issues.length === 0,
       issues,
       summary: `Found ${issues.length} issue(s) with certificate`,
-    };
+    }
   }
 }
 
@@ -189,11 +183,11 @@ export class InteractiveTools {
       description: "Inspect SSL certificate",
       usage: "openssl x509 -in <cert> -text",
     },
-  };
+  }
 
   static getToolsList() {
     return Object.values(this.availableTools)
       .map((tool) => `${tool.name.padEnd(30)} - ${tool.description}`)
-      .join("\n");
+      .join("\n")
   }
 }

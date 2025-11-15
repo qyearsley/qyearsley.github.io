@@ -7,7 +7,14 @@ export class StorageManager {
     this.currentVersion = "3.0" // Updated version for new features
   }
 
-  saveProgress(stats, garden, unlockedAreas, completedAreas = [], settings = {}) {
+  saveProgress(
+    stats,
+    garden,
+    unlockedAreas,
+    completedAreas = [],
+    settings = {},
+    projectType = "castle",
+  ) {
     try {
       const data = {
         stats: stats,
@@ -15,6 +22,7 @@ export class StorageManager {
         unlockedAreas: unlockedAreas || ["flower-meadow"],
         completedAreas: completedAreas || [],
         settings: settings || { inputMode: "multipleChoice", visualHints: "always" },
+        projectType: projectType,
         lastPlayed: Date.now(),
         version: this.currentVersion,
       }

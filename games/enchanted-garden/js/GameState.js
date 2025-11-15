@@ -34,6 +34,9 @@ export class GameState {
     /** @type {Object|null} */
     this.currentActivity = null
 
+    /** @type {string} */
+    this.projectType = "castle" // "castle", "garden", "robot", "spaceship"
+
     /** @type {Stats} */
     this.stats = {
       stars: 0,
@@ -187,7 +190,7 @@ export class GameState {
    * @returns {number} Progress as percentage (0-100)
    */
   getProgressPercent() {
-    return (this.stats.currentLevelProgress / this.QUESTIONS_PER_LEVEL) * 100
+    return (this.stats.currentLevelProgress / this.settings.questionsPerLevel) * 100
   }
 
   /**
@@ -199,7 +202,8 @@ export class GameState {
       this.garden,
       Array.from(this.unlockedAreas),
       Array.from(this.completedAreas),
-      this.settings
+      this.settings,
+      this.projectType,
     )
   }
 
@@ -219,6 +223,7 @@ export class GameState {
       this.garden = saved.garden || []
       this.unlockedAreas = new Set(saved.unlockedAreas || ["flower-meadow"])
       this.completedAreas = new Set(saved.completedAreas || [])
+      this.projectType = saved.projectType || "castle"
       if (saved.settings) {
         this.settings = {
           inputMode: saved.settings.inputMode || "multipleChoice",
@@ -227,6 +232,15 @@ export class GameState {
         }
       }
     }
+  }
+
+  /**
+   * Set project type
+   * @param {string} projectType - Project type identifier
+   */
+  setProjectType(projectType) {
+    this.projectType = projectType
+    this.saveProgress()
   }
 
   /**

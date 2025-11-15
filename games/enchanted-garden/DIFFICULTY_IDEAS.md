@@ -1,6 +1,7 @@
 # Future Difficulty & Enhancement Ideas
 
 ## Adaptive Difficulty
+
 - **Performance-based adjustment**: Track success rate and automatically adjust difficulty
   - If getting 3+ wrong in a row: reduce difficulty (smaller numbers, simpler problems)
   - If getting all correct quickly: increase difficulty
@@ -14,12 +15,14 @@
   - Independent difficulty progression per area
 
 ## Number Range Expansions
+
 - **Easy**: 1-10 (current for most areas)
 - **Medium**: 1-20
 - **Hard**: 1-50 or 1-100
 - **Expert**: Larger numbers, decimals, fractions
 
 ## Visual Hint System Enhancements
+
 - **Progressive hint reveal**:
   - First attempt: No hints
   - Second attempt: Partial hints
@@ -35,6 +38,7 @@
   - Level 4: No visuals
 
 ## Question Type Variations
+
 - **Word problems**: "Sara has 3 apples, gets 5 more..."
 - **Missing number**: `__ + 7 = 12` or `5 + __ = 13`
 - **Multiple operations**: `(2 + 3) - 1 = ?`
@@ -42,6 +46,7 @@
 - **Estimation**: "About how many..."
 
 ## New Areas (Future Expansion)
+
 - **Division Den**: Basic division problems
 - **Fraction Forest**: Introduction to fractions (halves, quarters)
 - **Money Market**: Counting coins, simple addition with money
@@ -49,6 +54,7 @@
 - **Word Workshop**: Spelling/reading integration with math
 
 ## Accessibility Features
+
 - **Color adjustments**:
   - High contrast mode
   - Colorblind-friendly palettes
@@ -65,6 +71,7 @@
   - Spacing adjustments
 
 ## Progress & Motivation
+
 - **Daily challenges**: Special problem of the day with bonus rewards
 - **Streak tracking**: Count consecutive days played
 - **Achievement badges**:
@@ -78,12 +85,14 @@
   - Set daily goals
 
 ## Technical Improvements
+
 - **Offline mode**: Service worker for offline play
 - **Cloud save**: Sync progress across devices
 - **Print worksheets**: Generate printable practice sheets based on current level
 - **Export progress**: Download CSV of all activity data
 
 ## UI/UX Improvements
+
 - **Animations**: More celebratory animations for milestones
 - **Transitions**: Smoother screen transitions
 - **Customization**: Let kids choose their avatar/companion creature
@@ -91,6 +100,7 @@
 - **Language support**: Add other languages
 
 ## Notes
+
 - Keep it simple and focused on math learning
 - Don't overwhelm with too many options
 - Maintain fast performance

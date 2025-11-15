@@ -1,4 +1,4 @@
-import { ProgressionManager } from "../enchanted-garden/js/ProgressionManager.js"
+import { ProgressionManager } from "../js/ProgressionManager.js"
 
 describe("ProgressionManager", () => {
   let progression
