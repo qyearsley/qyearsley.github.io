@@ -466,11 +466,11 @@ export class ActivityGenerator {
     // Build question based on whether we have half hours
     let timeDescription
     if (hoursToAdd > 0 && minutesToAdd > 0) {
-      timeDescription = `${hoursToAdd} hour${hoursToAdd > 1 ? 's' : ''} and ${minutesToAdd} minutes`
+      timeDescription = `${hoursToAdd} hour${hoursToAdd > 1 ? "s" : ""} and ${minutesToAdd} minutes`
     } else if (minutesToAdd > 0) {
       timeDescription = `${minutesToAdd} minutes`
     } else {
-      timeDescription = `${hoursToAdd} hour${hoursToAdd > 1 ? 's' : ''}`
+      timeDescription = `${hoursToAdd} hour${hoursToAdd > 1 ? "s" : ""}`
     }
 
     const question = `It is ${startHour}:${startMinuteStr}. What time is it ${timeDescription} later?`
@@ -490,21 +490,21 @@ export class ActivityGenerator {
   }
 
   createClockSVG(hour, minute) {
-    const hourAngle = ((hour % 12) * 30 + minute * 0.5) - 90
+    const hourAngle = (hour % 12) * 30 + minute * 0.5 - 90
     const minuteAngle = minute * 6 - 90
 
     // Generate all 12 hour numbers
     const hourNumbers = Array.from({ length: 12 }, (_, i) => {
       const num = i === 0 ? 12 : i
-      const angle = (i * 30 - 90) * Math.PI / 180
+      const angle = ((i * 30 - 90) * Math.PI) / 180
       const x = 60 + 40 * Math.cos(angle)
       const y = 60 + 40 * Math.sin(angle) + 5 // +5 to center text vertically
       return `<text x="${x}" y="${y}" text-anchor="middle" font-size="12" fill="#333" font-weight="bold">${num}</text>`
-    }).join('')
+    }).join("")
 
     // Generate minute tick marks
     const tickMarks = Array.from({ length: 60 }, (_, i) => {
-      const angle = (i * 6 - 90) * Math.PI / 180
+      const angle = ((i * 6 - 90) * Math.PI) / 180
       const isHourMark = i % 5 === 0
       const innerRadius = isHourMark ? 48 : 50
       const outerRadius = 52
@@ -514,7 +514,7 @@ export class ActivityGenerator {
       const y2 = 60 + outerRadius * Math.sin(angle)
       const width = isHourMark ? 2 : 1
       return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#333" stroke-width="${width}"/>`
-    }).join('')
+    }).join("")
 
     return `
       <svg width="140" height="140" viewBox="0 0 120 120" style="display:inline-block">
@@ -522,9 +522,9 @@ export class ActivityGenerator {
         ${tickMarks}
         ${hourNumbers}
         <!-- Hour hand -->
-        <line x1="60" y1="60" x2="${60 + 30 * Math.cos(hourAngle * Math.PI / 180)}" y2="${60 + 30 * Math.sin(hourAngle * Math.PI / 180)}" stroke="#333" stroke-width="6" stroke-linecap="round"/>
+        <line x1="60" y1="60" x2="${60 + 30 * Math.cos((hourAngle * Math.PI) / 180)}" y2="${60 + 30 * Math.sin((hourAngle * Math.PI) / 180)}" stroke="#333" stroke-width="6" stroke-linecap="round"/>
         <!-- Minute hand -->
-        <line x1="60" y1="60" x2="${60 + 45 * Math.cos(minuteAngle * Math.PI / 180)}" y2="${60 + 45 * Math.sin(minuteAngle * Math.PI / 180)}" stroke="#666" stroke-width="4" stroke-linecap="round"/>
+        <line x1="60" y1="60" x2="${60 + 45 * Math.cos((minuteAngle * Math.PI) / 180)}" y2="${60 + 45 * Math.sin((minuteAngle * Math.PI) / 180)}" stroke="#666" stroke-width="4" stroke-linecap="round"/>
         <!-- Center dot -->
         <circle cx="60" cy="60" r="4" fill="#333"/>
       </svg>
@@ -570,7 +570,7 @@ export class ActivityGenerator {
     const measurementTypes = ["length", "weight"]
     const type = measurementTypes[Math.floor(Math.random() * measurementTypes.length)]
 
-    let question, answer, options, visual
+    let question, answer, visual
 
     switch (type) {
       case "length": {
@@ -582,27 +582,21 @@ export class ActivityGenerator {
 
         if (opType === 0) {
           // Single measurement
-          question = `How many inches long is the line?`
+          question = `How long is the line in inches?`
           answer = length1
           visual = [{ html: this.createRulerSVG(length1) }]
         } else if (opType === 1) {
           // Addition
-          question = `One stick is ${length1} inches. Another is ${length2} inches. Total length?`
+          question = `One stick is ${length1} inches long. Another is ${length2} inches long. How long are they together?`
           answer = length1 + length2
-          visual = [
-            { html: this.createRulerSVG(length1) },
-            { html: this.createRulerSVG(length2) }
-          ]
+          visual = [{ html: this.createRulerSVG(length1) }, { html: this.createRulerSVG(length2) }]
         } else {
           // Subtraction (difference)
           const longer = Math.max(length1, length2)
           const shorter = Math.min(length1, length2)
-          question = `One rope is ${longer} inches. Another is ${shorter} inches. What's the difference?`
+          question = `One rope is ${longer} inches long. Another rope is ${shorter} inches long. How much longer is the first rope?`
           answer = longer - shorter
-          visual = [
-            { html: this.createRulerSVG(longer) },
-            { html: this.createRulerSVG(shorter) }
-          ]
+          visual = [{ html: this.createRulerSVG(longer) }, { html: this.createRulerSVG(shorter) }]
         }
         break
       }
@@ -616,23 +610,24 @@ export class ActivityGenerator {
         if (weightOpType === 0 || difficulty === "easy") {
           // Single weight multiplication
           const totalWeight = numItems1 * weightPer1
-          question = `${numItems1} apples weigh ${weightPer1} pound${weightPer1 > 1 ? 's' : ''} each. Total pounds?`
+          question = `${numItems1} apples weigh ${weightPer1} pound${weightPer1 > 1 ? "s" : ""} each. How many pounds in total?`
           answer = totalWeight
           visual = [{ html: this.createScaleSVG(numItems1) }]
         } else {
-          // Adding two weights
+          // Adding two weights - make sure weights are different per item
           const numItems2 = Math.floor(Math.random() * 4) + 2
+          const weightPer2 = weightPer1 === 1 ? 2 : 1 // Ensure different weight per item
           const totalWeight1 = numItems1 * weightPer1
-          const totalWeight2 = numItems2 * weightPer1
-          question = `${numItems1} apples weigh ${totalWeight1} pounds. ${numItems2} oranges weigh ${totalWeight2} pounds. Total?`
+          const totalWeight2 = numItems2 * weightPer2
+          question = `${numItems1} apples weigh ${weightPer1} pound${weightPer1 > 1 ? "s" : ""} each. ${numItems2} oranges weigh ${weightPer2} pound${weightPer2 > 1 ? "s" : ""} each. How many pounds altogether?`
           answer = totalWeight1 + totalWeight2
-          visual = []  // Too complex for visualization
+          visual = [] // Too complex for visualization
         }
         break
       }
     }
 
-    options = this.generateOptions(answer, 50)
+    const options = this.generateOptions(answer, 50)
 
     return {
       type: "measurement",
@@ -649,18 +644,22 @@ export class ActivityGenerator {
     return `
       <svg width="300" height="60" viewBox="0 0 300 60" style="display:inline-block">
         <rect x="0" y="20" width="${length * 25}" height="30" fill="none" stroke="#333" stroke-width="2"/>
-        ${Array.from({ length: length + 1 }, (_, i) => `
+        ${Array.from(
+          { length: length + 1 },
+          (_, i) => `
           <line x1="${i * 25}" y1="20" x2="${i * 25}" y2="50" stroke="#333" stroke-width="2"/>
           <text x="${i * 25}" y="15" text-anchor="middle" font-size="10">${i}</text>
-        `).join('')}
+        `,
+        ).join("")}
       </svg>
     `
   }
 
   createScaleSVG(numItems) {
-    const apples = Array.from({ length: numItems }, (_, i) =>
-      `<text x="${20 + i * 25}" y="50" font-size="30">🍎</text>`
-    ).join('')
+    const apples = Array.from(
+      { length: numItems },
+      (_, i) => `<text x="${20 + i * 25}" y="50" font-size="30">🍎</text>`,
+    ).join("")
 
     return `
       <svg width="200" height="80" viewBox="0 0 200 80" style="display:inline-block">
@@ -671,9 +670,10 @@ export class ActivityGenerator {
   }
 
   createCupsSVG(numCups) {
-    const cups = Array.from({ length: numCups }, (_, i) =>
-      `<text x="${20 + i * 35}" y="40" font-size="35">🧪</text>`
-    ).join('')
+    const cups = Array.from(
+      { length: numCups },
+      (_, i) => `<text x="${20 + i * 35}" y="40" font-size="35">🧪</text>`,
+    ).join("")
 
     return `
       <svg width="250" height="60" viewBox="0 0 250 60" style="display:inline-block">
@@ -689,12 +689,15 @@ export class ActivityGenerator {
     const patternTypes = ["skipCount", "whatsMissing"]
     const type = patternTypes[Math.floor(Math.random() * patternTypes.length)]
 
-    let question, answer, options, visual
+    let question, answer, visual
 
     switch (type) {
       case "skipCount": {
         // Skip counting using actual multiples
-        const skipBy = difficulty === "easy" ? [2, 5, 10][Math.floor(Math.random() * 3)] : [3, 4, 6][Math.floor(Math.random() * 3)]
+        const skipBy =
+          difficulty === "easy"
+            ? [2, 5, 10][Math.floor(Math.random() * 3)]
+            : [3, 4, 6][Math.floor(Math.random() * 3)]
 
         // Start from a multiple of skipBy (between 1x and 3x)
         const startMultiplier = Math.floor(Math.random() * 3) + 1
@@ -710,9 +713,10 @@ export class ActivityGenerator {
 
       case "whatsMissing": {
         // What's missing - show a sequence with one number missing
-        const diff = difficulty === "easy" ?
-          [1, 2, 5, 10][Math.floor(Math.random() * 4)] :
-          [3, 4, 6, 7][Math.floor(Math.random() * 4)]
+        const diff =
+          difficulty === "easy"
+            ? [1, 2, 5, 10][Math.floor(Math.random() * 4)]
+            : [3, 4, 6, 7][Math.floor(Math.random() * 4)]
 
         const firstNum = Math.floor(Math.random() * 10) + 1
         const fullSequence = [firstNum, firstNum + diff, firstNum + diff * 2, firstNum + diff * 3]
@@ -723,16 +727,16 @@ export class ActivityGenerator {
 
         // Build the visual sequence with a blank
         const displaySequence = fullSequence.map((num, idx) =>
-          idx === missingIndex ? "__" : num.toString()
+          idx === missingIndex ? "__" : num.toString(),
         )
 
-        question = `What number is missing?`
+        question = `What number is missing from the sequence?`
         visual = [displaySequence.join("  ,  ")]
         break
       }
     }
 
-    options = this.generateOptions(answer, 100)
+    const options = this.generateOptions(answer, 100)
 
     return {
       type: "pattern",

@@ -39,6 +39,8 @@ export class GameUI {
       visualHintsSelect: document.getElementById("visual-hints-select"),
       questionsPerLevelSelect: document.getElementById("questions-per-level-select"),
       castleBackButton: document.getElementById("castle-back-button"),
+      castleScreenTitle: document.getElementById("castle-screen-title"),
+      castleDescription: document.getElementById("castle-description"),
       castleProgressText: document.getElementById("castle-progress-text"),
       castleSvgContainer: document.getElementById("castle-svg-container"),
       castlePiecesDisplay: document.getElementById("castle-pieces-display"),
@@ -103,16 +105,24 @@ export class GameUI {
       this.elements.creatureImage.textContent = activity.creature
     }
 
-    this.elements.creatureMessage.textContent = activity.creatureMessage
+    // Only update creature message if element exists (it's hidden in simplified mode)
+    if (this.elements.creatureMessage) {
+      this.elements.creatureMessage.textContent = activity.creatureMessage
+    }
+
     this.elements.questionText.textContent = activity.question
 
     // Determine if visual is essential (required to answer the question)
-    const isEssentialVisual = activity.visual && activity.visual.length > 0 &&
-      activity.visual.some(item => item && item.html) // Clock, ruler, scale visuals are HTML
+    const isEssentialVisual =
+      activity.visual &&
+      activity.visual.length > 0 &&
+      (activity.visual.some((item) => item && item.html) || // Clock, ruler, scale visuals are HTML
+        activity.type === "pattern") // Pattern visuals are essential for the question
 
     // Display visual items based on hints setting
     // Essential visuals (like clock faces, rulers) are always shown
-    const shouldShowVisual = isEssentialVisual ||
+    const shouldShowVisual =
+      isEssentialVisual ||
       visualHints === "always" ||
       (visualHints === "sometimes" && Math.random() < 0.5)
 
@@ -180,7 +190,7 @@ export class GameUI {
       button.className = "answer-button"
       button.textContent = option
       button.dataset.answer = option
-      button.dataset.correct = (option == correctAnswer) ? "true" : "false"
+      button.dataset.correct = option == correctAnswer ? "true" : "false"
       button.dataset.keyboardHint = `${index + 1}`
       button.setAttribute("aria-label", `Answer ${index + 1}: ${option}`)
       button.setAttribute("tabindex", "0")
@@ -440,6 +450,28 @@ export class GameUI {
   }
 
   /**
+   * Update castle screen for the selected project
+   * @param {Object} projectInfo - Project configuration with title, icon, and pieceName
+   */
+  updateCastleScreen(projectInfo) {
+    if (this.elements.castleScreenTitle) {
+      this.elements.castleScreenTitle.textContent = projectInfo.title
+    }
+    if (this.elements.castleDescription) {
+      // Generate a description based on the project type
+      const descriptions = {
+        "Build a Castle": "Complete all areas to build the castle!",
+        "Grow a Garden": "Complete all areas to grow your garden!",
+        "Build a Robot": "Complete all areas to build your robot!",
+        "Build a Rocket": "Complete all areas to build your rocket!",
+      }
+      this.elements.castleDescription.textContent =
+        descriptions[projectInfo.title] ||
+        `Complete all areas to build your ${projectInfo.title.toLowerCase()}!`
+    }
+  }
+
+  /**
    * Update castle progress display
    * @param {number} completed - Number of completed areas
    * @param {number} total - Total number of areas
@@ -491,15 +523,15 @@ export class GameUI {
     if (!this.elements.castleButton) return
 
     // Remove existing badge if any
-    const existingBadge = this.elements.castleButton.querySelector('.castle-badge')
+    const existingBadge = this.elements.castleButton.querySelector(".castle-badge")
     if (existingBadge) {
       existingBadge.remove()
     }
 
     // Add badge if any areas completed
     if (completedCount > 0) {
-      const badge = document.createElement('span')
-      badge.className = 'castle-badge'
+      const badge = document.createElement("span")
+      badge.className = "castle-badge"
       badge.textContent = completedCount
       this.elements.castleButton.appendChild(badge)
     }
@@ -509,25 +541,30 @@ export class GameUI {
    * Show castle piece notification
    * @param {string} areaName - Name of completed area
    * @param {number} totalPieces - Total pieces collected
+   * @param {Object} projectInfo - Project information with icon and pieceName
    */
-  showCastleNotification(areaName, totalPieces) {
+  showCastleNotification(
+    areaName,
+    totalPieces,
+    projectInfo = { icon: "🏰", pieceName: "Castle Piece" },
+  ) {
     if (!this.elements.castleNotification) return
 
     this.elements.castleNotification.innerHTML = `
       <div class="castle-notification-content">
-        <div class="castle-notification-icon">🏰</div>
+        <div class="castle-notification-icon">${projectInfo.icon}</div>
         <div class="castle-notification-text">
           <strong>${areaName} Complete!</strong>
-          <span>Castle Piece ${totalPieces}/6 collected!</span>
+          <span>${projectInfo.pieceName} ${totalPieces}/6 collected!</span>
         </div>
       </div>
     `
 
-    this.elements.castleNotification.classList.add('show')
+    this.elements.castleNotification.classList.add("show")
 
     // Hide after 3 seconds
     setTimeout(() => {
-      this.elements.castleNotification.classList.remove('show')
+      this.elements.castleNotification.classList.remove("show")
     }, 2500)
   }
 }

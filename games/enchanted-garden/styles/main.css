@@ -9,28 +9,47 @@
   --theme-primary: #764ba2;
   --theme-accent: #667eea;
 
-  transition: background-color 0.6s ease, background-image 0.6s ease;
+  transition:
+    background-color 0.6s ease,
+    background-image 0.6s ease;
 }
 
 body {
-  font-family: Quicksand, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family:
+    Quicksand,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
   background-color: #667eea;
   min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for mobile browsers */
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 10px;
   overflow: hidden;
-  transition: background-color 0.6s ease, background-image 0.6s ease;
+  transition:
+    background-color 0.6s ease,
+    background-image 0.6s ease;
   background-size: auto;
   background-repeat: repeat;
+
+  /* Prevent pull-to-refresh on mobile */
+  overscroll-behavior: none;
+
+  /* Prevent touch callout on mobile */
+  -webkit-touch-callout: none;
 }
 
 #game-container {
   width: 100%;
   max-width: 900px;
   height: 100vh;
+  height: 100dvh; /* Dynamic viewport height for mobile browsers */
   max-height: 100vh;
+  max-height: 100dvh; /* Dynamic viewport height for mobile browsers */
   background: rgb(255, 255, 255, 0.95);
   border-radius: 20px;
   box-shadow: 0 20px 60px rgb(0, 0, 0, 0.3);
@@ -106,7 +125,9 @@ body {
 .progress-bar {
   height: 100%;
   background: linear-gradient(90deg, var(--theme-accent) 0%, var(--theme-primary) 100%);
-  transition: width 0.5s ease, background 0.6s ease;
+  transition:
+    width 0.5s ease,
+    background 0.6s ease;
   width: 0%;
 }
 
@@ -218,6 +239,56 @@ body {
 }
 
 /* Garden Hub */
+.project-intro {
+  text-align: center;
+  font-size: 22px;
+  color: #666;
+  margin: 20px 0;
+  font-weight: 600;
+}
+
+.project-choices {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.project-option {
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  border-radius: 20px;
+  padding: 40px 30px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 20px rgb(0, 0, 0, 0.1);
+}
+
+.project-option:hover {
+  transform: translateY(-8px) scale(1.05);
+  box-shadow: 0 15px 40px rgb(0, 0, 0, 0.25);
+}
+
+.project-icon {
+  font-size: 80px;
+  margin-bottom: 15px;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+.project-option h3 {
+  font-size: 24px;
+  color: var(--theme-primary);
+  margin: 0;
+  transition: color 0.6s ease;
+  font-weight: bold;
+}
+
+.project-option p {
+  display: none; /* Hide descriptive text */
+}
+
 .garden-areas {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -279,50 +350,25 @@ body {
 .creature-guide {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 15px;
-  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-  padding: 15px;
-  border-radius: 20px;
-  box-shadow: 0 5px 15px rgb(0, 0, 0, 0.1);
+  padding: 10px;
   flex-shrink: 0;
 }
 
 .creature-image {
-  font-size: 60px;
+  font-size: 48px;
   animation: wiggle 2s ease-in-out infinite;
 }
 
 .creature-speech {
-  flex: 1;
-  background: white;
-  padding: 12px 15px;
-  border-radius: 15px;
-  position: relative;
-}
-
-.creature-speech::before {
-  content: "";
-  position: absolute;
-  left: -10px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 0;
-  height: 0;
-  border-top: 10px solid transparent;
-  border-bottom: 10px solid transparent;
-  border-right: 10px solid white;
-}
-
-.creature-speech p {
-  font-size: 16px;
-  color: #333;
-  line-height: 1.3;
+  display: none; /* Hidden by default for cleaner UI */
 }
 
 /* Question Area */
 .question-area {
   background: white;
-  padding: 20px;
+  padding: 25px;
   border-radius: 20px;
   box-shadow: 0 5px 15px rgb(0, 0, 0, 0.1);
   text-align: center;
@@ -330,10 +376,11 @@ body {
 }
 
 .question {
-  font-size: 22px;
+  font-size: 28px;
   color: #333;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
   font-weight: bold;
+  line-height: 1.4;
 }
 
 .visual-area {
@@ -348,7 +395,7 @@ body {
 }
 
 .visual-item {
-  font-size: 40px;
+  font-size: 48px;
   animation: pop-in 0.3s ease-out;
 }
 
@@ -385,17 +432,21 @@ body {
 
 .answer-button {
   position: relative;
-  font-size: 32px;
+  font-size: 38px;
   font-weight: bold;
   color: var(--theme-primary);
   background: white;
   border: 4px solid var(--theme-primary);
-  padding: 20px;
+  padding: 25px;
   border-radius: 20px;
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: inherit;
   box-shadow: 0 5px 15px rgb(0, 0, 0, 0.1);
+
+  /* Remove tap highlight on mobile browsers */
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
 .answer-button:hover {
@@ -441,13 +492,7 @@ body {
 
 /* Garden Preview */
 .garden-preview {
-  margin-top: 15px;
-  padding: 15px;
-  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-  border-radius: 20px;
-  min-height: 100px;
-  flex-shrink: 0;
-  transition: background-color 0.6s ease, background-image 0.6s ease;
+  display: none; /* Hidden to reduce clutter and redundancy with star count */
 }
 
 .garden-canvas {
@@ -462,7 +507,7 @@ body {
 }
 
 .garden-item {
-  font-size: 40px;
+  font-size: 32px;
   animation: grow-in 0.5s ease-out;
 }
 
@@ -521,7 +566,7 @@ body {
   position: absolute;
   top: -5px;
   right: -5px;
-  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
   color: white;
   font-size: 12px;
   font-weight: bold;
@@ -537,7 +582,8 @@ body {
 }
 
 @keyframes badge-pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
 
@@ -582,6 +628,11 @@ select:focus-visible,
   outline: 4px solid var(--theme-accent);
   outline-offset: 4px;
   transform: scale(1.05);
+}
+
+/* Prevent persistent highlight after touch on mobile */
+.answer-button:focus:not(:focus-visible) {
+  outline: none;
 }
 
 /* Keyboard hint */
@@ -804,7 +855,7 @@ select:focus-visible,
   }
 
   .creature-image {
-    font-size: 50px;
+    font-size: 40px;
   }
 
   .creature-speech p {
@@ -812,20 +863,20 @@ select:focus-visible,
   }
 
   .question {
-    font-size: 18px;
+    font-size: 24px;
   }
 
   .visual-item {
-    font-size: 32px;
+    font-size: 40px;
   }
 
   .answer-button {
-    font-size: 24px;
-    padding: 15px;
+    font-size: 32px;
+    padding: 20px;
   }
 
   .garden-item {
-    font-size: 32px;
+    font-size: 28px;
   }
 }
 
@@ -841,7 +892,9 @@ select:focus-visible,
   border-radius: 20px;
   box-shadow: 0 10px 40px rgb(0, 0, 0, 0.4);
   z-index: 10001;
-  transition: transform 0.5s ease, opacity 0.5s ease;
+  transition:
+    transform 0.5s ease,
+    opacity 0.5s ease;
   opacity: 0;
   max-width: 90%;
 }

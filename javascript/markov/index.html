@@ -166,24 +166,24 @@
 
     <div class="container">
       <div class="section">
-        <label for="inputText">Input Text (paste your source text here):</label>
+        <label for="input-text">Input Text (paste your source text here):</label>
         <textarea
-          id="inputText"
+          id="input-text"
           placeholder="Paste some text here to train the Markov chain..."
         ></textarea>
       </div>
 
       <div class="controls">
         <div>
-          <label for="ngramType">N-gram Type:</label>
-          <select id="ngramType">
+          <label for="ngram-type">N-gram Type:</label>
+          <select id="ngram-type">
             <option value="char">Characters</option>
             <option value="word">Words</option>
           </select>
         </div>
         <div>
-          <label for="ngramSize">N-gram Size:</label>
-          <select id="ngramSize">
+          <label for="ngram-size">N-gram Size:</label>
+          <select id="ngram-size">
             <option value="2">2</option>
             <option value="3" selected>3</option>
             <option value="4">4</option>
@@ -193,16 +193,16 @@
 
       <div class="controls">
         <div>
-          <label for="outputLength">Output Length:</label>
-          <input type="number" id="outputLength" value="200" min="10" max="1000" />
+          <label for="output-length">Output Length:</label>
+          <input type="number" id="output-length" value="200" min="10" max="1000" />
         </div>
         <div>
-          <label for="startText">Start Text (optional):</label>
-          <input type="text" id="startText" placeholder="Leave empty for random start" />
+          <label for="start-text">Start Text (optional):</label>
+          <input type="text" id="start-text" placeholder="Leave empty for random start" />
         </div>
       </div>
 
-      <button id="generateBtn" onclick="generateText()">Generate Text</button>
+      <button id="generate-btn" onclick="generateText()">Generate Text</button>
     </div>
 
     <div class="container">

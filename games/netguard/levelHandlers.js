@@ -1,7 +1,18 @@
 // Level-specific handlers for NetGuard
 // This file contains all level-specific logic for commands and victory conditions
 
-import { LEVEL_IDS, LEVEL_1_NODES, LEVEL_2_NODES, LEVEL_3_NODES, LEVEL_4_NODES, LEVEL_5_NODES, LEVEL_6_NODES, LEVEL_7_NODES, COMMAND_IDS, CLUE_IDS } from "./constants.js";
+import {
+  LEVEL_IDS,
+  LEVEL_1_NODES,
+  LEVEL_2_NODES,
+  LEVEL_3_NODES,
+  LEVEL_4_NODES,
+  LEVEL_5_NODES,
+  LEVEL_6_NODES,
+  LEVEL_7_NODES,
+  COMMAND_IDS,
+  CLUE_IDS,
+} from "./constants.js"
 
 // Level 1: JWT Expiration Handler
 const level1Handler = {
@@ -22,13 +33,13 @@ const level1Handler = {
         description: "Enable JWT expiration validation",
         disabled: !gameState.vulnerabilityFound,
       },
-    ];
+    ]
   },
 
   // Get tool commands for this level
   getToolCommands(gameState) {
-    const node = gameState.networkNodes.find((n) => n.id === gameState.currentNode);
-    const commands = [];
+    const node = gameState.networkNodes.find((n) => n.id === gameState.currentNode)
+    const commands = []
 
     // JWT decoder (if token available)
     if (node?.sampleToken) {
@@ -37,12 +48,12 @@ const level1Handler = {
         name: "echo <token> | base64 -d",
         description: "Decode JWT token from logs",
         disabled: false,
-      });
+      })
     }
 
-    return commands;
+    return commands
   },
-};
+}
 
 // Level 2: SQL Injection Handler
 const level2Handler = {
@@ -58,7 +69,7 @@ const level2Handler = {
         disabled:
           !gameState.currentNode ||
           (gameState.currentNode !== LEVEL_2_NODES.API_SERVER &&
-           gameState.currentNode !== LEVEL_2_NODES.REPO),
+            gameState.currentNode !== LEVEL_2_NODES.REPO),
       },
       {
         id: COMMAND_IDS.FIX_SQL,
@@ -72,7 +83,7 @@ const level2Handler = {
         description: "Rotate hardcoded credentials",
         disabled: !gameState.cluesFound.has(CLUE_IDS.SOURCE_CODE_SECRETS),
       },
-    ];
+    ]
   },
 
   // Get tool commands for this level
@@ -84,9 +95,9 @@ const level2Handler = {
         description: "Test SQL query",
         disabled: false,
       },
-    ];
+    ]
   },
-};
+}
 
 // Level 3: Certificate Validation Handler
 const level3Handler = {
@@ -102,7 +113,7 @@ const level3Handler = {
         disabled:
           !gameState.currentNode ||
           (gameState.currentNode !== LEVEL_3_NODES.PAYMENT_PROXY &&
-           gameState.currentNode !== LEVEL_3_NODES.EXTERNAL_API),
+            gameState.currentNode !== LEVEL_3_NODES.EXTERNAL_API),
       },
       {
         id: COMMAND_IDS.FIX_CERT,
@@ -110,13 +121,13 @@ const level3Handler = {
         description: "Enable certificate validation",
         disabled: !gameState.cluesFound.has(CLUE_IDS.DISABLED_CERT_CHECK),
       },
-    ];
+    ]
   },
 
   // Get tool commands for this level
   getToolCommands(gameState) {
-    const node = gameState.networkNodes.find((n) => n.id === gameState.currentNode);
-    const commands = [];
+    const node = gameState.networkNodes.find((n) => n.id === gameState.currentNode)
+    const commands = []
 
     if (node?.certificate) {
       commands.push({
@@ -124,12 +135,12 @@ const level3Handler = {
         name: "openssl x509 -text",
         description: "Inspect certificate",
         disabled: false,
-      });
+      })
     }
 
-    return commands;
+    return commands
   },
-};
+}
 
 // Level 4: CSRF Attack Handler
 const level4Handler = {
@@ -149,13 +160,13 @@ const level4Handler = {
         description: "Implement CSRF token validation",
         disabled: !gameState.cluesFound.has(CLUE_IDS.MISSING_CSRF_VALIDATION),
       },
-    ];
+    ]
   },
 
   getToolCommands() {
-    return [];
+    return []
   },
-};
+}
 
 // Level 5: XSS Vulnerability Handler
 const level5Handler = {
@@ -181,13 +192,13 @@ const level5Handler = {
         description: "Add Content Security Policy",
         disabled: !gameState.cluesFound.has(CLUE_IDS.MISSING_CSP),
       },
-    ];
+    ]
   },
 
   getToolCommands() {
-    return [];
+    return []
   },
-};
+}
 
 // Level 6: Authentication Bypass Handler
 const level6Handler = {
@@ -213,13 +224,13 @@ const level6Handler = {
         description: "Fix predictable session tokens",
         disabled: !gameState.cluesFound.has(CLUE_IDS.INSECURE_SESSION),
       },
-    ];
+    ]
   },
 
   getToolCommands() {
-    return [];
+    return []
   },
-};
+}
 
 // Level 7: API Security Handler
 const level7Handler = {
@@ -251,13 +262,13 @@ const level7Handler = {
         description: "Filter sensitive data from responses",
         disabled: !gameState.cluesFound.has(CLUE_IDS.SENSITIVE_DATA_LEAK),
       },
-    ];
+    ]
   },
 
   getToolCommands() {
-    return [];
+    return []
   },
-};
+}
 
 // Map of level ID to handler
 export const LEVEL_HANDLERS = {
@@ -268,21 +279,18 @@ export const LEVEL_HANDLERS = {
   [LEVEL_IDS.XSS_VULNERABILITY]: level5Handler,
   [LEVEL_IDS.AUTH_BYPASS]: level6Handler,
   [LEVEL_IDS.API_SECURITY]: level7Handler,
-};
+}
 
 // Get handler for current level
 export function getCurrentLevelHandler(gameState) {
-  if (!gameState.currentLevel) return null;
-  return LEVEL_HANDLERS[gameState.currentLevel.id] || null;
+  if (!gameState.currentLevel) return null
+  return LEVEL_HANDLERS[gameState.currentLevel.id] || null
 }
 
 // Get all commands for current level (level-specific + tool commands)
 export function getLevelAndToolCommands(gameState) {
-  const handler = getCurrentLevelHandler(gameState);
-  if (!handler) return [];
+  const handler = getCurrentLevelHandler(gameState)
+  if (!handler) return []
 
-  return [
-    ...handler.getLevelCommands(gameState),
-    ...handler.getToolCommands(gameState),
-  ];
+  return [...handler.getLevelCommands(gameState), ...handler.getToolCommands(gameState)]
 }

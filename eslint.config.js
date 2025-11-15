@@ -7,12 +7,7 @@ export default [
   js.configs.recommended,
   prettier,
   {
-    files: [
-      "javascript/**/*.js",
-      "javascript/**/*.html",
-      "games/**/*.js",
-      "games/**/*.html",
-    ],
+    files: ["javascript/**/*.js", "javascript/**/*.html", "games/**/*.js", "games/**/*.html"],
     plugins: {
       import: importPlugin,
     },

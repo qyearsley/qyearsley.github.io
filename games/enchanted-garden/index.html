@@ -4,9 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Enchanted Garden</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="/style.css" />
     <link rel="stylesheet" href="styles/main.css" />
     <link rel="stylesheet" href="styles/garden.css" />
@@ -35,7 +38,6 @@
     </style>
   </head>
   <body>
-    <a href="#title-screen" class="skip-link">Skip to game</a>
     <div id="game-container">
       <!-- Title Screen -->
       <div id="title-screen" class="screen active">
@@ -55,16 +57,66 @@
         </div>
       </div>
 
+      <!-- Project Selection Screen -->
+      <div id="project-selection" class="screen">
+        <div class="header">
+          <button id="project-back-button" class="nav-button" aria-label="Return to garden hub">
+            ← Back
+          </button>
+          <h2>Choose Your Project</h2>
+        </div>
+
+        <p class="project-intro">What would you like to build?</p>
+
+        <div class="project-choices">
+          <div class="project-option" data-project="castle">
+            <div class="project-icon">🏰</div>
+            <h3>Magic Castle</h3>
+          </div>
+
+          <div class="project-option" data-project="garden">
+            <div class="project-icon">🌻</div>
+            <h3>Flower Garden</h3>
+          </div>
+
+          <div class="project-option" data-project="robot">
+            <div class="project-icon">🤖</div>
+            <h3>Super Robot</h3>
+          </div>
+
+          <div class="project-option" data-project="spaceship">
+            <div class="project-icon">🚀</div>
+            <h3>Space Rocket</h3>
+          </div>
+        </div>
+      </div>
+
       <!-- Garden Hub -->
       <div id="garden-hub" class="screen">
         <div class="header">
           <div>
-            <h2>Enchanted Garden</h2>
-            <button id="home-button" class="text-button" aria-label="Return to start screen">← Home</button>
+            <h2 id="project-title">Enchanted Garden</h2>
+            <button id="home-button" class="text-button" aria-label="Return to start screen">
+              ← Home
+            </button>
           </div>
           <div class="stats">
-            <button id="settings-button" class="icon-button" title="Settings" aria-label="Open settings">⚙️</button>
-            <button id="castle-button" class="icon-button" title="View Castle" aria-label="View castle progress">🏰</button>
+            <button
+              id="settings-button"
+              class="icon-button"
+              title="Settings"
+              aria-label="Open settings"
+            >
+              ⚙️
+            </button>
+            <button
+              id="castle-button"
+              class="icon-button"
+              title="View Project"
+              aria-label="View project progress"
+            >
+              <span id="project-icon">🏰</span>
+            </button>
             <span class="stat" aria-label="Stars earned">⭐ <span id="star-count">0</span></span>
           </div>
         </div>
@@ -105,8 +157,26 @@
       <!-- Activity Screen -->
       <div id="activity-screen" class="screen">
         <div class="header">
-          <button id="back-button" class="nav-button">← Back</button>
+          <div>
+            <button id="back-button" class="nav-button">← Back</button>
+          </div>
           <div class="stats">
+            <button
+              id="activity-settings-button"
+              class="icon-button"
+              title="Settings"
+              aria-label="Open settings"
+            >
+              ⚙️
+            </button>
+            <button
+              id="activity-castle-button"
+              class="icon-button"
+              title="View Project"
+              aria-label="View project progress"
+            >
+              <span id="activity-project-icon">🏰</span>
+            </button>
             <span class="stat" id="level-display">Level 1</span>
             <span class="stat">🌟 <span id="activity-star-count">0</span></span>
           </div>
@@ -121,12 +191,9 @@
         </div>
 
         <div class="activity-container">
-          <!-- Creature Guide -->
+          <!-- Creature Guide (Simplified) -->
           <div class="creature-guide">
             <div class="creature-image">🦄</div>
-            <div class="creature-speech">
-              <p id="creature-message">Help me solve this!</p>
-            </div>
           </div>
 
           <!-- Question Area -->
@@ -192,11 +259,13 @@
       <div id="castle-screen" class="screen">
         <div class="header">
           <button id="castle-back-button" class="nav-button">← Back</button>
-          <h2>Magic Castle</h2>
+          <h2 id="castle-screen-title">Magic Castle</h2>
         </div>
 
         <div class="castle-container">
-          <p class="castle-description">Complete all areas to build the castle!</p>
+          <p id="castle-description" class="castle-description">
+            Complete all areas to build the castle!
+          </p>
           <div id="castle-progress-text" class="progress-text">Pieces: 0/6</div>
 
           <div id="castle-svg-container" class="castle-svg-container">

@@ -9,6 +9,7 @@ export class EventManager {
   constructor(ui, callbacks) {
     this.ui = ui
     this.callbacks = callbacks
+    this.isProcessingAnswer = false
   }
 
   /**
@@ -23,12 +24,16 @@ export class EventManager {
     this.setupGardenAreas()
     this.setupAnswerButtons()
     this.setupSettingsButton()
+    this.setupActivitySettingsButton()
     this.setupCloseSettingsButton()
     this.setupSettingsSelects()
     this.setupCastleButton()
+    this.setupActivityCastleButton()
     this.setupCastleBackButton()
     this.setupKeyboardInput()
     this.setupKeyboardShortcuts()
+    this.setupProjectOptions()
+    this.setupProjectBackButton()
   }
 
   /**
@@ -170,6 +175,20 @@ export class EventManager {
   }
 
   /**
+   * Setup activity settings button listener
+   */
+  setupActivitySettingsButton() {
+    const activitySettingsButton = document.getElementById("activity-settings-button")
+    if (activitySettingsButton) {
+      activitySettingsButton.addEventListener("click", () => {
+        if (this.callbacks.onSettingsOpen) {
+          this.callbacks.onSettingsOpen()
+        }
+      })
+    }
+  }
+
+  /**
    * Setup close settings button listener
    */
   setupCloseSettingsButton() {
@@ -227,6 +246,20 @@ export class EventManager {
   }
 
   /**
+   * Setup activity castle button listener
+   */
+  setupActivityCastleButton() {
+    const activityCastleButton = document.getElementById("activity-castle-button")
+    if (activityCastleButton) {
+      activityCastleButton.addEventListener("click", () => {
+        if (this.callbacks.onCastleView) {
+          this.callbacks.onCastleView()
+        }
+      })
+    }
+  }
+
+  /**
    * Setup castle back button listener
    */
   setupCastleBackButton() {
@@ -265,6 +298,8 @@ export class EventManager {
    * Handle keyboard answer submission
    */
   handleKeyboardSubmit() {
+    if (this.isProcessingAnswer) return
+
     const input = document.getElementById("answer-input-field")
     if (!input) return
 
@@ -274,6 +309,13 @@ export class EventManager {
     if (userAnswer === "") {
       return // Don't submit if empty
     }
+
+    // Disable input field to prevent double submission
+    input.disabled = true
+    const submitBtn = document.getElementById("submit-answer-btn")
+    if (submitBtn) submitBtn.disabled = true
+
+    this.isProcessingAnswer = true
 
     // Compare as numbers if both can be parsed as numbers, otherwise compare as strings
     let isCorrect
@@ -289,6 +331,13 @@ export class EventManager {
     if (this.callbacks.onAnswerSelected) {
       this.callbacks.onAnswerSelected(userAnswer, isCorrect, input)
     }
+  }
+
+  /**
+   * Reset answer processing flag (called when new question is loaded)
+   */
+  resetAnswerProcessing() {
+    this.isProcessingAnswer = false
   }
 
   /**
@@ -313,10 +362,55 @@ export class EventManager {
         const buttonIndex = parseInt(e.key) - 1
         const answerButtons = document.querySelectorAll(".answer-button")
 
-        if (answerButtons[buttonIndex] && !answerButtons[buttonIndex].classList.contains("disabled")) {
+        if (
+          answerButtons[buttonIndex] &&
+          !answerButtons[buttonIndex].classList.contains("disabled")
+        ) {
           answerButtons[buttonIndex].click()
         }
       }
     })
+  }
+
+  /**
+   * Setup project option listeners
+   */
+  setupProjectOptions() {
+    const projectOptions = document.querySelectorAll(".project-option")
+    projectOptions.forEach((option) => {
+      option.setAttribute("tabindex", "0")
+      option.setAttribute("role", "button")
+
+      const clickHandler = (e) => {
+        const projectType = e.currentTarget.dataset.project
+        if (this.callbacks.onProjectSelect) {
+          this.callbacks.onProjectSelect(projectType)
+        }
+      }
+
+      option.addEventListener("click", clickHandler)
+
+      // Add keyboard support
+      option.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault()
+          clickHandler(e)
+        }
+      })
+    })
+  }
+
+  /**
+   * Setup project back button listener
+   */
+  setupProjectBackButton() {
+    const projectBackButton = document.getElementById("project-back-button")
+    if (projectBackButton) {
+      projectBackButton.addEventListener("click", () => {
+        if (this.callbacks.onProjectBack) {
+          this.callbacks.onProjectBack()
+        }
+      })
+    }
   }
 }

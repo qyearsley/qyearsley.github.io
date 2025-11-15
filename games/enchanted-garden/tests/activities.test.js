@@ -1,4 +1,4 @@
-import { ActivityGenerator } from "./js/activities.js"
+import { ActivityGenerator } from "../js/activities.js"
 
 describe("ActivityGenerator", () => {
   let generator
