@@ -90,6 +90,44 @@ function saveGameState() {
   localStorage.setItem(STORAGE_KEYS.GAME_SAVE, JSON.stringify(saveData))
 }
 
+// Save Per-Level Progress
+function saveLevelProgress() {
+  if (!gameState.currentLevel || !gameState.inProgress) return
+
+  const levelId = gameState.currentLevel.id
+  const progressData = JSON.parse(localStorage.getItem(STORAGE_KEYS.LEVEL_PROGRESS) || "{}")
+
+  progressData[levelId] = {
+    cluesFound: Array.from(gameState.cluesFound),
+    vulnerabilitiesFixed: Array.from(gameState.vulnerabilitiesFixed),
+    scannedNodes: Array.from(gameState.scannedNodes),
+  }
+
+  localStorage.setItem(STORAGE_KEYS.LEVEL_PROGRESS, JSON.stringify(progressData))
+}
+
+// Load Per-Level Progress
+function loadLevelProgress(levelId) {
+  try {
+    const progressData = JSON.parse(localStorage.getItem(STORAGE_KEYS.LEVEL_PROGRESS) || "{}")
+    return progressData[levelId] || null
+  } catch (e) {
+    console.error("Failed to load level progress:", e)
+    return null
+  }
+}
+
+// Clear Level Progress
+function clearLevelProgress(levelId) {
+  try {
+    const progressData = JSON.parse(localStorage.getItem(STORAGE_KEYS.LEVEL_PROGRESS) || "{}")
+    delete progressData[levelId]
+    localStorage.setItem(STORAGE_KEYS.LEVEL_PROGRESS, JSON.stringify(progressData))
+  } catch (e) {
+    console.error("Failed to clear level progress:", e)
+  }
+}
+
 // Load Game State
 function loadGameState() {
   try {
@@ -124,6 +162,7 @@ function handleQueryParameters() {
 function resetProgress() {
   if (confirm("⚠️ Reset all progress?\n\nThis will delete your save data and cannot be undone.")) {
     localStorage.removeItem(STORAGE_KEYS.GAME_SAVE)
+    localStorage.removeItem(STORAGE_KEYS.LEVEL_PROGRESS)
     gameState.completedLevels.clear()
     renderLevelList()
     addTerminalLine("Progress reset successfully.", "success")
@@ -279,6 +318,52 @@ function startLevel(levelId) {
   gameState.vulnerabilitiesFixed = new Set()
   gameState.inProgress = true
 
+  // Load saved progress if available
+  const savedProgress = loadLevelProgress(levelId)
+  if (savedProgress) {
+    savedProgress.cluesFound?.forEach((clue) => gameState.cluesFound.add(clue))
+    savedProgress.vulnerabilitiesFixed?.forEach((vuln) => gameState.vulnerabilitiesFixed.add(vuln))
+    savedProgress.scannedNodes?.forEach((node) => gameState.scannedNodes.add(node))
+
+    // Restore node statuses based on saved progress
+    gameState.networkNodes.forEach((node) => {
+      // Mark scanned nodes as healthy (unless they have issues)
+      if (gameState.scannedNodes.has(node.id)) {
+        if (node.status === "unexamined") {
+          node.status = "healthy"
+        }
+      }
+    })
+
+    // Update node statuses based on vulnerabilities found and fixed
+    if (gameState.vulnerabilityFound || gameState.cluesFound.size > 0) {
+      const authNode = gameState.networkNodes.find((n) => n.id === "auth")
+      if (authNode && gameState.cluesFound.has("auth_config")) {
+        authNode.status = gameState.vulnerabilitiesFixed.has("jwt_expiration") ? "healthy" : "compromised"
+      }
+
+      const commentNode = gameState.networkNodes.find((n) => n.id === "comment-system")
+      if (commentNode && gameState.vulnerabilitiesFixed.has("stored_xss")) {
+        commentNode.status = "healthy"
+      }
+
+      const webNode = gameState.networkNodes.find((n) => n.id === "web-server")
+      if (webNode && gameState.vulnerabilitiesFixed.has("missing_csp")) {
+        webNode.status = "healthy"
+      }
+
+      const adminNode = gameState.networkNodes.find((n) => n.id === "admin-panel")
+      if (adminNode && gameState.vulnerabilitiesFixed.has("auth_bypass")) {
+        adminNode.status = "healthy"
+      }
+
+      const sessionNode = gameState.networkNodes.find((n) => n.id === "session-store")
+      if (sessionNode && gameState.vulnerabilitiesFixed.has("broken_access_control")) {
+        sessionNode.status = "healthy"
+      }
+    }
+  }
+
   levelSelectionEl.style.display = "none"
   gameScreenEl.style.display = "block"
 
@@ -288,18 +373,22 @@ function startLevel(levelId) {
   // Initialize terminal
   terminalOutputEl.innerHTML = ""
   addTerminalLine("NetGuard Security Terminal v2.0", "")
-  addTerminalLine("Bastion host: security-workstation.techcorp.local", "")
   addTerminalLine("---", "")
-  addTerminalLine("🎯 MISSION BRIEFING:", "narrative")
+  addTerminalLine("🎯 MISSION:", "narrative")
   addTerminalLine(gameState.currentLevel.description, "narrative")
   addTerminalLine("", "")
-  addTerminalLine("LEARNING OBJECTIVES:", "info")
+  addTerminalLine("OBJECTIVES:", "info")
   gameState.currentLevel.concepts.forEach((concept) => {
     addTerminalLine(`• ${concept}`, "info")
   })
   addTerminalLine("---", "")
-  addTerminalLine("Click a node on the network map to SSH into it.", "info")
-  addTerminalLine("Use available commands to investigate and analyze systems.", "info")
+
+  if (savedProgress) {
+    addTerminalLine("📁 Progress restored from previous session", "success")
+    addTerminalLine("---", "")
+  }
+
+  addTerminalLine("Click a network node to SSH into it and investigate.", "info")
 
   renderNetworkMap()
   renderCommands()
@@ -372,19 +461,8 @@ function selectNode(nodeId) {
 
   // SSH connection message
   addTerminalLine(`ssh user@${node.hostname}`, "command")
-  addTerminalLine(`Connecting to ${node.hostname}...`, "info")
-  addTerminalLine(
-    `Warning: Permanently added '${node.hostname}' (ED25519) to the list of known hosts.`,
-    "info",
-  )
-  addTerminalLine(`user@${node.hostname}'s password: ********`, "")
-  addTerminalLine(`Last login: ${node.lastLogin || "Mon Nov 11 08:42:33 2024"}`, "")
-  addTerminalLine("", "")
-  addTerminalLine(`Welcome to Ubuntu 22.04.3 LTS (GNU/Linux 5.15.0-86-generic x86_64)`, "")
-  addTerminalLine("", "")
-  addTerminalLine(`System load:  ${node.systemLoad || "0.15"}`, "")
-  addTerminalLine(`Memory usage: ${node.memoryUsage || "42"}%`, "")
-  addTerminalLine(`Processes:    ${node.processes || "170"}`, "")
+  addTerminalLine(`Connected to ${node.hostname}`, "info")
+  addTerminalLine(`System load: ${node.systemLoad || "0.15"}  Memory: ${node.memoryUsage || "42"}%`, "info")
   addTerminalLine("", "")
 
   updateNPCPanel(node)
@@ -478,29 +556,11 @@ function executeCommand(commandId) {
     case "analyze-tokens":
       analyzeTokens(node)
       break
-    case "view-source":
-      viewSource(node)
-      break
     case "decode-jwt":
       openTool("echo <token> | base64 -d")
       break
-    case "test-sql":
-      openTool("psql -c")
-      break
     case "fix-jwt":
       fixJWTExpiration()
-      break
-    case "fix-sql":
-      fixSQLInjection()
-      break
-    case "fix-secrets":
-      rotateCredentials()
-      break
-    case "analyze-csrf":
-      analyzeCSRF()
-      break
-    case "fix-csrf":
-      fixCSRF()
       break
     case "analyze-xss":
       analyzeXSS()
@@ -519,18 +579,6 @@ function executeCommand(commandId) {
       break
     case "fix-session":
       fixSession()
-      break
-    case "analyze-api":
-      analyzeAPI()
-      break
-    case "add-rate-limit":
-      addRateLimit()
-      break
-    case "fix-idor":
-      fixIDOR()
-      break
-    case "fix-data-exposure":
-      fixDataExposure()
       break
     case "exit":
       disconnectNode()
@@ -565,6 +613,7 @@ function scanNode(node) {
   }
 
   renderNetworkMap()
+  saveLevelProgress()
 }
 
 // Check Logs
@@ -588,6 +637,8 @@ function checkLogs(node) {
       node.status = "suspicious"
       renderNetworkMap()
     }
+
+    saveLevelProgress()
   }
 }
 
@@ -647,46 +698,6 @@ function analyzeTokens(node) {
   node.status = "compromised"
   renderNetworkMap()
   renderCommands() // Re-render to enable fix-jwt button
-}
-
-// View Source Code (Level 2)
-function viewSource(node) {
-  if (!node.sourceCode) {
-    addTerminalLine("No source code available at this location.", "info")
-    return
-  }
-
-  addTerminalLine(`Viewing source code...`, "info")
-  addTerminalLine("---", "")
-  addTerminalLine(node.sourceCode, "")
-  addTerminalLine("---", "")
-
-  // Add clue if present
-  if (node.clue && !gameState.cluesFound.has(node.clue)) {
-    gameState.cluesFound.add(node.clue)
-    const clueDesc = gameState.currentLevel.clueDescriptions[node.clue]
-    addTerminalLine(`🔍 CLUE FOUND: ${clueDesc}`, "success")
-    addTerminalLine(
-      `Clues discovered: ${gameState.cluesFound.size}/${gameState.currentLevel.requiredClues.length}`,
-      "info",
-    )
-
-    if (node.clue === "source_code_secrets") {
-      addTerminalLine("⚠️ CRITICAL: Hardcoded credentials found in source!", "error")
-      addTerminalLine("Secrets should NEVER be committed to version control.", "warning")
-      addTerminalLine("Use environment variables or secret management systems.", "info")
-      node.status = "compromised"
-      renderNetworkMap()
-    }
-
-    if (node.clue === "injectable_endpoint") {
-      addTerminalLine("⚠️ SQL Injection vulnerability detected!", "error")
-      addTerminalLine("User input is directly concatenated into SQL queries.", "warning")
-      addTerminalLine("Use 'tools' command and sql-inject to test exploitation.", "info")
-      node.status = "compromised"
-      renderNetworkMap()
-    }
-  }
 }
 
 // Open Interactive Tool
@@ -777,16 +788,13 @@ function fixJWTExpiration() {
     return
   }
 
-  addTerminalLine("Connecting to auth-service-01.techcorp.local...", "info")
-  addTerminalLine("Updating JWT middleware configuration...", "info")
+  addTerminalLine("Enabling JWT expiration validation...", "info")
   addTerminalLine("---", "")
-  addTerminalLine("✅ Enabled expiration validation in jwt.config.js", "success")
+  addTerminalLine("✅ Updated jwt.config.js", "success")
   addTerminalLine("✅ Restarted authentication service", "success")
-  addTerminalLine("✅ Testing token validation...", "success")
   addTerminalLine("✅ Expired tokens now rejected", "success")
-  addTerminalLine("✅ Contractor access revoked", "success")
   addTerminalLine("---", "")
-  addTerminalLine("🛡️ Vulnerability patched successfully!", "success")
+  addTerminalLine("🛡️ Vulnerability patched!", "success")
 
   gameState.vulnerabilitiesFixed.add("jwt_expiration")
 
@@ -794,121 +802,11 @@ function fixJWTExpiration() {
   if (authNode) authNode.status = "healthy"
 
   renderNetworkMap()
+  saveLevelProgress()
   checkLevelComplete()
 }
 
-// Fix SQL Injection (Level 2)
-function fixSQLInjection() {
-  if (gameState.vulnerabilitiesFixed.has("sql_injection")) {
-    addTerminalLine("SQL injection vulnerability already fixed.", "info")
-    return
-  }
-
-  addTerminalLine("Patching SQL injection vulnerability...", "info")
-  addTerminalLine("---", "")
-  addTerminalLine("✅ Replaced string concatenation with parameterized queries", "success")
-  addTerminalLine("✅ Updated all affected endpoints", "success")
-  addTerminalLine("✅ Added input validation", "success")
-  addTerminalLine("✅ Deployed to production", "success")
-  addTerminalLine("---", "")
-  addTerminalLine("PATCH APPLIED:", "info")
-  addTerminalLine(
-    `
-// ❌ OLD (VULNERABLE):
-const query = "SELECT * FROM users WHERE id = '" + userId + "'";
-
-// ✅ NEW (SECURE):
-const query = "SELECT * FROM users WHERE id = ?";
-db.execute(query, [userId]);`,
-    "",
-  )
-  addTerminalLine("---", "")
-  addTerminalLine("🛡️ SQL injection vulnerability fixed!", "success")
-
-  gameState.vulnerabilitiesFixed.add("sql_injection")
-
-  const apiNode = gameState.networkNodes.find((n) => n.id === "api-server")
-  if (apiNode) apiNode.status = "healthy"
-
-  renderNetworkMap()
-  checkLevelComplete()
-}
-
-// Rotate Credentials (Level 2)
-function rotateCredentials() {
-  if (gameState.vulnerabilitiesFixed.has("hardcoded_credentials")) {
-    addTerminalLine("Credentials already rotated.", "info")
-    return
-  }
-
-  addTerminalLine("Rotating hardcoded credentials...", "info")
-  addTerminalLine("---", "")
-  addTerminalLine("✅ Generated new database password", "success")
-  addTerminalLine("✅ Updated environment variables", "success")
-  addTerminalLine("✅ Removed secrets from source code", "success")
-  addTerminalLine("✅ Committed security fix to repo", "success")
-  addTerminalLine("✅ Invalidated old credentials", "success")
-  addTerminalLine("---", "")
-  addTerminalLine("SECURITY BEST PRACTICES:", "info")
-  addTerminalLine("• Never commit secrets to version control", "info")
-  addTerminalLine("• Use environment variables or secret management systems", "info")
-  addTerminalLine("• Rotate credentials regularly", "info")
-  addTerminalLine("• Use different credentials for each environment", "info")
-  addTerminalLine("---", "")
-  addTerminalLine("🛡️ Credentials secured!", "success")
-
-  gameState.vulnerabilitiesFixed.add("hardcoded_credentials")
-
-  const repoNode = gameState.networkNodes.find((n) => n.id === "repo")
-  if (repoNode) repoNode.status = "healthy"
-
-  renderNetworkMap()
-  checkLevelComplete()
-}
-
-// Level 4: CSRF Functions
-function analyzeCSRF() {
-  addTerminalLine("Analyzing cross-origin request patterns...", "info")
-  addTerminalLine("---", "")
-  addTerminalLine("🔴 CSRF VULNERABILITY DETECTED!", "error")
-  addTerminalLine("State-changing requests accept no CSRF tokens", "error")
-  addTerminalLine("Malicious sites can forge requests using user's session", "error")
-  addTerminalLine("---", "")
-  addTerminalLine("SECURITY LESSON:", "info")
-  addTerminalLine("CSRF attacks exploit browser behavior of automatically", "info")
-  addTerminalLine("including cookies with requests. CSRF tokens prove", "info")
-  addTerminalLine("requests originate from your application, not attackers.", "info")
-  addTerminalLine("---", "")
-  addTerminalLine("Run enable-csrf-protection to fix this vulnerability.", "warning")
-}
-
-function fixCSRF() {
-  if (gameState.vulnerabilitiesFixed.has("csrf_protection")) {
-    addTerminalLine("CSRF protection already enabled.", "info")
-    return
-  }
-
-  addTerminalLine("Implementing CSRF protection...", "info")
-  addTerminalLine("---", "")
-  addTerminalLine("✅ Generated unique CSRF tokens per session", "success")
-  addTerminalLine("✅ Added token validation to all state-changing requests", "success")
-  addTerminalLine("✅ Configured SameSite cookie attribute", "success")
-  addTerminalLine("✅ Validated Origin/Referer headers", "success")
-  addTerminalLine("✅ Tested protection against forged requests", "success")
-  addTerminalLine("---", "")
-  addTerminalLine("🛡️ CSRF vulnerability patched!", "success")
-
-  gameState.vulnerabilitiesFixed.add("csrf_protection")
-  gameState.vulnerabilitiesFixed.add("missing_csrf_token")
-
-  const apiNode = gameState.networkNodes.find((n) => n.id === "api-backend")
-  if (apiNode) apiNode.status = "healthy"
-
-  renderNetworkMap()
-  checkLevelComplete()
-}
-
-// Level 5: XSS Functions
+// Level 2: XSS Functions
 function analyzeXSS() {
   addTerminalLine("Searching for malicious scripts in database...", "info")
   addTerminalLine("---", "")
@@ -930,25 +828,22 @@ function fixXSS() {
     return
   }
 
-  addTerminalLine("Sanitizing user input and fixing XSS...", "info")
+  addTerminalLine("Sanitizing user input...", "info")
   addTerminalLine("---", "")
   addTerminalLine("✅ Replaced innerHTML with textContent", "success")
-  addTerminalLine("✅ Implemented DOMPurify for HTML sanitization", "success")
-  addTerminalLine("✅ Encoded special characters in output", "success")
+  addTerminalLine("✅ Implemented DOMPurify sanitization", "success")
   addTerminalLine("✅ Removed malicious scripts from database", "success")
-  addTerminalLine("✅ Updated all render functions", "success")
   addTerminalLine("---", "")
-  addTerminalLine("🛡️ Stored XSS vulnerability eliminated!", "success")
+  addTerminalLine("🛡️ XSS vulnerability eliminated!", "success")
 
   gameState.vulnerabilitiesFixed.add("stored_xss")
-  if (gameState.vulnerabilitiesFixed.has("reflected_xss")) {
-    gameState.vulnerabilitiesFixed.add("reflected_xss")
-  }
+  gameState.vulnerabilitiesFixed.add("reflected_xss")
 
   const commentNode = gameState.networkNodes.find((n) => n.id === "comment-system")
   if (commentNode) commentNode.status = "healthy"
 
   renderNetworkMap()
+  saveLevelProgress()
   checkLevelComplete()
 }
 
@@ -958,21 +853,13 @@ function addCSP() {
     return
   }
 
-  addTerminalLine("Adding Content Security Policy headers...", "info")
+  addTerminalLine("Adding Content Security Policy...", "info")
   addTerminalLine("---", "")
-  addTerminalLine("✅ Added CSP header to Nginx configuration", "success")
+  addTerminalLine("✅ Added CSP header to server config", "success")
   addTerminalLine("✅ Restricted script sources to 'self'", "success")
-  addTerminalLine("✅ Disabled inline scripts and eval()", "success")
-  addTerminalLine("✅ Configured reporting endpoint", "success")
-  addTerminalLine("✅ Tested policy in enforcement mode", "success")
+  addTerminalLine("✅ Disabled inline scripts", "success")
   addTerminalLine("---", "")
-  addTerminalLine("CSP Header:", "info")
-  addTerminalLine(
-    "Content-Security-Policy: default-src 'self'; script-src 'self'; object-src 'none';",
-    "",
-  )
-  addTerminalLine("---", "")
-  addTerminalLine("🛡️ Defense in depth: CSP will block XSS even if sanitization fails!", "success")
+  addTerminalLine("🛡️ CSP will block XSS even if sanitization fails!", "success")
 
   gameState.vulnerabilitiesFixed.add("missing_csp")
 
@@ -980,10 +867,11 @@ function addCSP() {
   if (webNode) webNode.status = "healthy"
 
   renderNetworkMap()
+  saveLevelProgress()
   checkLevelComplete()
 }
 
-// Level 6: Authentication Bypass Functions
+// Level 3: Authentication Bypass Functions
 function checkAuth() {
   addTerminalLine("Auditing authorization checks...", "info")
   addTerminalLine("---", "")
@@ -1008,8 +896,6 @@ function fixAuth() {
   addTerminalLine("---", "")
   addTerminalLine("✅ Added role-based access control (RBAC)", "success")
   addTerminalLine("✅ Implemented object-level authorization", "success")
-  addTerminalLine("✅ Added ownership validation to all endpoints", "success")
-  addTerminalLine("✅ Middleware now checks both authentication AND authorization", "success")
   addTerminalLine("✅ Admin endpoints require 'admin' role", "success")
   addTerminalLine("---", "")
   addTerminalLine("🛡️ Authorization bypass fixed!", "success")
@@ -1020,6 +906,7 @@ function fixAuth() {
   if (adminNode) adminNode.status = "healthy"
 
   renderNetworkMap()
+  saveLevelProgress()
   checkLevelComplete()
 }
 
@@ -1029,16 +916,11 @@ function fixSession() {
     return
   }
 
-  addTerminalLine("Securing session token generation...", "info")
+  addTerminalLine("Securing session tokens...", "info")
   addTerminalLine("---", "")
-  addTerminalLine("✅ Replaced predictable IDs with cryptographically random tokens", "success")
-  addTerminalLine("✅ Using crypto.randomBytes(32) for session IDs", "success")
+  addTerminalLine("✅ Using crypto.randomBytes() for session IDs", "success")
   addTerminalLine("✅ Invalidated all existing sessions", "success")
   addTerminalLine("✅ Added session rotation on privilege change", "success")
-  addTerminalLine("✅ Configured secure session settings", "success")
-  addTerminalLine("---", "")
-  addTerminalLine("Old: user_1699632000_042 (predictable)", "error")
-  addTerminalLine("New: a8f5c2e9b4d1f7a3e6c9b2d5f8a1c4e7b... (cryptographically random)", "success")
   addTerminalLine("---", "")
   addTerminalLine("🛡️ Session hijacking vulnerability eliminated!", "success")
 
@@ -1048,102 +930,7 @@ function fixSession() {
   if (sessionNode) sessionNode.status = "healthy"
 
   renderNetworkMap()
-  checkLevelComplete()
-}
-
-// Level 7: API Security Functions
-function analyzeAPI() {
-  addTerminalLine("Running API security audit...", "info")
-  addTerminalLine("---", "")
-  addTerminalLine("FINDINGS:", "error")
-  addTerminalLine("❌ No rate limiting - allows enumeration attacks", "error")
-  addTerminalLine("❌ IDOR - users can access any user's data", "error")
-  addTerminalLine("❌ Excessive data exposure - returns sensitive fields", "error")
-  addTerminalLine("---", "")
-  addTerminalLine("IMPACT:", "warning")
-  addTerminalLine("Attacker enumerated all 10,000 users in 60 seconds", "warning")
-  addTerminalLine("Exfiltrated 450MB of PII including SSNs and salaries", "warning")
-  addTerminalLine("No authorization prevents access to other users' data", "warning")
-}
-
-function addRateLimit() {
-  if (gameState.vulnerabilitiesFixed.has("missing_rate_limiting")) {
-    addTerminalLine("Rate limiting already enabled.", "info")
-    return
-  }
-
-  addTerminalLine("Implementing rate limiting...", "info")
-  addTerminalLine("---", "")
-  addTerminalLine("✅ Configured Kong rate limit plugin", "success")
-  addTerminalLine("✅ Set limit: 100 requests per minute per IP", "success")
-  addTerminalLine("✅ Added 429 Too Many Requests responses", "success")
-  addTerminalLine("✅ Implemented exponential backoff", "success")
-  addTerminalLine("✅ Tested enumeration attack prevention", "success")
-  addTerminalLine("---", "")
-  addTerminalLine("🛡️ User enumeration attacks blocked!", "success")
-
-  gameState.vulnerabilitiesFixed.add("missing_rate_limiting")
-
-  const gatewayNode = gameState.networkNodes.find((n) => n.id === "api-gateway")
-  if (gatewayNode) gatewayNode.status = "healthy"
-
-  renderNetworkMap()
-  checkLevelComplete()
-}
-
-function fixIDOR() {
-  if (gameState.vulnerabilitiesFixed.has("broken_object_authorization")) {
-    addTerminalLine("Object-level authorization already fixed.", "info")
-    return
-  }
-
-  addTerminalLine("Fixing Insecure Direct Object References...", "info")
-  addTerminalLine("---", "")
-  addTerminalLine("✅ Added ownership checks to all endpoints", "success")
-  addTerminalLine("✅ Users can only access their own data", "success")
-  addTerminalLine("✅ Admins can access all data (with audit logging)", "success")
-  addTerminalLine("✅ Implemented authorization middleware", "success")
-  addTerminalLine("✅ Tested with different user roles", "success")
-  addTerminalLine("---", "")
-  addTerminalLine("BEFORE: GET /api/users/123 (anyone can access)", "error")
-  addTerminalLine("AFTER: GET /api/users/123 (only user 123 or admin)", "success")
-  addTerminalLine("---", "")
-  addTerminalLine("🛡️ IDOR vulnerability eliminated!", "success")
-
-  gameState.vulnerabilitiesFixed.add("broken_object_authorization")
-
-  const userAPI = gameState.networkNodes.find((n) => n.id === "user-api")
-  if (userAPI) userAPI.status = "healthy"
-
-  renderNetworkMap()
-  checkLevelComplete()
-}
-
-function fixDataExposure() {
-  if (gameState.vulnerabilitiesFixed.has("excessive_data_exposure")) {
-    addTerminalLine("Sensitive data filtering already implemented.", "info")
-    return
-  }
-
-  addTerminalLine("Filtering sensitive fields from API responses...", "info")
-  addTerminalLine("---", "")
-  addTerminalLine("✅ Created response DTOs (Data Transfer Objects)", "success")
-  addTerminalLine("✅ Removed SSN, salary, and internal notes from responses", "success")
-  addTerminalLine("✅ Implemented field-level permissions", "success")
-  addTerminalLine("✅ Regular users see: id, username, firstName, lastName", "success")
-  addTerminalLine("✅ Admins see additional fields based on need-to-know", "success")
-  addTerminalLine("---", "")
-  addTerminalLine("BEFORE: Returns 15 fields including SSN, salary, etc.", "error")
-  addTerminalLine("AFTER: Returns 4 public fields to regular users", "success")
-  addTerminalLine("---", "")
-  addTerminalLine("🛡️ Data exposure minimized!", "success")
-
-  gameState.vulnerabilitiesFixed.add("excessive_data_exposure")
-
-  const authzNode = gameState.networkNodes.find((n) => n.id === "authorization")
-  if (authzNode) authzNode.status = "healthy"
-
-  renderNetworkMap()
+  saveLevelProgress()
   checkLevelComplete()
 }
 
@@ -1200,8 +987,9 @@ function checkLevelComplete() {
 function showVictory() {
   gameState.completedLevels.add(gameState.currentLevel.id)
 
-  // Save progress
+  // Save progress and clear level-specific progress
   saveGameState()
+  clearLevelProgress(gameState.currentLevel.id)
 
   const victoryMessage = document.getElementById("victory-message")
   const nextLevelButton = document.getElementById("next-level")
