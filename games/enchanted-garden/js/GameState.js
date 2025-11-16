@@ -57,6 +57,7 @@ export class GameState {
       inputMode: "multipleChoice", // "multipleChoice" or "keyboard"
       visualHints: "always", // "always", "sometimes", "never"
       questionsPerLevel: 5, // number of questions per level
+      soundEffects: "off", // "on" or "off"
     }
 
     /** @type {Set<string>} */

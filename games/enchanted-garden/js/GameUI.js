@@ -38,6 +38,7 @@ export class GameUI {
       inputModeSelect: document.getElementById("input-mode-select"),
       visualHintsSelect: document.getElementById("visual-hints-select"),
       questionsPerLevelSelect: document.getElementById("questions-per-level-select"),
+      soundEffectsSelect: document.getElementById("sound-effects-select"),
       castleBackButton: document.getElementById("castle-back-button"),
       castleScreenTitle: document.getElementById("castle-screen-title"),
       castleDescription: document.getElementById("castle-description"),
@@ -96,9 +97,15 @@ export class GameUI {
    */
   displayActivity(activity, inputMode = "multipleChoice", visualHints = "always") {
     // Blur any focused element to prevent focus issues on mobile
-    if (document.activeElement) {
+    if (document.activeElement && document.activeElement !== document.body) {
       document.activeElement.blur()
     }
+
+    // Remove focus from any previously focused answer buttons
+    document.querySelectorAll(".answer-button").forEach((btn) => {
+      btn.blur()
+      btn.classList.remove("focus-visible")
+    })
 
     // Update creature image if provided
     if (activity.creature && this.elements.creatureImage) {
@@ -428,6 +435,9 @@ export class GameUI {
     }
     if (this.elements.questionsPerLevelSelect) {
       this.elements.questionsPerLevelSelect.value = settings.questionsPerLevel || 5
+    }
+    if (this.elements.soundEffectsSelect) {
+      this.elements.soundEffectsSelect.value = settings.soundEffects || "on"
     }
   }
 

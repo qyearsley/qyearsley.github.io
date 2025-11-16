@@ -193,7 +193,8 @@
         <div class="activity-container">
           <!-- Creature Guide (Simplified) -->
           <div class="creature-guide">
-            <div class="creature-image">🦄</div>
+            <div class="creature-image" aria-hidden="true">🦄</div>
+            <p id="creature-message" class="creature-message" role="status" aria-live="polite"></p>
           </div>
 
           <!-- Question Area -->
@@ -249,6 +250,15 @@
               <option value="10">10 Questions</option>
             </select>
             <p class="setting-description">How many questions to complete each level</p>
+          </div>
+
+          <div class="setting-group">
+            <label for="sound-effects-select">Sound Effects:</label>
+            <select id="sound-effects-select" class="setting-select">
+              <option value="on">On</option>
+              <option value="off">Off</option>
+            </select>
+            <p class="setting-description">Turn sound effects on or off</p>
           </div>
 
           <button id="close-settings" class="big-button">Done</button>

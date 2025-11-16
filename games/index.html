@@ -60,6 +60,33 @@
       .game-list a:hover .game-description {
         color: #495057;
       }
+
+      @media (prefers-color-scheme: dark) {
+        .game-list a {
+          background: #1a202c;
+          border-color: #4a5568;
+          color: #cbd5e0;
+        }
+
+        .game-list a:hover {
+          background: #4a5568;
+          border-color: #63b3ed;
+          color: #63b3ed;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-list a:focus {
+          outline-color: #63b3ed;
+        }
+
+        .game-list .game-description {
+          color: #a0aec0;
+        }
+
+        .game-list a:hover .game-description {
+          color: #cbd5e0;
+        }
+      }
     </style>
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
   </head>

@@ -6,6 +6,7 @@ import { EventManager } from "./EventManager.js"
 import { StorageManager } from "./storage.js"
 import { RewardSystem } from "./rewards.js"
 import { ActivityGenerator } from "./activities.js"
+import { SoundManager } from "./SoundManager.js"
 
 /**
  * Main game controller for Enchanted Garden
@@ -39,6 +40,10 @@ class EnchantedGarden {
     this.ui = new GameUI()
     this.particles = new ParticleSystem()
     this.progression = new ProgressionManager()
+    this.sounds = new SoundManager()
+
+    // Update sound manager based on settings
+    this.sounds.setEnabled(this.state.settings.soundEffects === "on")
 
     // Initialize event manager with callbacks
     this.events = new EventManager(this.ui, {
@@ -173,6 +178,11 @@ class EnchantedGarden {
    */
   updateSetting(key, value) {
     this.state.updateSetting(key, value)
+
+    // Update sound manager if sound setting changed
+    if (key === "soundEffects") {
+      this.sounds.setEnabled(value === "on")
+    }
   }
 
   /**
@@ -797,6 +807,9 @@ class EnchantedGarden {
     this.ui.markButtonCorrect(button)
     this.ui.showFeedback("Correct! 🌟", "correct")
 
+    // Play correct sound
+    this.sounds.playCorrect()
+
     // Create celebration particles
     const center = this.ui.getButtonCenter(button)
     this.particles.createParticles(center.x, center.y, this.ui.getParticlesContainer())
@@ -823,6 +836,9 @@ class EnchantedGarden {
   handleWrongAnswer(button) {
     this.ui.shakeButton(button)
     this.ui.showFeedback("Try again! 💫", "encourage")
+
+    // Play incorrect sound
+    this.sounds.playIncorrect()
 
     setTimeout(() => {
       this.ui.enableAnswerButtons()
@@ -856,6 +872,9 @@ class EnchantedGarden {
     const areaName = this.getAreaName(this.state.currentArea)
 
     this.state.completeLevel()
+
+    // Play celebration sound
+    this.sounds.playCelebration()
 
     // Update displays
     this.ui.updateStats(this.state.stats)
