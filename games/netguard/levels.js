@@ -48,8 +48,8 @@ export const LEVELS = {
       },
     ],
   },
-  4: {
-    id: 4,
+  3: {
+    id: 3,
     name: "CSRF Attack",
     description: "State-changing requests can be forged by attackers",
     difficulty: "Intermediate",
@@ -68,8 +68,8 @@ export const LEVELS = {
       },
     ],
   },
-  5: {
-    id: 5,
+  4: {
+    id: 4,
     name: "XSS Vulnerability",
     description: "User input reflected in page without sanitization",
     difficulty: "Intermediate",
@@ -88,8 +88,8 @@ export const LEVELS = {
       },
     ],
   },
-  6: {
-    id: 6,
+  5: {
+    id: 5,
     name: "Authentication Bypass",
     description: "Auth logic flaw allows unauthorized access to resources",
     difficulty: "Advanced",
@@ -108,8 +108,8 @@ export const LEVELS = {
       },
     ],
   },
-  7: {
-    id: 7,
+  6: {
+    id: 6,
     name: "API Security Flaws",
     description: "REST API exposes sensitive data and allows unauthorized ops",
     difficulty: "Advanced",
@@ -134,4 +134,4 @@ export const LEVELS = {
   },
 }
 
-export const LEVEL_ORDER = [1, 2, 4, 5, 6, 7]
+export const LEVEL_ORDER = [1, 2, 3, 4, 5, 6]

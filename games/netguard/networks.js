@@ -195,7 +195,7 @@ GET /api/users?id=1' OR '1'='1 - 200 OK (returned ALL users!)
   },
 ]
 
-export const LEVEL_4_NETWORK = [
+export const LEVEL_3_NETWORK = [
   {
     id: "api-backend",
     name: "API Backend",
@@ -283,7 +283,7 @@ Recommendation: Implement CSRF protection`,
   },
 ]
 
-export const LEVEL_5_NETWORK = [
+export const LEVEL_4_NETWORK = [
   {
     id: "comment-system",
     name: "Comment System",
@@ -368,7 +368,7 @@ app.get('/product/:id', (req, res) => {
   },
 ]
 
-export const LEVEL_6_NETWORK = [
+export const LEVEL_5_NETWORK = [
   {
     id: "admin-panel",
     name: "Admin Panel",
@@ -455,7 +455,7 @@ Examples:
   },
 ]
 
-export const LEVEL_7_NETWORK = [
+export const LEVEL_6_NETWORK = [
   {
     id: "user-api",
     name: "User API",
@@ -554,14 +554,14 @@ export function getNetworkForLevel(levelId) {
       return LEVEL_1_NETWORK
     case 2:
       return LEVEL_2_NETWORK
+    case 3:
+      return LEVEL_3_NETWORK
     case 4:
       return LEVEL_4_NETWORK
     case 5:
       return LEVEL_5_NETWORK
     case 6:
       return LEVEL_6_NETWORK
-    case 7:
-      return LEVEL_7_NETWORK
     default:
       return LEVEL_1_NETWORK
   }

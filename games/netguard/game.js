@@ -899,9 +899,7 @@ function fixCSRF() {
   addTerminalLine("🛡️ CSRF vulnerability patched!", "success")
 
   gameState.vulnerabilitiesFixed.add("csrf_protection")
-  if (gameState.vulnerabilitiesFixed.has("missing_csrf_token")) {
-    gameState.vulnerabilitiesFixed.add("missing_csrf_token")
-  }
+  gameState.vulnerabilitiesFixed.add("missing_csrf_token")
 
   const apiNode = gameState.networkNodes.find((n) => n.id === "api-backend")
   if (apiNode) apiNode.status = "healthy"
