@@ -9,7 +9,6 @@ import {
   LEVEL_4_NODES,
   LEVEL_5_NODES,
   LEVEL_6_NODES,
-  LEVEL_7_NODES,
   COMMAND_IDS,
   CLUE_IDS,
 } from "./constants.js"
@@ -99,51 +98,8 @@ const level2Handler = {
   },
 }
 
-// Level 3: Certificate Validation Handler
+// Level 3: CSRF Attack Handler
 const level3Handler = {
-  id: LEVEL_IDS.CERT_VALIDATION,
-
-  // Get level-specific commands
-  getLevelCommands(gameState) {
-    return [
-      {
-        id: COMMAND_IDS.CHECK_CERT,
-        name: "openssl s_client",
-        description: "Check SSL certificate",
-        disabled:
-          !gameState.currentNode ||
-          (gameState.currentNode !== LEVEL_3_NODES.PAYMENT_PROXY &&
-            gameState.currentNode !== LEVEL_3_NODES.EXTERNAL_API),
-      },
-      {
-        id: COMMAND_IDS.FIX_CERT,
-        name: "enable-cert-validation",
-        description: "Enable certificate validation",
-        disabled: !gameState.cluesFound.has(CLUE_IDS.DISABLED_CERT_CHECK),
-      },
-    ]
-  },
-
-  // Get tool commands for this level
-  getToolCommands(gameState) {
-    const node = gameState.networkNodes.find((n) => n.id === gameState.currentNode)
-    const commands = []
-
-    if (node?.certificate) {
-      commands.push({
-        id: COMMAND_IDS.CHECK_CERT_TOOL,
-        name: "openssl x509 -text",
-        description: "Inspect certificate",
-        disabled: false,
-      })
-    }
-
-    return commands
-  },
-}
-
-// Level 4: CSRF Attack Handler
-const level4Handler = {
   id: LEVEL_IDS.CSRF_ATTACK,
 
   getLevelCommands(gameState) {
@@ -152,7 +108,7 @@ const level4Handler = {
         id: COMMAND_IDS.ANALYZE_CSRF,
         name: "analyze-requests",
         description: "Analyze cross-origin requests",
-        disabled: !gameState.currentNode || gameState.currentNode !== LEVEL_4_NODES.SECURITY_LOGS,
+        disabled: !gameState.currentNode || gameState.currentNode !== LEVEL_3_NODES.SECURITY_LOGS,
       },
       {
         id: COMMAND_IDS.FIX_CSRF,
@@ -168,8 +124,8 @@ const level4Handler = {
   },
 }
 
-// Level 5: XSS Vulnerability Handler
-const level5Handler = {
+// Level 4: XSS Vulnerability Handler
+const level4Handler = {
   id: LEVEL_IDS.XSS_VULNERABILITY,
 
   getLevelCommands(gameState) {
@@ -178,7 +134,7 @@ const level5Handler = {
         id: COMMAND_IDS.ANALYZE_XSS,
         name: "grep '<script>' db.log",
         description: "Search for injected scripts",
-        disabled: !gameState.currentNode || gameState.currentNode !== LEVEL_5_NODES.DATABASE,
+        disabled: !gameState.currentNode || gameState.currentNode !== LEVEL_4_NODES.DATABASE,
       },
       {
         id: COMMAND_IDS.FIX_XSS,
@@ -200,8 +156,8 @@ const level5Handler = {
   },
 }
 
-// Level 6: Authentication Bypass Handler
-const level6Handler = {
+// Level 5: Authentication Bypass Handler
+const level5Handler = {
   id: LEVEL_IDS.AUTH_BYPASS,
 
   getLevelCommands(gameState) {
@@ -210,7 +166,7 @@ const level6Handler = {
         id: COMMAND_IDS.CHECK_AUTH,
         name: "audit-auth-checks",
         description: "Audit authorization logic",
-        disabled: !gameState.currentNode || gameState.currentNode !== LEVEL_6_NODES.AUDIT_LOG,
+        disabled: !gameState.currentNode || gameState.currentNode !== LEVEL_5_NODES.AUDIT_LOG,
       },
       {
         id: COMMAND_IDS.FIX_AUTH,
@@ -232,8 +188,8 @@ const level6Handler = {
   },
 }
 
-// Level 7: API Security Handler
-const level7Handler = {
+// Level 6: API Security Handler
+const level6Handler = {
   id: LEVEL_IDS.API_SECURITY,
 
   getLevelCommands(gameState) {
@@ -242,7 +198,7 @@ const level7Handler = {
         id: COMMAND_IDS.ANALYZE_API,
         name: "api-security-audit",
         description: "Audit API security",
-        disabled: !gameState.currentNode || gameState.currentNode !== LEVEL_7_NODES.API_DOCS,
+        disabled: !gameState.currentNode || gameState.currentNode !== LEVEL_6_NODES.API_DOCS,
       },
       {
         id: COMMAND_IDS.ADD_RATE_LIMIT,
@@ -274,11 +230,10 @@ const level7Handler = {
 export const LEVEL_HANDLERS = {
   [LEVEL_IDS.JWT_EXPIRATION]: level1Handler,
   [LEVEL_IDS.SQL_INJECTION]: level2Handler,
-  [LEVEL_IDS.CERT_VALIDATION]: level3Handler,
-  [LEVEL_IDS.CSRF_ATTACK]: level4Handler,
-  [LEVEL_IDS.XSS_VULNERABILITY]: level5Handler,
-  [LEVEL_IDS.AUTH_BYPASS]: level6Handler,
-  [LEVEL_IDS.API_SECURITY]: level7Handler,
+  [LEVEL_IDS.CSRF_ATTACK]: level3Handler,
+  [LEVEL_IDS.XSS_VULNERABILITY]: level4Handler,
+  [LEVEL_IDS.AUTH_BYPASS]: level5Handler,
+  [LEVEL_IDS.API_SECURITY]: level6Handler,
 }
 
 // Get handler for current level
