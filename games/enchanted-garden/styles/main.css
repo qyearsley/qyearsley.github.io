@@ -349,9 +349,10 @@ body {
 
 .creature-guide {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 15px;
+  gap: 8px;
   padding: 10px;
   flex-shrink: 0;
 }
@@ -359,6 +360,19 @@ body {
 .creature-image {
   font-size: 48px;
   animation: wiggle 2s ease-in-out infinite;
+}
+
+.creature-message {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--theme-primary);
+  text-align: center;
+  margin: 0;
+  padding: 8px 16px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 2px 8px rgb(0, 0, 0, 0.1);
+  max-width: 280px;
 }
 
 .creature-speech {
@@ -449,11 +463,19 @@ body {
   user-select: none;
 }
 
-.answer-button:hover {
-  background: var(--theme-primary);
-  color: white;
-  transform: scale(1.05);
-  box-shadow: 0 8px 25px rgb(0, 0, 0, 0.3);
+/* Only apply hover effects on devices that support hover (not touch screens) */
+@media (hover: hover) and (pointer: fine) {
+  .answer-button:hover:not(:active) {
+    background: var(--theme-primary);
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgb(0, 0, 0, 0.3);
+  }
+}
+
+/* Active state for all devices */
+.answer-button:active:not(.disabled) {
+  transform: scale(0.98);
 }
 
 .answer-button.correct {

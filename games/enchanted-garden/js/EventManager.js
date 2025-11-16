@@ -229,6 +229,14 @@ export class EventManager {
         }
       })
     }
+
+    if (this.ui.elements.soundEffectsSelect) {
+      this.ui.elements.soundEffectsSelect.addEventListener("change", (e) => {
+        if (this.callbacks.onSettingChange) {
+          this.callbacks.onSettingChange("soundEffects", e.target.value)
+        }
+      })
+    }
   }
 
   /**
