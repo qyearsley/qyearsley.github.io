@@ -16,9 +16,12 @@ class Game {
     this.wordBank = new WordBank()
     this.gameState = new GameState(this.storageManager)
     this.activityGenerator = new WordActivityGenerator(this.wordBank)
-    this.gameUI = new GameUI(this.gameState, this.activityGenerator)
     this.soundManager = new SoundManager()
+    this.gameUI = new GameUI(this.gameState, this.activityGenerator)
     this.eventManager = new EventManager(this)
+
+    // Pass sound manager to UI for availability checks
+    this.gameUI.setSoundManager(this.soundManager)
 
     // Game state
     this.currentActivity = null

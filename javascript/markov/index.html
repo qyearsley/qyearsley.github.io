@@ -85,6 +85,54 @@
         color: #555;
         font-size: 14px;
       }
+
+      @media (prefers-color-scheme: dark) {
+        body {
+          background-color: #1a1a1a;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%23404040' fill-opacity='0.2' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E");
+          color: #e0e0e0;
+        }
+
+        h1 {
+          color: #e0e0e0;
+        }
+
+        label {
+          color: #ccc;
+        }
+
+        .output {
+          background: #2a2a2a;
+          border-color: #555;
+          color: #e0e0e0;
+        }
+
+        .explanation {
+          background: #1e3a5f;
+          border-left-color: #5ba3ff;
+        }
+
+        .explanation h3 {
+          color: #5ba3ff;
+        }
+
+        .probability-sample {
+          background: #2a2a2a;
+          border-color: #555;
+        }
+
+        .probability-sample strong {
+          color: #5ba3ff;
+        }
+
+        .total-count {
+          color: #999;
+        }
+
+        #probabilities h4 {
+          color: #ccc;
+        }
+      }
     </style>
   </head>
   <body>

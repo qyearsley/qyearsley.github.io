@@ -82,6 +82,68 @@ export class EventManager {
         }
       }
     })
+
+    // Keyboard shortcuts
+    document.addEventListener("keydown", (e) => {
+      this.handleKeyboardShortcuts(e)
+    })
+  }
+
+  /**
+   * Handle keyboard shortcuts
+   * @param {KeyboardEvent} e - Keyboard event
+   */
+  handleKeyboardShortcuts(e) {
+    const currentScreen = this.game.gameState.currentScreen
+
+    // Escape key - go back/cancel
+    if (e.key === "Escape") {
+      e.preventDefault()
+      if (currentScreen === "activity-screen") {
+        this.game.showScreen("quest-map")
+      } else if (currentScreen === "quest-map") {
+        this.game.showScreen("title-screen")
+      } else if (currentScreen === "settings-screen") {
+        this.game.showScreen("title-screen")
+      } else if (currentScreen === "level-complete") {
+        this.game.showScreen("quest-map")
+      }
+      return
+    }
+
+    // Activity screen shortcuts
+    if (currentScreen === "activity-screen") {
+      // Number keys 1-4 to select choices (only if not already answered)
+      if (!this.answered && ["1", "2", "3", "4"].includes(e.key)) {
+        e.preventDefault()
+        const choiceIndex = parseInt(e.key) - 1
+        const choices = document.querySelectorAll(".choice-button")
+        if (choices[choiceIndex]) {
+          this.handleChoiceClick(choices[choiceIndex])
+        }
+        return
+      }
+
+      // Enter key to proceed to next
+      if (e.key === "Enter" && this.answered) {
+        e.preventDefault()
+        const nextButton = document.getElementById("next-activity")
+        if (nextButton && !nextButton.classList.contains("hidden")) {
+          this.game.nextActivity()
+        }
+        return
+      }
+    }
+
+    // Quest map - Enter to select focused quest
+    if (currentScreen === "quest-map" && e.key === "Enter") {
+      const focusedCard = document.activeElement
+      if (focusedCard?.classList.contains("quest-card") && focusedCard.classList.contains("unlocked")) {
+        e.preventDefault()
+        const questId = focusedCard.dataset.questId
+        this.game.startLevel(questId)
+      }
+    }
   }
 
   /**

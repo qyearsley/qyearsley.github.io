@@ -43,41 +43,41 @@
     </style>
   </head>
   <body>
-    <div id="game-container">
+    <div id="game-container" role="main" aria-label="Word Quest Game">
       <!-- Title Screen -->
-      <div id="title-screen" class="screen active">
-        <nav class="breadcrumbs">
+      <div id="title-screen" class="screen active" role="region" aria-label="Title screen">
+        <nav class="breadcrumbs" aria-label="Breadcrumb navigation">
           <a href="/">Home</a>
           <span class="separator">/</span>
           <a href="/games/">Games</a>
           <span class="separator">/</span>
-          <span class="current">Word Quest</span>
+          <span class="current" aria-current="page">Word Quest</span>
         </nav>
         <h1 class="game-title">📜 Word Quest 🗝️</h1>
         <p class="subtitle">Decode the ancient words!</p>
         <div class="title-buttons">
-          <button id="start-button" class="big-button">Start Quest</button>
-          <button id="continue-button" class="big-button hidden">Continue Quest</button>
-          <button id="start-fresh-button" class="secondary-button hidden">New Quest</button>
+          <button id="start-button" class="big-button" aria-label="Start a new quest">Start Quest</button>
+          <button id="continue-button" class="big-button hidden" aria-label="Continue your previous quest">Continue Quest</button>
+          <button id="start-fresh-button" class="secondary-button hidden" aria-label="Start a fresh quest, resetting all progress">New Quest</button>
         </div>
       </div>
 
       <!-- Settings Screen -->
-      <div id="settings-screen" class="screen">
+      <div id="settings-screen" class="screen" role="region" aria-label="Game settings">
         <div class="header">
           <h2>Choose Your Decoder Rank</h2>
         </div>
 
         <div class="settings-content">
           <div class="setting-group">
-            <h3>Difficulty Level</h3>
-            <div class="difficulty-options">
+            <h3 id="difficulty-label">Difficulty Level</h3>
+            <div class="difficulty-options" role="radiogroup" aria-labelledby="difficulty-label">
               <label class="difficulty-option">
-                <input type="radio" name="difficulty" value="explorer" checked />
+                <input type="radio" name="difficulty" value="explorer" checked aria-describedby="explorer-desc" />
                 <div class="difficulty-card">
-                  <div class="difficulty-icon">🌟</div>
+                  <div class="difficulty-icon" aria-hidden="true">🌟</div>
                   <h4>Explorer</h4>
-                  <p>Kindergarten - 1st Grade</p>
+                  <p id="explorer-desc">Kindergarten - 1st Grade</p>
                   <ul>
                     <li>Letter sounds</li>
                     <li>Simple 2-3 letter words</li>
@@ -87,11 +87,11 @@
               </label>
 
               <label class="difficulty-option">
-                <input type="radio" name="difficulty" value="adventurer" />
+                <input type="radio" name="difficulty" value="adventurer" aria-describedby="adventurer-desc" />
                 <div class="difficulty-card">
-                  <div class="difficulty-icon">⭐⭐</div>
+                  <div class="difficulty-icon" aria-hidden="true">⭐⭐</div>
                   <h4>Adventurer</h4>
-                  <p>1st - 2nd Grade</p>
+                  <p id="adventurer-desc">1st - 2nd Grade</p>
                   <ul>
                     <li>Word families</li>
                     <li>3-5 letter words</li>
@@ -101,11 +101,11 @@
               </label>
 
               <label class="difficulty-option">
-                <input type="radio" name="difficulty" value="master" />
+                <input type="radio" name="difficulty" value="master" aria-describedby="master-desc" />
                 <div class="difficulty-card">
-                  <div class="difficulty-icon">⭐⭐⭐</div>
+                  <div class="difficulty-icon" aria-hidden="true">⭐⭐⭐</div>
                   <h4>Master</h4>
-                  <p>2nd - 3rd Grade</p>
+                  <p id="master-desc">2nd - 3rd Grade</p>
                   <ul>
                     <li>Complex patterns</li>
                     <li>Multi-syllable words</li>
@@ -117,26 +117,27 @@
           </div>
 
           <div class="setting-group">
-            <h3>Activities Per Level</h3>
-            <div class="activities-options">
-              <label><input type="radio" name="questionsPerLevel" value="3" /> 3 (Quick)</label>
-              <label><input type="radio" name="questionsPerLevel" value="5" checked /> 5 (Standard)</label>
-              <label><input type="radio" name="questionsPerLevel" value="8" /> 8 (Long)</label>
+            <h3 id="questions-label">Activities Per Level</h3>
+            <div class="activities-options" role="radiogroup" aria-labelledby="questions-label">
+              <label><input type="radio" name="questionsPerLevel" value="3" aria-label="3 activities per level, quick session" /> 3 (Quick)</label>
+              <label><input type="radio" name="questionsPerLevel" value="5" checked aria-label="5 activities per level, standard session" /> 5 (Standard)</label>
+              <label><input type="radio" name="questionsPerLevel" value="8" aria-label="8 activities per level, long session" /> 8 (Long)</label>
             </div>
           </div>
 
           <div class="setting-group">
-            <h3>Input Mode</h3>
-            <div class="input-options">
-              <label><input type="radio" name="inputMode" value="multipleChoice" checked /> Multiple Choice (Easier)</label>
-              <label><input type="radio" name="inputMode" value="keyboard" /> Type Answers (Harder)</label>
+            <h3 id="input-label">Input Mode</h3>
+            <div class="input-options" role="radiogroup" aria-labelledby="input-label">
+              <label><input type="radio" name="inputMode" value="multipleChoice" checked aria-label="Multiple choice input mode, easier" /> Multiple Choice (Easier)</label>
+              <label><input type="radio" name="inputMode" value="keyboard" aria-label="Keyboard input mode, harder" /> Type Answers (Harder)</label>
             </div>
           </div>
 
           <div class="setting-group">
-            <h3>Audio Support</h3>
+            <h3 id="audio-label">Audio Support</h3>
             <div class="audio-options">
-              <label><input type="checkbox" name="audioHints" checked /> Play word sounds</label>
+              <label><input type="checkbox" name="audioHints" checked aria-describedby="audio-desc" /> Play word sounds</label>
+              <p id="audio-desc" class="sr-only">Enable audio pronunciation of words using text-to-speech</p>
             </div>
           </div>
         </div>
@@ -145,7 +146,7 @@
       </div>
 
       <!-- Quest Map Screen -->
-      <div id="quest-map" class="screen">
+      <div id="quest-map" class="screen" role="region" aria-label="Quest map">
         <div class="header">
           <h2>Quest Map</h2>
           <button id="home-button" class="text-button" aria-label="Return to start screen">
@@ -154,67 +155,67 @@
         </div>
 
         <div class="map-container">
-          <div class="decoder-rank">
-            <span id="rank-display">Apprentice Decoder</span>
-            <span id="stars-display">⭐ 0 Stars</span>
+          <div class="decoder-rank" role="status" aria-live="polite">
+            <span id="rank-display" aria-label="Current decoder rank">Apprentice Decoder</span>
+            <span id="stars-display" aria-label="Total stars earned">⭐ 0 Stars</span>
           </div>
 
-          <div class="quest-paths">
+          <div class="quest-paths" role="list" aria-label="Available quests">
             <!-- Quest areas will be dynamically added here -->
           </div>
         </div>
 
-        <button id="settings-button" class="secondary-button">⚙️ Settings</button>
+        <button id="settings-button" class="secondary-button" aria-label="Open settings">⚙️ Settings</button>
       </div>
 
       <!-- Activity Screen -->
-      <div id="activity-screen" class="screen">
+      <div id="activity-screen" class="screen" role="region" aria-label="Activity screen">
         <div class="header">
           <button id="back-to-map-button" class="nav-button" aria-label="Return to quest map">
             ← Map
           </button>
           <div class="activity-header-info">
             <h3 id="quest-name">Sound Cipher</h3>
-            <div class="progress-info">
-              <span id="activity-progress">Question 1 of 5</span>
-              <span id="activity-stars">⭐ 0</span>
+            <div class="progress-info" role="status" aria-live="polite">
+              <span id="activity-progress" aria-label="Current progress">Question 1 of 5</span>
+              <span id="activity-stars" aria-label="Stars earned">⭐ 0</span>
             </div>
           </div>
         </div>
 
         <div class="activity-content">
-          <div id="activity-question" class="question-area">
+          <div id="activity-question" class="question-area" role="region" aria-label="Question">
             <!-- Activity content will be dynamically generated -->
           </div>
 
-          <div id="activity-choices" class="choices-area">
+          <div id="activity-choices" class="choices-area" role="radiogroup" aria-label="Answer choices">
             <!-- Choices will be dynamically generated -->
           </div>
 
-          <div id="activity-feedback" class="feedback-area hidden">
+          <div id="activity-feedback" class="feedback-area hidden" role="status" aria-live="assertive" aria-atomic="true">
             <!-- Feedback messages -->
           </div>
         </div>
 
         <div class="activity-controls">
-          <button id="submit-answer" class="big-button" disabled>Submit</button>
-          <button id="next-activity" class="big-button hidden">Next →</button>
+          <button id="submit-answer" class="big-button" disabled aria-label="Submit your answer">Submit</button>
+          <button id="next-activity" class="big-button hidden" aria-label="Go to next activity">Next →</button>
         </div>
       </div>
 
       <!-- Level Complete Screen -->
-      <div id="level-complete" class="screen">
+      <div id="level-complete" class="screen" role="region" aria-label="Level completion">
         <div class="celebration">
           <h2>🎉 Quest Complete! 🎉</h2>
-          <div id="completion-message" class="completion-message">
+          <div id="completion-message" class="completion-message" role="status" aria-live="polite">
             <!-- Dynamic completion message -->
           </div>
-          <div id="rewards-display" class="rewards">
+          <div id="rewards-display" class="rewards" role="region" aria-label="Rewards earned">
             <!-- Rewards will be shown here -->
           </div>
           <div class="completion-buttons">
-            <button id="continue-quest-button" class="big-button">Continue Quest</button>
-            <button id="return-to-map-button" class="secondary-button">Return to Map</button>
+            <button id="continue-quest-button" class="big-button" aria-label="Continue to next level">Continue Quest</button>
+            <button id="return-to-map-button" class="secondary-button" aria-label="Return to quest map">Return to Map</button>
           </div>
         </div>
       </div>

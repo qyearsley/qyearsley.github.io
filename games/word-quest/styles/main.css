@@ -140,6 +140,19 @@ body {
   border-color: var(--quest-primary);
 }
 
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
 .hidden {
   display: none !important;
 }
@@ -451,6 +464,24 @@ body {
 
 .audio-button:hover {
   background: var(--quest-secondary);
+}
+
+.audio-unavailable {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+  border-radius: 8px;
+  color: #856404;
+  font-size: 0.9rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .audio-unavailable {
+    background: #664d03;
+    border-color: #ffc107;
+    color: #ffecb5;
+  }
 }
 
 .choices-area {

@@ -6,6 +6,15 @@ export class GameUI {
   constructor(gameState, activityGenerator) {
     this.gameState = gameState
     this.activityGenerator = activityGenerator
+    this.soundManager = null // Will be set by game.js
+  }
+
+  /**
+   * Set the sound manager reference
+   * @param {SoundManager} soundManager - Sound manager instance
+   */
+  setSoundManager(soundManager) {
+    this.soundManager = soundManager
   }
 
   /**
@@ -112,22 +121,25 @@ export class GameUI {
         const theme = this.activityGenerator.getQuestTheme(questId)
         const isUnlocked = this.gameState.isQuestUnlocked(questId)
         const progress = this.gameState.getQuestProgress(questId)
+        const ariaLabel = isUnlocked
+          ? `${theme.name}: ${theme.description}. ${progress.completed} levels completed, ${progress.stars} stars earned. Click to start.`
+          : `${theme.name}: Locked. Complete previous quest to unlock.`
 
         return `
-        <div class="quest-card ${isUnlocked ? "unlocked" : "locked"}" data-quest-id="${questId}">
-          <div class="quest-icon">${theme.icon}</div>
+        <div class="quest-card ${isUnlocked ? "unlocked" : "locked"}" data-quest-id="${questId}" role="listitem" ${isUnlocked ? 'tabindex="0"' : ""} aria-label="${ariaLabel}">
+          <div class="quest-icon" aria-hidden="true">${theme.icon}</div>
           <div class="quest-info">
             <h3>${theme.name}</h3>
             <p>${theme.description}</p>
             ${
               isUnlocked
                 ? `
-              <div class="quest-progress">
+              <div class="quest-progress" aria-hidden="true">
                 <span>${progress.completed} levels completed</span>
                 <span>⭐ ${progress.stars}</span>
               </div>
             `
-                : '<div class="locked-message">🔒 Complete previous quest to unlock</div>'
+                : '<div class="locked-message" aria-hidden="true">🔒 Complete previous quest to unlock</div>'
             }
           </div>
         </div>
@@ -169,11 +181,15 @@ export class GameUI {
         <h3>${activity.question}</h3>
         ${visualHTML}
         ${
-          activity.audioWord && this.gameState.settings.audioHints
-            ? `<button class="audio-button" onclick="window.game.soundManager.playWord('${activity.audioWord}')">
+          activity.audioWord && this.gameState.settings.audioHints && this.soundManager?.isSpeechAvailable()
+            ? `<button class="audio-button" onclick="window.game.soundManager.playWord('${activity.audioWord}')" aria-label="Hear the word pronounced">
              🔊 Hear it
            </button>`
-            : ""
+            : activity.audioWord && this.gameState.settings.audioHints && !this.soundManager?.isSpeechAvailable()
+              ? `<div class="audio-unavailable" role="status" aria-live="polite">
+             <small>🔇 Audio not available in this browser</small>
+           </div>`
+              : ""
         }
       `
     }
@@ -182,8 +198,8 @@ export class GameUI {
     if (choicesArea) {
       choicesArea.innerHTML = activity.choices
         .map(
-          (choice) => `
-        <button class="choice-button" data-value="${choice}">
+          (choice, index) => `
+        <button class="choice-button" data-value="${choice}" role="radio" aria-checked="false" aria-label="Choice ${index + 1}: ${choice}">
           ${choice}
         </button>
       `,
