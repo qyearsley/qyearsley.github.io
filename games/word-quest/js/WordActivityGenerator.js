@@ -48,8 +48,6 @@ export class WordActivityGenerator {
    * @returns {Object} Activity object
    */
   generateActivity(activityNumber, questId, difficulty) {
-    const theme = this.questThemes[questId]
-
     switch (questId) {
       case "sound-cipher":
         return this.generateSoundCipherActivity(activityNumber, difficulty)
@@ -351,7 +349,6 @@ export class WordActivityGenerator {
     const familyWords = families[familyKey]
 
     const correctWord = familyWords[activityNumber % familyWords.length]
-    const otherWords = familyWords.filter((w) => w !== correctWord)
 
     return {
       type: "word-family",
@@ -492,10 +489,10 @@ export class WordActivityGenerator {
    * Helper: Generate similar words for distractor choices
    */
   generateSimilarWords(word, difficulty, count) {
-    const allWords = [
-      ...this.wordBank.getWords(difficulty, "cvc"),
-      ...this.wordBank.getWords(difficulty, "cvce" || "cvc"),
-    ]
+    const cvcWords = this.wordBank.getWords(difficulty, "cvc")
+    const cvceWords = this.wordBank.getWords(difficulty, "cvce")
+
+    const allWords = [...cvcWords, ...cvceWords]
 
     // Find words with similar length
     const similarLength = allWords.filter((w) => Math.abs(w.length - word.length) <= 1 && w !== word)
