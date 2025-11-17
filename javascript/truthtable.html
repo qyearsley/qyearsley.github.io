@@ -9,6 +9,7 @@
       content="Generate truth tables for boolean logic expressions with support for AND, OR, NOT, XOR, and more operators."
     />
     <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/components.css" />
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
     <script type="module">
       "use strict"
@@ -62,70 +63,6 @@
         })
       })
     </script>
-    <style>
-      /* Page-specific styles only; shared styles are in /style.css */
-      .truth-table {
-        margin: 2rem 0;
-        overflow-x: auto;
-      }
-
-      .truth-table table {
-        border-collapse: collapse;
-        width: 100%;
-        background: white;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        border-radius: 8px;
-        overflow: hidden;
-      }
-
-      .truth-table th {
-        background: #007bff;
-        color: white;
-        padding: 1rem;
-        text-align: center;
-        font-weight: 600;
-        border: 1px solid #0056b3;
-      }
-
-      .truth-table td {
-        padding: 0.75rem;
-        text-align: center;
-        border: 1px solid #dee2e6;
-        font-family: monospace;
-        font-weight: 600;
-      }
-
-      .truth-table tr:nth-child(even) {
-        background: #f8f9fa;
-      }
-
-      .truth-table tr:hover {
-        background: #e9ecef;
-      }
-
-      .operators {
-        background: #f8f9fa;
-        padding: 1rem;
-        border-radius: 4px;
-        border: 1px solid #e9ecef;
-        margin: 1rem 0;
-      }
-
-      .operator-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-      }
-
-      .operator-item {
-        font-family: monospace;
-        background: white;
-        padding: 0.5rem 1rem;
-        border-radius: 4px;
-        border: 1px solid #dee2e6;
-        font-weight: 600;
-      }
-    </style>
   </head>
   <body>
     <div class="container">
