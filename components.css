@@ -1,0 +1,260 @@
+/**
+ * Common component styles for legacy content pages
+ * Includes dark mode support for tables, info boxes, and other shared elements
+ */
+
+/* Data Tables */
+.data-table,
+.syllabary-table,
+.truth-table table {
+  border-collapse: collapse;
+  width: 100%;
+  background: white;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.data-table th,
+.syllabary-table th,
+.truth-table th {
+  background: #007bff;
+  color: white;
+  padding: 0.75rem;
+  text-align: center;
+  font-weight: 600;
+  border: 1px solid #0056b3;
+}
+
+.data-table td,
+.syllabary-table td,
+.truth-table td {
+  padding: 0.5rem;
+  text-align: center;
+  border: 1px solid #dee2e6;
+  vertical-align: middle;
+}
+
+.data-table tr:nth-child(even),
+.syllabary-table tr:nth-child(even),
+.truth-table tr:nth-child(even) {
+  background: #f8f9fa;
+}
+
+.data-table tr:hover,
+.syllabary-table tr:hover,
+.truth-table tr:hover {
+  background: #e9ecef;
+}
+
+/* Special table header styling */
+.syllabary-table th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.syllabary-table th:first-child {
+  background: #495057;
+  font-weight: 700;
+  min-width: 3rem;
+}
+
+/* Table containers */
+.table-container,
+.syllabary-container,
+.truth-table {
+  overflow-x: auto;
+  margin: 2rem 0;
+  border-radius: 8px;
+}
+
+/* Info Boxes and Legends */
+.legend,
+.data-files,
+.operators,
+.info-box {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+  margin: 1rem 0;
+}
+
+.legend h3,
+.data-files h3,
+.info-box h3 {
+  margin-top: 0;
+  color: #495057;
+}
+
+.data-files {
+  background: #e7f3ff;
+  border-left: 4px solid #007bff;
+}
+
+.data-files h3 {
+  color: #0056b3;
+}
+
+/* Operator/Example Lists */
+.operator-list,
+.example-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.operator-item,
+.example-item {
+  font-family: monospace;
+  background: white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+  font-weight: 600;
+}
+
+/* Frequency/Category Indicators */
+.frequent {
+  color: #000;
+  font-weight: 600;
+}
+
+.infrequent {
+  color: #6c757d;
+  font-weight: 400;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+}
+
+.legend-color {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 2px;
+}
+
+.frequent-color {
+  background: #000;
+}
+
+.infrequent-color {
+  background: #6c757d;
+}
+
+/* Interactive Elements */
+.syllabary-table span {
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border-radius: 3px;
+  padding: 0.25rem;
+  display: inline-block;
+}
+
+.syllabary-table span:hover {
+  background: #007bff !important;
+  color: white !important;
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  /* Tables */
+  .data-table,
+  .syllabary-table,
+  .truth-table table {
+    background: #2d3748;
+    border-color: #4a5568;
+  }
+
+  .data-table th,
+  .syllabary-table th,
+  .truth-table th {
+    background: #63b3ed;
+    color: #1a202c;
+    border-color: #4299e1;
+  }
+
+  .syllabary-table th:first-child {
+    background: #4a5568;
+    color: #e2e8f0;
+  }
+
+  .data-table td,
+  .syllabary-table td,
+  .truth-table td {
+    border-color: #4a5568;
+    color: #e2e8f0;
+  }
+
+  .data-table tr:nth-child(even),
+  .syllabary-table tr:nth-child(even),
+  .truth-table tr:nth-child(even) {
+    background: #1a202c;
+  }
+
+  .data-table tr:hover,
+  .syllabary-table tr:hover,
+  .truth-table tr:hover {
+    background: #4a5568;
+  }
+
+  /* Info Boxes */
+  .legend,
+  .operators,
+  .info-box {
+    background: #1a202c;
+    border-color: #4a5568;
+  }
+
+  .legend h3,
+  .data-files h3,
+  .info-box h3 {
+    color: #e2e8f0;
+  }
+
+  .data-files {
+    background: #1e3a5f;
+    border-color: #63b3ed;
+  }
+
+  .data-files h3 {
+    color: #90cdf4;
+  }
+
+  /* Lists */
+  .operator-item,
+  .example-item {
+    background: #2d3748;
+    border-color: #4a5568;
+    color: #e2e8f0;
+  }
+
+  /* Frequency indicators */
+  .frequent {
+    color: #e2e8f0;
+  }
+
+  .infrequent {
+    color: #a0aec0;
+  }
+
+  .frequent-color {
+    background: #e2e8f0;
+  }
+
+  .infrequent-color {
+    background: #a0aec0;
+  }
+
+  /* Interactive */
+  .syllabary-table span:hover {
+    background: #63b3ed !important;
+    color: #1a202c !important;
+  }
+}

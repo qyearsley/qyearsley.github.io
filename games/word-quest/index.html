@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Word Quest</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="styles/main.css" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <style>
+      /* Debug - ensure content is visible */
+      #game-container {
+        display: block !important;
+        visibility: visible !important;
+        min-height: 100vh;
+      }
+
+      /* Override breadcrumb styling for quest theme */
+      #title-screen .breadcrumbs {
+        margin-bottom: 1rem;
+        justify-content: center;
+      }
+      #title-screen .breadcrumbs a {
+        color: #c17817;
+        font-weight: 600;
+      }
+      #title-screen .breadcrumbs a:hover {
+        color: #d4922f;
+      }
+      #title-screen .breadcrumbs .separator {
+        color: #d4a574;
+      }
+      #title-screen .breadcrumbs .current {
+        color: #8b5a00;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="game-container">
+      <!-- Title Screen -->
+      <div id="title-screen" class="screen active">
+        <nav class="breadcrumbs">
+          <a href="/">Home</a>
+          <span class="separator">/</span>
+          <a href="/games/">Games</a>
+          <span class="separator">/</span>
+          <span class="current">Word Quest</span>
+        </nav>
+        <h1 class="game-title">📜 Word Quest 🗝️</h1>
+        <p class="subtitle">Decode the ancient words!</p>
+        <div class="title-buttons">
+          <button id="start-button" class="big-button">Start Quest</button>
+          <button id="continue-button" class="big-button hidden">Continue Quest</button>
+          <button id="start-fresh-button" class="secondary-button hidden">New Quest</button>
+        </div>
+      </div>
+
+      <!-- Settings Screen -->
+      <div id="settings-screen" class="screen">
+        <div class="header">
+          <h2>Choose Your Decoder Rank</h2>
+        </div>
+
+        <div class="settings-content">
+          <div class="setting-group">
+            <h3>Difficulty Level</h3>
+            <div class="difficulty-options">
+              <label class="difficulty-option">
+                <input type="radio" name="difficulty" value="explorer" checked />
+                <div class="difficulty-card">
+                  <div class="difficulty-icon">🌟</div>
+                  <h4>Explorer</h4>
+                  <p>Kindergarten - 1st Grade</p>
+                  <ul>
+                    <li>Letter sounds</li>
+                    <li>Simple 2-3 letter words</li>
+                    <li>Basic sight words</li>
+                  </ul>
+                </div>
+              </label>
+
+              <label class="difficulty-option">
+                <input type="radio" name="difficulty" value="adventurer" />
+                <div class="difficulty-card">
+                  <div class="difficulty-icon">⭐⭐</div>
+                  <h4>Adventurer</h4>
+                  <p>1st - 2nd Grade</p>
+                  <ul>
+                    <li>Word families</li>
+                    <li>3-5 letter words</li>
+                    <li>More sight words</li>
+                  </ul>
+                </div>
+              </label>
+
+              <label class="difficulty-option">
+                <input type="radio" name="difficulty" value="master" />
+                <div class="difficulty-card">
+                  <div class="difficulty-icon">⭐⭐⭐</div>
+                  <h4>Master</h4>
+                  <p>2nd - 3rd Grade</p>
+                  <ul>
+                    <li>Complex patterns</li>
+                    <li>Multi-syllable words</li>
+                    <li>Advanced spelling</li>
+                  </ul>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <h3>Activities Per Level</h3>
+            <div class="activities-options">
+              <label><input type="radio" name="questionsPerLevel" value="3" /> 3 (Quick)</label>
+              <label><input type="radio" name="questionsPerLevel" value="5" checked /> 5 (Standard)</label>
+              <label><input type="radio" name="questionsPerLevel" value="8" /> 8 (Long)</label>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <h3>Input Mode</h3>
+            <div class="input-options">
+              <label><input type="radio" name="inputMode" value="multipleChoice" checked /> Multiple Choice (Easier)</label>
+              <label><input type="radio" name="inputMode" value="keyboard" /> Type Answers (Harder)</label>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <h3>Audio Support</h3>
+            <div class="audio-options">
+              <label><input type="checkbox" name="audioHints" checked /> Play word sounds</label>
+            </div>
+          </div>
+        </div>
+
+        <button id="settings-start-button" class="big-button">Begin Quest</button>
+      </div>
+
+      <!-- Quest Map Screen -->
+      <div id="quest-map" class="screen">
+        <div class="header">
+          <h2>Quest Map</h2>
+          <button id="home-button" class="text-button" aria-label="Return to start screen">
+            ← Home
+          </button>
+        </div>
+
+        <div class="map-container">
+          <div class="decoder-rank">
+            <span id="rank-display">Apprentice Decoder</span>
+            <span id="stars-display">⭐ 0 Stars</span>
+          </div>
+
+          <div class="quest-paths">
+            <!-- Quest areas will be dynamically added here -->
+          </div>
+        </div>
+
+        <button id="settings-button" class="secondary-button">⚙️ Settings</button>
+      </div>
+
+      <!-- Activity Screen -->
+      <div id="activity-screen" class="screen">
+        <div class="header">
+          <button id="back-to-map-button" class="nav-button" aria-label="Return to quest map">
+            ← Map
+          </button>
+          <div class="activity-header-info">
+            <h3 id="quest-name">Sound Cipher</h3>
+            <div class="progress-info">
+              <span id="activity-progress">Question 1 of 5</span>
+              <span id="activity-stars">⭐ 0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="activity-content">
+          <div id="activity-question" class="question-area">
+            <!-- Activity content will be dynamically generated -->
+          </div>
+
+          <div id="activity-choices" class="choices-area">
+            <!-- Choices will be dynamically generated -->
+          </div>
+
+          <div id="activity-feedback" class="feedback-area hidden">
+            <!-- Feedback messages -->
+          </div>
+        </div>
+
+        <div class="activity-controls">
+          <button id="submit-answer" class="big-button" disabled>Submit</button>
+          <button id="next-activity" class="big-button hidden">Next →</button>
+        </div>
+      </div>
+
+      <!-- Level Complete Screen -->
+      <div id="level-complete" class="screen">
+        <div class="celebration">
+          <h2>🎉 Quest Complete! 🎉</h2>
+          <div id="completion-message" class="completion-message">
+            <!-- Dynamic completion message -->
+          </div>
+          <div id="rewards-display" class="rewards">
+            <!-- Rewards will be shown here -->
+          </div>
+          <div class="completion-buttons">
+            <button id="continue-quest-button" class="big-button">Continue Quest</button>
+            <button id="return-to-map-button" class="secondary-button">Return to Map</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game Scripts -->
+    <script type="module" src="js/storage.js"></script>
+    <script type="module" src="js/WordBank.js"></script>
+    <script type="module" src="js/GameState.js"></script>
+    <script type="module" src="js/WordActivityGenerator.js"></script>
+    <script type="module" src="js/GameUI.js"></script>
+    <script type="module" src="js/SoundManager.js"></script>
+    <script type="module" src="js/EventManager.js"></script>
+    <script type="module" src="js/game.js"></script>
+  </body>
+</html>

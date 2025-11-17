@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Markov Chain Text Generator</title>
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/components.css" />
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
     <style>
       body {
@@ -14,13 +16,6 @@
         line-height: 1.6;
         background-color: #ffffff;
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%23e0e0e0' fill-opacity='0.2' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E");
-      }
-
-      .container {
-        background: #f8f9fa;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 20px;
       }
 
       h1 {
@@ -38,61 +33,6 @@
         margin-bottom: 5px;
         font-weight: 600;
         color: #555;
-      }
-
-      textarea,
-      input,
-      select {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 14px;
-        box-sizing: border-box;
-        background: white;
-        transition:
-          border-color 0.2s,
-          box-shadow 0.2s;
-      }
-
-      textarea:focus,
-      input:focus,
-      select:focus {
-        outline: none;
-        border-color: #007bff;
-        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-      }
-
-      textarea {
-        height: 120px;
-        resize: vertical;
-      }
-
-      .controls {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
-        margin-bottom: 15px;
-      }
-
-      button {
-        background: #007bff;
-        color: white;
-        border: none;
-        padding: 12px 24px;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 16px;
-        transition: background-color 0.2s;
-      }
-
-      button:hover {
-        background: #0056b3;
-      }
-
-      button:disabled {
-        background: #6c757d;
-        cursor: not-allowed;
       }
 
       .output {
