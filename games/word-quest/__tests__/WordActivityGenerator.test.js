@@ -36,11 +36,11 @@ describe("WordActivityGenerator", () => {
       expect(activity.choices).toBeInstanceOf(Array)
     })
 
-    test("should generate blending-workshop activity", () => {
+    test("should generate blending-workshop (spelling) activity", () => {
       const activity = generator.generateActivity(1, "blending-workshop", "explorer")
 
       expect(activity).toBeDefined()
-      expect(activity.type).toBe("blend-cvc")
+      expect(activity.type).toBe("spell-beginning")
       expect(activity.word).toBeDefined()
     })
 

@@ -92,27 +92,34 @@ export class GameUI {
       .map((questId) => {
         const theme = this.activityGenerator.getQuestTheme(questId)
         const isUnlocked = this.gameState.isQuestUnlocked(questId)
+        const isCompleted = this.gameState.isQuestCompleted(questId)
         const progress = this.gameState.getQuestProgress(questId)
+
+        let statusText = ""
+        let statusClass = ""
+
+        if (isCompleted) {
+          statusText = `✓ Complete (${progress.stars} ⭐)`
+          statusClass = "completed"
+        } else if (isUnlocked) {
+          statusText = "Start Quest →"
+          statusClass = "unlocked"
+        } else {
+          statusText = "🔒 Locked"
+          statusClass = "locked"
+        }
+
         const ariaLabel = isUnlocked
-          ? `${theme.name}: ${theme.description}. ${progress.completed} levels completed, ${progress.stars} stars earned. Click to start.`
+          ? `${theme.name}: ${theme.description}. ${isCompleted ? "Completed" : "Ready to start"}. Click to start.`
           : `${theme.name}: Locked. Complete previous quest to unlock.`
 
         return `
-        <div class="quest-card ${isUnlocked ? "unlocked" : "locked"}" data-quest-id="${questId}" role="listitem" ${isUnlocked ? 'tabindex="0"' : ""} aria-label="${ariaLabel}">
+        <div class="quest-card ${statusClass}" data-quest-id="${questId}" role="listitem" ${isUnlocked ? 'tabindex="0"' : ""} aria-label="${ariaLabel}">
           <div class="quest-icon" aria-hidden="true">${theme.icon}</div>
           <div class="quest-info">
             <h3>${theme.name}</h3>
-            <p>${theme.description}</p>
-            ${
-              isUnlocked
-                ? `
-              <div class="quest-progress" aria-hidden="true">
-                <span>${progress.completed} levels completed</span>
-                <span>⭐ ${progress.stars}</span>
-              </div>
-            `
-                : '<div class="locked-message" aria-hidden="true">🔒 Complete previous quest to unlock</div>'
-            }
+            <p class="quest-description">${theme.description}</p>
+            <div class="quest-status">${statusText}</div>
           </div>
         </div>
       `
@@ -192,11 +199,30 @@ export class GameUI {
         // Multiple choice mode - show buttons
         choicesArea.innerHTML = activity.choices
           .map(
-            (choice, index) => `
-          <button class="choice-button" data-value="${choice}" role="radio" aria-checked="false" aria-label="Choice ${index + 1}: ${choice}">
-            ${choice}
+            (choice, index) => {
+              // Determine keyboard shortcut
+              let shortcut = ""
+              let shortcutData = ""
+              if (activity.type === "vowel-sound") {
+                // Use 's' and 'l' for short/long
+                if (choice === "short") {
+                  shortcut = " (S)"
+                  shortcutData = ` data-shortcut="s"`
+                } else if (choice === "long") {
+                  shortcut = " (L)"
+                  shortcutData = ` data-shortcut="l"`
+                }
+              } else {
+                // Use numbers 1-4
+                shortcut = ` (${index + 1})`
+              }
+
+              return `
+          <button class="choice-button" data-value="${choice}"${shortcutData} role="radio" aria-checked="false" aria-label="Choice ${index + 1}: ${choice}">
+            ${choice}<span class="keyboard-hint">${shortcut}</span>
           </button>
-        `,
+        `
+            },
           )
           .join("")
       }
@@ -234,7 +260,6 @@ export class GameUI {
         <div class="feedback correct">
           <div class="feedback-icon">✨</div>
           <h3>Correct!</h3>
-          <p>Great job decoding that word!</p>
         </div>
       `
     } else {
@@ -242,8 +267,7 @@ export class GameUI {
         <div class="feedback incorrect">
           <div class="feedback-icon">🔍</div>
           <h3>Not quite!</h3>
-          <p>The correct answer is: <strong>${activity.correctAnswer}</strong></p>
-          ${activity.hint ? `<p class="hint">💡 ${activity.hint}</p>` : ""}
+          <p>The answer is: <strong>${activity.correctAnswer}</strong></p>
         </div>
       `
     }
@@ -261,21 +285,21 @@ export class GameUI {
     if (completionMessage) {
       const questTheme = this.activityGenerator.getQuestTheme(this.gameState.currentQuest)
       completionMessage.innerHTML = `
-        <h3>You completed ${questTheme.name}!</h3>
-        <p>You earned ${this.gameState.settings.questionsPerLevel} stars!</p>
+        <h3>Quest Complete! 🎉</h3>
+        <p>You mastered ${questTheme.name}!</p>
       `
     }
 
     if (rewardsDisplay) {
-      const progress = this.gameState.getQuestProgress(this.gameState.currentQuest)
+      const totalCompleted = Array.from(this.gameState.completedQuests).length
       rewardsDisplay.innerHTML = `
         <div class="reward-stats">
           <div class="stat">
-            <span class="stat-value">${progress.completed}</span>
-            <span class="stat-label">Levels Completed</span>
+            <span class="stat-value">${totalCompleted}</span>
+            <span class="stat-label">Quests Complete</span>
           </div>
           <div class="stat">
-            <span class="stat-value">${progress.stars}</span>
+            <span class="stat-value">${this.gameState.stats.stars}</span>
             <span class="stat-label">Total Stars</span>
           </div>
           <div class="stat">

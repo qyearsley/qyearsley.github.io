@@ -14,8 +14,8 @@ export class WordActivityGenerator {
       },
       "blending-workshop": {
         icon: "🧩",
-        name: "Blending Workshop",
-        description: "Combine sounds into words",
+        name: "Spelling Workshop",
+        description: "Listen and spell words",
       },
       "speed-vault": {
         icon: "⚡",
@@ -128,12 +128,12 @@ export class WordActivityGenerator {
 
       return {
         type: "magic-e",
-        question: `What word has the magic 'e' at the end?`,
-        visual: `Listen for the long vowel sound`,
+        question: `Which word do you hear?`,
+        visual: `Listen carefully`,
         correctAnswer: correctWord,
         choices: this.generateSimilarWords(correctWord, "adventurer", 3),
         audioWord: correctWord,
-        hint: `The magic 'e' makes the vowel say its name!`,
+        hint: `This word has a magic 'e' that makes the vowel say its name!`,
         word: correctWord,
       }
     } else if (useDigraph) {
@@ -157,12 +157,12 @@ export class WordActivityGenerator {
 
       return {
         type: "digraph",
-        question: `Which letters work together in "${correctWord}"?`,
+        question: `What digraph is in "${correctWord}"?`,
         visual: correctWord,
         correctAnswer: digraph,
         choices: this.shuffleArray([digraph, ...selectedDistractors]),
         audioWord: correctWord,
-        hint: `Two letters work together to make one sound!`,
+        hint: `A digraph is two letters that make one sound!`,
         word: correctWord,
       }
     } else {
@@ -258,61 +258,128 @@ export class WordActivityGenerator {
   }
 
   /**
-   * BLENDING WORKSHOP - Combining sounds into words
+   * BLENDING WORKSHOP - Spelling from sounds
    */
   generateBlendingActivity(activityNumber, difficulty) {
     if (difficulty === "explorer") {
-      // Simple CVC blending
+      // Simple CVC spelling - choose beginning sound
       const words = this.wordBank.getWords("explorer", "cvc")
       const correctWord = words[activityNumber % words.length]
-      const sounds = correctWord.split("")
+      const firstLetter = correctWord[0]
+      const restOfWord = correctWord.substring(1)
+
+      // Generate distractor letters
+      const allLetters = "bcdfghjklmnpqrstvwxyz".split("")
+      const distractors = this.getRandomItems(
+        allLetters.filter((l) => l !== firstLetter),
+        2,
+      )
 
       return {
-        type: "blend-cvc",
-        question: `Blend these sounds together:`,
-        visual: sounds.join(" - "),
-        correctAnswer: correctWord,
-        choices: this.generateSimilarWords(correctWord, difficulty, 3),
+        type: "spell-beginning",
+        question: `What letter does this word start with?`,
+        visual: `_ ${restOfWord}`,
+        correctAnswer: firstLetter,
+        choices: this.shuffleArray([firstLetter, ...distractors]),
         audioWord: correctWord,
-        hint: `Say each sound, then say them faster!`,
+        hint: `Listen to the first sound!`,
         word: correctWord,
-        sounds: sounds,
       }
     } else if (difficulty === "adventurer") {
-      // CVCe or blend words
-      const useBlend = activityNumber % 2 === 0
-      const words = useBlend
-        ? this.wordBank.getWords("adventurer", "blends")
+      // CVCe or digraph spelling - choose middle/vowel sound
+      const useDigraph = activityNumber % 2 === 0
+      const words = useDigraph
+        ? this.wordBank.getWords("adventurer", "digraphs")
         : this.wordBank.getWords("adventurer", "cvce")
       const correctWord = words[activityNumber % words.length]
 
-      return {
-        type: "blend-word",
-        question: `What word do these sounds make?`,
-        visual: this.breakIntoPhonemes(correctWord).join(" - "),
-        correctAnswer: correctWord,
-        choices: this.generateSimilarWords(correctWord, difficulty, 3),
-        audioWord: correctWord,
-        hint: `Blend the sounds smoothly together!`,
-        word: correctWord,
+      // For digraphs, find the digraph position
+      if (useDigraph) {
+        const digraphs = ["ch", "sh", "th", "wh"]
+        for (const digraph of digraphs) {
+          const index = correctWord.indexOf(digraph)
+          if (index !== -1) {
+            const before = correctWord.substring(0, index)
+            const after = correctWord.substring(index + 2)
+            const distractors = digraphs.filter((d) => d !== digraph).slice(0, 2)
+
+            return {
+              type: "spell-digraph",
+              question: `How do you spell this word?`,
+              visual: `${before} __ ${after}`,
+              correctAnswer: digraph,
+              choices: this.shuffleArray([digraph, ...distractors]),
+              audioWord: correctWord,
+              hint: `Listen for the digraph sound!`,
+              word: correctWord,
+            }
+          }
+        }
       }
+
+      // For CVCe, choose the vowel
+      const vowelIndex = correctWord.search(/[aeiou]/)
+      if (vowelIndex !== -1) {
+        const vowel = correctWord[vowelIndex]
+        const before = correctWord.substring(0, vowelIndex)
+        const after = correctWord.substring(vowelIndex + 1)
+        const distractors = "aeiou".split("").filter((v) => v !== vowel).slice(0, 2)
+
+        return {
+          type: "spell-vowel",
+          question: `What vowel do you hear in this word?`,
+          visual: `${before} __ ${after}`,
+          correctAnswer: vowel,
+          choices: this.shuffleArray([vowel, ...distractors]),
+          audioWord: correctWord,
+          hint: `Listen for the long vowel sound!`,
+          word: correctWord,
+        }
+      }
+
+      // Fallback
+      return this.generateSpellingActivity(activityNumber, difficulty)
     } else {
-      // Multi-syllable blending
+      // Multi-syllable spelling - choose missing part
       const words = this.wordBank.getWords("master", "multiSyllable")
       const correctWord = words[activityNumber % words.length]
       const syllables = this.breakIntoSyllables(correctWord)
 
-      return {
-        type: "blend-syllables",
-        question: `Put these syllables together:`,
-        visual: syllables.join(" - "),
-        correctAnswer: correctWord,
-        choices: this.generateSimilarWords(correctWord, difficulty, 3),
-        audioWord: correctWord,
-        hint: `Say each syllable, then put them together!`,
-        word: correctWord,
-        syllables: syllables,
+      if (syllables.length >= 2) {
+        // Pick a syllable to blank out
+        const blankIndex = activityNumber % syllables.length
+        const correctSyllable = syllables[blankIndex]
+
+        // Create visual with blank
+        const visual = syllables
+          .map((syl, i) => (i === blankIndex ? "___" : syl))
+          .join("")
+
+        // Generate distractors (other syllables from similar words)
+        const allWords = this.wordBank.getWords("master", "multiSyllable")
+        const allSyllables = []
+        for (const w of allWords) {
+          allSyllables.push(...this.breakIntoSyllables(w))
+        }
+        const distractors = this.getRandomItems(
+          allSyllables.filter((s) => s !== correctSyllable && s.length === correctSyllable.length),
+          2,
+        )
+
+        return {
+          type: "spell-syllable",
+          question: `What syllable is missing?`,
+          visual: visual,
+          correctAnswer: correctSyllable,
+          choices: this.shuffleArray([correctSyllable, ...distractors]),
+          audioWord: correctWord,
+          hint: `Listen to the whole word!`,
+          word: correctWord,
+        }
       }
+
+      // Fallback
+      return this.generateSpellingActivity(activityNumber, difficulty)
     }
   }
 
