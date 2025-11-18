@@ -119,13 +119,11 @@ export class GameState {
    * Complete current level
    */
   completeLevel() {
-    this.stats.currentLevel++
-    this.stats.currentLevelProgress = 0
-
-    // Update quest progress
+    // Mark quest as completed
     if (this.currentQuest) {
-      this.questProgress[this.currentQuest].completed++
-      this.questProgress[this.currentQuest].stars += this.settings.questionsPerLevel
+      this.completedQuests.add(this.currentQuest)
+      this.questProgress[this.currentQuest].completed = 1
+      this.questProgress[this.currentQuest].stars = this.settings.questionsPerLevel
     }
 
     // Check if we should unlock next quest
@@ -147,11 +145,10 @@ export class GameState {
       "story-vault",
     ]
 
-    // Unlock next quest after completing 5 levels in current quest
+    // Unlock next quest after completing current quest
     const currentIndex = quests.indexOf(this.currentQuest)
     if (currentIndex >= 0 && currentIndex < quests.length - 1) {
-      const levelsCompleted = this.questProgress[this.currentQuest].completed
-      if (levelsCompleted >= 5) {
+      if (this.completedQuests.has(this.currentQuest)) {
         this.unlockedQuests.add(quests[currentIndex + 1])
       }
     }

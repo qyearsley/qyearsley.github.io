@@ -131,42 +131,40 @@ describe("GameState", () => {
   })
 
   describe("completeLevel", () => {
-    test("should increment level and reset progress", () => {
-      gameState.stats.currentLevel = 1
-      gameState.stats.currentLevelProgress = 5
-
-      gameState.completeLevel()
-
-      expect(gameState.stats.currentLevel).toBe(2)
-      expect(gameState.stats.currentLevelProgress).toBe(0)
-    })
-
-    test("should update quest progress", () => {
+    test("should mark quest as completed", () => {
       gameState.currentQuest = "sound-cipher"
       gameState.settings.questionsPerLevel = 5
 
-      const initialCompleted = gameState.questProgress["sound-cipher"].completed
+      gameState.completeLevel()
+
+      expect(gameState.isQuestCompleted("sound-cipher")).toBe(true)
+      expect(gameState.questProgress["sound-cipher"].completed).toBe(1)
+      expect(gameState.questProgress["sound-cipher"].stars).toBe(5)
+    })
+
+    test("should unlock next quest when current is completed", () => {
+      gameState.currentQuest = "sound-cipher"
+      gameState.settings.questionsPerLevel = 5
 
       gameState.completeLevel()
 
-      expect(gameState.questProgress["sound-cipher"].completed).toBe(initialCompleted + 1)
-      expect(gameState.questProgress["sound-cipher"].stars).toBeGreaterThan(0)
+      expect(gameState.isQuestUnlocked("blending-workshop")).toBe(true)
     })
   })
 
   describe("checkUnlocks", () => {
-    test("should unlock next quest after 5 completions", () => {
+    test("should unlock next quest after completing current quest", () => {
       gameState.currentQuest = "sound-cipher"
-      gameState.questProgress["sound-cipher"].completed = 5
+      gameState.completedQuests.add("sound-cipher")
 
       gameState.checkUnlocks()
 
       expect(gameState.isQuestUnlocked("blending-workshop")).toBe(true)
     })
 
-    test("should not unlock if less than 5 completions", () => {
+    test("should not unlock if current quest not completed", () => {
       gameState.currentQuest = "sound-cipher"
-      gameState.questProgress["sound-cipher"].completed = 3
+      // Don't mark as completed
 
       gameState.checkUnlocks()
 

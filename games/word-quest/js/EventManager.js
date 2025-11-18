@@ -83,7 +83,7 @@ export class EventManager {
 
     // Level complete buttons
     document.getElementById("continue-quest-button")?.addEventListener("click", () => {
-      this.game.startLevel(this.game.gameState.currentQuest)
+      this.game.showScreen("quest-map")
     })
 
     document.getElementById("return-to-map-button")?.addEventListener("click", () => {
@@ -141,15 +141,35 @@ export class EventManager {
 
     // Activity screen shortcuts
     if (currentScreen === "activity-screen") {
+      // Check if user is typing in an input field
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
+        return
+      }
+
       // Number keys 1-4 to select choices (only if not already answered)
       if (!this.answered && ["1", "2", "3", "4"].includes(e.key)) {
         e.preventDefault()
         const choiceIndex = parseInt(e.key) - 1
         const choices = document.querySelectorAll(".choice-button")
-        if (choices[choiceIndex]) {
+        if (choices[choiceIndex] && !choices[choiceIndex].disabled) {
           this.handleChoiceClick(choices[choiceIndex])
         }
         return
+      }
+
+      // Support for letter shortcuts (s/l for short/long)
+      if (!this.answered) {
+        const choices = document.querySelectorAll(".choice-button")
+        for (const choice of choices) {
+          const shortcut = choice.dataset.shortcut
+          if (shortcut && e.key.toLowerCase() === shortcut.toLowerCase()) {
+            e.preventDefault()
+            if (!choice.disabled) {
+              this.handleChoiceClick(choice)
+            }
+            return
+          }
+        }
       }
     }
 
@@ -253,7 +273,7 @@ export class EventManager {
     // Auto-advance to next question after a short delay (like Enchanted Garden)
     setTimeout(() => {
       this.game.nextActivity()
-    }, 1500)
+    }, 1000)
   }
 
   /**
@@ -294,7 +314,7 @@ export class EventManager {
     // Auto-advance to next question after a short delay
     setTimeout(() => {
       this.game.nextActivity()
-    }, 1500)
+    }, 1000)
   }
 
   /**
