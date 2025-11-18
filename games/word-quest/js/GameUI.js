@@ -36,9 +36,6 @@ export class GameUI {
       case "title-screen":
         this.updateTitleScreen()
         break
-      case "settings-screen":
-        this.updateSettingsScreen()
-        break
       case "quest-map":
         this.updateQuestMap()
         break
@@ -62,31 +59,6 @@ export class GameUI {
       continueButton?.classList.add("hidden")
       startFreshButton?.classList.add("hidden")
     }
-  }
-
-  /**
-   * Update settings screen with current settings
-   */
-  updateSettingsScreen() {
-    const settings = this.gameState.settings
-
-    // Set difficulty radio
-    const difficultyRadio = document.querySelector(`input[name="difficulty"][value="${settings.difficulty}"]`)
-    if (difficultyRadio) difficultyRadio.checked = true
-
-    // Set questions per level
-    const questionsRadio = document.querySelector(
-      `input[name="questionsPerLevel"][value="${settings.questionsPerLevel}"]`,
-    )
-    if (questionsRadio) questionsRadio.checked = true
-
-    // Set input mode
-    const inputRadio = document.querySelector(`input[name="inputMode"][value="${settings.inputMode}"]`)
-    if (inputRadio) inputRadio.checked = true
-
-    // Set audio hints
-    const audioCheckbox = document.querySelector('input[name="audioHints"]')
-    if (audioCheckbox) audioCheckbox.checked = settings.audioHints
   }
 
   /**
@@ -196,15 +168,38 @@ export class GameUI {
 
     // Render choices
     if (choicesArea) {
-      choicesArea.innerHTML = activity.choices
-        .map(
-          (choice, index) => `
-        <button class="choice-button" data-value="${choice}" role="radio" aria-checked="false" aria-label="Choice ${index + 1}: ${choice}">
-          ${choice}
-        </button>
-      `,
-        )
-        .join("")
+      const inputMode = this.gameState.settings.inputMode
+
+      if (inputMode === "keyboard") {
+        // Keyboard input mode - show text input
+        choicesArea.innerHTML = `
+          <div class="keyboard-input-container">
+            <input
+              type="text"
+              id="answer-input"
+              class="answer-input"
+              placeholder="Type your answer..."
+              autocomplete="off"
+              autocapitalize="off"
+              aria-label="Type your answer"
+            />
+            <button id="submit-answer-button" class="big-button" aria-label="Submit your answer">
+              Submit
+            </button>
+          </div>
+        `
+      } else {
+        // Multiple choice mode - show buttons
+        choicesArea.innerHTML = activity.choices
+          .map(
+            (choice, index) => `
+          <button class="choice-button" data-value="${choice}" role="radio" aria-checked="false" aria-label="Choice ${index + 1}: ${choice}">
+            ${choice}
+          </button>
+        `,
+          )
+          .join("")
+      }
     }
 
     // Reset feedback

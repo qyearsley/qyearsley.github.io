@@ -11,11 +11,7 @@ export class EventManager {
   setupEventListeners() {
     // Title screen buttons
     document.getElementById("start-button")?.addEventListener("click", () => {
-      if (this.game.gameState.hasSavedProgress()) {
-        this.game.showScreen("settings-screen")
-      } else {
-        this.game.showScreen("settings-screen")
-      }
+      this.game.showScreen("quest-map")
     })
 
     document.getElementById("continue-button")?.addEventListener("click", () => {
@@ -25,13 +21,28 @@ export class EventManager {
     document.getElementById("start-fresh-button")?.addEventListener("click", () => {
       if (confirm("Are you sure you want to start a new quest? This will reset all progress.")) {
         this.game.gameState.resetProgress()
-        this.game.showScreen("settings-screen")
+        this.game.showScreen("quest-map")
       }
     })
 
-    // Settings screen
-    document.getElementById("settings-start-button")?.addEventListener("click", () => {
-      this.handleSettingsSubmit()
+    // Settings modal buttons
+    document.getElementById("settings-button")?.addEventListener("click", () => {
+      this.openSettingsModal()
+    })
+
+    document.getElementById("activity-settings-button")?.addEventListener("click", () => {
+      this.openSettingsModal()
+    })
+
+    document.getElementById("close-settings")?.addEventListener("click", () => {
+      this.closeSettingsModal()
+    })
+
+    // Close modal when clicking outside
+    document.getElementById("settings-modal")?.addEventListener("click", (e) => {
+      if (e.target.id === "settings-modal") {
+        this.closeSettingsModal()
+      }
     })
 
     // Quest map buttons
@@ -39,13 +50,27 @@ export class EventManager {
       this.game.showScreen("title-screen")
     })
 
-    document.getElementById("settings-button")?.addEventListener("click", () => {
-      this.game.showScreen("settings-screen")
-    })
-
     // Activity screen buttons
     document.getElementById("back-to-map-button")?.addEventListener("click", () => {
       this.game.showScreen("quest-map")
+    })
+
+    // Handle keyboard input submission (delegate to handle submit-answer-button)
+    document.addEventListener("click", (e) => {
+      if (e.target.id === "submit-answer-button") {
+        this.handleKeyboardSubmit()
+      }
+    })
+
+    // Handle Enter key in text input
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        const answerInput = document.getElementById("answer-input")
+        if (answerInput && document.activeElement === answerInput) {
+          e.preventDefault()
+          this.handleKeyboardSubmit()
+        }
+      }
     })
 
     document.getElementById("submit-answer")?.addEventListener("click", () => {
@@ -96,14 +121,17 @@ export class EventManager {
   handleKeyboardShortcuts(e) {
     const currentScreen = this.game.gameState.currentScreen
 
-    // Escape key - go back/cancel
+    // Escape key - close modal or go back
     if (e.key === "Escape") {
       e.preventDefault()
+      const modal = document.getElementById("settings-modal")
+      if (modal && !modal.classList.contains("hidden")) {
+        this.closeSettingsModal()
+        return
+      }
       if (currentScreen === "activity-screen") {
         this.game.showScreen("quest-map")
       } else if (currentScreen === "quest-map") {
-        this.game.showScreen("title-screen")
-      } else if (currentScreen === "settings-screen") {
         this.game.showScreen("title-screen")
       } else if (currentScreen === "level-complete") {
         this.game.showScreen("quest-map")
@@ -123,16 +151,6 @@ export class EventManager {
         }
         return
       }
-
-      // Enter key to proceed to next
-      if (e.key === "Enter" && this.answered) {
-        e.preventDefault()
-        const nextButton = document.getElementById("next-activity")
-        if (nextButton && !nextButton.classList.contains("hidden")) {
-          this.game.nextActivity()
-        }
-        return
-      }
     }
 
     // Quest map - Enter to select focused quest
@@ -147,14 +165,40 @@ export class EventManager {
   }
 
   /**
-   * Handle settings form submission
+   * Open settings modal
    */
-  handleSettingsSubmit() {
-    const difficulty = document.querySelector('input[name="difficulty"]:checked')?.value || "explorer"
-    const questionsPerLevel =
-      parseInt(document.querySelector('input[name="questionsPerLevel"]:checked')?.value) || 5
-    const inputMode = document.querySelector('input[name="inputMode"]:checked')?.value || "multipleChoice"
-    const audioHints = document.querySelector('input[name="audioHints"]')?.checked ?? true
+  openSettingsModal() {
+    const modal = document.getElementById("settings-modal")
+    if (!modal) return
+
+    // Populate current settings
+    const settings = this.game.gameState.settings
+
+    const difficultySelect = document.getElementById("difficulty-select")
+    const questionsSelect = document.getElementById("questions-per-level-select")
+    const inputModeSelect = document.getElementById("input-mode-select")
+    const audioHintsSelect = document.getElementById("audio-hints-select")
+
+    if (difficultySelect) difficultySelect.value = settings.difficulty
+    if (questionsSelect) questionsSelect.value = settings.questionsPerLevel.toString()
+    if (inputModeSelect) inputModeSelect.value = settings.inputMode
+    if (audioHintsSelect) audioHintsSelect.value = settings.audioHints.toString()
+
+    modal.classList.remove("hidden")
+  }
+
+  /**
+   * Close settings modal and save settings
+   */
+  closeSettingsModal() {
+    const modal = document.getElementById("settings-modal")
+    if (!modal) return
+
+    // Save settings
+    const difficulty = document.getElementById("difficulty-select")?.value || "explorer"
+    const questionsPerLevel = parseInt(document.getElementById("questions-per-level-select")?.value) || 5
+    const inputMode = document.getElementById("input-mode-select")?.value || "multipleChoice"
+    const audioHints = document.getElementById("audio-hints-select")?.value === "true"
 
     this.game.gameState.setDifficulty(difficulty)
     this.game.gameState.updateSettings({
@@ -164,7 +208,10 @@ export class EventManager {
       audioHints,
     })
 
-    this.game.showScreen("quest-map")
+    // Update sound manager
+    this.game.soundManager.setEnabled(audioHints)
+
+    modal.classList.add("hidden")
   }
 
   /**
@@ -203,17 +250,58 @@ export class EventManager {
       }
     })
 
-    // Hide submit button, show next button
-    document.getElementById("submit-answer")?.classList.add("hidden")
-    document.getElementById("next-activity")?.classList.remove("hidden")
+    // Auto-advance to next question after a short delay (like Enchanted Garden)
+    setTimeout(() => {
+      this.game.nextActivity()
+    }, 1500)
+  }
+
+  /**
+   * Handle keyboard input submission
+   */
+  handleKeyboardSubmit() {
+    // Ignore if already answered
+    if (this.answered) return
+
+    const answerInput = document.getElementById("answer-input")
+    if (!answerInput) return
+
+    const userAnswer = answerInput.value.trim().toLowerCase()
+    if (!userAnswer) return
+
+    // Mark as answered
+    this.answered = true
+
+    const activity = this.game.gameState.currentActivity
+    const correctAnswer = activity.correctAnswer.toString().toLowerCase()
+    const isCorrect = userAnswer === correctAnswer
+
+    // Disable input
+    answerInput.disabled = true
+    const submitButton = document.getElementById("submit-answer-button")
+    if (submitButton) submitButton.disabled = true
+
+    // Show feedback
+    this.game.showFeedback(isCorrect)
+
+    if (isCorrect) {
+      this.game.gameState.recordCorrectAnswer(activity.word)
+      answerInput.classList.add("correct")
+    } else {
+      answerInput.classList.add("incorrect")
+    }
+
+    // Auto-advance to next question after a short delay
+    setTimeout(() => {
+      this.game.nextActivity()
+    }, 1500)
   }
 
   /**
    * Handle answer submission (kept for compatibility)
    */
   handleSubmitAnswer() {
-    // This is now handled by handleChoiceClick
-    // Kept for any keyboard input mode in the future
+    // This is now handled by handleChoiceClick or handleKeyboardSubmit
   }
 
   /**
@@ -226,5 +314,17 @@ export class EventManager {
       btn.classList.remove("selected", "correct", "incorrect")
       btn.disabled = false
     })
+
+    // Clear keyboard input if present
+    const answerInput = document.getElementById("answer-input")
+    if (answerInput) {
+      answerInput.value = ""
+      answerInput.disabled = false
+      answerInput.classList.remove("correct", "incorrect")
+    }
+    const submitButton = document.getElementById("submit-answer-button")
+    if (submitButton) {
+      submitButton.disabled = false
+    }
   }
 }
