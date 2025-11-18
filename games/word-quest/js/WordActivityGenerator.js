@@ -125,12 +125,11 @@ export class WordActivityGenerator {
       // Magic E activity
       const cvceWords = this.wordBank.getWords("adventurer", "cvce")
       const correctWord = cvceWords[activityNumber % cvceWords.length]
-      const cvcBase = correctWord.slice(0, -1) // Remove the 'e'
 
       return {
         type: "magic-e",
-        question: `Which word is correct?`,
-        visual: `Transform: ${cvcBase} + e = ?`,
+        question: `What word has the magic 'e' at the end?`,
+        visual: `Listen for the long vowel sound`,
         correctAnswer: correctWord,
         choices: this.generateSimilarWords(correctWord, "adventurer", 3),
         audioWord: correctWord,
@@ -152,12 +151,16 @@ export class WordActivityGenerator {
         }
       }
 
+      // Get distractors that are different from the correct digraph
+      const distractorDigraphs = digraphs.filter((d) => d !== digraph)
+      const selectedDistractors = this.getRandomItems(distractorDigraphs, 2)
+
       return {
         type: "digraph",
-        question: `Which letters make the /sound/ in "${correctWord}"?`,
+        question: `Which letters work together in "${correctWord}"?`,
         visual: correctWord,
         correctAnswer: digraph,
-        choices: this.shuffleArray([digraph, ...this.getRandomItems(["ch", "sh", "th", "wh", "ph"], 2)]),
+        choices: this.shuffleArray([digraph, ...selectedDistractors]),
         audioWord: correctWord,
         hint: `Two letters work together to make one sound!`,
         word: correctWord,

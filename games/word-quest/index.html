@@ -62,95 +62,17 @@
         </div>
       </div>
 
-      <!-- Settings Screen -->
-      <div id="settings-screen" class="screen" role="region" aria-label="Game settings">
-        <div class="header">
-          <h2>Choose Your Decoder Rank</h2>
-        </div>
-
-        <div class="settings-content">
-          <div class="setting-group">
-            <h3 id="difficulty-label">Difficulty Level</h3>
-            <div class="difficulty-options" role="radiogroup" aria-labelledby="difficulty-label">
-              <label class="difficulty-option">
-                <input type="radio" name="difficulty" value="explorer" checked aria-describedby="explorer-desc" />
-                <div class="difficulty-card">
-                  <div class="difficulty-icon" aria-hidden="true">🌟</div>
-                  <h4>Explorer</h4>
-                  <p id="explorer-desc">Kindergarten - 1st Grade</p>
-                  <ul>
-                    <li>Letter sounds</li>
-                    <li>Simple 2-3 letter words</li>
-                    <li>Basic sight words</li>
-                  </ul>
-                </div>
-              </label>
-
-              <label class="difficulty-option">
-                <input type="radio" name="difficulty" value="adventurer" aria-describedby="adventurer-desc" />
-                <div class="difficulty-card">
-                  <div class="difficulty-icon" aria-hidden="true">⭐⭐</div>
-                  <h4>Adventurer</h4>
-                  <p id="adventurer-desc">1st - 2nd Grade</p>
-                  <ul>
-                    <li>Word families</li>
-                    <li>3-5 letter words</li>
-                    <li>More sight words</li>
-                  </ul>
-                </div>
-              </label>
-
-              <label class="difficulty-option">
-                <input type="radio" name="difficulty" value="master" aria-describedby="master-desc" />
-                <div class="difficulty-card">
-                  <div class="difficulty-icon" aria-hidden="true">⭐⭐⭐</div>
-                  <h4>Master</h4>
-                  <p id="master-desc">2nd - 3rd Grade</p>
-                  <ul>
-                    <li>Complex patterns</li>
-                    <li>Multi-syllable words</li>
-                    <li>Advanced spelling</li>
-                  </ul>
-                </div>
-              </label>
-            </div>
-          </div>
-
-          <div class="setting-group">
-            <h3 id="questions-label">Activities Per Level</h3>
-            <div class="activities-options" role="radiogroup" aria-labelledby="questions-label">
-              <label><input type="radio" name="questionsPerLevel" value="3" aria-label="3 activities per level, quick session" /> 3 (Quick)</label>
-              <label><input type="radio" name="questionsPerLevel" value="5" checked aria-label="5 activities per level, standard session" /> 5 (Standard)</label>
-              <label><input type="radio" name="questionsPerLevel" value="8" aria-label="8 activities per level, long session" /> 8 (Long)</label>
-            </div>
-          </div>
-
-          <div class="setting-group">
-            <h3 id="input-label">Input Mode</h3>
-            <div class="input-options" role="radiogroup" aria-labelledby="input-label">
-              <label><input type="radio" name="inputMode" value="multipleChoice" checked aria-label="Multiple choice input mode, easier" /> Multiple Choice (Easier)</label>
-              <label><input type="radio" name="inputMode" value="keyboard" aria-label="Keyboard input mode, harder" /> Type Answers (Harder)</label>
-            </div>
-          </div>
-
-          <div class="setting-group">
-            <h3 id="audio-label">Audio Support</h3>
-            <div class="audio-options">
-              <label><input type="checkbox" name="audioHints" checked aria-describedby="audio-desc" /> Play word sounds</label>
-              <p id="audio-desc" class="sr-only">Enable audio pronunciation of words using text-to-speech</p>
-            </div>
-          </div>
-        </div>
-
-        <button id="settings-start-button" class="big-button">Begin Quest</button>
-      </div>
-
       <!-- Quest Map Screen -->
       <div id="quest-map" class="screen" role="region" aria-label="Quest map">
         <div class="header">
-          <h2>Quest Map</h2>
-          <button id="home-button" class="text-button" aria-label="Return to start screen">
-            ← Home
+          <div>
+            <h2>Quest Map</h2>
+            <button id="home-button" class="text-button" aria-label="Return to start screen">
+              ← Home
+            </button>
+          </div>
+          <button id="settings-button" class="icon-button" title="Settings" aria-label="Open settings">
+            ⚙️
           </button>
         </div>
 
@@ -164,8 +86,6 @@
             <!-- Quest areas will be dynamically added here -->
           </div>
         </div>
-
-        <button id="settings-button" class="secondary-button" aria-label="Open settings">⚙️ Settings</button>
       </div>
 
       <!-- Activity Screen -->
@@ -181,6 +101,9 @@
               <span id="activity-stars" aria-label="Stars earned">⭐ 0</span>
             </div>
           </div>
+          <button id="activity-settings-button" class="icon-button" title="Settings" aria-label="Open settings">
+            ⚙️
+          </button>
         </div>
 
         <div class="activity-content">
@@ -218,6 +141,53 @@
             <button id="return-to-map-button" class="secondary-button" aria-label="Return to quest map">Return to Map</button>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hidden">
+      <div class="modal-content">
+        <h2>Settings ⚙️</h2>
+
+        <div class="setting-group">
+          <label for="difficulty-select">Difficulty Level:</label>
+          <select id="difficulty-select" class="setting-select">
+            <option value="explorer">Explorer (K-1st Grade)</option>
+            <option value="adventurer">Adventurer (1st-2nd Grade)</option>
+            <option value="master">Master (2nd-3rd Grade)</option>
+          </select>
+          <p class="setting-description">Choose the difficulty level for questions</p>
+        </div>
+
+        <div class="setting-group">
+          <label for="questions-per-level-select">Questions Per Level:</label>
+          <select id="questions-per-level-select" class="setting-select">
+            <option value="3">3 Questions</option>
+            <option value="5">5 Questions</option>
+            <option value="8">8 Questions</option>
+          </select>
+          <p class="setting-description">How many questions to complete each level</p>
+        </div>
+
+        <div class="setting-group">
+          <label for="input-mode-select">Answer Input:</label>
+          <select id="input-mode-select" class="setting-select">
+            <option value="multipleChoice">Multiple Choice</option>
+            <option value="keyboard">Type Answer</option>
+          </select>
+          <p class="setting-description">Choose how to answer questions</p>
+        </div>
+
+        <div class="setting-group">
+          <label for="audio-hints-select">Audio Hints:</label>
+          <select id="audio-hints-select" class="setting-select">
+            <option value="true">On</option>
+            <option value="false">Off</option>
+          </select>
+          <p class="setting-description">Play word sounds</p>
+        </div>
+
+        <button id="close-settings" class="big-button">Done</button>
       </div>
     </div>
 
