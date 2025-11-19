@@ -90,9 +90,9 @@ describe("WordActivityGenerator", () => {
 
     test("should use pictures when available", () => {
       // Find a word with a picture
-      const wordsWithPics = wordBank.getWords("explorer", "cvc").filter(w =>
-        wordBank.hasPicture("explorer", w)
-      )
+      const wordsWithPics = wordBank
+        .getWords("explorer", "cvc")
+        .filter((w) => wordBank.hasPicture("explorer", w))
 
       if (wordsWithPics.length > 0) {
         const activity = generator.generateBeginningSound(0)
@@ -203,7 +203,7 @@ describe("WordActivityGenerator", () => {
       const arr = ["a", "b", "c", "d"]
       const shuffled = generator.shuffleArray(arr)
 
-      arr.forEach(item => {
+      arr.forEach((item) => {
         expect(shuffled).toContain(item)
       })
     })
@@ -231,7 +231,7 @@ describe("WordActivityGenerator", () => {
       const theme = generator.getQuestTheme("invalid-quest")
 
       expect(theme).toBeDefined()
-      expect(theme.name).toBe("Sound Cipher")
+      expect(theme.name).toBe("Sound Code")
     })
 
     test("should have themes for all quests", () => {
@@ -244,7 +244,7 @@ describe("WordActivityGenerator", () => {
         "story-vault",
       ]
 
-      quests.forEach(quest => {
+      quests.forEach((quest) => {
         const theme = generator.getQuestTheme(quest)
         expect(theme).toBeDefined()
         expect(theme.icon).toBeTruthy()

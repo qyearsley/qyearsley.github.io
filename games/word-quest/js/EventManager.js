@@ -50,6 +50,16 @@ export class EventManager {
       this.game.showScreen("title-screen")
     })
 
+    // Word gallery button
+    document.getElementById("word-gallery-button")?.addEventListener("click", () => {
+      this.game.showScreen("word-gallery-screen")
+    })
+
+    // Word gallery back button
+    document.getElementById("gallery-back-button")?.addEventListener("click", () => {
+      this.game.showScreen("quest-map")
+    })
+
     // Activity screen buttons
     document.getElementById("back-to-map-button")?.addEventListener("click", () => {
       this.game.showScreen("quest-map")
@@ -176,7 +186,10 @@ export class EventManager {
     // Quest map - Enter to select focused quest
     if (currentScreen === "quest-map" && e.key === "Enter") {
       const focusedCard = document.activeElement
-      if (focusedCard?.classList.contains("quest-card") && focusedCard.classList.contains("unlocked")) {
+      if (
+        focusedCard?.classList.contains("quest-card") &&
+        focusedCard.classList.contains("unlocked")
+      ) {
         e.preventDefault()
         const questId = focusedCard.dataset.questId
         this.game.startLevel(questId)
@@ -216,7 +229,8 @@ export class EventManager {
 
     // Save settings
     const difficulty = document.getElementById("difficulty-select")?.value || "explorer"
-    const questionsPerLevel = parseInt(document.getElementById("questions-per-level-select")?.value) || 5
+    const questionsPerLevel =
+      parseInt(document.getElementById("questions-per-level-select")?.value) || 5
     const inputMode = document.getElementById("input-mode-select")?.value || "multipleChoice"
     const audioHints = document.getElementById("audio-hints-select")?.value === "true"
 

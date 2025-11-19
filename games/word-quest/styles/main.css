@@ -413,6 +413,79 @@ body {
   font-style: italic;
 }
 
+/* Quest Theme Backgrounds */
+.quest-card[data-quest-id="sound-cipher"].unlocked {
+  background: linear-gradient(135deg, #1a1f3a 0%, #2d3561 100%);
+  color: white;
+  border-color: #ffd700;
+  background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 5 L25 15 L35 15 L27 22 L30 32 L20 25 L10 32 L13 22 L5 15 L15 15 Z' fill='%23ffd700' opacity='0.1'/%3E%3C/svg%3E");
+}
+
+.quest-card[data-quest-id="sound-cipher"].unlocked h3,
+.quest-card[data-quest-id="sound-cipher"].unlocked .quest-description {
+  color: #ffd700;
+}
+
+.quest-card[data-quest-id="blending-workshop"].unlocked {
+  background: linear-gradient(135deg, #2d1b4e 0%, #4a2c6b 100%);
+  color: white;
+  border-color: #9d4edd;
+  background-image: url("data:image/svg+xml,%3Csvg width='30' height='30' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='15' cy='15' r='5' fill='%239d4edd' opacity='0.2'/%3E%3Ccircle cx='15' cy='15' r='10' fill='none' stroke='%239d4edd' stroke-width='1' opacity='0.15'/%3E%3C/svg%3E");
+}
+
+.quest-card[data-quest-id="blending-workshop"].unlocked h3,
+.quest-card[data-quest-id="blending-workshop"].unlocked .quest-description {
+  color: #d8b4fe;
+}
+
+.quest-card[data-quest-id="speed-vault"].unlocked {
+  background: linear-gradient(135deg, #1a535c 0%, #2a6f7a 100%);
+  color: white;
+  border-color: #ff6b6b;
+  background-image: url("data:image/svg+xml,%3Csvg width='40' height='20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 10 Q10 5 20 10 T40 10' stroke='%23ff6b6b' fill='none' stroke-width='2' opacity='0.2'/%3E%3C/svg%3E");
+}
+
+.quest-card[data-quest-id="speed-vault"].unlocked h3,
+.quest-card[data-quest-id="speed-vault"].unlocked .quest-description {
+  color: #ffc9c9;
+}
+
+.quest-card[data-quest-id="pattern-archive"].unlocked {
+  background: linear-gradient(135deg, #bc6c25 0%, #dda15e 100%);
+  color: white;
+  border-color: #ffd60a;
+  background-image: url("data:image/svg+xml,%3Csvg width='30' height='30' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='5' y='5' width='20' height='20' fill='none' stroke='%23ffd60a' stroke-width='1.5' opacity='0.2'/%3E%3Cline x1='15' y1='5' x2='15' y2='25' stroke='%23ffd60a' stroke-width='1' opacity='0.15'/%3E%3Cline x1='5' y1='15' x2='25' y2='15' stroke='%23ffd60a' stroke-width='1' opacity='0.15'/%3E%3C/svg%3E");
+}
+
+.quest-card[data-quest-id="pattern-archive"].unlocked h3,
+.quest-card[data-quest-id="pattern-archive"].unlocked .quest-description {
+  color: #ffe88c;
+}
+
+.quest-card[data-quest-id="spell-forge"].unlocked {
+  background: linear-gradient(135deg, #370617 0%, #6a040f 100%);
+  color: white;
+  border-color: #ff8500;
+  background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='20,5 25,15 20,20 15,15' fill='%23ff8500' opacity='0.2'/%3E%3Cpolygon points='20,20 25,30 20,35 15,30' fill='%23ff8500' opacity='0.15'/%3E%3C/svg%3E");
+}
+
+.quest-card[data-quest-id="spell-forge"].unlocked h3,
+.quest-card[data-quest-id="spell-forge"].unlocked .quest-description {
+  color: #ffb366;
+}
+
+.quest-card[data-quest-id="story-vault"].unlocked {
+  background: linear-gradient(135deg, #14213d 0%, #1e3a5f 100%);
+  color: white;
+  border-color: #fca311;
+  background-image: url("data:image/svg+xml,%3Csvg width='30' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='8' y='5' width='14' height='30' fill='none' stroke='%23fca311' stroke-width='1.5' opacity='0.2'/%3E%3Cline x1='8' y1='15' x2='22' y2='15' stroke='%23fca311' opacity='0.15'/%3E%3Cline x1='8' y1='20' x2='22' y2='20' stroke='%23fca311' opacity='0.15'/%3E%3Cline x1='8' y1='25' x2='22' y2='25' stroke='%23fca311' opacity='0.15'/%3E%3C/svg%3E");
+}
+
+.quest-card[data-quest-id="story-vault"].unlocked h3,
+.quest-card[data-quest-id="story-vault"].unlocked .quest-description {
+  color: #ffd166;
+}
+
 /* Activity Screen */
 #activity-screen {
   padding: 0.5rem;
@@ -437,6 +510,12 @@ body {
   align-items: center;
   gap: 1rem;
   box-shadow: 0 4px 8px var(--shadow);
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
 }
 
 .activity-header-info {
@@ -470,6 +549,49 @@ body {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+}
+
+/* Creature Guide */
+.creature-guide {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px;
+  margin-bottom: 1rem;
+  flex-shrink: 0;
+}
+
+.creature-icon {
+  font-size: 48px;
+  flex-shrink: 0;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.creature-narrative {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--quest-primary-dark);
+  text-align: left;
+  margin: 0;
+  padding: 8px 16px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 2px 8px var(--shadow);
+  max-width: 320px;
+  border: 2px solid var(--quest-border);
 }
 
 .question-area {
@@ -944,5 +1066,146 @@ body {
   .answer-input.incorrect {
     background: #b71c1c;
     color: white;
+  }
+
+  .word-card {
+    background: var(--quest-paper);
+    color: var(--quest-text);
+  }
+
+  .word-card-front,
+  .word-card-back {
+    background: var(--quest-paper);
+  }
+}
+
+/* Word Gallery Screen */
+#word-gallery-screen {
+  padding: 0.5rem;
+}
+
+.gallery-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.gallery-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: white;
+  border: 3px solid var(--quest-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 4px 8px var(--shadow);
+}
+
+.word-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.word-card {
+  background: white;
+  border: 3px solid var(--quest-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-shadow: 0 4px 8px var(--shadow);
+  transition: all 0.3s ease;
+  perspective: 1000px;
+  cursor: pointer;
+}
+
+.word-card:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 8px 16px var(--shadow);
+  border-color: var(--quest-primary);
+}
+
+.word-card-word {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--quest-primary-dark);
+  margin-bottom: 0.5rem;
+}
+
+.word-card-badge {
+  font-size: 1rem;
+  padding: 0.25rem 0.75rem;
+  background: var(--quest-accent);
+  color: white;
+  border-radius: 20px;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+.word-card.flipped {
+  animation: flip 0.6s ease-in-out;
+}
+
+@keyframes flip {
+  0% {
+    transform: rotateY(0deg);
+  }
+
+  50% {
+    transform: rotateY(90deg);
+  }
+
+  100% {
+    transform: rotateY(0deg);
+  }
+}
+
+.empty-gallery {
+  text-align: center;
+  padding: 3rem;
+  color: var(--quest-text-light);
+}
+
+.empty-gallery-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.empty-gallery h3 {
+  color: var(--quest-primary-dark);
+  margin-bottom: 0.5rem;
+}
+
+.empty-gallery p {
+  font-size: 1.1rem;
+}
+
+/* Responsive adjustments for Word Gallery */
+@media (width <= 768px) {
+  .gallery-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .word-cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+
+  .word-card {
+    padding: 1rem;
+    min-height: 120px;
+  }
+
+  .word-card-word {
+    font-size: 1.5rem;
   }
 }

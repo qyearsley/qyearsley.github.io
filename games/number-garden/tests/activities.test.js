@@ -2,13 +2,19 @@ import { ActivityGenerator } from "../js/activities.js"
 
 describe("ActivityGenerator", () => {
   let generator
+  let mockGameState
 
   beforeEach(() => {
-    generator = new ActivityGenerator()
+    mockGameState = {
+      settings: {
+        difficulty: "adventurer",
+      },
+    }
+    generator = new ActivityGenerator(mockGameState)
   })
 
   describe("generateActivity", () => {
-    test("generates easy difficulty for early activities", () => {
+    test("generates activities with correct structure", () => {
       const activity = generator.generateActivity(0, "flower-meadow")
       expect(activity).toBeDefined()
       expect(activity.type).toMatch(/addition|subtraction|multiplication/)
@@ -16,7 +22,8 @@ describe("ActivityGenerator", () => {
       expect(activity.correctAnswer).toBeGreaterThan(0)
     })
 
-    test("generates medium difficulty for mid activities", () => {
+    test("generates appropriate difficulty based on settings", () => {
+      // Default is adventurer (medium difficulty)
       const activity = generator.generateActivity(15)
       expect(activity).toBeDefined()
       expect(activity.correctAnswer).toBeLessThanOrEqual(30)
@@ -249,18 +256,37 @@ describe("ActivityGenerator", () => {
   })
 
   describe("difficulty progression", () => {
-    test("difficulty increases with activity number", () => {
-      // Easy problems (0-9)
-      const easy = generator.generateActivity(5, "flower-meadow")
-      expect(easy.correctAnswer).toBeLessThanOrEqual(20) // max 10+10
+    test("explorer difficulty uses smaller numbers (1-20)", () => {
+      mockGameState.settings.difficulty = "explorer"
+      generator = new ActivityGenerator(mockGameState)
 
-      // Medium problems (10-19) can be larger
-      const medium = generator.generateActivity(15, "flower-meadow")
-      expect(medium.correctAnswer).toBeGreaterThan(0)
+      // Test addition - max numbers are 10, so max sum is 20
+      for (let i = 0; i < 10; i++) {
+        const activity = generator.generateActivity(i, "flower-meadow")
+        expect(activity.correctAnswer).toBeLessThanOrEqual(20)
+      }
+    })
 
-      // Hard problems (20+) can be even larger
-      const hard = generator.generateActivity(25, "flower-meadow")
-      expect(hard.correctAnswer).toBeGreaterThan(0)
+    test("adventurer difficulty uses medium numbers (1-50)", () => {
+      mockGameState.settings.difficulty = "adventurer"
+      generator = new ActivityGenerator(mockGameState)
+
+      // Test addition - max numbers are 15, so max sum is 30
+      for (let i = 0; i < 10; i++) {
+        const activity = generator.generateActivity(i, "flower-meadow")
+        expect(activity.correctAnswer).toBeLessThanOrEqual(30)
+      }
+    })
+
+    test("master difficulty uses larger numbers (1-100)", () => {
+      mockGameState.settings.difficulty = "master"
+      generator = new ActivityGenerator(mockGameState)
+
+      // Test addition - max numbers are 20, so max sum is 40
+      for (let i = 0; i < 10; i++) {
+        const activity = generator.generateActivity(i, "flower-meadow")
+        expect(activity.correctAnswer).toBeLessThanOrEqual(40)
+      }
     })
   })
 })

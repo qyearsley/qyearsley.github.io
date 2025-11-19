@@ -34,6 +34,9 @@ export class EventManager {
     this.setupKeyboardShortcuts()
     this.setupProjectOptions()
     this.setupProjectBackButton()
+    this.setupContinueFromProjectButton()
+    this.setupContinueFromLevelCompleteButton()
+    this.setupReturnToHubButton()
   }
 
   /**
@@ -206,6 +209,14 @@ export class EventManager {
    * Setup settings select listeners
    */
   setupSettingsSelects() {
+    if (this.ui.elements.difficultySelect) {
+      this.ui.elements.difficultySelect.addEventListener("change", (e) => {
+        if (this.callbacks.onSettingChange) {
+          this.callbacks.onSettingChange("difficulty", e.target.value)
+        }
+      })
+    }
+
     if (this.ui.elements.inputModeSelect) {
       this.ui.elements.inputModeSelect.addEventListener("change", (e) => {
         if (this.callbacks.onSettingChange) {
@@ -417,6 +428,48 @@ export class EventManager {
       projectBackButton.addEventListener("click", () => {
         if (this.callbacks.onProjectBack) {
           this.callbacks.onProjectBack()
+        }
+      })
+    }
+  }
+
+  /**
+   * Setup continue from project modal button listener
+   */
+  setupContinueFromProjectButton() {
+    const continueFromProject = document.getElementById("continue-from-project")
+    if (continueFromProject) {
+      continueFromProject.addEventListener("click", () => {
+        if (this.callbacks.onContinueFromProject) {
+          this.callbacks.onContinueFromProject()
+        }
+      })
+    }
+  }
+
+  /**
+   * Setup continue from level complete button listener
+   */
+  setupContinueFromLevelCompleteButton() {
+    const continuePlayingButton = document.getElementById("continue-playing-button")
+    if (continuePlayingButton) {
+      continuePlayingButton.addEventListener("click", () => {
+        if (this.callbacks.onContinueFromLevelComplete) {
+          this.callbacks.onContinueFromLevelComplete()
+        }
+      })
+    }
+  }
+
+  /**
+   * Setup return to hub button listener
+   */
+  setupReturnToHubButton() {
+    const returnToHubButton = document.getElementById("return-to-hub-button")
+    if (returnToHubButton) {
+      returnToHubButton.addEventListener("click", () => {
+        if (this.callbacks.onReturnToHub) {
+          this.callbacks.onReturnToHub()
         }
       })
     }

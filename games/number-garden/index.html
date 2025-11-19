@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Enchanted Garden</title>
+    <title>Number Garden</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -11,6 +11,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="../common/styles/common.css" />
     <link rel="stylesheet" href="styles/main.css" />
     <link rel="stylesheet" href="styles/garden.css" />
     <link rel="stylesheet" href="styles/animations.css" />
@@ -46,10 +47,10 @@
           <span class="separator">/</span>
           <a href="/games/">Games</a>
           <span class="separator">/</span>
-          <span class="current">Enchanted Garden</span>
+          <span class="current">Number Garden</span>
         </nav>
-        <h1 class="game-title">🌸 Enchanted Garden 🌸</h1>
-        <p class="subtitle">Help the magic garden!</p>
+        <h1 class="game-title">🌸 Number Garden 🌸</h1>
+        <p class="subtitle">Help the magic garden grow!</p>
         <div class="title-buttons">
           <button id="start-button" class="big-button">Start</button>
           <button id="continue-button" class="big-button hidden">Continue</button>
@@ -95,7 +96,7 @@
       <div id="garden-hub" class="screen">
         <div class="header">
           <div>
-            <h2 id="project-title">Enchanted Garden</h2>
+            <h2 id="project-title">Number Garden</h2>
             <button id="home-button" class="text-button" aria-label="Return to start screen">
               ← Home
             </button>
@@ -216,10 +217,63 @@
         </div>
       </div>
 
+      <!-- Level Complete Screen -->
+      <div id="level-complete-screen" class="screen" role="region" aria-label="Level completion">
+        <div class="celebration">
+          <h2 id="level-complete-title">🎉 Level Complete! 🎉</h2>
+          <div
+            id="level-completion-message"
+            class="completion-message"
+            role="status"
+            aria-live="polite"
+          >
+            Great work! You've completed this area.
+          </div>
+          <div id="level-rewards-display" class="rewards" role="region" aria-label="Rewards earned">
+            <div class="reward-item">
+              <span class="reward-icon">⭐</span>
+              <span id="level-stars-earned" class="reward-text">5 stars earned!</span>
+            </div>
+            <div class="reward-item">
+              <span class="reward-icon">🌸</span>
+              <span id="level-flowers-earned" class="reward-text">5 flowers collected!</span>
+            </div>
+          </div>
+          <div id="level-project-progress-container" class="project-progress-container hidden">
+            <div class="project-piece-earned">
+              <span class="project-piece-icon" id="level-project-icon">🏰</span>
+              <p id="level-project-message">You earned a new castle piece!</p>
+            </div>
+          </div>
+          <div class="completion-buttons">
+            <button id="continue-playing-button" class="big-button" aria-label="Continue playing">
+              Continue →
+            </button>
+            <button
+              id="return-to-hub-button"
+              class="secondary-button"
+              aria-label="Return to garden hub"
+            >
+              Garden Hub
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Settings Modal -->
       <div id="settings-modal" class="modal hidden">
         <div class="modal-content">
           <h2>Settings ⚙️</h2>
+
+          <div class="setting-group">
+            <label for="difficulty-select">Difficulty Level:</label>
+            <select id="difficulty-select" class="setting-select">
+              <option value="explorer">Explorer (Ages 5-7)</option>
+              <option value="adventurer">Adventurer (Ages 7-9)</option>
+              <option value="master">Master (Ages 9-11)</option>
+            </select>
+            <p class="setting-description">Choose the difficulty level for math problems</p>
+          </div>
 
           <div class="setting-group">
             <label for="input-mode-select">Answer Input:</label>
@@ -243,11 +297,9 @@
           <div class="setting-group">
             <label for="questions-per-level-select">Questions Per Level</label>
             <select id="questions-per-level-select" class="setting-select">
-              <option value="3">3 Questions</option>
-              <option value="5">5 Questions</option>
-              <option value="6">6 Questions</option>
-              <option value="8">8 Questions</option>
-              <option value="10">10 Questions</option>
+              <option value="3">3 Questions (Quick)</option>
+              <option value="5">5 Questions (Standard)</option>
+              <option value="8">8 Questions (Practice)</option>
             </select>
             <p class="setting-description">How many questions to complete each level</p>
           </div>
@@ -262,6 +314,18 @@
           </div>
 
           <button id="close-settings" class="big-button">Done</button>
+        </div>
+      </div>
+
+      <!-- Project Progress Modal -->
+      <div id="project-progress-modal" class="modal hidden">
+        <div class="modal-content project-modal">
+          <h2 id="project-modal-title">Building Progress!</h2>
+          <div id="project-visual" class="project-visual">
+            <!-- Project visualization will be shown here -->
+          </div>
+          <p id="project-progress-text" class="project-progress-text"></p>
+          <button id="continue-from-project" class="big-button">Continue</button>
         </div>
       </div>
 

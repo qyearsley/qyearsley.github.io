@@ -1,8 +1,12 @@
+import { MATH } from "./constants.js"
+import { BaseGameUI } from "../../common/js/BaseGameUI.js"
+
 /**
- * Handles all DOM manipulation and UI updates for Enchanted Garden
+ * Handles all DOM manipulation and UI updates for Number Garden
  */
-export class GameUI {
+export class GameUI extends BaseGameUI {
   constructor() {
+    super()
     this.elements = this.cacheElements()
   }
 
@@ -12,11 +16,7 @@ export class GameUI {
    */
   cacheElements() {
     return {
-      screens: document.querySelectorAll(".screen"),
-      startButton: document.getElementById("start-button"),
-      continueButton: document.getElementById("continue-button"),
-      startFreshButton: document.getElementById("start-fresh-button"),
-      backButton: document.getElementById("back-button"),
+      ...this.cacheCommonElements(),
       gardenAreas: document.querySelectorAll(".garden-area"),
       creatureImage: document.querySelector(".creature-image"),
       creatureMessage: document.getElementById("creature-message"),
@@ -27,14 +27,10 @@ export class GameUI {
       gardenCanvas: document.getElementById("garden-canvas"),
       starCounts: document.querySelectorAll("#star-count, #activity-star-count"),
       levelDisplay: document.getElementById("level-display"),
-      progressBar: document.getElementById("progress-bar"),
-      progressText: document.getElementById("progress-text"),
       gardenPreview: document.querySelector(".garden-preview"),
       particlesContainer: document.getElementById("particles-container"),
-      settingsButton: document.getElementById("settings-button"),
       castleButton: document.getElementById("castle-button"),
-      settingsModal: document.getElementById("settings-modal"),
-      closeSettings: document.getElementById("close-settings"),
+      difficultySelect: document.getElementById("difficulty-select"),
       inputModeSelect: document.getElementById("input-mode-select"),
       visualHintsSelect: document.getElementById("visual-hints-select"),
       questionsPerLevelSelect: document.getElementById("questions-per-level-select"),
@@ -46,18 +42,11 @@ export class GameUI {
       castleSvgContainer: document.getElementById("castle-svg-container"),
       castlePiecesDisplay: document.getElementById("castle-pieces-display"),
       castleNotification: document.getElementById("castle-notification"),
-    }
-  }
-
-  /**
-   * Show a specific screen
-   * @param {string} screenId - Screen identifier
-   */
-  showScreen(screenId) {
-    this.elements.screens.forEach((screen) => screen.classList.remove("active"))
-    const targetScreen = document.getElementById(screenId)
-    if (targetScreen) {
-      targetScreen.classList.add("active")
+      projectProgressModal: document.getElementById("project-progress-modal"),
+      projectModalTitle: document.getElementById("project-modal-title"),
+      projectVisual: document.getElementById("project-visual"),
+      projectProgressText: document.getElementById("project-progress-text"),
+      continueFromProject: document.getElementById("continue-from-project"),
     }
   }
 
@@ -80,13 +69,7 @@ export class GameUI {
    * @param {number} total - Total required
    */
   updateProgressBar(current, total) {
-    if (this.elements.progressBar) {
-      const percent = (current / total) * 100
-      this.elements.progressBar.style.width = `${percent}%`
-    }
-    if (this.elements.progressText) {
-      this.elements.progressText.textContent = `${current}/${total}`
-    }
+    super.updateProgressBar(current, total, MATH.PERCENT_MULTIPLIER)
   }
 
   /**
@@ -242,22 +225,46 @@ export class GameUI {
   }
 
   /**
-   * Show feedback message
+   * Show feedback message with structured display
    * @param {string} message - Feedback message
-   * @param {string} type - Feedback type (correct, encourage)
+   * @param {string} type - Feedback type (correct, incorrect, encourage)
+   * @param {Object} options - Additional options
+   * @param {string} options.correctAnswer - The correct answer to show (for incorrect)
+   * @param {string} options.explanation - Optional explanation text
    */
-  showFeedback(message, type) {
-    this.elements.feedbackArea.textContent = message
-    this.elements.feedbackArea.className = `feedback-area ${type}`
-    this.elements.feedbackArea.classList.remove("hidden")
-  }
+  showFeedback(message, type, options = {}) {
+    const feedbackArea = this.elements.feedbackArea
+    if (!feedbackArea) return
 
-  /**
-   * Mark an answer button as correct
-   * @param {HTMLElement} button - The button element
-   */
-  markButtonCorrect(button) {
-    button.classList.add("correct")
+    // Determine icon based on type
+    const icons = {
+      correct: "✨",
+      incorrect: "🔍",
+      encourage: "💫",
+    }
+    const icon = icons[type] || "💡"
+
+    // Build structured feedback HTML
+    let feedbackHTML = `
+      <div class="feedback ${type}">
+        <div class="feedback-icon">${icon}</div>
+        <h3>${message}</h3>
+    `
+
+    // Add correct answer for incorrect responses
+    if (type === "incorrect" && options.correctAnswer) {
+      feedbackHTML += `<p>The answer is: <strong>${options.correctAnswer}</strong></p>`
+    }
+
+    // Add explanation if provided
+    if (options.explanation) {
+      feedbackHTML += `<p class="feedback-explanation">${options.explanation}</p>`
+    }
+
+    feedbackHTML += `</div>`
+
+    feedbackArea.innerHTML = feedbackHTML
+    feedbackArea.classList.remove("hidden")
   }
 
   /**
@@ -405,28 +412,13 @@ export class GameUI {
   }
 
   /**
-   * Update title screen buttons based on saved progress
-   * @param {boolean} hasSavedProgress - Whether there is saved progress
-   */
-  updateTitleButtons(hasSavedProgress) {
-    if (hasSavedProgress) {
-      // Show continue and start fresh buttons, hide start button
-      this.elements.startButton.classList.add("hidden")
-      this.elements.continueButton.classList.remove("hidden")
-      this.elements.startFreshButton.classList.remove("hidden")
-    } else {
-      // Show only start button
-      this.elements.startButton.classList.remove("hidden")
-      this.elements.continueButton.classList.add("hidden")
-      this.elements.startFreshButton.classList.add("hidden")
-    }
-  }
-
-  /**
    * Update settings UI with current values
    * @param {Object} settings - Settings object
    */
   updateSettingsUI(settings) {
+    if (this.elements.difficultySelect) {
+      this.elements.difficultySelect.value = settings.difficulty || "adventurer"
+    }
     if (this.elements.inputModeSelect) {
       this.elements.inputModeSelect.value = settings.inputMode || "multipleChoice"
     }
@@ -438,24 +430,6 @@ export class GameUI {
     }
     if (this.elements.soundEffectsSelect) {
       this.elements.soundEffectsSelect.value = settings.soundEffects || "on"
-    }
-  }
-
-  /**
-   * Show settings modal
-   */
-  showSettings() {
-    if (this.elements.settingsModal) {
-      this.elements.settingsModal.classList.remove("hidden")
-    }
-  }
-
-  /**
-   * Hide settings modal
-   */
-  hideSettings() {
-    if (this.elements.settingsModal) {
-      this.elements.settingsModal.classList.add("hidden")
     }
   }
 
@@ -576,5 +550,112 @@ export class GameUI {
     setTimeout(() => {
       this.elements.castleNotification.classList.remove("show")
     }, 2500)
+  }
+
+  /**
+   * Show project progress modal
+   * @param {string} projectType - Type of project (castle, garden, robot, spaceship)
+   * @param {number} completedCount - Number of completed areas
+   * @param {boolean} isComplete - Whether the project is fully complete
+   */
+  showProjectProgress(projectType, completedCount, isComplete = false) {
+    if (!this.elements.projectProgressModal) return
+
+    // Define project visualizations based on progress
+    const projectVisuals = {
+      castle: ["🧱", "🧱🧱", "🧱🧱🧱", "🏰🧱", "🏰🏰", "🏰✨"],
+      garden: ["🌱", "🌱🌱", "🌻", "🌻🌸", "🌻🌸🌺", "🌻🌸🌺🌷"],
+      robot: ["🔧", "🔧⚙️", "🦾", "🦿🦾", "🤖", "🤖✨"],
+      spaceship: ["🔩", "🔩🔧", "🛸", "🛸⚡", "🚀", "🚀✨"],
+    }
+
+    const projectTitles = {
+      castle: "Building Your Castle!",
+      garden: "Growing Your Garden!",
+      robot: "Building Your Robot!",
+      spaceship: "Building Your Rocket!",
+    }
+
+    const visual = projectVisuals[projectType]?.[completedCount - 1] || "🎯"
+    const title = isComplete
+      ? projectTitles[projectType]?.replace("Building", "Completed") ||
+        projectTitles[projectType]?.replace("Growing", "Grew")
+      : projectTitles[projectType]
+
+    this.elements.projectModalTitle.textContent = title
+    this.elements.projectVisual.textContent = visual
+    this.elements.projectProgressText.textContent = isComplete
+      ? "🎉 All areas complete! 🎉"
+      : `Progress: ${completedCount}/6 areas complete`
+
+    this.elements.projectProgressModal.classList.remove("hidden")
+  }
+
+  /**
+   * Hide project progress modal
+   */
+  hideProjectProgress() {
+    if (this.elements.projectProgressModal) {
+      this.elements.projectProgressModal.classList.add("hidden")
+    }
+  }
+
+  /**
+   * Update level complete screen with rewards and progress
+   * @param {number} starsEarned - Number of stars earned this level
+   * @param {number} flowersEarned - Number of flowers earned this level
+   * @param {boolean} wasAreaCompleted - Whether this level completed an area
+   * @param {string} projectType - Type of project (castle, garden, robot, spaceship)
+   * @param {number} completedAreasCount - Total number of completed areas
+   */
+  updateLevelCompleteScreen(
+    starsEarned,
+    flowersEarned,
+    wasAreaCompleted,
+    projectType,
+    completedAreasCount,
+  ) {
+    // Update stars earned text
+    const starsText = document.getElementById("level-stars-earned")
+    if (starsText) {
+      starsText.textContent = `${starsEarned} stars earned!`
+    }
+
+    // Update flowers earned text
+    const flowersText = document.getElementById("level-flowers-earned")
+    if (flowersText) {
+      flowersText.textContent = `${flowersEarned} flowers collected!`
+    }
+
+    // Show/hide project progress based on whether area was completed
+    const projectProgressContainer = document.getElementById("level-project-progress-container")
+    if (projectProgressContainer) {
+      if (wasAreaCompleted) {
+        projectProgressContainer.classList.remove("hidden")
+
+        // Update project icon and message
+        const projectIcon = document.getElementById("level-project-icon")
+        const projectMessage = document.getElementById("level-project-message")
+
+        // Define project visuals data
+        const projectVisuals = {
+          castle: { icon: "🏰", pieceName: "Castle Piece" },
+          garden: { icon: "🌻", pieceName: "Garden Section" },
+          robot: { icon: "🤖", pieceName: "Robot Part" },
+          spaceship: { icon: "🚀", pieceName: "Rocket Part" },
+        }
+
+        const projectInfo = projectVisuals[projectType] || projectVisuals.castle
+
+        if (projectIcon) {
+          projectIcon.textContent = projectInfo.icon
+        }
+        if (projectMessage) {
+          projectMessage.textContent = `You earned a new ${projectInfo.pieceName.toLowerCase()}! (${completedAreasCount}/6)`
+        }
+      } else {
+        projectProgressContainer.classList.add("hidden")
+      }
+    }
   }
 }

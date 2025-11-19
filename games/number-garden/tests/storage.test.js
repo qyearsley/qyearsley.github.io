@@ -26,8 +26,8 @@ describe("StorageManager", () => {
 
   describe("initialization", () => {
     test("initializes with correct storage key and version", () => {
-      expect(storageManager.storageKey).toBe("enchantedGardenProgress")
-      expect(storageManager.currentVersion).toBe("3.0")
+      expect(storageManager.gameKey).toBe("numberGardenProgress")
+      expect(storageManager.version).toBe("3.0")
     })
   })
 
@@ -56,7 +56,7 @@ describe("StorageManager", () => {
       )
 
       expect(result).toBe(true)
-      const saved = JSON.parse(localStorage.getItem("enchantedGardenProgress"))
+      const saved = JSON.parse(localStorage.getItem("numberGardenProgress"))
       expect(saved.stats).toEqual(stats)
       expect(saved.garden).toEqual(garden)
       expect(saved.unlockedAreas).toEqual(unlockedAreas)
@@ -74,7 +74,7 @@ describe("StorageManager", () => {
 
       storageManager.saveProgress(stats, garden, unlockedAreas)
 
-      const saved = JSON.parse(localStorage.getItem("enchantedGardenProgress"))
+      const saved = JSON.parse(localStorage.getItem("numberGardenProgress"))
       expect(saved.unlockedAreas).toEqual(["flower-meadow"])
       expect(saved.completedAreas).toEqual([])
       // When settings is undefined, the default parameter {} is used, not the || fallback
@@ -91,7 +91,7 @@ describe("StorageManager", () => {
 
       storageManager.saveProgress(stats, garden, unlockedAreas, completedAreas, settings)
 
-      const saved = JSON.parse(localStorage.getItem("enchantedGardenProgress"))
+      const saved = JSON.parse(localStorage.getItem("numberGardenProgress"))
       expect(saved.settings).toEqual({})
     })
   })
@@ -122,12 +122,12 @@ describe("StorageManager", () => {
         garden: [],
         version: "2.0", // Old version
       }
-      localStorage.setItem("enchantedGardenProgress", JSON.stringify(oldData))
+      localStorage.setItem("numberGardenProgress", JSON.stringify(oldData))
 
       const loaded = storageManager.loadProgress()
 
       expect(loaded).toBeNull()
-      expect(localStorage.getItem("enchantedGardenProgress")).toBeNull()
+      expect(localStorage.getItem("numberGardenProgress")).toBeNull()
     })
 
     test("returns null for data missing version", () => {
@@ -136,7 +136,7 @@ describe("StorageManager", () => {
         garden: [],
         // No version field
       }
-      localStorage.setItem("enchantedGardenProgress", JSON.stringify(dataNoVersion))
+      localStorage.setItem("numberGardenProgress", JSON.stringify(dataNoVersion))
 
       const loaded = storageManager.loadProgress()
 
@@ -148,7 +148,7 @@ describe("StorageManager", () => {
         version: "3.0",
         // Missing stats and garden
       }
-      localStorage.setItem("enchantedGardenProgress", JSON.stringify(invalidData))
+      localStorage.setItem("numberGardenProgress", JSON.stringify(invalidData))
 
       const loaded = storageManager.loadProgress()
 
@@ -156,7 +156,7 @@ describe("StorageManager", () => {
     })
 
     test("returns null for corrupted JSON", () => {
-      localStorage.setItem("enchantedGardenProgress", "not valid json {")
+      localStorage.setItem("numberGardenProgress", "not valid json {")
 
       const loaded = storageManager.loadProgress()
 
@@ -170,12 +170,12 @@ describe("StorageManager", () => {
       const garden = []
       storageManager.saveProgress(stats, garden, [])
 
-      expect(localStorage.getItem("enchantedGardenProgress")).not.toBeNull()
+      expect(localStorage.getItem("numberGardenProgress")).not.toBeNull()
 
       const result = storageManager.clearProgress()
 
       expect(result).toBe(true)
-      expect(localStorage.getItem("enchantedGardenProgress")).toBeNull()
+      expect(localStorage.getItem("numberGardenProgress")).toBeNull()
     })
 
     test("returns true even when no data exists", () => {
