@@ -42,7 +42,23 @@ export class WordBank {
         ],
 
         // 2-letter words
-        twoLetter: ["at", "it", "an", "in", "on", "to", "up", "go", "no", "so", "my", "is", "as", "be", "or"],
+        twoLetter: [
+          "at",
+          "it",
+          "an",
+          "in",
+          "on",
+          "to",
+          "up",
+          "go",
+          "no",
+          "so",
+          "my",
+          "is",
+          "as",
+          "be",
+          "or",
+        ],
 
         // Word families
         wordFamilies: {
@@ -449,7 +465,19 @@ export class WordBank {
         ],
 
         // Silent letters
-        silentLetters: ["knee", "knife", "know", "knock", "write", "wrong", "wrap", "lamb", "climb", "comb", "thumb"],
+        silentLetters: [
+          "knee",
+          "knife",
+          "know",
+          "knock",
+          "write",
+          "wrong",
+          "wrap",
+          "lamb",
+          "climb",
+          "comb",
+          "thumb",
+        ],
 
         // 2nd-3rd grade Dolch + common words
         sightWords: [

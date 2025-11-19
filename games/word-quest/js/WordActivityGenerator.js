@@ -9,33 +9,63 @@ export class WordActivityGenerator {
     this.questThemes = {
       "sound-cipher": {
         icon: "🔑",
-        name: "Sound Cipher",
-        description: "Decode letter sounds",
+        name: "Sound Code",
+        description: "Learn letter sounds",
+        creature: "🕵️",
+        creatureName: "Detective Dog",
+        background: "#1a1f3a",
+        accentColor: "#ffd700",
+        narrative: "Detective Dog needs your help! Listen to the sounds and crack the code.",
       },
       "blending-workshop": {
-        icon: "🧩",
-        name: "Spelling Workshop",
-        description: "Listen and spell words",
+        icon: "🧪",
+        name: "Potion Lab",
+        description: "Mix sounds into words",
+        creature: "🐱",
+        creatureName: "Wizard Cat",
+        background: "#2d1b4e",
+        accentColor: "#9d4edd",
+        narrative: "Wizard Cat is brewing word potions! Blend these sounds together.",
       },
       "speed-vault": {
-        icon: "⚡",
-        name: "Speed Vault",
-        description: "Recognize words quickly",
+        icon: "🎵",
+        name: "Rhyme Time",
+        description: "Find words that rhyme",
+        creature: "🐦",
+        creatureName: "DJ Bird",
+        background: "#1a535c",
+        accentColor: "#ff6b6b",
+        narrative: "DJ Bird is mixing beats! Find words that rhyme to complete the song.",
       },
       "pattern-archive": {
         icon: "🗺️",
-        name: "Pattern Archive",
+        name: "Pattern Quest",
         description: "Discover word patterns",
+        creature: "🦜",
+        creatureName: "Explorer Parrot",
+        background: "#bc6c25",
+        accentColor: "#ffd60a",
+        narrative: "Explorer Parrot found ancient word patterns! Can you spot the pattern?",
       },
       "spell-forge": {
-        icon: "📜",
-        name: "Spell Forge",
+        icon: "🔨",
+        name: "Word Forge",
         description: "Build words from sounds",
+        creature: "🐻",
+        creatureName: "Blacksmith Bear",
+        background: "#370617",
+        accentColor: "#ff8500",
+        narrative: "Blacksmith Bear is forging new words! Put the sounds together.",
       },
       "story-vault": {
         icon: "📖",
         name: "Story Vault",
-        description: "Read and understand",
+        description: "Read and understand stories",
+        creature: "🦉",
+        creatureName: "Librarian Owl",
+        background: "#14213d",
+        accentColor: "#fca311",
+        narrative: "Librarian Owl has a story to share! Read carefully and find the answer.",
       },
     }
   }
@@ -214,7 +244,13 @@ export class WordActivityGenerator {
         question: `What r-controlled vowel pattern is in "${correctWord}"?`,
         visual: correctWord,
         correctAnswer: pattern,
-        choices: this.shuffleArray([pattern, ...this.getRandomItems(patterns.filter((p) => p !== pattern), 2)]),
+        choices: this.shuffleArray([
+          pattern,
+          ...this.getRandomItems(
+            patterns.filter((p) => p !== pattern),
+            2,
+          ),
+        ]),
         audioWord: correctWord,
         hint: `The 'r' changes how the vowel sounds!`,
         word: correctWord,
@@ -234,7 +270,10 @@ export class WordActivityGenerator {
         question: `Which letter is silent in "${correctWord}"?`,
         visual: correctWord,
         correctAnswer: silentLetter,
-        choices: correctWord.split("").filter((l, i, arr) => arr.indexOf(l) === i).slice(0, 3),
+        choices: correctWord
+          .split("")
+          .filter((l, i, arr) => arr.indexOf(l) === i)
+          .slice(0, 3),
         audioWord: correctWord,
         hint: `Some letters don't make a sound!`,
         word: correctWord,
@@ -323,7 +362,10 @@ export class WordActivityGenerator {
         const vowel = correctWord[vowelIndex]
         const before = correctWord.substring(0, vowelIndex)
         const after = correctWord.substring(vowelIndex + 1)
-        const distractors = "aeiou".split("").filter((v) => v !== vowel).slice(0, 2)
+        const distractors = "aeiou"
+          .split("")
+          .filter((v) => v !== vowel)
+          .slice(0, 2)
 
         return {
           type: "spell-vowel",
@@ -351,9 +393,7 @@ export class WordActivityGenerator {
         const correctSyllable = syllables[blankIndex]
 
         // Create visual with blank
-        const visual = syllables
-          .map((syl, i) => (i === blankIndex ? "___" : syl))
-          .join("")
+        const visual = syllables.map((syl, i) => (i === blankIndex ? "___" : syl)).join("")
 
         // Generate distractors (other syllables from similar words)
         const allWords = this.wordBank.getWords("master", "multiSyllable")
@@ -455,7 +495,10 @@ export class WordActivityGenerator {
 
     // Create fill-in-the-blank
     const blankPosition = Math.floor(correctWord.length / 2)
-    const blanked = correctWord.split("").map((l, i) => (i === blankPosition ? "_" : l)).join("")
+    const blanked = correctWord
+      .split("")
+      .map((l, i) => (i === blankPosition ? "_" : l))
+      .join("")
 
     const correctLetter = correctWord[blankPosition]
     const distractors = this.getRandomItems(
@@ -565,7 +608,9 @@ export class WordActivityGenerator {
     const allWords = [...cvcWords, ...cvceWords]
 
     // Find words with similar length
-    const similarLength = allWords.filter((w) => Math.abs(w.length - word.length) <= 1 && w !== word)
+    const similarLength = allWords.filter(
+      (w) => Math.abs(w.length - word.length) <= 1 && w !== word,
+    )
 
     const distractors = this.getRandomItems(similarLength, count - 1)
     return this.shuffleArray([word, ...distractors])

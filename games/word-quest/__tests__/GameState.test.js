@@ -24,7 +24,7 @@ describe("GameState", () => {
     test("should initialize with default values", () => {
       expect(gameState.currentScreen).toBe("title")
       expect(gameState.currentQuest).toBeNull()
-      expect(gameState.difficulty).toBe("explorer")
+      expect(gameState.difficulty).toBe("adventurer")
       expect(gameState.stats.stars).toBe(0)
       expect(gameState.stats.wordsLearned).toBe(0)
       expect(gameState.stats.currentLevel).toBe(1)
@@ -42,10 +42,21 @@ describe("GameState", () => {
     test("should load saved progress if available", () => {
       const savedData = {
         difficulty: "adventurer",
-        stats: { stars: 50, wordsLearned: 25, activitiesCompleted: 30, currentLevel: 5, currentLevelProgress: 2 },
+        stats: {
+          stars: 50,
+          wordsLearned: 25,
+          activitiesCompleted: 30,
+          currentLevel: 5,
+          currentLevelProgress: 2,
+        },
         unlockedQuests: ["sound-cipher", "blending-workshop"],
         masteredWords: ["cat", "dog", "sun"],
-        settings: { difficulty: "adventurer", questionsPerLevel: 8, inputMode: "keyboard", audioHints: false },
+        settings: {
+          difficulty: "adventurer",
+          questionsPerLevel: 8,
+          inputMode: "keyboard",
+          audioHints: false,
+        },
         completedQuests: ["sound-cipher"],
         questProgress: {
           "sound-cipher": { completed: 5, stars: 25 },

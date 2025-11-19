@@ -27,7 +27,7 @@ export class GameState {
     this.currentActivity = null
 
     /** @type {string} */
-    this.difficulty = "explorer" // "explorer", "adventurer", "master"
+    this.difficulty = "adventurer" // "explorer", "adventurer", "master"
 
     /** @type {Stats} */
     this.stats = {
@@ -46,7 +46,7 @@ export class GameState {
 
     /** @type {Object} */
     this.settings = {
-      difficulty: "explorer",
+      difficulty: "adventurer",
       inputMode: "multipleChoice", // "multipleChoice" or "keyboard"
       questionsPerLevel: 5, // number of questions per level
       audioHints: true, // whether to play audio hints
@@ -238,7 +238,7 @@ export class GameState {
     const data = this.storageManager.loadGameState()
 
     if (data) {
-      this.difficulty = data.difficulty || "explorer"
+      this.difficulty = data.difficulty || "adventurer"
       this.stats = data.stats || this.stats
       this.unlockedQuests = new Set(data.unlockedQuests || ["sound-cipher"])
       this.masteredWords = new Set(data.masteredWords || [])

@@ -11,6 +11,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="../common/styles/common.css" />
     <link rel="stylesheet" href="styles/main.css" />
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
     <style>
@@ -56,9 +57,23 @@
         <h1 class="game-title">📜 Word Quest 🗝️</h1>
         <p class="subtitle">Decode the ancient words!</p>
         <div class="title-buttons">
-          <button id="start-button" class="big-button" aria-label="Start a new quest">Start Quest</button>
-          <button id="continue-button" class="big-button hidden" aria-label="Continue your previous quest">Continue Quest</button>
-          <button id="start-fresh-button" class="secondary-button hidden" aria-label="Start a fresh quest, resetting all progress">New Quest</button>
+          <button id="start-button" class="big-button" aria-label="Start a new quest">
+            Start Quest
+          </button>
+          <button
+            id="continue-button"
+            class="big-button hidden"
+            aria-label="Continue your previous quest"
+          >
+            Continue Quest
+          </button>
+          <button
+            id="start-fresh-button"
+            class="secondary-button hidden"
+            aria-label="Start a fresh quest, resetting all progress"
+          >
+            New Quest
+          </button>
         </div>
       </div>
 
@@ -71,9 +86,24 @@
               ← Home
             </button>
           </div>
-          <button id="settings-button" class="icon-button" title="Settings" aria-label="Open settings">
-            ⚙️
-          </button>
+          <div class="header-actions">
+            <button
+              id="word-gallery-button"
+              class="icon-button"
+              title="Word Gallery"
+              aria-label="View word gallery"
+            >
+              📚
+            </button>
+            <button
+              id="settings-button"
+              class="icon-button"
+              title="Settings"
+              aria-label="Open settings"
+            >
+              ⚙️
+            </button>
+          </div>
         </div>
 
         <div class="map-container">
@@ -84,6 +114,37 @@
 
           <div class="quest-paths" role="list" aria-label="Available quests">
             <!-- Quest areas will be dynamically added here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Word Gallery Screen -->
+      <div id="word-gallery-screen" class="screen" role="region" aria-label="Word gallery">
+        <div class="header">
+          <button id="gallery-back-button" class="nav-button" aria-label="Return to quest map">
+            ← Back
+          </button>
+          <h2>Your Word Gallery 📚</h2>
+        </div>
+
+        <div class="gallery-container">
+          <div class="gallery-stats">
+            <div class="stat-card">
+              <span class="stat-value" id="gallery-words-count">0</span>
+              <span class="stat-label">Words Learned</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value" id="gallery-quests-count">0</span>
+              <span class="stat-label">Quests Completed</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value" id="gallery-stars-count">0</span>
+              <span class="stat-label">Total Stars</span>
+            </div>
+          </div>
+
+          <div id="word-cards-grid" class="word-cards-grid">
+            <!-- Word cards will be dynamically inserted here -->
           </div>
         </div>
       </div>
@@ -101,28 +162,56 @@
               <span id="activity-stars" aria-label="Stars earned">⭐ 0</span>
             </div>
           </div>
-          <button id="activity-settings-button" class="icon-button" title="Settings" aria-label="Open settings">
+          <button
+            id="activity-settings-button"
+            class="icon-button"
+            title="Settings"
+            aria-label="Open settings"
+          >
             ⚙️
           </button>
         </div>
 
         <div class="activity-content">
+          <!-- Creature Guide -->
+          <div class="creature-guide">
+            <div id="quest-creature" class="creature-icon" aria-hidden="true">🕵️</div>
+            <p id="creature-narrative" class="creature-narrative" role="status" aria-live="polite">
+              Ready to start!
+            </p>
+          </div>
+
           <div id="activity-question" class="question-area" role="region" aria-label="Question">
             <!-- Activity content will be dynamically generated -->
           </div>
 
-          <div id="activity-choices" class="choices-area" role="radiogroup" aria-label="Answer choices">
+          <div
+            id="activity-choices"
+            class="choices-area"
+            role="radiogroup"
+            aria-label="Answer choices"
+          >
             <!-- Choices will be dynamically generated -->
           </div>
 
-          <div id="activity-feedback" class="feedback-area hidden" role="status" aria-live="assertive" aria-atomic="true">
+          <div
+            id="activity-feedback"
+            class="feedback-area hidden"
+            role="status"
+            aria-live="assertive"
+            aria-atomic="true"
+          >
             <!-- Feedback messages -->
           </div>
         </div>
 
         <div class="activity-controls">
-          <button id="submit-answer" class="big-button" disabled aria-label="Submit your answer">Submit</button>
-          <button id="next-activity" class="big-button hidden" aria-label="Go to next activity">Next →</button>
+          <button id="submit-answer" class="big-button" disabled aria-label="Submit your answer">
+            Submit
+          </button>
+          <button id="next-activity" class="big-button hidden" aria-label="Go to next activity">
+            Next →
+          </button>
         </div>
       </div>
 
@@ -137,8 +226,20 @@
             <!-- Rewards will be shown here -->
           </div>
           <div class="completion-buttons">
-            <button id="continue-quest-button" class="big-button" aria-label="Continue to next quest">Next Quest →</button>
-            <button id="return-to-map-button" class="secondary-button" aria-label="Return to quest map">Quest Map</button>
+            <button
+              id="continue-quest-button"
+              class="big-button"
+              aria-label="Continue to next quest"
+            >
+              Next Quest →
+            </button>
+            <button
+              id="return-to-map-button"
+              class="secondary-button"
+              aria-label="Return to quest map"
+            >
+              Quest Map
+            </button>
           </div>
         </div>
       </div>
@@ -162,9 +263,9 @@
         <div class="setting-group">
           <label for="questions-per-level-select">Questions Per Level:</label>
           <select id="questions-per-level-select" class="setting-select">
-            <option value="3">3 Questions</option>
-            <option value="5">5 Questions</option>
-            <option value="8">8 Questions</option>
+            <option value="3">3 Questions (Quick)</option>
+            <option value="5">5 Questions (Standard)</option>
+            <option value="8">8 Questions (Practice)</option>
           </select>
           <p class="setting-description">How many questions to complete each level</p>
         </div>

@@ -58,6 +58,7 @@ export class GameState {
       visualHints: "always", // "always", "sometimes", "never"
       questionsPerLevel: 5, // number of questions per level
       soundEffects: "off", // "on" or "off"
+      difficulty: "adventurer", // "explorer", "adventurer", "master"
     }
 
     /** @type {Set<string>} */
@@ -230,6 +231,8 @@ export class GameState {
           inputMode: saved.settings.inputMode || "multipleChoice",
           visualHints: saved.settings.visualHints || "always",
           questionsPerLevel: saved.settings.questionsPerLevel || 5,
+          soundEffects: saved.settings.soundEffects || "off",
+          difficulty: saved.settings.difficulty || "adventurer",
         }
       }
     }

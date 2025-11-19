@@ -349,10 +349,10 @@ body {
 
 .creature-guide {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 12px;
   padding: 10px;
   flex-shrink: 0;
 }
@@ -360,13 +360,14 @@ body {
 .creature-image {
   font-size: 48px;
   animation: wiggle 2s ease-in-out infinite;
+  flex-shrink: 0;
 }
 
 .creature-message {
   font-size: 16px;
   font-weight: 600;
   color: var(--theme-primary);
-  text-align: center;
+  text-align: left;
   margin: 0;
   padding: 8px 16px;
   background: white;
@@ -493,11 +494,9 @@ body {
 /* Feedback Area */
 .feedback-area {
   margin-top: 15px;
-  padding: 20px;
+  padding: 0;
   border-radius: 20px;
   text-align: center;
-  font-size: 24px;
-  font-weight: bold;
   transition: all 0.3s ease;
   min-height: 68px;
   flex-shrink: 0;
@@ -507,9 +506,57 @@ body {
   visibility: hidden;
 }
 
-.feedback-area.correct {
-  background: #4ade80;
+/* Structured Feedback */
+.feedback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 20px;
+  border-radius: 20px;
+}
+
+.feedback-icon {
+  font-size: 48px;
+  animation: bounce 0.5s ease;
+}
+
+.feedback h3 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: bold;
+  color: inherit;
+}
+
+.feedback p {
+  margin: 5px 0 0;
+  font-size: 18px;
+  font-weight: normal;
+}
+
+.feedback p strong {
+  font-weight: bold;
+  font-size: 22px;
+}
+
+.feedback.correct {
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
   color: white;
+}
+
+.feedback.incorrect {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: white;
+}
+
+.feedback.encourage {
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+  color: white;
+}
+
+.feedback-explanation {
+  font-style: italic;
+  opacity: 0.9;
 }
 
 /* Garden Preview */
@@ -728,6 +775,30 @@ select:focus-visible,
   color: #666;
   margin-top: 5px;
   font-style: italic;
+}
+
+/* Project Progress Modal */
+.project-modal {
+  text-align: center;
+}
+
+.project-visual {
+  font-size: 120px;
+  line-height: 1.2;
+  margin: 20px 0;
+  min-height: 150px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.project-progress-text {
+  font-size: 20px;
+  color: #666;
+  margin: 20px 0;
+  font-weight: 600;
 }
 
 /* Castle Screen */
@@ -984,4 +1055,160 @@ select:focus-visible,
 .castle-notification-text span {
   font-size: 16px;
   opacity: 0.9;
+}
+
+/* Level Complete Screen */
+#level-complete-screen {
+  padding: 2rem 1rem;
+  text-align: center;
+  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+}
+
+.celebration {
+  background: white;
+  border: 3px solid var(--theme-primary);
+  border-radius: 20px;
+  padding: 3rem 2rem;
+  box-shadow: 0 8px 24px rgb(0, 0, 0, 0.2);
+  max-width: 600px;
+  margin: 0 auto;
+  animation: celebration-bounce 0.6s ease-out;
+}
+
+@keyframes celebration-bounce {
+  0% {
+    transform: scale(0.8) rotate(-5deg);
+    opacity: 0;
+  }
+
+  50% {
+    transform: scale(1.05) rotate(2deg);
+  }
+
+  100% {
+    transform: scale(1) rotate(0);
+    opacity: 1;
+  }
+}
+
+.celebration h2 {
+  color: var(--theme-primary);
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  text-shadow: 2px 2px 4px rgb(0, 0, 0, 0.1);
+}
+
+.completion-message {
+  font-size: 1.2rem;
+  color: #666;
+  margin: 1.5rem 0;
+  font-weight: 600;
+}
+
+.rewards {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  border-radius: 15px;
+}
+
+.reward-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--theme-primary);
+}
+
+.reward-icon {
+  font-size: 2rem;
+}
+
+.reward-text {
+  font-size: 1.1rem;
+}
+
+.project-progress-container {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 15px;
+  color: white;
+  animation: pop-in 0.5s ease-out;
+}
+
+.project-piece-earned {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.project-piece-icon {
+  font-size: 4rem;
+  animation: spin-in 0.8s ease-out;
+}
+
+@keyframes spin-in {
+  0% {
+    transform: rotate(0deg) scale(0);
+  }
+
+  50% {
+    transform: rotate(180deg) scale(1.2);
+  }
+
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+.project-piece-earned p {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.completion-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 400px;
+  margin: 2rem auto 0;
+}
+
+/* Responsive adjustments for level complete screen */
+@media (width <= 768px) {
+  .celebration {
+    padding: 2rem 1rem;
+  }
+
+  .celebration h2 {
+    font-size: 2rem;
+  }
+
+  .completion-message {
+    font-size: 1rem;
+  }
+
+  .reward-item {
+    font-size: 1rem;
+  }
+
+  .reward-icon {
+    font-size: 1.5rem;
+  }
+
+  .project-piece-icon {
+    font-size: 3rem;
+  }
+
+  .completion-buttons {
+    width: 100%;
+  }
 }

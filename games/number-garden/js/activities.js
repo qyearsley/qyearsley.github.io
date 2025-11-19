@@ -2,7 +2,9 @@
  * Activity generation system
  */
 export class ActivityGenerator {
-  constructor() {
+  constructor(gameState) {
+    this.gameState = gameState
+
     // Area-specific themes
     this.areaThemes = {
       "flower-meadow": {
@@ -81,8 +83,8 @@ export class ActivityGenerator {
   }
 
   generateActivity(activityNumber, areaId = "flower-meadow") {
-    // Determine difficulty based on activity number
-    const difficulty = this.getDifficulty(activityNumber)
+    // Determine difficulty based on user setting
+    const difficulty = this.getDifficulty()
 
     // Each area focuses on a specific type of math problem
     let activityType
@@ -128,10 +130,22 @@ export class ActivityGenerator {
     }
   }
 
-  getDifficulty(activityNumber) {
-    if (activityNumber < 10) return "easy"
-    if (activityNumber < 20) return "medium"
-    return "hard"
+  /**
+   * Get difficulty level based on user settings
+   * @returns {string} Difficulty level ("easy", "medium", "hard")
+   */
+  getDifficulty() {
+    // Get difficulty from game state settings
+    const userDifficulty = this.gameState?.settings?.difficulty || "adventurer"
+
+    // Map user-friendly difficulty names to internal difficulty levels
+    const difficultyMap = {
+      explorer: "easy", // Ages 5-7
+      adventurer: "medium", // Ages 7-9
+      master: "hard", // Ages 9-11
+    }
+
+    return difficultyMap[userDifficulty] || "medium"
   }
 
   generateAddition(difficulty, areaId) {
@@ -605,24 +619,11 @@ export class ActivityGenerator {
         const numItems1 = Math.floor(Math.random() * 4) + 2 // 2-5 items
         const weightPer1 = difficulty === "easy" ? 1 : Math.floor(Math.random() * 2) + 1 // 1-2 pounds
 
-        const weightOpType = Math.floor(Math.random() * 2) // 0=single, 1=add
-
-        if (weightOpType === 0 || difficulty === "easy") {
-          // Single weight multiplication
-          const totalWeight = numItems1 * weightPer1
-          question = `${numItems1} apples weigh ${weightPer1} pound${weightPer1 > 1 ? "s" : ""} each. How many pounds in total?`
-          answer = totalWeight
-          visual = [{ html: this.createScaleSVG(numItems1) }]
-        } else {
-          // Adding two weights - make sure weights are different per item
-          const numItems2 = Math.floor(Math.random() * 4) + 2
-          const weightPer2 = weightPer1 === 1 ? 2 : 1 // Ensure different weight per item
-          const totalWeight1 = numItems1 * weightPer1
-          const totalWeight2 = numItems2 * weightPer2
-          question = `${numItems1} apples weigh ${weightPer1} pound${weightPer1 > 1 ? "s" : ""} each. ${numItems2} oranges weigh ${weightPer2} pound${weightPer2 > 1 ? "s" : ""} each. How many pounds altogether?`
-          answer = totalWeight1 + totalWeight2
-          visual = [] // Too complex for visualization
-        }
+        // Single weight multiplication only
+        const totalWeight = numItems1 * weightPer1
+        question = `${numItems1} apples weigh ${weightPer1} pound${weightPer1 > 1 ? "s" : ""} each. How many pounds in total?`
+        answer = totalWeight
+        visual = [{ html: this.createScaleSVG(numItems1) }]
         break
       }
     }
