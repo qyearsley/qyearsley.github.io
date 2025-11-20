@@ -3,6 +3,7 @@
  */
 import { WordActivityGenerator } from "../js/WordActivityGenerator.js"
 import { WordBank } from "../js/WordBank.js"
+import { getStoriesForDifficulty } from "../data/stories.js"
 
 describe("WordActivityGenerator", () => {
   let generator
@@ -18,10 +19,10 @@ describe("WordActivityGenerator", () => {
       expect(generator.wordBank).toBe(wordBank)
     })
 
-    test("should have quest themes defined", () => {
-      expect(generator.questThemes).toBeDefined()
-      expect(generator.questThemes["sound-cipher"]).toBeDefined()
-      expect(generator.questThemes["blending-workshop"]).toBeDefined()
+    test("should have generators defined", () => {
+      expect(generator.generators).toBeDefined()
+      expect(generator.generators["sound-cipher"]).toBeDefined()
+      expect(generator.generators["blending-workshop"]).toBeDefined()
     })
   })
 
@@ -48,8 +49,8 @@ describe("WordActivityGenerator", () => {
       const activity = generator.generateActivity(1, "speed-vault", "adventurer")
 
       expect(activity).toBeDefined()
-      expect(activity.type).toBe("sight-word")
-      expect(activity.word).toBeDefined()
+      expect(["rhyme-matching", "odd-one-out"]).toContain(activity.type)
+      expect(activity.correctAnswer).toBeDefined()
     })
 
     test("should generate pattern-archive activity", () => {
@@ -79,7 +80,8 @@ describe("WordActivityGenerator", () => {
 
   describe("generateBeginningSound", () => {
     test("should generate beginning sound activity", () => {
-      const activity = generator.generateBeginningSound(1)
+      const soundGenerator = generator.generators["sound-cipher"]
+      const activity = soundGenerator.generateBeginningSound(1)
 
       expect(activity.type).toBe("beginning-sound")
       expect(activity.correctAnswer).toMatch(/^[a-z]$/)
@@ -89,13 +91,14 @@ describe("WordActivityGenerator", () => {
     })
 
     test("should use pictures when available", () => {
+      const soundGenerator = generator.generators["sound-cipher"]
       // Find a word with a picture
       const wordsWithPics = wordBank
         .getWords("explorer", "cvc")
         .filter((w) => wordBank.hasPicture("explorer", w))
 
       if (wordsWithPics.length > 0) {
-        const activity = generator.generateBeginningSound(0)
+        const activity = soundGenerator.generateBeginningSound(0)
         if (activity.showPicture) {
           expect(activity.visual).toBeTruthy()
         }
@@ -105,21 +108,24 @@ describe("WordActivityGenerator", () => {
 
   describe("generateSimilarWords", () => {
     test("should generate similar words with correct answer included", () => {
-      const words = generator.generateSimilarWords("cat", "explorer", 4)
+      const baseGenerator = generator.generators["sound-cipher"]
+      const words = baseGenerator.generateSimilarWords("cat", "explorer", 4)
 
       expect(words).toHaveLength(4)
       expect(words).toContain("cat")
     })
 
     test("should work for adventurer level with cvce words", () => {
-      const words = generator.generateSimilarWords("bike", "adventurer", 4)
+      const baseGenerator = generator.generators["sound-cipher"]
+      const words = baseGenerator.generateSimilarWords("bike", "adventurer", 4)
 
       expect(words).toHaveLength(4)
       expect(words).toContain("bike")
     })
 
     test("should handle explorer level without cvce words", () => {
-      const words = generator.generateSimilarWords("cat", "explorer", 3)
+      const baseGenerator = generator.generators["sound-cipher"]
+      const words = baseGenerator.generateSimilarWords("cat", "explorer", 3)
 
       expect(words).toHaveLength(3)
       expect(words).toContain("cat")
@@ -128,63 +134,73 @@ describe("WordActivityGenerator", () => {
 
   describe("breakIntoPhonemes", () => {
     test("should break simple words into phonemes", () => {
-      const phonemes = generator.breakIntoPhonemes("cat")
+      const baseGenerator = generator.generators["sound-cipher"]
+      const phonemes = baseGenerator.breakIntoPhonemes("cat")
       expect(phonemes).toEqual(["c", "a", "t"])
     })
 
     test("should handle digraphs", () => {
-      const phonemes = generator.breakIntoPhonemes("shop")
+      const baseGenerator = generator.generators["sound-cipher"]
+      const phonemes = baseGenerator.breakIntoPhonemes("shop")
       expect(phonemes).toEqual(["sh", "o", "p"])
     })
 
     test("should handle multiple digraphs", () => {
-      const phonemes = generator.breakIntoPhonemes("check")
+      const baseGenerator = generator.generators["sound-cipher"]
+      const phonemes = baseGenerator.breakIntoPhonemes("check")
       expect(phonemes).toEqual(["ch", "e", "ck"])
     })
 
     test("should handle words without digraphs", () => {
-      const phonemes = generator.breakIntoPhonemes("dog")
+      const baseGenerator = generator.generators["sound-cipher"]
+      const phonemes = baseGenerator.breakIntoPhonemes("dog")
       expect(phonemes).toEqual(["d", "o", "g"])
     })
   })
 
   describe("breakIntoSyllables", () => {
     test("should break multi-syllable words", () => {
-      const syllables = generator.breakIntoSyllables("rabbit")
+      const baseGenerator = generator.generators["sound-cipher"]
+      const syllables = baseGenerator.breakIntoSyllables("rabbit")
       expect(syllables).toBeInstanceOf(Array)
       expect(syllables.length).toBeGreaterThan(1)
     })
 
     test("should handle single syllable words", () => {
-      const syllables = generator.breakIntoSyllables("cat")
+      const baseGenerator = generator.generators["sound-cipher"]
+      const syllables = baseGenerator.breakIntoSyllables("cat")
       expect(syllables).toHaveLength(1)
       expect(syllables[0]).toBe("cat")
     })
 
     test("should not return empty array", () => {
-      const syllables = generator.breakIntoSyllables("window")
+      const baseGenerator = generator.generators["sound-cipher"]
+      const syllables = baseGenerator.breakIntoSyllables("window")
       expect(syllables.length).toBeGreaterThan(0)
     })
   })
 
   describe("getRandomItems", () => {
     test("should return requested number of items", () => {
+      const baseGenerator = generator.generators["sound-cipher"]
       const items = ["a", "b", "c", "d", "e"]
-      const result = generator.getRandomItems(items, 3)
+      const result = baseGenerator.getRandomItems(items, 3)
 
       expect(result).toHaveLength(3)
     })
 
     test("should return all items if count exceeds array length", () => {
+      const baseGenerator = generator.generators["sound-cipher"]
       const items = ["a", "b"]
-      const result = generator.getRandomItems(items, 5)
+      const result = baseGenerator.getRandomItems(items, 5)
 
       expect(result.length).toBeLessThanOrEqual(2)
     })
 
     test("should return unique items from array", () => {
+      const baseGenerator = generator.generators["sound-cipher"]
       const items = ["a", "b", "c", "d"]
-      const result = generator.getRandomItems(items, 3)
+      const result = baseGenerator.getRandomItems(items, 3)
 
       const unique = new Set(result)
       expect(unique.size).toBe(result.length)
@@ -193,15 +209,17 @@ describe("WordActivityGenerator", () => {
 
   describe("shuffleArray", () => {
     test("should return array with same length", () => {
+      const baseGenerator = generator.generators["sound-cipher"]
       const arr = [1, 2, 3, 4, 5]
-      const shuffled = generator.shuffleArray(arr)
+      const shuffled = baseGenerator.shuffleArray(arr)
 
       expect(shuffled).toHaveLength(arr.length)
     })
 
     test("should contain all original elements", () => {
+      const baseGenerator = generator.generators["sound-cipher"]
       const arr = ["a", "b", "c", "d"]
-      const shuffled = generator.shuffleArray(arr)
+      const shuffled = baseGenerator.shuffleArray(arr)
 
       arr.forEach((item) => {
         expect(shuffled).toContain(item)
@@ -209,9 +227,10 @@ describe("WordActivityGenerator", () => {
     })
 
     test("should not mutate original array", () => {
+      const baseGenerator = generator.generators["sound-cipher"]
       const arr = [1, 2, 3]
       const original = [...arr]
-      generator.shuffleArray(arr)
+      baseGenerator.shuffleArray(arr)
 
       expect(arr).toEqual(original)
     })
@@ -276,7 +295,7 @@ describe("WordActivityGenerator", () => {
 
   describe("getDecodableStories", () => {
     test("should return stories for explorer level", () => {
-      const stories = generator.getDecodableStories("explorer")
+      const stories = getStoriesForDifficulty("explorer")
 
       expect(stories).toBeInstanceOf(Array)
       expect(stories.length).toBeGreaterThan(0)
@@ -287,8 +306,8 @@ describe("WordActivityGenerator", () => {
     })
 
     test("should have progressively longer stories for higher levels", () => {
-      const explorer = generator.getDecodableStories("explorer")
-      const master = generator.getDecodableStories("master")
+      const explorer = getStoriesForDifficulty("explorer")
+      const master = getStoriesForDifficulty("master")
 
       const avgExplorerLength = explorer[0].text.length
       const avgMasterLength = master[0].text.length

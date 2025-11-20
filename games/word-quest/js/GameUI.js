@@ -202,25 +202,25 @@ export class GameUI extends BaseGameUI {
         choicesArea.innerHTML = activity.choices
           .map((choice, index) => {
             // Determine keyboard shortcut
-            let shortcut = ""
+            let keyboardHint = ""
             let shortcutData = ""
             if (activity.type === "vowel-sound") {
               // Use 's' and 'l' for short/long
               if (choice === "short") {
-                shortcut = " (S)"
+                keyboardHint = "S"
                 shortcutData = ` data-shortcut="s"`
               } else if (choice === "long") {
-                shortcut = " (L)"
+                keyboardHint = "L"
                 shortcutData = ` data-shortcut="l"`
               }
             } else {
               // Use numbers 1-4
-              shortcut = ` (${index + 1})`
+              keyboardHint = `${index + 1}`
             }
 
             return `
-          <button class="choice-button" data-value="${choice}"${shortcutData} role="radio" aria-checked="false" aria-label="Choice ${index + 1}: ${choice}">
-            ${choice}<span class="keyboard-hint">${shortcut}</span>
+          <button class="choice-button" data-value="${choice}"${shortcutData} data-keyboard-hint="${keyboardHint}" role="radio" aria-checked="false" aria-label="Choice ${index + 1}: ${choice}">
+            ${choice}
           </button>
         `
           })
@@ -342,31 +342,126 @@ export class GameUI extends BaseGameUI {
       return
     }
 
-    // Convert Set to Array and sort alphabetically
-    const words = Array.from(this.gameState.masteredWords).sort()
+    // Convert Set to Array
+    const words = Array.from(this.gameState.masteredWords)
 
-    // Create word cards
+    // Group words by word families
+    const wordBank = this.activityGenerator.wordBank
+    const wordFamilyGroups = {}
+    const uncategorizedWords = []
+
+    // Check all difficulty levels for word families
     words.forEach((word) => {
-      const card = document.createElement("div")
-      card.className = "word-card"
-      card.setAttribute("role", "button")
-      card.setAttribute("tabindex", "0")
-      card.setAttribute("aria-label", `Word: ${word}`)
+      let foundFamily = false
+      for (const difficulty of ["explorer", "adventurer", "master"]) {
+        const families = wordBank.getAllWordFamilies(difficulty)
+        for (const [familyName, familyWords] of Object.entries(families)) {
+          if (familyWords.includes(word)) {
+            if (!wordFamilyGroups[familyName]) {
+              wordFamilyGroups[familyName] = []
+            }
+            wordFamilyGroups[familyName].push(word)
+            foundFamily = true
+            break
+          }
+        }
+        if (foundFamily) break
+      }
+      if (!foundFamily) {
+        uncategorizedWords.push(word)
+      }
+    })
 
-      card.innerHTML = `
-        <div class="word-card-word">${word}</div>
-        <div class="word-card-badge">Mastered ✓</div>
-      `
+    // Create family sections
+    const familyKeys = Object.keys(wordFamilyGroups).sort()
 
-      // Add click to flip animation
-      card.addEventListener("click", () => {
-        card.classList.add("flipped")
-        setTimeout(() => {
-          card.classList.remove("flipped")
-        }, 600)
+    familyKeys.forEach((familyName) => {
+      const familyWords = wordFamilyGroups[familyName].sort()
+
+      // Create family section
+      const familySection = document.createElement("div")
+      familySection.className = "word-family-section"
+
+      const familyHeader = document.createElement("h3")
+      familyHeader.className = "word-family-header"
+      familyHeader.textContent = `-${familyName} family (${familyWords.length} word${familyWords.length > 1 ? "s" : ""})`
+      familySection.appendChild(familyHeader)
+
+      const familyGrid = document.createElement("div")
+      familyGrid.className = "word-family-grid"
+
+      familyWords.forEach((word) => {
+        const card = this.createWordCard(word)
+        familyGrid.appendChild(card)
       })
 
-      wordCardsGrid.appendChild(card)
+      familySection.appendChild(familyGrid)
+      wordCardsGrid.appendChild(familySection)
     })
+
+    // Add uncategorized words if any
+    if (uncategorizedWords.length > 0) {
+      const otherSection = document.createElement("div")
+      otherSection.className = "word-family-section"
+
+      const otherHeader = document.createElement("h3")
+      otherHeader.className = "word-family-header"
+      otherHeader.textContent = `Other Words (${uncategorizedWords.length})`
+      otherSection.appendChild(otherHeader)
+
+      const otherGrid = document.createElement("div")
+      otherGrid.className = "word-family-grid"
+
+      uncategorizedWords.sort().forEach((word) => {
+        const card = this.createWordCard(word)
+        otherGrid.appendChild(card)
+      })
+
+      otherSection.appendChild(otherGrid)
+      wordCardsGrid.appendChild(otherSection)
+    }
+  }
+
+  /**
+   * Create a word card element
+   * @param {string} word - The word to create a card for
+   * @returns {HTMLElement} The card element
+   */
+  createWordCard(word) {
+    const wordBank = this.activityGenerator.wordBank
+    const card = document.createElement("div")
+    card.className = "word-card"
+    card.setAttribute("role", "button")
+    card.setAttribute("tabindex", "0")
+    card.setAttribute("aria-label", `Word: ${word}`)
+
+    // Try to find a picture for this word
+    let picture = null
+    for (const difficulty of ["explorer", "adventurer", "master"]) {
+      picture = wordBank.getPictureForWord(difficulty, word)
+      if (picture) break
+    }
+
+    card.innerHTML = `
+      ${picture ? `<div class="word-card-picture">${picture}</div>` : ""}
+      <div class="word-card-word">${word}</div>
+      <div class="word-card-badge">✓</div>
+    `
+
+    // Add click to play sound and show animation
+    card.addEventListener("click", () => {
+      // Play sound if available
+      if (this.soundManager) {
+        this.soundManager.playWord(word)
+      }
+
+      // Add flip animation
+      card.classList.add("flipped")
+      setTimeout(() => {
+        card.classList.remove("flipped")
+      }, 600)
+    })
+
+    return card
   }
 }
