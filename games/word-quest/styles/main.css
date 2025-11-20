@@ -716,6 +716,18 @@ body {
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: Quicksand, sans-serif;
+  position: relative;
+}
+
+/* Keyboard hint in upper-right corner */
+.choice-button::after {
+  content: attr(data-keyboard-hint);
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 12px;
+  opacity: 0.5;
+  font-weight: normal;
 }
 
 .choice-button:hover:not(:disabled) {
@@ -746,10 +758,9 @@ body {
   cursor: not-allowed;
 }
 
+/* Old keyboard hint style - no longer needed */
 .keyboard-hint {
-  opacity: 0.6;
-  font-size: 0.85em;
-  margin-left: 0.25rem;
+  display: none;
 }
 
 .feedback-area {
@@ -1106,10 +1117,29 @@ body {
 }
 
 .word-cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
   margin: 1rem 0;
+}
+
+.word-family-section {
+  margin-bottom: 2rem;
+}
+
+.word-family-header {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--quest-primary);
+  margin-bottom: 1rem;
+  padding-left: 0.5rem;
+  border-left: 4px solid var(--quest-accent);
+}
+
+.word-family-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
 }
 
 .word-card {
@@ -1133,6 +1163,11 @@ body {
   transform: translateY(-5px) scale(1.02);
   box-shadow: 0 8px 16px var(--shadow);
   border-color: var(--quest-primary);
+}
+
+.word-card-picture {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .word-card-word {
@@ -1196,7 +1231,7 @@ body {
     grid-template-columns: 1fr;
   }
 
-  .word-cards-grid {
+  .word-family-grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
 
@@ -1205,7 +1240,15 @@ body {
     min-height: 120px;
   }
 
+  .word-card-picture {
+    font-size: 2rem;
+  }
+
   .word-card-word {
     font-size: 1.5rem;
+  }
+
+  .word-family-header {
+    font-size: 1.1rem;
   }
 }

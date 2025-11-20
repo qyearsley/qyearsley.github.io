@@ -52,22 +52,24 @@ describe("ActivityGenerator", () => {
 
   describe("generateAddition", () => {
     test("generates valid addition problem", () => {
-      const activity = generator.generateAddition("easy")
+      const activity = generator.basicMath.generateAddition("flower-meadow")
       expect(activity.type).toBe("addition")
       expect(activity.question).toContain("+")
       expect(activity.correctAnswer).toBeGreaterThan(0)
     })
 
     test("easy difficulty uses numbers up to 10", () => {
+      mockGameState.settings.difficulty = "explorer"
+      generator = new ActivityGenerator(mockGameState)
       for (let i = 0; i < 10; i++) {
-        const activity = generator.generateAddition("easy")
+        const activity = generator.basicMath.generateAddition("flower-meadow")
         // With max=10, largest answer is 10+10=20
         expect(activity.correctAnswer).toBeLessThanOrEqual(20)
       }
     })
 
     test("answer options are unique", () => {
-      const activity = generator.generateAddition("easy")
+      const activity = generator.basicMath.generateAddition("flower-meadow")
       const uniqueOptions = new Set(activity.options)
       expect(uniqueOptions.size).toBe(4)
     })
@@ -75,14 +77,14 @@ describe("ActivityGenerator", () => {
 
   describe("generateSubtraction", () => {
     test("generates valid subtraction problem", () => {
-      const activity = generator.generateSubtraction("easy")
+      const activity = generator.basicMath.generateSubtraction("crystal-cave")
       expect(activity.type).toBe("subtraction")
       expect(activity.question).toContain("-")
       expect(activity.correctAnswer).toBeGreaterThanOrEqual(0)
     })
 
     test("includes crossed-out visual items", () => {
-      const activity = generator.generateSubtraction("easy")
+      const activity = generator.basicMath.generateSubtraction("crystal-cave")
       const crossedOutItems = activity.visual.filter(
         (item) => typeof item === "object" && item.crossed,
       )
@@ -91,7 +93,7 @@ describe("ActivityGenerator", () => {
 
     test("answer is always positive", () => {
       for (let i = 0; i < 20; i++) {
-        const activity = generator.generateSubtraction("medium")
+        const activity = generator.basicMath.generateSubtraction("crystal-cave")
         expect(activity.correctAnswer).toBeGreaterThanOrEqual(0)
       }
     })
@@ -99,18 +101,18 @@ describe("ActivityGenerator", () => {
 
   describe("createSubtractionVisual", () => {
     test("creates correct number of items", () => {
-      const visual = generator.createSubtractionVisual(5, 2)
+      const visual = generator.basicMath.createSubtractionVisual(5, 2, "crystal-cave")
       expect(visual.length).toBe(5)
     })
 
     test("marks correct number as crossed out", () => {
-      const visual = generator.createSubtractionVisual(7, 3)
+      const visual = generator.basicMath.createSubtractionVisual(7, 3, "crystal-cave")
       const crossedOut = visual.filter((item) => typeof item === "object" && item.crossed)
       expect(crossedOut.length).toBe(3)
     })
 
     test("non-crossed items come first", () => {
-      const visual = generator.createSubtractionVisual(6, 2)
+      const visual = generator.basicMath.createSubtractionVisual(6, 2, "crystal-cave")
       const firstFour = visual.slice(0, 4)
       const lastTwo = visual.slice(4, 6)
 
@@ -124,19 +126,19 @@ describe("ActivityGenerator", () => {
 
   describe("generateOptions", () => {
     test("generates 4 unique options", () => {
-      const options = generator.generateOptions(5, 20)
+      const options = generator.basicMath.generateOptions(5)
       expect(options.length).toBe(4)
       expect(new Set(options).size).toBe(4)
     })
 
     test("includes correct answer", () => {
       const correctAnswer = 7
-      const options = generator.generateOptions(correctAnswer, 20)
+      const options = generator.basicMath.generateOptions(correctAnswer)
       expect(options).toContain(correctAnswer)
     })
 
     test("all options are positive", () => {
-      const options = generator.generateOptions(3, 10)
+      const options = generator.basicMath.generateOptions(3)
       options.forEach((option) => {
         expect(option).toBeGreaterThan(0)
       })
@@ -145,7 +147,7 @@ describe("ActivityGenerator", () => {
 
   describe("generateMultiplication", () => {
     test("generates valid multiplication problem", () => {
-      const activity = generator.generateMultiplication("easy")
+      const activity = generator.basicMath.generateMultiplication("enchanted-forest")
       expect(activity.type).toBe("multiplication")
       expect(activity.question).toContain("×")
       expect(activity.correctAnswer).toBeGreaterThan(0)
@@ -153,7 +155,7 @@ describe("ActivityGenerator", () => {
 
     test("one operand is always between 2-5", () => {
       for (let i = 0; i < 20; i++) {
-        const activity = generator.generateMultiplication("medium")
+        const activity = generator.basicMath.generateMultiplication("enchanted-forest")
         const parts = activity.question.split(" × ")
         const num1 = parseInt(parts[0])
         const num2 = parseInt(parts[1].split(" =")[0])
@@ -165,7 +167,7 @@ describe("ActivityGenerator", () => {
     })
 
     test("includes separator in visual", () => {
-      const activity = generator.generateMultiplication("easy")
+      const activity = generator.basicMath.generateMultiplication("enchanted-forest")
       const separators = activity.visual.filter(
         (item) => typeof item === "object" && item.separator,
       )
@@ -175,20 +177,20 @@ describe("ActivityGenerator", () => {
 
   describe("createMultiplicationVisual", () => {
     test("creates correct total number of items", () => {
-      const visual = generator.createMultiplicationVisual(3, 4)
+      const visual = generator.basicMath.createMultiplicationVisual(3, 4, "enchanted-forest")
       // 3 groups of 4 items + 2 separators = 14 total
       expect(visual.length).toBe(3 * 4 + 2)
     })
 
     test("includes correct number of separators", () => {
-      const visual = generator.createMultiplicationVisual(3, 4)
+      const visual = generator.basicMath.createMultiplicationVisual(3, 4, "enchanted-forest")
       const separators = visual.filter((item) => typeof item === "object" && item.separator)
       // 3 groups needs 2 separators
       expect(separators.length).toBe(2)
     })
 
     test("no separator after last group", () => {
-      const visual = generator.createMultiplicationVisual(2, 3)
+      const visual = generator.basicMath.createMultiplicationVisual(2, 3, "enchanted-forest")
       const lastItem = visual[visual.length - 1]
       // Last item should not be a separator
       expect(typeof lastItem === "object" && lastItem.separator).toBe(false)
