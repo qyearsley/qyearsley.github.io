@@ -922,54 +922,84 @@ select:focus-visible,
   }
 
   .screen {
-    padding: 15px;
+    padding: 10px;
   }
 
   .game-title {
-    font-size: 32px;
+    font-size: 28px;
+    margin-bottom: 10px;
   }
 
   .subtitle {
-    font-size: 16px;
+    font-size: 14px;
+    margin-bottom: 20px;
   }
 
   .big-button {
     font-size: 18px;
-    padding: 15px 30px;
+    padding: 12px 24px;
+  }
+
+  .header {
+    margin-bottom: 10px;
+    padding-bottom: 5px;
   }
 
   .header h2 {
-    font-size: 20px;
+    font-size: 18px;
   }
 
   .stat {
-    font-size: 14px;
-    padding: 5px 10px;
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+
+  .creature-guide {
+    padding: 5px;
+    gap: 8px;
   }
 
   .creature-image {
-    font-size: 40px;
+    font-size: 32px;
+  }
+
+  .creature-message {
+    font-size: 12px;
+    padding: 6px 10px;
   }
 
   .creature-speech p {
     font-size: 14px;
   }
 
+  .question-area {
+    padding: 15px;
+  }
+
   .question {
-    font-size: 24px;
+    font-size: 20px;
+    margin-bottom: 10px;
   }
 
   .visual-item {
-    font-size: 40px;
+    font-size: 32px;
+  }
+
+  .answer-options {
+    gap: 10px;
   }
 
   .answer-button {
-    font-size: 32px;
-    padding: 20px;
+    font-size: 28px;
+    padding: 15px;
   }
 
   .garden-item {
     font-size: 28px;
+  }
+
+  .activity-container {
+    gap: 10px;
   }
 }
 
