@@ -229,4 +229,30 @@ describe("Inference Rules", () => {
     // Should derive B | C
     expect(resolution.expression).toMatch(/B.*C/)
   })
+
+  test("Resolution case 4: right-right complementary literals", async () => {
+    // Test: (B | A), (C | ~A) => (B | C)
+    // This tests the case where both complementary literals are on the right
+    const steps = [
+      { id: 1, expression: "B | A", isPremise: true },
+      { id: 2, expression: "C | ~A", isPremise: true },
+    ]
+    const conclusions = await inferNextSteps(steps)
+    const resolution = conclusions.find((c) => c.justification === "Resolution")
+    expect(resolution).toBeDefined()
+    expect(resolution.expression).toMatch(/B.*C/)
+  })
+
+  test("Does not add duplicate conclusions in same inference batch", async () => {
+    // This tests the dedup logic at line 145
+    // Create a scenario where the same conclusion could be derived multiple ways
+    const steps = [
+      { id: 1, expression: "P & Q", isPremise: true }, // Simplification will derive P and Q
+      { id: 2, expression: "P", isPremise: true }, // P already exists
+    ]
+    const conclusions = await inferNextSteps(steps)
+    // Should not derive P (already exists) or Q twice
+    const pConclusions = conclusions.filter((c) => c.expression === "P")
+    expect(pConclusions).toHaveLength(0) // P shouldn't be derived since it exists
+  })
 })

@@ -8,9 +8,13 @@
  * 1. Parentheses ()
  * 2. NOT (~, !)
  * 3. AND (&, ^)
- * 4. OR (|)
- * 5. IMPLIES (->)
- * 6. IFF (<->)
+ * 4. NAND
+ * 5. OR (|)
+ * 6. NOR
+ * 7. XOR
+ * 8. XNOR
+ * 9. IMPLIES (->)
+ * 10. IFF (<->)
  *
  * Examples:
  *   "P -> Q" parses to { type: 'BINARY', operator: '->', left: {type: 'ATOM', value: 'P'}, right: {...} }
@@ -21,7 +25,7 @@
 
 /**
  * Token types for the lexer
- * @typedef {'ATOM'|'NOT'|'AND'|'OR'|'IMPLIES'|'IFF'|'LPAREN'|'RPAREN'|'EOF'} TokenType
+ * @typedef {'ATOM'|'NOT'|'AND'|'OR'|'XOR'|'NAND'|'NOR'|'XNOR'|'IMPLIES'|'IFF'|'LPAREN'|'RPAREN'|'EOF'} TokenType
  */
 
 /**
@@ -51,7 +55,7 @@
 /**
  * @typedef {Object} BinaryNode
  * @property {'BINARY'} type
- * @property {'&'|'|'|'->'|'<->'} operator - The binary operator
+ * @property {'&'|'|'|'xor'|'nand'|'nor'|'xnor'|'->'|'<->'} operator - The binary operator
  * @property {ASTNode} left - Left operand
  * @property {ASTNode} right - Right operand
  */
@@ -80,7 +84,11 @@
  * Supported operators (in order checked - longest first to avoid partial matches):
  * - NOT: ~, !, "not"
  * - AND: &, ^, "and"
+ * - NAND: "nand"
  * - OR: |, "or"
+ * - NOR: "nor"
+ * - XOR: "xor"
+ * - XNOR: "xnor"
  * - IMPLIES: ->, "implies", "then"
  * - IFF: <->, "iff"
  *
@@ -122,6 +130,38 @@ export function tokenize(input) {
     if (remaining.startsWith("<->") || remaining.startsWith("iff")) {
       tokens.push({ type: "IFF", value: "<->" })
       cursor += remaining.startsWith("<->") ? 3 : 3
+      continue
+    }
+
+    // XNOR operator ("xnor")
+    const isWordXnor = remaining.startsWith("xnor") && !/^[a-z0-9]/.test(input[cursor + 4] || "")
+    if (isWordXnor) {
+      tokens.push({ type: "XNOR", value: "xnor" })
+      cursor += 4
+      continue
+    }
+
+    // NAND operator ("nand")
+    const isWordNand = remaining.startsWith("nand") && !/^[a-z0-9]/.test(input[cursor + 4] || "")
+    if (isWordNand) {
+      tokens.push({ type: "NAND", value: "nand" })
+      cursor += 4
+      continue
+    }
+
+    // NOR operator ("nor")
+    const isWordNor = remaining.startsWith("nor") && !/^[a-z0-9]/.test(input[cursor + 3] || "")
+    if (isWordNor) {
+      tokens.push({ type: "NOR", value: "nor" })
+      cursor += 3
+      continue
+    }
+
+    // XOR operator ("xor")
+    const isWordXor = remaining.startsWith("xor") && !/^[a-z0-9]/.test(input[cursor + 3] || "")
+    if (isWordXor) {
+      tokens.push({ type: "XOR", value: "xor" })
+      cursor += 3
       continue
     }
 
@@ -199,8 +239,12 @@ export function tokenize(input) {
  *
  * The grammar (in order of precedence from lowest to highest):
  *   iff     ::= implies ('IFF' implies)*             // P <-> Q <-> R  (left-associative)
- *   implies ::= or ('->' implies)?                   // P -> Q -> R = P -> (Q -> R)  (right-associative!)
- *   or      ::= and ('|' and)*                       // P | Q | R  (left-associative)
+ *   implies ::= xnor ('->' implies)?                 // P -> Q -> R = P -> (Q -> R)  (right-associative!)
+ *   xnor    ::= xor ('XNOR' xor)*                    // P xnor Q xnor R  (left-associative)
+ *   xor     ::= nor ('XOR' nor)*                     // P xor Q xor R  (left-associative)
+ *   nor     ::= or ('NOR' or)*                       // P nor Q nor R  (left-associative)
+ *   or      ::= nand ('|' nand)*                     // P | Q | R  (left-associative)
+ *   nand    ::= and ('NAND' and)*                    // P nand Q nand R  (left-associative)
  *   and     ::= not ('&' not)*                       // P & Q & R  (left-associative)
  *   not     ::= 'NOT' not | primary                  // ~~P works recursively
  *   primary ::= 'ATOM' | '(' iff ')'                 // P or (P & Q)
@@ -325,7 +369,7 @@ export class Parser {
    * @returns {ASTNode}
    */
   parseImplies() {
-    let left = this.parseOr()
+    let left = this.parseXnor()
     if (this.current().type === "IMPLIES") {
       this.consume()
       // Recursion makes it right-associative (unlike the while loops in other methods)
@@ -336,27 +380,83 @@ export class Parser {
   }
 
   /**
+   * Parses XNOR (exclusive nor / equivalence) expressions
+   * @returns {ASTNode}
+   */
+  parseXnor() {
+    let left = this.parseXor()
+    while (this.current().type === "XNOR") {
+      this.consume()
+      const right = this.parseXor()
+      left = { type: "BINARY", operator: "xnor", left, right }
+    }
+    return left
+  }
+
+  /**
+   * Parses XOR (exclusive or) expressions
+   * @returns {ASTNode}
+   */
+  parseXor() {
+    let left = this.parseNor()
+    while (this.current().type === "XOR") {
+      this.consume()
+      const right = this.parseNor()
+      left = { type: "BINARY", operator: "xor", left, right }
+    }
+    return left
+  }
+
+  /**
+   * Parses NOR (not or) expressions
+   * @returns {ASTNode}
+   */
+  parseNor() {
+    let left = this.parseOr()
+    while (this.current().type === "NOR") {
+      this.consume()
+      const right = this.parseOr()
+      left = { type: "BINARY", operator: "nor", left, right }
+    }
+    return left
+  }
+
+  /**
    * Parses OR (disjunction) expressions
    *
    * Algorithm: Left-associative iteration
-   * Grammar: or ::= and ('|' and)*
+   * Grammar: or ::= nand ('|' nand)*
    *
    * Example parse of "P | Q | R":
-   * 1. left = parseAnd() → get P
-   * 2. See OR, consume it, right = parseAnd() → get Q, left = (P | Q)
-   * 3. See OR, consume it, right = parseAnd() → get R, left = ((P | Q) | R)
+   * 1. left = parseNand() → get P
+   * 2. See OR, consume it, right = parseNand() → get Q, left = (P | Q)
+   * 3. See OR, consume it, right = parseNand() → get R, left = ((P | Q) | R)
    *
-   * Why higher precedence than IFF/IMPLIES?
+   * Why higher precedence than NOR/XOR/XNOR/IMPLIES?
    * "P -> Q | R" should parse as "P -> (Q | R)", so OR binds tighter than IMPLIES
    *
    * @returns {ASTNode}
    */
   parseOr() {
-    let left = this.parseAnd()
+    let left = this.parseNand()
     while (this.current().type === "OR") {
       this.consume()
-      const right = this.parseAnd()
+      const right = this.parseNand()
       left = { type: "BINARY", operator: "|", left, right }
+    }
+    return left
+  }
+
+  /**
+   * Parses NAND (not and) expressions
+   * @returns {ASTNode}
+   */
+  parseNand() {
+    let left = this.parseAnd()
+    while (this.current().type === "NAND") {
+      this.consume()
+      const right = this.parseAnd()
+      left = { type: "BINARY", operator: "nand", left, right }
     }
     return left
   }

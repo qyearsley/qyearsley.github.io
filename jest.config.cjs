@@ -1,6 +1,7 @@
 module.exports = {
   testEnvironment: "jsdom",
   testMatch: ["**/*.test.js"],
+  silent: true, // Suppress console output during tests
   collectCoverageFrom: [
     "javascript/**/*.js",
     "games/netguard/**/*.js",

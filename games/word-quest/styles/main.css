@@ -1027,9 +1027,11 @@ body {
     padding: 5px;
     margin-bottom: 0.5rem;
   }
+
   .creature-icon {
     font-size: 32px;
   }
+
   .creature-narrative {
     font-size: 14px;
     padding: 6px 12px;
@@ -1038,6 +1040,7 @@ body {
   .question-area {
     margin-bottom: 0.5rem;
   }
+
   .question-area h3 {
     font-size: 1.1rem;
     margin-bottom: 0.5rem;
