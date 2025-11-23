@@ -129,7 +129,7 @@ export class TimeGenerator extends BaseMathGenerator {
       timeDescription = `${hoursToAdd} hour${hoursToAdd > 1 ? "s" : ""}`
     }
 
-    const question = `It is ${startHour}:${startMinuteStr}. What time is it ${timeDescription} later?`
+    const question = `It will be ${startHour}:${startMinuteStr}. What time will it be in ${timeDescription}?`
     const answer = `${endHour}:${endMinuteStr}`
     const options = generateTimeOptions(endHour, endMinute)
 

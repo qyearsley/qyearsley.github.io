@@ -32,6 +32,7 @@ export class PatternArchiveGenerator extends BaseActivityGenerator {
         ),
       ],
       audioWord: correctWord,
+      autoPlayAudio: true, // Listening helps identify rhymes
       hint: `Listen for the rhyme!`,
       word: correctWord,
       pattern: familyKey,

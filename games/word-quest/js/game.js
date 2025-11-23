@@ -38,6 +38,18 @@ class Game {
     // Update sound manager based on settings
     this.soundManager.setEnabled(this.gameState.settings.audioHints)
 
+    // Check for URL parameters (e.g., ?unlock=all)
+    const params = new URLSearchParams(window.location.search)
+    const unlockParam = params.get("unlock")
+    if (unlockParam === "all") {
+      this.gameState.unlockedQuests.add("sound-cipher")
+      this.gameState.unlockedQuests.add("blending-workshop")
+      this.gameState.unlockedQuests.add("speed-vault")
+      this.gameState.unlockedQuests.add("pattern-archive")
+      this.gameState.unlockedQuests.add("spell-forge")
+      this.gameState.unlockedQuests.add("story-vault")
+    }
+
     // Show appropriate starting screen
     if (this.gameState.hasSavedProgress()) {
       this.showScreen("title-screen")

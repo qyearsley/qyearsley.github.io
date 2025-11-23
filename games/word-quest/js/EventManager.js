@@ -255,9 +255,6 @@ export class EventManager {
     // Ignore if already answered
     if (this.answered) return
 
-    // Mark as answered
-    this.answered = true
-
     // Store selected answer
     this.selectedAnswer = button.dataset.value
 
@@ -271,23 +268,37 @@ export class EventManager {
     this.game.showFeedback(isCorrect)
 
     if (isCorrect) {
+      // Play correct sound
+      this.game.soundManager.playCorrect()
+
+      // Mark as fully answered
+      this.answered = true
       this.game.gameState.recordCorrectAnswer(activity.word)
+
+      // Disable all choices and show correct
+      document.querySelectorAll(".choice-button").forEach((btn) => {
+        btn.disabled = true
+        if (btn.dataset.value === activity.correctAnswer) {
+          btn.classList.add("correct")
+        }
+      })
+
+      // Auto-advance to next question after a short delay
+      setTimeout(() => {
+        this.game.nextActivity()
+      }, 1000)
+    } else {
+      // Play incorrect sound
+      this.game.soundManager.playIncorrect()
+
+      // Wrong answer - allow retry like Number Garden
+      button.classList.add("incorrect")
+
+      // Wait briefly, then clear the incorrect marking and allow retry
+      setTimeout(() => {
+        button.classList.remove("selected", "incorrect")
+      }, 800)
     }
-
-    // Disable all choices and show correct/incorrect
-    document.querySelectorAll(".choice-button").forEach((btn) => {
-      btn.disabled = true
-      if (btn.dataset.value === activity.correctAnswer) {
-        btn.classList.add("correct")
-      } else if (btn.dataset.value === this.selectedAnswer && !isCorrect) {
-        btn.classList.add("incorrect")
-      }
-    })
-
-    // Auto-advance to next question after a short delay (like Enchanted Garden)
-    setTimeout(() => {
-      this.game.nextActivity()
-    }, 1000)
   }
 
   /**
@@ -319,9 +330,13 @@ export class EventManager {
     this.game.showFeedback(isCorrect)
 
     if (isCorrect) {
+      // Play correct sound
+      this.game.soundManager.playCorrect()
       this.game.gameState.recordCorrectAnswer(activity.word)
       answerInput.classList.add("correct")
     } else {
+      // Play incorrect sound
+      this.game.soundManager.playIncorrect()
       answerInput.classList.add("incorrect")
     }
 

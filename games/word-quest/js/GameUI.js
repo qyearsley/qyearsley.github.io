@@ -243,6 +243,19 @@ export class GameUI extends BaseGameUI {
     if (nextButton) {
       nextButton.classList.add("hidden")
     }
+
+    // Auto-play audio for listening-focused questions
+    if (
+      activity.autoPlayAudio &&
+      activity.audioWord &&
+      this.gameState.settings.audioHints &&
+      this.soundManager?.isSpeechAvailable()
+    ) {
+      // Delay slightly to ensure UI is rendered
+      setTimeout(() => {
+        this.soundManager.playWord(activity.audioWord)
+      }, 300)
+    }
   }
 
   /**
@@ -252,8 +265,6 @@ export class GameUI extends BaseGameUI {
   showFeedback(isCorrect) {
     const feedbackArea = document.getElementById("activity-feedback")
     if (!feedbackArea) return
-
-    const activity = this.gameState.currentActivity
 
     if (isCorrect) {
       feedbackArea.innerHTML = `
@@ -266,8 +277,7 @@ export class GameUI extends BaseGameUI {
       feedbackArea.innerHTML = `
         <div class="feedback incorrect">
           <div class="feedback-icon">🔍</div>
-          <h3>Not quite!</h3>
-          <p>The answer is: <strong>${activity.correctAnswer}</strong></p>
+          <h3>Try again!</h3>
         </div>
       `
     }
