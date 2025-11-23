@@ -42,6 +42,7 @@ export class SpellForgeGenerator extends BaseActivityGenerator {
       correctAnswer: correctLetter,
       choices: this.shuffleArray([correctLetter, ...distractors]),
       audioWord: correctWord,
+      autoPlayAudio: true, // Listening is integral to this question
       hint: `Listen to the word and think about each sound!`,
       word: correctWord,
       fullWord: correctWord,

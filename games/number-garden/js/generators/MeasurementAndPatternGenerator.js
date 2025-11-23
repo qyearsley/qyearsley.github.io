@@ -30,15 +30,11 @@ export class MeasurementAndPatternGenerator extends BaseMathGenerator {
     const length1 = Math.floor(Math.random() * 8) + 2 // 2-9 inches
     const length2 = Math.floor(Math.random() * 8) + 2
 
-    const opType = Math.floor(Math.random() * 3) // 0=single, 1=add, 2=subtract
+    const opType = Math.floor(Math.random() * 2) + 1 // 1=add, 2=subtract
 
     let question, answer, visual
 
-    if (opType === 0) {
-      question = `How long is the line in inches?`
-      answer = length1
-      visual = [{ html: this.createRulerSVG(length1) }]
-    } else if (opType === 1) {
+    if (opType === 1) {
       question = `One stick is ${length1} inches long. Another is ${length2} inches long. How long are they together?`
       answer = length1 + length2
       visual = [{ html: this.createRulerSVG(length1) }, { html: this.createRulerSVG(length2) }]

@@ -45,6 +45,7 @@ export class BlendingWorkshopGenerator extends BaseActivityGenerator {
       correctAnswer: firstLetter,
       choices: this.shuffleArray([firstLetter, ...distractors]),
       audioWord: correctWord,
+      autoPlayAudio: true, // Listening is integral to this question
       hint: `Listen to the first sound!`,
       word: correctWord,
     }
@@ -73,10 +74,11 @@ export class BlendingWorkshopGenerator extends BaseActivityGenerator {
           return {
             type: "spell-digraph",
             question: `How do you spell this word?`,
-            visual: `${before} __ ${after}`,
+            visual: `${before} _ ${after}`,
             correctAnswer: digraph,
             choices: this.shuffleArray([digraph, ...distractors]),
             audioWord: correctWord,
+            autoPlayAudio: true, // Listening is integral to this question
             hint: `Listen for the digraph sound!`,
             word: correctWord,
           }
@@ -97,10 +99,11 @@ export class BlendingWorkshopGenerator extends BaseActivityGenerator {
       return {
         type: "spell-vowel",
         question: `What vowel do you hear in this word?`,
-        visual: `${before} __ ${after}`,
+        visual: `${before} _ ${after}`,
         correctAnswer: vowel,
         choices: this.shuffleArray([vowel, ...distractors]),
         audioWord: correctWord,
+        autoPlayAudio: true, // Listening is integral to this question
         hint: `Listen for the long vowel sound!`,
         word: correctWord,
       }
@@ -145,6 +148,7 @@ export class BlendingWorkshopGenerator extends BaseActivityGenerator {
         correctAnswer: correctSyllable,
         choices: this.shuffleArray([correctSyllable, ...distractors]),
         audioWord: correctWord,
+        autoPlayAudio: true, // Listening is integral to this question
         hint: `Listen to the whole word!`,
         word: correctWord,
       }

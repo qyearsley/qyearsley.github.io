@@ -90,6 +90,7 @@ export class SoundCipherGenerator extends BaseActivityGenerator {
       correctAnswer: correctWord,
       choices: this.generateSimilarWords(correctWord, "adventurer", 3),
       audioWord: correctWord,
+      autoPlayAudio: true, // Listening is integral to this question
       hint: `This word has a magic 'e' that makes the vowel say its name!`,
       word: correctWord,
     }
@@ -249,6 +250,7 @@ export class SoundCipherGenerator extends BaseActivityGenerator {
       correctAnswer: correctWord[0],
       choices: this.shuffleArray([correctWord[0], ...this.getRandomItems("aeiou".split(""), 2)]),
       audioWord: correctWord,
+      autoPlayAudio: true, // Listening is integral to this question
       hint: `Listen carefully to the vowel sound!`,
       word: correctWord,
     }
