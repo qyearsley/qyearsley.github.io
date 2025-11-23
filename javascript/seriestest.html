@@ -25,18 +25,16 @@
       </header>
 
       <main class="main-content">
+        <nav class="breadcrumbs">
+          <a href="/">Home</a>
+          <span class="separator">/</span>
+          <a href="/javascript/">JavaScript</a>
+          <span class="separator">/</span>
+          <span class="current">Series Tester</span>
+        </nav>
+
         <section class="section">
-          <p>
-            A <b>series</b> is the sum of the terms in a sequence. For some sequences, the more
-            terms are added, the closer the sum gets to some finite number. Such series are set to
-            <b>converge</b>.
-          </p>
-
-          <p>
-            Below, you can approximate the sum of an infinite sequence by computing
-            <i>&Sigma;(n=0, N)f(n)</i> for some large <i>N</i>.
-          </p>
-
+          <h2>Calculate Series Sum</h2>
           <form id="form" class="form-container">
             <div class="form-group">
               <label for="f">f(n) =</label>
@@ -67,8 +65,22 @@
 
           <div id="error" class="error-message" style="display: none"></div>
           <div id="output"></div>
+        </section>
 
-          <h2>Some convergent series to try</h2>
+        <section class="section">
+          <h2>About Convergent Series</h2>
+          <p>
+            A <b>series</b> is the sum of the terms in a sequence. For some sequences, the more
+            terms are added, the closer the sum gets to some finite number. Such series are said to
+            <b>converge</b>.
+          </p>
+
+          <p>
+            This tool approximates the sum of an infinite sequence by computing
+            <i>&Sigma;(n=0, N)f(n)</i> for some large <i>N</i>.
+          </p>
+
+          <h3>Some convergent series to try</h3>
           <table border="1">
             <thead>
               <tr>

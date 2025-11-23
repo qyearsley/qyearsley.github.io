@@ -104,4 +104,9 @@ describe("formatAST", () => {
     }
     expect(formatAST(ast)).toBe("~(P & Q) | R")
   })
+
+  test("returns empty string for invalid node type", () => {
+    const invalidAst = { type: "INVALID", value: "test" }
+    expect(formatAST(invalidAst)).toBe("")
+  })
 })

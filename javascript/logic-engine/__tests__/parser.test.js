@@ -43,6 +43,22 @@ describe("Tokenizer", () => {
     expect(tokenize("P iff Q")[1]).toEqual({ type: "IFF", value: "<->" })
   })
 
+  test("tokenizes XOR operator", () => {
+    expect(tokenize("P xor Q")[1]).toEqual({ type: "XOR", value: "xor" })
+  })
+
+  test("tokenizes NAND operator", () => {
+    expect(tokenize("P nand Q")[1]).toEqual({ type: "NAND", value: "nand" })
+  })
+
+  test("tokenizes NOR operator", () => {
+    expect(tokenize("P nor Q")[1]).toEqual({ type: "NOR", value: "nor" })
+  })
+
+  test("tokenizes XNOR operator", () => {
+    expect(tokenize("P xnor Q")[1]).toEqual({ type: "XNOR", value: "xnor" })
+  })
+
   test("tokenizes parentheses", () => {
     const tokens = tokenize("(P)")
     expect(tokens[0]).toEqual({ type: "LPAREN", value: "(" })
@@ -124,6 +140,46 @@ describe("Parser", () => {
     expect(ast).toEqual({
       type: "BINARY",
       operator: "<->",
+      left: { type: "ATOM", value: "P" },
+      right: { type: "ATOM", value: "Q" },
+    })
+  })
+
+  test("parses XOR expressions", () => {
+    const ast = new Parser(tokenize("P xor Q")).parse()
+    expect(ast).toEqual({
+      type: "BINARY",
+      operator: "xor",
+      left: { type: "ATOM", value: "P" },
+      right: { type: "ATOM", value: "Q" },
+    })
+  })
+
+  test("parses NAND expressions", () => {
+    const ast = new Parser(tokenize("P nand Q")).parse()
+    expect(ast).toEqual({
+      type: "BINARY",
+      operator: "nand",
+      left: { type: "ATOM", value: "P" },
+      right: { type: "ATOM", value: "Q" },
+    })
+  })
+
+  test("parses NOR expressions", () => {
+    const ast = new Parser(tokenize("P nor Q")).parse()
+    expect(ast).toEqual({
+      type: "BINARY",
+      operator: "nor",
+      left: { type: "ATOM", value: "P" },
+      right: { type: "ATOM", value: "Q" },
+    })
+  })
+
+  test("parses XNOR expressions", () => {
+    const ast = new Parser(tokenize("P xnor Q")).parse()
+    expect(ast).toEqual({
+      type: "BINARY",
+      operator: "xnor",
       left: { type: "ATOM", value: "P" },
       right: { type: "ATOM", value: "Q" },
     })
