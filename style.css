@@ -25,7 +25,6 @@ body {
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgb(0, 0, 0, 0.1);
-  overflow: hidden;
 }
 
 /* Header */
@@ -259,6 +258,28 @@ body {
 
 .breadcrumbs .current {
   color: #2d3748;
+}
+
+/* When breadcrumbs are in header, use light colors */
+.header .breadcrumbs {
+  color: #cbd5e0;
+  margin-bottom: 1rem;
+}
+
+.header .breadcrumbs a {
+  color: #cbd5e0;
+}
+
+.header .breadcrumbs a:hover {
+  color: white;
+}
+
+.header .breadcrumbs .current {
+  color: white;
+}
+
+.header .breadcrumbs .separator {
+  color: #718096;
 }
 
 /* Project Links */
