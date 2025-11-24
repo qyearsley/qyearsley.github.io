@@ -53,6 +53,10 @@ body.logic-engine {
   margin: 0 0.5rem;
 }
 
+.logic-engine-header .breadcrumbs .current {
+  color: white;
+}
+
 .logic-engine-header h1 {
   font-size: 1.875rem;
   font-weight: bold;
