@@ -20,7 +20,7 @@ body {
 
 /* Container */
 .container {
-  max-width: 800px;
+  max-width: 960px;
   margin: 0 auto;
   background: white;
   border-radius: 8px;
@@ -405,6 +405,63 @@ td {
   font-size: 0.875rem;
 }
 
+.form-inline-group {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.form-inline-group .form-group {
+  flex: 1;
+  min-width: 150px;
+  margin-bottom: 0;
+}
+
+.form-select {
+  padding: 0.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  background: white;
+  cursor: pointer;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: #3182ce;
+}
+
+.form-textarea {
+  width: 100%;
+  min-height: 150px;
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.9rem;
+  resize: vertical;
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: #3182ce;
+}
+
+.probability-sample {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  padding: 10px;
+  margin-bottom: 8px;
+  font-family: monospace;
+  font-size: 13px;
+}
+
+.probability-sample strong {
+  color: #007bff;
+}
+
 .submit-btn {
   background: #3182ce;
   color: white;
@@ -499,6 +556,15 @@ td {
 .info-box h3 {
   margin-top: 0;
   color: #495057;
+}
+
+.info-box ul {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.info-box li {
+  margin-bottom: 0.25rem;
 }
 
 /* Accessibility - Focus indicators */
@@ -704,6 +770,36 @@ textarea {
     color: #a0aec0;
   }
 
+  .form-select {
+    background: #2d3748;
+    border-color: #4a5568;
+    color: #e2e8f0;
+  }
+
+  .form-select:focus {
+    border-color: #63b3ed;
+  }
+
+  .form-textarea {
+    background: #2d3748;
+    border-color: #4a5568;
+    color: #e2e8f0;
+  }
+
+  .form-textarea:focus {
+    border-color: #63b3ed;
+  }
+
+  .probability-sample {
+    background: #2d3748;
+    border-color: #4a5568;
+    color: #e2e8f0;
+  }
+
+  .probability-sample strong {
+    color: #63b3ed;
+  }
+
   .submit-btn {
     background: #63b3ed;
     color: #1a202c;
@@ -747,6 +843,10 @@ textarea {
 
   .info-box h3 {
     color: #e2e8f0;
+  }
+
+  .info-box ul {
+    margin-left: 1.5rem;
   }
 
   .skip-link {
