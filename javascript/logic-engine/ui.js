@@ -37,7 +37,10 @@ export function initUI() {
     const input = premiseInput.value.trim()
     if (input) {
       // Split by comma to support multiple premises
-      const expressions = input.split(",").map((expr) => expr.trim()).filter((expr) => expr)
+      const expressions = input
+        .split(",")
+        .map((expr) => expr.trim())
+        .filter((expr) => expr)
 
       if (expressions.length > 0) {
         let hasError = false
