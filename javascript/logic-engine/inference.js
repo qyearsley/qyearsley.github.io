@@ -627,11 +627,7 @@ export async function inferNextSteps(currentSteps) {
       }
 
       // Check for literal contradiction: true and false
-      if (
-        p1.ast.type === "LITERAL" &&
-        p2.ast.type === "LITERAL" &&
-        p1.ast.value !== p2.ast.value
-      ) {
+      if (p1.ast.type === "LITERAL" && p2.ast.type === "LITERAL" && p1.ast.value !== p2.ast.value) {
         // Found true and false together - contradiction
         addConclusion(
           { type: "LITERAL", value: false },

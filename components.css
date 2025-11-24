@@ -671,6 +671,155 @@ body.logic-engine {
 
 /* Dark Mode Support */
 @media (prefers-color-scheme: dark) {
+  /* Logic Engine Dark Mode */
+  body.logic-engine {
+    background: #1a202c;
+  }
+
+  .logic-card {
+    background: #2d3748;
+    border: 1px solid #4a5568;
+  }
+
+  .logic-card h2 {
+    color: #e2e8f0;
+  }
+
+  .logic-card h3 {
+    color: #cbd5e0;
+  }
+
+  .logic-card p {
+    color: #a0aec0;
+  }
+
+  .logic-input {
+    background: #1a202c;
+    border-color: #4a5568;
+    color: #e2e8f0;
+  }
+
+  .logic-input:focus {
+    border-color: #63b3ed;
+    box-shadow: 0 0 0 2px #63b3ed;
+  }
+
+  .logic-input:disabled {
+    background: #2d3748;
+  }
+
+  .operator-details {
+    color: #a0aec0;
+  }
+
+  .operator-details summary:hover {
+    color: #cbd5e0;
+  }
+
+  .operator-details code {
+    background: #1a202c;
+    color: #e2e8f0;
+  }
+
+  .example-btn {
+    background: #1a202c;
+    color: #cbd5e0;
+    border: 1px solid #4a5568;
+  }
+
+  .example-btn:hover {
+    background: #4a5568;
+  }
+
+  /* Proof steps - ensure text is visible */
+  .proof-step.premise {
+    background: #1e3a5f;
+    border-color: #2c5aa0;
+  }
+
+  .proof-step.derived {
+    background: #1e4d2b;
+    border-color: #15803d;
+  }
+
+  .step-badge.premise {
+    background: #2c5aa0;
+    color: #bfdbfe;
+  }
+
+  .step-badge.derived {
+    background: #15803d;
+    color: #bbf7d0;
+  }
+
+  .step-expression {
+    color: #e2e8f0;
+  }
+
+  .step-justification.premise {
+    color: #90cdf4;
+  }
+
+  .step-justification.derived {
+    color: #86efac;
+  }
+
+  .step-justification .step-refs {
+    color: #a0aec0;
+  }
+
+  .empty-state {
+    color: #a0aec0;
+  }
+
+  .empty-state svg {
+    color: #4a5568;
+  }
+
+  .empty-state p:first-of-type {
+    color: #a0aec0;
+  }
+
+  .status-message.error {
+    background: #742a2a;
+    border-color: #9b2c2c;
+  }
+
+  .status-message.error svg {
+    color: #fc8181;
+  }
+
+  .status-message.error .message-text {
+    color: #feb2b2;
+  }
+
+  .status-message.success {
+    background: #1e4d2b;
+    border-color: #15803d;
+  }
+
+  .status-message.success svg {
+    color: #86efac;
+  }
+
+  .status-message.success .message-text {
+    color: #bbf7d0;
+  }
+
+  .info-card {
+    background: #1e3a5f;
+    border-color: #2c5aa0;
+  }
+
+  .info-card h3 {
+    color: #e2e8f0;
+  }
+
+  .info-card .info-content,
+  .info-card .info-content p {
+    color: #cbd5e0;
+  }
+
   /* Tables */
   .data-table,
   .syllabary-table,

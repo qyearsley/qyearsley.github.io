@@ -14,77 +14,49 @@
       }
 
       .game-list li {
-        margin-bottom: 12px;
+        margin-bottom: 0.5rem;
       }
 
       .game-list a {
-        display: block;
-        padding: 16px;
-        background: #f8f9fa;
-        border: 1px solid #e9ecef;
-        border-radius: 6px;
+        color: #3182ce;
         text-decoration: none;
-        color: #495057;
-        transition: all 0.2s ease;
+        font-weight: 500;
       }
 
       .game-list a:hover {
-        background: #e9ecef;
-        border-color: #007bff;
-        color: #007bff;
-        transform: translateY(-1px);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-
-      .game-list a:active {
-        transform: translateY(0);
+        text-decoration: underline;
       }
 
       .game-list a:focus {
-        outline: 2px solid #007bff;
+        outline: 2px solid #3182ce;
         outline-offset: 2px;
       }
 
       .game-list .game-title {
-        font-size: 1.2em;
+        font-size: 1.05em;
         font-weight: 600;
-        margin-bottom: 6px;
+      }
+
+      .game-list .game-title::after {
+        content: ": ";
       }
 
       .game-list .game-description {
-        font-size: 0.95em;
-        line-height: 1.5;
+        font-weight: 400;
         color: #6c757d;
-      }
-
-      .game-list a:hover .game-description {
-        color: #495057;
       }
 
       @media (prefers-color-scheme: dark) {
         .game-list a {
-          background: #1a202c;
-          border-color: #4a5568;
-          color: #cbd5e0;
+          color: #63b3ed;
         }
 
         .game-list a:hover {
-          background: #4a5568;
-          border-color: #63b3ed;
-          color: #63b3ed;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .game-list a:focus {
-          outline-color: #63b3ed;
+          color: #90cdf4;
         }
 
         .game-list .game-description {
           color: #a0aec0;
-        }
-
-        .game-list a:hover .game-description {
-          color: #cbd5e0;
         }
       }
     </style>

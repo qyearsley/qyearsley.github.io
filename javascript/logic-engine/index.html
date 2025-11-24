@@ -27,61 +27,67 @@
       </header>
 
       <main class="main-content">
-      <!-- Input Section -->
-      <section class="section">
-        <h2>Add Premises</h2>
-        <p style="font-size: 0.9rem; color: #6b7280; margin-bottom: 0.75rem;">
-          Enter one or more premises separated by commas (e.g., <code>p, p -&gt; q</code>)
-        </p>
+        <!-- Input Section -->
+        <section class="section">
+          <h2>Add Premises</h2>
+          <p style="font-size: 0.9rem; color: #6b7280; margin-bottom: 0.75rem">
+            Enter one or more premises separated by commas (e.g., <code>p, p -&gt; q</code>)
+          </p>
 
-        <div class="flex-row">
-          <input
-            type="text"
-            id="premise-input"
-            placeholder="e.g., p, p -&gt; q  or  rain -&gt; wet"
-            class="logic-input"
-          />
-          <button id="add-premise" class="btn-primary">Add</button>
-        </div>
+          <div class="flex-row">
+            <input
+              type="text"
+              id="premise-input"
+              placeholder="e.g., p, p -&gt; q  or  rain -&gt; wet"
+              class="logic-input"
+            />
+            <button id="add-premise" class="btn-primary">Add</button>
+          </div>
 
-        <div class="button-group">
-          <button id="run-inference" class="btn-secondary">
-            <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M13 10V3L4 14h7v7l9-11h-7z"
-              />
-            </svg>
-            Run Inference
-          </button>
-          <button id="clear-all" class="btn-tertiary">Clear All</button>
-        </div>
-      </section>
+          <div class="button-group">
+            <button id="run-inference" class="btn-secondary">
+              <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                />
+              </svg>
+              Run Inference
+            </button>
+            <button id="clear-all" class="btn-tertiary">Clear All</button>
+          </div>
+        </section>
 
-      <!-- Status Message -->
-      <div id="status-message"></div>
+        <!-- Status Message -->
+        <div id="status-message"></div>
 
-      <!-- Proof Steps Display -->
-      <section class="section">
-        <h2>Proof Steps</h2>
-        <div id="steps-container"></div>
-      </section>
+        <!-- Proof Steps Display -->
+        <section class="section">
+          <h2>Proof Steps</h2>
+          <div id="steps-container"></div>
+        </section>
 
-      <!-- Examples Section -->
-      <section class="section">
-        <h3>Quick Examples</h3>
-        <p>Click an example to load its premises and explore different inference rules:</p>
-        <div id="examples" class="example-buttons"></div>
-      </section>
+        <!-- Examples Section -->
+        <section class="section">
+          <h3>Quick Examples</h3>
+          <p>Click an example to load its premises and explore different inference rules:</p>
+          <div id="examples" class="example-buttons"></div>
+        </section>
 
-      <!-- Info Section -->
-      <section class="section info-box">
-        <h3>About This Tool</h3>
+        <!-- Info Section -->
+        <section class="section info-box">
+          <h3>About This Tool</h3>
           <p>
             This logic proof engine automatically derives new conclusions from your premises using
-            10 <a href="https://en.wikipedia.org/wiki/Rule_of_inference" target="_blank" rel="noopener noreferrer">classical propositional logic inference rules</a>:
+            10
+            <a
+              href="https://en.wikipedia.org/wiki/Rule_of_inference"
+              target="_blank"
+              rel="noopener noreferrer"
+              >classical propositional logic inference rules</a
+            >:
           </p>
           <ul>
             <li>Double Negation</li>
@@ -99,37 +105,31 @@
             The indentation shows derivation depth - premises are at the left margin, and
             conclusions are indented based on how many inference steps they are from the premises.
           </p>
-      </section>
+        </section>
 
-      <section class="section info-box">
-        <h3>Supported Operators</h3>
-        <ul>
-          <li>
-            <code>~P</code> or <code>not P</code> — Negation
-          </li>
-          <li>
-            <code>P & Q</code> or <code>P and Q</code> — Conjunction
-          </li>
-          <li>
-            <code>P | Q</code> or <code>P or Q</code> — Disjunction
-          </li>
-          <li><code>P -&gt; Q</code> — Implication</li>
-          <li><code>P &lt;-&gt; Q</code> — Biconditional</li>
-          <li><code>P xor Q</code> — Exclusive OR</li>
-          <li><code>P nand Q</code> — Not AND</li>
-          <li><code>P nor Q</code> — Not OR</li>
-          <li><code>P xnor Q</code> — Exclusive NOR</li>
-        </ul>
-      </section>
+        <section class="section info-box">
+          <h3>Supported Operators</h3>
+          <ul>
+            <li><code>~P</code> or <code>not P</code> — Negation</li>
+            <li><code>P & Q</code> or <code>P and Q</code> — Conjunction</li>
+            <li><code>P | Q</code> or <code>P or Q</code> — Disjunction</li>
+            <li><code>P -&gt; Q</code> — Implication</li>
+            <li><code>P &lt;-&gt; Q</code> — Biconditional</li>
+            <li><code>P xor Q</code> — Exclusive OR</li>
+            <li><code>P nand Q</code> — Not AND</li>
+            <li><code>P nor Q</code> — Not OR</li>
+            <li><code>P xnor Q</code> — Exclusive NOR</li>
+          </ul>
+        </section>
 
-      <section class="section">
-        <h2>Navigation</h2>
-        <ul class="external-links">
-          <li><a href="/javascript/">← Back to JavaScript experiments</a></li>
-          <li><a href="/">← Back to main page</a></li>
-        </ul>
-      </section>
-    </main>
+        <section class="section">
+          <h2>Navigation</h2>
+          <ul class="external-links">
+            <li><a href="/javascript/">← Back to JavaScript experiments</a></li>
+            <li><a href="/">← Back to main page</a></li>
+          </ul>
+        </section>
+      </main>
     </div>
 
     <script type="module">
