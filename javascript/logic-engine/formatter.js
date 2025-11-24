@@ -29,6 +29,10 @@ export function formatAST(node) {
     return node.value
   }
 
+  if (node.type === "LITERAL") {
+    return node.value.toString()
+  }
+
   if (node.type === "NOT") {
     const operand = formatAST(node.operand)
     // Add parens around binary expressions to avoid ambiguity

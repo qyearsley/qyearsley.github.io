@@ -177,6 +177,76 @@ export async function inferNextSteps(currentSteps) {
       }
     }
 
+    // Rule 1.5: Literal Simplification
+    // Simplifies expressions involving true/false literals
+    //
+    // Logical Principles:
+    // - true is always true, false is always false
+    // - Conjunction: true & P → P, false & P → false
+    // - Disjunction: true | P → true, false | P → P
+    // - Negation: ~true → false, ~false → true
+    // - Implication: true -> P → P, false -> P → true, P -> true → true
+    //
+    // Why useful?
+    // Allows reasoning with Boolean constants, simplifies complex expressions
+    // Educational: shows how logical operators interact with truth values
+
+    // ~true → false, ~false → true
+    if (step.ast.type === "NOT" && step.ast.operand.type === "LITERAL") {
+      const newValue = !step.ast.operand.value
+      addConclusion({ type: "LITERAL", value: newValue }, "Literal Simplification", [step.id])
+    }
+
+    // Binary operations with literals
+    if (step.ast.type === "BINARY") {
+      const { left, right, operator } = step.ast
+
+      // true & P → P, P & true → P
+      if (operator === "&") {
+        if (left.type === "LITERAL" && left.value === true) {
+          addConclusion(right, "Literal Simplification", [step.id])
+        } else if (right.type === "LITERAL" && right.value === true) {
+          addConclusion(left, "Literal Simplification", [step.id])
+        }
+        // false & P → false, P & false → false
+        else if (left.type === "LITERAL" && left.value === false) {
+          addConclusion({ type: "LITERAL", value: false }, "Literal Simplification", [step.id])
+        } else if (right.type === "LITERAL" && right.value === false) {
+          addConclusion({ type: "LITERAL", value: false }, "Literal Simplification", [step.id])
+        }
+      }
+
+      // true | P → true, P | true → true
+      if (operator === "|") {
+        if (left.type === "LITERAL" && left.value === true) {
+          addConclusion({ type: "LITERAL", value: true }, "Literal Simplification", [step.id])
+        } else if (right.type === "LITERAL" && right.value === true) {
+          addConclusion({ type: "LITERAL", value: true }, "Literal Simplification", [step.id])
+        }
+        // false | P → P, P | false → P
+        else if (left.type === "LITERAL" && left.value === false) {
+          addConclusion(right, "Literal Simplification", [step.id])
+        } else if (right.type === "LITERAL" && right.value === false) {
+          addConclusion(left, "Literal Simplification", [step.id])
+        }
+      }
+
+      // true -> P → P
+      if (operator === "->") {
+        if (left.type === "LITERAL" && left.value === true) {
+          addConclusion(right, "Literal Simplification", [step.id])
+        }
+        // false -> P → true
+        else if (left.type === "LITERAL" && left.value === false) {
+          addConclusion({ type: "LITERAL", value: true }, "Literal Simplification", [step.id])
+        }
+        // P -> true → true
+        else if (right.type === "LITERAL" && right.value === true) {
+          addConclusion({ type: "LITERAL", value: true }, "Literal Simplification", [step.id])
+        }
+      }
+    }
+
     // Rule 2: De Morgan's Laws
     // ~(A & B) => ~A | ~B  (negation distributes over AND, flips to OR)
     // ~(A | B) => ~A & ~B  (negation distributes over OR, flips to AND)
@@ -523,6 +593,49 @@ export async function inferNextSteps(currentSteps) {
             right: p2.ast,
           },
           "Adjunction",
+          [p1.id, p2.id],
+        )
+      }
+    }
+  }
+
+  // Phase 2.5: Contradiction Detection
+  //
+  // Check if we have both P and ~P in our facts, or both true and false
+  // This indicates an inconsistent set of premises
+  //
+  // Logical Principle: Principle of explosion (ex falso quodlibet)
+  // From a contradiction, anything can be derived
+  //
+  // Why detect it?
+  // - Educational: Shows users their premises are inconsistent
+  // - Practical: Helps debug logical errors
+  // - Classical logic: From false, we can derive false (explicit marker)
+  for (let i = 0; i < parsed.length; i++) {
+    for (let j = i + 1; j < parsed.length; j++) {
+      const p1 = parsed[i]
+      const p2 = parsed[j]
+
+      // Check if p1 and p2 contradict each other (P and ~P)
+      if (isNegation(p1.ast, p2.ast)) {
+        // Found contradiction: derive false
+        addConclusion(
+          { type: "LITERAL", value: false },
+          `Contradiction (steps ${p1.id} and ${p2.id})`,
+          [p1.id, p2.id],
+        )
+      }
+
+      // Check for literal contradiction: true and false
+      if (
+        p1.ast.type === "LITERAL" &&
+        p2.ast.type === "LITERAL" &&
+        p1.ast.value !== p2.ast.value
+      ) {
+        // Found true and false together - contradiction
+        addConclusion(
+          { type: "LITERAL", value: false },
+          `Contradiction (steps ${p1.id} and ${p2.id})`,
           [p1.id, p2.id],
         )
       }

@@ -25,25 +25,31 @@
 
 /**
  * Token types for the lexer
- * @typedef {'ATOM'|'NOT'|'AND'|'OR'|'XOR'|'NAND'|'NOR'|'XNOR'|'IMPLIES'|'IFF'|'LPAREN'|'RPAREN'|'EOF'} TokenType
+ * @typedef {'ATOM'|'NOT'|'AND'|'OR'|'XOR'|'NAND'|'NOR'|'XNOR'|'IMPLIES'|'IFF'|'LPAREN'|'RPAREN'|'LITERAL'|'EOF'} TokenType
  */
 
 /**
  * A token from the lexer
  * @typedef {Object} Token
  * @property {TokenType} type - The token type
- * @property {string} value - The token value (normalized operator or atom name)
+ * @property {string|boolean} value - The token value (normalized operator, atom name, or boolean for LITERAL)
  */
 
 /**
  * Abstract Syntax Tree node representing a logical expression
- * @typedef {AtomNode|NotNode|BinaryNode} ASTNode
+ * @typedef {AtomNode|LiteralNode|NotNode|BinaryNode} ASTNode
  */
 
 /**
  * @typedef {Object} AtomNode
  * @property {'ATOM'} type
  * @property {string} value - The proposition name (e.g., "P", "Q", "rain")
+ */
+
+/**
+ * @typedef {Object} LiteralNode
+ * @property {'LITERAL'} type
+ * @property {boolean} value - The boolean literal value (true or false)
  */
 
 /**
@@ -215,7 +221,16 @@ export function tokenize(input) {
     const match = input.slice(cursor).match(/^[a-zA-Z0-9_]+/)
     if (match) {
       const value = match[0]
-      tokens.push({ type: "ATOM", value })
+
+      // Check for boolean literals
+      if (value === "true") {
+        tokens.push({ type: "LITERAL", value: true })
+      } else if (value === "false") {
+        tokens.push({ type: "LITERAL", value: false })
+      } else {
+        tokens.push({ type: "ATOM", value })
+      }
+
       cursor += value.length
       continue
     }
@@ -548,13 +563,16 @@ export class Parser {
       return node
     }
 
-    // Handle atoms (base case)
+    // Handle atoms and literals (base case)
     const token = this.consume()
     if (token.type === "ATOM") {
       return { type: "ATOM", value: token.value }
     }
+    if (token.type === "LITERAL") {
+      return { type: "LITERAL", value: token.value }
+    }
 
-    // Syntax error: expected atom or '(' but got something else
+    // Syntax error: expected atom, literal or '(' but got something else
     // This is a lenient parser - we return an ERROR atom instead of throwing
     console.error("Unexpected token:", token)
     return { type: "ATOM", value: "ERROR" }
@@ -592,6 +610,10 @@ export function areEqual(a, b) {
   if (a.type !== b.type) return false
 
   if (a.type === "ATOM") {
+    return a.value === b.value
+  }
+
+  if (a.type === "LITERAL") {
     return a.value === b.value
   }
 
@@ -673,6 +695,8 @@ export function isNegation(base, check) {
  */
 export function isSimple(node) {
   if (node.type === "ATOM") return true
+  if (node.type === "LITERAL") return true
   if (node.type === "NOT" && node.operand.type === "ATOM") return true
+  if (node.type === "NOT" && node.operand.type === "LITERAL") return true
   return false
 }

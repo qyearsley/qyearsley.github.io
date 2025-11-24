@@ -19,6 +19,7 @@ import {
 } from "./state.js"
 import { inferNextSteps } from "./inference.js"
 import { PREDEFINED_EXAMPLES } from "./examples.js"
+import { tokenize, Parser } from "./parser.js"
 
 /**
  * Initializes the UI and sets up event listeners
@@ -33,12 +34,41 @@ export function initUI() {
 
   // Add premise on button click
   addButton.addEventListener("click", () => {
-    const expression = premiseInput.value.trim()
-    if (expression) {
-      addPremise(expression)
-      premiseInput.value = ""
-      clearError()
-      render()
+    const input = premiseInput.value.trim()
+    if (input) {
+      // Split by comma to support multiple premises
+      const expressions = input.split(",").map((expr) => expr.trim()).filter((expr) => expr)
+
+      if (expressions.length > 0) {
+        let hasError = false
+        let errorMsg = ""
+
+        // Validate all expressions before adding any
+        for (const expression of expressions) {
+          try {
+            const tokens = tokenize(expression)
+            const parser = new Parser(tokens)
+            parser.parse()
+          } catch (e) {
+            hasError = true
+            errorMsg = `Invalid expression "${expression}": ${e.message}`
+            break
+          }
+        }
+
+        if (hasError) {
+          setError(errorMsg)
+          render()
+        } else {
+          // All valid, add them
+          expressions.forEach((expression) => {
+            addPremise(expression)
+          })
+          premiseInput.value = ""
+          clearError()
+          render()
+        }
+      }
     }
   })
 
@@ -88,7 +118,7 @@ export function initUI() {
   PREDEFINED_EXAMPLES.forEach((example) => {
     const button = document.createElement("button")
     button.textContent = example.name
-    button.className = "px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+    button.className = "example-btn"
     if (example.description) {
       button.title = example.description
     }
@@ -161,39 +191,38 @@ function renderSteps() {
 
   if (state.steps.length === 0) {
     container.innerHTML = `
-      <div class="text-center py-12 text-gray-500">
-        <svg class="mx-auto w-16 h-16 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="empty-state">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
         </svg>
-        <p class="text-lg font-medium">No proof steps yet</p>
-        <p class="text-sm mt-1">Add premises or load an example to begin</p>
+        <p>No proof steps yet</p>
+        <p>Add premises or load an example to begin</p>
       </div>
     `
     return
   }
 
   const depths = calculateDepths()
-  let html = '<div class="space-y-1">'
+  let html = '<div class="steps-container">'
 
   for (const step of state.steps) {
     const depth = depths.get(step.id) || 0
     const indentPx = depth * 24 // 24px per level
-    const bgColor = step.isPremise ? "bg-blue-50" : "bg-green-50"
-    const borderColor = step.isPremise ? "border-blue-200" : "border-green-200"
+    const stepClass = step.isPremise ? "premise" : "derived"
 
     html += `
-      <div class="flex items-start gap-3 p-3 rounded ${bgColor} border ${borderColor}" style="margin-left: ${indentPx}px">
-        <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full ${step.isPremise ? "bg-blue-100 text-blue-700" : "bg-green-100 text-green-700"} font-mono text-sm font-bold">
+      <div class="proof-step ${stepClass}" style="margin-left: ${indentPx}px">
+        <div class="step-badge ${stepClass}">
           ${step.id}
         </div>
-        <div class="flex-1 min-w-0">
-          <div class="font-mono text-base mb-1">${escapeHtml(step.expression)}</div>
+        <div class="step-content">
+          <div class="step-expression">${escapeHtml(step.expression)}</div>
           ${
             step.isPremise
-              ? '<div class="text-xs text-blue-600 font-medium">Premise</div>'
-              : `<div class="text-xs text-green-600">
-                <span class="font-medium">${escapeHtml(step.justification)}</span>
-                <span class="text-gray-500"> (from steps ${step.referencedStepIds.join(", ")})</span>
+              ? '<div class="step-justification premise">Premise</div>'
+              : `<div class="step-justification derived">
+                <span class="rule-name">${escapeHtml(step.justification)}</span>
+                <span class="step-refs"> (from steps ${step.referencedStepIds.join(", ")})</span>
                </div>`
           }
         </div>
@@ -213,20 +242,20 @@ function renderStatus() {
 
   if (state.status === "ERROR" && state.errorMessage) {
     statusDiv.innerHTML = `
-      <div class="p-4 bg-red-50 border border-red-200 rounded flex items-start gap-3">
-        <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+      <div class="status-message error">
+        <svg fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
         </svg>
-        <div class="text-sm text-red-800">${escapeHtml(state.errorMessage)}</div>
+        <div class="message-text">${escapeHtml(state.errorMessage)}</div>
       </div>
     `
   } else if (state.status === "SUCCESS") {
     statusDiv.innerHTML = `
-      <div class="p-4 bg-green-50 border border-green-200 rounded flex items-start gap-3">
-        <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+      <div class="status-message success">
+        <svg fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
         </svg>
-        <div class="text-sm text-green-800">
+        <div class="message-text">
           New conclusions derived! Run inference again to continue.
         </div>
       </div>
@@ -252,7 +281,7 @@ function updateButtons() {
 
   if (isLoading) {
     inferButton.innerHTML = `
-      <svg class="animate-spin h-5 w-5 mr-2 inline-block" fill="none" viewBox="0 0 24 24">
+      <svg class="btn-icon animate-spin" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
       </svg>
@@ -260,7 +289,7 @@ function updateButtons() {
     `
   } else {
     inferButton.innerHTML = `
-      <svg class="w-5 h-5 mr-2 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
       </svg>
       Run Inference

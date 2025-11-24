@@ -7,198 +7,161 @@
     <link rel="stylesheet" href="/style.css" />
     <link rel="stylesheet" href="/components.css" />
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
-    <style>
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
-        line-height: 1.6;
-        background-color: #ffffff;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%23e0e0e0' fill-opacity='0.2' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E");
-      }
-
-      h1 {
-        color: #333;
-        text-align: center;
-        margin-bottom: 30px;
-      }
-
-      .section {
-        margin-bottom: 25px;
-      }
-
-      label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: 600;
-        color: #555;
-      }
-
-      .output {
-        background: white;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        padding: 15px;
-        min-height: 100px;
-        white-space: pre-wrap;
-        font-family: "Courier New", monospace;
-      }
-
-      .explanation {
-        background: #e7f3ff;
-        border-left: 4px solid #007bff;
-        padding: 15px;
-        margin-bottom: 20px;
-      }
-
-      .explanation h3 {
-        margin-top: 0;
-        color: #007bff;
-      }
-
-      .probability-sample {
-        background: white;
-        border: 1px solid #e9ecef;
-        border-radius: 4px;
-        padding: 10px;
-        margin-bottom: 8px;
-        font-family: "Courier New", monospace;
-        font-size: 13px;
-      }
-
-      .probability-sample strong {
-        color: #007bff;
-      }
-
-      .total-count {
-        color: #666;
-        font-size: 11px;
-      }
-
-      #probabilities {
-        margin-top: 15px;
-      }
-
-      #probabilities h4 {
-        margin-bottom: 10px;
-        color: #555;
-        font-size: 14px;
-      }
-
-      @media (prefers-color-scheme: dark) {
-        body {
-          background-color: #1a1a1a;
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%23404040' fill-opacity='0.2' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E");
-          color: #e0e0e0;
-        }
-
-        h1 {
-          color: #e0e0e0;
-        }
-
-        label {
-          color: #ccc;
-        }
-
-        .output {
-          background: #2a2a2a;
-          border-color: #555;
-          color: #e0e0e0;
-        }
-
-        .explanation {
-          background: #1e3a5f;
-          border-left-color: #5ba3ff;
-        }
-
-        .explanation h3 {
-          color: #5ba3ff;
-        }
-
-        .probability-sample {
-          background: #2a2a2a;
-          border-color: #555;
-        }
-
-        .probability-sample strong {
-          color: #5ba3ff;
-        }
-
-        .total-count {
-          color: #999;
-        }
-
-        #probabilities h4 {
-          color: #ccc;
-        }
-      }
-    </style>
   </head>
   <body>
-    <h1>Markov Chain Text Generator</h1>
-
-    <div class="explanation">
-      <h3>What are Markov Chains?</h3>
-      <p>
-        A Markov chain is a mathematical model that predicts the next state based only on the
-        current state, without considering the full history. In text generation, we use n-grams
-        (sequences of n characters or words) to build a model that predicts what comes next based on
-        the current n-gram.
-      </p>
-      <p>
-        <strong>Try it:</strong> Paste some text below, choose your n-gram size, and generate new
-        text that mimics the style and patterns of your input!
-      </p>
-    </div>
-
     <div class="container">
-      <div class="section">
-        <label for="input-text">Input Text (paste your source text here):</label>
-        <textarea
-          id="input-text"
-          placeholder="Paste some text here to train the Markov chain..."
-        ></textarea>
-      </div>
+      <header class="header">
+        <nav class="breadcrumbs">
+          <a href="/">Home</a>
+          <span class="separator">/</span>
+          <a href="/javascript/">JavaScript</a>
+          <span class="separator">/</span>
+          <span class="current">Markov Chain</span>
+        </nav>
+        <h1>Markov Chain Text Generator</h1>
+        <p>Generate new text based on patterns learned from your input</p>
+      </header>
 
-      <div class="controls">
-        <div>
-          <label for="ngram-type">N-gram Type:</label>
-          <select id="ngram-type">
-            <option value="char">Characters</option>
-            <option value="word">Words</option>
-          </select>
-        </div>
-        <div>
-          <label for="ngram-size">N-gram Size:</label>
-          <select id="ngram-size">
-            <option value="2">2</option>
-            <option value="3" selected>3</option>
-            <option value="4">4</option>
-          </select>
-        </div>
-      </div>
+      <main class="main-content">
+        <section class="section">
+          <h2>Generator</h2>
+          <div class="form-group">
+            <label for="input-text">Input Text (paste your source text here):</label>
+            <textarea
+              id="input-text"
+              placeholder="Paste some text here to train the Markov chain..."
+              class="form-textarea"
+            ></textarea>
+          </div>
 
-      <div class="controls">
-        <div>
-          <label for="output-length">Output Length:</label>
-          <input type="number" id="output-length" value="200" min="10" max="1000" />
-        </div>
-        <div>
-          <label for="start-text">Start Text (optional):</label>
-          <input type="text" id="start-text" placeholder="Leave empty for random start" />
-        </div>
-      </div>
+          <div class="form-inline-group">
+            <div class="form-group">
+              <label for="ngram-type">N-gram Type:</label>
+              <select id="ngram-type" class="form-select">
+                <option value="char">Characters</option>
+                <option value="word">Words</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="ngram-size">N-gram Size:</label>
+              <select id="ngram-size" class="form-select">
+                <option value="2">2</option>
+                <option value="3" selected>3</option>
+                <option value="4">4</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="output-length">Output Length:</label>
+              <select id="output-length" class="form-select">
+                <option value="100">100 characters</option>
+                <option value="200" selected>200 characters</option>
+                <option value="500">500 characters</option>
+              </select>
+            </div>
+          </div>
 
-      <button id="generate-btn" onclick="generateText()">Generate Text</button>
+          <button id="generate" class="submit-btn">Generate Text</button>
+
+          <div class="form-group">
+            <label>Generated Output:</label>
+            <div id="output" class="output-box"></div>
+          </div>
+
+          <details class="section">
+            <summary style="cursor: pointer; font-weight: 600; margin-bottom: 1rem">
+              Show Probabilities
+            </summary>
+            <div id="probabilities"></div>
+          </details>
+        </section>
+
+        <section class="section info-box">
+          <h3>What are Markov Chains?</h3>
+          <p>
+            A Markov chain is a mathematical model that predicts the next state based only on the
+            current state, without considering the full history. In text generation, we use n-grams
+            (sequences of n characters or words) to build a model that predicts what comes next based
+            on the current n-gram.
+          </p>
+          <p>
+            This generator uses the input text to build a probability model, then generates new text
+            by randomly selecting the next character or word based on the learned probabilities.
+          </p>
+        </section>
+
+        <section class="section">
+          <h2>Navigation</h2>
+          <ul class="external-links">
+            <li><a href="/javascript/">← Back to JavaScript experiments</a></li>
+            <li><a href="/">← Back to main page</a></li>
+          </ul>
+        </section>
+      </main>
     </div>
 
-    <div class="container">
-      <h3>Generated Text:</h3>
-      <div class="output" id="output">Generated text will appear here...</div>
-      <div id="probabilities"></div>
-    </div>
+    <script type="module">
+      import { MarkovChain } from "./markov.js"
 
-    <script src="markov.js"></script>
+      let chain = null
+
+      /**
+       * Generates text using the Markov chain based on current settings
+       */
+      function generate() {
+        const inputText = document.getElementById("input-text").value
+        const outputDiv = document.getElementById("output")
+        const probabilitiesDiv = document.getElementById("probabilities")
+        const ngramType = document.getElementById("ngram-type").value
+        const ngramSize = parseInt(document.getElementById("ngram-size").value)
+        const outputLength = parseInt(document.getElementById("output-length").value)
+
+        if (!inputText.trim()) {
+          outputDiv.textContent = "Please enter some input text first."
+          probabilitiesDiv.innerHTML = ""
+          return
+        }
+
+        try {
+          chain = new MarkovChain(inputText, ngramType, ngramSize)
+          const generated = chain.generate(outputLength)
+          outputDiv.textContent = generated
+
+          // Show probabilities
+          const transitions = chain.getTransitions()
+          let html = "<h4>Transition Probabilities (sample):</h4>"
+
+          const entries = Object.entries(transitions).slice(0, 10)
+          for (const [ngram, possibilities] of entries) {
+            const totalCount = Object.values(possibilities).reduce((a, b) => a + b, 0)
+            html += `<div class="probability-sample">`
+            html += `<strong>${JSON.stringify(ngram)}</strong> →<br>`
+            for (const [next, count] of Object.entries(possibilities)) {
+              const prob = ((count / totalCount) * 100).toFixed(1)
+              html += `&nbsp;&nbsp;${JSON.stringify(next)}: ${prob}% (${count}/${totalCount})<br>`
+            }
+            html += `</div>`
+          }
+
+          probabilitiesDiv.innerHTML = html
+        } catch (error) {
+          outputDiv.textContent = `Error: ${error.message}`
+          probabilitiesDiv.innerHTML = ""
+        }
+      }
+
+      document.getElementById("generate").addEventListener("click", generate)
+
+      // Auto-generate on input if there's text
+      document.getElementById("input-text").addEventListener("input", () => {
+        if (document.getElementById("input-text").value.trim()) {
+          generate()
+        }
+      })
+
+      // Load default example text
+      document.getElementById("input-text").value =
+        "To be or not to be, that is the question. Whether tis nobler in the mind to suffer the slings and arrows of outrageous fortune, or to take arms against a sea of troubles."
+      generate()
+    </script>
   </body>
 </html>
