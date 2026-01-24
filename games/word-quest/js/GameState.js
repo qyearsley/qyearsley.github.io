@@ -48,9 +48,11 @@ export class GameState {
     this.settings = {
       difficulty: "adventurer",
       inputMode: "multipleChoice", // "multipleChoice" or "keyboard"
-      questionsPerLevel: 5, // number of questions per level
       audioHints: true, // whether to play audio hints
     }
+
+    /** @type {number} - Fixed number of questions per level */
+    this.questionsPerLevel = 5
 
     /** @type {Set<string>} */
     this.completedQuests = new Set()
@@ -108,7 +110,7 @@ export class GameState {
     this.stats.activitiesCompleted++
 
     // Check if level is complete
-    if (this.stats.currentLevelProgress >= this.settings.questionsPerLevel) {
+    if (this.stats.currentLevelProgress >= this.questionsPerLevel) {
       this.completeLevel()
     }
 
@@ -123,7 +125,7 @@ export class GameState {
     if (this.currentQuest) {
       this.completedQuests.add(this.currentQuest)
       this.questProgress[this.currentQuest].completed = 1
-      this.questProgress[this.currentQuest].stars = this.settings.questionsPerLevel
+      this.questProgress[this.currentQuest].stars = this.questionsPerLevel
     }
 
     // Check if we should unlock next quest

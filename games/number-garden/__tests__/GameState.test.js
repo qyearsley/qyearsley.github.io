@@ -39,9 +39,9 @@ describe("GameState", () => {
     })
 
     test("initializes with default settings", () => {
-      expect(gameState.settings.questionsPerLevel).toBe(5)
+      expect(gameState.questionsPerLevel).toBe(5)
       expect(gameState.settings.inputMode).toBe("multipleChoice")
-      expect(gameState.settings.visualHints).toBe("always")
+      expect(gameState.settings.visualHints).toBe("on")
     })
   })
 
@@ -359,8 +359,7 @@ describe("GameState", () => {
           unlockedAreas: ["flower-meadow"],
           settings: {
             inputMode: "keyboard",
-            visualHints: "sometimes",
-            questionsPerLevel: 10,
+            visualHints: "off",
           },
         }
       }
@@ -368,8 +367,7 @@ describe("GameState", () => {
       const newGameState = new GameState(mockStorageManager)
 
       expect(newGameState.settings.inputMode).toBe("keyboard")
-      expect(newGameState.settings.visualHints).toBe("sometimes")
-      expect(newGameState.settings.questionsPerLevel).toBe(10)
+      expect(newGameState.settings.visualHints).toBe("off")
     })
 
     test("uses default settings when not provided", () => {
@@ -385,8 +383,8 @@ describe("GameState", () => {
       const newGameState = new GameState(mockStorageManager)
 
       expect(newGameState.settings.inputMode).toBe("multipleChoice")
-      expect(newGameState.settings.visualHints).toBe("always")
-      expect(newGameState.settings.questionsPerLevel).toBe(5)
+      expect(newGameState.settings.visualHints).toBe("on")
+      expect(newGameState.questionsPerLevel).toBe(5)
     })
 
     test("loads project type from storage", () => {

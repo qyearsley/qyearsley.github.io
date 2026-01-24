@@ -55,11 +55,13 @@ export class GameState {
     /** @type {Object} */
     this.settings = {
       inputMode: "multipleChoice", // "multipleChoice" or "keyboard"
-      visualHints: "always", // "always", "sometimes", "never"
-      questionsPerLevel: 5, // number of questions per level
+      visualHints: "on", // "on" or "off"
       soundEffects: "off", // "on" or "off"
       difficulty: "adventurer", // "explorer", "adventurer", "master"
     }
+
+    /** @type {number} - Fixed number of questions per level */
+    this.questionsPerLevel = 5
 
     /** @type {Set<string>} */
     this.completedAreas = new Set()
@@ -96,7 +98,7 @@ export class GameState {
     this.stats.currentLevelProgress += 1
     this.garden.push(flower)
 
-    return this.stats.currentLevelProgress >= this.settings.questionsPerLevel
+    return this.stats.currentLevelProgress >= this.questionsPerLevel
   }
 
   /**
@@ -192,7 +194,7 @@ export class GameState {
    * @returns {number} Progress as percentage (0-100)
    */
   getProgressPercent() {
-    return (this.stats.currentLevelProgress / this.settings.questionsPerLevel) * 100
+    return (this.stats.currentLevelProgress / this.questionsPerLevel) * 100
   }
 
   /**
@@ -229,8 +231,7 @@ export class GameState {
       if (saved.settings) {
         this.settings = {
           inputMode: saved.settings.inputMode || "multipleChoice",
-          visualHints: saved.settings.visualHints || "always",
-          questionsPerLevel: saved.settings.questionsPerLevel || 5,
+          visualHints: saved.settings.visualHints === "always" ? "on" : saved.settings.visualHints === "never" ? "off" : saved.settings.visualHints || "on",
           soundEffects: saved.settings.soundEffects || "off",
           difficulty: saved.settings.difficulty || "adventurer",
         }

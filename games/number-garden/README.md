@@ -1,4 +1,4 @@
-# Enchanted Garden 🌸
+# Number Garden 🌸
 
 An educational math game for children featuring addition, subtraction, multiplication, time-telling, measurement, and pattern recognition.
 
@@ -23,8 +23,10 @@ An educational math game for children featuring addition, subtraction, multiplic
 Access settings via the ⚙️ button on the garden hub:
 
 - **Answer Mode:** Multiple choice or keyboard typing
-- **Visual Hints:** Control when pictures appear (always/sometimes/never)
-- **Questions Per Level:** Choose 3, 5, 6, 8, or 10 questions
+- **Visual Hints:** Toggle pictures on or off
+- **Sound Effects:** Toggle sound effects on or off
+
+Each level consists of 5 questions.
 
 ## Keyboard Controls
 

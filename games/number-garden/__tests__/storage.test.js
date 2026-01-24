@@ -43,7 +43,7 @@ describe("StorageManager", () => {
       const garden = [{ color: "red", emoji: "🌹", name: "Rose" }]
       const unlockedAreas = ["flower-meadow", "crystal-cave"]
       const completedAreas = ["flower-meadow"]
-      const settings = { inputMode: "keyboard", visualHints: "always" }
+      const settings = { inputMode: "keyboard", visualHints: "on" }
       const projectType = "castle"
 
       const result = storageManager.saveProgress(

@@ -32,7 +32,7 @@ export class StorageManager extends BaseStorageManager {
       garden: garden,
       unlockedAreas: unlockedAreas || ["flower-meadow"],
       completedAreas: completedAreas || [],
-      settings: settings || { inputMode: "multipleChoice", visualHints: "always" },
+      settings: settings || { inputMode: "multipleChoice", visualHints: "on" },
       projectType: projectType,
     }
 
