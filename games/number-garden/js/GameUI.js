@@ -78,7 +78,7 @@ export class GameUI extends BaseGameUI {
    * @param {string} inputMode - Input mode ("multipleChoice" or "keyboard")
    * @param {string} visualHints - Visual hints setting
    */
-  displayActivity(activity, inputMode = "multipleChoice", visualHints = "always") {
+  displayActivity(activity, inputMode = "multipleChoice", visualHints = "on") {
     // Blur any focused element to prevent focus issues on mobile
     if (document.activeElement && document.activeElement !== document.body) {
       document.activeElement.blur()
@@ -111,10 +111,7 @@ export class GameUI extends BaseGameUI {
 
     // Display visual items based on hints setting
     // Essential visuals (like clock faces, rulers) are always shown
-    const shouldShowVisual =
-      isEssentialVisual ||
-      visualHints === "always" ||
-      (visualHints === "sometimes" && Math.random() < 0.5)
+    const shouldShowVisual = isEssentialVisual || visualHints === "on"
 
     if (shouldShowVisual) {
       this.displayVisualItems(activity.visual)
@@ -423,10 +420,7 @@ export class GameUI extends BaseGameUI {
       this.elements.inputModeSelect.value = settings.inputMode || "multipleChoice"
     }
     if (this.elements.visualHintsSelect) {
-      this.elements.visualHintsSelect.value = settings.visualHints || "always"
-    }
-    if (this.elements.questionsPerLevelSelect) {
-      this.elements.questionsPerLevelSelect.value = settings.questionsPerLevel || 5
+      this.elements.visualHintsSelect.value = settings.visualHints || "on"
     }
     if (this.elements.soundEffectsSelect) {
       this.elements.soundEffectsSelect.value = settings.soundEffects || "on"
