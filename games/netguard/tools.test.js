@@ -203,11 +203,15 @@ describe("CertificateValidator", () => {
   })
 
   test("should validate correct certificates", () => {
+    const now = new Date()
+    const validFrom = new Date(now.getTime() - 86400000) // 1 day ago
+    const validUntil = new Date(now.getTime() + 31536000000) // 1 year from now
+
     const cert = {
       subject: "example.com",
       issuer: "TrustedCA",
-      notBefore: "2024-01-01T00:00:00Z",
-      notAfter: "2025-12-31T00:00:00Z",
+      notBefore: validFrom.toISOString(),
+      notAfter: validUntil.toISOString(),
     }
 
     const result = CertificateValidator.validate(cert)

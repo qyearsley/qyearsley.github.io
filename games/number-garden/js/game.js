@@ -11,10 +11,10 @@ import { ProjectVisuals } from "./ProjectVisuals.js"
 import { TIMING } from "./constants.js"
 
 /**
- * Main game controller for Enchanted Garden
+ * Main game controller for Number Garden
  * Orchestrates all game systems and handles game flow
  */
-class EnchantedGarden {
+class NumberGarden {
   /**
    * Project type configuration
    * @private
@@ -400,8 +400,8 @@ class EnchantedGarden {
    */
   getProjectInfo() {
     return (
-      EnchantedGarden.PROJECT_CONFIG[this.state.projectType] ||
-      EnchantedGarden.PROJECT_CONFIG.castle
+      NumberGarden.PROJECT_CONFIG[this.state.projectType] ||
+      NumberGarden.PROJECT_CONFIG.castle
     )
   }
 
@@ -430,7 +430,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const rewardSystem = new RewardSystem()
   const activityGenerator = new ActivityGenerator()
 
-  window.game = new EnchantedGarden({
+  window.game = new NumberGarden({
     storageManager,
     rewardSystem,
     activityGenerator,
