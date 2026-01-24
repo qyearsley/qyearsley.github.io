@@ -1,6 +1,10 @@
 /**
  * Word Bank - Curated word lists for Word Quest
  * Organized by difficulty level and skill type
+ *
+ * Phonics abbreviations:
+ * - CVC: Consonant-Vowel-Consonant (e.g., "cat", "dog", "sun")
+ * - CVCe: Consonant-Vowel-Consonant-silent e (e.g., "cake", "bike", "home")
  */
 export class WordBank {
   constructor() {
@@ -425,7 +429,6 @@ export class WordBank {
           "puppet",
           "pumpkin",
           "problem",
-          "napkin",
           "plastic",
           "cactus",
           "dentist",
