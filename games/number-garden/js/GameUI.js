@@ -3,6 +3,10 @@ import { BaseGameUI } from "../../common/js/BaseGameUI.js"
 
 /**
  * Handles all DOM manipulation and UI updates for Number Garden
+ *
+ * Security Note: This class uses innerHTML for dynamic content generation.
+ * All content is generated from controlled game data (questions, visual representations,
+ * garden layouts) and not from user input, making it safe from XSS attacks.
  */
 export class GameUI extends BaseGameUI {
   constructor() {

@@ -48,7 +48,7 @@ describe("BoolExpr", () => {
     ).toEqual(["a"])
   })
 
-  test("vas with two vars", () => {
+  test("vars with two vars", () => {
     expect(
       new tt.BoolExprBinary("and", new tt.BoolExprVar("a"), new tt.BoolExprVar("b")).vars(),
     ).toEqual(["a", "b"])

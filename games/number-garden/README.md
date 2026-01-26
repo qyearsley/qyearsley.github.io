@@ -38,6 +38,8 @@ Each level consists of 5 questions.
 
 ## For Developers
 
+See [js/README.md](js/README.md) for detailed module architecture documentation.
+
 ### Structure
 
 ```
