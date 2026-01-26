@@ -148,5 +148,19 @@ class Game {
 
 // Start the game when DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
-  new Game()
+  try {
+    new Game()
+  } catch (error) {
+    console.error("Failed to initialize Word Quest:", error)
+    // Display user-friendly error message
+    const errorContainer = document.createElement("div")
+    errorContainer.style.cssText =
+      "position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fee; border: 2px solid #c33; padding: 2rem; border-radius: 8px; max-width: 500px; text-align: center; font-family: system-ui, sans-serif;"
+    errorContainer.innerHTML = `
+      <h2 style="color: #c33; margin-top: 0;">Game Failed to Load</h2>
+      <p>We're sorry, but Word Quest encountered an error while starting.</p>
+      <p style="font-size: 0.9em; color: #666;">Try refreshing the page. If the problem persists, your browser may not support this game.</p>
+    `
+    document.body.appendChild(errorContainer)
+  }
 })

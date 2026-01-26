@@ -4,6 +4,10 @@
  *
  * This class centralizes common DOM manipulation patterns to reduce
  * code duplication and ensure consistent UI behavior across games.
+ *
+ * Security Note: Game UI classes use innerHTML for dynamic content generation.
+ * All content is generated from controlled game data (not user input), making it
+ * safe from XSS attacks. User input is never directly inserted into the DOM.
  */
 export class BaseGameUI {
   constructor() {

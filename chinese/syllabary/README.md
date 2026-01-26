@@ -13,13 +13,13 @@ This directory contains the script and data files for generating the Chinese tra
 
 ## Usage
 
-To generate the syllabary table:
+To regenerate the syllabary table:
 
 ```bash
 python3 make_syllabary.py
 ```
 
-This will output HTML table markup to stdout that can be embedded in the syllabary.html page.
+This will output the updated `syllabary.html` file in the parent `chinese/` directory.
 
 ## Data Format
 

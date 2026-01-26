@@ -12,7 +12,6 @@ module.exports = {
     "!javascript/**/*.html",
     "!games/netguard/**/*.html",
     "!games/number-garden/**/*.html",
-    "!games/netguard/game.js.backup",
   ],
   coverageDirectory: "coverage",
   coverageReporters: ["text", "lcov", "html"],

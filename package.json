@@ -6,8 +6,8 @@
   "scripts": {
     "lint": "npm run lint:js && npm run lint:html && npm run lint:css",
     "lint:js": "eslint javascript/ games/",
-    "lint:html": "htmlhint \"**/*.html\" --ignore \"node_modules/**,games/enchanted-garden/node_modules/**,coverage/**\"",
-    "lint:css": "stylelint \"**/*.css\" --ignore-pattern \"node_modules/**\" --ignore-pattern \"games/enchanted-garden/node_modules/**\" --ignore-pattern \"coverage/**\"",
+    "lint:html": "htmlhint \"**/*.html\" --ignore \"node_modules/**,coverage/**\"",
+    "lint:css": "stylelint \"**/*.css\" --ignore-pattern \"node_modules/**\" --ignore-pattern \"coverage/**\"",
     "format": "npx prettier --write .",
     "start": "http-server -p 8000",
     "test": "NODE_OPTIONS='--experimental-vm-modules' jest",

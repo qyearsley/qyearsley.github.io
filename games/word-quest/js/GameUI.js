@@ -3,6 +3,10 @@ import { BaseGameUI } from "../../common/js/BaseGameUI.js"
 /**
  * Game UI Manager for Word Quest
  * Handles rendering of all game screens and UI elements
+ *
+ * Security Note: This class uses innerHTML for dynamic content generation.
+ * All content is generated from controlled game data (word lists, quest themes,
+ * activity configurations) and not from user input, making it safe from XSS attacks.
  */
 export class GameUI extends BaseGameUI {
   constructor(gameState, activityGenerator) {

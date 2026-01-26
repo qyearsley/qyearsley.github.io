@@ -4,6 +4,10 @@ import { LEVELS, LEVEL_ORDER } from "../levels.js"
 /**
  * Manages all DOM manipulation and UI updates for NetGuard
  * Extends BaseGameUI to leverage common UI patterns
+ *
+ * Security Note: This class uses innerHTML for dynamic content generation.
+ * All content is generated from controlled game data (level configurations, network maps,
+ * terminal output) and not from user input, making it safe from XSS attacks.
  */
 export class GameUI extends BaseGameUI {
   constructor() {
