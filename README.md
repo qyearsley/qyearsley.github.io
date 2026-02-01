@@ -4,7 +4,7 @@ Personal website showcasing educational games, JavaScript experiments, and Chine
 
 ## Contents
 
-- **[Games](games/)** - Educational web games (math, reading, cybersecurity)
+- **[Games](games/)** - Educational web games
 - **[JavaScript Experiments](javascript/)** - Interactive tools and visualizations
 - **[Chinese Tools](chinese/)** - Language learning resources
 

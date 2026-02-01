@@ -399,10 +399,7 @@ class NumberGarden {
    * @returns {Object} Project info with icon, title, and pieceName
    */
   getProjectInfo() {
-    return (
-      NumberGarden.PROJECT_CONFIG[this.state.projectType] ||
-      NumberGarden.PROJECT_CONFIG.castle
-    )
+    return NumberGarden.PROJECT_CONFIG[this.state.projectType] || NumberGarden.PROJECT_CONFIG.castle
   }
 
   /**

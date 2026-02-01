@@ -17,7 +17,7 @@
     "testEnvironment": "jsdom",
     "transform": {},
     "testMatch": [
-      "**/tests/**/*.test.js"
+      "**/__tests__/**/*.test.js"
     ]
   }
 }
