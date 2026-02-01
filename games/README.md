@@ -6,4 +6,3 @@ Educational web games built with JavaScript.
 
 - **[Number Garden](number-garden/)** - Math game for elementary students (addition, subtraction, multiplication, time-telling, measurement, patterns)
 - **[Word Quest](word-quest/)** - Phonics-based reading game teaching letter sounds, blending, sight words, and spelling
-- **[NetGuard](netguard/)** - Cybersecurity investigation game for learning network security concepts
