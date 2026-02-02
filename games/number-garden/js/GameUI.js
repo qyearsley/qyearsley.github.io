@@ -1,6 +1,8 @@
 import { MATH } from "./constants.js"
 import { BaseGameUI } from "./BaseGameUI.js"
 
+const VISUAL_ITEM_ANIMATION_DELAY_MS = 100
+
 /**
  * Handles all DOM manipulation and UI updates for Number Garden
  *
@@ -163,7 +165,7 @@ export class GameUI extends BaseGameUI {
           }
 
           this.elements.visualArea.appendChild(visualItem)
-        }, index * 100)
+        }, index * VISUAL_ITEM_ANIMATION_DELAY_MS)
       })
     }
   }

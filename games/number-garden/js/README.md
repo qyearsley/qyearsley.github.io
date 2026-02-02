@@ -60,6 +60,90 @@ Generates SVG visualizations for project completion (castles, gardens, robots, s
 
 ## Data Flow
 
+### High-Level Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                          game.js (Main Controller)                   │
+│                     Orchestrates all game systems                    │
+└─────────────────────────────────────────────────────────────────────┘
+                                    │
+        ┌───────────────────────────┼────────────────────────────┐
+        │                           │                            │
+        ▼                           ▼                            ▼
+┌──────────────┐          ┌───────────────────┐      ┌──────────────────┐
+│  GameState   │◄─────────│  StorageManager   │      │   EventManager   │
+│              │          │                   │      │                  │
+│ • stats      │          │ • save/load       │      │ • event routing  │
+│ • settings   │          │ • versioning      │      │ • user actions   │
+│ • progress   │          │                   │      │                  │
+└──────┬───────┘          └───────────────────┘      └────────┬─────────┘
+       │                                                       │
+       │ queries data                            callbacks    │
+       │                                                       │
+       ▼                                                       ▼
+┌──────────────┐                                      ┌──────────────────┐
+│   GameUI     │                                      │   game.js        │
+│              │                                      │   handlers       │
+│ • render UI  │                                      │                  │
+│ • DOM updates│◄─────────────────────────────────────┤ • game logic    │
+│              │      calls display methods           │ • state updates │
+└──────────────┘                                      └──────────────────┘
+```
+
+### Activity Generation Flow
+
+```
+User enters area
+       │
+       ▼
+┌──────────────────┐
+│ ActivityGenerator│
+│                  │
+│ Delegates to:    │
+└────────┬─────────┘
+         │
+         ├─► BasicMathGenerator
+         │   • generateAddition()
+         │   • generateSubtraction()
+         │   • generateMultiplication()
+         │
+         ├─► TimeGenerator
+         │   • generateClockReading()
+         │   • generateTimeElapsed()
+         │
+         └─► MeasurementAndPatternGenerator
+             • generateLength()
+             • generateWeight()
+             • generatePattern()
+             • generateSkipCounting()
+                      │
+                      ▼
+            Returns Activity Object
+            {
+              type, question,
+              correctAnswer, options,
+              visual, creature
+            }
+                      │
+                      ▼
+              GameUI renders question
+                      │
+                      ▼
+          User selects answer
+                      │
+                      ▼
+        EventManager → game.js
+                      │
+                      ▼
+           GameState updated
+                      │
+                      ▼
+        GameUI shows feedback
+```
+
+### Sequence: User Interaction
+
 1. User action → EventManager
 2. EventManager → Callback in game.js
 3. game.js → Updates GameState
@@ -70,9 +154,19 @@ Generates SVG visualizations for project completion (castles, gardens, robots, s
 
 Tests are located in `__tests__/` directory. Each major module has corresponding tests:
 
-- `GameState.test.js` - State management
+### Core Modules
+- `GameState.test.js` - State management, progress tracking
+- `storage.test.js` - localStorage operations
 - `SoundManager.test.js` - Audio system
 - `ProgressionManager.test.js` - Difficulty scaling
+- `ParticleSystem.test.js` - Visual effects
+- `rewards.test.js` - Reward system
+- `activities.test.js` - Activity structures
+
+### Generators
+- `BasicMathGenerator.test.js` - Addition, subtraction, multiplication
+- `TimeGenerator.test.js` - Clock reading, time elapsed
+- `MeasurementAndPatternGenerator.test.js` - Measurement, patterns, sequences
 
 Run tests: `npm test`
 

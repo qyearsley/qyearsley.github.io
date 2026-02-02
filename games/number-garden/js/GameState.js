@@ -1,3 +1,5 @@
+import { DEFAULTS } from "./constants.js"
+
 /**
  * @typedef {Object} Stats
  * @property {number} stars - Total stars earned
@@ -60,9 +62,6 @@ export class GameState {
       difficulty: "adventurer", // "explorer", "adventurer", "master"
     }
 
-    /** @type {number} - Fixed number of questions per level */
-    this.questionsPerLevel = 5
-
     /** @type {Set<string>} */
     this.completedAreas = new Set()
 
@@ -98,7 +97,7 @@ export class GameState {
     this.stats.currentLevelProgress += 1
     this.garden.push(flower)
 
-    return this.stats.currentLevelProgress >= this.questionsPerLevel
+    return this.stats.currentLevelProgress >= DEFAULTS.QUESTIONS_PER_LEVEL
   }
 
   /**
@@ -194,7 +193,7 @@ export class GameState {
    * @returns {number} Progress as percentage (0-100)
    */
   getProgressPercent() {
-    return (this.stats.currentLevelProgress / this.questionsPerLevel) * 100
+    return (this.stats.currentLevelProgress / DEFAULTS.QUESTIONS_PER_LEVEL) * 100
   }
 
   /**
