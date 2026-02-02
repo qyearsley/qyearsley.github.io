@@ -2,7 +2,7 @@
  * Base Activity Generator for Number Garden
  * Provides common functionality for all math activity generators
  */
-import { shuffleArray, generateMathOptions, getRandomItems } from "../../../common/js/utils.js"
+import { shuffleArray, generateMathOptions, getRandomItems } from "../utils.js"
 import { getAreaTheme, getRandomMessage, getRandomVisualEmoji } from "../../data/areaThemes.js"
 
 export class BaseMathGenerator {
