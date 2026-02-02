@@ -1,5 +1,5 @@
 import { MATH } from "./constants.js"
-import { BaseGameUI } from "../../common/js/BaseGameUI.js"
+import { BaseGameUI } from "./BaseGameUI.js"
 
 /**
  * Handles all DOM manipulation and UI updates for Number Garden

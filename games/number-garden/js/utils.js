@@ -48,8 +48,7 @@ export function generateMathOptions(correctAnswer, maxRange, count = 3) {
   // Generate wrong answers that are plausible (within ±5 range)
   while (options.size < count + 1) {
     const offset = Math.floor(Math.random() * 5) + 1
-    const wrongAnswer =
-      Math.random() < 0.5 ? correctAnswer + offset : correctAnswer - offset
+    const wrongAnswer = Math.random() < 0.5 ? correctAnswer + offset : correctAnswer - offset
 
     if (wrongAnswer > 0 && wrongAnswer <= maxRange && wrongAnswer !== correctAnswer) {
       options.add(wrongAnswer)

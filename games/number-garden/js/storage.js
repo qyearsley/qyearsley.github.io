@@ -1,8 +1,8 @@
 /**
  * Storage manager for saving and loading progress
- * Extends the common StorageManager with Number Garden specific functionality
+ * Extends the base StorageManager with Number Garden specific functionality
  */
-import { StorageManager as BaseStorageManager } from "../../common/js/StorageManager.js"
+import { StorageManager as BaseStorageManager } from "./StorageManager.js"
 
 export class StorageManager extends BaseStorageManager {
   constructor() {

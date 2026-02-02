@@ -231,7 +231,12 @@ export class GameState {
       if (saved.settings) {
         this.settings = {
           inputMode: saved.settings.inputMode || "multipleChoice",
-          visualHints: saved.settings.visualHints === "always" ? "on" : saved.settings.visualHints === "never" ? "off" : saved.settings.visualHints || "on",
+          visualHints:
+            saved.settings.visualHints === "always"
+              ? "on"
+              : saved.settings.visualHints === "never"
+                ? "off"
+                : saved.settings.visualHints || "on",
           soundEffects: saved.settings.soundEffects || "off",
           difficulty: saved.settings.difficulty || "adventurer",
         }

@@ -23,30 +23,39 @@ game.js (NumberGarden class)
 ## Key Modules
 
 ### game.js
+
 Main controller that orchestrates all game systems. Uses dependency injection to initialize subsystems and wire them together through callbacks passed to EventManager.
 
 ### GameState.js
+
 Single source of truth for game data (progress, stats, settings). Provides methods to query and update state. Works with StorageManager for persistence.
 
 ### GameUI.js
+
 Extends BaseGameUI. Responsible for all DOM manipulation and rendering. Receives data from GameState and displays it. Never directly modifies game state.
 
 ### EventManager.js
+
 Central event coordination. Attaches event listeners to DOM elements and routes them to appropriate callbacks (defined in game.js). Prevents event handler sprawl.
 
 ### ProgressionManager.js
+
 Determines appropriate difficulty for activities based on player progress. Ensures steady learning curve.
 
 ### ActivityGenerator.js
+
 Creates math problems based on difficulty level. Generates questions, answers, and visual representations.
 
 ### SoundManager.js
+
 Manages Web Audio API for sound effects. Gracefully degrades if audio not supported.
 
 ### StorageManager.js
-Shared utility (from `games/common/js/`) that handles localStorage operations with error handling.
+
+Handles localStorage operations with error handling and version management for saving/loading game progress.
 
 ### ProjectVisuals.js
+
 Generates SVG visualizations for project completion (castles, gardens, robots, spaceships).
 
 ## Data Flow
@@ -60,6 +69,7 @@ Generates SVG visualizations for project completion (castles, gardens, robots, s
 ## Testing
 
 Tests are located in `__tests__/` directory. Each major module has corresponding tests:
+
 - `GameState.test.js` - State management
 - `SoundManager.test.js` - Audio system
 - `ProgressionManager.test.js` - Difficulty scaling
