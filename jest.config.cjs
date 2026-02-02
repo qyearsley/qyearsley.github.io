@@ -4,13 +4,10 @@ module.exports = {
   silent: true, // Suppress console output during tests
   collectCoverageFrom: [
     "javascript/**/*.js",
-    "games/netguard/**/*.js",
     "games/number-garden/**/*.js",
     "!javascript/**/*.test.js",
-    "!games/netguard/**/*.test.js",
     "!games/number-garden/**/*.test.js",
     "!javascript/**/*.html",
-    "!games/netguard/**/*.html",
     "!games/number-garden/**/*.html",
   ],
   coverageDirectory: "coverage",
