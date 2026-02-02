@@ -3,7 +3,7 @@
  * Handles clock reading and time elapsed activities
  */
 import { BaseMathGenerator } from "./BaseMathGenerator.js"
-import { generateTimeOptions } from "../../../common/js/utils.js"
+import { generateTimeOptions } from "../utils.js"
 
 export class TimeGenerator extends BaseMathGenerator {
   /**

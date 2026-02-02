@@ -2,7 +2,7 @@
 
 ## Overview
 
-Shared utilities used across all games to reduce code duplication and ensure consistent behavior.
+Shared utilities used across educational games to reduce code duplication and ensure consistent behavior.
 
 ## Modules
 
@@ -10,30 +10,31 @@ Shared utilities used across all games to reduce code duplication and ensure con
 Base class for all game UI managers. Provides common DOM manipulation patterns:
 - `showScreen(screenId)` - Screen transition logic
 - `showModal(modal)` / `hideModal(modal)` - Modal management
-- `cacheCommonElements()` - Cache frequently accessed DOM elements
+- `setVisible(element, visible)` - Toggle element visibility
+- `setText(elementId, text)` / `setHTML(elementId, html)` - Content updates
+- `updateProgressBar(current, total)` - Progress tracking
+- `disableButton()` / `enableButton()` - Button state management
+- `showFeedback(message, type)` - Feedback display
+- `markButtonCorrect()` / `markButtonIncorrect()` - Visual feedback
+- `shakeElement()` - Error animation
 
 All game-specific GameUI classes extend this base class.
 
 **Security Note**: Uses innerHTML for dynamic content generation. All content is generated from controlled game data (not user input), making it safe from XSS attacks.
 
 ### StorageManager.js
-Handles localStorage operations with error handling:
-- `save(key, data)` - Serialize and save to localStorage
-- `load(key)` - Load and deserialize from localStorage
-- `clear(key)` - Remove saved data
-- `has(key)` - Check if data exists
+Handles localStorage operations with error handling and version management:
+- `saveGameState(data)` - Serialize and save to localStorage
+- `loadGameState()` - Load and deserialize from localStorage
+- `clearGameState()` - Remove saved data
+- `hasGameState()` - Check if data exists
+- `exportGameState()` / `importGameState(json)` - Import/export functionality
 
-Gracefully handles:
-- localStorage not available (private browsing)
-- Quota exceeded errors
-- JSON parse failures
-
-### utils.js
-Utility functions shared across games:
-- Array shuffling
-- Random number generation
-- Math helpers
-- String manipulation
+Features:
+- Automatic version checking and migration
+- Graceful error handling for private browsing mode
+- Quota exceeded error handling
+- JSON parse failure protection
 
 ## Usage Pattern
 
