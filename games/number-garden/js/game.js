@@ -133,7 +133,6 @@ class NumberGarden {
       this.ui.updateStats(this.state.stats)
       this.ui.updateTitleButtons(false)
       this.showScreen("garden-hub")
-      console.log("🔄 Started fresh")
     }
   }
 
@@ -152,10 +151,8 @@ class NumberGarden {
         this.state.unlockArea("time-temple")
         this.state.unlockArea("measurement-market")
         this.state.unlockArea("pattern-path")
-        console.log("🔓 All areas unlocked for testing")
       } else {
         this.state.unlockArea(unlockParam)
-        console.log(`🔓 Unlocked ${unlockParam} for testing`)
       }
     }
   }
@@ -437,12 +434,11 @@ document.addEventListener("DOMContentLoaded", () => {
     console.error("Failed to initialize Number Garden:", error)
     // Display user-friendly error message
     const errorContainer = document.createElement("div")
-    errorContainer.style.cssText =
-      "position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fee; border: 2px solid #c33; padding: 2rem; border-radius: 8px; max-width: 500px; text-align: center; font-family: system-ui, sans-serif;"
+    errorContainer.className = "error-container"
     errorContainer.innerHTML = `
-      <h2 style="color: #c33; margin-top: 0;">Game Failed to Load</h2>
+      <h2>Game Failed to Load</h2>
       <p>We're sorry, but Number Garden encountered an error while starting.</p>
-      <p style="font-size: 0.9em; color: #666;">Try refreshing the page. If the problem persists, your browser may not support this game.</p>
+      <p class="error-details">Try refreshing the page. If the problem persists, your browser may not support this game.</p>
     `
     document.body.appendChild(errorContainer)
   }

@@ -197,6 +197,31 @@
   display: block;
 }
 
+/* ==================== Error Messages ==================== */
+.error-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fee;
+  border: 2px solid #c33;
+  padding: 2rem;
+  border-radius: 8px;
+  max-width: 500px;
+  text-align: center;
+  font-family: system-ui, sans-serif;
+}
+
+.error-container h2 {
+  color: #c33;
+  margin-top: 0;
+}
+
+.error-details {
+  font-size: 0.9em;
+  color: #666;
+}
+
 /* ==================== Responsive ==================== */
 @media (width <= 768px) {
   .modal-content {

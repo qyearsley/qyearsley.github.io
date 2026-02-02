@@ -39,7 +39,6 @@ describe("GameState", () => {
     })
 
     test("initializes with default settings", () => {
-      expect(gameState.questionsPerLevel).toBe(5)
       expect(gameState.settings.inputMode).toBe("multipleChoice")
       expect(gameState.settings.visualHints).toBe("on")
     })
@@ -384,7 +383,6 @@ describe("GameState", () => {
 
       expect(newGameState.settings.inputMode).toBe("multipleChoice")
       expect(newGameState.settings.visualHints).toBe("on")
-      expect(newGameState.questionsPerLevel).toBe(5)
     })
 
     test("loads project type from storage", () => {

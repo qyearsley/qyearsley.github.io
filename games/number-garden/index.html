@@ -52,9 +52,13 @@
         <h1 class="game-title">🌸 Number Garden 🌸</h1>
         <p class="subtitle">Help the magic garden grow!</p>
         <div class="title-buttons">
-          <button id="start-button" class="big-button">Start</button>
-          <button id="continue-button" class="big-button hidden">Continue</button>
-          <button id="start-fresh-button" class="secondary-button hidden">Start Fresh</button>
+          <button id="start-button" class="big-button" aria-label="Start new game">Start</button>
+          <button id="continue-button" class="big-button hidden" aria-label="Continue saved game">
+            Continue
+          </button>
+          <button id="start-fresh-button" class="secondary-button hidden" aria-label="Reset and start over">
+            Start Fresh
+          </button>
         </div>
       </div>
 
@@ -159,7 +163,7 @@
       <div id="activity-screen" class="screen">
         <div class="header">
           <div>
-            <button id="back-button" class="nav-button">← Back</button>
+            <button id="back-button" class="nav-button" aria-label="Return to garden hub">← Back</button>
           </div>
           <div class="stats">
             <button
@@ -302,7 +306,7 @@
             <p class="setting-description">Turn sound effects on or off</p>
           </div>
 
-          <button id="close-settings" class="big-button">Done</button>
+          <button id="close-settings" class="big-button" aria-label="Close settings">Done</button>
         </div>
       </div>
 
@@ -314,14 +318,18 @@
             <!-- Project visualization will be shown here -->
           </div>
           <p id="project-progress-text" class="project-progress-text"></p>
-          <button id="continue-from-project" class="big-button">Continue</button>
+          <button id="continue-from-project" class="big-button" aria-label="Continue playing">
+            Continue
+          </button>
         </div>
       </div>
 
       <!-- Castle Screen -->
       <div id="castle-screen" class="screen">
         <div class="header">
-          <button id="castle-back-button" class="nav-button">← Back</button>
+          <button id="castle-back-button" class="nav-button" aria-label="Return to garden hub">
+            ← Back
+          </button>
           <h2 id="castle-screen-title">Magic Castle</h2>
         </div>
 

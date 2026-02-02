@@ -47,9 +47,6 @@ export class StorageManager {
 
       // Check version compatibility
       if (data.version !== this.version) {
-        console.log(
-          `Version mismatch: expected ${this.version}, got ${data.version}. Clearing old data.`,
-        )
         this.clearGameState()
         return null
       }

@@ -4,6 +4,9 @@ import html from "eslint-plugin-html"
 import importPlugin from "eslint-plugin-import"
 
 export default [
+  {
+    ignores: ["coverage/", "node_modules/"],
+  },
   js.configs.recommended,
   prettier,
   {
@@ -31,6 +34,12 @@ export default [
         clearInterval: "readonly",
         clearTimeout: "readonly",
         localStorage: "readonly",
+        Event: "readonly",
+        KeyboardEvent: "readonly",
+        MouseEvent: "readonly",
+        HTMLElement: "readonly",
+        HTMLInputElement: "readonly",
+        HTMLButtonElement: "readonly",
         // Chart.js
         Chart: "readonly",
         // Custom functions from your scripts
