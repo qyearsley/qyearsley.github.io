@@ -24,6 +24,17 @@
 "use strict"
 
 /**
+ * Custom error class for parse errors with position information
+ */
+export class ParseError extends Error {
+  constructor(message, position) {
+    super(message)
+    this.name = "ParseError"
+    this.position = position
+  }
+}
+
+/**
  * Token types for the lexer
  * @typedef {'ATOM'|'NOT'|'AND'|'OR'|'XOR'|'NAND'|'NOR'|'XNOR'|'IMPLIES'|'IFF'|'LPAREN'|'RPAREN'|'LITERAL'|'EOF'} TokenType
  */
@@ -313,13 +324,15 @@ export class Parser {
   /**
    * Parses the token stream into an AST
    * @returns {ASTNode} The root of the abstract syntax tree
-   * @throws {Error} If there are syntax errors
+   * @throws {ParseError} If there are syntax errors
    */
   parse() {
     const node = this.parseIff()
     if (this.current().type !== "EOF") {
-      // Could throw an error here for trailing tokens
-      console.warn("Warning: Unexpected tokens after expression")
+      throw new ParseError(
+        `Unexpected token '${this.current().value}' after expression`,
+        this.pos,
+      )
     }
     return node
   }
@@ -559,7 +572,9 @@ export class Parser {
     // Handle parenthesized expressions
     if (this.match("LPAREN")) {
       const node = this.parseIff() // Start over at lowest precedence
-      this.match("RPAREN") // Consume closing paren (lenient if missing)
+      if (!this.match("RPAREN")) {
+        throw new ParseError("Expected closing parenthesis ')'", this.pos)
+      }
       return node
     }
 
@@ -573,9 +588,13 @@ export class Parser {
     }
 
     // Syntax error: expected atom, literal or '(' but got something else
-    // This is a lenient parser - we return an ERROR atom instead of throwing
-    console.error("Unexpected token:", token)
-    return { type: "ATOM", value: "ERROR" }
+    if (token.type === "EOF") {
+      throw new ParseError("Unexpected end of expression", this.pos)
+    }
+    throw new ParseError(
+      `Expected atom, literal, or '(' but found '${token.value}'`,
+      this.pos,
+    )
   }
 }
 

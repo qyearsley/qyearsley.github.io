@@ -4,7 +4,7 @@
  * Tests for tokenizer, parser, and utility functions
  */
 
-import { tokenize, Parser, areEqual, isNegation, isSimple } from "../parser.js"
+import { tokenize, Parser, areEqual, isNegation, isSimple, ParseError } from "../parser.js"
 
 describe("Tokenizer", () => {
   test("tokenizes simple atoms", () => {
@@ -221,16 +221,16 @@ describe("Parser", () => {
   })
 
   test("handles empty input gracefully", () => {
-    // Empty input creates just an EOF token, parser returns ERROR atom
+    // Empty input creates just an EOF token, parser throws error
     const tokens = tokenize("")
     expect(tokens).toHaveLength(1) // Just EOF
     expect(tokens[0].type).toBe("EOF")
   })
 
-  test("handles unbalanced parentheses", () => {
-    const ast = new Parser(tokenize("(P & Q")).parse()
-    // Parser is lenient - it will parse what it can
-    expect(ast.type).toBe("BINARY")
+  test("throws error for unbalanced parentheses", () => {
+    expect(() => {
+      new Parser(tokenize("(P & Q")).parse()
+    }).toThrow(ParseError)
   })
 
   test("handles multiple spaces", () => {
@@ -329,3 +329,49 @@ describe("isSimple", () => {
     expect(isSimple(notNotP)).toBe(false)
   })
 })
+
+describe("ParseError", () => {
+  test("throws ParseError for unexpected token after expression", () => {
+    expect(() => {
+      new Parser(tokenize("P Q")).parse()
+    }).toThrow(ParseError)
+
+    try {
+      new Parser(tokenize("P Q")).parse()
+    } catch (e) {
+      expect(e.message).toContain("Unexpected token")
+      expect(e.position).toBeDefined()
+    }
+  })
+
+  test("throws ParseError for missing closing parenthesis", () => {
+    expect(() => {
+      new Parser(tokenize("(P & Q")).parse()
+    }).toThrow(ParseError)
+
+    try {
+      new Parser(tokenize("(P & Q")).parse()
+    } catch (e) {
+      expect(e.message).toContain("closing parenthesis")
+    }
+  })
+
+  test("throws ParseError for unexpected end of expression", () => {
+    expect(() => {
+      new Parser(tokenize("P &")).parse()
+    }).toThrow(ParseError)
+
+    try {
+      new Parser(tokenize("P &")).parse()
+    } catch (e) {
+      expect(e.message).toContain("Unexpected end")
+    }
+  })
+
+  test("throws ParseError for invalid token type", () => {
+    expect(() => {
+      new Parser(tokenize("P ~")).parse()
+    }).toThrow(ParseError)
+  })
+})
+

@@ -5,30 +5,42 @@
  */
 
 import { inferNextSteps } from "../inference.js"
+import { tokenize, Parser } from "../parser.js"
+
+/**
+ * Helper to create a step with parsed AST
+ */
+function createStep(id, expression, isPremise = true) {
+  const tokens = tokenize(expression)
+  const ast = new Parser(tokens).parse()
+  return { id, expression, ast, isPremise }
+}
 
 describe("Inference Rules", () => {
   test("Double Negation: ~~P => P", async () => {
-    const steps = [{ id: 1, expression: "~~P", isPremise: true }]
+    const steps = [createStep(1, "~~P")]
     const conclusions = await inferNextSteps(steps)
 
     expect(conclusions).toHaveLength(1)
     expect(conclusions[0].expression).toBe("P")
     expect(conclusions[0].justification).toBe("Double Negation")
     expect(conclusions[0].referencedStepIds).toEqual([1])
+    expect(conclusions[0].ast).toBeDefined() // Verify AST is cached
   })
 
   test("De Morgan's Law: ~(P & Q) => ~P | ~Q", async () => {
-    const steps = [{ id: 1, expression: "~(P & Q)", isPremise: true }]
+    const steps = [createStep(1, "~(P & Q)")]
     const conclusions = await inferNextSteps(steps)
 
     expect(conclusions.length).toBeGreaterThan(0)
     const deMorgan = conclusions.find((c) => c.justification === "De Morgan's Law")
     expect(deMorgan).toBeDefined()
     expect(deMorgan.expression).toBe("~P | ~Q")
+    expect(deMorgan.ast).toBeDefined()
   })
 
   test("De Morgan's Law: ~(P | Q) => ~P & ~Q", async () => {
-    const steps = [{ id: 1, expression: "~(P | Q)", isPremise: true }]
+    const steps = [createStep(1, "~(P | Q)")]
     const conclusions = await inferNextSteps(steps)
 
     const deMorgan = conclusions.find((c) => c.justification === "De Morgan's Law")
@@ -36,8 +48,35 @@ describe("Inference Rules", () => {
     expect(deMorgan.expression).toBe("~P & ~Q")
   })
 
+  test("Literal Simplification: ~true => false", async () => {
+    const steps = [createStep(1, "~true")]
+    const conclusions = await inferNextSteps(steps)
+
+    expect(conclusions).toHaveLength(1)
+    expect(conclusions[0].expression).toBe("false")
+    expect(conclusions[0].justification).toBe("Literal Simplification")
+  })
+
+  test("Literal Simplification: true & P => P", async () => {
+    const steps = [createStep(1, "true & P")]
+    const conclusions = await inferNextSteps(steps)
+
+    const simplified = conclusions.find((c) => c.justification === "Literal Simplification")
+    expect(simplified).toBeDefined()
+    expect(simplified.expression).toBe("P")
+  })
+
+  test("Literal Simplification: false | P => P", async () => {
+    const steps = [createStep(1, "false | P")]
+    const conclusions = await inferNextSteps(steps)
+
+    const simplified = conclusions.find((c) => c.justification === "Literal Simplification")
+    expect(simplified).toBeDefined()
+    expect(simplified.expression).toBe("P")
+  })
+
   test("Simplification: P & Q => P, Q", async () => {
-    const steps = [{ id: 1, expression: "P & Q", isPremise: true }]
+    const steps = [createStep(1, "P & Q")]
     const conclusions = await inferNextSteps(steps)
 
     expect(conclusions.length).toBeGreaterThanOrEqual(2)
@@ -48,10 +87,7 @@ describe("Inference Rules", () => {
   })
 
   test("Modus Ponens: (P -> Q), P => Q", async () => {
-    const steps = [
-      { id: 1, expression: "P -> Q", isPremise: true },
-      { id: 2, expression: "P", isPremise: true },
-    ]
+    const steps = [createStep(1, "P -> Q"), createStep(2, "P")]
     const conclusions = await inferNextSteps(steps)
 
     expect(conclusions.length).toBeGreaterThan(0)
@@ -62,10 +98,7 @@ describe("Inference Rules", () => {
   })
 
   test("Modus Tollens: (P -> Q), ~Q => ~P", async () => {
-    const steps = [
-      { id: 1, expression: "P -> Q", isPremise: true },
-      { id: 2, expression: "~Q", isPremise: true },
-    ]
+    const steps = [createStep(1, "P -> Q"), createStep(2, "~Q")]
     const conclusions = await inferNextSteps(steps)
 
     const modusTollens = conclusions.find((c) => c.justification === "Modus Tollens")
@@ -74,10 +107,7 @@ describe("Inference Rules", () => {
   })
 
   test("Disjunctive Syllogism: (P | Q), ~P => Q", async () => {
-    const steps = [
-      { id: 1, expression: "P | Q", isPremise: true },
-      { id: 2, expression: "~P", isPremise: true },
-    ]
+    const steps = [createStep(1, "P | Q"), createStep(2, "~P")]
     const conclusions = await inferNextSteps(steps)
 
     const disjSyll = conclusions.find((c) => c.justification === "Disjunctive Syllogism")
@@ -86,10 +116,7 @@ describe("Inference Rules", () => {
   })
 
   test("Disjunctive Syllogism: (P | Q), ~Q => P", async () => {
-    const steps = [
-      { id: 1, expression: "P | Q", isPremise: true },
-      { id: 2, expression: "~Q", isPremise: true },
-    ]
+    const steps = [createStep(1, "P | Q"), createStep(2, "~Q")]
     const conclusions = await inferNextSteps(steps)
 
     const disjSyll = conclusions.find((c) => c.justification === "Disjunctive Syllogism")
@@ -98,10 +125,7 @@ describe("Inference Rules", () => {
   })
 
   test("Hypothetical Syllogism: (P -> Q), (Q -> R) => (P -> R)", async () => {
-    const steps = [
-      { id: 1, expression: "P -> Q", isPremise: true },
-      { id: 2, expression: "Q -> R", isPremise: true },
-    ]
+    const steps = [createStep(1, "P -> Q"), createStep(2, "Q -> R")]
     const conclusions = await inferNextSteps(steps)
 
     const hypSyll = conclusions.find((c) => c.justification === "Hypothetical Syllogism")
@@ -110,10 +134,7 @@ describe("Inference Rules", () => {
   })
 
   test("Constructive Dilemma: ((P -> Q) & (R -> S)), (P | R) => (Q | S)", async () => {
-    const steps = [
-      { id: 1, expression: "(P -> Q) & (R -> S)", isPremise: true },
-      { id: 2, expression: "P | R", isPremise: true },
-    ]
+    const steps = [createStep(1, "(P -> Q) & (R -> S)"), createStep(2, "P | R")]
     const conclusions = await inferNextSteps(steps)
 
     const constrDilemma = conclusions.find((c) => c.justification === "Constructive Dilemma")
@@ -122,10 +143,7 @@ describe("Inference Rules", () => {
   })
 
   test("Resolution: (P | Q), (~P | R) => (Q | R)", async () => {
-    const steps = [
-      { id: 1, expression: "P | Q", isPremise: true },
-      { id: 2, expression: "~P | R", isPremise: true },
-    ]
+    const steps = [createStep(1, "P | Q"), createStep(2, "~P | R")]
     const conclusions = await inferNextSteps(steps)
 
     const resolution = conclusions.find((c) => c.justification === "Resolution")
@@ -134,10 +152,7 @@ describe("Inference Rules", () => {
   })
 
   test("Adjunction: P, Q => P & Q (simple atoms only)", async () => {
-    const steps = [
-      { id: 1, expression: "P", isPremise: true },
-      { id: 2, expression: "Q", isPremise: true },
-    ]
+    const steps = [createStep(1, "P"), createStep(2, "Q")]
     const conclusions = await inferNextSteps(steps)
 
     const adjunction = conclusions.find((c) => c.justification === "Adjunction")
@@ -145,11 +160,17 @@ describe("Inference Rules", () => {
     expect(adjunction.expression).toBe("P & Q")
   })
 
+  test("Contradiction Detection: P, ~P => false", async () => {
+    const steps = [createStep(1, "P"), createStep(2, "~P")]
+    const conclusions = await inferNextSteps(steps)
+
+    const contradiction = conclusions.find((c) => c.justification.includes("Contradiction"))
+    expect(contradiction).toBeDefined()
+    expect(contradiction.expression).toBe("false")
+  })
+
   test("Does not duplicate existing conclusions", async () => {
-    const steps = [
-      { id: 1, expression: "~~P", isPremise: true },
-      { id: 2, expression: "P", isPremise: true }, // Already have P
-    ]
+    const steps = [createStep(1, "~~P"), createStep(2, "P")]
     const conclusions = await inferNextSteps(steps)
 
     // Should not derive P again via double negation
@@ -159,10 +180,10 @@ describe("Inference Rules", () => {
   test("Limits output to 3 conclusions max", async () => {
     // Create premises that will generate many conclusions
     const steps = [
-      { id: 1, expression: "P", isPremise: true },
-      { id: 2, expression: "Q", isPremise: true },
-      { id: 3, expression: "R", isPremise: true },
-      { id: 4, expression: "S", isPremise: true },
+      createStep(1, "P"),
+      createStep(2, "Q"),
+      createStep(3, "R"),
+      createStep(4, "S"),
     ]
     const conclusions = await inferNextSteps(steps)
 
@@ -171,26 +192,25 @@ describe("Inference Rules", () => {
 
   test("Complex multi-step proof", async () => {
     // Start with Modus Ponens premises
-    const steps = [
-      { id: 1, expression: "P -> Q", isPremise: true },
-      { id: 2, expression: "P", isPremise: true },
-    ]
+    const steps = [createStep(1, "P -> Q"), createStep(2, "P")]
 
     // First inference should derive Q
     let conclusions = await inferNextSteps(steps)
     expect(conclusions.find((c) => c.expression === "Q")).toBeDefined()
 
     // Add Q to steps
+    const qConclusion = conclusions.find((c) => c.expression === "Q")
     steps.push({
       id: 3,
       expression: "Q",
+      ast: qConclusion.ast,
       isPremise: false,
       justification: "Modus Ponens",
       referencedStepIds: [1, 2],
     })
 
     // Add Q -> R
-    steps.push({ id: 4, expression: "Q -> R", isPremise: true })
+    steps.push(createStep(4, "Q -> R"))
 
     // Should now derive R via Modus Ponens
     conclusions = await inferNextSteps(steps)
@@ -199,17 +219,18 @@ describe("Inference Rules", () => {
     expect(derivedR.justification).toBe("Modus Ponens")
   })
 
-  test("Handles unparseable expressions gracefully", async () => {
-    const steps = [{ id: 1, expression: "invalid syntax @#$", isPremise: true }]
+  test("Handles steps without cached AST (fallback parsing)", async () => {
+    const steps = [{ id: 1, expression: "~~P", isPremise: true }] // No ast property
     const conclusions = await inferNextSteps(steps)
-    // Should not crash, just return no conclusions
-    expect(conclusions).toEqual([])
+
+    expect(conclusions).toHaveLength(1)
+    expect(conclusions[0].expression).toBe("P")
   })
 
   test("Works with descriptive atom names", async () => {
     const steps = [
-      { id: 1, expression: "raining -> wet_street", isPremise: true },
-      { id: 2, expression: "raining", isPremise: true },
+      createStep(1, "raining -> wet_street"),
+      createStep(2, "raining"),
     ]
     const conclusions = await inferNextSteps(steps)
     const derived = conclusions.find((c) => c.expression === "wet_street")
@@ -219,10 +240,7 @@ describe("Inference Rules", () => {
 
   test("Resolution works with all negation positions", async () => {
     // Test: (A | B), (C | ~A) => (B | C)
-    const steps = [
-      { id: 1, expression: "A | B", isPremise: true },
-      { id: 2, expression: "C | ~A", isPremise: true },
-    ]
+    const steps = [createStep(1, "A | B"), createStep(2, "C | ~A")]
     const conclusions = await inferNextSteps(steps)
     const resolution = conclusions.find((c) => c.justification === "Resolution")
     expect(resolution).toBeDefined()
@@ -233,10 +251,7 @@ describe("Inference Rules", () => {
   test("Resolution case 4: right-right complementary literals", async () => {
     // Test: (B | A), (C | ~A) => (B | C)
     // This tests the case where both complementary literals are on the right
-    const steps = [
-      { id: 1, expression: "B | A", isPremise: true },
-      { id: 2, expression: "C | ~A", isPremise: true },
-    ]
+    const steps = [createStep(1, "B | A"), createStep(2, "C | ~A")]
     const conclusions = await inferNextSteps(steps)
     const resolution = conclusions.find((c) => c.justification === "Resolution")
     expect(resolution).toBeDefined()
@@ -244,11 +259,11 @@ describe("Inference Rules", () => {
   })
 
   test("Does not add duplicate conclusions in same inference batch", async () => {
-    // This tests the dedup logic at line 145
+    // This tests the dedup logic
     // Create a scenario where the same conclusion could be derived multiple ways
     const steps = [
-      { id: 1, expression: "P & Q", isPremise: true }, // Simplification will derive P and Q
-      { id: 2, expression: "P", isPremise: true }, // P already exists
+      createStep(1, "P & Q"), // Simplification will derive P and Q
+      createStep(2, "P"), // P already exists
     ]
     const conclusions = await inferNextSteps(steps)
     // Should not derive P (already exists) or Q twice
