@@ -45,13 +45,15 @@ export function initUI() {
       if (expressions.length > 0) {
         let hasError = false
         let errorMsg = ""
+        const parsedExpressions = []
 
-        // Validate all expressions before adding any
+        // Validate and parse all expressions before adding any
         for (const expression of expressions) {
           try {
             const tokens = tokenize(expression)
             const parser = new Parser(tokens)
-            parser.parse()
+            const ast = parser.parse()
+            parsedExpressions.push({ expression, ast })
           } catch (e) {
             hasError = true
             errorMsg = `Invalid expression "${expression}": ${e.message}`
@@ -63,9 +65,9 @@ export function initUI() {
           setError(errorMsg)
           render()
         } else {
-          // All valid, add them
-          expressions.forEach((expression) => {
-            addPremise(expression)
+          // All valid, add them with cached ASTs
+          parsedExpressions.forEach(({ expression, ast }) => {
+            addPremise(expression, ast)
           })
           premiseInput.value = ""
           clearError()
@@ -126,7 +128,19 @@ export function initUI() {
       button.title = example.description
     }
     button.addEventListener("click", () => {
-      loadExample(example.premises)
+      // Parse all premises before loading
+      const parsedPremises = []
+      for (const premise of example.premises) {
+        try {
+          const tokens = tokenize(premise)
+          const ast = new Parser(tokens).parse()
+          parsedPremises.push({ expression: premise, ast })
+        } catch (e) {
+          console.warn(`Failed to parse example premise: ${premise}`, e)
+          // Skip invalid premises
+        }
+      }
+      loadExample(parsedPremises)
       render()
     })
     examplesContainer.appendChild(button)

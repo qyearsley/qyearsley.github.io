@@ -26,6 +26,7 @@ import { formatAST } from "./formatter.js"
  * A derived conclusion from inference
  * @typedef {Object} DerivedConclusion
  * @property {string} expression - The derived logical expression
+ * @property {import('./parser.js').ASTNode} ast - The parsed AST (cached for performance)
  * @property {string} justification - The inference rule name
  * @property {number[]} referencedStepIds - IDs of the steps used in this inference
  */
@@ -47,6 +48,398 @@ import { formatAST } from "./formatter.js"
  * @property {import('./parser.js').ASTNode} ast - Parsed AST
  * @property {string} raw - Original string expression
  */
+
+/**
+ * Type for the addConclusion callback
+ * @callback AddConclusionFn
+ * @param {import('./parser.js').ASTNode} ast - The conclusion AST
+ * @param {string} rule - The inference rule name
+ * @param {number[]} refs - Referenced step IDs
+ */
+
+/**
+ * Applies Double Negation rule: ~~A => A
+ * @param {ParsedStep[]} parsed - All parsed steps
+ * @param {AddConclusionFn} addConclusion - Callback to add conclusions
+ */
+function applyDoubleNegation(parsed, addConclusion) {
+  for (const step of parsed) {
+    if (step.ast.type === "NOT") {
+      const inner = step.ast.operand
+      if (inner.type === "NOT") {
+        addConclusion(inner.operand, "Double Negation", [step.id])
+      }
+    }
+  }
+}
+
+/**
+ * Applies Literal Simplification rules for true/false constants
+ * @param {ParsedStep[]} parsed - All parsed steps
+ * @param {AddConclusionFn} addConclusion - Callback to add conclusions
+ */
+function applyLiteralSimplification(parsed, addConclusion) {
+  for (const step of parsed) {
+    // ~true → false, ~false → true
+    if (step.ast.type === "NOT" && step.ast.operand.type === "LITERAL") {
+      const newValue = !step.ast.operand.value
+      addConclusion({ type: "LITERAL", value: newValue }, "Literal Simplification", [step.id])
+    }
+
+    // Binary operations with literals
+    if (step.ast.type === "BINARY") {
+      const { left, right, operator } = step.ast
+
+      // Conjunction simplifications
+      if (operator === "&") {
+        if (left.type === "LITERAL" && left.value === true) {
+          addConclusion(right, "Literal Simplification", [step.id])
+        } else if (right.type === "LITERAL" && right.value === true) {
+          addConclusion(left, "Literal Simplification", [step.id])
+        } else if (left.type === "LITERAL" && left.value === false) {
+          addConclusion({ type: "LITERAL", value: false }, "Literal Simplification", [step.id])
+        } else if (right.type === "LITERAL" && right.value === false) {
+          addConclusion({ type: "LITERAL", value: false }, "Literal Simplification", [step.id])
+        }
+      }
+
+      // Disjunction simplifications
+      if (operator === "|") {
+        if (left.type === "LITERAL" && left.value === true) {
+          addConclusion({ type: "LITERAL", value: true }, "Literal Simplification", [step.id])
+        } else if (right.type === "LITERAL" && right.value === true) {
+          addConclusion({ type: "LITERAL", value: true }, "Literal Simplification", [step.id])
+        } else if (left.type === "LITERAL" && left.value === false) {
+          addConclusion(right, "Literal Simplification", [step.id])
+        } else if (right.type === "LITERAL" && right.value === false) {
+          addConclusion(left, "Literal Simplification", [step.id])
+        }
+      }
+
+      // Implication simplifications
+      if (operator === "->") {
+        if (left.type === "LITERAL" && left.value === true) {
+          addConclusion(right, "Literal Simplification", [step.id])
+        } else if (left.type === "LITERAL" && left.value === false) {
+          addConclusion({ type: "LITERAL", value: true }, "Literal Simplification", [step.id])
+        } else if (right.type === "LITERAL" && right.value === true) {
+          addConclusion({ type: "LITERAL", value: true }, "Literal Simplification", [step.id])
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Applies De Morgan's Laws: ~(A & B) => ~A | ~B, ~(A | B) => ~A & ~B
+ * @param {ParsedStep[]} parsed - All parsed steps
+ * @param {AddConclusionFn} addConclusion - Callback to add conclusions
+ */
+function applyDeMorgan(parsed, addConclusion) {
+  for (const step of parsed) {
+    if (step.ast.type === "NOT") {
+      const inner = step.ast.operand
+
+      if (inner.type === "BINARY" && inner.operator === "&") {
+        // ~(A & B) => ~A | ~B
+        const newAst = {
+          type: "BINARY",
+          operator: "|",
+          left: { type: "NOT", operand: inner.left },
+          right: { type: "NOT", operand: inner.right },
+        }
+        addConclusion(newAst, "De Morgan's Law", [step.id])
+      } else if (inner.type === "BINARY" && inner.operator === "|") {
+        // ~(A | B) => ~A & ~B
+        const newAst = {
+          type: "BINARY",
+          operator: "&",
+          left: { type: "NOT", operand: inner.left },
+          right: { type: "NOT", operand: inner.right },
+        }
+        addConclusion(newAst, "De Morgan's Law", [step.id])
+      }
+    }
+  }
+}
+
+/**
+ * Applies Simplification rule: A & B => A, B
+ * @param {ParsedStep[]} parsed - All parsed steps
+ * @param {AddConclusionFn} addConclusion - Callback to add conclusions
+ */
+function applySimplification(parsed, addConclusion) {
+  for (const step of parsed) {
+    if (step.ast.type === "BINARY" && step.ast.operator === "&") {
+      addConclusion(step.ast.left, "Simplification", [step.id])
+      addConclusion(step.ast.right, "Simplification", [step.id])
+    }
+  }
+}
+
+/**
+ * Applies Modus Ponens: (P -> Q), P => Q
+ * @param {ParsedStep[]} parsed - All parsed steps
+ * @param {AddConclusionFn} addConclusion - Callback to add conclusions
+ */
+function applyModusPonens(parsed, addConclusion) {
+  for (let i = 0; i < parsed.length; i++) {
+    for (let j = 0; j < parsed.length; j++) {
+      if (i === j) continue
+
+      const p1 = parsed[i]
+      const p2 = parsed[j]
+
+      if (p1.ast.type === "BINARY" && p1.ast.operator === "->") {
+        if (areEqual(p1.ast.left, p2.ast)) {
+          addConclusion(p1.ast.right, "Modus Ponens", [p1.id, p2.id])
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Applies Modus Tollens: (P -> Q), ~Q => ~P
+ * @param {ParsedStep[]} parsed - All parsed steps
+ * @param {AddConclusionFn} addConclusion - Callback to add conclusions
+ */
+function applyModusTollens(parsed, addConclusion) {
+  for (let i = 0; i < parsed.length; i++) {
+    for (let j = 0; j < parsed.length; j++) {
+      if (i === j) continue
+
+      const p1 = parsed[i]
+      const p2 = parsed[j]
+
+      if (p1.ast.type === "BINARY" && p1.ast.operator === "->") {
+        if (isNegation(p1.ast.right, p2.ast)) {
+          addConclusion({ type: "NOT", operand: p1.ast.left }, "Modus Tollens", [p1.id, p2.id])
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Applies Disjunctive Syllogism: (P | Q), ~P => Q
+ * @param {ParsedStep[]} parsed - All parsed steps
+ * @param {AddConclusionFn} addConclusion - Callback to add conclusions
+ */
+function applyDisjunctiveSyllogism(parsed, addConclusion) {
+  for (let i = 0; i < parsed.length; i++) {
+    for (let j = 0; j < parsed.length; j++) {
+      if (i === j) continue
+
+      const p1 = parsed[i]
+      const p2 = parsed[j]
+
+      if (p1.ast.type === "BINARY" && p1.ast.operator === "|") {
+        if (isNegation(p1.ast.left, p2.ast)) {
+          addConclusion(p1.ast.right, "Disjunctive Syllogism", [p1.id, p2.id])
+        } else if (isNegation(p1.ast.right, p2.ast)) {
+          addConclusion(p1.ast.left, "Disjunctive Syllogism", [p1.id, p2.id])
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Applies Hypothetical Syllogism: (A -> B), (B -> C) => (A -> C)
+ * @param {ParsedStep[]} parsed - All parsed steps
+ * @param {AddConclusionFn} addConclusion - Callback to add conclusions
+ */
+function applyHypotheticalSyllogism(parsed, addConclusion) {
+  for (let i = 0; i < parsed.length; i++) {
+    for (let j = 0; j < parsed.length; j++) {
+      if (i === j) continue
+
+      const p1 = parsed[i]
+      const p2 = parsed[j]
+
+      if (
+        p1.ast.type === "BINARY" &&
+        p1.ast.operator === "->" &&
+        p2.ast.type === "BINARY" &&
+        p2.ast.operator === "->"
+      ) {
+        if (areEqual(p1.ast.right, p2.ast.left)) {
+          addConclusion(
+            {
+              type: "BINARY",
+              operator: "->",
+              left: p1.ast.left,
+              right: p2.ast.right,
+            },
+            "Hypothetical Syllogism",
+            [p1.id, p2.id],
+          )
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Applies Constructive Dilemma: ((A -> B) & (C -> D)), (A | C) => (B | D)
+ * @param {ParsedStep[]} parsed - All parsed steps
+ * @param {AddConclusionFn} addConclusion - Callback to add conclusions
+ */
+function applyConstructiveDilemma(parsed, addConclusion) {
+  for (let i = 0; i < parsed.length; i++) {
+    for (let j = 0; j < parsed.length; j++) {
+      if (i === j) continue
+
+      const p1 = parsed[i]
+      const p2 = parsed[j]
+
+      if (p1.ast.type === "BINARY" && p1.ast.operator === "&") {
+        const left = p1.ast.left
+        const right = p1.ast.right
+
+        if (
+          left.type === "BINARY" &&
+          left.operator === "->" &&
+          right.type === "BINARY" &&
+          right.operator === "->"
+        ) {
+          const A = left.left
+          const B = left.right
+          const C = right.left
+          const D = right.right
+
+          if (p2.ast.type === "BINARY" && p2.ast.operator === "|") {
+            if (
+              (areEqual(p2.ast.left, A) && areEqual(p2.ast.right, C)) ||
+              (areEqual(p2.ast.left, C) && areEqual(p2.ast.right, A))
+            ) {
+              addConclusion(
+                {
+                  type: "BINARY",
+                  operator: "|",
+                  left: B,
+                  right: D,
+                },
+                "Constructive Dilemma",
+                [p1.id, p2.id],
+              )
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Applies Resolution: (A | B), (~A | C) => (B | C)
+ * @param {ParsedStep[]} parsed - All parsed steps
+ * @param {AddConclusionFn} addConclusion - Callback to add conclusions
+ */
+function applyResolution(parsed, addConclusion) {
+  for (let i = 0; i < parsed.length; i++) {
+    for (let j = 0; j < parsed.length; j++) {
+      if (i === j) continue
+
+      const p1 = parsed[i]
+      const p2 = parsed[j]
+
+      if (
+        p1.ast.type === "BINARY" &&
+        p1.ast.operator === "|" &&
+        p2.ast.type === "BINARY" &&
+        p2.ast.operator === "|"
+      ) {
+        // Check all four cases for complementary literals
+        if (isNegation(p1.ast.left, p2.ast.left)) {
+          addConclusion(
+            { type: "BINARY", operator: "|", left: p1.ast.right, right: p2.ast.right },
+            "Resolution",
+            [p1.id, p2.id],
+          )
+        } else if (isNegation(p1.ast.left, p2.ast.right)) {
+          addConclusion(
+            { type: "BINARY", operator: "|", left: p1.ast.right, right: p2.ast.left },
+            "Resolution",
+            [p1.id, p2.id],
+          )
+        } else if (isNegation(p1.ast.right, p2.ast.left)) {
+          addConclusion(
+            { type: "BINARY", operator: "|", left: p1.ast.left, right: p2.ast.right },
+            "Resolution",
+            [p1.id, p2.id],
+          )
+        } else if (isNegation(p1.ast.right, p2.ast.right)) {
+          addConclusion(
+            { type: "BINARY", operator: "|", left: p1.ast.left, right: p2.ast.left },
+            "Resolution",
+            [p1.id, p2.id],
+          )
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Applies Adjunction: P, Q => P & Q (restricted to simple propositions)
+ * @param {ParsedStep[]} parsed - All parsed steps
+ * @param {AddConclusionFn} addConclusion - Callback to add conclusions
+ */
+function applyAdjunction(parsed, addConclusion) {
+  for (let i = 0; i < parsed.length; i++) {
+    for (let j = i + 1; j < parsed.length; j++) {
+      const p1 = parsed[i]
+      const p2 = parsed[j]
+
+      if (isSimple(p1.ast) && isSimple(p2.ast)) {
+        addConclusion(
+          {
+            type: "BINARY",
+            operator: "&",
+            left: p1.ast,
+            right: p2.ast,
+          },
+          "Adjunction",
+          [p1.id, p2.id],
+        )
+      }
+    }
+  }
+}
+
+/**
+ * Detects contradictions: P and ~P => false
+ * @param {ParsedStep[]} parsed - All parsed steps
+ * @param {AddConclusionFn} addConclusion - Callback to add conclusions
+ */
+function detectContradiction(parsed, addConclusion) {
+  for (let i = 0; i < parsed.length; i++) {
+    for (let j = i + 1; j < parsed.length; j++) {
+      const p1 = parsed[i]
+      const p2 = parsed[j]
+
+      // Check if p1 and p2 contradict each other
+      if (isNegation(p1.ast, p2.ast)) {
+        addConclusion(
+          { type: "LITERAL", value: false },
+          `Contradiction (steps ${p1.id} and ${p2.id})`,
+          [p1.id, p2.id],
+        )
+      }
+
+      // Check for literal contradiction: true and false
+      if (p1.ast.type === "LITERAL" && p2.ast.type === "LITERAL" && p1.ast.value !== p2.ast.value) {
+        addConclusion(
+          { type: "LITERAL", value: false },
+          `Contradiction (steps ${p1.id} and ${p2.id})`,
+          [p1.id, p2.id],
+        )
+      }
+    }
+  }
+}
 
 /**
  * Attempts to derive new conclusions from existing proof steps
@@ -89,17 +482,22 @@ import { formatAST } from "./formatter.js"
  * @returns {Promise<DerivedConclusion[]>} Array of new derived conclusions (max 3)
  */
 export async function inferNextSteps(currentSteps) {
-  // Phase 0: Parse all existing steps into ASTs for pattern matching
-  // Why parse here instead of caching? Steps are modified rarely, and parsing is fast (O(n))
+  // Phase 0: Build parsed steps array from cached ASTs
+  // This is now O(1) per step since ASTs are pre-parsed and cached
   const parsed = []
   for (const step of currentSteps) {
-    try {
-      const tokens = tokenize(step.expression)
-      const ast = new Parser(tokens).parse()
-      parsed.push({ id: step.id, ast, raw: step.expression })
-    } catch (e) {
-      // Lenient parsing: skip malformed expressions instead of crashing
-      console.warn(`Failed to parse step ${step.id}: ${step.expression}`, e)
+    if (step.ast) {
+      parsed.push({ id: step.id, ast: step.ast, raw: step.expression })
+    } else {
+      // Fallback for steps without cached AST (shouldn't happen in normal flow)
+      console.warn(`Step ${step.id} missing cached AST, parsing on demand`)
+      try {
+        const tokens = tokenize(step.expression)
+        const ast = new Parser(tokens).parse()
+        parsed.push({ id: step.id, ast, raw: step.expression })
+      } catch (e) {
+        console.warn(`Failed to parse step ${step.id}: ${step.expression}`, e)
+      }
     }
   }
 
@@ -136,507 +534,36 @@ export async function inferNextSteps(currentSteps) {
     }
 
     // Dedup against new conclusions in this batch
-    if (
-      newConclusions.some((c) => {
-        const cAst = new Parser(tokenize(c.expression)).parse()
-        return areEqual(cAst, ast)
-      })
-    ) {
+    if (newConclusions.some((c) => areEqual(c.ast, ast))) {
       return
     }
 
-    // Unique conclusion - add it!
+    // Unique conclusion - add it with cached AST for performance!
     newConclusions.push({
       expression: formatAST(ast),
+      ast, // Cache the AST for future inference runs
       justification: rule,
       referencedStepIds: refs,
     })
   }
 
   // Phase 1: Apply Unary Rules (O(n) - single pass through steps)
-  // These rules transform one fact into another fact
-
-  for (const step of parsed) {
-    // Rule 1: Double Negation (~~A => A)
-    //
-    // Logical Principle: A double negative equals the positive
-    // Example: "It's not true that it's not raining" = "It's raining"
-    //
-    // Pattern matching:
-    // - Must have: NOT(NOT(...))
-    // - Extract: the inner operand (after removing both NOTs)
-    //
-    // Why useful?
-    // Often arises from applying other rules, especially De Morgan's Laws
-    // or negating implications
-    if (step.ast.type === "NOT") {
-      const inner = step.ast.operand
-      if (inner.type === "NOT") {
-        // Found ~~A, derive A
-        addConclusion(inner.operand, "Double Negation", [step.id])
-      }
-    }
-
-    // Rule 1.5: Literal Simplification
-    // Simplifies expressions involving true/false literals
-    //
-    // Logical Principles:
-    // - true is always true, false is always false
-    // - Conjunction: true & P → P, false & P → false
-    // - Disjunction: true | P → true, false | P → P
-    // - Negation: ~true → false, ~false → true
-    // - Implication: true -> P → P, false -> P → true, P -> true → true
-    //
-    // Why useful?
-    // Allows reasoning with Boolean constants, simplifies complex expressions
-    // Educational: shows how logical operators interact with truth values
-
-    // ~true → false, ~false → true
-    if (step.ast.type === "NOT" && step.ast.operand.type === "LITERAL") {
-      const newValue = !step.ast.operand.value
-      addConclusion({ type: "LITERAL", value: newValue }, "Literal Simplification", [step.id])
-    }
-
-    // Binary operations with literals
-    if (step.ast.type === "BINARY") {
-      const { left, right, operator } = step.ast
-
-      // true & P → P, P & true → P
-      if (operator === "&") {
-        if (left.type === "LITERAL" && left.value === true) {
-          addConclusion(right, "Literal Simplification", [step.id])
-        } else if (right.type === "LITERAL" && right.value === true) {
-          addConclusion(left, "Literal Simplification", [step.id])
-        }
-        // false & P → false, P & false → false
-        else if (left.type === "LITERAL" && left.value === false) {
-          addConclusion({ type: "LITERAL", value: false }, "Literal Simplification", [step.id])
-        } else if (right.type === "LITERAL" && right.value === false) {
-          addConclusion({ type: "LITERAL", value: false }, "Literal Simplification", [step.id])
-        }
-      }
-
-      // true | P → true, P | true → true
-      if (operator === "|") {
-        if (left.type === "LITERAL" && left.value === true) {
-          addConclusion({ type: "LITERAL", value: true }, "Literal Simplification", [step.id])
-        } else if (right.type === "LITERAL" && right.value === true) {
-          addConclusion({ type: "LITERAL", value: true }, "Literal Simplification", [step.id])
-        }
-        // false | P → P, P | false → P
-        else if (left.type === "LITERAL" && left.value === false) {
-          addConclusion(right, "Literal Simplification", [step.id])
-        } else if (right.type === "LITERAL" && right.value === false) {
-          addConclusion(left, "Literal Simplification", [step.id])
-        }
-      }
-
-      // true -> P → P
-      if (operator === "->") {
-        if (left.type === "LITERAL" && left.value === true) {
-          addConclusion(right, "Literal Simplification", [step.id])
-        }
-        // false -> P → true
-        else if (left.type === "LITERAL" && left.value === false) {
-          addConclusion({ type: "LITERAL", value: true }, "Literal Simplification", [step.id])
-        }
-        // P -> true → true
-        else if (right.type === "LITERAL" && right.value === true) {
-          addConclusion({ type: "LITERAL", value: true }, "Literal Simplification", [step.id])
-        }
-      }
-    }
-
-    // Rule 2: De Morgan's Laws
-    // ~(A & B) => ~A | ~B  (negation distributes over AND, flips to OR)
-    // ~(A | B) => ~A & ~B  (negation distributes over OR, flips to AND)
-    //
-    // Logical Principle: Negating a compound statement distributes to parts
-    // Examples:
-    // - "Not (raining AND cold)" = "(Not raining) OR (Not cold)"
-    // - "Not (coffee OR tea)" = "(Not coffee) AND (Not tea)"
-    //
-    // Why the flip?
-    // Think about truth conditions:
-    // - A & B is false when AT LEAST ONE is false → ~A | ~B
-    // - A | B is false when BOTH are false → ~A & ~B
-    //
-    // Pattern matching:
-    // - Must have: NOT(BINARY(...))
-    // - Check operator: & or |
-    // - Build new AST: negate each operand, flip operator
-    if (step.ast.type === "NOT") {
-      const inner = step.ast.operand
-
-      if (inner.type === "BINARY" && inner.operator === "&") {
-        // ~(A & B) => ~A | ~B
-        const newAst = {
-          type: "BINARY",
-          operator: "|",
-          left: { type: "NOT", operand: inner.left },
-          right: { type: "NOT", operand: inner.right },
-        }
-        addConclusion(newAst, "De Morgan's Law", [step.id])
-      } else if (inner.type === "BINARY" && inner.operator === "|") {
-        // ~(A | B) => ~A & ~B
-        const newAst = {
-          type: "BINARY",
-          operator: "&",
-          left: { type: "NOT", operand: inner.left },
-          right: { type: "NOT", operand: inner.right },
-        }
-        addConclusion(newAst, "De Morgan's Law", [step.id])
-      }
-    }
-
-    // Rule 3: Simplification (A & B => A, B)
-    //
-    // Logical Principle: If a conjunction is true, both parts are true
-    // Example: "It's raining AND cold" → "It's raining" (also → "It's cold")
-    //
-    // Why two conclusions?
-    // From one conjunction, we derive both parts independently
-    // Deduplication prevents adding duplicates if called multiple times
-    //
-    // Pattern matching:
-    // - Must have: BINARY with & operator
-    // - Derive: left operand AND right operand (separately)
-    //
-    // Note: This only works for AND, not OR
-    // - P | Q doesn't tell us which is true (could be either or both)
-    // - P & Q guarantees both are true
-    if (step.ast.type === "BINARY" && step.ast.operator === "&") {
-      addConclusion(step.ast.left, "Simplification", [step.id])
-      addConclusion(step.ast.right, "Simplification", [step.id])
-    }
-  }
+  applyDoubleNegation(parsed, addConclusion)
+  applyLiteralSimplification(parsed, addConclusion)
+  applyDeMorgan(parsed, addConclusion)
+  applySimplification(parsed, addConclusion)
 
   // Phase 2: Apply Binary Rules (O(n²) - compare all pairs of steps)
-  // These rules combine two facts to derive a new fact
-  //
-  // Why nested loops?
-  // We need to check every combination of two facts to find matching patterns
-  // Example: To apply Modus Ponens, we need to find (P → Q) and P somewhere in our facts
-  //
-  // Why i === j check?
-  // A rule that requires two *different* facts shouldn't match a fact with itself
-  // Exception: some rules below check i < j to avoid duplicate pairs (1,2) and (2,1)
-
-  for (let i = 0; i < parsed.length; i++) {
-    for (let j = 0; j < parsed.length; j++) {
-      if (i === j) continue // Skip comparing a fact with itself
-
-      const p1 = parsed[i]
-      const p2 = parsed[j]
-
-      // Rule 4: Modus Ponens ((P -> Q), P => Q)
-      //
-      // Logical Principle: If we know "P implies Q" and "P is true", then Q must be true
-      // Example: "If it rains, streets are wet" + "It's raining" → "Streets are wet"
-      //
-      // Pattern matching:
-      // - p1 must be: BINARY with -> operator (an implication)
-      // - p2 must be: structurally equal to left side of p1 (the antecedent)
-      // - Derive: right side of p1 (the consequent)
-      //
-      // Why order matters:
-      // We check p1 as implication and p2 as antecedent
-      // The outer loop will also try p2 as implication and p1 as antecedent
-      // This handles facts in any order
-      if (p1.ast.type === "BINARY" && p1.ast.operator === "->") {
-        if (areEqual(p1.ast.left, p2.ast)) {
-          addConclusion(p1.ast.right, "Modus Ponens", [p1.id, p2.id])
-        }
-      }
-
-      // Rule 5: Modus Tollens ((P -> Q), ~Q => ~P)
-      //
-      // Logical Principle: If "P implies Q" and "Q is false", then P must be false
-      // Example: "If it rains, streets are wet" + "Streets aren't wet" → "It's not raining"
-      // This is the contrapositive reasoning
-      //
-      // Pattern matching:
-      // - p1 must be: BINARY with -> operator
-      // - p2 must be: negation of right side of p1 (negated consequent)
-      // - Derive: negation of left side of p1 (negated antecedent)
-      //
-      // Why isNegation instead of areEqual?
-      // p2 could be ~Q (when p1.right is Q) or Q (when p1.right is ~Q)
-      // isNegation handles both directions bidirectionally
-      if (p1.ast.type === "BINARY" && p1.ast.operator === "->") {
-        if (isNegation(p1.ast.right, p2.ast)) {
-          addConclusion({ type: "NOT", operand: p1.ast.left }, "Modus Tollens", [p1.id, p2.id])
-        }
-      }
-
-      // Rule 6: Disjunctive Syllogism ((P | Q), ~P => Q)
-      //
-      // Logical Principle: If "P or Q" is true and "P is false", then Q must be true
-      // Example: "Coffee or tea" + "Not coffee" → "Tea"
-      //
-      // Pattern matching:
-      // - p1 must be: BINARY with | operator (a disjunction)
-      // - p2 must be: negation of either left or right side
-      // - Derive: the OTHER side (the non-negated option)
-      //
-      // Two cases:
-      // 1. p2 is ~P (negates left) → derive Q (right)
-      // 2. p2 is ~Q (negates right) → derive P (left)
-      if (p1.ast.type === "BINARY" && p1.ast.operator === "|") {
-        if (isNegation(p1.ast.left, p2.ast)) {
-          addConclusion(p1.ast.right, "Disjunctive Syllogism", [p1.id, p2.id])
-        } else if (isNegation(p1.ast.right, p2.ast)) {
-          addConclusion(p1.ast.left, "Disjunctive Syllogism", [p1.id, p2.id])
-        }
-      }
-
-      // Rule 7: Hypothetical Syllogism ((A -> B), (B -> C) => (A -> C))
-      //
-      // Logical Principle: Chain implications together
-      // Example: "Rain → Wet" + "Wet → Slippery" → "Rain → Slippery"
-      // Also called "transitive property of implication"
-      //
-      // Pattern matching:
-      // - Both p1 and p2 must be: BINARY with -> operator
-      // - p1.right must equal p2.left (the middle term chains)
-      // - Derive: new implication from p1.left to p2.right (skip the middle)
-      //
-      // Why this works:
-      // If A → B and B → C, then whenever A is true:
-      // 1. B must be true (from A → B)
-      // 2. C must be true (from B → C)
-      // Therefore A → C
-      if (
-        p1.ast.type === "BINARY" &&
-        p1.ast.operator === "->" &&
-        p2.ast.type === "BINARY" &&
-        p2.ast.operator === "->"
-      ) {
-        if (areEqual(p1.ast.right, p2.ast.left)) {
-          addConclusion(
-            {
-              type: "BINARY",
-              operator: "->",
-              left: p1.ast.left,
-              right: p2.ast.right,
-            },
-            "Hypothetical Syllogism",
-            [p1.id, p2.id],
-          )
-        }
-      }
-
-      // Rule 8: Constructive Dilemma (((A -> B) & (C -> D)), (A | C) => (B | D))
-      //
-      // Logical Principle: If we have two implications and one of the antecedents is true,
-      // then one of the consequents must be true
-      //
-      // Example:
-      // - "If study, pass" AND "If work, earn money"
-      // - "Study OR work"
-      // - Therefore: "Pass OR earn money"
-      //
-      // Pattern matching (most complex rule):
-      // - p1 must be: (A → B) & (C → D)  [conjunction of two implications]
-      // - p2 must be: A | C              [disjunction of the two antecedents]
-      // - Derive: B | D                  [disjunction of the two consequents]
-      //
-      // Why complex?
-      // Nested structure checking: must verify p1 contains AND of two IMPLIES
-      // Then extract A, B, C, D and check p2 matches A | C (in either order)
-      //
-      // Commutativity handling:
-      // p2 could be "A | C" or "C | A", both are valid
-      if (p1.ast.type === "BINARY" && p1.ast.operator === "&") {
-        const left = p1.ast.left
-        const right = p1.ast.right
-
-        // Check if p1 is a conjunction of two implications
-        if (
-          left.type === "BINARY" &&
-          left.operator === "->" &&
-          right.type === "BINARY" &&
-          right.operator === "->"
-        ) {
-          // Extract the four components: (A → B) & (C → D)
-          const A = left.left
-          const B = left.right
-          const C = right.left
-          const D = right.right
-
-          // Check if p2 matches (A | C) in either order
-          if (p2.ast.type === "BINARY" && p2.ast.operator === "|") {
-            if (
-              (areEqual(p2.ast.left, A) && areEqual(p2.ast.right, C)) ||
-              (areEqual(p2.ast.left, C) && areEqual(p2.ast.right, A))
-            ) {
-              // Derive (B | D)
-              addConclusion(
-                {
-                  type: "BINARY",
-                  operator: "|",
-                  left: B,
-                  right: D,
-                },
-                "Constructive Dilemma",
-                [p1.id, p2.id],
-              )
-            }
-          }
-        }
-      }
-
-      // Rule 9: Resolution ((A | B), (~A | C) => (B | C))
-      //
-      // Logical Principle: If two disjunctions share a complementary literal,
-      // we can "resolve" them by combining the remaining parts
-      //
-      // Example: "Rain or snow" + "Not rain or cold" → "Snow or cold"
-      //
-      // Pattern matching:
-      // - Both p1 and p2 must be: BINARY with | operator
-      // - Find a pair where one literal is the negation of another
-      // - Derive: disjunction of the two non-complementary literals
-      //
-      // Four cases to check (exhaustive):
-      // 1. p1.left and p2.left are complementary → keep p1.right | p2.right
-      // 2. p1.left and p2.right are complementary → keep p1.right | p2.left
-      // 3. p1.right and p2.left are complementary → keep p1.left | p2.right
-      // 4. p1.right and p2.right are complementary → keep p1.left | p2.left
-      //
-      // Why all four?
-      // Disjunctions are commutative: (A | B) = (B | A)
-      // And negations can be on either side of either disjunction
-      // Must check all combinations to handle any order
-      //
-      // Used in automated theorem proving:
-      // Resolution is complete for propositional logic (can prove any tautology)
-      if (
-        p1.ast.type === "BINARY" &&
-        p1.ast.operator === "|" &&
-        p2.ast.type === "BINARY" &&
-        p2.ast.operator === "|"
-      ) {
-        // Case 1: left-left complementary (A | B), (~A | C) → (B | C)
-        if (isNegation(p1.ast.left, p2.ast.left)) {
-          addConclusion(
-            { type: "BINARY", operator: "|", left: p1.ast.right, right: p2.ast.right },
-            "Resolution",
-            [p1.id, p2.id],
-          )
-        }
-        // Case 2: left-right complementary (A | B), (C | ~A) → (B | C)
-        else if (isNegation(p1.ast.left, p2.ast.right)) {
-          addConclusion(
-            { type: "BINARY", operator: "|", left: p1.ast.right, right: p2.ast.left },
-            "Resolution",
-            [p1.id, p2.id],
-          )
-        }
-        // Case 3: right-left complementary (B | A), (~A | C) → (B | C)
-        else if (isNegation(p1.ast.right, p2.ast.left)) {
-          addConclusion(
-            { type: "BINARY", operator: "|", left: p1.ast.left, right: p2.ast.right },
-            "Resolution",
-            [p1.id, p2.id],
-          )
-        }
-        // Case 4: right-right complementary (B | A), (C | ~A) → (B | C)
-        else if (isNegation(p1.ast.right, p2.ast.right)) {
-          addConclusion(
-            { type: "BINARY", operator: "|", left: p1.ast.left, right: p2.ast.left },
-            "Resolution",
-            [p1.id, p2.id],
-          )
-        }
-      }
-
-      // Rule 10: Adjunction (P, Q => P & Q)
-      //
-      // Logical Principle: If two facts are both true, their conjunction is true
-      // Example: "It's raining" + "It's cold" → "It's raining AND cold"
-      //
-      // Pattern matching:
-      // - Both p1 and p2 must be: simple propositions (atoms or negated atoms)
-      // - Derive: conjunction of the two facts
-      //
-      // Why i < j?
-      // Prevents duplicate pairs: we don't want both (P, Q) and (Q, P)
-      // With i < j, we only process each unique pair once
-      //
-      // Why restrict to isSimple()?
-      // This is a CRITICAL restriction to prevent combinatorial explosion!
-      //
-      // Without restriction - Explosion scenario:
-      // Starting facts: P, Q, R, S (4 atoms)
-      // Step 1: Adjunction creates C(4,2) = 6 conjunctions
-      //   → P&Q, P&R, P&S, Q&R, Q&S, R&S
-      // Step 2: Now we have 10 facts (4 + 6), Adjunction creates C(10,2) = 45 conjunctions
-      // Step 3: Now we have 55 facts, Adjunction creates C(55,2) = 1485 conjunctions
-      // Result: Exponential growth, browser freezes, UI becomes unusable
-      //
-      // With isSimple() restriction:
-      // - Only applies to atoms and negated atoms: P, Q, ~P, ~Q
-      // - Complex expressions like P&Q, P->Q, ~(P&Q) are excluded
-      // - Limits growth to O(n²) instead of exponential
-      // - Example: 20 simple atoms → at most C(20,2) = 190 conjunctions total
-      //
-      // Trade-off:
-      // We lose some completeness (can't derive all possible conjunctions)
-      // But gain usability (UI remains responsive, results are manageable)
-      if (i < j && isSimple(p1.ast) && isSimple(p2.ast)) {
-        addConclusion(
-          {
-            type: "BINARY",
-            operator: "&",
-            left: p1.ast,
-            right: p2.ast,
-          },
-          "Adjunction",
-          [p1.id, p2.id],
-        )
-      }
-    }
-  }
+  applyModusPonens(parsed, addConclusion)
+  applyModusTollens(parsed, addConclusion)
+  applyDisjunctiveSyllogism(parsed, addConclusion)
+  applyHypotheticalSyllogism(parsed, addConclusion)
+  applyConstructiveDilemma(parsed, addConclusion)
+  applyResolution(parsed, addConclusion)
+  applyAdjunction(parsed, addConclusion)
 
   // Phase 2.5: Contradiction Detection
-  //
-  // Check if we have both P and ~P in our facts, or both true and false
-  // This indicates an inconsistent set of premises
-  //
-  // Logical Principle: Principle of explosion (ex falso quodlibet)
-  // From a contradiction, anything can be derived
-  //
-  // Why detect it?
-  // - Educational: Shows users their premises are inconsistent
-  // - Practical: Helps debug logical errors
-  // - Classical logic: From false, we can derive false (explicit marker)
-  for (let i = 0; i < parsed.length; i++) {
-    for (let j = i + 1; j < parsed.length; j++) {
-      const p1 = parsed[i]
-      const p2 = parsed[j]
-
-      // Check if p1 and p2 contradict each other (P and ~P)
-      if (isNegation(p1.ast, p2.ast)) {
-        // Found contradiction: derive false
-        addConclusion(
-          { type: "LITERAL", value: false },
-          `Contradiction (steps ${p1.id} and ${p2.id})`,
-          [p1.id, p2.id],
-        )
-      }
-
-      // Check for literal contradiction: true and false
-      if (p1.ast.type === "LITERAL" && p2.ast.type === "LITERAL" && p1.ast.value !== p2.ast.value) {
-        // Found true and false together - contradiction
-        addConclusion(
-          { type: "LITERAL", value: false },
-          `Contradiction (steps ${p1.id} and ${p2.id})`,
-          [p1.id, p2.id],
-        )
-      }
-    }
-  }
+  detectContradiction(parsed, addConclusion)
 
   // Phase 3: Limit Output (UX optimization)
   //

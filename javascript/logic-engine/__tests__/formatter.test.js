@@ -70,8 +70,8 @@ describe("formatAST", () => {
     expect(formatAST(ast)).toBe("P <-> Q")
   })
 
-  test("adds parentheses for nested binary expressions", () => {
-    // (P & Q) | R
+  test("adds parentheses only when needed for precedence", () => {
+    // (P & Q) | R - no parens needed since & has higher precedence than |
     const ast = {
       type: "BINARY",
       operator: "|",
@@ -83,7 +83,23 @@ describe("formatAST", () => {
       },
       right: { type: "ATOM", value: "R" },
     }
-    expect(formatAST(ast)).toBe("(P & Q) | R")
+    expect(formatAST(ast)).toBe("P & Q | R")
+  })
+
+  test("adds parentheses when child has lower precedence", () => {
+    // P & (Q | R) - parens ARE needed since | has lower precedence than &
+    const ast = {
+      type: "BINARY",
+      operator: "&",
+      left: { type: "ATOM", value: "P" },
+      right: {
+        type: "BINARY",
+        operator: "|",
+        left: { type: "ATOM", value: "Q" },
+        right: { type: "ATOM", value: "R" },
+      },
+    }
+    expect(formatAST(ast)).toBe("P & (Q | R)")
   })
 
   test("handles complex nested structures", () => {

@@ -32,11 +32,13 @@ export const state = {
 /**
  * Adds a premise (user-entered statement) to the proof
  * @param {string} expression - The logical expression
+ * @param {import('./parser.js').ASTNode} ast - The parsed AST (for caching)
  */
-export function addPremise(expression) {
+export function addPremise(expression, ast) {
   state.steps.push({
     id: state.nextId++,
     expression: expression.trim(),
+    ast,
     isPremise: true,
     timestamp: Date.now(),
   })
@@ -51,6 +53,7 @@ export function addDerivedSteps(conclusions) {
     state.steps.push({
       id: state.nextId++,
       expression: conclusion.expression,
+      ast: conclusion.ast,
       isPremise: false,
       justification: conclusion.justification,
       referencedStepIds: conclusion.referencedStepIds,
@@ -97,12 +100,12 @@ export function clearError() {
 }
 
 /**
- * Loads an example by setting premises
- * @param {string[]} premises - Array of premise expressions
+ * Loads an example by setting premises (with parsed ASTs)
+ * @param {Array<{expression: string, ast: import('./parser.js').ASTNode}>} parsedPremises - Array of premise expressions with ASTs
  */
-export function loadExample(premises) {
+export function loadExample(parsedPremises) {
   clearAll()
-  for (const premise of premises) {
-    addPremise(premise)
+  for (const { expression, ast } of parsedPremises) {
+    addPremise(expression, ast)
   }
 }
