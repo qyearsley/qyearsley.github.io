@@ -1,6 +1,16 @@
 /**
- * Storage manager for saving and loading progress
+ * Number Garden Storage - Game-specific storage implementation
  * Extends the base StorageManager with Number Garden specific functionality
+ *
+ * Architecture: This is the game-specific storage layer.
+ * - Extends StorageManager.js (reusable base class)
+ * - Adds Number Garden-specific methods (saveProgress, loadProgress)
+ * - Handles game-specific data structure and validation
+ * - Import this class in game code, not the base StorageManager
+ *
+ * Error Handling: Follows same patterns as base class.
+ * - All validation failures are logged with specific reasons
+ * - Returns null for load failures, boolean for save/import operations
  */
 import { StorageManager as BaseStorageManager } from "./StorageManager.js"
 
@@ -51,11 +61,15 @@ export class StorageManager extends BaseStorageManager {
     }
 
     // Validate Number Garden specific structure
-    if (data.stats && data.garden) {
-      return data
+    if (!data.stats || !data.garden) {
+      this._logError(
+        "loadProgress",
+        "Invalid data structure: missing required fields (stats and/or garden)",
+      )
+      return null
     }
 
-    return null
+    return data
   }
 
   /**
@@ -85,7 +99,7 @@ export class StorageManager extends BaseStorageManager {
 
       // Validate that we have the required fields (stats and garden)
       if (!data.stats || !data.garden) {
-        console.error("Cannot import: missing required fields (stats and garden)")
+        this._logError("importProgress", "Missing required fields: stats and/or garden")
         return false
       }
 
@@ -97,7 +111,7 @@ export class StorageManager extends BaseStorageManager {
       // Save the data (which will add lastPlayed timestamp)
       return this.saveGameState(data)
     } catch (error) {
-      console.error("Error importing progress:", error)
+      this._logError("importProgress", "Failed to parse or save imported data", error)
       return false
     }
   }

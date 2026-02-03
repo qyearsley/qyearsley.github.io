@@ -60,47 +60,29 @@ styles/
 └── animations.css      # Keyframe animations
 ```
 
-### Key Design Patterns
-
-- **Dependency Injection**: Main controller accepts optional dependencies for testing
-- **Single Responsibility**: Each class has one clear purpose
-- **Configuration Objects**: `PROJECT_CONFIG` centralizes project definitions
-- **Event Delegation**: Centralized event handling for performance
-- **Double-Submit Prevention**: Flag system prevents accidental duplicate answers
-
-### Running Tests
+### Testing
 
 ```bash
 npm install
-npm test
+npm test        # Run all tests
 ```
 
-### Testing & Development
-
-**Unlock areas for quick testing:**
-
+**Quick testing:**
 - `index.html?unlock=all` - Unlock all areas
 - `index.html?unlock=crystal-cave` - Unlock specific area
-
-**Starting fresh:**
-When you have saved progress, the title screen shows:
-
-- **Continue** - Resume your saved progress
-- **Start Fresh** - Reset all progress (with confirmation)
-
-**Console messages:**
-
-- `🔓 All areas unlocked for testing`
-- `🔓 Unlocked [area-name] for testing`
-- `🔄 Started fresh`
 
 ## Browser Support
 
 Works in all modern browsers (Chrome, Firefox, Safari, Edge). Fully accessible with keyboard and screen readers.
 
-### Mobile & Tablet Support
+### Mobile Support
 
-- **Dynamic Viewport**: Uses `dvh` units for proper sizing on mobile browsers
-- **Touch Optimized**: Prevents unwanted tap highlights and focus persistence
-- **Responsive Design**: Adapts to screen sizes from phones to tablets to desktop
-- **Overscroll Prevention**: Disabled pull-to-refresh for smoother gameplay
+Optimized for touch devices with responsive design and proper viewport handling.
+
+## Security & Privacy
+
+- No user input accepted - all content generated from game data
+- Progress saved locally in browser (no external transmission)
+- No personal information collected
+- No cookies or tracking
+- Self-hosted code (Google Fonts only external resource)
