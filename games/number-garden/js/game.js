@@ -13,6 +13,11 @@ import { TIMING } from "./constants.js"
 /**
  * Main game controller for Number Garden
  * Orchestrates all game systems and handles game flow
+ *
+ * Security Note: This module uses innerHTML in two places:
+ * 1. Setting project SVG from ProjectVisuals (generated from controlled data)
+ * 2. Static error message display (hardcoded template)
+ * All content is generated from controlled game data, not user input.
  */
 class NumberGarden {
   /**

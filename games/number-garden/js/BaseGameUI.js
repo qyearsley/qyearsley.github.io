@@ -121,22 +121,100 @@ export class BaseGameUI {
   /**
    * Show settings modal
    * Assumes a settings modal with standard ID
+   * Implements focus trap for keyboard accessibility
    */
   showSettings() {
     const settingsModal = document.getElementById("settings-modal")
     if (settingsModal) {
+      // Store the element that opened the modal to return focus later
+      this.modalTriggerElement = document.activeElement
+
       settingsModal.classList.remove("hidden")
+
+      // Set up focus trap
+      this.setupFocusTrap(settingsModal)
+
+      // Focus the first focusable element
+      const focusableElements = this.getFocusableElements(settingsModal)
+      if (focusableElements.length > 0) {
+        focusableElements[0].focus()
+      }
     }
   }
 
   /**
    * Hide settings modal
    * Assumes a settings modal with standard ID
+   * Restores focus to the element that opened the modal
    */
   hideSettings() {
     const settingsModal = document.getElementById("settings-modal")
     if (settingsModal) {
       settingsModal.classList.add("hidden")
+
+      // Remove focus trap
+      this.removeFocusTrap(settingsModal)
+
+      // Return focus to trigger element
+      if (this.modalTriggerElement) {
+        this.modalTriggerElement.focus()
+        this.modalTriggerElement = null
+      }
+    }
+  }
+
+  /**
+   * Get all focusable elements within a container
+   * @param {HTMLElement} container - Container element
+   * @returns {Array<HTMLElement>} Array of focusable elements
+   */
+  getFocusableElements(container) {
+    const selector =
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    return Array.from(container.querySelectorAll(selector))
+  }
+
+  /**
+   * Set up focus trap for modal
+   * @param {HTMLElement} modal - Modal element
+   */
+  setupFocusTrap(modal) {
+    // Store handler for later removal
+    this.focusTrapHandler = (e) => {
+      if (e.key !== "Tab") return
+
+      const focusableElements = this.getFocusableElements(modal)
+      if (focusableElements.length === 0) return
+
+      const firstElement = focusableElements[0]
+      const lastElement = focusableElements[focusableElements.length - 1]
+
+      if (e.shiftKey) {
+        // Shift + Tab
+        if (document.activeElement === firstElement) {
+          e.preventDefault()
+          lastElement.focus()
+        }
+      } else {
+        // Tab
+        if (document.activeElement === lastElement) {
+          e.preventDefault()
+          firstElement.focus()
+        }
+      }
+    }
+
+    modal.addEventListener("keydown", this.focusTrapHandler)
+  }
+
+  /**
+   * Remove focus trap from modal
+   * @param {HTMLElement} modal - Modal element
+   */
+  removeFocusTrap(modal) {
+    if (this.focusTrapHandler) {
+      modal.removeEventListener("keydown", this.focusTrapHandler)
+      this.focusTrapHandler = null
     }
   }
 
