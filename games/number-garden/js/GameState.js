@@ -1,4 +1,4 @@
-import { DEFAULTS } from "./constants.js"
+import { DEFAULTS, AREAS } from "./constants.js"
 
 /**
  * @typedef {Object} Stats
@@ -49,7 +49,7 @@ export class GameState {
     }
 
     /** @type {Set<string>} */
-    this.unlockedAreas = new Set(["flower-meadow"])
+    this.unlockedAreas = new Set([AREAS.FLOWER_MEADOW])
 
     /** @type {Flower[]} */
     this.garden = []
@@ -114,15 +114,15 @@ export class GameState {
 
     // Unlock next area based on level
     if (this.stats.currentLevel === 2) {
-      this.unlockedAreas.add("crystal-cave")
+      this.unlockedAreas.add(AREAS.CRYSTAL_CAVE)
     } else if (this.stats.currentLevel === 3) {
-      this.unlockedAreas.add("enchanted-forest")
+      this.unlockedAreas.add(AREAS.ENCHANTED_FOREST)
     } else if (this.stats.currentLevel === 4) {
-      this.unlockedAreas.add("time-temple")
+      this.unlockedAreas.add(AREAS.TIME_TEMPLE)
     } else if (this.stats.currentLevel === 5) {
-      this.unlockedAreas.add("measurement-market")
+      this.unlockedAreas.add(AREAS.MEASUREMENT_MARKET)
     } else if (this.stats.currentLevel === 6) {
-      this.unlockedAreas.add("pattern-path")
+      this.unlockedAreas.add(AREAS.PATTERN_PATH)
     }
   }
 
@@ -155,7 +155,7 @@ export class GameState {
       currentLevelProgress: 0,
     }
     this.garden = []
-    this.unlockedAreas = new Set(["flower-meadow"])
+    this.unlockedAreas = new Set([AREAS.FLOWER_MEADOW])
     this.completedAreas = new Set()
     this.currentArea = null
     this.currentActivity = null
@@ -214,7 +214,13 @@ export class GameState {
    * Load progress from storage
    */
   loadProgress() {
-    const saved = this.storageManager.loadProgress()
+    let saved
+    try {
+      saved = this.storageManager.loadProgress()
+    } catch (error) {
+      console.warn("Failed to load progress, starting fresh:", error)
+      return
+    }
     if (saved) {
       this.stats = {
         stars: saved.stats.stars || 0,
@@ -224,7 +230,7 @@ export class GameState {
         currentLevelProgress: saved.stats.currentLevelProgress || 0,
       }
       this.garden = saved.garden || []
-      this.unlockedAreas = new Set(saved.unlockedAreas || ["flower-meadow"])
+      this.unlockedAreas = new Set(saved.unlockedAreas || [AREAS.FLOWER_MEADOW])
       this.completedAreas = new Set(saved.completedAreas || [])
       this.projectType = saved.projectType || "castle"
       if (saved.settings) {

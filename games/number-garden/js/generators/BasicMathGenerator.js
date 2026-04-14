@@ -4,6 +4,7 @@
  */
 import { BaseMathGenerator } from "./BaseMathGenerator.js"
 import { getRandomVisualEmoji } from "../../data/areaThemes.js"
+import { randomInt } from "../utils.js"
 
 export class BasicMathGenerator extends BaseMathGenerator {
   /**
@@ -25,8 +26,8 @@ export class BasicMathGenerator extends BaseMathGenerator {
       hard: 20,
     }[difficulty]
 
-    const num1 = Math.floor(Math.random() * max) + 1
-    const num2 = Math.floor(Math.random() * max) + 1
+    const num1 = randomInt(1, max)
+    const num2 = randomInt(1, max)
     const answer = num1 + num2
 
     const visual = this.createVisualItems(num1, num2, areaId)
@@ -51,8 +52,8 @@ export class BasicMathGenerator extends BaseMathGenerator {
     }[difficulty]
 
     // Start with larger number to ensure positive result
-    const num1 = Math.floor(Math.random() * max) + Math.floor(max / 2) + 1
-    const num2 = Math.floor(Math.random() * (num1 - 1)) + 1
+    const num1 = randomInt(Math.floor(max / 2) + 1, max + Math.floor(max / 2))
+    const num2 = randomInt(1, num1 - 1)
     const answer = num1 - num2
 
     // Create visual with crossed-out items to show subtraction
@@ -73,12 +74,12 @@ export class BasicMathGenerator extends BaseMathGenerator {
 
     // Keep one operand small (2-5) for visual manageability
     // Why? Displaying 8 groups of 9 items (72 emojis) overwhelms the screen
-    const smallNum = Math.floor(Math.random() * 4) + 2 // 2-5
+    const smallNum = randomInt(2, 5)
 
     const largeNum = {
-      easy: Math.floor(Math.random() * 5) + 1, // 1-5
-      medium: Math.floor(Math.random() * 7) + 1, // 1-7
-      hard: Math.floor(Math.random() * 10) + 1, // 1-10
+      easy: randomInt(1, 5),
+      medium: randomInt(1, 7),
+      hard: randomInt(1, 10),
     }[difficulty]
 
     const answer = smallNum * largeNum

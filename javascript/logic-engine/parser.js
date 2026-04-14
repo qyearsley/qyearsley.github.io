@@ -246,8 +246,10 @@ export function tokenize(input) {
       continue
     }
 
-    // Unknown character (e.g., @, #, $) - skip and continue
-    // This makes the tokenizer lenient with invalid input
+    // Unknown character (e.g., @, #, $, commas, periods) - skip and continue.
+    // This is intentionally lenient: users often type natural-language punctuation
+    // like "P, Q" or "If P. Then Q" and silently ignoring it gives a better UX
+    // than throwing a parse error for each stray character.
     cursor++
   }
 

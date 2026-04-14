@@ -1,4 +1,4 @@
-import { MATH } from "./constants.js"
+import { MATH, AREA_ICONS } from "./constants.js"
 import { BaseGameUI } from "./BaseGameUI.js"
 
 const VISUAL_ITEM_ANIMATION_DELAY_MS = 100
@@ -91,7 +91,7 @@ export class GameUI extends BaseGameUI {
     }
 
     // Remove focus from any previously focused answer buttons
-    document.querySelectorAll(".answer-button").forEach((btn) => {
+    this.elements.answerOptions.querySelectorAll(".answer-button").forEach((btn) => {
       btn.blur()
       btn.classList.remove("focus-visible")
     })
@@ -285,7 +285,7 @@ export class GameUI extends BaseGameUI {
    * Disable all answer buttons
    */
   disableAnswerButtons() {
-    document.querySelectorAll(".answer-button").forEach((btn) => {
+    this.elements.answerOptions.querySelectorAll(".answer-button").forEach((btn) => {
       btn.classList.add("disabled")
     })
   }
@@ -294,7 +294,7 @@ export class GameUI extends BaseGameUI {
    * Enable all answer buttons
    */
   enableAnswerButtons() {
-    document.querySelectorAll(".answer-button").forEach((btn) => {
+    this.elements.answerOptions.querySelectorAll(".answer-button").forEach((btn) => {
       btn.classList.remove("disabled")
     })
   }
@@ -473,18 +473,9 @@ export class GameUI extends BaseGameUI {
   displayCastlePieces(completedAreas) {
     if (!this.elements.castlePiecesDisplay) return
 
-    const areaNames = {
-      "flower-meadow": "🦄",
-      "crystal-cave": "🔮",
-      "enchanted-forest": "🧚",
-      "time-temple": "🕰️",
-      "measurement-market": "🦊",
-      "pattern-path": "🦋",
-    }
-
     this.elements.castlePiecesDisplay.innerHTML = ""
 
-    Object.entries(areaNames).forEach(([areaId, emoji]) => {
+    Object.entries(AREA_ICONS).forEach(([areaId, emoji]) => {
       const piece = document.createElement("div")
       piece.className = "castle-piece"
       piece.textContent = emoji

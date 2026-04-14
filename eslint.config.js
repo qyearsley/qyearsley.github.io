@@ -66,10 +66,10 @@ export default [
     },
     rules: {
       "no-unused-vars": "warn",
-      "no-console": "off",
+      "no-console": ["warn", { allow: ["warn", "error"] }],
       "prefer-const": "warn",
       "no-var": "error",
-      "import/no-unresolved": "off",
+      "import/no-unresolved": "error",
       "import/no-extraneous-dependencies": "off",
     },
   },

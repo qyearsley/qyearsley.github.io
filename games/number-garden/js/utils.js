@@ -3,6 +3,25 @@
  */
 
 /**
+ * Generate a random integer in the range [min, max] (inclusive)
+ * @param {number} min - Minimum value
+ * @param {number} max - Maximum value
+ * @returns {number} Random integer between min and max
+ */
+export function randomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
+/**
+ * Pick a random element from an array
+ * @param {Array} array - Source array
+ * @returns {*} Random element
+ */
+export function randomChoice(array) {
+  return array[Math.floor(Math.random() * array.length)]
+}
+
+/**
  * Shuffle array using Fisher-Yates algorithm
  * Creates a new array to avoid mutating the original
  *
@@ -47,7 +66,7 @@ export function generateMathOptions(correctAnswer, maxRange, count = 3) {
 
   // Generate wrong answers that are plausible (within ±5 range)
   while (options.size < count + 1) {
-    const offset = Math.floor(Math.random() * 5) + 1
+    const offset = randomInt(1, 5)
     const wrongAnswer = Math.random() < 0.5 ? correctAnswer + offset : correctAnswer - offset
 
     if (wrongAnswer > 0 && wrongAnswer <= maxRange && wrongAnswer !== correctAnswer) {
@@ -83,7 +102,7 @@ export function generateTimeOptions(correctHour, correctMinute, count = 3) {
     } else {
       // Change minute (quarter hour increments)
       const minuteOptions = [0, 15, 30, 45]
-      wrongMinute = minuteOptions[Math.floor(Math.random() * minuteOptions.length)]
+      wrongMinute = randomChoice(minuteOptions)
     }
 
     const wrongMinuteStr = wrongMinute < 10 ? `0${wrongMinute}` : `${wrongMinute}`

@@ -8,7 +8,7 @@ import { RewardSystem } from "./rewards.js"
 import { ActivityGenerator } from "./activities.js"
 import { SoundManager } from "./SoundManager.js"
 import { ProjectVisuals } from "./ProjectVisuals.js"
-import { TIMING } from "./constants.js"
+import { TIMING, AREAS, AREA_NAMES } from "./constants.js"
 
 /**
  * Main game controller for Number Garden
@@ -151,11 +151,11 @@ class NumberGarden {
     const unlockParam = params.get("unlock")
     if (unlockParam) {
       if (unlockParam === "all") {
-        this.state.unlockArea("crystal-cave")
-        this.state.unlockArea("enchanted-forest")
-        this.state.unlockArea("time-temple")
-        this.state.unlockArea("measurement-market")
-        this.state.unlockArea("pattern-path")
+        this.state.unlockArea(AREAS.CRYSTAL_CAVE)
+        this.state.unlockArea(AREAS.ENCHANTED_FOREST)
+        this.state.unlockArea(AREAS.TIME_TEMPLE)
+        this.state.unlockArea(AREAS.MEASUREMENT_MARKET)
+        this.state.unlockArea(AREAS.PATTERN_PATH)
       } else {
         this.state.unlockArea(unlockParam)
       }
@@ -410,15 +410,7 @@ class NumberGarden {
    * @returns {string} Area name
    */
   getAreaName(areaId) {
-    const names = {
-      "flower-meadow": "Flower Meadow",
-      "crystal-cave": "Crystal Cave",
-      "enchanted-forest": "Enchanted Forest",
-      "time-temple": "Time Temple",
-      "measurement-market": "Measurement Market",
-      "pattern-path": "Pattern Path",
-    }
-    return names[areaId] || areaId
+    return AREA_NAMES[areaId] || areaId
   }
 }
 

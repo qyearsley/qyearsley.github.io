@@ -4,6 +4,42 @@
  */
 
 /**
+ * Area identifiers used throughout the game
+ */
+export const AREAS = {
+  FLOWER_MEADOW: "flower-meadow",
+  CRYSTAL_CAVE: "crystal-cave",
+  ENCHANTED_FOREST: "enchanted-forest",
+  TIME_TEMPLE: "time-temple",
+  MEASUREMENT_MARKET: "measurement-market",
+  PATTERN_PATH: "pattern-path",
+}
+
+/**
+ * Human-readable area names
+ */
+export const AREA_NAMES = {
+  [AREAS.FLOWER_MEADOW]: "Flower Meadow",
+  [AREAS.CRYSTAL_CAVE]: "Crystal Cave",
+  [AREAS.ENCHANTED_FOREST]: "Enchanted Forest",
+  [AREAS.TIME_TEMPLE]: "Time Temple",
+  [AREAS.MEASUREMENT_MARKET]: "Measurement Market",
+  [AREAS.PATTERN_PATH]: "Pattern Path",
+}
+
+/**
+ * Area emoji icons (used in castle pieces display)
+ */
+export const AREA_ICONS = {
+  [AREAS.FLOWER_MEADOW]: "🦄",
+  [AREAS.CRYSTAL_CAVE]: "🔮",
+  [AREAS.ENCHANTED_FOREST]: "🧚",
+  [AREAS.TIME_TEMPLE]: "🕰️",
+  [AREAS.MEASUREMENT_MARKET]: "🦊",
+  [AREAS.PATTERN_PATH]: "🦋",
+}
+
+/**
  * Timing constants (in milliseconds)
  */
 export const TIMING = {

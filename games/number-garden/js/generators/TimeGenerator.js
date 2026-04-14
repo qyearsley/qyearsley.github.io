@@ -3,7 +3,7 @@
  * Handles clock reading and time elapsed activities
  */
 import { BaseMathGenerator } from "./BaseMathGenerator.js"
-import { generateTimeOptions } from "../utils.js"
+import { generateTimeOptions, randomChoice, randomInt } from "../utils.js"
 
 export class TimeGenerator extends BaseMathGenerator {
   /**
@@ -49,8 +49,8 @@ export class TimeGenerator extends BaseMathGenerator {
         break
     }
 
-    const hour = hourOptions[Math.floor(Math.random() * hourOptions.length)]
-    const minute = minuteOptions[Math.floor(Math.random() * minuteOptions.length)]
+    const hour = randomChoice(hourOptions)
+    const minute = randomChoice(minuteOptions)
 
     const minuteStr = minute < 10 ? `0${minute}` : `${minute}`
     const question = `What time does the clock show?`
@@ -79,26 +79,26 @@ export class TimeGenerator extends BaseMathGenerator {
    * @returns {Object} Activity object
    */
   generateTimeElapsed(difficulty) {
-    const startHour = Math.floor(Math.random() * 11) + 1 // 1-11
+    const startHour = randomInt(1, 11)
     let startMinute = 0
     let hoursToAdd = 0
     let minutesToAdd = 0
 
     switch (difficulty) {
       case "easy":
-        hoursToAdd = [1, 2][Math.floor(Math.random() * 2)]
+        hoursToAdd = randomChoice([1, 2])
         break
       case "medium":
-        hoursToAdd = [2, 3][Math.floor(Math.random() * 2)]
+        hoursToAdd = randomChoice([2, 3])
         break
       case "hard": {
         const useHalfHour = Math.random() < 0.5
         if (useHalfHour) {
-          startMinute = [0, 30][Math.floor(Math.random() * 2)]
+          startMinute = randomChoice([0, 30])
           minutesToAdd = 30
-          hoursToAdd = [1, 2, 3][Math.floor(Math.random() * 3)]
+          hoursToAdd = randomChoice([1, 2, 3])
         } else {
-          hoursToAdd = [3, 4, 5][Math.floor(Math.random() * 3)]
+          hoursToAdd = randomChoice([3, 4, 5])
         }
         break
       }

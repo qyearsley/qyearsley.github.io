@@ -3,6 +3,7 @@
  * Handles measurement (length, weight) and pattern/sequence activities
  */
 import { BaseMathGenerator } from "./BaseMathGenerator.js"
+import { randomInt, randomChoice } from "../utils.js"
 
 export class MeasurementAndPatternGenerator extends BaseMathGenerator {
   /**
@@ -12,7 +13,7 @@ export class MeasurementAndPatternGenerator extends BaseMathGenerator {
    */
   generateMeasurement(areaId) {
     const measurementTypes = ["length", "weight"]
-    const type = measurementTypes[Math.floor(Math.random() * measurementTypes.length)]
+    const type = randomChoice(measurementTypes)
 
     if (type === "length") {
       return this.generateLength(areaId)
@@ -27,10 +28,10 @@ export class MeasurementAndPatternGenerator extends BaseMathGenerator {
    * @returns {Object} Activity object
    */
   generateLength(areaId) {
-    const length1 = Math.floor(Math.random() * 8) + 2 // 2-9 inches
-    const length2 = Math.floor(Math.random() * 8) + 2
+    const length1 = randomInt(2, 9)
+    const length2 = randomInt(2, 9)
 
-    const opType = Math.floor(Math.random() * 2) + 1 // 1=add, 2=subtract
+    const opType = randomInt(1, 2)
 
     let question, answer, visual
 
@@ -56,8 +57,8 @@ export class MeasurementAndPatternGenerator extends BaseMathGenerator {
    */
   generateWeight(areaId) {
     const difficulty = this.getDifficulty()
-    const numItems = Math.floor(Math.random() * 4) + 2 // 2-5 items
-    const weightPer = difficulty === "easy" ? 1 : Math.floor(Math.random() * 2) + 1 // 1-2 pounds
+    const numItems = randomInt(2, 5)
+    const weightPer = difficulty === "easy" ? 1 : randomInt(1, 2)
 
     const totalWeight = numItems * weightPer
     const question = `${numItems} apples weigh ${weightPer} pound${weightPer > 1 ? "s" : ""} each. How many pounds in total?`
@@ -75,7 +76,7 @@ export class MeasurementAndPatternGenerator extends BaseMathGenerator {
   generatePattern(areaId) {
     const difficulty = this.getDifficulty()
     const patternTypes = ["skipCount", "whatsMissing"]
-    const type = patternTypes[Math.floor(Math.random() * patternTypes.length)]
+    const type = randomChoice(patternTypes)
 
     if (type === "skipCount") {
       return this.generateSkipCounting(difficulty, areaId)
@@ -93,10 +94,10 @@ export class MeasurementAndPatternGenerator extends BaseMathGenerator {
   generateSkipCounting(difficulty, areaId) {
     const skipBy =
       difficulty === "easy"
-        ? [2, 5, 10][Math.floor(Math.random() * 3)]
-        : [3, 4, 6][Math.floor(Math.random() * 3)]
+        ? randomChoice([2, 5, 10])
+        : randomChoice([3, 4, 6])
 
-    const startMultiplier = Math.floor(Math.random() * 3) + 1
+    const startMultiplier = randomInt(1, 3)
     const start = skipBy * startMultiplier
 
     const sequence = [start, start + skipBy, start + skipBy * 2]
@@ -117,13 +118,13 @@ export class MeasurementAndPatternGenerator extends BaseMathGenerator {
   generateMissingNumber(difficulty, areaId) {
     const diff =
       difficulty === "easy"
-        ? [1, 2, 5, 10][Math.floor(Math.random() * 4)]
-        : [3, 4, 6, 7][Math.floor(Math.random() * 4)]
+        ? randomChoice([1, 2, 5, 10])
+        : randomChoice([3, 4, 6, 7])
 
-    const firstNum = Math.floor(Math.random() * 10) + 1
+    const firstNum = randomInt(1, 10)
     const fullSequence = [firstNum, firstNum + diff, firstNum + diff * 2, firstNum + diff * 3]
 
-    const missingIndex = Math.floor(Math.random() * 2) + 1
+    const missingIndex = randomInt(1, 2)
     const answer = fullSequence[missingIndex]
 
     const displaySequence = fullSequence.map((num, idx) =>
