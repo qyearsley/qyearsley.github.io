@@ -1,0 +1,24 @@
+/* Canvas container */
+.canvas-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+#game-canvas {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  cursor: crosshair;
+}
+
+@media (width <= 768px) {
+  .canvas-wrapper {
+    width: 100%;
+  }
+
+  #game-canvas {
+    width: 100%;
+  }
+}

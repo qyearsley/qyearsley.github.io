@@ -1,5 +1,5 @@
 import { MATH, AREA_ICONS } from "./constants.js"
-import { BaseGameUI } from "./BaseGameUI.js"
+import { BaseGameUI } from "../../shared/BaseGameUI.js"
 
 const VISUAL_ITEM_ANIMATION_DELAY_MS = 100
 

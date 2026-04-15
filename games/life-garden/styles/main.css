@@ -1,0 +1,399 @@
+/* Life Garden - Main Styles */
+
+.screen {
+  display: none;
+}
+
+.screen.active {
+  display: block;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Game layout */
+.game-layout {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Top bar with controls */
+.game-top-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.icon-btn {
+  background: none;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 0.4rem 0.8rem;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: #4a5568;
+  text-decoration: none;
+}
+
+.icon-btn:hover {
+  background: #f7fafc;
+  border-color: #cbd5e0;
+}
+
+.puzzle-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #2d3748;
+}
+
+.top-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: auto;
+}
+
+.ctrl-btn {
+  background: #edf2f7;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: #2d3748;
+  transition: background 0.15s;
+}
+
+.ctrl-btn:hover {
+  background: #e2e8f0;
+}
+
+.ctrl-btn:focus {
+  outline: 2px solid #38a169;
+  outline-offset: 2px;
+}
+
+.gen-display {
+  font-size: 0.85rem;
+  color: #718096;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Speed toggle */
+.speed-toggle {
+  display: flex;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.speed-btn {
+  background: white;
+  border: none;
+  border-right: 1px solid #e2e8f0;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  color: #718096;
+  transition: all 0.15s;
+}
+
+.speed-btn:last-child {
+  border-right: none;
+}
+
+.speed-btn:hover {
+  background: #f7fafc;
+}
+
+.speed-btn.active {
+  background: #38a169;
+  color: white;
+}
+
+/* Main area */
+.game-main {
+  display: flex;
+  gap: 1.5rem;
+  flex: 1;
+}
+
+/* Sidebar */
+.game-sidebar {
+  width: 200px;
+  flex-shrink: 0;
+}
+
+.sidebar-section {
+  margin-bottom: 1.5rem;
+}
+
+.sidebar-section h3 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #718096;
+  margin-bottom: 0.5rem;
+}
+
+/* Species palette */
+.species-palette {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.species-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.species-btn:hover {
+  border-color: #38a169;
+}
+
+.species-btn.selected {
+  border-color: #38a169;
+  background: #f0fff4;
+}
+
+.species-emoji {
+  font-size: 1.2rem;
+}
+
+.species-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #2d3748;
+}
+
+.species-key {
+  margin-left: auto;
+  font-size: 0.7rem;
+  color: #a0aec0;
+}
+
+/* Presets */
+.preset-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.preset-btn {
+  background: #edf2f7;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  color: #4a5568;
+  transition: all 0.15s;
+}
+
+.preset-btn:hover {
+  background: #e2e8f0;
+  border-color: #38a169;
+}
+
+/* Rules */
+.rules-section summary {
+  font-size: 0.85rem;
+  color: #718096;
+  cursor: pointer;
+  user-select: none;
+}
+
+.rules-section summary:hover {
+  color: #4a5568;
+}
+
+.rules-list {
+  margin: 0.5rem 0 0 1.2rem;
+  font-size: 0.8rem;
+  color: #718096;
+  line-height: 1.6;
+}
+
+.rules-list li {
+  margin-bottom: 0.4rem;
+}
+
+/* Shortcuts */
+.shortcuts-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.8rem;
+  color: #718096;
+  line-height: 1.8;
+}
+
+kbd {
+  background: #edf2f7;
+  border: 1px solid #e2e8f0;
+  border-radius: 3px;
+  padding: 0.1rem 0.35rem;
+  font-family: system-ui, sans-serif;
+  font-size: 0.75rem;
+  color: #4a5568;
+}
+
+/* Responsive */
+@media (width <= 768px) {
+  .game-main {
+    flex-flow: column;
+  }
+
+  .game-sidebar {
+    width: 100%;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .sidebar-section {
+    flex: 1;
+    min-width: 150px;
+    margin-bottom: 0.5rem;
+  }
+
+  .species-palette {
+    flex-flow: row wrap;
+  }
+
+  .game-layout {
+    padding: 0.5rem;
+  }
+
+  .top-controls {
+    margin-left: 0;
+    flex-basis: 100%;
+    order: 10;
+  }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .icon-btn {
+    color: #cbd5e0;
+    border-color: #4a5568;
+  }
+
+  .icon-btn:hover {
+    background: #2d3748;
+    border-color: #718096;
+  }
+
+  .puzzle-title {
+    color: #e2e8f0;
+  }
+
+  .gen-display {
+    color: #a0aec0;
+  }
+
+  .sidebar-section h3 {
+    color: #a0aec0;
+  }
+
+  .species-btn {
+    background: #2d3748;
+    border-color: #4a5568;
+  }
+
+  .species-btn:hover {
+    border-color: #68d391;
+  }
+
+  .species-btn.selected {
+    border-color: #68d391;
+    background: #1c3a1c;
+  }
+
+  .species-name {
+    color: #e2e8f0;
+  }
+
+  .species-key {
+    color: #718096;
+  }
+
+  .ctrl-btn {
+    background: #2d3748;
+    border-color: #4a5568;
+    color: #e2e8f0;
+  }
+
+  .ctrl-btn:hover {
+    background: #4a5568;
+  }
+
+  .speed-toggle {
+    border-color: #4a5568;
+  }
+
+  .speed-btn {
+    background: #2d3748;
+    border-color: #4a5568;
+    color: #a0aec0;
+  }
+
+  .speed-btn:hover {
+    background: #4a5568;
+  }
+
+  .speed-btn.active {
+    background: #68d391;
+    color: #1a202c;
+  }
+
+  .rules-section summary {
+    color: #a0aec0;
+  }
+
+  .rules-section summary:hover {
+    color: #e2e8f0;
+  }
+
+  .rules-list {
+    color: #a0aec0;
+  }
+
+  .preset-btn {
+    background: #2d3748;
+    border-color: #4a5568;
+    color: #a0aec0;
+  }
+
+  .preset-btn:hover {
+    background: #4a5568;
+    border-color: #68d391;
+  }
+
+  .shortcuts-list {
+    color: #a0aec0;
+  }
+
+  kbd {
+    background: #2d3748;
+    border-color: #4a5568;
+    color: #cbd5e0;
+  }
+}

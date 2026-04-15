@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Life Garden</title>
+    <meta name="description" content="A cellular automata sandbox with a gardening theme" />
+    <meta name="theme-color" content="#2d5016" />
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="styles/main.css" />
+    <link rel="stylesheet" href="styles/canvas.css" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <div id="game-screen" class="screen active">
+      <div class="game-layout">
+        <div class="game-top-bar">
+          <a href="/games/" class="icon-btn" title="Back to games">&larr;</a>
+          <span class="puzzle-title">Life Garden</span>
+          <div class="top-controls">
+            <button id="play-btn" class="ctrl-btn" title="Space">&#x25b6; Play</button>
+            <button id="pause-btn" class="ctrl-btn hidden" title="Space">&#x23f8; Pause</button>
+            <button id="step-back-btn" class="ctrl-btn" title="&#x2190;">&#x23ee; Back</button>
+            <button id="step-btn" class="ctrl-btn" title="&#x2192;">&#x23ed; Step</button>
+            <button id="reset-btn" class="ctrl-btn" title="R">&#x21ba; Clear</button>
+            <div class="speed-toggle">
+              <button class="speed-btn" data-speed="slow">Slow</button>
+              <button class="speed-btn active" data-speed="normal">Normal</button>
+              <button class="speed-btn" data-speed="fast">Fast</button>
+            </div>
+          </div>
+          <span id="generation-display" class="gen-display">Gen 0</span>
+        </div>
+        <div id="main-content" class="game-main">
+          <div class="game-sidebar">
+            <div class="sidebar-section">
+              <h3>Species</h3>
+              <div id="species-palette" class="species-palette"></div>
+            </div>
+            <div class="sidebar-section">
+              <h3>Presets</h3>
+              <div id="preset-buttons" class="preset-buttons"></div>
+            </div>
+            <details class="sidebar-section rules-section">
+              <summary>How it works</summary>
+              <ul class="rules-list">
+                <li>Each generation, cells live or die based on their neighbors (the 8 surrounding cells).</li>
+                <li><strong>Grass</strong> survives with 2-3 neighbors. Spreads where 3 neighbors exist. Counts grass and flowers.</li>
+                <li><strong>Flowers</strong> survive with 2-4 neighbors, only counting flowers. Age and die after 30 gens.</li>
+                <li><strong>Bees</strong> thrive near flowers. They pollinate: flowers near bees spread more easily. Die after 20 gens.</li>
+                <li><strong>Rabbits</strong> live near grass and other rabbits. They eat grass: grass next to 2+ rabbits dies. Die after 25 gens.</li>
+              </ul>
+            </details>
+            <div class="sidebar-section shortcuts-section">
+              <h3>Shortcuts</h3>
+              <ul class="shortcuts-list">
+                <li><kbd>Space</kbd> Play / Pause</li>
+                <li><kbd>&#x2192;</kbd> Step forward</li>
+                <li><kbd>&#x2190;</kbd> Step back</li>
+                <li><kbd>R</kbd> Clear grid</li>
+                <li><kbd>1</kbd> <kbd>2</kbd> Select species</li>
+                <li>Click to place, drag to paint</li>
+              </ul>
+            </div>
+          </div>
+          <div class="canvas-wrapper">
+            <canvas id="game-canvas" width="640" height="640"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="js/game.js"></script>
+  </body>
+</html>

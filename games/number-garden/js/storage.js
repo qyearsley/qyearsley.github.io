@@ -12,7 +12,7 @@
  * - All validation failures are logged with specific reasons
  * - Returns null for load failures, boolean for save/import operations
  */
-import { StorageManager as BaseStorageManager } from "./StorageManager.js"
+import { StorageManager as BaseStorageManager } from "../../shared/StorageManager.js"
 
 export class StorageManager extends BaseStorageManager {
   constructor() {
