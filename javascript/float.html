@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Floating Point Exposed</title>
+    <meta
+      name="description"
+      content="See the IEEE 754 bit layout of any floating-point number"
+    />
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <script type="module">
+      "use strict"
+
+      function float64Bits(value) {
+        const buf = new ArrayBuffer(8)
+        new Float64Array(buf)[0] = value
+        const view = new DataView(buf)
+        const hi = view.getUint32(0, false)
+        const lo = view.getUint32(4, false)
+        const bits =
+          hi.toString(2).padStart(32, "0") + lo.toString(2).padStart(32, "0")
+        return bits
+      }
+
+      function parseBits(bits) {
+        const sign = bits[0]
+        const exponent = bits.slice(1, 12)
+        const mantissa = bits.slice(12)
+        return { sign, exponent, mantissa }
+      }
+
+      function describeNumber(value) {
+        if (Number.isNaN(value)) return "NaN — not a number"
+        if (!Number.isFinite(value))
+          return value > 0 ? "+Infinity" : "-Infinity"
+        if (Object.is(value, -0)) return "-0 (negative zero)"
+        if (value === 0) return "+0"
+        return null
+      }
+
+      function exponentInfo(expBits) {
+        const raw = parseInt(expBits, 2)
+        const bias = 1023
+        if (raw === 0) return { raw, biased: "denormalized", actual: 1 - bias }
+        if (raw === 2047) return { raw, biased: "special (Inf/NaN)", actual: null }
+        return { raw, biased: raw - bias, actual: raw - bias }
+      }
+
+      function renderBitBoxes(bits, className) {
+        return bits
+          .split("")
+          .map(
+            (b) => `<span class="bit ${className} ${b === "1" ? "one" : "zero"}">${b}</span>`,
+          )
+          .join("")
+      }
+
+      function renderRepresentation(value) {
+        const { sign, exponent, mantissa } = parseBits(float64Bits(value))
+        const exp = exponentInfo(exponent)
+        const signChar = sign === "0" ? "+" : "-"
+        const special = describeNumber(value)
+
+        let formulaHtml = ""
+        if (!special) {
+          const prefix = exp.raw === 0 ? "0" : "1"
+          formulaHtml = `
+            <div class="formula">
+              ${signChar}1 &times; ${prefix}.${mantissa.slice(0, 6)}... &times; 2<sup>${exp.actual}</sup>
+            </div>
+          `
+        } else {
+          formulaHtml = `<div class="formula special-value">${special}</div>`
+        }
+
+        return `
+          <div class="float-result">
+            <div class="value-display">${Object.is(value, -0) ? "-0" : value}</div>
+            ${formulaHtml}
+
+            <div class="bit-layout">
+              <div class="bit-group">
+                <div class="bit-label">Sign (1 bit)</div>
+                <div class="bit-row">${renderBitBoxes(sign, "sign")}</div>
+                <div class="bit-value">${sign === "0" ? "positive" : "negative"}</div>
+              </div>
+              <div class="bit-group">
+                <div class="bit-label">Exponent (11 bits)</div>
+                <div class="bit-row">${renderBitBoxes(exponent, "exp")}</div>
+                <div class="bit-value">raw ${exp.raw}${exp.actual !== null ? `, biased ${exp.actual}` : ` (${exp.biased})`}</div>
+              </div>
+              <div class="bit-group">
+                <div class="bit-label">Mantissa (52 bits)</div>
+                <div class="bit-row mantissa-row">${renderBitBoxes(mantissa, "mant")}</div>
+              </div>
+            </div>
+
+            <div class="hex-display">
+              Hex: 0x${[...float64Bits(value).matchAll(/.{4}/g)].map((m) => parseInt(m[0], 2).toString(16).toUpperCase()).join("")}
+            </div>
+          </div>
+        `
+      }
+
+      function update() {
+        const input = document.getElementById("input").value.trim()
+        const output = document.getElementById("output")
+
+        if (!input) {
+          output.innerHTML = '<div class="placeholder">Enter a number above</div>'
+          return
+        }
+
+        // Try to evaluate simple expressions like 0.1 + 0.2
+        let value
+        try {
+          // Only allow digits, dots, +, -, *, /, parens, spaces, e, E, Infinity, NaN
+          if (!/^[\d.+\-*/() eENaInfity]+$/.test(input)) {
+            output.innerHTML = '<div class="error-msg">Enter a number or simple expression</div>'
+            return
+          }
+          value = Function(`"use strict"; return (${input})`)()
+        } catch {
+          output.innerHTML = '<div class="error-msg">Could not parse expression</div>'
+          return
+        }
+
+        if (typeof value !== "number") {
+          output.innerHTML = '<div class="error-msg">Result is not a number</div>'
+          return
+        }
+
+        output.innerHTML = renderRepresentation(value)
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("input").addEventListener("input", update)
+
+        document.querySelectorAll(".example-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            document.getElementById("input").value = btn.dataset.text
+            update()
+          })
+        })
+
+        update()
+      })
+    </script>
+    <style>
+      .float-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 1.3rem;
+        font-family: "SF Mono", Menlo, Consolas, monospace;
+        border: 2px solid #cbd5e0;
+        border-radius: 8px;
+        background: #fff;
+        color: #1a202c;
+        margin-bottom: 0.5rem;
+      }
+
+      .float-input:focus {
+        outline: none;
+        border-color: #3182ce;
+        box-shadow: 0 0 0 3px rgb(49, 130, 206, 0.2);
+      }
+
+      .examples-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .example-btn {
+        padding: 0.35rem 0.75rem;
+        border: 1px solid #cbd5e0;
+        border-radius: 4px;
+        background: #f7fafc;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-family: "SF Mono", Menlo, Consolas, monospace;
+        color: #4a5568;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+      }
+
+      .example-btn:hover {
+        background: #edf2f7;
+        border-color: #a0aec0;
+      }
+
+      .placeholder,
+      .error-msg {
+        text-align: center;
+        padding: 2rem;
+        font-style: italic;
+        color: #a0aec0;
+      }
+
+      .error-msg {
+        color: #e53e3e;
+      }
+
+      /* Result */
+      .float-result {
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1.25rem;
+        background: #f7fafc;
+      }
+
+      .value-display {
+        font-size: 1.8rem;
+        font-family: "SF Mono", Menlo, Consolas, monospace;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+      }
+
+      .formula {
+        font-family: "SF Mono", Menlo, Consolas, monospace;
+        font-size: 0.95rem;
+        color: #718096;
+        margin-bottom: 1rem;
+      }
+
+      .special-value {
+        font-style: italic;
+      }
+
+      /* Bit layout */
+      .bit-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+      }
+
+      .bit-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+      }
+
+      .bit-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #718096;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .bit-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1px;
+      }
+
+      .mantissa-row {
+        max-width: 100%;
+      }
+
+      .bit {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.15rem;
+        height: 1.5rem;
+        font-family: "SF Mono", Menlo, Consolas, monospace;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border-radius: 2px;
+        color: #fff;
+      }
+
+      .bit.sign {
+        background: #e53e3e;
+      }
+
+      .bit.sign.zero {
+        background: #38a169;
+      }
+
+      .bit.exp {
+        background: #805ad5;
+      }
+
+      .bit.exp.zero {
+        background: #b794f4;
+      }
+
+      .bit.mant {
+        background: #3182ce;
+      }
+
+      .bit.mant.zero {
+        background: #90cdf4;
+        color: #2a4365;
+      }
+
+      .bit-value {
+        font-size: 0.8rem;
+        color: #a0aec0;
+      }
+
+      .hex-display {
+        font-family: "SF Mono", Menlo, Consolas, monospace;
+        font-size: 0.85rem;
+        color: #718096;
+      }
+
+      /* How section */
+      .how-section {
+        margin-top: 1.5rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        background: #f7fafc;
+      }
+
+      .how-section h2 {
+        font-size: 1.05rem;
+        margin: 0 0 0.75rem;
+      }
+
+      .how-section p,
+      .how-section li {
+        font-size: 0.9rem;
+        color: #4a5568;
+        line-height: 1.5;
+      }
+
+      .how-section ul {
+        margin: 0.25rem 0 0.5rem;
+        padding-left: 1.25rem;
+      }
+
+      .how-section code {
+        background: #edf2f7;
+        padding: 0.1rem 0.3rem;
+        border-radius: 3px;
+        font-size: 0.85rem;
+      }
+
+      /* Dark mode */
+      @media (prefers-color-scheme: dark) {
+        .float-input {
+          background: #2d3748;
+          border-color: #4a5568;
+          color: #e2e8f0;
+        }
+
+        .float-input:focus {
+          border-color: #63b3ed;
+          box-shadow: 0 0 0 3px rgb(99, 179, 237, 0.2);
+        }
+
+        .example-btn {
+          background: #2d3748;
+          border-color: #4a5568;
+          color: #cbd5e0;
+        }
+
+        .example-btn:hover {
+          background: #4a5568;
+        }
+
+        .placeholder {
+          color: #718096;
+        }
+
+        .error-msg {
+          color: #fc8181;
+        }
+
+        .float-result {
+          background: #2d3748;
+          border-color: #4a5568;
+        }
+
+        .value-display {
+          color: #e2e8f0;
+        }
+
+        .formula {
+          color: #a0aec0;
+        }
+
+        .bit-label {
+          color: #a0aec0;
+        }
+
+        .bit.sign {
+          background: #c53030;
+        }
+
+        .bit.sign.zero {
+          background: #276749;
+        }
+
+        .bit.exp.zero {
+          background: #6b46c1;
+        }
+
+        .bit.mant {
+          background: #2b6cb0;
+        }
+
+        .bit.mant.zero {
+          background: #2a4365;
+          color: #90cdf4;
+        }
+
+        .bit-value {
+          color: #718096;
+        }
+
+        .hex-display {
+          color: #a0aec0;
+        }
+
+        .how-section {
+          background: #2d3748;
+          border-color: #4a5568;
+        }
+
+        .how-section p,
+        .how-section li {
+          color: #a0aec0;
+        }
+
+        .how-section code {
+          background: #1a202c;
+          color: #e2e8f0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="container">
+      <header class="header">
+        <h1>Floating Point Exposed</h1>
+        <p>See the IEEE 754 bit layout of any number</p>
+      </header>
+
+      <main id="main-content" class="main-content">
+        <nav class="breadcrumbs">
+          <a href="/">Home</a>
+          <span class="separator">/</span>
+          <a href="/javascript/">JavaScript</a>
+          <span class="separator">/</span>
+          <span class="current">Floating Point Exposed</span>
+        </nav>
+
+        <section class="section">
+          <label for="input"><strong>Enter a number or expression:</strong></label>
+          <input
+            id="input"
+            type="text"
+            class="float-input"
+            value="0.1 + 0.2"
+            autocomplete="off"
+          />
+
+          <div class="examples-row">
+            <button class="example-btn" data-text="0.1 + 0.2">0.1 + 0.2</button>
+            <button class="example-btn" data-text="0.3">0.3</button>
+            <button class="example-btn" data-text="1">1</button>
+            <button class="example-btn" data-text="-0">-0</button>
+            <button class="example-btn" data-text="Infinity">Infinity</button>
+            <button class="example-btn" data-text="NaN">NaN</button>
+            <button class="example-btn" data-text="9007199254740992">2^53 (max safe int)</button>
+            <button class="example-btn" data-text="0.1">0.1</button>
+            <button class="example-btn" data-text="5e-324">smallest</button>
+          </div>
+
+          <div id="output"></div>
+        </section>
+
+        <section class="how-section">
+          <h2>How IEEE 754 double-precision works</h2>
+          <p>
+            JavaScript numbers are 64-bit IEEE 754 "double precision" floats. The 64 bits are
+            divided into three fields:
+          </p>
+          <ul>
+            <li>
+              <strong style="color: #e53e3e">Sign</strong> (1 bit) &mdash; 0 for positive, 1 for
+              negative
+            </li>
+            <li>
+              <strong style="color: #805ad5">Exponent</strong> (11 bits) &mdash; stored with a bias
+              of 1023. Raw value 0 means denormalized; 2047 means Infinity or NaN.
+            </li>
+            <li>
+              <strong style="color: #3182ce">Mantissa</strong> (52 bits) &mdash; the fractional
+              part. There's an implicit leading 1 (for normal numbers), so you get 53 bits of
+              precision total.
+            </li>
+          </ul>
+          <p>
+            The value is: &plusmn;1.mantissa &times; 2<sup>(exponent - 1023)</sup>
+          </p>
+          <p>
+            This is why <code>0.1 + 0.2 !== 0.3</code> &mdash; 0.1 and 0.2 can't be represented
+            exactly in binary, so the sum accumulates a tiny rounding error.
+            Try clicking "0.1 + 0.2" and "0.3" to compare their bits.
+          </p>
+        </section>
+      </main>
+    </div>
+    <script src="/shared/nav.js"></script>
+  </body>
+</html>

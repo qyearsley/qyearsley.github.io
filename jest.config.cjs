@@ -5,8 +5,10 @@ module.exports = {
   collectCoverageFrom: [
     "javascript/**/*.js",
     "games/number-garden/**/*.js",
+    "games/turing-tape/**/*.js",
     "!javascript/**/*.test.js",
     "!games/number-garden/**/*.test.js",
+    "!games/turing-tape/**/*.test.js",
     "!javascript/**/*.html",
     "!games/number-garden/**/*.html",
   ],

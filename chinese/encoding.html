@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Encoding Explorer</title>
+    <meta
+      name="description"
+      content="See how Chinese characters are encoded in UTF-8, UTF-16, and GB2312"
+    />
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <script type="module">
+      "use strict"
+
+      // --- GB2312 lookup for common characters ---
+      // Each entry: Unicode code point -> [high byte, low byte]
+      // These are the EUC-CN encoded values (GB2312 + 0x80 offset)
+      const GB2312 = {
+        0x4e2d: [0xd6, 0xd0], // 中
+        0x56fd: [0xb9, 0xfa], // 国
+        0x4eba: [0xc8, 0xcb], // 人
+        0x5927: [0xb4, 0xf3], // 大
+        0x5b66: [0xd1, 0xa7], // 学
+        0x751f: [0xc9, 0xfa], // 生
+        0x65f6: [0xca, 0xb1], // 时
+        0x95f4: [0xbc, 0xe4], // 间
+        0x6211: [0xce, 0xd2], // 我
+        0x4f60: [0xc4, 0xe3], // 你
+        0x4ed6: [0xcb, 0xfb], // 他
+        0x5979: [0xcb, 0xfd], // 她
+        0x7684: [0xb5, 0xc4], // 的
+        0x662f: [0xca, 0xc7], // 是
+        0x4e0d: [0xb2, 0xbb], // 不
+        0x6709: [0xd3, 0xd0], // 有
+        0x8fd9: [0xd5, 0xe2], // 这
+        0x90a3: [0xc4, 0xc7], // 那
+        0x4ec0: [0xca, 0xb2], // 什
+        0x4e48: [0xc3, 0xb4], // 么
+        0x597d: [0xba, 0xc3], // 好
+        0x5728: [0xd4, 0xda], // 在
+        0x4e86: [0xc1, 0xcb], // 了
+        0x4e0a: [0xc9, 0xcf], // 上
+        0x4e0b: [0xcf, 0xc2], // 下
+        0x5c0f: [0xd0, 0xa1], // 小
+        0x5929: [0xcc, 0xec], // 天
+        0x5730: [0xb5, 0xd8], // 地
+        0x6c34: [0xcb, 0xae], // 水
+        0x706b: [0xbb, 0xf0], // 火
+        0x5c71: [0xc9, 0xbd], // 山
+        0x6728: [0xc4, 0xbe], // 木
+        0x91d1: [0xbd, 0xf0], // 金
+        0x571f: [0xcd, 0xc1], // 土
+        0x7535: [0xb5, 0xe7], // 电
+        0x8bdd: [0xbb, 0xb0], // 话
+        0x8bf4: [0xcb, 0xb5], // 说
+        0x8bfb: [0xb6, 0xc1], // 读
+        0x5199: [0xd0, 0xb4], // 写
+        0x7231: [0xb0, 0xae], // 爱
+        0x5fc3: [0xd0, 0xc4], // 心
+        0x6587: [0xce, 0xc4], // 文
+        0x5b57: [0xd7, 0xd6], // 字
+        0x8bed: [0xd3, 0xef], // 语
+        0x8a00: [0xd1, 0xd4], // 言
+        0x97f3: [0xd2, 0xf4], // 音
+        0x4e66: [0xca, 0xe9], // 书
+        0x753b: [0xbb, 0xad], // 画
+        0x6b4c: [0xb8, 0xe8], // 歌
+        0x821e: [0xce, 0xe8], // 舞
+        0x98de: [0xb7, 0xc9], // 飞
+        0x9a6c: [0xc2, 0xed], // 马
+        0x9f99: [0xc1, 0xfa], // 龙
+        0x864e: [0xbb, 0xa2], // 虎
+        0x5bb6: [0xbc, 0xd2], // 家
+        0x56ed: [0xd4, 0xb0], // 园
+        0x82b1: [0xbb, 0xa8], // 花
+        0x6708: [0xd4, 0xc2], // 月
+        0x65e5: [0xc8, 0xd5], // 日
+        0x661f: [0xd0, 0xc7], // 星
+        0x98ce: [0xb7, 0xe7], // 风
+        0x96e8: [0xd3, 0xea], // 雨
+        0x96ea: [0xd1, 0xa9], // 雪
+        0x8def: [0xc2, 0xb7], // 路
+        0x95e8: [0xc3, 0xc5], // 门
+        0x7a97: [0xb4, 0xb0], // 窗
+        0x8f66: [0xb3, 0xb5], // 车
+        0x8239: [0xb4, 0xac], // 船
+        0x98df: [0xca, 0xb3], // 食
+        0x996e: [0xd2, 0xfb], // 饮
+        0x8336: [0xb2, 0xe8], // 茶
+        0x9152: [0xbe, 0xc6], // 酒
+        0x7b14: [0xb1, 0xca], // 笔
+        0x7eb8: [0xd6, 0xbd], // 纸
+        0x5e74: [0xc4, 0xea], // 年
+        0x6625: [0xb4, 0xba], // 春
+        0x590f: [0xcf, 0xc4], // 夏
+        0x79cb: [0xc7, 0xef], // 秋
+        0x51ac: [0xb6, 0xac], // 冬
+        0x5357: [0xc4, 0xcf], // 南
+        0x5317: [0xb1, 0xb1], // 北
+        0x4e1c: [0xb6, 0xab], // 东
+        0x897f: [0xce, 0xf7], // 西
+      }
+
+      const encoder = new TextEncoder()
+
+      function getUtf8Bytes(char) {
+        return Array.from(encoder.encode(char))
+      }
+
+      function getUtf16Units(char) {
+        const units = []
+        for (let i = 0; i < char.length; i++) {
+          units.push(char.charCodeAt(i))
+        }
+        return units
+      }
+
+      function getGb2312(codePoint) {
+        const entry = GB2312[codePoint]
+        return entry ? [...entry] : null
+      }
+
+      function utf8BitBreakdown(byte, position, totalBytes) {
+        const bits = byte.toString(2).padStart(8, "0")
+        if (totalBytes === 1) {
+          return { prefix: bits[0], payload: bits.slice(1) }
+        }
+        if (position === 0) {
+          const prefixLen = totalBytes + 1
+          return { prefix: bits.slice(0, prefixLen), payload: bits.slice(prefixLen) }
+        }
+        return { prefix: bits.slice(0, 2), payload: bits.slice(2) }
+      }
+
+      function analyzeCharacter(char) {
+        const codePoint = char.codePointAt(0)
+        const utf8 = getUtf8Bytes(char)
+        const utf16 = getUtf16Units(char)
+        const gb2312 = getGb2312(codePoint)
+        return { char, codePoint, utf8, utf16, gb2312 }
+      }
+
+      function renderByteBox(value, extraClass) {
+        const hex = value.toString(16).toUpperCase().padStart(2, "0")
+        return `<span class="byte-box ${extraClass || ""}">${hex}</span>`
+      }
+
+      function renderUtf8Detail(bytes) {
+        return bytes
+          .map((b, i) => {
+            const { prefix, payload } = utf8BitBreakdown(b, i, bytes.length)
+            return `<span class="bit-breakdown"><span class="bit-prefix">${prefix}</span><span class="bit-payload">${payload}</span></span>`
+          })
+          .join(" ")
+      }
+
+      function renderCharResult(info) {
+        const cpHex = info.codePoint.toString(16).toUpperCase().padStart(4, "0")
+
+        const utf8Boxes = info.utf8.map((b) => renderByteBox(b, "utf8")).join("")
+        const utf8Bits = renderUtf8Detail(info.utf8)
+
+        const utf16Boxes = info.utf16
+          .map((u) => {
+            const hi = (u >> 8) & 0xff
+            const lo = u & 0xff
+            return renderByteBox(hi, "utf16") + renderByteBox(lo, "utf16")
+          })
+          .join("")
+        const isSurrogate = info.utf16.length > 1
+        const utf16Note = isSurrogate ? " (surrogate pair)" : ""
+
+        let gb2312Html
+        if (info.gb2312) {
+          gb2312Html = info.gb2312.map((b) => renderByteBox(b, "gb2312")).join("")
+        } else if (info.codePoint < 0x80) {
+          gb2312Html = renderByteBox(info.codePoint, "gb2312")
+        } else {
+          gb2312Html = '<span class="na">Not in table</span>'
+        }
+
+        return `
+          <div class="char-result">
+            <div class="char-display">${info.char}</div>
+            <div class="char-codepoint">U+${cpHex}</div>
+            <div class="encoding-row">
+              <span class="enc-label">UTF-8</span>
+              <span class="enc-bytes">${utf8Boxes}</span>
+              <span class="enc-count">${info.utf8.length} byte${info.utf8.length > 1 ? "s" : ""}</span>
+            </div>
+            <div class="bit-row">${utf8Bits}</div>
+            <div class="encoding-row">
+              <span class="enc-label">UTF-16</span>
+              <span class="enc-bytes">${utf16Boxes}</span>
+              <span class="enc-count">${info.utf16.length * 2} bytes${utf16Note}</span>
+            </div>
+            <div class="encoding-row">
+              <span class="enc-label">GB2312</span>
+              <span class="enc-bytes">${gb2312Html}</span>
+              <span class="enc-count">${info.gb2312 ? "2 bytes" : ""}</span>
+            </div>
+          </div>
+        `
+      }
+
+      function update() {
+        const input = document.getElementById("input").value
+        const output = document.getElementById("output")
+
+        if (!input.trim()) {
+          output.innerHTML = '<div class="placeholder">Type or paste characters above</div>'
+          return
+        }
+
+        // Split into individual characters (handles surrogates correctly)
+        const chars = [...input]
+        const html = chars.map((ch) => renderCharResult(analyzeCharacter(ch))).join("")
+        output.innerHTML = html
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("input").addEventListener("input", update)
+
+        // Example buttons
+        document.querySelectorAll(".example-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            document.getElementById("input").value = btn.dataset.text
+            update()
+          })
+        })
+
+        update()
+      })
+    </script>
+    <style>
+      .explorer-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 1.5rem;
+        font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+        border: 2px solid #cbd5e0;
+        border-radius: 8px;
+        background: #fff;
+        color: #1a202c;
+        margin-bottom: 0.5rem;
+      }
+
+      .explorer-input:focus {
+        outline: none;
+        border-color: #3182ce;
+        box-shadow: 0 0 0 3px rgb(49, 130, 206, 0.2);
+      }
+
+      .examples-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .example-btn {
+        padding: 0.35rem 0.75rem;
+        border: 1px solid #cbd5e0;
+        border-radius: 4px;
+        background: #f7fafc;
+        cursor: pointer;
+        font-size: 1rem;
+        font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+        color: #4a5568;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+      }
+
+      .example-btn:hover {
+        background: #edf2f7;
+        border-color: #a0aec0;
+      }
+
+      .placeholder {
+        color: #a0aec0;
+        text-align: center;
+        padding: 2rem;
+        font-style: italic;
+      }
+
+      /* Character result card */
+      .char-result {
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 0.75rem;
+        background: #f7fafc;
+      }
+
+      .char-display {
+        font-size: 2.5rem;
+        font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+        line-height: 1.2;
+        margin-bottom: 0.15rem;
+      }
+
+      .char-codepoint {
+        font-family: "SF Mono", Menlo, Consolas, monospace;
+        font-size: 0.9rem;
+        color: #718096;
+        margin-bottom: 0.75rem;
+      }
+
+      .encoding-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.3rem;
+      }
+
+      .enc-label {
+        font-weight: 600;
+        font-size: 0.85rem;
+        min-width: 4.5rem;
+        color: #4a5568;
+      }
+
+      .enc-bytes {
+        display: flex;
+        gap: 3px;
+        flex-wrap: wrap;
+      }
+
+      .enc-count {
+        font-size: 0.8rem;
+        color: #a0aec0;
+        margin-left: auto;
+        white-space: nowrap;
+      }
+
+      .byte-box {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 2rem;
+        height: 1.75rem;
+        padding: 0 0.35rem;
+        border-radius: 4px;
+        font-family: "SF Mono", Menlo, Consolas, monospace;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #fff;
+      }
+
+      .byte-box.utf8 {
+        background: #3182ce;
+      }
+
+      .byte-box.utf16 {
+        background: #805ad5;
+      }
+
+      .byte-box.gb2312 {
+        background: #d69e2e;
+      }
+
+      .na {
+        font-size: 0.85rem;
+        color: #a0aec0;
+        font-style: italic;
+      }
+
+      /* Bit breakdown row */
+      .bit-row {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        padding-left: 5.25rem;
+      }
+
+      .bit-breakdown {
+        font-family: "SF Mono", Menlo, Consolas, monospace;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+      }
+
+      .bit-prefix {
+        color: #a0aec0;
+      }
+
+      .bit-payload {
+        color: #3182ce;
+        font-weight: 600;
+      }
+
+      /* How it works section */
+      .how-section {
+        margin-top: 1.5rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        background: #f7fafc;
+      }
+
+      .how-section h2 {
+        font-size: 1.05rem;
+        margin: 0 0 0.75rem;
+      }
+
+      .how-section h3 {
+        margin: 0.75rem 0 0.35rem;
+        font-size: 0.95rem;
+      }
+
+      .how-section h3:first-child {
+        margin-top: 0;
+      }
+
+      .how-section p,
+      .how-section li {
+        font-size: 0.9rem;
+        color: #4a5568;
+        line-height: 1.5;
+      }
+
+      .how-section ul {
+        margin: 0.25rem 0;
+        padding-left: 1.25rem;
+      }
+
+      .how-section code {
+        background: #edf2f7;
+        padding: 0.1rem 0.3rem;
+        border-radius: 3px;
+        font-size: 0.85rem;
+      }
+
+      /* Dark mode */
+      @media (prefers-color-scheme: dark) {
+        .explorer-input {
+          background: #2d3748;
+          border-color: #4a5568;
+          color: #e2e8f0;
+        }
+
+        .explorer-input:focus {
+          border-color: #63b3ed;
+          box-shadow: 0 0 0 3px rgb(99, 179, 237, 0.2);
+        }
+
+        .example-btn {
+          background: #2d3748;
+          border-color: #4a5568;
+          color: #cbd5e0;
+        }
+
+        .example-btn:hover {
+          background: #4a5568;
+          border-color: #718096;
+        }
+
+        .placeholder {
+          color: #718096;
+        }
+
+        .char-result {
+          background: #2d3748;
+          border-color: #4a5568;
+        }
+
+        .char-display {
+          color: #e2e8f0;
+        }
+
+        .char-codepoint {
+          color: #a0aec0;
+        }
+
+        .enc-label {
+          color: #cbd5e0;
+        }
+
+        .enc-count {
+          color: #718096;
+        }
+
+        .byte-box.utf8 {
+          background: #2b6cb0;
+        }
+
+        .byte-box.utf16 {
+          background: #6b46c1;
+        }
+
+        .byte-box.gb2312 {
+          background: #b7791f;
+        }
+
+        .na {
+          color: #718096;
+        }
+
+        .bit-prefix {
+          color: #718096;
+        }
+
+        .bit-payload {
+          color: #63b3ed;
+        }
+
+        .how-section {
+          background: #2d3748;
+          border-color: #4a5568;
+        }
+
+        .how-section p,
+        .how-section li {
+          color: #a0aec0;
+        }
+
+        .how-section code {
+          background: #1a202c;
+          color: #e2e8f0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="container">
+      <header class="header">
+        <h1>Encoding Explorer</h1>
+        <p>See how characters are encoded in UTF-8, UTF-16, and GB2312</p>
+      </header>
+
+      <main id="main-content" class="main-content">
+        <nav class="breadcrumbs">
+          <a href="/">Home</a>
+          <span class="separator">/</span>
+          <a href="/chinese/">Chinese</a>
+          <span class="separator">/</span>
+          <span class="current">Encoding Explorer</span>
+        </nav>
+
+        <section class="section">
+          <label for="input"><strong>Type or paste characters:</strong></label>
+          <input id="input" type="text" class="explorer-input" value="中" autocomplete="off" />
+
+          <div class="examples-row">
+            <button class="example-btn" data-text="A">A</button>
+            <button class="example-btn" data-text="e">e</button>
+            <button class="example-btn" data-text="中">中</button>
+            <button class="example-btn" data-text="国">国</button>
+            <button class="example-btn" data-text="龙">龙</button>
+            <button class="example-btn" data-text="学">学</button>
+            <button class="example-btn" data-text="中国人">中国人</button>
+            <button class="example-btn" data-text="春夏秋冬">春夏秋冬</button>
+            <button class="example-btn" data-text="火山">火山</button>
+            <button class="example-btn" data-text="Hello">Hello</button>
+          </div>
+
+          <div id="output"></div>
+        </section>
+
+        <section class="how-section">
+          <h2>How encodings work</h2>
+
+          <h3>UTF-8</h3>
+          <p>
+            Variable-length: 1 byte for ASCII, 2 for Latin/Greek, 3 for most CJK, 4 for emoji and
+            rare characters. The leading bits of each byte indicate its role:
+          </p>
+          <ul>
+            <li><code>0xxxxxxx</code> -- single byte (ASCII)</li>
+            <li><code>110xxxxx 10xxxxxx</code> -- 2 bytes</li>
+            <li><code>1110xxxx 10xxxxxx 10xxxxxx</code> -- 3 bytes</li>
+            <li><code>11110xxx 10xxxxxx 10xxxxxx 10xxxxxx</code> -- 4 bytes</li>
+          </ul>
+          <p>
+            The <span style="color: #a0aec0">grey bits</span> are structure; the
+            <strong style="color: #3182ce">blue bits</strong> carry the code point.
+          </p>
+
+          <h3>UTF-16</h3>
+          <p>
+            Fixed 2 bytes for characters in the Basic Multilingual Plane (U+0000 to U+FFFF), which
+            includes all common CJK. Characters above U+FFFF use a surrogate pair (4 bytes).
+          </p>
+
+          <h3>GB2312</h3>
+          <p>
+            A legacy Chinese encoding from 1980. Maps ~7,000 simplified Chinese characters to 2-byte
+            codes. ASCII characters use 1 byte. This tool shows GB2312 values for a curated set of
+            common characters.
+          </p>
+        </section>
+      </main>
+    </div>
+    <script src="/shared/nav.js"></script>
+  </body>
+</html>

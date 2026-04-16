@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Turing Tape</title>
+    <meta
+      name="description"
+      content="Write rules for a Turing machine to transform tapes in this puzzle game"
+    />
+    <meta name="theme-color" content="#2d3748" />
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="styles/main.css" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <div class="game-layout">
+      <div class="game-top-bar">
+        <a href="/games/" class="icon-btn" title="Back to games">&larr;</a>
+        <span class="level-title" id="level-title">Turing Tape</span>
+        <span class="step-display" id="step-display">Steps: 0</span>
+      </div>
+
+      <main id="main-content" class="game-main">
+        <!-- Level selector -->
+        <div class="section-group">
+          <h2 class="section-heading">Puzzles</h2>
+          <nav id="level-nav" class="level-nav" aria-label="Level selector"></nav>
+        </div>
+
+        <div id="demos-section" class="section-group">
+          <h2 class="section-heading">Demos</h2>
+          <nav id="demo-nav" class="level-nav" aria-label="Demo selector"></nav>
+        </div>
+
+        <!-- Level description -->
+        <p id="level-description" class="level-description"></p>
+
+        <!-- Target tape (hidden for demos) -->
+        <div id="target-section" class="tape-section">
+          <div class="tape-label">Goal</div>
+          <div id="target-tape" class="tape tape-target"></div>
+        </div>
+
+        <!-- Active tape + head -->
+        <div class="tape-section">
+          <div class="tape-label">Tape</div>
+          <div id="active-tape" class="tape tape-active"></div>
+          <div id="head-indicator" class="head-indicator"></div>
+        </div>
+
+        <!-- State + controls on one line -->
+        <div class="controls-bar">
+          <div class="status-line">
+            State: <strong id="current-state">A</strong>
+          </div>
+          <div class="controls">
+            <button id="step-btn" class="ctrl-btn" title="Space">
+              <span class="btn-icon">&#x23ed;</span> Step <kbd>Space</kbd>
+            </button>
+            <button id="play-btn" class="ctrl-btn" title="Enter">
+              <span class="btn-icon">&#x25b6;</span> Play <kbd>Enter</kbd>
+            </button>
+            <button id="reset-btn" class="ctrl-btn" title="R">
+              <span class="btn-icon">&#x21ba;</span> Reset <kbd>R</kbd>
+            </button>
+          </div>
+        </div>
+
+        <!-- Result message -->
+        <div id="result-msg" class="result-msg hidden"></div>
+
+        <!-- Rule table -->
+        <div class="rule-section">
+          <div class="rule-header">
+            <h2>Rules</h2>
+            <button id="add-rule-btn" class="small-btn" title="Add rule">+ Add Rule</button>
+          </div>
+          <table id="rule-table" class="rule-table">
+            <thead>
+              <tr>
+                <th>State</th>
+                <th>Read</th>
+                <th>Write</th>
+                <th>Move</th>
+                <th>Next State</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="rule-body"></tbody>
+          </table>
+        </div>
+
+        <!-- How it works -->
+        <section class="info-section">
+          <h2>How it works</h2>
+          <ul>
+            <li>The machine reads the symbol under the <strong>head</strong> (highlighted cell).</li>
+            <li>
+              It looks for a rule matching the current <strong>state</strong> and the symbol read.
+            </li>
+            <li>
+              The rule says what to <strong>write</strong>, which way to <strong>move</strong> (L/R),
+              and what <strong>state</strong> to go to next.
+            </li>
+            <li>
+              The machine halts when it enters the <strong>HALT</strong> state or has no matching
+              rule.
+            </li>
+            <li>You win when the tape matches the <strong>Goal</strong> after halting.</li>
+          </ul>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="js/game.js"></script>
+  </body>
+</html>

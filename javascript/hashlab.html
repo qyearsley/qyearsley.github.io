@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hash Collision Lab</title>
+    <meta
+      name="description"
+      content="Visualize how hash tables work by watching strings hash into buckets"
+    />
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <script type="module">
+      "use strict"
+
+      // --- Hash functions ---
+      const hashFunctions = {
+        "djb2": {
+          name: "djb2",
+          description: "Classic string hash by Dan Bernstein. Multiplies by 33 and adds each character code.",
+          fn(str) {
+            let hash = 5381
+            for (let i = 0; i < str.length; i++) {
+              hash = ((hash << 5) + hash + str.charCodeAt(i)) >>> 0
+            }
+            return hash
+          },
+        },
+        "sum": {
+          name: "charSum",
+          description: "Sums character codes. Simple but produces many collisions for anagrams.",
+          fn(str) {
+            let sum = 0
+            for (let i = 0; i < str.length; i++) {
+              sum += str.charCodeAt(i)
+            }
+            return sum >>> 0
+          },
+        },
+        "length": {
+          name: "length",
+          description: "Uses string length as hash. Terrible -- demonstrates why good hash functions matter.",
+          fn(str) {
+            return str.length
+          },
+        },
+        "fnv1a": {
+          name: "FNV-1a",
+          description: "Fowler-Noll-Vo hash. XORs each byte then multiplies by a prime. Good distribution.",
+          fn(str) {
+            let hash = 0x811c9dc5
+            for (let i = 0; i < str.length; i++) {
+              hash ^= str.charCodeAt(i)
+              hash = Math.imul(hash, 0x01000193) >>> 0
+            }
+            return hash
+          },
+        },
+      }
+
+      let bucketCount = 8
+      let currentHash = "djb2"
+      const entries = [] // {key, hash, bucket}
+
+      function hashIntoBucket(str) {
+        const rawHash = hashFunctions[currentHash].fn(str)
+        return { hash: rawHash, bucket: rawHash % bucketCount }
+      }
+
+      function addEntry(key) {
+        if (!key.trim()) return
+        // Check for duplicate
+        if (entries.some((e) => e.key === key)) return
+        const { hash, bucket } = hashIntoBucket(key)
+        entries.push({ key, hash, bucket })
+      }
+
+      function rehashAll() {
+        for (const entry of entries) {
+          const { hash, bucket } = hashIntoBucket(entry.key)
+          entry.hash = hash
+          entry.bucket = bucket
+        }
+      }
+
+      function getStats() {
+        const buckets = new Array(bucketCount).fill(0)
+        for (const e of entries) buckets[e.bucket]++
+        const collisions = buckets.reduce((sum, b) => sum + Math.max(0, b - 1), 0)
+        const maxDepth = Math.max(0, ...buckets)
+        const used = buckets.filter((b) => b > 0).length
+        return { buckets, collisions, maxDepth, used }
+      }
+
+      function render() {
+        const stats = getStats()
+
+        // Render buckets
+        const bucketsEl = document.getElementById("buckets")
+        bucketsEl.innerHTML = ""
+        for (let i = 0; i < bucketCount; i++) {
+          const items = entries.filter((e) => e.bucket === i)
+          const bucketEl = document.createElement("div")
+          bucketEl.className = "bucket"
+          if (items.length > 1) bucketEl.classList.add("collision")
+
+          const label = document.createElement("div")
+          label.className = "bucket-label"
+          label.textContent = `[${i}]`
+          bucketEl.appendChild(label)
+
+          const chain = document.createElement("div")
+          chain.className = "bucket-chain"
+          for (const item of items) {
+            const node = document.createElement("div")
+            node.className = "bucket-item"
+            node.textContent = item.key
+            node.title = `hash: ${item.hash}`
+            chain.appendChild(node)
+          }
+          if (items.length === 0) {
+            const empty = document.createElement("div")
+            empty.className = "bucket-empty"
+            chain.appendChild(empty)
+          }
+          bucketEl.appendChild(chain)
+          bucketsEl.appendChild(bucketEl)
+        }
+
+        // Render stats
+        document.getElementById("stat-entries").textContent = entries.length
+        document.getElementById("stat-collisions").textContent = stats.collisions
+        document.getElementById("stat-max-depth").textContent = stats.maxDepth
+        document.getElementById("stat-load").textContent =
+          bucketCount > 0 ? (entries.length / bucketCount).toFixed(2) : "0"
+
+        // Render hash function description
+        document.getElementById("hash-desc").textContent =
+          hashFunctions[currentHash].description
+
+        // Recent entries list
+        const recentEl = document.getElementById("recent-entries")
+        recentEl.innerHTML = ""
+        for (const e of [...entries].reverse().slice(0, 15)) {
+          const li = document.createElement("div")
+          li.className = "recent-entry"
+          li.innerHTML = `
+            <span class="re-key">${escapeHtml(e.key)}</span>
+            <span class="re-arrow">&rarr;</span>
+            <span class="re-hash">${e.hash}</span>
+            <span class="re-arrow">%${bucketCount}=</span>
+            <span class="re-bucket">[${e.bucket}]</span>
+          `
+          recentEl.appendChild(li)
+        }
+      }
+
+      function escapeHtml(str) {
+        const div = document.createElement("div")
+        div.textContent = str
+        return div.innerHTML
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const input = document.getElementById("input")
+        const addBtn = document.getElementById("add-btn")
+        const clearBtn = document.getElementById("clear-btn")
+        const batchBtn = document.getElementById("batch-btn")
+        const hashSelect = document.getElementById("hash-select")
+        const bucketSlider = document.getElementById("bucket-slider")
+        const bucketLabel = document.getElementById("bucket-count-label")
+
+        function doAdd() {
+          addEntry(input.value)
+          input.value = ""
+          input.focus()
+          render()
+        }
+
+        addBtn.addEventListener("click", doAdd)
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") doAdd()
+        })
+
+        clearBtn.addEventListener("click", () => {
+          entries.length = 0
+          render()
+        })
+
+        // Batch add common words
+        const wordSets = {
+          animals: ["cat", "dog", "bird", "fish", "horse", "snake", "bear", "wolf", "deer", "frog", "lion", "tiger"],
+          colors: ["red", "blue", "green", "yellow", "orange", "purple", "pink", "black", "white", "gray", "cyan"],
+          anagrams: ["listen", "silent", "enlist", "tinsel", "inlets", "elints"],
+          numbers: ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"],
+        }
+
+        batchBtn.addEventListener("click", () => {
+          const keys = Object.keys(wordSets)
+          const setName = keys[Math.floor(Math.random() * keys.length)]
+          const words = wordSets[setName]
+          for (const w of words) addEntry(w)
+          render()
+        })
+
+        hashSelect.addEventListener("change", () => {
+          currentHash = hashSelect.value
+          rehashAll()
+          render()
+        })
+
+        bucketSlider.addEventListener("input", () => {
+          bucketCount = parseInt(bucketSlider.value, 10)
+          bucketLabel.textContent = bucketCount
+          rehashAll()
+          render()
+        })
+
+        render()
+      })
+    </script>
+    <style>
+      .lab-input-row {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .lab-input {
+        flex: 1;
+        padding: 0.6rem 0.75rem;
+        font-size: 1rem;
+        border: 2px solid #cbd5e0;
+        border-radius: 6px;
+        background: #fff;
+        color: #1a202c;
+      }
+
+      .lab-input:focus {
+        outline: none;
+        border-color: #3182ce;
+        box-shadow: 0 0 0 3px rgb(49, 130, 206, 0.2);
+      }
+
+      .lab-btn {
+        padding: 0.6rem 1rem;
+        border: 2px solid #cbd5e0;
+        border-radius: 6px;
+        background: #fff;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #4a5568;
+        white-space: nowrap;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+      }
+
+      .lab-btn:hover {
+        background: #edf2f7;
+        border-color: #a0aec0;
+      }
+
+      .lab-btn.primary {
+        background: #3182ce;
+        border-color: #3182ce;
+        color: #fff;
+      }
+
+      .lab-btn.primary:hover {
+        background: #2b6cb0;
+      }
+
+      .controls-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding: 0.75rem 1rem;
+        background: #f7fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+      }
+
+      .control-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .control-group label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #4a5568;
+        white-space: nowrap;
+      }
+
+      .control-group select {
+        padding: 0.35rem 0.5rem;
+        border: 1px solid #cbd5e0;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        background: #fff;
+      }
+
+      .control-group input[type="range"] {
+        width: 100px;
+      }
+
+      #hash-desc {
+        font-size: 0.8rem;
+        color: #718096;
+        font-style: italic;
+        margin: 0 0 1rem;
+      }
+
+      /* Buckets visualization */
+      .buckets-container {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        margin-bottom: 1rem;
+      }
+
+      .bucket {
+        display: flex;
+        align-items: stretch;
+        min-height: 2rem;
+      }
+
+      .bucket.collision .bucket-label {
+        background: #fed7d7;
+        color: #9b2c2c;
+      }
+
+      .bucket-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 2.5rem;
+        padding: 0 0.4rem;
+        background: #edf2f7;
+        border-radius: 4px 0 0 4px;
+        font-family: "SF Mono", Menlo, Consolas, monospace;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #4a5568;
+      }
+
+      .bucket-chain {
+        display: flex;
+        gap: 2px;
+        align-items: stretch;
+        flex: 1;
+        padding: 2px;
+        background: #f7fafc;
+        border: 1px solid #e2e8f0;
+        border-left: none;
+        border-radius: 0 4px 4px 0;
+        min-height: 1.75rem;
+      }
+
+      .bucket-item {
+        display: flex;
+        align-items: center;
+        padding: 0.2rem 0.5rem;
+        background: #3182ce;
+        color: #fff;
+        border-radius: 3px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        white-space: nowrap;
+      }
+
+      .bucket.collision .bucket-item {
+        background: #e53e3e;
+      }
+
+      .bucket-empty {
+        flex: 1;
+      }
+
+      /* Stats bar */
+      .stats-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        margin-bottom: 1rem;
+        padding: 0.6rem 1rem;
+        background: #f7fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+      }
+
+      .stat {
+        text-align: center;
+      }
+
+      .stat-value {
+        font-size: 1.3rem;
+        font-weight: 700;
+        font-family: "SF Mono", Menlo, Consolas, monospace;
+        color: #2d3748;
+      }
+
+      .stat-label {
+        font-size: 0.75rem;
+        color: #718096;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      /* Recent entries */
+      .recent-section {
+        margin-top: 1rem;
+      }
+
+      .recent-section h3 {
+        font-size: 0.9rem;
+        margin: 0 0 0.35rem;
+        color: #718096;
+      }
+
+      .recent-entries {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .recent-entry {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.8rem;
+        font-family: "SF Mono", Menlo, Consolas, monospace;
+        padding: 0.2rem 0.4rem;
+        background: #f7fafc;
+        border-radius: 3px;
+      }
+
+      .re-key {
+        font-weight: 600;
+        color: #2d3748;
+      }
+
+      .re-arrow {
+        color: #a0aec0;
+      }
+
+      .re-hash {
+        color: #805ad5;
+      }
+
+      .re-bucket {
+        color: #3182ce;
+        font-weight: 600;
+      }
+
+      /* How section */
+      .how-section {
+        margin-top: 1.5rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        background: #f7fafc;
+      }
+
+      .how-section h2 {
+        font-size: 1.05rem;
+        margin: 0 0 0.75rem;
+      }
+
+      .how-section p,
+      .how-section li {
+        font-size: 0.9rem;
+        color: #4a5568;
+        line-height: 1.5;
+      }
+
+      .how-section ul {
+        margin: 0.25rem 0 0.5rem;
+        padding-left: 1.25rem;
+      }
+
+      .how-section code {
+        background: #edf2f7;
+        padding: 0.1rem 0.3rem;
+        border-radius: 3px;
+        font-size: 0.85rem;
+      }
+
+      /* Dark mode */
+      @media (prefers-color-scheme: dark) {
+        .lab-input {
+          background: #2d3748;
+          border-color: #4a5568;
+          color: #e2e8f0;
+        }
+
+        .lab-input:focus {
+          border-color: #63b3ed;
+          box-shadow: 0 0 0 3px rgb(99, 179, 237, 0.2);
+        }
+
+        .lab-btn {
+          background: #2d3748;
+          border-color: #4a5568;
+          color: #cbd5e0;
+        }
+
+        .lab-btn:hover {
+          background: #4a5568;
+        }
+
+        .lab-btn.primary {
+          background: #2b6cb0;
+          border-color: #2b6cb0;
+          color: #fff;
+        }
+
+        .controls-row {
+          background: #2d3748;
+          border-color: #4a5568;
+        }
+
+        .control-group label {
+          color: #cbd5e0;
+        }
+
+        .control-group select {
+          background: #1a202c;
+          border-color: #4a5568;
+          color: #e2e8f0;
+        }
+
+        #hash-desc {
+          color: #a0aec0;
+        }
+
+        .bucket-label {
+          background: #4a5568;
+          color: #cbd5e0;
+        }
+
+        .bucket.collision .bucket-label {
+          background: #742a2a;
+          color: #feb2b2;
+        }
+
+        .bucket-chain {
+          background: #1a202c;
+          border-color: #4a5568;
+        }
+
+        .bucket-item {
+          background: #2b6cb0;
+        }
+
+        .bucket.collision .bucket-item {
+          background: #c53030;
+        }
+
+        .stats-bar {
+          background: #2d3748;
+          border-color: #4a5568;
+        }
+
+        .stat-value {
+          color: #e2e8f0;
+        }
+
+        .stat-label {
+          color: #a0aec0;
+        }
+
+        .recent-entry {
+          background: #2d3748;
+        }
+
+        .re-key {
+          color: #e2e8f0;
+        }
+
+        .re-hash {
+          color: #b794f4;
+        }
+
+        .re-bucket {
+          color: #63b3ed;
+        }
+
+        .how-section {
+          background: #2d3748;
+          border-color: #4a5568;
+        }
+
+        .how-section p,
+        .how-section li {
+          color: #a0aec0;
+        }
+
+        .how-section code {
+          background: #1a202c;
+          color: #e2e8f0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="container">
+      <header class="header">
+        <h1>Hash Collision Lab</h1>
+        <p>Watch strings hash into buckets and see collisions happen</p>
+      </header>
+
+      <main id="main-content" class="main-content">
+        <nav class="breadcrumbs">
+          <a href="/">Home</a>
+          <span class="separator">/</span>
+          <a href="/javascript/">JavaScript</a>
+          <span class="separator">/</span>
+          <span class="current">Hash Collision Lab</span>
+        </nav>
+
+        <section class="section">
+          <div class="lab-input-row">
+            <input
+              id="input"
+              type="text"
+              class="lab-input"
+              placeholder="Type a string and press Enter"
+              autocomplete="off"
+            />
+            <button id="add-btn" class="lab-btn primary">Add</button>
+            <button id="batch-btn" class="lab-btn">Add Batch</button>
+            <button id="clear-btn" class="lab-btn">Clear</button>
+          </div>
+
+          <div class="controls-row">
+            <div class="control-group">
+              <label for="hash-select">Hash function:</label>
+              <select id="hash-select">
+                <option value="djb2">djb2</option>
+                <option value="fnv1a">FNV-1a</option>
+                <option value="sum">charSum</option>
+                <option value="length">length (bad!)</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <label for="bucket-slider">Buckets: <span id="bucket-count-label">8</span></label>
+              <input id="bucket-slider" type="range" min="2" max="32" value="8" />
+            </div>
+          </div>
+
+          <p id="hash-desc"></p>
+
+          <div class="stats-bar">
+            <div class="stat">
+              <div class="stat-value" id="stat-entries">0</div>
+              <div class="stat-label">Entries</div>
+            </div>
+            <div class="stat">
+              <div class="stat-value" id="stat-collisions">0</div>
+              <div class="stat-label">Collisions</div>
+            </div>
+            <div class="stat">
+              <div class="stat-value" id="stat-max-depth">0</div>
+              <div class="stat-label">Max Depth</div>
+            </div>
+            <div class="stat">
+              <div class="stat-value" id="stat-load">0</div>
+              <div class="stat-label">Load Factor</div>
+            </div>
+          </div>
+
+          <div id="buckets" class="buckets-container"></div>
+
+          <div class="recent-section">
+            <h3>Hash log</h3>
+            <div id="recent-entries" class="recent-entries"></div>
+          </div>
+        </section>
+
+        <section class="how-section">
+          <h2>How hash tables work</h2>
+          <p>
+            A hash table stores data in an array of <strong>buckets</strong>. To decide which bucket
+            a key goes in, it runs the key through a <strong>hash function</strong> to get a number,
+            then takes that number modulo the bucket count.
+          </p>
+          <p>
+            A <strong>collision</strong> happens when two different keys land in the same bucket.
+            Good hash functions spread keys evenly to minimize collisions. Bad ones (like using
+            string length) create lots of collisions.
+          </p>
+          <p>Try these experiments:</p>
+          <ul>
+            <li>Switch to <code>length</code> hash and add words of different lengths -- see how same-length words always collide</li>
+            <li>Switch to <code>charSum</code> and add anagrams (listen, silent) -- they collide because they have the same character sum</li>
+            <li>Slide the bucket count down to 2 and watch collisions pile up</li>
+            <li>Compare <code>djb2</code> vs <code>FNV-1a</code> distribution on the same words</li>
+          </ul>
+        </section>
+      </main>
+    </div>
+    <script src="/shared/nav.js"></script>
+  </body>
+</html>
