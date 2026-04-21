@@ -15,16 +15,94 @@
       .form-input {
         max-width: 300px; /* Narrower than default for this form. */
       }
+
+      .password-output {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin: 1.5rem 0 0.5rem;
+        padding: 1rem;
+        background: var(--color-bg-code);
+        border: 2px dashed var(--color-text-muted);
+        border-radius: 4px;
+        min-height: 3rem;
+      }
+
+      .password-text {
+        flex: 1;
+        font-family: monospace;
+        font-size: 1.3rem;
+        font-weight: 600;
+        letter-spacing: 2px;
+        word-break: break-all;
+      }
+
+      .copy-btn {
+        flex-shrink: 0;
+        padding: 0.4rem 0.75rem;
+        border: 1px solid var(--color-border);
+        border-radius: 4px;
+        background: var(--color-bg-input);
+        color: var(--color-text-secondary);
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: background 0.15s, border-color 0.15s;
+      }
+
+      .copy-btn:hover {
+        background: var(--color-bg-card);
+        border-color: var(--color-primary);
+      }
+
+      .copy-btn.copied {
+        background: #16a34a;
+        border-color: #16a34a;
+        color: #fff;
+      }
+
+      .strength-bar {
+        margin: 0 0 1.5rem;
+      }
+
+      .strength-track {
+        height: 6px;
+        background: var(--color-border);
+        border-radius: 3px;
+        overflow: hidden;
+        margin-bottom: 0.35rem;
+      }
+
+      .strength-fill {
+        height: 100%;
+        border-radius: 3px;
+        transition: width 0.3s, background 0.3s;
+      }
+
+      .strength-label {
+        font-size: 0.8rem;
+        color: var(--color-text-muted);
+      }
+
+      .strength-label strong {
+        color: var(--color-text);
+      }
+
+      .password-error {
+        color: var(--color-error);
+        font-weight: 600;
+      }
     </style>
+    <script src="/shared/theme.js"></script>
   </head>
   <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <div class="container">
       <header class="header">
         <h1>Random Password Generator</h1>
         <p>Generate secure random passwords with custom character sets</p>
       </header>
 
-      <main class="main-content">
+      <main id="main-content" class="main-content">
         <nav class="breadcrumbs">
           <a href="/">Home</a>
           <span class="separator">/</span>
@@ -33,13 +111,6 @@
           <span class="current">Password Generator</span>
         </nav>
         <section class="section">
-          <h2>How It Works</h2>
-          <p>
-            This password generator creates random strings using JavaScript regular expressions to
-            define character sets. You can specify exactly which characters to include, making it
-            easy to create passwords that meet specific requirements.
-          </p>
-
           <h2>Generate Password</h2>
           <form id="form" class="form-container">
             <div class="form-group">
@@ -64,60 +135,100 @@
             <button type="submit" class="submit-btn">Generate Password</button>
           </form>
 
-          <div id="output" class="output-box"></div>
+          <div id="output"></div>
 
           <h2>Common Character Sets</h2>
+          <p>Click any preset to use it:</p>
           <div class="examples">
-            <div class="example-item">
-              <strong>Letters & Numbers:</strong> <code>[A-Za-z0-9]</code>
+            <div class="example-item" data-regex="[A-Za-z0-9]" data-len="12">
+              <strong>Letters & Numbers</strong> <code>[A-Za-z0-9]</code>
             </div>
-            <div class="example-item"><strong>Lowercase Only:</strong> <code>[a-z]</code></div>
-            <div class="example-item"><strong>Uppercase Only:</strong> <code>[A-Z]</code></div>
-            <div class="example-item"><strong>Numbers Only:</strong> <code>[0-9]</code></div>
-            <div class="example-item">
-              <strong>With Special Characters:</strong>
+            <div class="example-item" data-regex="[A-Za-z0-9!@#$%^&*]" data-len="16">
+              <strong>Strong (with special chars)</strong>
               <code>[A-Za-z0-9!@#$%^&*]</code>
             </div>
-            <div class="example-item">
-              <strong>Hex Characters:</strong> <code>[0-9A-Fa-f]</code>
+            <div class="example-item" data-regex="[a-z]" data-len="12">
+              <strong>Lowercase Only</strong> <code>[a-z]</code>
+            </div>
+            <div class="example-item" data-regex="[A-Z]" data-len="12">
+              <strong>Uppercase Only</strong> <code>[A-Z]</code>
+            </div>
+            <div class="example-item" data-regex="[0-9]" data-len="4">
+              <strong>PIN (4 digits)</strong> <code>[0-9]</code>
+            </div>
+            <div class="example-item" data-regex="[0-9A-Fa-f]" data-len="32">
+              <strong>Hex (32 chars)</strong> <code>[0-9A-Fa-f]</code>
+            </div>
+            <div class="example-item" data-regex="[A-Za-z0-9+/=]" data-len="24">
+              <strong>Base64-safe</strong> <code>[A-Za-z0-9+/=]</code>
+            </div>
+            <div class="example-item" data-regex="[!-~]" data-len="20">
+              <strong>All printable ASCII</strong> <code>[!-~]</code>
             </div>
           </div>
-        </section>
 
-        <section class="section">
-          <h2>Navigation</h2>
-          <ul class="external-links">
-            <li><a href="/javascript/">← Back to JavaScript experiments</a></li>
-            <li><a href="/">← Back to main page</a></li>
-          </ul>
+          <h2>How It Works</h2>
+          <p>
+            This password generator creates random strings using JavaScript regular expressions to
+            define character sets. You can specify exactly which characters to include, making it
+            easy to create passwords that meet specific requirements.
+          </p>
         </section>
       </main>
     </div>
 
     <script>
+      /* global navigator */
       "use strict"
 
-      /**
-       * Generates a password and updates the output display.
-       */
+      let lastPassword = ""
+
+      function strengthInfo(length, charsetSize) {
+        const entropy = length * Math.log2(charsetSize)
+        let label, color, pct
+        if (entropy < 28) {
+          label = "Very weak"
+          color = "#dc2626"
+          pct = 15
+        } else if (entropy < 36) {
+          label = "Weak"
+          color = "#ea580c"
+          pct = 30
+        } else if (entropy < 60) {
+          label = "Reasonable"
+          color = "#d97706"
+          pct = 50
+        } else if (entropy < 80) {
+          label = "Strong"
+          color = "#16a34a"
+          pct = 75
+        } else {
+          label = "Very strong"
+          color = "#15803d"
+          pct = 100
+        }
+        return { entropy: entropy, label: label, color: color, pct: pct }
+      }
+
       function update() {
         const len = parseInt(document.getElementById("length").value, 10)
         const regexInput = document.getElementById("regex").value
         const outputElement = document.getElementById("output")
 
-        // Validate length.
         if (isNaN(len) || len < 1 || len > 100) {
           outputElement.innerHTML =
-            '<span style="color: #dc3545;">Error: Length must be between 1 and 100</span>'
+            '<div class="password-output"><span class="password-error">Error: Length must be between 1 and 100</span></div>'
+          lastPassword = ""
           return
         }
 
-        // Validate and create regex.
         let regex
         try {
           regex = new RegExp(regexInput)
-        } catch (e) {
-          outputElement.innerHTML = `<span style="color: #dc3545;">Error: Invalid regex pattern - ${e.message}</span>`
+        } catch {
+          outputElement.innerHTML =
+            '<div class="password-output"><span class="password-error">Error: Invalid regex pattern</span></div>'
+          lastPassword = ""
           return
         }
 
@@ -125,65 +236,111 @@
 
         if (chars.length === 0) {
           outputElement.innerHTML =
-            '<span style="color: #dc3545;">Error: No characters match the regex pattern</span>'
+            '<div class="password-output"><span class="password-error">Error: No characters match the regex</span></div>'
+          lastPassword = ""
           return
         }
 
         const password = randomString(len, chars)
-        outputElement.innerHTML = `<span style="font-size: 1.5rem; letter-spacing: 2px;">${password}</span>`
+        lastPassword = password
+        const info = strengthInfo(len, chars.length)
+
+        outputElement.innerHTML =
+          '<div class="password-output">' +
+          '<span class="password-text">' +
+          escapeHtml(password) +
+          "</span>" +
+          '<button class="copy-btn" id="copy-btn" type="button">Copy</button>' +
+          "</div>" +
+          '<div class="strength-bar">' +
+          '<div class="strength-track">' +
+          '<div class="strength-fill" style="width:' +
+          info.pct +
+          "%; background:" +
+          info.color +
+          ';"></div>' +
+          "</div>" +
+          '<div class="strength-label">' +
+          "<strong>" +
+          info.label +
+          "</strong> — " +
+          Math.round(info.entropy) +
+          " bits of entropy (" +
+          chars.length +
+          " chars in set)" +
+          "</div>" +
+          "</div>"
+
+        document.getElementById("copy-btn").addEventListener("click", copyPassword)
       }
 
-      /**
-       * Handles form submission.
-       *
-       * @param {Event} event - Form submit event.
-       */
+      function escapeHtml(s) {
+        const div = document.createElement("div")
+        div.appendChild(document.createTextNode(s))
+        return div.innerHTML
+      }
+
+      function copyPassword() {
+        if (!lastPassword) return
+        navigator.clipboard.writeText(lastPassword).then(function () {
+          const btn = document.getElementById("copy-btn")
+          btn.textContent = "Copied!"
+          btn.classList.add("copied")
+          setTimeout(function () {
+            btn.textContent = "Copy"
+            btn.classList.remove("copied")
+          }, 1500)
+        })
+      }
+
       function handleSubmit(event) {
         event.preventDefault()
         update()
       }
 
-      /**
-       * Generates a list of printable ASCII characters that match the given regex.
-       *
-       * @param {RegExp} regex - Regular expression to test characters against.
-       * @returns {string[]} Array of matching characters.
-       */
       function charset(regex) {
         const PRINTABLE_ASCII_START = 32
         const PRINTABLE_ASCII_END = 126
 
-        return Array.from({ length: PRINTABLE_ASCII_END - PRINTABLE_ASCII_START + 1 }, (_, i) =>
-          String.fromCharCode(PRINTABLE_ASCII_START + i),
-        ).filter((char) => regex.test(char))
+        return Array.from({ length: PRINTABLE_ASCII_END - PRINTABLE_ASCII_START + 1 }, function (_, i) {
+          return String.fromCharCode(PRINTABLE_ASCII_START + i)
+        }).filter(function (char) {
+          return regex.test(char)
+        })
       }
 
-      /**
-       * Generates a random string of given length from the character set.
-       *
-       * @param {number} length - Desired length of the string.
-       * @param {string[]} chars - Array of characters to choose from.
-       * @returns {string} Randomly generated string.
-       */
       function randomString(length, chars) {
-        return Array.from({ length }, () => randomElement(chars)).join("")
+        return Array.from({ length: length }, function () {
+          return randomElement(chars)
+        }).join("")
       }
 
-      /**
-       * Gets a random element from an array.
-       *
-       * @param {Array} array - Array to select from.
-       * @returns {*} Random element from the array.
-       */
       function randomElement(array) {
         return array[Math.floor(Math.random() * array.length)]
       }
 
-      // Set up event listeners on page load.
-      document.addEventListener("DOMContentLoaded", () => {
+      document.addEventListener("DOMContentLoaded", function () {
+        // Load from URL params if present
+        const params = new URLSearchParams(window.location.search)
+        if (params.get("len")) document.getElementById("length").value = params.get("len")
+        if (params.get("regex")) document.getElementById("regex").value = params.get("regex")
+
         update()
         document.getElementById("form").addEventListener("submit", handleSubmit)
+
+        // Clickable presets
+        document.querySelectorAll(".example-item[data-regex]").forEach(function (item) {
+          item.addEventListener("click", function () {
+            document.getElementById("regex").value = item.dataset.regex
+            if (item.dataset.len) {
+              document.getElementById("length").value = item.dataset.len
+            }
+            update()
+          })
+        })
       })
     </script>
+    <script src="/shared/nav.js"></script>
+    <script src="/shared/prevnext.js"></script>
   </body>
 </html>

@@ -7,61 +7,8 @@
     <meta name="description" content="Educational games and interactive experiences" />
     <meta name="theme-color" content="#2d3748" />
     <link rel="stylesheet" href="/style.css" />
-    <style>
-      .game-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-      }
-
-      .game-list li {
-        margin-bottom: 0.5rem;
-      }
-
-      .game-list a {
-        color: #3182ce;
-        text-decoration: none;
-        font-weight: 500;
-      }
-
-      .game-list a:hover {
-        text-decoration: underline;
-      }
-
-      .game-list a:focus {
-        outline: 2px solid #3182ce;
-        outline-offset: 2px;
-      }
-
-      .game-list .game-title {
-        font-size: 1.05em;
-        font-weight: 600;
-      }
-
-      .game-list .game-title::after {
-        content: ": ";
-      }
-
-      .game-list .game-description {
-        font-weight: 400;
-        color: #6c757d;
-      }
-
-      @media (prefers-color-scheme: dark) {
-        .game-list a {
-          color: #63b3ed;
-        }
-
-        .game-list a:hover {
-          color: #90cdf4;
-        }
-
-        .game-list .game-description {
-          color: #a0aec0;
-        }
-      }
-    </style>
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <script src="/shared/theme.js"></script>
   </head>
   <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -80,33 +27,24 @@
 
         <section class="section">
           <h2>Available Games</h2>
-          <ul class="game-list">
+          <ul class="internal-links">
             <li>
-              <a href="/games/number-garden/">
-                <div class="game-title">🌸 Number Garden</div>
-                <div class="game-description">
-                  Help magical creatures by solving math problems in this colorful adventure for
-                  young learners.
-                </div>
-              </a>
+              <a href="/games/number-garden/"
+                ><strong>Number Garden</strong
+                ><span>Math adventure for young learners</span></a
+              >
             </li>
             <li>
-              <a href="/games/life-garden/">
-                <div class="game-title">🌿 Life Garden</div>
-                <div class="game-description">
-                  Plant seeds on a grid and watch a tiny ecosystem come to life in this cellular
-                  automata puzzle game.
-                </div>
-              </a>
+              <a href="/games/life-garden/"
+                ><strong>Life Garden</strong
+                ><span>Cellular automata puzzle game</span></a
+              >
             </li>
             <li>
-              <a href="/games/turing-tape/">
-                <div class="game-title">📼 Turing Tape</div>
-                <div class="game-description">
-                  Write rules for a Turing machine to transform tapes in this puzzle game about
-                  computation.
-                </div>
-              </a>
+              <a href="/games/turing-tape/"
+                ><strong>Turing Tape</strong
+                ><span>Write rules for a Turing machine to transform tapes</span></a
+              >
             </li>
           </ul>
         </section>

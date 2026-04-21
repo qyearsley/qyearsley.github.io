@@ -446,9 +446,9 @@ describe("GameUI", () => {
     })
   })
 
-  describe("updateCastleScreen", () => {
+  describe("updateCastleScreen (via castle)", () => {
     test("updates castle screen title", () => {
-      gameUI.updateCastleScreen({ title: "Build a Castle" })
+      gameUI.castle.updateCastleScreen({ title: "Build a Castle" })
 
       expect(document.getElementById("castle-screen-title").textContent).toBe("Build a Castle")
     })

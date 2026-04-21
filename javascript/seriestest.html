@@ -12,19 +12,97 @@
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
     <style>
       #output {
-        margin: 1em;
-        border: 1px solid gray;
+        margin: 1em 0;
+      }
+
+      .series-result {
+        padding: 1rem;
+        background: var(--color-bg-card);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        font-family: monospace;
+      }
+
+      .series-sum {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+
+      .series-detail {
+        font-size: 0.85rem;
+        color: var(--color-text-muted);
+      }
+
+      .series-target {
+        font-size: 0.9rem;
+        color: var(--color-primary);
+        margin-top: 0.25rem;
+      }
+
+      .chart-container {
+        margin-top: 0.75rem;
+        border: 1px solid var(--color-border);
+        border-radius: 4px;
+        overflow: hidden;
+        background: var(--color-bg-input);
+      }
+
+      .chart-container svg {
+        display: block;
+        width: 100%;
+        height: 120px;
+      }
+
+      .chart-label {
+        font-size: 0.75rem;
+        color: var(--color-text-muted);
+        margin-top: 0.25rem;
+        text-align: center;
+      }
+
+      .presets-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
+      .preset-btn {
+        padding: 0.35rem 0.75rem;
+        border: 1px solid var(--color-border-dark);
+        border-radius: 4px;
+        background: var(--color-bg-card);
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-family: monospace;
+        color: var(--color-text-secondary);
+        transition: border-color 0.15s, background 0.15s;
+      }
+
+      .preset-btn:hover {
+        background: var(--color-bg-code);
+        border-color: var(--color-primary);
+      }
+
+      .preset-btn.active {
+        background: var(--color-primary);
+        border-color: var(--color-primary);
+        color: #fff;
       }
     </style>
+    <script src="/shared/theme.js"></script>
   </head>
   <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <div class="container">
       <header class="header">
         <h1>Convergent Series Tester</h1>
         <p>Test the convergence of infinite series by computing partial sums</p>
       </header>
 
-      <main class="main-content">
+      <main id="main-content" class="main-content">
         <nav class="breadcrumbs">
           <a href="/">Home</a>
           <span class="separator">/</span>
@@ -35,6 +113,17 @@
 
         <section class="section">
           <h2>Calculate Series Sum</h2>
+
+          <div class="presets-row">
+            <span style="font-size: 0.85rem; color: var(--color-text-muted)">Presets:</span>
+            <button class="preset-btn" data-formula="1 / Math.pow(2, n)" data-n="100" data-target="2" data-label="2 (Geometric)">2 (Geometric)</button>
+            <button class="preset-btn" data-formula="1 / (function f(k){return k<=1?1:k*f(k-1)})(n)" data-n="20" data-target="2.71828" data-label="e (Euler)">e (Euler)</button>
+            <button class="preset-btn" data-formula="1 / Math.pow(n + 1, 2)" data-n="1000" data-target="1.6449" data-label="pi^2/6 (Basel)">&pi;&sup2;/6 (Basel)</button>
+            <button class="preset-btn" data-formula="Math.pow(-1, n) / (2 * n + 1)" data-n="1000" data-target="0.7854" data-label="pi/4 (Leibniz)">&pi;/4 (Leibniz)</button>
+            <button class="preset-btn" data-formula="Math.pow(-1, n) / (n + 1)" data-n="1000" data-target="0.6931" data-label="ln(2)">ln(2)</button>
+            <button class="preset-btn" data-formula="1 / Math.pow(3, n)" data-n="100" data-target="1.5" data-label="1.5 (Geometric r=1/3)">1.5 (Geometric r=1/3)</button>
+          </div>
+
           <form id="form" class="form-container">
             <div class="form-group">
               <label for="f">f(n) =</label>
@@ -79,146 +168,209 @@
             This tool approximates the sum of an infinite sequence by computing
             <i>&Sigma;(n=0, N)f(n)</i> for some large <i>N</i>.
           </p>
-
-          <h3>Some convergent series to try</h3>
-          <table border="1">
-            <thead>
-              <tr>
-                <th>Series</th>
-                <th>JavaScript</th>
-                <th>Converges to</th>
-              </tr>
-            </thead>
-            <tr>
-              <td>Geometric series (r=1/2)</td>
-              <td><code>1 / Math.pow(2, n)</code></td>
-              <td>2</td>
-            </tr>
-            <tr>
-              <td>Geometric series (r=1/3)</td>
-              <td><code>1 / Math.pow(3, n)</code></td>
-              <td>1.5</td>
-            </tr>
-            <tr>
-              <td>1/n² series</td>
-              <td><code>1 / Math.pow(n + 1, 2)</code></td>
-              <td>π²/6 ≈ 1.645</td>
-            </tr>
-            <tr>
-              <td>1/n! series</td>
-              <td><code>1 / factorial(n)</code></td>
-              <td>e ≈ 2.718</td>
-            </tr>
-            <tr>
-              <td>Alternating series</td>
-              <td><code>Math.pow(-1, n) / (n + 1)</code></td>
-              <td>ln(2) ≈ 0.693</td>
-            </tr>
-          </table>
-
-          <p>
-            <small
-              >Note: For the factorial function, you'll need to define it first:
-              <code
-                >function factorial(n) { return n &lt;= 1 ? 1 : n * factorial(n-1); }</code
-              ></small
-            >
-          </p>
-        </section>
-
-        <section class="section">
-          <h2>Navigation</h2>
-          <ul class="external-links">
-            <li><a href="/javascript/">← Back to JavaScript experiments</a></li>
-            <li><a href="/">← Back to main page</a></li>
-          </ul>
         </section>
       </main>
     </div>
 
     <script>
+      /* global getComputedStyle */
       "use strict"
 
-      /**
-       * Convergent Series Tester
-       * Quinten Yearsley
-       * Created 2008, Rewritten 2013, Modernized 2025
-       */
+      let targetValue = null
 
-      /**
-       * Reads the input and updates the output contents.
-       * Note: Uses new Function() which evaluates user input as code.
-       */
       function update() {
         const fInput = document.getElementById("f").value
         const N = parseInt(document.getElementById("n").value, 10)
         const outputElement = document.getElementById("output")
         const errorElement = document.getElementById("error")
 
-        // Clear previous errors.
         errorElement.style.display = "none"
         outputElement.innerHTML = ""
 
-        // Validate N.
         if (isNaN(N) || N < 1 || N > 10000) {
           errorElement.textContent = "N must be between 1 and 10000"
           errorElement.style.display = "block"
           return
         }
 
-        // Try to create and execute the function.
         try {
-          const f = new Function("n", `return ${fInput}`)
+          const f = new Function("n", "return " + fInput)
           const terms = computeTerms(f, N)
           const termsSum = sum(terms)
+          const partials = partialSums(terms)
 
-          const output = `
-            &Sigma;(n=0,${N})f(n) = ${termsSum}
-            <br>&nbsp;&nbsp;&nbsp;&nbsp;
-            = sum([${terms.slice(0, 3)},...,${terms.slice(-1)}])
-          `
-          outputElement.innerHTML = output
+          let targetHtml = ""
+          if (targetValue !== null) {
+            const error = Math.abs(termsSum - targetValue)
+            targetHtml =
+              '<div class="series-target">Target: ' +
+              targetValue +
+              " | Error: " +
+              error.toExponential(4) +
+              "</div>"
+          }
+
+          outputElement.innerHTML =
+            '<div class="series-result">' +
+            '<div class="series-sum">&Sigma;(n=0,' +
+            N +
+            ")f(n) = " +
+            termsSum +
+            "</div>" +
+            '<div class="series-detail">First terms: [' +
+            terms.slice(0, 3).join(", ") +
+            ", ..., " +
+            terms.slice(-1) +
+            "]</div>" +
+            targetHtml +
+            "</div>" +
+            '<div class="chart-container">' +
+            renderChart(partials) +
+            "</div>" +
+            '<div class="chart-label">Partial sums as n increases</div>'
         } catch (e) {
-          errorElement.textContent = `Error evaluating function: ${e.message}`
+          errorElement.textContent = "Error evaluating function: " + e.message
           errorElement.style.display = "block"
         }
       }
 
-      /**
-       * Handles form submission.
-       *
-       * @param {Event} event - Form submit event.
-       */
       function handleSubmit(event) {
         event.preventDefault()
         update()
       }
 
-      /**
-       * Generates a list of function outputs for each index from 0 to n.
-       *
-       * @param {Function} f - Function to evaluate at each index.
-       * @param {number} n - Maximum index (inclusive).
-       * @returns {number[]} Array of function outputs.
-       */
       function computeTerms(f, n) {
         return Array.from({ length: n + 1 }, (_, i) => f(i))
       }
 
-      /**
-       * Sums the items in an array.
-       *
-       * @param {number[]} arr - Array of numbers to sum.
-       * @returns {number} Sum of all array elements.
-       */
       function sum(arr) {
         return arr.reduce((acc, val) => acc + val, 0)
       }
 
-      // Set up event listeners on page load.
+      function partialSums(terms) {
+        const sums = []
+        let running = 0
+        for (let i = 0; i < terms.length; i++) {
+          running += terms[i]
+          sums.push(running)
+        }
+        return sums
+      }
+
+      function renderChart(partials) {
+        // Sample evenly if too many points
+        const maxPoints = 200
+        let data = partials
+        if (data.length > maxPoints) {
+          const sampled = []
+          for (let i = 0; i < maxPoints; i++) {
+            sampled.push(data[Math.floor((i / maxPoints) * data.length)])
+          }
+          sampled.push(data[data.length - 1])
+          data = sampled
+        }
+
+        const w = 600
+        const h = 120
+        const pad = 8
+
+        // Find range, handle flat lines
+        let minVal = Math.min(...data)
+        let maxVal = Math.max(...data)
+
+        // Include target value in range if set
+        if (targetValue !== null) {
+          minVal = Math.min(minVal, targetValue)
+          maxVal = Math.max(maxVal, targetValue)
+        }
+
+        if (minVal === maxVal) {
+          minVal -= 1
+          maxVal += 1
+        }
+        const range = maxVal - minVal
+
+        // Build polyline points
+        const points = []
+        for (let j = 0; j < data.length; j++) {
+          const x = pad + (j / (data.length - 1)) * (w - 2 * pad)
+          const y = h - pad - ((data[j] - minVal) / range) * (h - 2 * pad)
+          points.push(x.toFixed(1) + "," + y.toFixed(1))
+        }
+
+        // Get colors from CSS variables
+        const color =
+          getComputedStyle(document.documentElement)
+            .getPropertyValue("--color-primary")
+            .trim() || "#3182ce"
+        const errorColor =
+          getComputedStyle(document.documentElement)
+            .getPropertyValue("--color-error")
+            .trim() || "#dc3545"
+
+        let targetLine = ""
+        if (targetValue !== null) {
+          const targetY = h - pad - ((targetValue - minVal) / range) * (h - 2 * pad)
+          targetLine =
+            '<line x1="' + pad + '" y1="' + targetY.toFixed(1) +
+            '" x2="' + (w - pad) + '" y2="' + targetY.toFixed(1) +
+            '" stroke="' + errorColor +
+            '" stroke-width="1" stroke-dasharray="6 3" stroke-opacity="0.7"/>' +
+            '<text x="' + (w - pad - 2) + '" y="' + (targetY - 3).toFixed(1) +
+            '" text-anchor="end" fill="' + errorColor +
+            '" font-size="9" font-family="monospace" opacity="0.8">' +
+            targetValue + '</text>'
+        }
+
+        // Final value reference line (faint)
+        const finalY = h - pad - ((data[data.length - 1] - minVal) / range) * (h - 2 * pad)
+
+        return (
+          '<svg viewBox="0 0 ' + w + " " + h + '" preserveAspectRatio="none">' +
+          '<line x1="' + pad + '" y1="' + finalY.toFixed(1) +
+          '" x2="' + (w - pad) + '" y2="' + finalY.toFixed(1) +
+          '" stroke="' + color + '" stroke-opacity="0.15" stroke-dasharray="4 2"/>' +
+          targetLine +
+          '<polyline fill="none" stroke="' + color +
+          '" stroke-width="2" stroke-linejoin="round" points="' +
+          points.join(" ") + '"/>' +
+          "</svg>"
+        )
+      }
+
+      function applyPreset(formula, n, target) {
+        document.getElementById("f").value = formula
+        document.getElementById("n").value = n
+        targetValue = target
+        update()
+        // Update active state on buttons
+        document.querySelectorAll(".preset-btn").forEach((btn) => {
+          btn.classList.toggle("active", btn.dataset.formula === formula)
+        })
+      }
+
       document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("form").addEventListener("submit", handleSubmit)
+
+        document.querySelectorAll(".preset-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const formula = btn.dataset.formula
+            const n = parseInt(btn.dataset.n, 10)
+            const target = parseFloat(btn.dataset.target)
+            applyPreset(formula, n, target)
+          })
+        })
+
+        // Clear target when user manually edits the formula
+        document.getElementById("f").addEventListener("input", () => {
+          targetValue = null
+          document.querySelectorAll(".preset-btn").forEach((btn) => {
+            btn.classList.remove("active")
+          })
+        })
       })
     </script>
+    <script src="/shared/nav.js"></script>
+    <script src="/shared/prevnext.js"></script>
   </body>
 </html>

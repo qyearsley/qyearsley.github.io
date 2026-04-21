@@ -7,15 +7,17 @@
     <link rel="stylesheet" href="/style.css" />
     <link rel="stylesheet" href="/components.css" />
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <script src="/shared/theme.js"></script>
   </head>
   <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <div class="container">
       <header class="header">
         <h1>Markov Chain Text Generator</h1>
         <p>Generate new text based on patterns learned from your input</p>
       </header>
 
-      <main class="main-content">
+      <main id="main-content" class="main-content">
         <nav class="breadcrumbs">
           <a href="/">Home</a>
           <span class="separator">/</span>
@@ -27,7 +29,13 @@
         <section class="section">
           <h2>Generator</h2>
           <div class="form-group">
-            <label for="input-text">Input Text (paste your source text here):</label>
+            <label>Source Text:</label>
+            <div class="controls-row" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem">
+              <button class="preset-btn active" data-preset="shakespeare">Shakespeare</button>
+              <button class="preset-btn" data-preset="nursery">Nursery Rhyme</button>
+              <button class="preset-btn" data-preset="technical">Technical</button>
+              <button class="preset-btn" data-preset="custom">Paste Your Own</button>
+            </div>
             <textarea
               id="input-text"
               placeholder="Paste some text here to train the Markov chain..."
@@ -89,25 +97,47 @@
             by randomly selecting the next character or word based on the learned probabilities.
           </p>
         </section>
-
-        <section class="section">
-          <h2>Navigation</h2>
-          <ul class="external-links">
-            <li><a href="/javascript/">← Back to JavaScript experiments</a></li>
-            <li><a href="/">← Back to main page</a></li>
-          </ul>
-        </section>
       </main>
     </div>
 
+    <style>
+      .preset-btn {
+        padding: 0.35rem 0.75rem;
+        border: 1px solid var(--color-border-dark, #cbd5e0);
+        border-radius: 4px;
+        background: var(--color-bg-card, #f8fafc);
+        cursor: pointer;
+        font-size: 0.85rem;
+        color: var(--color-text-secondary, #4a5568);
+        transition: border-color 0.15s, background 0.15s;
+      }
+
+      .preset-btn:hover {
+        background: var(--color-bg-code, #e9ecef);
+        border-color: var(--color-primary, #3182ce);
+      }
+
+      .preset-btn.active {
+        background: var(--color-primary, #3182ce);
+        border-color: var(--color-primary, #3182ce);
+        color: #fff;
+      }
+    </style>
     <script type="module">
       import { MarkovChain } from "./markov.js"
 
-      let chain = null
+      const presetTexts = {
+        shakespeare:
+          "To be or not to be, that is the question. Whether tis nobler in the mind to suffer the slings and arrows of outrageous fortune, or to take arms against a sea of troubles, and by opposing end them. To die, to sleep, no more; and by a sleep to say we end the heartache and the thousand natural shocks that flesh is heir to. Tis a consummation devoutly to be wished.",
+        nursery:
+          "Humpty Dumpty sat on a wall, Humpty Dumpty had a great fall. All the king's horses and all the king's men couldn't put Humpty together again. Jack and Jill went up the hill to fetch a pail of water. Jack fell down and broke his crown, and Jill came tumbling after. Mary had a little lamb whose fleece was white as snow, and everywhere that Mary went the lamb was sure to go.",
+        technical:
+          "A hash table is a data structure that maps keys to values using a hash function. The hash function computes an index into an array of buckets, from which the desired value can be found. Ideally, the hash function will assign each key to a unique bucket, but most hash table designs employ an imperfect hash function, which might cause hash collisions where the hash function generates the same index for more than one key.",
+      }
 
-      /**
-       * Generates text using the Markov chain based on current settings
-       */
+      let chain = null
+      let debounceTimer = null
+
       function generate() {
         const inputText = document.getElementById("input-text").value
         const outputDiv = document.getElementById("output")
@@ -127,42 +157,69 @@
           const generated = chain.generate(outputLength)
           outputDiv.textContent = generated
 
-          // Show probabilities
           const transitions = chain.getTransitions()
           let html = "<h4>Transition Probabilities (sample):</h4>"
 
           const entries = Object.entries(transitions).slice(0, 10)
           for (const [ngram, possibilities] of entries) {
             const totalCount = Object.values(possibilities).reduce((a, b) => a + b, 0)
-            html += `<div class="probability-sample">`
-            html += `<strong>${JSON.stringify(ngram)}</strong> →<br>`
+            html += '<div class="probability-sample">'
+            html += "<strong>" + ngram + "</strong> &rarr;<br>"
             for (const [next, count] of Object.entries(possibilities)) {
               const prob = ((count / totalCount) * 100).toFixed(1)
-              html += `&nbsp;&nbsp;${JSON.stringify(next)}: ${prob}% (${count}/${totalCount})<br>`
+              html += "&nbsp;&nbsp;" + next + ": " + prob + "% (" + count + "/" + totalCount + ")<br>"
             }
-            html += `</div>`
+            html += "</div>"
           }
 
           probabilitiesDiv.innerHTML = html
         } catch (error) {
-          outputDiv.textContent = `Error: ${error.message}`
+          outputDiv.textContent = "Error: " + error.message
           probabilitiesDiv.innerHTML = ""
+        }
+      }
+
+      function debouncedGenerate() {
+        clearTimeout(debounceTimer)
+        debounceTimer = setTimeout(generate, 500)
+      }
+
+      function setPreset(name) {
+        const textarea = document.getElementById("input-text")
+        document.querySelectorAll(".preset-btn").forEach(function (btn) {
+          btn.classList.toggle("active", btn.dataset.preset === name)
+        })
+
+        if (name === "custom") {
+          textarea.value = ""
+          textarea.focus()
+        } else if (presetTexts[name]) {
+          textarea.value = presetTexts[name]
+          generate()
         }
       }
 
       document.getElementById("generate").addEventListener("click", generate)
 
-      // Auto-generate on input if there's text
-      document.getElementById("input-text").addEventListener("input", () => {
-        if (document.getElementById("input-text").value.trim()) {
-          generate()
-        }
+      // Debounced auto-generate on text input
+      document.getElementById("input-text").addEventListener("input", debouncedGenerate)
+
+      // Preset buttons
+      document.querySelectorAll(".preset-btn[data-preset]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          setPreset(btn.dataset.preset)
+        })
       })
 
-      // Load default example text
-      document.getElementById("input-text").value =
-        "To be or not to be, that is the question. Whether tis nobler in the mind to suffer the slings and arrows of outrageous fortune, or to take arms against a sea of troubles."
-      generate()
+      // Re-generate when settings change
+      document.getElementById("ngram-type").addEventListener("change", generate)
+      document.getElementById("ngram-size").addEventListener("change", generate)
+      document.getElementById("output-length").addEventListener("change", generate)
+
+      // Load default
+      setPreset("shakespeare")
     </script>
+    <script src="/shared/nav.js"></script>
+    <script src="/shared/prevnext.js"></script>
   </body>
 </html>

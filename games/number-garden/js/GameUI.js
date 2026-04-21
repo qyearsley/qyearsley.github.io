@@ -1,5 +1,6 @@
-import { MATH, AREA_ICONS } from "./constants.js"
+import { MATH } from "./constants.js"
 import { BaseGameUI } from "../../shared/BaseGameUI.js"
+import { CastleUI } from "./CastleUI.js"
 
 const VISUAL_ITEM_ANIMATION_DELAY_MS = 100
 
@@ -14,6 +15,7 @@ export class GameUI extends BaseGameUI {
   constructor() {
     super()
     this.elements = this.cacheElements()
+    this.castle = new CastleUI(this.elements)
   }
 
   /**
@@ -414,10 +416,6 @@ export class GameUI extends BaseGameUI {
     })
   }
 
-  /**
-   * Update settings UI with current values
-   * @param {Object} settings - Settings object
-   */
   updateSettingsUI(settings) {
     if (this.elements.difficultySelect) {
       this.elements.difficultySelect.value = settings.difficulty || "adventurer"
@@ -430,223 +428,6 @@ export class GameUI extends BaseGameUI {
     }
     if (this.elements.soundEffectsSelect) {
       this.elements.soundEffectsSelect.value = settings.soundEffects || "on"
-    }
-  }
-
-  /**
-   * Update castle screen for the selected project
-   * @param {Object} projectInfo - Project configuration with title, icon, and pieceName
-   */
-  updateCastleScreen(projectInfo) {
-    if (this.elements.castleScreenTitle) {
-      this.elements.castleScreenTitle.textContent = projectInfo.title
-    }
-    if (this.elements.castleDescription) {
-      // Generate a description based on the project type
-      const descriptions = {
-        "Build a Castle": "Complete all areas to build the castle!",
-        "Grow a Garden": "Complete all areas to grow your garden!",
-        "Build a Robot": "Complete all areas to build your robot!",
-        "Build a Rocket": "Complete all areas to build your rocket!",
-      }
-      this.elements.castleDescription.textContent =
-        descriptions[projectInfo.title] ||
-        `Complete all areas to build your ${projectInfo.title.toLowerCase()}!`
-    }
-  }
-
-  /**
-   * Update castle progress display
-   * @param {number} completed - Number of completed areas
-   * @param {number} total - Total number of areas
-   */
-  updateCastleProgress(completed, total) {
-    if (this.elements.castleProgressText) {
-      this.elements.castleProgressText.textContent = `Pieces: ${completed}/${total}`
-    }
-  }
-
-  /**
-   * Display castle pieces indicators
-   * @param {Set<string>} completedAreas - Set of completed area IDs
-   */
-  displayCastlePieces(completedAreas) {
-    if (!this.elements.castlePiecesDisplay) return
-
-    this.elements.castlePiecesDisplay.innerHTML = ""
-
-    Object.entries(AREA_ICONS).forEach(([areaId, emoji]) => {
-      const piece = document.createElement("div")
-      piece.className = "castle-piece"
-      piece.textContent = emoji
-
-      if (completedAreas.has(areaId)) {
-        piece.classList.add("completed")
-      } else {
-        piece.classList.add("locked")
-      }
-
-      this.elements.castlePiecesDisplay.appendChild(piece)
-    })
-  }
-
-  /**
-   * Update castle badge on castle button
-   * @param {number} completedCount - Number of completed areas
-   */
-  updateCastleBadge(completedCount) {
-    if (!this.elements.castleButton) return
-
-    // Remove existing badge if any
-    const existingBadge = this.elements.castleButton.querySelector(".castle-badge")
-    if (existingBadge) {
-      existingBadge.remove()
-    }
-
-    // Add badge if any areas completed
-    if (completedCount > 0) {
-      const badge = document.createElement("span")
-      badge.className = "castle-badge"
-      badge.textContent = completedCount
-      this.elements.castleButton.appendChild(badge)
-    }
-  }
-
-  /**
-   * Show castle piece notification
-   * @param {string} areaName - Name of completed area
-   * @param {number} totalPieces - Total pieces collected
-   * @param {Object} projectInfo - Project information with icon and pieceName
-   */
-  showCastleNotification(
-    areaName,
-    totalPieces,
-    projectInfo = { icon: "🏰", pieceName: "Castle Piece" },
-  ) {
-    if (!this.elements.castleNotification) return
-
-    this.elements.castleNotification.innerHTML = `
-      <div class="castle-notification-content">
-        <div class="castle-notification-icon">${projectInfo.icon}</div>
-        <div class="castle-notification-text">
-          <strong>${areaName} Complete!</strong>
-          <span>${projectInfo.pieceName} ${totalPieces}/6 collected!</span>
-        </div>
-      </div>
-    `
-
-    this.elements.castleNotification.classList.add("show")
-
-    // Hide after 3 seconds
-    setTimeout(() => {
-      this.elements.castleNotification.classList.remove("show")
-    }, 2500)
-  }
-
-  /**
-   * Show project progress modal
-   * @param {string} projectType - Type of project (castle, garden, robot, spaceship)
-   * @param {number} completedCount - Number of completed areas
-   * @param {boolean} isComplete - Whether the project is fully complete
-   */
-  showProjectProgress(projectType, completedCount, isComplete = false) {
-    if (!this.elements.projectProgressModal) return
-
-    // Define project visualizations based on progress
-    const projectVisuals = {
-      castle: ["🧱", "🧱🧱", "🧱🧱🧱", "🏰🧱", "🏰🏰", "🏰✨"],
-      garden: ["🌱", "🌱🌱", "🌻", "🌻🌸", "🌻🌸🌺", "🌻🌸🌺🌷"],
-      robot: ["🔧", "🔧⚙️", "🦾", "🦿🦾", "🤖", "🤖✨"],
-      spaceship: ["🔩", "🔩🔧", "🛸", "🛸⚡", "🚀", "🚀✨"],
-    }
-
-    const projectTitles = {
-      castle: "Building Your Castle!",
-      garden: "Growing Your Garden!",
-      robot: "Building Your Robot!",
-      spaceship: "Building Your Rocket!",
-    }
-
-    const visual = projectVisuals[projectType]?.[completedCount - 1] || "🎯"
-    const title = isComplete
-      ? projectTitles[projectType]?.replace("Building", "Completed") ||
-        projectTitles[projectType]?.replace("Growing", "Grew")
-      : projectTitles[projectType]
-
-    this.elements.projectModalTitle.textContent = title
-    this.elements.projectVisual.textContent = visual
-    this.elements.projectProgressText.textContent = isComplete
-      ? "🎉 All areas complete! 🎉"
-      : `Progress: ${completedCount}/6 areas complete`
-
-    this.elements.projectProgressModal.classList.remove("hidden")
-  }
-
-  /**
-   * Hide project progress modal
-   */
-  hideProjectProgress() {
-    if (this.elements.projectProgressModal) {
-      this.elements.projectProgressModal.classList.add("hidden")
-    }
-  }
-
-  /**
-   * Update level complete screen with rewards and progress
-   * @param {number} starsEarned - Number of stars earned this level
-   * @param {number} flowersEarned - Number of flowers earned this level
-   * @param {boolean} wasAreaCompleted - Whether this level completed an area
-   * @param {string} projectType - Type of project (castle, garden, robot, spaceship)
-   * @param {number} completedAreasCount - Total number of completed areas
-   */
-  updateLevelCompleteScreen(
-    starsEarned,
-    flowersEarned,
-    wasAreaCompleted,
-    projectType,
-    completedAreasCount,
-  ) {
-    // Update stars earned text
-    const starsText = document.getElementById("level-stars-earned")
-    if (starsText) {
-      starsText.textContent = `${starsEarned} stars earned!`
-    }
-
-    // Update flowers earned text
-    const flowersText = document.getElementById("level-flowers-earned")
-    if (flowersText) {
-      flowersText.textContent = `${flowersEarned} flowers collected!`
-    }
-
-    // Show/hide project progress based on whether area was completed
-    const projectProgressContainer = document.getElementById("level-project-progress-container")
-    if (projectProgressContainer) {
-      if (wasAreaCompleted) {
-        projectProgressContainer.classList.remove("hidden")
-
-        // Update project icon and message
-        const projectIcon = document.getElementById("level-project-icon")
-        const projectMessage = document.getElementById("level-project-message")
-
-        // Define project visuals data
-        const projectVisuals = {
-          castle: { icon: "🏰", pieceName: "Castle Piece" },
-          garden: { icon: "🌻", pieceName: "Garden Section" },
-          robot: { icon: "🤖", pieceName: "Robot Part" },
-          spaceship: { icon: "🚀", pieceName: "Rocket Part" },
-        }
-
-        const projectInfo = projectVisuals[projectType] || projectVisuals.castle
-
-        if (projectIcon) {
-          projectIcon.textContent = projectInfo.icon
-        }
-        if (projectMessage) {
-          projectMessage.textContent = `You earned a new ${projectInfo.pieceName.toLowerCase()}! (${completedAreasCount}/6)`
-        }
-      } else {
-        projectProgressContainer.classList.add("hidden")
-      }
     }
   }
 }

@@ -51,6 +51,13 @@
 
       // Set up event listeners on page load.
       document.addEventListener("DOMContentLoaded", () => {
+        // Load expression from URL if present
+        const params = new URLSearchParams(window.location.search)
+        const expr = params.get("expr")
+        if (expr) {
+          document.getElementById("input").value = expr
+        }
+
         update()
         document.getElementById("form").addEventListener("submit", handleSubmit)
 
@@ -63,8 +70,10 @@
         })
       })
     </script>
+    <script src="/shared/theme.js"></script>
   </head>
   <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <div class="container">
       <header class="header">
         <h1>Truth Table Generator</h1>
@@ -74,7 +83,7 @@
         </p>
       </header>
 
-      <main class="main-content">
+      <main id="main-content" class="main-content">
         <nav class="breadcrumbs">
           <a href="/">Home</a>
           <span class="separator">/</span>
@@ -154,15 +163,9 @@
             </div>
           </div>
         </section>
-
-        <section class="section">
-          <h2>Navigation</h2>
-          <ul class="external-links">
-            <li><a href="/javascript/">← Back to JavaScript experiments</a></li>
-            <li><a href="/">← Back to main page</a></li>
-          </ul>
-        </section>
       </main>
     </div>
+    <script src="/shared/nav.js"></script>
+    <script src="/shared/prevnext.js"></script>
   </body>
 </html>

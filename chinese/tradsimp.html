@@ -14,20 +14,31 @@
     <script type="module">
       "use strict"
 
-      import { simplify } from "./tradsimp.js"
+      import { simplify, traditionalize } from "./tradsimp.js"
+
+      let lastOutput = ""
+      let direction = "trad-to-simp" // or "simp-to-trad"
 
       function updateConversion() {
         const input = document.getElementById("input").value
         const output = document.getElementById("output")
+        const placeholder = direction === "trad-to-simp"
+          ? "Simplified text will appear here..."
+          : "Traditional text will appear here..."
 
         if (!input.trim()) {
-          output.innerHTML = '<span class="placeholder">Simplified text will appear here...</span>'
+          output.innerHTML = '<span class="placeholder">' + placeholder + "</span>"
+          lastOutput = ""
           return
         }
 
         try {
-          const simplified = simplify(input)
-          output.innerHTML = simplified
+          const converted = direction === "trad-to-simp" ? simplify(input) : traditionalize(input)
+          lastOutput = converted
+          output.innerHTML =
+            '<span class="converted-text">' + converted + "</span>" +
+            '<button class="copy-output-btn" id="copy-output" type="button">Copy</button>'
+          document.getElementById("copy-output").addEventListener("click", copyOutput)
         } catch (e) {
           output.innerHTML = '<span class="error">Error: ' + e + "</span>"
         }
@@ -96,13 +107,52 @@
         })
       }
 
+      function copyOutput() {
+        if (!lastOutput) return
+        navigator.clipboard.writeText(lastOutput).then(() => {
+          const btn = document.getElementById("copy-output")
+          btn.textContent = "Copied!"
+          btn.classList.add("copied")
+          setTimeout(() => {
+            btn.textContent = "Copy"
+            btn.classList.remove("copied")
+          }, 1500)
+        })
+      }
+
+      function setDirection(dir) {
+        direction = dir
+        const label = document.getElementById("input-label")
+        const input = document.getElementById("input")
+        const tradBtn = document.getElementById("dir-trad-simp")
+        const simpBtn = document.getElementById("dir-simp-trad")
+
+        if (dir === "trad-to-simp") {
+          label.textContent = "Traditional Chinese Text:"
+          input.placeholder = "輸入繁體中文..."
+          tradBtn.style.background = "var(--color-primary)"
+          tradBtn.style.color = "#fff"
+          simpBtn.style.background = "var(--color-bg-card)"
+          simpBtn.style.color = "var(--color-text-secondary)"
+        } else {
+          label.textContent = "Simplified Chinese Text:"
+          input.placeholder = "输入简体中文..."
+          simpBtn.style.background = "var(--color-primary)"
+          simpBtn.style.color = "#fff"
+          tradBtn.style.background = "var(--color-bg-card)"
+          tradBtn.style.color = "var(--color-text-secondary)"
+        }
+        updateConversion()
+      }
+
       // Initialize when page loads
       document.addEventListener("DOMContentLoaded", () => {
         loadExamples()
         updateConversion()
 
-        // Add input listener for real-time conversion
         document.getElementById("input").addEventListener("input", updateConversion)
+        document.getElementById("dir-trad-simp").addEventListener("click", () => setDirection("trad-to-simp"))
+        document.getElementById("dir-simp-trad").addEventListener("click", () => setDirection("simp-to-trad"))
       })
     </script>
     <style>
@@ -117,26 +167,49 @@
       .conversion-output {
         margin: 1.5rem 0;
         padding: 1rem;
-        background: #e9ecef;
+        background: var(--color-bg-code);
         border-radius: 4px;
         font-size: 1.2rem;
         font-family: "Microsoft YaHei", "SimSun", serif;
         text-align: center;
-        border: 2px dashed #6c757d;
+        border: 2px dashed var(--color-text-muted);
         min-height: 3rem;
         display: flex;
         align-items: center;
         justify-content: center;
+        gap: 0.75rem;
+        position: relative;
       }
 
       .placeholder {
-        color: #6c757d;
+        color: var(--color-text-muted);
         font-style: italic;
       }
 
       .error {
-        color: #dc3545;
+        color: var(--color-error);
         font-weight: 600;
+      }
+
+      .copy-output-btn {
+        flex-shrink: 0;
+        padding: 0.3rem 0.6rem;
+        border: 1px solid var(--color-border);
+        border-radius: 4px;
+        background: var(--color-bg-input);
+        color: var(--color-text-secondary);
+        font-size: 0.8rem;
+        cursor: pointer;
+      }
+
+      .copy-output-btn:hover {
+        border-color: var(--color-primary);
+      }
+
+      .copy-output-btn.copied {
+        background: #16a34a;
+        border-color: #16a34a;
+        color: #fff;
       }
 
       .examples {
@@ -202,17 +275,17 @@
         }
       }
     </style>
+    <script src="/shared/theme.js"></script>
   </head>
   <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <div class="container">
       <header class="header">
-        <h1>Traditional to Simplified Chinese Converter</h1>
-        <p>
-          Convert traditional Chinese characters to simplified Chinese using the tradsimp.js library
-        </p>
+        <h1>Chinese Character Converter</h1>
+        <p>Convert between traditional and simplified Chinese characters</p>
       </header>
 
-      <main class="main-content">
+      <main id="main-content" class="main-content">
         <nav class="breadcrumbs">
           <a href="/">Home</a>
           <span class="separator">/</span>
@@ -228,9 +301,13 @@
           </p>
 
           <h2>Convert Text</h2>
+          <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem">
+            <button class="preset-btn active" id="dir-trad-simp" style="padding: 0.35rem 0.75rem; border: 1px solid var(--color-border-dark); border-radius: 4px; background: var(--color-primary); color: #fff; cursor: pointer; font-size: 0.85rem">Traditional → Simplified</button>
+            <button class="preset-btn" id="dir-simp-trad" style="padding: 0.35rem 0.75rem; border: 1px solid var(--color-border-dark); border-radius: 4px; background: var(--color-bg-card); color: var(--color-text-secondary); cursor: pointer; font-size: 0.85rem">Simplified → Traditional</button>
+          </div>
           <form class="converter-form">
             <div class="form-group">
-              <label for="input">Traditional Chinese Text:</label>
+              <label for="input" id="input-label">Traditional Chinese Text:</label>
               <input id="input" type="text" class="form-input" placeholder="輸入繁體中文..." />
             </div>
           </form>
@@ -243,15 +320,9 @@
           <p>Click any example to try it:</p>
           <div id="examples" class="examples"></div>
         </section>
-
-        <section class="section">
-          <h2>Navigation</h2>
-          <ul class="external-links">
-            <li><a href="/javascript/">← Back to JavaScript experiments</a></li>
-            <li><a href="/">← Back to main page</a></li>
-          </ul>
-        </section>
       </main>
     </div>
+    <script src="/shared/nav.js"></script>
+    <script src="/shared/prevnext.js"></script>
   </body>
 </html>

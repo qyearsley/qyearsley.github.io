@@ -13,6 +13,9 @@
     <script type="module">
       "use strict"
 
+      // State: the current 64-bit string. Updated by input OR by clicking bits.
+      let currentBits = null
+
       function float64Bits(value) {
         const buf = new ArrayBuffer(8)
         new Float64Array(buf)[0] = value
@@ -22,6 +25,16 @@
         const bits =
           hi.toString(2).padStart(32, "0") + lo.toString(2).padStart(32, "0")
         return bits
+      }
+
+      function bitsToFloat64(bits) {
+        const buf = new ArrayBuffer(8)
+        const view = new DataView(buf)
+        const hi = parseInt(bits.slice(0, 32), 2)
+        const lo = parseInt(bits.slice(32), 2)
+        view.setUint32(0, hi, false)
+        view.setUint32(4, lo, false)
+        return new Float64Array(buf)[0]
       }
 
       function parseBits(bits) {
@@ -48,17 +61,19 @@
         return { raw, biased: raw - bias, actual: raw - bias }
       }
 
-      function renderBitBoxes(bits, className) {
+      function renderBitBoxes(bits, className, startIndex) {
         return bits
           .split("")
           .map(
-            (b) => `<span class="bit ${className} ${b === "1" ? "one" : "zero"}">${b}</span>`,
+            (b, i) =>
+              `<span class="bit ${className} ${b === "1" ? "one" : "zero"}" data-index="${startIndex + i}" role="button" tabindex="0" title="Click to toggle bit ${startIndex + i}">${b}</span>`,
           )
           .join("")
       }
 
-      function renderRepresentation(value) {
-        const { sign, exponent, mantissa } = parseBits(float64Bits(value))
+      function renderRepresentation(bits) {
+        const value = bitsToFloat64(bits)
+        const { sign, exponent, mantissa } = parseBits(bits)
         const exp = exponentInfo(exponent)
         const signChar = sign === "0" ? "+" : "-"
         const special = describeNumber(value)
@@ -83,69 +98,107 @@
             <div class="bit-layout">
               <div class="bit-group">
                 <div class="bit-label">Sign (1 bit)</div>
-                <div class="bit-row">${renderBitBoxes(sign, "sign")}</div>
+                <div class="bit-row">${renderBitBoxes(sign, "sign", 0)}</div>
                 <div class="bit-value">${sign === "0" ? "positive" : "negative"}</div>
               </div>
               <div class="bit-group">
                 <div class="bit-label">Exponent (11 bits)</div>
-                <div class="bit-row">${renderBitBoxes(exponent, "exp")}</div>
+                <div class="bit-row">${renderBitBoxes(exponent, "exp", 1)}</div>
                 <div class="bit-value">raw ${exp.raw}${exp.actual !== null ? `, biased ${exp.actual}` : ` (${exp.biased})`}</div>
               </div>
               <div class="bit-group">
                 <div class="bit-label">Mantissa (52 bits)</div>
-                <div class="bit-row mantissa-row">${renderBitBoxes(mantissa, "mant")}</div>
+                <div class="bit-row mantissa-row">${renderBitBoxes(mantissa, "mant", 12)}</div>
               </div>
             </div>
 
             <div class="hex-display">
-              Hex: 0x${[...float64Bits(value).matchAll(/.{4}/g)].map((m) => parseInt(m[0], 2).toString(16).toUpperCase()).join("")}
+              Hex: 0x${[...bits.matchAll(/.{4}/g)].map((m) => parseInt(m[0], 2).toString(16).toUpperCase()).join("")}
             </div>
+            <div class="bit-hint">Click any bit to toggle it</div>
           </div>
         `
       }
 
-      function update() {
+      function render() {
+        const output = document.getElementById("output")
+        output.innerHTML = renderRepresentation(currentBits)
+      }
+
+      function toggleBit(index) {
+        const arr = currentBits.split("")
+        arr[index] = arr[index] === "0" ? "1" : "0"
+        currentBits = arr.join("")
+        // Update the input to reflect the new value
+        const value = bitsToFloat64(currentBits)
+        document.getElementById("input").value =
+          Object.is(value, -0) ? "-0" : String(value)
+        render()
+      }
+
+      function updateFromInput() {
         const input = document.getElementById("input").value.trim()
         const output = document.getElementById("output")
 
         if (!input) {
           output.innerHTML = '<div class="placeholder">Enter a number above</div>'
+          currentBits = null
           return
         }
 
-        // Try to evaluate simple expressions like 0.1 + 0.2
         let value
         try {
-          // Only allow digits, dots, +, -, *, /, parens, spaces, e, E, Infinity, NaN
           if (!/^[\d.+\-*/() eENaInfity]+$/.test(input)) {
             output.innerHTML = '<div class="error-msg">Enter a number or simple expression</div>'
+            currentBits = null
             return
           }
           value = Function(`"use strict"; return (${input})`)()
         } catch {
           output.innerHTML = '<div class="error-msg">Could not parse expression</div>'
+          currentBits = null
           return
         }
 
         if (typeof value !== "number") {
           output.innerHTML = '<div class="error-msg">Result is not a number</div>'
+          currentBits = null
           return
         }
 
-        output.innerHTML = renderRepresentation(value)
+        currentBits = float64Bits(value)
+        render()
       }
 
       document.addEventListener("DOMContentLoaded", () => {
-        document.getElementById("input").addEventListener("input", update)
+        const inputEl = document.getElementById("input")
+        const output = document.getElementById("output")
+
+        inputEl.addEventListener("input", updateFromInput)
 
         document.querySelectorAll(".example-btn").forEach((btn) => {
           btn.addEventListener("click", () => {
-            document.getElementById("input").value = btn.dataset.text
-            update()
+            inputEl.value = btn.dataset.text
+            updateFromInput()
           })
         })
 
-        update()
+        // Delegate click/keyboard on bits
+        output.addEventListener("click", (e) => {
+          const bit = e.target.closest(".bit[data-index]")
+          if (bit) toggleBit(Number(bit.dataset.index))
+        })
+        output.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            const bit = e.target.closest(".bit[data-index]")
+            if (bit) {
+              e.preventDefault()
+              toggleBit(Number(bit.dataset.index))
+            }
+          }
+        })
+
+        updateFromInput()
       })
     </script>
     <style>
@@ -154,16 +207,16 @@
         padding: 0.75rem 1rem;
         font-size: 1.3rem;
         font-family: "SF Mono", Menlo, Consolas, monospace;
-        border: 2px solid #cbd5e0;
+        border: 2px solid var(--color-border-dark);
         border-radius: 8px;
-        background: #fff;
-        color: #1a202c;
+        background: var(--color-bg-input);
+        color: var(--color-text);
         margin-bottom: 0.5rem;
       }
 
       .float-input:focus {
         outline: none;
-        border-color: #3182ce;
+        border-color: var(--color-primary);
         box-shadow: 0 0 0 3px rgb(49, 130, 206, 0.2);
       }
 
@@ -176,21 +229,21 @@
 
       .example-btn {
         padding: 0.35rem 0.75rem;
-        border: 1px solid #cbd5e0;
+        border: 1px solid var(--color-border-dark);
         border-radius: 4px;
-        background: #f7fafc;
+        background: var(--color-bg-card);
         cursor: pointer;
         font-size: 0.9rem;
         font-family: "SF Mono", Menlo, Consolas, monospace;
-        color: #4a5568;
+        color: var(--color-text-secondary);
         transition:
           border-color 0.15s,
           background 0.15s;
       }
 
       .example-btn:hover {
-        background: #edf2f7;
-        border-color: #a0aec0;
+        background: var(--color-bg-code);
+        border-color: var(--color-text-muted);
       }
 
       .placeholder,
@@ -198,19 +251,19 @@
         text-align: center;
         padding: 2rem;
         font-style: italic;
-        color: #a0aec0;
+        color: var(--color-text-muted);
       }
 
       .error-msg {
-        color: #e53e3e;
+        color: var(--color-error);
       }
 
       /* Result */
       .float-result {
-        border: 1px solid #e2e8f0;
+        border: 1px solid var(--color-border);
         border-radius: 8px;
         padding: 1.25rem;
-        background: #f7fafc;
+        background: var(--color-bg-card);
       }
 
       .value-display {
@@ -223,7 +276,7 @@
       .formula {
         font-family: "SF Mono", Menlo, Consolas, monospace;
         font-size: 0.95rem;
-        color: #718096;
+        color: var(--color-text-tertiary);
         margin-bottom: 1rem;
       }
 
@@ -248,7 +301,7 @@
       .bit-label {
         font-size: 0.8rem;
         font-weight: 600;
-        color: #718096;
+        color: var(--color-text-tertiary);
         text-transform: uppercase;
         letter-spacing: 0.04em;
       }
@@ -274,6 +327,27 @@
         font-weight: 600;
         border-radius: 2px;
         color: #fff;
+        cursor: pointer;
+        transition: transform 0.1s, filter 0.1s;
+        user-select: none;
+      }
+
+      .bit:hover {
+        transform: scale(1.2);
+        filter: brightness(1.2);
+        z-index: 1;
+      }
+
+      .bit:focus-visible {
+        outline: 2px solid var(--color-primary);
+        outline-offset: 1px;
+      }
+
+      .bit-hint {
+        font-size: 0.8rem;
+        color: var(--color-text-muted);
+        margin-top: 0.5rem;
+        font-style: italic;
       }
 
       .bit.sign {
@@ -303,22 +377,22 @@
 
       .bit-value {
         font-size: 0.8rem;
-        color: #a0aec0;
+        color: var(--color-text-muted);
       }
 
       .hex-display {
         font-family: "SF Mono", Menlo, Consolas, monospace;
         font-size: 0.85rem;
-        color: #718096;
+        color: var(--color-text-tertiary);
       }
 
       /* How section */
       .how-section {
         margin-top: 1.5rem;
-        border: 1px solid #e2e8f0;
+        border: 1px solid var(--color-border);
         border-radius: 8px;
         padding: 1rem 1.25rem;
-        background: #f7fafc;
+        background: var(--color-bg-card);
       }
 
       .how-section h2 {
@@ -329,7 +403,7 @@
       .how-section p,
       .how-section li {
         font-size: 0.9rem;
-        color: #4a5568;
+        color: var(--color-text-secondary);
         line-height: 1.5;
       }
 
@@ -339,105 +413,29 @@
       }
 
       .how-section code {
-        background: #edf2f7;
+        background: var(--color-bg-code);
         padding: 0.1rem 0.3rem;
         border-radius: 3px;
         font-size: 0.85rem;
       }
 
-      /* Dark mode */
+      /* Dark mode — only bit-specific color overrides remain;
+         everything else is handled by CSS variables. */
       @media (prefers-color-scheme: dark) {
-        .float-input {
-          background: #2d3748;
-          border-color: #4a5568;
-          color: #e2e8f0;
-        }
-
-        .float-input:focus {
-          border-color: #63b3ed;
-          box-shadow: 0 0 0 3px rgb(99, 179, 237, 0.2);
-        }
-
-        .example-btn {
-          background: #2d3748;
-          border-color: #4a5568;
-          color: #cbd5e0;
-        }
-
-        .example-btn:hover {
-          background: #4a5568;
-        }
-
-        .placeholder {
-          color: #718096;
-        }
-
-        .error-msg {
-          color: #fc8181;
-        }
-
-        .float-result {
-          background: #2d3748;
-          border-color: #4a5568;
-        }
-
-        .value-display {
-          color: #e2e8f0;
-        }
-
-        .formula {
-          color: #a0aec0;
-        }
-
-        .bit-label {
-          color: #a0aec0;
-        }
-
-        .bit.sign {
-          background: #c53030;
-        }
-
-        .bit.sign.zero {
-          background: #276749;
-        }
-
-        .bit.exp.zero {
-          background: #6b46c1;
-        }
-
-        .bit.mant {
-          background: #2b6cb0;
-        }
-
-        .bit.mant.zero {
-          background: #2a4365;
-          color: #90cdf4;
-        }
-
-        .bit-value {
-          color: #718096;
-        }
-
-        .hex-display {
-          color: #a0aec0;
-        }
-
-        .how-section {
-          background: #2d3748;
-          border-color: #4a5568;
-        }
-
-        .how-section p,
-        .how-section li {
-          color: #a0aec0;
-        }
-
-        .how-section code {
-          background: #1a202c;
-          color: #e2e8f0;
-        }
+        :root:not([data-theme="light"]) .bit.sign { background: #c53030; }
+        :root:not([data-theme="light"]) .bit.sign.zero { background: #276749; }
+        :root:not([data-theme="light"]) .bit.exp.zero { background: #6b46c1; }
+        :root:not([data-theme="light"]) .bit.mant { background: #2b6cb0; }
+        :root:not([data-theme="light"]) .bit.mant.zero { background: #2a4365; color: #90cdf4; }
       }
+
+      [data-theme="dark"] .bit.sign { background: #c53030; }
+      [data-theme="dark"] .bit.sign.zero { background: #276749; }
+      [data-theme="dark"] .bit.exp.zero { background: #6b46c1; }
+      [data-theme="dark"] .bit.mant { background: #2b6cb0; }
+      [data-theme="dark"] .bit.mant.zero { background: #2a4365; color: #90cdf4; }
     </style>
+    <script src="/shared/theme.js"></script>
   </head>
   <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -514,5 +512,6 @@
       </main>
     </div>
     <script src="/shared/nav.js"></script>
+    <script src="/shared/prevnext.js"></script>
   </body>
 </html>

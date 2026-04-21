@@ -34,6 +34,7 @@ export default [
         clearInterval: "readonly",
         clearTimeout: "readonly",
         localStorage: "readonly",
+        Storage: "readonly",
         Event: "readonly",
         KeyboardEvent: "readonly",
         MouseEvent: "readonly",
@@ -56,6 +57,7 @@ export default [
         // Jest globals
         jest: "readonly",
         describe: "readonly",
+        it: "readonly",
         test: "readonly",
         expect: "readonly",
         beforeEach: "readonly",

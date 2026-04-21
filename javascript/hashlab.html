@@ -230,27 +230,27 @@
         flex: 1;
         padding: 0.6rem 0.75rem;
         font-size: 1rem;
-        border: 2px solid #cbd5e0;
+        border: 2px solid var(--color-border-dark);
         border-radius: 6px;
-        background: #fff;
-        color: #1a202c;
+        background: var(--color-bg-input);
+        color: var(--color-text);
       }
 
       .lab-input:focus {
         outline: none;
-        border-color: #3182ce;
+        border-color: var(--color-primary);
         box-shadow: 0 0 0 3px rgb(49, 130, 206, 0.2);
       }
 
       .lab-btn {
         padding: 0.6rem 1rem;
-        border: 2px solid #cbd5e0;
+        border: 2px solid var(--color-border-dark);
         border-radius: 6px;
-        background: #fff;
+        background: var(--color-bg-input);
         cursor: pointer;
         font-size: 0.9rem;
         font-weight: 600;
-        color: #4a5568;
+        color: var(--color-text-secondary);
         white-space: nowrap;
         transition:
           border-color 0.15s,
@@ -258,18 +258,18 @@
       }
 
       .lab-btn:hover {
-        background: #edf2f7;
-        border-color: #a0aec0;
+        background: var(--color-bg-code);
+        border-color: var(--color-text-muted);
       }
 
       .lab-btn.primary {
-        background: #3182ce;
-        border-color: #3182ce;
+        background: var(--color-primary);
+        border-color: var(--color-primary);
         color: #fff;
       }
 
       .lab-btn.primary:hover {
-        background: #2b6cb0;
+        background: var(--color-primary-hover);
       }
 
       .controls-row {
@@ -279,8 +279,8 @@
         align-items: center;
         margin-bottom: 1rem;
         padding: 0.75rem 1rem;
-        background: #f7fafc;
-        border: 1px solid #e2e8f0;
+        background: var(--color-bg-card);
+        border: 1px solid var(--color-border);
         border-radius: 8px;
       }
 
@@ -293,16 +293,17 @@
       .control-group label {
         font-size: 0.85rem;
         font-weight: 600;
-        color: #4a5568;
+        color: var(--color-text-secondary);
         white-space: nowrap;
       }
 
       .control-group select {
         padding: 0.35rem 0.5rem;
-        border: 1px solid #cbd5e0;
+        border: 1px solid var(--color-border-dark);
         border-radius: 4px;
         font-size: 0.9rem;
-        background: #fff;
+        background: var(--color-bg-input);
+        color: var(--color-text);
       }
 
       .control-group input[type="range"] {
@@ -311,7 +312,7 @@
 
       #hash-desc {
         font-size: 0.8rem;
-        color: #718096;
+        color: var(--color-text-tertiary);
         font-style: italic;
         margin: 0 0 1rem;
       }
@@ -341,12 +342,12 @@
         justify-content: center;
         min-width: 2.5rem;
         padding: 0 0.4rem;
-        background: #edf2f7;
+        background: var(--color-bg-code);
         border-radius: 4px 0 0 4px;
         font-family: "SF Mono", Menlo, Consolas, monospace;
         font-size: 0.8rem;
         font-weight: 600;
-        color: #4a5568;
+        color: var(--color-text-secondary);
       }
 
       .bucket-chain {
@@ -355,8 +356,8 @@
         align-items: stretch;
         flex: 1;
         padding: 2px;
-        background: #f7fafc;
-        border: 1px solid #e2e8f0;
+        background: var(--color-bg-card);
+        border: 1px solid var(--color-border);
         border-left: none;
         border-radius: 0 4px 4px 0;
         min-height: 1.75rem;
@@ -366,7 +367,7 @@
         display: flex;
         align-items: center;
         padding: 0.2rem 0.5rem;
-        background: #3182ce;
+        background: var(--color-primary);
         color: #fff;
         border-radius: 3px;
         font-size: 0.8rem;
@@ -389,8 +390,8 @@
         gap: 1.5rem;
         margin-bottom: 1rem;
         padding: 0.6rem 1rem;
-        background: #f7fafc;
-        border: 1px solid #e2e8f0;
+        background: var(--color-bg-card);
+        border: 1px solid var(--color-border);
         border-radius: 6px;
       }
 
@@ -402,12 +403,12 @@
         font-size: 1.3rem;
         font-weight: 700;
         font-family: "SF Mono", Menlo, Consolas, monospace;
-        color: #2d3748;
+        color: var(--color-text-heading);
       }
 
       .stat-label {
         font-size: 0.75rem;
-        color: #718096;
+        color: var(--color-text-tertiary);
         text-transform: uppercase;
         letter-spacing: 0.04em;
       }
@@ -420,7 +421,7 @@
       .recent-section h3 {
         font-size: 0.9rem;
         margin: 0 0 0.35rem;
-        color: #718096;
+        color: var(--color-text-tertiary);
       }
 
       .recent-entries {
@@ -436,17 +437,17 @@
         font-size: 0.8rem;
         font-family: "SF Mono", Menlo, Consolas, monospace;
         padding: 0.2rem 0.4rem;
-        background: #f7fafc;
+        background: var(--color-bg-card);
         border-radius: 3px;
       }
 
       .re-key {
         font-weight: 600;
-        color: #2d3748;
+        color: var(--color-text-heading);
       }
 
       .re-arrow {
-        color: #a0aec0;
+        color: var(--color-text-muted);
       }
 
       .re-hash {
@@ -454,17 +455,17 @@
       }
 
       .re-bucket {
-        color: #3182ce;
+        color: var(--color-primary);
         font-weight: 600;
       }
 
       /* How section */
       .how-section {
         margin-top: 1.5rem;
-        border: 1px solid #e2e8f0;
+        border: 1px solid var(--color-border);
         border-radius: 8px;
         padding: 1rem 1.25rem;
-        background: #f7fafc;
+        background: var(--color-bg-card);
       }
 
       .how-section h2 {
@@ -475,7 +476,7 @@
       .how-section p,
       .how-section li {
         font-size: 0.9rem;
-        color: #4a5568;
+        color: var(--color-text-secondary);
         line-height: 1.5;
       }
 
@@ -485,128 +486,24 @@
       }
 
       .how-section code {
-        background: #edf2f7;
+        background: var(--color-bg-code);
         padding: 0.1rem 0.3rem;
         border-radius: 3px;
         font-size: 0.85rem;
       }
 
-      /* Dark mode */
+      /* Dark mode — only component-specific color overrides */
       @media (prefers-color-scheme: dark) {
-        .lab-input {
-          background: #2d3748;
-          border-color: #4a5568;
-          color: #e2e8f0;
-        }
-
-        .lab-input:focus {
-          border-color: #63b3ed;
-          box-shadow: 0 0 0 3px rgb(99, 179, 237, 0.2);
-        }
-
-        .lab-btn {
-          background: #2d3748;
-          border-color: #4a5568;
-          color: #cbd5e0;
-        }
-
-        .lab-btn:hover {
-          background: #4a5568;
-        }
-
-        .lab-btn.primary {
-          background: #2b6cb0;
-          border-color: #2b6cb0;
-          color: #fff;
-        }
-
-        .controls-row {
-          background: #2d3748;
-          border-color: #4a5568;
-        }
-
-        .control-group label {
-          color: #cbd5e0;
-        }
-
-        .control-group select {
-          background: #1a202c;
-          border-color: #4a5568;
-          color: #e2e8f0;
-        }
-
-        #hash-desc {
-          color: #a0aec0;
-        }
-
-        .bucket-label {
-          background: #4a5568;
-          color: #cbd5e0;
-        }
-
-        .bucket.collision .bucket-label {
-          background: #742a2a;
-          color: #feb2b2;
-        }
-
-        .bucket-chain {
-          background: #1a202c;
-          border-color: #4a5568;
-        }
-
-        .bucket-item {
-          background: #2b6cb0;
-        }
-
-        .bucket.collision .bucket-item {
-          background: #c53030;
-        }
-
-        .stats-bar {
-          background: #2d3748;
-          border-color: #4a5568;
-        }
-
-        .stat-value {
-          color: #e2e8f0;
-        }
-
-        .stat-label {
-          color: #a0aec0;
-        }
-
-        .recent-entry {
-          background: #2d3748;
-        }
-
-        .re-key {
-          color: #e2e8f0;
-        }
-
-        .re-hash {
-          color: #b794f4;
-        }
-
-        .re-bucket {
-          color: #63b3ed;
-        }
-
-        .how-section {
-          background: #2d3748;
-          border-color: #4a5568;
-        }
-
-        .how-section p,
-        .how-section li {
-          color: #a0aec0;
-        }
-
-        .how-section code {
-          background: #1a202c;
-          color: #e2e8f0;
-        }
+        :root:not([data-theme="light"]) .bucket.collision .bucket-label { background: #742a2a; color: #feb2b2; }
+        :root:not([data-theme="light"]) .bucket.collision .bucket-item { background: #c53030; }
+        :root:not([data-theme="light"]) .re-hash { color: #b794f4; }
       }
+
+      [data-theme="dark"] .bucket.collision .bucket-label { background: #742a2a; color: #feb2b2; }
+      [data-theme="dark"] .bucket.collision .bucket-item { background: #c53030; }
+      [data-theme="dark"] .re-hash { color: #b794f4; }
     </style>
+    <script src="/shared/theme.js"></script>
   </head>
   <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -707,5 +604,6 @@
       </main>
     </div>
     <script src="/shared/nav.js"></script>
+    <script src="/shared/prevnext.js"></script>
   </body>
 </html>

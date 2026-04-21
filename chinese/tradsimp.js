@@ -238,4 +238,29 @@ const simplified = {
   "繩": "绳", "暱": "昵", "瞞": "瞒",
 }
 
-export { simplify }
+// Build reverse mapping (simplified -> traditional).
+// When multiple traditional chars map to the same simplified char,
+// the first one in the dictionary wins.
+const traditional = {}
+for (const [trad, simp] of Object.entries(simplified)) {
+  if (!traditional[simp]) {
+    traditional[simp] = trad
+  }
+}
+
+/**
+ * Converts Simplified Chinese characters to Traditional Chinese.
+ *
+ * @param {string} str - The text to convert.
+ * @returns {string} Text with simplified characters replaced by traditional equivalents.
+ */
+function traditionalize(str) {
+  let result = ""
+  for (const c of str) {
+    const trad = traditional[c]
+    result += trad ? trad : c
+  }
+  return result
+}
+
+export { simplify, traditionalize }

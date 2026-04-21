@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="/style.css" />
     <link rel="stylesheet" href="styles/main.css" />
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <script src="/shared/theme.js"></script>
   </head>
   <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -115,6 +116,14 @@
       </main>
     </div>
 
+    <script src="/shared/nav.js"></script>
     <script type="module" src="js/game.js"></script>
+    <script>
+      if (window.__registerShortcut) {
+        window.__registerShortcut("Space", "Step execution")
+        window.__registerShortcut("Enter", "Play / pause")
+        window.__registerShortcut("r", "Reset machine")
+      }
+    </script>
   </body>
 </html>

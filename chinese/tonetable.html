@@ -95,6 +95,7 @@
         }
       }
     </style>
+    <script src="/shared/theme.js"></script>
   </head>
   <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -155,7 +156,17 @@
 
         <section class="section">
           <h2>Tone Table</h2>
-          <table id="tonetable">
+          <div class="form-group" style="margin-bottom: 0.75rem">
+            <input
+              type="text"
+              id="table-filter"
+              class="form-input"
+              placeholder="Filter by pinyin or character..."
+              style="max-width: 400px"
+            />
+            <small id="filter-count"></small>
+          </div>
+          <table id="tonetable" class="filterable-table">
             <tr>
               <th></th>
               <th>0</th>
@@ -6083,5 +6094,8 @@
         </section>
       </main>
     </div>
+    <script src="/shared/table-filter.js"></script>
+    <script src="/shared/nav.js"></script>
+    <script src="/shared/prevnext.js"></script>
   </body>
 </html>

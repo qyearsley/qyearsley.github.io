@@ -171,16 +171,20 @@ class LifeGarden {
   }
 
   _simulationTick() {
-    // Save current grid to history before stepping
-    this.history.push(this.grid)
-    if (this.history.length > MAX_HISTORY) {
-      this.history.shift()
-    }
+    try {
+      this.history.push(this.grid)
+      if (this.history.length > MAX_HISTORY) {
+        this.history.shift()
+      }
 
-    this.grid = this.grid.step()
-    this.state.generation++
-    this.ui.updateGeneration(this.state.generation)
-    this.renderer.render(this.grid)
+      this.grid = this.grid.step()
+      this.state.generation++
+      this.ui.updateGeneration(this.state.generation)
+      this.renderer.render(this.grid)
+    } catch (error) {
+      console.error("Simulation error:", error)
+      this._pauseSimulation()
+    }
   }
 
   _resetGrid() {
@@ -231,5 +235,9 @@ class LifeGarden {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  window.game = new LifeGarden()
+  try {
+    window.game = new LifeGarden()
+  } catch (error) {
+    console.error("Failed to initialize Life Garden:", error)
+  }
 })

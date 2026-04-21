@@ -30,9 +30,13 @@ const resetBtn = $("reset-btn")
 const addRuleBtn = $("add-rule-btn")
 
 // --- Init ---
-buildLevelNav()
-buildDemoNav()
-loadLevel(levels[0])
+try {
+  buildLevelNav()
+  buildDemoNav()
+  loadLevel(levels[0])
+} catch (error) {
+  console.error("Failed to initialize Turing Tape:", error)
+}
 
 // --- Level navigation ---
 function buildLevelNav() {
@@ -209,7 +213,12 @@ function addRuleRow(
   const moveSelect = makeSelect(["L", "R", "S"], moveVal, readonly)
   const nextStateSelect = makeSelect(currentLevel.states, nextVal, readonly)
 
-  for (const sel of [stateSelect, readSelect, writeSelect, moveSelect, nextStateSelect]) {
+  const labels = ["Current state", "Read symbol", "Write symbol", "Move direction", "Next state"]
+  const selects = [stateSelect, readSelect, writeSelect, moveSelect, nextStateSelect]
+
+  for (let i = 0; i < selects.length; i++) {
+    const sel = selects[i]
+    sel.setAttribute("aria-label", labels[i])
     const td = document.createElement("td")
     td.appendChild(sel)
     tr.appendChild(td)
@@ -279,15 +288,20 @@ function highlightActiveRule(state, symbol) {
 // --- Controls ---
 function doStep() {
   if (machine.halted) return
-  const prevState = machine.state
-  const prevSymbol = machine.tape[machine.head]
-  machine.step()
-  highlightActiveRule(prevState, prevSymbol)
-  updateDisplay()
+  try {
+    const prevState = machine.state
+    const prevSymbol = machine.tape[machine.head]
+    machine.step()
+    highlightActiveRule(prevState, prevSymbol)
+    updateDisplay()
 
-  if (machine.halted) {
+    if (machine.halted) {
+      stopPlay()
+      if (!isDemo) checkWin()
+    }
+  } catch (error) {
+    console.error("Step error:", error)
     stopPlay()
-    if (!isDemo) checkWin()
   }
 }
 

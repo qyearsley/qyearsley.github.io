@@ -26,16 +26,18 @@
         font-family: monospace;
       }
     </style>
+    <script src="/shared/theme.js"></script>
   </head>
 
   <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <div class="container">
       <header class="header">
         <h1>How Long Have You Lived?</h1>
         <p>Calculate the time elapsed since your birth in various units</p>
       </header>
 
-      <main class="main-content">
+      <main id="main-content" class="main-content">
         <nav class="breadcrumbs">
           <a href="/">Home</a>
           <span class="separator">/</span>
@@ -54,34 +56,35 @@
           </form>
 
           <div id="output" class="output-display" style="display: none">
+            <div id="age-summary" style="font-size: 1.3rem; font-weight: 600; margin-bottom: 1rem; text-align: center"></div>
             <h3>You have now been alive for:</h3>
             <table class="results-table">
               <tr>
-                <td class="numeric" id="seconds"></td>
-                <td>seconds</td>
+                <td class="numeric" id="years"></td>
+                <td>years</td>
               </tr>
               <tr>
-                <td class="numeric" id="hours"></td>
-                <td>hours</td>
+                <td class="numeric" id="months"></td>
+                <td>months</td>
+              </tr>
+              <tr>
+                <td class="numeric" id="weeks"></td>
+                <td>weeks</td>
               </tr>
               <tr>
                 <td class="numeric" id="days"></td>
                 <td>days</td>
               </tr>
               <tr>
-                <td class="numeric" id="weeks"></td>
-                <td>weeks</td>
+                <td class="numeric" id="hours"></td>
+                <td>hours</td>
+              </tr>
+              <tr>
+                <td class="numeric" id="seconds"></td>
+                <td>seconds</td>
               </tr>
             </table>
           </div>
-        </section>
-
-        <section class="section">
-          <h2>Navigation</h2>
-          <ul class="external-links">
-            <li><a href="/javascript/">← Back to JavaScript experiments</a></li>
-            <li><a href="/">← Back to main page</a></li>
-          </ul>
         </section>
       </main>
     </div>
@@ -155,10 +158,30 @@
         const days = hours / 24
         const weeks = days / 7
 
-        document.getElementById("seconds").textContent = Math.floor(seconds)
-        document.getElementById("hours").textContent = Math.floor(hours)
-        document.getElementById("days").textContent = Math.floor(days)
-        document.getElementById("weeks").textContent = Math.floor(weeks)
+        // Calculate years and months
+        let years = now.getFullYear() - birthday.getFullYear()
+        let months = now.getMonth() - birthday.getMonth()
+        if (months < 0) {
+          years--
+          months += 12
+        }
+        if (now.getDate() < birthday.getDate()) {
+          months--
+          if (months < 0) {
+            years--
+            months += 12
+          }
+        }
+        const totalMonths = years * 12 + months
+
+        document.getElementById("age-summary").textContent =
+          years + " years, " + months + " months old"
+        document.getElementById("years").textContent = years
+        document.getElementById("months").textContent = totalMonths
+        document.getElementById("weeks").textContent = Math.floor(weeks).toLocaleString()
+        document.getElementById("days").textContent = Math.floor(days).toLocaleString()
+        document.getElementById("hours").textContent = Math.floor(hours).toLocaleString()
+        document.getElementById("seconds").textContent = Math.floor(seconds).toLocaleString()
       }
 
       // Initialize on page load and set up form handler.
@@ -167,5 +190,7 @@
         document.getElementById("form").addEventListener("submit", handleSubmit)
       })
     </script>
+    <script src="/shared/nav.js"></script>
+    <script src="/shared/prevnext.js"></script>
   </body>
 </html>

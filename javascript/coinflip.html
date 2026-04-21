@@ -15,6 +15,7 @@
       integrity="sha384-OLBgp1GsljhM2TJ+sbHjaiH9txEUvgdDTAzHv2P24donTt6/529l+9Ua0vFImLlb"
       crossorigin="anonymous"
     ></script>
+    <script src="/shared/theme.js"></script>
   </head>
 
   <body>
@@ -22,7 +23,7 @@
     <div class="container">
       <header class="header">
         <h1>Coin Flips Experiment</h1>
-        <p>Demonstrating probability convergence through interactive coin flipping</p>
+        <p>Demonstrating probability convergence through interactive simulation</p>
       </header>
 
       <main id="main-content" class="main-content">
@@ -38,7 +39,32 @@
           <h2>Experiment</h2>
           <form id="form" class="form-container">
             <div class="form-group">
-              <label for="num-samples">Number of flips to simulate:</label>
+              <label for="distribution">Distribution:</label>
+              <select id="distribution" class="form-input">
+                <option value="fair">Fair coin (p=0.5)</option>
+                <option value="weighted">Weighted coin</option>
+                <option value="d6">Die (d6)</option>
+              </select>
+            </div>
+
+            <div id="weight-group" class="form-group" style="display: none">
+              <label for="weight-slider"
+                >Probability of heads: <span id="weight-value">0.70</span></label
+              >
+              <input
+                type="range"
+                id="weight-slider"
+                min="0.01"
+                max="0.99"
+                step="0.01"
+                value="0.70"
+                class="form-input"
+                style="width: 100%; max-width: 300px"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="num-samples">Number of trials to simulate:</label>
               <input
                 type="number"
                 id="num-samples"
@@ -48,13 +74,20 @@
                 class="form-input"
                 required
               />
-              <small>Simulates 1 to N coin flips (10-10000)</small>
+              <small>Simulates 1 to N trials (10-10000)</small>
             </div>
             <button type="submit" class="submit-btn">Generate Chart</button>
           </form>
 
           <div id="error" class="error-message" style="display: none"></div>
-          <div style="position: relative; height: 300px; width: 800px; margin-top: 2rem">
+          <div
+            style="
+              position: relative;
+              height: 350px;
+              max-width: 100%;
+              margin-top: 2rem;
+            "
+          >
             <canvas id="my-canvas"></canvas>
           </div>
         </section>
@@ -68,17 +101,15 @@
           </p>
 
           <p>
-            This experiment demonstrates this convergence. It flips coins from 1 to your chosen
-            maximum, recording the percentage of heads at each step. The graph shows how the
-            frequency approaches 50% as the number of flips increases.
+            This experiment demonstrates this convergence. Choose a distribution, set the number of
+            trials, and watch how the observed frequencies approach their theoretical expected values
+            as the sample size grows.
           </p>
-        </section>
 
-        <section class="section">
-          <h2>Navigation</h2>
-          <ul class="external-links">
-            <li><a href="/javascript/">← Back to JavaScript experiments</a></li>
-            <li><a href="/">← Back to main page</a></li>
+          <ul style="margin-top: 0.5rem; padding-left: 1.5rem">
+            <li><strong>Fair coin</strong> &mdash; converges to 50%</li>
+            <li><strong>Weighted coin</strong> &mdash; converges to the chosen probability p</li>
+            <li><strong>Die (d6)</strong> &mdash; each face converges to ~16.7%</li>
           </ul>
         </section>
       </main>
@@ -89,6 +120,153 @@
 
       let chart = null
 
+      const DIE_COLORS = [
+        "#e74c3c",
+        "#3498db",
+        "#2ecc71",
+        "#f39c12",
+        "#9b59b6",
+        "#1abc9c",
+      ]
+
+      const DIE_LABELS = [
+        "Face 1",
+        "Face 2",
+        "Face 3",
+        "Face 4",
+        "Face 5",
+        "Face 6",
+      ]
+
+      /**
+       * Returns the current distribution mode.
+       * @returns {"fair"|"weighted"|"d6"}
+       */
+      function getMode() {
+        return document.getElementById("distribution").value
+      }
+
+      /**
+       * Returns the weighted coin probability from the slider.
+       * @returns {number}
+       */
+      function getWeight() {
+        return parseFloat(document.getElementById("weight-slider").value)
+      }
+
+      /**
+       * Generates cumulative frequency data for a fair or weighted coin.
+       *
+       * At each step i (1..n), flips a coin i times total (running tally)
+       * and records the cumulative proportion of heads.
+       *
+       * @param {number} n - Number of trials.
+       * @param {number} p - Probability of heads.
+       * @returns {number[]} Cumulative head frequency at each step.
+       */
+      function generateCoinFrequencies(n, p) {
+        const frequencies = new Array(n)
+        let heads = 0
+        for (let i = 0; i < n; i++) {
+          if (Math.random() < p) {
+            heads++
+          }
+          frequencies[i] = heads / (i + 1)
+        }
+        return frequencies
+      }
+
+      /**
+       * Generates cumulative frequency data for a 6-sided die.
+       *
+       * Returns an array of 6 arrays, one per face, each containing
+       * the cumulative proportion of that face at each step.
+       *
+       * @param {number} n - Number of rolls.
+       * @returns {number[][]} 6 arrays of cumulative frequencies.
+       */
+      function generateDieFrequencies(n) {
+        const counts = [0, 0, 0, 0, 0, 0]
+        const frequencies = Array.from({ length: 6 }, () => new Array(n))
+        for (let i = 0; i < n; i++) {
+          const face = Math.floor(Math.random() * 6)
+          counts[face]++
+          for (let f = 0; f < 6; f++) {
+            frequencies[f][i] = counts[f] / (i + 1)
+          }
+        }
+        return frequencies
+      }
+
+      /**
+       * Creates a dashed reference line dataset.
+       *
+       * @param {number} value - The y-value for the reference line.
+       * @param {number} n - Number of data points.
+       * @param {string} label - Legend label.
+       * @returns {object} Chart.js dataset config.
+       */
+      function makeReferenceLine(value, n, label) {
+        return {
+          label: label,
+          data: new Array(n).fill(value),
+          borderColor: "rgba(150, 150, 150, 0.7)",
+          borderWidth: 1.5,
+          borderDash: [6, 4],
+          fill: false,
+          pointRadius: 0,
+          pointHoverRadius: 0,
+          tension: 0,
+          order: 10,
+        }
+      }
+
+      /**
+       * Computes y-axis bounds based on mode and parameters.
+       *
+       * @param {"fair"|"weighted"|"d6"} mode
+       * @param {number} p - Coin probability (only used for weighted).
+       * @returns {{min: number, max: number}}
+       */
+      function getYBounds(mode, p) {
+        if (mode === "d6") {
+          return { min: 0, max: 0.6 }
+        }
+        // For coins, center around p with some room.
+        const margin = Math.max(0.15, Math.min(p, 1 - p) + 0.1)
+        return {
+          min: Math.max(0, p - margin),
+          max: Math.min(1, p + margin),
+        }
+      }
+
+      /**
+       * Builds the chart title string.
+       *
+       * @param {"fair"|"weighted"|"d6"} mode
+       * @param {number} p
+       * @returns {string}
+       */
+      function getChartTitle(mode, p) {
+        if (mode === "d6") {
+          return "Die Roll Frequency Convergence (d6)"
+        }
+        if (mode === "weighted") {
+          return "Weighted Coin Frequency Convergence (p=" + p.toFixed(2) + ")"
+        }
+        return "Coin Flip Frequency Convergence"
+      }
+
+      /**
+       * Builds the x-axis label.
+       *
+       * @param {"fair"|"weighted"|"d6"} mode
+       * @returns {string}
+       */
+      function getXLabel(mode) {
+        return mode === "d6" ? "Number of Die Rolls" : "Number of Coin Flips"
+      }
+
       /**
        * Graphs the visualization given the input from the form.
        */
@@ -96,45 +274,73 @@
         const canvas = document.getElementById("my-canvas")
         const numSamples = parseInt(document.getElementById("num-samples").value, 10)
         const errorElement = document.getElementById("error")
+        const mode = getMode()
 
         // Clear previous errors.
         errorElement.style.display = "none"
 
         // Validate input.
         if (isNaN(numSamples) || numSamples < 10 || numSamples > 10000) {
-          errorElement.textContent = "Number of samples must be between 10 and 10000"
+          errorElement.textContent = "Number of trials must be between 10 and 10000"
           errorElement.style.display = "block"
           return
         }
 
-        const frequencies = generateFlipFrequencies(numSamples)
-
-        // Create labels for x-axis (1 to numSamples).
         const labels = Array.from({ length: numSamples }, (_, i) => i + 1)
+        const datasets = []
+
+        if (mode === "d6") {
+          const allFreqs = generateDieFrequencies(numSamples)
+          for (let f = 0; f < 6; f++) {
+            datasets.push({
+              label: DIE_LABELS[f],
+              data: allFreqs[f],
+              borderColor: DIE_COLORS[f],
+              backgroundColor: "transparent",
+              borderWidth: 1.5,
+              fill: false,
+              tension: 0,
+              pointRadius: 0,
+              pointHoverRadius: 3,
+            })
+          }
+          datasets.push(
+            makeReferenceLine(1 / 6, numSamples, "Expected (1/6)")
+          )
+        } else {
+          const p = mode === "weighted" ? getWeight() : 0.5
+          const frequencies = generateCoinFrequencies(numSamples, p)
+          datasets.push({
+            label: "Frequency of Heads",
+            data: frequencies,
+            borderColor: "#8AB87D",
+            backgroundColor: "rgba(138, 184, 125, 0.1)",
+            borderWidth: 2,
+            fill: false,
+            tension: 0,
+            pointRadius: 0,
+            pointHoverRadius: 3,
+          })
+          const refLabel =
+            mode === "weighted"
+              ? "Expected (p=" + p.toFixed(2) + ")"
+              : "Expected (0.50)"
+          datasets.push(makeReferenceLine(p, numSamples, refLabel))
+        }
+
+        const p = mode === "weighted" ? getWeight() : 0.5
+        const bounds = getYBounds(mode, p)
 
         // Destroy existing chart if it exists.
         if (chart) {
           chart.destroy()
         }
 
-        // Create new chart.
         chart = new Chart(canvas, {
           type: "line",
           data: {
             labels: labels,
-            datasets: [
-              {
-                label: "Frequency of Heads",
-                data: frequencies,
-                borderColor: "#8AB87D",
-                backgroundColor: "rgba(138, 184, 125, 0.1)",
-                borderWidth: 2,
-                fill: false,
-                tension: 0,
-                pointRadius: 0,
-                pointHoverRadius: 3,
-              },
-            ],
+            datasets: datasets,
           },
           options: {
             responsive: true,
@@ -142,8 +348,8 @@
             scales: {
               y: {
                 beginAtZero: false,
-                min: 0.15,
-                max: 0.85,
+                min: bounds.min,
+                max: bounds.max,
                 grid: {
                   color: "rgba(150, 150, 150, 0.3)",
                   drawBorder: false,
@@ -160,17 +366,23 @@
                 },
                 title: {
                   display: true,
-                  text: "Number of Coin Flips",
+                  text: getXLabel(mode),
                 },
               },
             },
             plugins: {
               title: {
                 display: true,
-                text: "Coin Flip Frequency Convergence",
+                text: getChartTitle(mode, p),
               },
               legend: {
-                display: false,
+                display: mode === "d6",
+                labels: {
+                  filter: function (item) {
+                    // Hide the reference line from legend in d6 mode.
+                    return !item.text.startsWith("Expected")
+                  },
+                },
               },
             },
             interaction: {
@@ -182,26 +394,13 @@
       }
 
       /**
-       * Generates frequencies showing how coin flips converge to 0.5.
-       *
-       * For each number i from 1 to numSampleSets, flips a coin i times and
-       * records the proportion of heads. As i increases, this proportion
-       * reliably approaches 0.5.
-       *
-       * @param {number} numSampleSets - Maximum number of flips to simulate.
-       * @returns {number[]} Array of head frequencies for each sample size.
+       * Shows or hides the weight slider based on selected distribution.
        */
-      function generateFlipFrequencies(numSampleSets) {
-        return Array.from({ length: numSampleSets }, (_, i) => {
-          const numFlips = i + 1
-          // Math.random() is not exactly like flipping a coin;
-          // it returns a number between 0 and 1.
-          const sum = Array.from({ length: numFlips }, () => Math.random()).reduce(
-            (acc, val) => acc + val,
-            0,
-          )
-          return sum / numFlips
-        })
+      function onDistributionChange() {
+        const mode = getMode()
+        const weightGroup = document.getElementById("weight-group")
+        weightGroup.style.display = mode === "weighted" ? "" : "none"
+        update()
       }
 
       /**
@@ -214,11 +413,26 @@
         update()
       }
 
-      // Initialize chart on page load and set up form handler.
+      // Initialize on page load.
       document.addEventListener("DOMContentLoaded", () => {
-        update()
+        const distSelect = document.getElementById("distribution")
+        const weightSlider = document.getElementById("weight-slider")
+        const weightValue = document.getElementById("weight-value")
+
+        distSelect.addEventListener("change", onDistributionChange)
+
+        weightSlider.addEventListener("input", () => {
+          weightValue.textContent = parseFloat(weightSlider.value).toFixed(2)
+        })
+        weightSlider.addEventListener("change", () => {
+          update()
+        })
+
         document.getElementById("form").addEventListener("submit", handleSubmit)
+        update()
       })
     </script>
+    <script src="/shared/nav.js"></script>
+    <script src="/shared/prevnext.js"></script>
   </body>
 </html>

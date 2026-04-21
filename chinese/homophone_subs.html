@@ -109,15 +109,17 @@
         }
       }
     </style>
+    <script src="/shared/theme.js"></script>
   </head>
   <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <div class="container">
       <header class="header">
         <h1>Simplified-Traditional One-to-Many Relationships</h1>
         <p>Traditional characters that were merged during simplification</p>
       </header>
 
-      <main class="main-content">
+      <main id="main-content" class="main-content">
         <nav class="breadcrumbs">
           <a href="/">Home</a>
           <span class="separator">/</span>
@@ -156,8 +158,18 @@
 
         <section class="section">
           <h2>Character Relationships</h2>
+          <div class="form-group" style="margin-bottom: 0.75rem">
+            <input
+              type="text"
+              id="table-filter"
+              class="form-input"
+              placeholder="Filter by character or pinyin..."
+              style="max-width: 400px"
+            />
+            <small id="filter-count"></small>
+          </div>
           <div class="table-container">
-            <table>
+            <table class="filterable-table">
               <thead>
                 <tr>
                   <th width="10%">Simplified Character</th>
@@ -2468,15 +2480,10 @@
             </table>
           </div>
         </section>
-
-        <section class="section">
-          <h2>Navigation</h2>
-          <ul class="external-links">
-            <li><a href="index.html">← Chinese language notes</a></li>
-            <li><a href="/">← Main page</a></li>
-          </ul>
-        </section>
       </main>
     </div>
+    <script src="/shared/table-filter.js"></script>
+    <script src="/shared/nav.js"></script>
+    <script src="/shared/prevnext.js"></script>
   </body>
 </html>

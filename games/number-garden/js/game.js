@@ -67,7 +67,7 @@ class NumberGarden {
       onCastleBack: () => this.showScreen("garden-hub"),
       onProjectSelect: (projectType) => this.selectProject(projectType),
       onProjectBack: () => this.showScreen("title-screen"),
-      onContinueFromProject: () => this.ui.hideProjectProgress(),
+      onContinueFromProject: () => this.ui.castle.hideProjectProgress(),
       onContinueFromLevelComplete: () => this.showScreen("garden-hub"),
       onReturnToHub: () => this.showScreen("garden-hub"),
     })
@@ -75,7 +75,7 @@ class NumberGarden {
     this.events.initializeEventListeners()
     this.ui.updateStats(this.state.stats)
     this.ui.updateSettingsUI(this.state.settings)
-    this.ui.updateCastleBadge(this.state.getCompletedAreasCount())
+    this.ui.castle.updateCastleBadge(this.state.getCompletedAreasCount())
 
     // Update project UI on load
     this.updateProjectUI()
@@ -197,9 +197,9 @@ class NumberGarden {
   viewCastle() {
     const projectInfo = this.getProjectInfo()
     this.showScreen("castle-screen")
-    this.ui.updateCastleScreen(projectInfo)
-    this.ui.updateCastleProgress(this.state.getCompletedAreasCount(), 6)
-    this.ui.displayCastlePieces(this.state.completedAreas)
+    this.ui.castle.updateCastleScreen(projectInfo)
+    this.ui.castle.updateCastleProgress(this.state.getCompletedAreasCount(), 6)
+    this.ui.castle.displayCastlePieces(this.state.completedAreas)
     this.renderCastle()
   }
 
@@ -247,7 +247,7 @@ class NumberGarden {
     // Update area locks when showing garden hub
     if (screenId === "garden-hub") {
       this.ui.updateAreaLocks(this.state.unlockedAreas)
-      this.ui.updateCastleBadge(this.state.getCompletedAreasCount())
+      this.ui.castle.updateCastleBadge(this.state.getCompletedAreasCount())
     }
   }
 
@@ -387,7 +387,7 @@ class NumberGarden {
 
     // Show level-complete screen with celebration
     this.showScreen("level-complete-screen")
-    this.ui.updateLevelCompleteScreen(
+    this.ui.castle.updateLevelCompleteScreen(
       questionsCompleted,
       questionsCompleted,
       wasAreaJustCompleted,

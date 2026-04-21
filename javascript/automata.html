@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cellular Automata Explorer</title>
+    <meta
+      name="description"
+      content="Visualize elementary 1D cellular automata — the 256 rules from Wolfram's classification"
+    />
+    <meta name="theme-color" content="#2d3748" />
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <script src="/shared/theme.js"></script>
+    <style>
+      .controls-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
+      .rule-input {
+        width: 5rem;
+        padding: 0.5rem;
+        font-size: 1.1rem;
+        font-family: monospace;
+        text-align: center;
+      }
+
+      .preset-btn {
+        padding: 0.35rem 0.75rem;
+        border: 1px solid var(--color-border-dark);
+        border-radius: 4px;
+        background: var(--color-bg-card);
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-family: monospace;
+        color: var(--color-text-secondary);
+        transition: border-color 0.15s, background 0.15s;
+      }
+
+      .preset-btn:hover {
+        background: var(--color-bg-code);
+        border-color: var(--color-primary);
+      }
+
+      .preset-btn.active {
+        background: var(--color-primary);
+        border-color: var(--color-primary);
+        color: #fff;
+      }
+
+      .canvas-container {
+        border: 1px solid var(--color-border);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+      }
+
+      .canvas-container canvas {
+        display: block;
+        width: 100%;
+        image-rendering: pixelated;
+      }
+
+      /* Rule diagram */
+      .rule-diagram {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin: 1rem 0;
+      }
+
+      .rule-case {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        font-family: monospace;
+        font-size: 0.75rem;
+      }
+
+      .rule-pattern {
+        display: flex;
+        gap: 1px;
+      }
+
+      .rule-cell {
+        width: 14px;
+        height: 14px;
+        border: 1px solid var(--color-border);
+      }
+
+      .rule-cell.on {
+        background: var(--color-text);
+      }
+
+      .rule-cell.off {
+        background: var(--color-bg-container);
+      }
+
+      .rule-output {
+        width: 14px;
+        height: 14px;
+        border: 1px solid var(--color-border);
+        margin-top: 2px;
+      }
+
+      .rule-output.on {
+        background: var(--color-text);
+      }
+
+      .rule-output.off {
+        background: var(--color-bg-container);
+      }
+
+      /* Wolfram classes section */
+      .class-group {
+        margin-bottom: 1.25rem;
+      }
+
+      .class-group h4 {
+        margin-bottom: 0.4rem;
+        font-size: 0.95rem;
+      }
+
+      .class-group p {
+        margin-bottom: 0.4rem;
+        font-size: 0.9rem;
+        color: var(--color-text-secondary);
+      }
+
+      .class-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+      }
+    </style>
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="container">
+      <header class="header">
+        <h1>Cellular Automata Explorer</h1>
+        <p>Visualize the 256 elementary 1D cellular automata rules</p>
+      </header>
+
+      <main id="main-content" class="main-content">
+        <nav class="breadcrumbs">
+          <a href="/">Home</a>
+          <span class="separator">/</span>
+          <a href="/javascript/">JavaScript</a>
+          <span class="separator">/</span>
+          <span class="current">Cellular Automata</span>
+        </nav>
+
+        <section class="section">
+          <h2>Rule</h2>
+          <div class="controls-row">
+            <label for="rule-num">Rule:</label>
+            <input
+              id="rule-num"
+              type="number"
+              min="0"
+              max="255"
+              value="30"
+              class="rule-input form-input"
+            />
+            <button id="random-btn" class="preset-btn">Random</button>
+          </div>
+          <div class="controls-row">
+            <span style="font-size: 0.85rem; color: var(--color-text-muted)">Presets:</span>
+            <button class="preset-btn" data-rule="30">Rule 30</button>
+            <button class="preset-btn" data-rule="90">Rule 90</button>
+            <button class="preset-btn" data-rule="110">Rule 110</button>
+            <button class="preset-btn" data-rule="184">Rule 184</button>
+            <button class="preset-btn" data-rule="45">Rule 45</button>
+            <button class="preset-btn" data-rule="73">Rule 73</button>
+          </div>
+
+          <div id="rule-diagram" class="rule-diagram"></div>
+
+          <div class="canvas-container">
+            <canvas id="canvas" width="800" height="400"></canvas>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>How It Works</h2>
+          <p>
+            An <b>elementary cellular automaton</b> is a 1D grid of cells, each either on or off.
+            At each step, every cell's next state is determined by its current state and its two
+            neighbors — a 3-cell neighborhood with 8 possible patterns.
+          </p>
+          <p>
+            A <b>rule number</b> (0-255) encodes which patterns produce an "on" cell. Since
+            there are 8 possible 3-cell patterns and each can map to on or off, there are
+            2<sup>8</sup> = 256 possible rules.
+          </p>
+          <p>
+            The diagram above shows each rule's 8 cases. The top row is the input pattern
+            (left neighbor, cell, right neighbor), and the bottom cell is the output.
+          </p>
+          <p>
+            Some notable rules:
+          </p>
+          <ul style="margin-left: 1.5rem; margin-bottom: 1rem">
+            <li><b>Rule 30</b> — chaotic, used in Mathematica's random number generator</li>
+            <li><b>Rule 90</b> — produces a Sierpinski triangle</li>
+            <li><b>Rule 110</b> — proven Turing-complete</li>
+            <li><b>Rule 184</b> — models traffic flow</li>
+          </ul>
+          <h3>Connection to Conway's Life</h3>
+          <p>
+            These 1D automata are the simplest members of the same family as
+            <a href="/games/life-garden/">Conway's Game of Life</a>.
+            Life is a 2D cellular automaton where each cell has 8 neighbors instead of 2,
+            and the rule considers the count of live neighbors rather than the exact pattern.
+            But the core idea is identical: simple local rules produce complex global behavior.
+            Rule 110's Turing-completeness shows that even the 1D case is capable of
+            arbitrary computation.
+          </p>
+        </section>
+
+        <section class="section">
+          <h2>Wolfram's Four Classes</h2>
+          <p>
+            Stephen Wolfram classified all 256 elementary rules into four classes based on
+            their long-term behavior. This classification shows that even the simplest
+            possible rules — one dimension, two states, nearest neighbors — can produce
+            the full spectrum from trivial uniformity to universal computation.
+          </p>
+
+          <div class="class-group">
+            <h4>Class I — Uniform</h4>
+            <p>Evolution leads to a homogeneous state. All cells become the same regardless of initial conditions.</p>
+            <div class="class-buttons">
+              <button class="preset-btn" data-rule="0">0</button>
+              <button class="preset-btn" data-rule="8">8</button>
+              <button class="preset-btn" data-rule="32">32</button>
+              <button class="preset-btn" data-rule="160">160</button>
+            </div>
+          </div>
+
+          <div class="class-group">
+            <h4>Class II — Periodic</h4>
+            <p>Evolution leads to stable or periodically repeating structures.</p>
+            <div class="class-buttons">
+              <button class="preset-btn" data-rule="4">4</button>
+              <button class="preset-btn" data-rule="50">50</button>
+              <button class="preset-btn" data-rule="108">108</button>
+              <button class="preset-btn" data-rule="132">132</button>
+              <button class="preset-btn" data-rule="218">218</button>
+            </div>
+          </div>
+
+          <div class="class-group">
+            <h4>Class III — Chaotic</h4>
+            <p>Evolution produces pseudo-random, aperiodic patterns.</p>
+            <div class="class-buttons">
+              <button class="preset-btn" data-rule="30">30</button>
+              <button class="preset-btn" data-rule="45">45</button>
+              <button class="preset-btn" data-rule="60">60</button>
+              <button class="preset-btn" data-rule="73">73</button>
+              <button class="preset-btn" data-rule="105">105</button>
+              <button class="preset-btn" data-rule="150">150</button>
+            </div>
+          </div>
+
+          <div class="class-group">
+            <h4>Class IV — Complex</h4>
+            <p>Localized structures emerge and interact in complicated ways. Capable of universal computation.</p>
+            <div class="class-buttons">
+              <button class="preset-btn" data-rule="54">54</button>
+              <button class="preset-btn" data-rule="110">110</button>
+              <button class="preset-btn" data-rule="124">124</button>
+            </div>
+          </div>
+
+          <p>
+            The progression from Class I to Class IV mirrors a phase transition: too
+            little activity produces uniformity, too much produces chaos, and the
+            boundary between order and chaos — Class IV — is where complex, computation-capable
+            behavior appears. Rule 110, a Class IV rule, has been proven
+            Turing-complete, meaning it can simulate any computation given sufficient
+            time and space.
+          </p>
+        </section>
+      </main>
+    </div>
+    <script>
+      /* global getComputedStyle */
+      "use strict"
+      ;(function () {
+        const canvas = document.getElementById("canvas")
+        const ctx = canvas.getContext("2d")
+        const ruleInput = document.getElementById("rule-num")
+        const diagramEl = document.getElementById("rule-diagram")
+        const cellSize = 4
+
+        function getColors() {
+          const style = getComputedStyle(document.documentElement)
+          return {
+            on: style.getPropertyValue("--color-text").trim() || "#333",
+            off: style.getPropertyValue("--color-bg-container").trim() || "#fff",
+          }
+        }
+
+        function generate(ruleNum) {
+          const cols = Math.floor(canvas.width / cellSize)
+          const rows = Math.floor(canvas.height / cellSize)
+          const colors = getColors()
+
+          // Initialize with single cell in center
+          let current = new Uint8Array(cols)
+          current[Math.floor(cols / 2)] = 1
+
+          ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+          for (let y = 0; y < rows; y++) {
+            // Draw current row
+            for (let x = 0; x < cols; x++) {
+              ctx.fillStyle = current[x] ? colors.on : colors.off
+              ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize)
+            }
+
+            // Compute next row
+            const next = new Uint8Array(cols)
+            for (let x = 0; x < cols; x++) {
+              const left = x > 0 ? current[x - 1] : 0
+              const center = current[x]
+              const right = x < cols - 1 ? current[x + 1] : 0
+              const neighborhood = (left << 2) | (center << 1) | right
+              next[x] = (ruleNum >> neighborhood) & 1
+            }
+            current = next
+          }
+        }
+
+        function renderDiagram(ruleNum) {
+          let html = ""
+          // Show all 8 cases, from 111 (7) down to 000 (0)
+          for (let i = 7; i >= 0; i--) {
+            const bits = [(i >> 2) & 1, (i >> 1) & 1, i & 1]
+            const output = (ruleNum >> i) & 1
+            html +=
+              '<div class="rule-case">' +
+              '<div class="rule-pattern">' +
+              bits.map(function (b) {
+                return '<div class="rule-cell ' + (b ? "on" : "off") + '"></div>'
+              }).join("") +
+              "</div>" +
+              '<div class="rule-output ' + (output ? "on" : "off") + '"></div>' +
+              "</div>"
+          }
+          diagramEl.innerHTML = html
+        }
+
+        function update() {
+          const ruleNum = Math.max(0, Math.min(255, parseInt(ruleInput.value, 10) || 0))
+          ruleInput.value = ruleNum
+          renderDiagram(ruleNum)
+          generate(ruleNum)
+
+          // Update active preset button
+          document.querySelectorAll(".preset-btn[data-rule]").forEach(function (btn) {
+            btn.classList.toggle("active", parseInt(btn.dataset.rule, 10) === ruleNum)
+          })
+        }
+
+        ruleInput.addEventListener("input", update)
+
+        document.querySelectorAll(".preset-btn[data-rule]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            ruleInput.value = btn.dataset.rule
+            update()
+            // If the button is in the Wolfram Classes section, scroll canvas into view
+            if (btn.closest(".class-group")) {
+              canvas.scrollIntoView({ behavior: "smooth", block: "center" })
+            }
+          })
+        })
+
+        document.getElementById("random-btn").addEventListener("click", function () {
+          ruleInput.value = Math.floor(Math.random() * 256)
+          update()
+        })
+
+        update()
+      })()
+    </script>
+    <script src="/shared/nav.js"></script>
+    <script src="/shared/prevnext.js"></script>
+  </body>
+</html>
