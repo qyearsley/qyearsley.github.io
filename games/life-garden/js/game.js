@@ -227,10 +227,7 @@ class LifeGarden {
   }
 
   _updatePalette() {
-    this.ui.renderSpeciesPalette(
-      this.registry.placeable(),
-      this.selectedSpecies,
-    )
+    this.ui.renderSpeciesPalette(this.registry.placeable(), this.selectedSpecies)
   }
 }
 

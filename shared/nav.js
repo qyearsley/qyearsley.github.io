@@ -6,8 +6,6 @@
   var shortcuts = [
     { key: "j", description: "Next link" },
     { key: "k", description: "Previous link" },
-    { key: "n", description: "Next page", condition: "prevnext" },
-    { key: "p", description: "Previous page", condition: "prevnext" },
     { key: "u", description: "Up to section index", condition: "breadcrumb" },
     { key: "?", description: "Show keyboard shortcuts" },
     { key: "h", description: "Go to homepage" },
@@ -127,10 +125,6 @@
     shortcuts.forEach(function (s) {
       // Hide conditional shortcuts if their context isn't present
       if (s.condition === "theme" && !window.__themeToggle) return
-      if (s.condition === "prevnext") {
-        if (s.key === "n" && !document.querySelector(".prevnext-link.next")) return
-        if (s.key === "p" && !document.querySelector(".prevnext-link.prev")) return
-      }
       if (s.condition === "breadcrumb" && !getParentLink()) return
 
       var dt = document.createElement("dt")
@@ -183,9 +177,7 @@
 
   // Link navigation
   function getLinks() {
-    return Array.from(
-      document.querySelectorAll(".internal-links a, .game-list a"),
-    )
+    return Array.from(document.querySelectorAll(".internal-links a, .game-list a"))
   }
 
   document.addEventListener("keydown", function (e) {
@@ -229,26 +221,6 @@
           window.location.href = "/"
         }
         return
-
-      case "n": {
-        if (isHelpOpen()) return
-        var nextLink = document.querySelector(".prevnext-link.next")
-        if (nextLink) {
-          e.preventDefault()
-          window.location.href = nextLink.href
-        }
-        return
-      }
-
-      case "p": {
-        if (isHelpOpen()) return
-        var prevLink = document.querySelector(".prevnext-link.prev")
-        if (prevLink) {
-          e.preventDefault()
-          window.location.href = prevLink.href
-        }
-        return
-      }
 
       case "u": {
         if (isHelpOpen()) return

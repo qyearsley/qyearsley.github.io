@@ -9,15 +9,17 @@
       content="Visualize how hash tables work by watching strings hash into buckets"
     />
     <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/components.css" />
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
     <script type="module">
       "use strict"
 
       // --- Hash functions ---
       const hashFunctions = {
-        "djb2": {
+        djb2: {
           name: "djb2",
-          description: "Classic string hash by Dan Bernstein. Multiplies by 33 and adds each character code.",
+          description:
+            "Classic string hash by Dan Bernstein. Multiplies by 33 and adds each character code.",
           fn(str) {
             let hash = 5381
             for (let i = 0; i < str.length; i++) {
@@ -26,7 +28,7 @@
             return hash
           },
         },
-        "sum": {
+        sum: {
           name: "charSum",
           description: "Sums character codes. Simple but produces many collisions for anagrams.",
           fn(str) {
@@ -37,16 +39,18 @@
             return sum >>> 0
           },
         },
-        "length": {
+        length: {
           name: "length",
-          description: "Uses string length as hash. Terrible -- demonstrates why good hash functions matter.",
+          description:
+            "Uses string length as hash. Terrible -- demonstrates why good hash functions matter.",
           fn(str) {
             return str.length
           },
         },
-        "fnv1a": {
+        fnv1a: {
           name: "FNV-1a",
-          description: "Fowler-Noll-Vo hash. XORs each byte then multiplies by a prime. Good distribution.",
+          description:
+            "Fowler-Noll-Vo hash. XORs each byte then multiplies by a prime. Good distribution.",
           fn(str) {
             let hash = 0x811c9dc5
             for (let i = 0; i < str.length; i++) {
@@ -135,8 +139,7 @@
           bucketCount > 0 ? (entries.length / bucketCount).toFixed(2) : "0"
 
         // Render hash function description
-        document.getElementById("hash-desc").textContent =
-          hashFunctions[currentHash].description
+        document.getElementById("hash-desc").textContent = hashFunctions[currentHash].description
 
         // Recent entries list
         const recentEl = document.getElementById("recent-entries")
@@ -189,8 +192,33 @@
 
         // Batch add common words
         const wordSets = {
-          animals: ["cat", "dog", "bird", "fish", "horse", "snake", "bear", "wolf", "deer", "frog", "lion", "tiger"],
-          colors: ["red", "blue", "green", "yellow", "orange", "purple", "pink", "black", "white", "gray", "cyan"],
+          animals: [
+            "cat",
+            "dog",
+            "bird",
+            "fish",
+            "horse",
+            "snake",
+            "bear",
+            "wolf",
+            "deer",
+            "frog",
+            "lion",
+            "tiger",
+          ],
+          colors: [
+            "red",
+            "blue",
+            "green",
+            "yellow",
+            "orange",
+            "purple",
+            "pink",
+            "black",
+            "white",
+            "gray",
+            "cyan",
+          ],
           anagrams: ["listen", "silent", "enlist", "tinsel", "inlets", "elints"],
           numbers: ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"],
         }
@@ -459,49 +487,30 @@
         font-weight: 600;
       }
 
-      /* How section */
-      .how-section {
-        margin-top: 1.5rem;
-        border: 1px solid var(--color-border);
-        border-radius: 8px;
-        padding: 1rem 1.25rem;
-        background: var(--color-bg-card);
-      }
-
-      .how-section h2 {
-        font-size: 1.05rem;
-        margin: 0 0 0.75rem;
-      }
-
-      .how-section p,
-      .how-section li {
-        font-size: 0.9rem;
-        color: var(--color-text-secondary);
-        line-height: 1.5;
-      }
-
-      .how-section ul {
-        margin: 0.25rem 0 0.5rem;
-        padding-left: 1.25rem;
-      }
-
-      .how-section code {
-        background: var(--color-bg-code);
-        padding: 0.1rem 0.3rem;
-        border-radius: 3px;
-        font-size: 0.85rem;
-      }
-
       /* Dark mode — only component-specific color overrides */
       @media (prefers-color-scheme: dark) {
-        :root:not([data-theme="light"]) .bucket.collision .bucket-label { background: #742a2a; color: #feb2b2; }
-        :root:not([data-theme="light"]) .bucket.collision .bucket-item { background: #c53030; }
-        :root:not([data-theme="light"]) .re-hash { color: #b794f4; }
+        :root:not([data-theme="light"]) .bucket.collision .bucket-label {
+          background: #742a2a;
+          color: #feb2b2;
+        }
+        :root:not([data-theme="light"]) .bucket.collision .bucket-item {
+          background: #c53030;
+        }
+        :root:not([data-theme="light"]) .re-hash {
+          color: #b794f4;
+        }
       }
 
-      [data-theme="dark"] .bucket.collision .bucket-label { background: #742a2a; color: #feb2b2; }
-      [data-theme="dark"] .bucket.collision .bucket-item { background: #c53030; }
-      [data-theme="dark"] .re-hash { color: #b794f4; }
+      [data-theme="dark"] .bucket.collision .bucket-label {
+        background: #742a2a;
+        color: #feb2b2;
+      }
+      [data-theme="dark"] .bucket.collision .bucket-item {
+        background: #c53030;
+      }
+      [data-theme="dark"] .re-hash {
+        color: #b794f4;
+      }
     </style>
     <script src="/shared/theme.js"></script>
   </head>
@@ -595,8 +604,14 @@
           </p>
           <p>Try these experiments:</p>
           <ul>
-            <li>Switch to <code>length</code> hash and add words of different lengths -- see how same-length words always collide</li>
-            <li>Switch to <code>charSum</code> and add anagrams (listen, silent) -- they collide because they have the same character sum</li>
+            <li>
+              Switch to <code>length</code> hash and add words of different lengths -- see how
+              same-length words always collide
+            </li>
+            <li>
+              Switch to <code>charSum</code> and add anagrams (listen, silent) -- they collide
+              because they have the same character sum
+            </li>
             <li>Slide the bucket count down to 2 and watch collisions pile up</li>
             <li>Compare <code>djb2</code> vs <code>FNV-1a</code> distribution on the same words</li>
           </ul>
@@ -604,6 +619,5 @@
       </main>
     </div>
     <script src="/shared/nav.js"></script>
-    <script src="/shared/prevnext.js"></script>
   </body>
 </html>

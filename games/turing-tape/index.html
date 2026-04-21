@@ -54,9 +54,7 @@
 
         <!-- State + controls on one line -->
         <div class="controls-bar">
-          <div class="status-line">
-            State: <strong id="current-state">A</strong>
-          </div>
+          <div class="status-line">State: <strong id="current-state">A</strong></div>
           <div class="controls">
             <button id="step-btn" class="ctrl-btn" title="Space">
               <span class="btn-icon">&#x23ed;</span> Step <kbd>Space</kbd>
@@ -98,13 +96,15 @@
         <section class="info-section">
           <h2>How it works</h2>
           <ul>
-            <li>The machine reads the symbol under the <strong>head</strong> (highlighted cell).</li>
+            <li>
+              The machine reads the symbol under the <strong>head</strong> (highlighted cell).
+            </li>
             <li>
               It looks for a rule matching the current <strong>state</strong> and the symbol read.
             </li>
             <li>
-              The rule says what to <strong>write</strong>, which way to <strong>move</strong> (L/R),
-              and what <strong>state</strong> to go to next.
+              The rule says what to <strong>write</strong>, which way to
+              <strong>move</strong> (L/R), and what <strong>state</strong> to go to next.
             </li>
             <li>
               The machine halts when it enters the <strong>HALT</strong> state or has no matching

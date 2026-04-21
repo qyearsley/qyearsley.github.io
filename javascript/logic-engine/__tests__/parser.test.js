@@ -374,4 +374,3 @@ describe("ParseError", () => {
     }).toThrow(ParseError)
   })
 })
-

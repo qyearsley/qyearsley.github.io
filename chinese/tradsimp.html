@@ -22,9 +22,10 @@
       function updateConversion() {
         const input = document.getElementById("input").value
         const output = document.getElementById("output")
-        const placeholder = direction === "trad-to-simp"
-          ? "Simplified text will appear here..."
-          : "Traditional text will appear here..."
+        const placeholder =
+          direction === "trad-to-simp"
+            ? "Simplified text will appear here..."
+            : "Traditional text will appear here..."
 
         if (!input.trim()) {
           output.innerHTML = '<span class="placeholder">' + placeholder + "</span>"
@@ -36,7 +37,9 @@
           const converted = direction === "trad-to-simp" ? simplify(input) : traditionalize(input)
           lastOutput = converted
           output.innerHTML =
-            '<span class="converted-text">' + converted + "</span>" +
+            '<span class="converted-text">' +
+            converted +
+            "</span>" +
             '<button class="copy-output-btn" id="copy-output" type="button">Copy</button>'
           document.getElementById("copy-output").addEventListener("click", copyOutput)
         } catch (e) {
@@ -151,17 +154,21 @@
         updateConversion()
 
         document.getElementById("input").addEventListener("input", updateConversion)
-        document.getElementById("dir-trad-simp").addEventListener("click", () => setDirection("trad-to-simp"))
-        document.getElementById("dir-simp-trad").addEventListener("click", () => setDirection("simp-to-trad"))
+        document
+          .getElementById("dir-trad-simp")
+          .addEventListener("click", () => setDirection("trad-to-simp"))
+        document
+          .getElementById("dir-simp-trad")
+          .addEventListener("click", () => setDirection("simp-to-trad"))
       })
     </script>
     <style>
       .converter-form {
-        background: #f8f9fa;
+        background: var(--color-bg-card);
         padding: 1.5rem;
         border-radius: 8px;
         margin: 1.5rem 0;
-        border: 1px solid #e9ecef;
+        border: 1px solid var(--color-border);
       }
 
       .conversion-output {
@@ -222,57 +229,25 @@
       .traditional {
         font-size: 1.2rem;
         font-weight: 600;
-        color: #495057;
+        color: var(--color-text-secondary);
       }
 
       .arrow {
-        color: #6c757d;
+        color: var(--color-text-muted);
         font-weight: bold;
       }
 
       .simplified {
         font-size: 1.2rem;
         font-weight: 600;
-        color: #007bff;
+        color: var(--color-primary);
       }
 
       .english {
         font-size: 0.9rem;
-        color: #6c757d;
+        color: var(--color-text-muted);
         font-style: italic;
         margin-left: auto;
-      }
-
-      @media (prefers-color-scheme: dark) {
-        .converter-form {
-          background: #2a2a2a;
-          border-color: #444;
-        }
-
-        .conversion-output {
-          background: #333;
-          border-color: #555;
-        }
-
-        .placeholder {
-          color: #999;
-        }
-
-        .traditional {
-          color: #aaa;
-        }
-
-        .arrow {
-          color: #999;
-        }
-
-        .simplified {
-          color: #5ba3ff;
-        }
-
-        .english {
-          color: #999;
-        }
       }
     </style>
     <script src="/shared/theme.js"></script>
@@ -302,8 +277,36 @@
 
           <h2>Convert Text</h2>
           <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem">
-            <button class="preset-btn active" id="dir-trad-simp" style="padding: 0.35rem 0.75rem; border: 1px solid var(--color-border-dark); border-radius: 4px; background: var(--color-primary); color: #fff; cursor: pointer; font-size: 0.85rem">Traditional → Simplified</button>
-            <button class="preset-btn" id="dir-simp-trad" style="padding: 0.35rem 0.75rem; border: 1px solid var(--color-border-dark); border-radius: 4px; background: var(--color-bg-card); color: var(--color-text-secondary); cursor: pointer; font-size: 0.85rem">Simplified → Traditional</button>
+            <button
+              class="preset-btn active"
+              id="dir-trad-simp"
+              style="
+                padding: 0.35rem 0.75rem;
+                border: 1px solid var(--color-border-dark);
+                border-radius: 4px;
+                background: var(--color-primary);
+                color: #fff;
+                cursor: pointer;
+                font-size: 0.85rem;
+              "
+            >
+              Traditional → Simplified
+            </button>
+            <button
+              class="preset-btn"
+              id="dir-simp-trad"
+              style="
+                padding: 0.35rem 0.75rem;
+                border: 1px solid var(--color-border-dark);
+                border-radius: 4px;
+                background: var(--color-bg-card);
+                color: var(--color-text-secondary);
+                cursor: pointer;
+                font-size: 0.85rem;
+              "
+            >
+              Simplified → Traditional
+            </button>
           </div>
           <form class="converter-form">
             <div class="form-group">
@@ -323,6 +326,5 @@
       </main>
     </div>
     <script src="/shared/nav.js"></script>
-    <script src="/shared/prevnext.js"></script>
   </body>
 </html>

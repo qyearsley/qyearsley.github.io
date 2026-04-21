@@ -324,11 +324,7 @@
 
     // Register keyboard shortcut if nav.js loaded first
     if (window.__registerShortcut) {
-      window.__registerShortcut(
-        "t",
-        "Cycle theme (light/dark/system)",
-        cycleTheme,
-      )
+      window.__registerShortcut("t", "Cycle theme (light/dark/system)", cycleTheme)
     }
   })
 })()

@@ -9,6 +9,7 @@
       content="Test the convergence of infinite series by computing partial sums."
     />
     <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/components.css" />
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
     <style>
       #output {
@@ -68,28 +69,8 @@
         align-items: center;
         margin-bottom: 1rem;
       }
-
       .preset-btn {
-        padding: 0.35rem 0.75rem;
-        border: 1px solid var(--color-border-dark);
-        border-radius: 4px;
-        background: var(--color-bg-card);
-        cursor: pointer;
-        font-size: 0.85rem;
         font-family: monospace;
-        color: var(--color-text-secondary);
-        transition: border-color 0.15s, background 0.15s;
-      }
-
-      .preset-btn:hover {
-        background: var(--color-bg-code);
-        border-color: var(--color-primary);
-      }
-
-      .preset-btn.active {
-        background: var(--color-primary);
-        border-color: var(--color-primary);
-        color: #fff;
       }
     </style>
     <script src="/shared/theme.js"></script>
@@ -116,12 +97,60 @@
 
           <div class="presets-row">
             <span style="font-size: 0.85rem; color: var(--color-text-muted)">Presets:</span>
-            <button class="preset-btn" data-formula="1 / Math.pow(2, n)" data-n="100" data-target="2" data-label="2 (Geometric)">2 (Geometric)</button>
-            <button class="preset-btn" data-formula="1 / (function f(k){return k<=1?1:k*f(k-1)})(n)" data-n="20" data-target="2.71828" data-label="e (Euler)">e (Euler)</button>
-            <button class="preset-btn" data-formula="1 / Math.pow(n + 1, 2)" data-n="1000" data-target="1.6449" data-label="pi^2/6 (Basel)">&pi;&sup2;/6 (Basel)</button>
-            <button class="preset-btn" data-formula="Math.pow(-1, n) / (2 * n + 1)" data-n="1000" data-target="0.7854" data-label="pi/4 (Leibniz)">&pi;/4 (Leibniz)</button>
-            <button class="preset-btn" data-formula="Math.pow(-1, n) / (n + 1)" data-n="1000" data-target="0.6931" data-label="ln(2)">ln(2)</button>
-            <button class="preset-btn" data-formula="1 / Math.pow(3, n)" data-n="100" data-target="1.5" data-label="1.5 (Geometric r=1/3)">1.5 (Geometric r=1/3)</button>
+            <button
+              class="preset-btn"
+              data-formula="1 / Math.pow(2, n)"
+              data-n="100"
+              data-target="2"
+              data-label="2 (Geometric)"
+            >
+              2 (Geometric)
+            </button>
+            <button
+              class="preset-btn"
+              data-formula="1 / (function f(k){return k<=1?1:k*f(k-1)})(n)"
+              data-n="20"
+              data-target="2.71828"
+              data-label="e (Euler)"
+            >
+              e (Euler)
+            </button>
+            <button
+              class="preset-btn"
+              data-formula="1 / Math.pow(n + 1, 2)"
+              data-n="1000"
+              data-target="1.6449"
+              data-label="pi^2/6 (Basel)"
+            >
+              &pi;&sup2;/6 (Basel)
+            </button>
+            <button
+              class="preset-btn"
+              data-formula="Math.pow(-1, n) / (2 * n + 1)"
+              data-n="1000"
+              data-target="0.7854"
+              data-label="pi/4 (Leibniz)"
+            >
+              &pi;/4 (Leibniz)
+            </button>
+            <button
+              class="preset-btn"
+              data-formula="Math.pow(-1, n) / (n + 1)"
+              data-n="1000"
+              data-target="0.6931"
+              data-label="ln(2)"
+            >
+              ln(2)
+            </button>
+            <button
+              class="preset-btn"
+              data-formula="1 / Math.pow(3, n)"
+              data-n="100"
+              data-target="1.5"
+              data-label="1.5 (Geometric r=1/3)"
+            >
+              1.5 (Geometric r=1/3)
+            </button>
           </div>
 
           <form id="form" class="form-container">
@@ -300,40 +329,64 @@
 
         // Get colors from CSS variables
         const color =
-          getComputedStyle(document.documentElement)
-            .getPropertyValue("--color-primary")
-            .trim() || "#3182ce"
+          getComputedStyle(document.documentElement).getPropertyValue("--color-primary").trim() ||
+          "#3182ce"
         const errorColor =
-          getComputedStyle(document.documentElement)
-            .getPropertyValue("--color-error")
-            .trim() || "#dc3545"
+          getComputedStyle(document.documentElement).getPropertyValue("--color-error").trim() ||
+          "#dc3545"
 
         let targetLine = ""
         if (targetValue !== null) {
           const targetY = h - pad - ((targetValue - minVal) / range) * (h - 2 * pad)
           targetLine =
-            '<line x1="' + pad + '" y1="' + targetY.toFixed(1) +
-            '" x2="' + (w - pad) + '" y2="' + targetY.toFixed(1) +
-            '" stroke="' + errorColor +
+            '<line x1="' +
+            pad +
+            '" y1="' +
+            targetY.toFixed(1) +
+            '" x2="' +
+            (w - pad) +
+            '" y2="' +
+            targetY.toFixed(1) +
+            '" stroke="' +
+            errorColor +
             '" stroke-width="1" stroke-dasharray="6 3" stroke-opacity="0.7"/>' +
-            '<text x="' + (w - pad - 2) + '" y="' + (targetY - 3).toFixed(1) +
-            '" text-anchor="end" fill="' + errorColor +
+            '<text x="' +
+            (w - pad - 2) +
+            '" y="' +
+            (targetY - 3).toFixed(1) +
+            '" text-anchor="end" fill="' +
+            errorColor +
             '" font-size="9" font-family="monospace" opacity="0.8">' +
-            targetValue + '</text>'
+            targetValue +
+            "</text>"
         }
 
         // Final value reference line (faint)
         const finalY = h - pad - ((data[data.length - 1] - minVal) / range) * (h - 2 * pad)
 
         return (
-          '<svg viewBox="0 0 ' + w + " " + h + '" preserveAspectRatio="none">' +
-          '<line x1="' + pad + '" y1="' + finalY.toFixed(1) +
-          '" x2="' + (w - pad) + '" y2="' + finalY.toFixed(1) +
-          '" stroke="' + color + '" stroke-opacity="0.15" stroke-dasharray="4 2"/>' +
+          '<svg viewBox="0 0 ' +
+          w +
+          " " +
+          h +
+          '" preserveAspectRatio="none">' +
+          '<line x1="' +
+          pad +
+          '" y1="' +
+          finalY.toFixed(1) +
+          '" x2="' +
+          (w - pad) +
+          '" y2="' +
+          finalY.toFixed(1) +
+          '" stroke="' +
+          color +
+          '" stroke-opacity="0.15" stroke-dasharray="4 2"/>' +
           targetLine +
-          '<polyline fill="none" stroke="' + color +
+          '<polyline fill="none" stroke="' +
+          color +
           '" stroke-width="2" stroke-linejoin="round" points="' +
-          points.join(" ") + '"/>' +
+          points.join(" ") +
+          '"/>' +
           "</svg>"
         )
       }
@@ -371,6 +424,5 @@
       })
     </script>
     <script src="/shared/nav.js"></script>
-    <script src="/shared/prevnext.js"></script>
   </body>
 </html>

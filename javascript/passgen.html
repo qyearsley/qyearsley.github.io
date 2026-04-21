@@ -46,7 +46,9 @@
         color: var(--color-text-secondary);
         font-size: 0.85rem;
         cursor: pointer;
-        transition: background 0.15s, border-color 0.15s;
+        transition:
+          background 0.15s,
+          border-color 0.15s;
       }
 
       .copy-btn:hover {
@@ -75,7 +77,9 @@
       .strength-fill {
         height: 100%;
         border-radius: 3px;
-        transition: width 0.3s, background 0.3s;
+        transition:
+          width 0.3s,
+          background 0.3s;
       }
 
       .strength-label {
@@ -302,9 +306,12 @@
         const PRINTABLE_ASCII_START = 32
         const PRINTABLE_ASCII_END = 126
 
-        return Array.from({ length: PRINTABLE_ASCII_END - PRINTABLE_ASCII_START + 1 }, function (_, i) {
-          return String.fromCharCode(PRINTABLE_ASCII_START + i)
-        }).filter(function (char) {
+        return Array.from(
+          { length: PRINTABLE_ASCII_END - PRINTABLE_ASCII_START + 1 },
+          function (_, i) {
+            return String.fromCharCode(PRINTABLE_ASCII_START + i)
+          },
+        ).filter(function (char) {
           return regex.test(char)
         })
       }
@@ -341,6 +348,5 @@
       })
     </script>
     <script src="/shared/nav.js"></script>
-    <script src="/shared/prevnext.js"></script>
   </body>
 </html>

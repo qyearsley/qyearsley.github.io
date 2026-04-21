@@ -322,7 +322,11 @@ describe("EventManager", () => {
       eventManager.setupKeyboardInput()
       document.getElementById("submit-answer-btn").click()
 
-      expect(callbacks.onAnswerSelected).toHaveBeenCalledWith("42", true, expect.any(HTMLInputElement))
+      expect(callbacks.onAnswerSelected).toHaveBeenCalledWith(
+        "42",
+        true,
+        expect.any(HTMLInputElement),
+      )
     })
 
     test("Enter key in input field triggers submission", () => {
@@ -332,7 +336,11 @@ describe("EventManager", () => {
       Object.defineProperty(event, "target", { value: input, enumerable: true })
       document.getElementById("answer-options").dispatchEvent(event)
 
-      expect(callbacks.onAnswerSelected).toHaveBeenCalledWith("42", true, expect.any(HTMLInputElement))
+      expect(callbacks.onAnswerSelected).toHaveBeenCalledWith(
+        "42",
+        true,
+        expect.any(HTMLInputElement),
+      )
     })
 
     test("empty input does not trigger submission", () => {
@@ -353,7 +361,11 @@ describe("EventManager", () => {
 
       document.getElementById("submit-answer-btn").click()
 
-      expect(callbacks.onAnswerSelected).toHaveBeenCalledWith("42", true, expect.any(HTMLInputElement))
+      expect(callbacks.onAnswerSelected).toHaveBeenCalledWith(
+        "42",
+        true,
+        expect.any(HTMLInputElement),
+      )
     })
 
     test("compares string answers correctly", () => {
@@ -365,7 +377,11 @@ describe("EventManager", () => {
       eventManager.setupKeyboardInput()
       document.getElementById("submit-answer-btn").click()
 
-      expect(callbacks.onAnswerSelected).toHaveBeenCalledWith("hello", true, expect.any(HTMLInputElement))
+      expect(callbacks.onAnswerSelected).toHaveBeenCalledWith(
+        "hello",
+        true,
+        expect.any(HTMLInputElement),
+      )
     })
 
     test("prevents double submission with processing flag", () => {
@@ -411,7 +427,11 @@ describe("EventManager", () => {
       const event = new KeyboardEvent("keydown", { key: "1" })
       document.dispatchEvent(event)
 
-      expect(callbacks.onAnswerSelected).toHaveBeenCalledWith(1, expect.anything(), expect.anything())
+      expect(callbacks.onAnswerSelected).toHaveBeenCalledWith(
+        1,
+        expect.anything(),
+        expect.anything(),
+      )
     })
 
     test("does not trigger when typing in input field", () => {

@@ -243,12 +243,7 @@ describe("TuringMachine", () => {
         ["C", "_", "1", "L", "B"],
         ["C", "1", "1", "S", "HALT"],
       ])
-      const tm = new TuringMachine(
-        ["_", "_", "_", "_", "_", "_", "_", "_", "_"],
-        rules,
-        "A",
-        4,
-      )
+      const tm = new TuringMachine(["_", "_", "_", "_", "_", "_", "_", "_", "_"], rules, "A", 4)
       tm.run()
       expect(tm.haltReason).toBe("halt-state")
       const ones = tm.tape.filter((c) => c === "1").length

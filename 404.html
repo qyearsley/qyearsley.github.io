@@ -57,9 +57,7 @@
       <main id="main-content" class="main-content">
         <section class="section" style="text-align: center; padding: 2rem 0">
           <div class="not-found-code">404</div>
-          <p class="not-found-message">
-            The page you're looking for doesn't exist.
-          </p>
+          <p class="not-found-message">The page you're looking for doesn't exist.</p>
           <a href="/" class="back-link">Go to homepage</a>
           <p class="not-found-hint">
             Meanwhile, Conway's Game of Life is running in the background.
@@ -127,19 +125,13 @@
         function draw() {
           ctx.clearRect(0, 0, canvas.width, canvas.height)
           var color =
-            getComputedStyle(document.documentElement)
-              .getPropertyValue("--color-primary")
-              .trim() || "#3182ce"
+            getComputedStyle(document.documentElement).getPropertyValue("--color-primary").trim() ||
+            "#3182ce"
           ctx.fillStyle = color
           for (var y = 0; y < rows; y++) {
             for (var x = 0; x < cols; x++) {
               if (grid[y * cols + x]) {
-                ctx.fillRect(
-                  x * cellSize,
-                  y * cellSize,
-                  cellSize - 1,
-                  cellSize - 1,
-                )
+                ctx.fillRect(x * cellSize, y * cellSize, cellSize - 1, cellSize - 1)
               }
             }
           }

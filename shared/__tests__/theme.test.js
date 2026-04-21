@@ -40,9 +40,7 @@ describe("theme.js", () => {
 
     it("injects theme styles", () => {
       const styles = document.querySelectorAll("style")
-      const themeStyle = Array.from(styles).find((s) =>
-        s.textContent.includes(".theme-toggle"),
-      )
+      const themeStyle = Array.from(styles).find((s) => s.textContent.includes(".theme-toggle"))
       expect(themeStyle).not.toBeUndefined()
     })
   })
@@ -92,17 +90,13 @@ describe("theme.js", () => {
 
     it("closes on Escape key", () => {
       document.querySelector(".theme-toggle").click()
-      document.dispatchEvent(
-        new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
-      )
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))
       expect(document.querySelector(".theme-popover.open")).toBeNull()
     })
 
     it("closes on outside click", () => {
       document.querySelector(".theme-toggle").click()
-      document.body.dispatchEvent(
-        new MouseEvent("click", { bubbles: true }),
-      )
+      document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }))
       expect(document.querySelector(".theme-popover.open")).toBeNull()
     })
 

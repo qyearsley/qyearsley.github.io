@@ -10,6 +10,7 @@
     />
     <meta name="theme-color" content="#2d3748" />
     <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/components.css" />
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
     <script src="/shared/theme.js"></script>
     <style>
@@ -30,26 +31,7 @@
       }
 
       .preset-btn {
-        padding: 0.35rem 0.75rem;
-        border: 1px solid var(--color-border-dark);
-        border-radius: 4px;
-        background: var(--color-bg-card);
-        cursor: pointer;
-        font-size: 0.85rem;
         font-family: monospace;
-        color: var(--color-text-secondary);
-        transition: border-color 0.15s, background 0.15s;
-      }
-
-      .preset-btn:hover {
-        background: var(--color-bg-code);
-        border-color: var(--color-primary);
-      }
-
-      .preset-btn.active {
-        background: var(--color-primary);
-        border-color: var(--color-primary);
-        color: #fff;
       }
 
       .canvas-container {
@@ -190,22 +172,20 @@
         <section class="section">
           <h2>How It Works</h2>
           <p>
-            An <b>elementary cellular automaton</b> is a 1D grid of cells, each either on or off.
-            At each step, every cell's next state is determined by its current state and its two
+            An <b>elementary cellular automaton</b> is a 1D grid of cells, each either on or off. At
+            each step, every cell's next state is determined by its current state and its two
             neighbors — a 3-cell neighborhood with 8 possible patterns.
           </p>
           <p>
-            A <b>rule number</b> (0-255) encodes which patterns produce an "on" cell. Since
-            there are 8 possible 3-cell patterns and each can map to on or off, there are
-            2<sup>8</sup> = 256 possible rules.
+            A <b>rule number</b> (0-255) encodes which patterns produce an "on" cell. Since there
+            are 8 possible 3-cell patterns and each can map to on or off, there are 2<sup>8</sup> =
+            256 possible rules.
           </p>
           <p>
-            The diagram above shows each rule's 8 cases. The top row is the input pattern
-            (left neighbor, cell, right neighbor), and the bottom cell is the output.
+            The diagram above shows each rule's 8 cases. The top row is the input pattern (left
+            neighbor, cell, right neighbor), and the bottom cell is the output.
           </p>
-          <p>
-            Some notable rules:
-          </p>
+          <p>Some notable rules:</p>
           <ul style="margin-left: 1.5rem; margin-bottom: 1rem">
             <li><b>Rule 30</b> — chaotic, used in Mathematica's random number generator</li>
             <li><b>Rule 90</b> — produces a Sierpinski triangle</li>
@@ -215,27 +195,29 @@
           <h3>Connection to Conway's Life</h3>
           <p>
             These 1D automata are the simplest members of the same family as
-            <a href="/games/life-garden/">Conway's Game of Life</a>.
-            Life is a 2D cellular automaton where each cell has 8 neighbors instead of 2,
-            and the rule considers the count of live neighbors rather than the exact pattern.
-            But the core idea is identical: simple local rules produce complex global behavior.
-            Rule 110's Turing-completeness shows that even the 1D case is capable of
-            arbitrary computation.
+            <a href="/games/life-garden/">Conway's Game of Life</a>. Life is a 2D cellular automaton
+            where each cell has 8 neighbors instead of 2, and the rule considers the count of live
+            neighbors rather than the exact pattern. But the core idea is identical: simple local
+            rules produce complex global behavior. Rule 110's Turing-completeness shows that even
+            the 1D case is capable of arbitrary computation.
           </p>
         </section>
 
         <section class="section">
           <h2>Wolfram's Four Classes</h2>
           <p>
-            Stephen Wolfram classified all 256 elementary rules into four classes based on
-            their long-term behavior. This classification shows that even the simplest
-            possible rules — one dimension, two states, nearest neighbors — can produce
-            the full spectrum from trivial uniformity to universal computation.
+            Stephen Wolfram classified all 256 elementary rules into four classes based on their
+            long-term behavior. This classification shows that even the simplest possible rules —
+            one dimension, two states, nearest neighbors — can produce the full spectrum from
+            trivial uniformity to universal computation.
           </p>
 
           <div class="class-group">
             <h4>Class I — Uniform</h4>
-            <p>Evolution leads to a homogeneous state. All cells become the same regardless of initial conditions.</p>
+            <p>
+              Evolution leads to a homogeneous state. All cells become the same regardless of
+              initial conditions.
+            </p>
             <div class="class-buttons">
               <button class="preset-btn" data-rule="0">0</button>
               <button class="preset-btn" data-rule="8">8</button>
@@ -271,7 +253,10 @@
 
           <div class="class-group">
             <h4>Class IV — Complex</h4>
-            <p>Localized structures emerge and interact in complicated ways. Capable of universal computation.</p>
+            <p>
+              Localized structures emerge and interact in complicated ways. Capable of universal
+              computation.
+            </p>
             <div class="class-buttons">
               <button class="preset-btn" data-rule="54">54</button>
               <button class="preset-btn" data-rule="110">110</button>
@@ -280,12 +265,11 @@
           </div>
 
           <p>
-            The progression from Class I to Class IV mirrors a phase transition: too
-            little activity produces uniformity, too much produces chaos, and the
-            boundary between order and chaos — Class IV — is where complex, computation-capable
-            behavior appears. Rule 110, a Class IV rule, has been proven
-            Turing-complete, meaning it can simulate any computation given sufficient
-            time and space.
+            The progression from Class I to Class IV mirrors a phase transition: too little activity
+            produces uniformity, too much produces chaos, and the boundary between order and chaos —
+            Class IV — is where complex, computation-capable behavior appears. Rule 110, a Class IV
+            rule, has been proven Turing-complete, meaning it can simulate any computation given
+            sufficient time and space.
           </p>
         </section>
       </main>
@@ -348,11 +332,15 @@
             html +=
               '<div class="rule-case">' +
               '<div class="rule-pattern">' +
-              bits.map(function (b) {
-                return '<div class="rule-cell ' + (b ? "on" : "off") + '"></div>'
-              }).join("") +
+              bits
+                .map(function (b) {
+                  return '<div class="rule-cell ' + (b ? "on" : "off") + '"></div>'
+                })
+                .join("") +
               "</div>" +
-              '<div class="rule-output ' + (output ? "on" : "off") + '"></div>' +
+              '<div class="rule-output ' +
+              (output ? "on" : "off") +
+              '"></div>' +
               "</div>"
           }
           diagramEl.innerHTML = html
@@ -392,6 +380,5 @@
       })()
     </script>
     <script src="/shared/nav.js"></script>
-    <script src="/shared/prevnext.js"></script>
   </body>
 </html>

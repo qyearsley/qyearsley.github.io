@@ -331,10 +331,7 @@ export class Parser {
   parse() {
     const node = this.parseIff()
     if (this.current().type !== "EOF") {
-      throw new ParseError(
-        `Unexpected token '${this.current().value}' after expression`,
-        this.pos,
-      )
+      throw new ParseError(`Unexpected token '${this.current().value}' after expression`, this.pos)
     }
     return node
   }
@@ -593,10 +590,7 @@ export class Parser {
     if (token.type === "EOF") {
       throw new ParseError("Unexpected end of expression", this.pos)
     }
-    throw new ParseError(
-      `Expected atom, literal, or '(' but found '${token.value}'`,
-      this.pos,
-    )
+    throw new ParseError(`Expected atom, literal, or '(' but found '${token.value}'`, this.pos)
   }
 }
 

@@ -64,12 +64,7 @@ export class Renderer {
     // Goal zone overlays
     for (const zone of this.goalZones) {
       ctx.fillStyle = "rgba(255, 215, 0, 0.12)"
-      ctx.fillRect(
-        this.offsetX + zone.x * cs,
-        this.offsetY + zone.y * cs,
-        zone.w * cs,
-        zone.h * cs,
-      )
+      ctx.fillRect(this.offsetX + zone.x * cs, this.offsetY + zone.y * cs, zone.w * cs, zone.h * cs)
       ctx.strokeStyle = "rgba(255, 215, 0, 0.4)"
       ctx.lineWidth = 2
       ctx.strokeRect(
@@ -192,7 +187,12 @@ export class Renderer {
     ctx.fillStyle = "rgba(255,255,255,0.4)"
     const pr = s * 0.08
     const d = s * 0.22
-    for (const [dx, dy] of [[0, -1], [0, 1], [-1, 0], [1, 0]]) {
+    for (const [dx, dy] of [
+      [0, -1],
+      [0, 1],
+      [-1, 0],
+      [1, 0],
+    ]) {
       ctx.beginPath()
       ctx.arc(cx + dx * d, cy + dy * d, pr, 0, Math.PI * 2)
       ctx.fill()

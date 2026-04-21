@@ -92,10 +92,7 @@ export class MeasurementAndPatternGenerator extends BaseMathGenerator {
    * @returns {Object} Activity object
    */
   generateSkipCounting(difficulty, areaId) {
-    const skipBy =
-      difficulty === "easy"
-        ? randomChoice([2, 5, 10])
-        : randomChoice([3, 4, 6])
+    const skipBy = difficulty === "easy" ? randomChoice([2, 5, 10]) : randomChoice([3, 4, 6])
 
     const startMultiplier = randomInt(1, 3)
     const start = skipBy * startMultiplier
@@ -116,10 +113,7 @@ export class MeasurementAndPatternGenerator extends BaseMathGenerator {
    * @returns {Object} Activity object
    */
   generateMissingNumber(difficulty, areaId) {
-    const diff =
-      difficulty === "easy"
-        ? randomChoice([1, 2, 5, 10])
-        : randomChoice([3, 4, 6, 7])
+    const diff = difficulty === "easy" ? randomChoice([1, 2, 5, 10]) : randomChoice([3, 4, 6, 7])
 
     const firstNum = randomInt(1, 10)
     const fullSequence = [firstNum, firstNum + diff, firstNum + diff * 2, firstNum + diff * 3]

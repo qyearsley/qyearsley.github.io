@@ -179,12 +179,7 @@ describe("Inference Rules", () => {
 
   test("Limits output to 3 conclusions max", async () => {
     // Create premises that will generate many conclusions
-    const steps = [
-      createStep(1, "P"),
-      createStep(2, "Q"),
-      createStep(3, "R"),
-      createStep(4, "S"),
-    ]
+    const steps = [createStep(1, "P"), createStep(2, "Q"), createStep(3, "R"), createStep(4, "S")]
     const conclusions = await inferNextSteps(steps)
 
     expect(conclusions.length).toBeLessThanOrEqual(3)
@@ -228,10 +223,7 @@ describe("Inference Rules", () => {
   })
 
   test("Works with descriptive atom names", async () => {
-    const steps = [
-      createStep(1, "raining -> wet_street"),
-      createStep(2, "raining"),
-    ]
+    const steps = [createStep(1, "raining -> wet_street"), createStep(2, "raining")]
     const conclusions = await inferNextSteps(steps)
     const derived = conclusions.find((c) => c.expression === "wet_street")
     expect(derived).toBeDefined()

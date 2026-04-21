@@ -53,19 +53,13 @@ describe("StorageManager", () => {
     })
 
     it("loads valid data", () => {
-      localStorage.setItem(
-        "test-game",
-        JSON.stringify({ score: 10, version: "1.0" }),
-      )
+      localStorage.setItem("test-game", JSON.stringify({ score: 10, version: "1.0" }))
       const data = sm.loadGameState()
       expect(data.score).toBe(10)
     })
 
     it("returns null and clears on version mismatch", () => {
-      localStorage.setItem(
-        "test-game",
-        JSON.stringify({ score: 10, version: "0.9" }),
-      )
+      localStorage.setItem("test-game", JSON.stringify({ score: 10, version: "0.9" }))
       expect(sm.loadGameState()).toBeNull()
       expect(localStorage.getItem("test-game")).toBeNull()
     })
@@ -101,10 +95,7 @@ describe("StorageManager", () => {
     })
 
     it("returns formatted JSON string", () => {
-      localStorage.setItem(
-        "test-game",
-        JSON.stringify({ score: 5, version: "1.0" }),
-      )
+      localStorage.setItem("test-game", JSON.stringify({ score: 5, version: "1.0" }))
       const exported = sm.exportGameState()
       expect(typeof exported).toBe("string")
       expect(JSON.parse(exported).score).toBe(5)

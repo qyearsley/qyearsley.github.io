@@ -131,12 +131,11 @@ describe("nav.js", () => {
 
     it("hides conditional shortcuts when context is missing", () => {
       pressKey("?")
-      const descriptions = Array.from(
-        document.querySelectorAll(".shortcut-list dd"),
-      ).map((dd) => dd.textContent)
-      // "Next page" should be hidden (no .prevnext-link.next in DOM)
-      expect(descriptions).not.toContain("Next page")
-      expect(descriptions).not.toContain("Previous page")
+      const descriptions = Array.from(document.querySelectorAll(".shortcut-list dd")).map(
+        (dd) => dd.textContent,
+      )
+      // "Cycle theme" should be hidden (no __themeToggle in DOM)
+      expect(descriptions).not.toContain("Cycle theme")
     })
   })
 
@@ -266,23 +265,6 @@ describe("nav.js", () => {
   })
 
   describe("page navigation keys", () => {
-    it("n links to next page when prevnext-link exists", () => {
-      document.body.innerHTML += '<a class="prevnext-link next" href="/next">Next</a>'
-      const event = pressKey("n")
-      expect(event.defaultPrevented).toBe(true)
-    })
-
-    it("n does nothing without prevnext-link", () => {
-      const event = pressKey("n")
-      expect(event.defaultPrevented).toBe(false)
-    })
-
-    it("p links to previous page when prevnext-link exists", () => {
-      document.body.innerHTML += '<a class="prevnext-link prev" href="/prev">Prev</a>'
-      const event = pressKey("p")
-      expect(event.defaultPrevented).toBe(true)
-    })
-
     it("u navigates to parent breadcrumb", () => {
       const event = pressKey("u")
       expect(event.defaultPrevented).toBe(true)

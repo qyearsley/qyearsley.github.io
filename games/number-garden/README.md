@@ -68,6 +68,7 @@ npm test        # Run all tests
 ```
 
 **Quick testing:**
+
 - `index.html?unlock=all` - Unlock all areas
 - `index.html?unlock=crystal-cave` - Unlock specific area
 

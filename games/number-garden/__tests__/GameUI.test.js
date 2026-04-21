@@ -416,8 +416,10 @@ describe("GameUI", () => {
       }
 
       // Add options to selects
-      document.getElementById("difficulty-select").innerHTML = '<option value="explorer">Explorer</option>'
-      document.getElementById("input-mode-select").innerHTML = '<option value="keyboard">Keyboard</option>'
+      document.getElementById("difficulty-select").innerHTML =
+        '<option value="explorer">Explorer</option>'
+      document.getElementById("input-mode-select").innerHTML =
+        '<option value="keyboard">Keyboard</option>'
       document.getElementById("visual-hints-select").innerHTML = '<option value="off">Off</option>'
       document.getElementById("sound-effects-select").innerHTML = '<option value="off">Off</option>'
 
@@ -431,7 +433,8 @@ describe("GameUI", () => {
 
     test("uses default values when settings are missing", () => {
       // Add options to selects
-      document.getElementById("difficulty-select").innerHTML = '<option value="adventurer">Adventurer</option>'
+      document.getElementById("difficulty-select").innerHTML =
+        '<option value="adventurer">Adventurer</option>'
       document.getElementById("input-mode-select").innerHTML =
         '<option value="multipleChoice">Multiple Choice</option>'
       document.getElementById("visual-hints-select").innerHTML = '<option value="on">On</option>'

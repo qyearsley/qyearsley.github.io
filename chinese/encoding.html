@@ -9,6 +9,7 @@
       content="See how Chinese characters are encoded in UTF-8, UTF-16, and GB2312"
     />
     <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/components.css" />
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
     <script type="module">
       "use strict"
@@ -239,16 +240,16 @@
         padding: 0.75rem 1rem;
         font-size: 1.5rem;
         font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
-        border: 2px solid #cbd5e0;
+        border: 2px solid var(--color-border-dark);
         border-radius: 8px;
-        background: #fff;
-        color: #1a202c;
+        background: var(--color-bg-input);
+        color: var(--color-text);
         margin-bottom: 0.5rem;
       }
 
       .explorer-input:focus {
         outline: none;
-        border-color: #3182ce;
+        border-color: var(--color-primary);
         box-shadow: 0 0 0 3px rgb(49, 130, 206, 0.2);
       }
 
@@ -260,38 +261,23 @@
       }
 
       .example-btn {
-        padding: 0.35rem 0.75rem;
-        border: 1px solid #cbd5e0;
-        border-radius: 4px;
-        background: #f7fafc;
-        cursor: pointer;
         font-size: 1rem;
         font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
-        color: #4a5568;
-        transition:
-          border-color 0.15s,
-          background 0.15s;
-      }
-
-      .example-btn:hover {
-        background: #edf2f7;
-        border-color: #a0aec0;
       }
 
       .placeholder {
-        color: #a0aec0;
+        color: var(--color-text-muted);
         text-align: center;
         padding: 2rem;
         font-style: italic;
       }
 
-      /* Character result card */
       .char-result {
-        border: 1px solid #e2e8f0;
+        border: 1px solid var(--color-border);
         border-radius: 8px;
         padding: 1rem 1.25rem;
         margin-bottom: 0.75rem;
-        background: #f7fafc;
+        background: var(--color-bg-card);
       }
 
       .char-display {
@@ -304,7 +290,7 @@
       .char-codepoint {
         font-family: "SF Mono", Menlo, Consolas, monospace;
         font-size: 0.9rem;
-        color: #718096;
+        color: var(--color-text-tertiary);
         margin-bottom: 0.75rem;
       }
 
@@ -319,7 +305,7 @@
         font-weight: 600;
         font-size: 0.85rem;
         min-width: 4.5rem;
-        color: #4a5568;
+        color: var(--color-text-secondary);
       }
 
       .enc-bytes {
@@ -330,7 +316,7 @@
 
       .enc-count {
         font-size: 0.8rem;
-        color: #a0aec0;
+        color: var(--color-text-muted);
         margin-left: auto;
         white-space: nowrap;
       }
@@ -352,22 +338,19 @@
       .byte-box.utf8 {
         background: #3182ce;
       }
-
       .byte-box.utf16 {
         background: #805ad5;
       }
-
       .byte-box.gb2312 {
         background: #d69e2e;
       }
 
       .na {
         font-size: 0.85rem;
-        color: #a0aec0;
+        color: var(--color-text-muted);
         font-style: italic;
       }
 
-      /* Bit breakdown row */
       .bit-row {
         display: flex;
         gap: 0.5rem;
@@ -382,26 +365,11 @@
       }
 
       .bit-prefix {
-        color: #a0aec0;
+        color: var(--color-text-muted);
       }
-
       .bit-payload {
-        color: #3182ce;
+        color: var(--color-primary);
         font-weight: 600;
-      }
-
-      /* How it works section */
-      .how-section {
-        margin-top: 1.5rem;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 1rem 1.25rem;
-        background: #f7fafc;
-      }
-
-      .how-section h2 {
-        font-size: 1.05rem;
-        margin: 0 0 0.75rem;
       }
 
       .how-section h3 {
@@ -413,112 +381,32 @@
         margin-top: 0;
       }
 
-      .how-section p,
-      .how-section li {
-        font-size: 0.9rem;
-        color: #4a5568;
-        line-height: 1.5;
-      }
-
-      .how-section ul {
-        margin: 0.25rem 0;
-        padding-left: 1.25rem;
-      }
-
-      .how-section code {
-        background: #edf2f7;
-        padding: 0.1rem 0.3rem;
-        border-radius: 3px;
-        font-size: 0.85rem;
-      }
-
-      /* Dark mode */
       @media (prefers-color-scheme: dark) {
-        .explorer-input {
-          background: #2d3748;
-          border-color: #4a5568;
-          color: #e2e8f0;
-        }
-
-        .explorer-input:focus {
-          border-color: #63b3ed;
-          box-shadow: 0 0 0 3px rgb(99, 179, 237, 0.2);
-        }
-
-        .example-btn {
-          background: #2d3748;
-          border-color: #4a5568;
-          color: #cbd5e0;
-        }
-
-        .example-btn:hover {
-          background: #4a5568;
-          border-color: #718096;
-        }
-
-        .placeholder {
-          color: #718096;
-        }
-
-        .char-result {
-          background: #2d3748;
-          border-color: #4a5568;
-        }
-
-        .char-display {
-          color: #e2e8f0;
-        }
-
-        .char-codepoint {
-          color: #a0aec0;
-        }
-
-        .enc-label {
-          color: #cbd5e0;
-        }
-
-        .enc-count {
-          color: #718096;
-        }
-
-        .byte-box.utf8 {
+        :root:not([data-theme="light"]) .byte-box.utf8 {
           background: #2b6cb0;
         }
-
-        .byte-box.utf16 {
+        :root:not([data-theme="light"]) .byte-box.utf16 {
           background: #6b46c1;
         }
-
-        .byte-box.gb2312 {
+        :root:not([data-theme="light"]) .byte-box.gb2312 {
           background: #b7791f;
         }
-
-        .na {
-          color: #718096;
-        }
-
-        .bit-prefix {
-          color: #718096;
-        }
-
-        .bit-payload {
+        :root:not([data-theme="light"]) .bit-payload {
           color: #63b3ed;
         }
+      }
 
-        .how-section {
-          background: #2d3748;
-          border-color: #4a5568;
-        }
-
-        .how-section p,
-        .how-section li {
-          color: #a0aec0;
-        }
-
-        .how-section code {
-          background: #1a202c;
-          color: #e2e8f0;
-        }
+      [data-theme="dark"] .byte-box.utf8 {
+        background: #2b6cb0;
+      }
+      [data-theme="dark"] .byte-box.utf16 {
+        background: #6b46c1;
+      }
+      [data-theme="dark"] .byte-box.gb2312 {
+        background: #b7791f;
+      }
+      [data-theme="dark"] .bit-payload {
+        color: #63b3ed;
       }
     </style>
     <script src="/shared/theme.js"></script>
@@ -595,6 +483,5 @@
       </main>
     </div>
     <script src="/shared/nav.js"></script>
-    <script src="/shared/prevnext.js"></script>
   </body>
 </html>

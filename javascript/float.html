@@ -4,11 +4,9 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Floating Point Exposed</title>
-    <meta
-      name="description"
-      content="See the IEEE 754 bit layout of any floating-point number"
-    />
+    <meta name="description" content="See the IEEE 754 bit layout of any floating-point number" />
     <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/components.css" />
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
     <script type="module">
       "use strict"
@@ -22,8 +20,7 @@
         const view = new DataView(buf)
         const hi = view.getUint32(0, false)
         const lo = view.getUint32(4, false)
-        const bits =
-          hi.toString(2).padStart(32, "0") + lo.toString(2).padStart(32, "0")
+        const bits = hi.toString(2).padStart(32, "0") + lo.toString(2).padStart(32, "0")
         return bits
       }
 
@@ -46,8 +43,7 @@
 
       function describeNumber(value) {
         if (Number.isNaN(value)) return "NaN — not a number"
-        if (!Number.isFinite(value))
-          return value > 0 ? "+Infinity" : "-Infinity"
+        if (!Number.isFinite(value)) return value > 0 ? "+Infinity" : "-Infinity"
         if (Object.is(value, -0)) return "-0 (negative zero)"
         if (value === 0) return "+0"
         return null
@@ -131,8 +127,7 @@
         currentBits = arr.join("")
         // Update the input to reflect the new value
         const value = bitsToFloat64(currentBits)
-        document.getElementById("input").value =
-          Object.is(value, -0) ? "-0" : String(value)
+        document.getElementById("input").value = Object.is(value, -0) ? "-0" : String(value)
         render()
       }
 
@@ -328,7 +323,9 @@
         border-radius: 2px;
         color: #fff;
         cursor: pointer;
-        transition: transform 0.1s, filter 0.1s;
+        transition:
+          transform 0.1s,
+          filter 0.1s;
         user-select: none;
       }
 
@@ -386,54 +383,43 @@
         color: var(--color-text-tertiary);
       }
 
-      /* How section */
-      .how-section {
-        margin-top: 1.5rem;
-        border: 1px solid var(--color-border);
-        border-radius: 8px;
-        padding: 1rem 1.25rem;
-        background: var(--color-bg-card);
-      }
-
-      .how-section h2 {
-        font-size: 1.05rem;
-        margin: 0 0 0.75rem;
-      }
-
-      .how-section p,
-      .how-section li {
-        font-size: 0.9rem;
-        color: var(--color-text-secondary);
-        line-height: 1.5;
-      }
-
-      .how-section ul {
-        margin: 0.25rem 0 0.5rem;
-        padding-left: 1.25rem;
-      }
-
-      .how-section code {
-        background: var(--color-bg-code);
-        padding: 0.1rem 0.3rem;
-        border-radius: 3px;
-        font-size: 0.85rem;
-      }
-
       /* Dark mode — only bit-specific color overrides remain;
          everything else is handled by CSS variables. */
       @media (prefers-color-scheme: dark) {
-        :root:not([data-theme="light"]) .bit.sign { background: #c53030; }
-        :root:not([data-theme="light"]) .bit.sign.zero { background: #276749; }
-        :root:not([data-theme="light"]) .bit.exp.zero { background: #6b46c1; }
-        :root:not([data-theme="light"]) .bit.mant { background: #2b6cb0; }
-        :root:not([data-theme="light"]) .bit.mant.zero { background: #2a4365; color: #90cdf4; }
+        :root:not([data-theme="light"]) .bit.sign {
+          background: #c53030;
+        }
+        :root:not([data-theme="light"]) .bit.sign.zero {
+          background: #276749;
+        }
+        :root:not([data-theme="light"]) .bit.exp.zero {
+          background: #6b46c1;
+        }
+        :root:not([data-theme="light"]) .bit.mant {
+          background: #2b6cb0;
+        }
+        :root:not([data-theme="light"]) .bit.mant.zero {
+          background: #2a4365;
+          color: #90cdf4;
+        }
       }
 
-      [data-theme="dark"] .bit.sign { background: #c53030; }
-      [data-theme="dark"] .bit.sign.zero { background: #276749; }
-      [data-theme="dark"] .bit.exp.zero { background: #6b46c1; }
-      [data-theme="dark"] .bit.mant { background: #2b6cb0; }
-      [data-theme="dark"] .bit.mant.zero { background: #2a4365; color: #90cdf4; }
+      [data-theme="dark"] .bit.sign {
+        background: #c53030;
+      }
+      [data-theme="dark"] .bit.sign.zero {
+        background: #276749;
+      }
+      [data-theme="dark"] .bit.exp.zero {
+        background: #6b46c1;
+      }
+      [data-theme="dark"] .bit.mant {
+        background: #2b6cb0;
+      }
+      [data-theme="dark"] .bit.mant.zero {
+        background: #2a4365;
+        color: #90cdf4;
+      }
     </style>
     <script src="/shared/theme.js"></script>
   </head>
@@ -456,13 +442,7 @@
 
         <section class="section">
           <label for="input"><strong>Enter a number or expression:</strong></label>
-          <input
-            id="input"
-            type="text"
-            class="float-input"
-            value="0.1 + 0.2"
-            autocomplete="off"
-          />
+          <input id="input" type="text" class="float-input" value="0.1 + 0.2" autocomplete="off" />
 
           <div class="examples-row">
             <button class="example-btn" data-text="0.1 + 0.2">0.1 + 0.2</button>
@@ -500,18 +480,15 @@
               precision total.
             </li>
           </ul>
-          <p>
-            The value is: &plusmn;1.mantissa &times; 2<sup>(exponent - 1023)</sup>
-          </p>
+          <p>The value is: &plusmn;1.mantissa &times; 2<sup>(exponent - 1023)</sup></p>
           <p>
             This is why <code>0.1 + 0.2 !== 0.3</code> &mdash; 0.1 and 0.2 can't be represented
-            exactly in binary, so the sum accumulates a tiny rounding error.
-            Try clicking "0.1 + 0.2" and "0.3" to compare their bits.
+            exactly in binary, so the sum accumulates a tiny rounding error. Try clicking "0.1 +
+            0.2" and "0.3" to compare their bits.
           </p>
         </section>
       </main>
     </div>
     <script src="/shared/nav.js"></script>
-    <script src="/shared/prevnext.js"></script>
   </body>
 </html>

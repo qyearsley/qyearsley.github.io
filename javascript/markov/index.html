@@ -30,7 +30,10 @@
           <h2>Generator</h2>
           <div class="form-group">
             <label>Source Text:</label>
-            <div class="controls-row" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem">
+            <div
+              class="controls-row"
+              style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem"
+            >
               <button class="preset-btn active" data-preset="shakespeare">Shakespeare</button>
               <button class="preset-btn" data-preset="nursery">Nursery Rhyme</button>
               <button class="preset-btn" data-preset="technical">Technical</button>
@@ -100,29 +103,6 @@
       </main>
     </div>
 
-    <style>
-      .preset-btn {
-        padding: 0.35rem 0.75rem;
-        border: 1px solid var(--color-border-dark, #cbd5e0);
-        border-radius: 4px;
-        background: var(--color-bg-card, #f8fafc);
-        cursor: pointer;
-        font-size: 0.85rem;
-        color: var(--color-text-secondary, #4a5568);
-        transition: border-color 0.15s, background 0.15s;
-      }
-
-      .preset-btn:hover {
-        background: var(--color-bg-code, #e9ecef);
-        border-color: var(--color-primary, #3182ce);
-      }
-
-      .preset-btn.active {
-        background: var(--color-primary, #3182ce);
-        border-color: var(--color-primary, #3182ce);
-        color: #fff;
-      }
-    </style>
     <script type="module">
       import { MarkovChain } from "./markov.js"
 
@@ -167,7 +147,8 @@
             html += "<strong>" + ngram + "</strong> &rarr;<br>"
             for (const [next, count] of Object.entries(possibilities)) {
               const prob = ((count / totalCount) * 100).toFixed(1)
-              html += "&nbsp;&nbsp;" + next + ": " + prob + "% (" + count + "/" + totalCount + ")<br>"
+              html +=
+                "&nbsp;&nbsp;" + next + ": " + prob + "% (" + count + "/" + totalCount + ")<br>"
             }
             html += "</div>"
           }
@@ -220,6 +201,5 @@
       setPreset("shakespeare")
     </script>
     <script src="/shared/nav.js"></script>
-    <script src="/shared/prevnext.js"></script>
   </body>
 </html>

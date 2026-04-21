@@ -294,6 +294,64 @@ body.logic-engine {
   outline-offset: 2px;
 }
 
+/* Preset buttons (used in automata, series tester, markov) */
+.preset-btn {
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--color-border-dark, #cbd5e0);
+  border-radius: 4px;
+  background: var(--color-bg-card, #f8fafc);
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary, #4a5568);
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+
+.preset-btn:hover {
+  background: var(--color-bg-code, #e9ecef);
+  border-color: var(--color-primary, #3182ce);
+}
+
+.preset-btn.active {
+  background: var(--color-primary, #3182ce);
+  border-color: var(--color-primary, #3182ce);
+  color: #fff;
+}
+
+/* How-it-works section (used in hashlab, float) */
+.how-section {
+  margin-top: 1.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  background: var(--color-bg-card);
+}
+
+.how-section h2 {
+  font-size: 1.05rem;
+  margin: 0 0 0.75rem;
+}
+
+.how-section p,
+.how-section li {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.how-section ul {
+  margin: 0.25rem 0 0.5rem;
+  padding-left: 1.25rem;
+}
+
+.how-section code {
+  background: var(--color-bg-code);
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+  font-size: 0.85rem;
+}
+
 /* Proof steps */
 .steps-container {
   display: flex;

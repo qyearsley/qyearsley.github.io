@@ -155,6 +155,7 @@ User enters area
 Tests are located in `__tests__/` directory. Each major module has corresponding tests:
 
 ### Core Modules
+
 - `GameState.test.js` - State management, progress tracking
 - `storage.test.js` - localStorage operations
 - `SoundManager.test.js` - Audio system
@@ -164,6 +165,7 @@ Tests are located in `__tests__/` directory. Each major module has corresponding
 - `activities.test.js` - Activity structures
 
 ### Generators
+
 - `BasicMathGenerator.test.js` - Addition, subtraction, multiplication
 - `TimeGenerator.test.js` - Clock reading, time elapsed
 - `MeasurementAndPatternGenerator.test.js` - Measurement, patterns, sequences
