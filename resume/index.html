@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Resume - Quinten Yearsley</title>
+    <meta name="description" content="Quinten Yearsley's resume - Software Engineer" />
+    <meta name="theme-color" content="#2d3748" />
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/resume/resume.css" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <script src="/shared/theme.js"></script>
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="container">
+      <header class="header compact">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="/">Home</a>
+          <span class="separator" aria-hidden="true">/</span>
+          <span class="current">Resume</span>
+        </nav>
+        <h1>Quinten Yearsley</h1>
+        <p class="subtitle">Software Engineer</p>
+        <p class="resume-contact">
+          <a href="mailto:qyearsley@gmail.com">qyearsley@gmail.com</a>
+          <span class="separator">|</span>
+          (408) 800-1439
+          <span class="separator">|</span>
+          Los Altos, CA
+          <span class="separator">|</span>
+          <a href="https://linkedin.com/in/q-yearsley">LinkedIn</a>
+        </p>
+      </header>
+
+      <main id="main-content" class="main-content">
+        <section class="section">
+          <h2>Professional Summary</h2>
+          <p class="summary">
+            Software engineer with 13 years of experience building developer
+            tools, web services, and infrastructure at scale. Track record of
+            independently identifying problems, designing solutions, and
+            delivering end-to-end. Passionate about reliability, clean code, and
+            building tools that make teams more effective.
+          </p>
+        </section>
+
+        <section class="section">
+          <h2>Skills</h2>
+          <ul class="skills-list">
+            <li><strong>Languages:</strong> Python, Go, JavaScript/TypeScript, Shell, SQL</li>
+            <li><strong>Frameworks:</strong> Django, React</li>
+            <li><strong>Infrastructure:</strong> Kubernetes, GCP (App Engine), Ansible, Docker</li>
+            <li><strong>Tools:</strong> Splunk, CI/CD Systems, Git</li>
+            <li><strong>Leadership:</strong> Cross-Team Collaboration, Mentorship, Technical Documentation</li>
+          </ul>
+        </section>
+
+        <section class="section">
+          <h2>Experience</h2>
+
+          <div class="job">
+            <h3>Software Engineer</h3>
+            <p class="job-meta"><strong>Apple</strong> <span class="job-date">August 2023 - Present</span></p>
+            <p>Built tools and automation to improve the efficiency and reliability of device lab operations managing 5,000+ machines.</p>
+            <ul>
+              <li>Mentored interns; wrote and maintained technical documentation including API references and onboarding guides</li>
+            </ul>
+
+            <h4>Fleet Management Dashboard <span class="tech">(Django, React, Kubernetes)</span></h4>
+            <ul>
+              <li>Led development from requirements through deployment, replacing a legacy tool; reduced page load times from 20+ seconds to under 2 seconds</li>
+            </ul>
+
+            <h4>Device Recovery Automation <span class="tech">(Python)</span></h4>
+            <ul>
+              <li>Overhauled system: added 1,500 lines of tests and improved recovery rates across all hardware models</li>
+            </ul>
+
+            <h4>Fleet Operations &amp; Monitoring <span class="tech">(Ansible, Splunk)</span></h4>
+            <ul>
+              <li>Led qualification and deployment of OS upgrades across 5,000+ machines using orchestration playbooks with preflight checks and post-upgrade verification</li>
+              <li>Maintained and improved agent provisioning system: pinned dependencies for reproducibility, standardized logging, added CI pipelines</li>
+              <li>Built operational Splunk dashboards for device recovery rates, OS rollout tracking, and fleet utilization</li>
+            </ul>
+          </div>
+
+          <div class="job">
+            <h3>Software Engineer</h3>
+            <p class="job-meta"><strong>Google</strong> <span class="job-date">July 2013 - March 2023</span></p>
+            <p>Designed, built, and maintained open-source developer tools and services for the Chromium developer community.</p>
+            <ul>
+              <li>Mentored junior engineers and hosted interns</li>
+              <li>Diagnosed and resolved production outages during on-call rotations</li>
+              <li>Consistently improved maintainability, quality, and documentation of systems</li>
+            </ul>
+
+            <h4>Presubmit Testing Service <span class="tech">(Go, App Engine)</span></h4>
+            <ul>
+              <li>Co-designed and implemented a scalable presubmit testing service used by thousands of developers daily as a critical part of their workflow</li>
+              <li>Migrated from a legacy system, reducing maintenance burden and enabling new functionality</li>
+            </ul>
+
+            <h4>Static Analysis Platform <span class="tech">(Go, App Engine)</span></h4>
+            <ul>
+              <li>Built and maintained a system that runs static analysis tools and posts automated feedback on unsubmitted code changes</li>
+              <li>Grew an ecosystem of analyzers across several major open-source projects, improving code quality across hundreds of changes per day</li>
+            </ul>
+
+            <h4>Performance Dashboard <span class="tech">(Python, JavaScript, App Engine)</span></h4>
+            <ul>
+              <li>Improved alerting algorithms to reduce noise and surface real regressions, contributing to fixing 7,000+ performance regressions over 10 years</li>
+            </ul>
+
+            <h4>Web Platform Test Infrastructure <span class="tech">(Python)</span></h4>
+            <ul>
+              <li>Built tooling enabling developers to easily contribute to and benefit from cross-browser web platform test suites</li>
+            </ul>
+
+            <h4>Code Review Plugin <span class="tech">(JavaScript, Polymer)</span></h4>
+            <ul>
+              <li>Designed and implemented a UI plugin allowing developers to selectively rerun failed tests, saving computing resources and developer time</li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>Education</h2>
+          <div class="job">
+            <h3>B.S. Computer Science | B.A. Linguistics</h3>
+            <p class="job-meta"><strong>University of Arizona</strong> <span class="job-date">2013</span></p>
+            <ul>
+              <li>Summa Cum Laude, Honors</li>
+            </ul>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script src="/shared/nav.js"></script>
+  </body>
+</html>

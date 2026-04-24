@@ -1,0 +1,129 @@
+/* Resume-specific styles */
+
+.summary {
+  font-style: italic;
+  color: var(--color-text-secondary);
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.resume-contact {
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  opacity: 0.85;
+}
+
+.resume-contact a {
+  color: var(--color-header-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.resume-contact .separator {
+  margin: 0 0.25rem;
+  opacity: 0.5;
+}
+
+.skills-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.skills-list li {
+  margin-bottom: 0.35rem;
+}
+
+.skills-list strong {
+  color: var(--color-primary);
+}
+
+.job {
+  margin-bottom: 1.5rem;
+}
+
+.job h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--color-text-heading);
+  margin-bottom: 0.15rem;
+}
+
+.job-meta {
+  margin-bottom: 0.5rem;
+  color: var(--color-text-secondary);
+}
+
+.job-meta strong {
+  color: var(--color-text-heading);
+}
+
+.job-date {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.job-date::before {
+  content: " | ";
+  color: var(--color-text-tertiary);
+  font-style: normal;
+}
+
+.job h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-heading);
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.tech {
+  font-weight: 400;
+  color: var(--color-text-muted);
+  font-size: 0.9em;
+}
+
+.job ul {
+  margin: 0.25rem 0 0.5rem 1.5rem;
+  padding: 0;
+}
+
+.job li {
+  margin-bottom: 0.3rem;
+  color: var(--color-text-secondary);
+}
+
+@media print {
+  body {
+    padding: 0;
+    background: white;
+    background-image: none;
+  }
+
+  .container {
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .header {
+    background: white;
+    color: #333;
+    border-bottom: 2px solid #333;
+  }
+
+  .header h1 {
+    color: #111;
+  }
+
+  .header .subtitle,
+  .header .resume-contact,
+  .header .resume-contact a {
+    color: #444;
+  }
+
+  .breadcrumbs,
+  .skip-link {
+    display: none;
+  }
+}
