@@ -1,0 +1,10 @@
+{
+  "_title": "收敛级数测试器",
+  "_description": "通过计算部分和测试无穷级数收敛性",
+
+  "Convergent Series Tester": "收敛级数测试器",
+  "Test the convergence of infinite series by computing partial sums": "通过计算部分和测试无穷级数收敛性",
+  "Series Tester": "级数测试",
+  "Calculate Series Sum": "计算级数和",
+  "About Convergent Series": "关于收敛级数"
+}

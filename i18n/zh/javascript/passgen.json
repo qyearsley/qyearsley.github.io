@@ -1,0 +1,12 @@
+{
+  "_title": "随机密码生成器",
+  "_description": "用自定义字符集生成随机密码",
+
+  "Random Password Generator": "随机密码生成器",
+  "Generate secure random passwords with custom character sets": "用自定义字符集生成安全随机密码",
+  "Password Generator": "密码生成器",
+  "Generate Password": "生成密码",
+  "Common Character Sets": "常用字符集",
+  "Click any preset to use it:": "点击预设使用：",
+  "How It Works": "工作原理"
+}

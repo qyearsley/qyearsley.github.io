@@ -1,0 +1,15 @@
+{
+  "_title": "马尔可夫链文本生成器",
+  "_description": "用马尔可夫链从文本模式生成新文本",
+
+  "Markov Chain Text Generator": "马尔可夫链文本生成器",
+  "Generate text from learned patterns": "从学习的模式生成文本",
+  "Markov Chain": "马尔可夫链",
+  "Generator": "生成器",
+  "Show Probabilities": "显示概率",
+  "What are Markov Chains?": "什么是马尔可夫链？",
+  "A Markov chain predicts the next state based only on the current state, ignoring history. For text generation, we use n-grams (sequences of n characters or words) to predict what comes next.":
+    "马尔可夫链仅基于当前状态预测下一状态，忽略历史。文本生成中，我们用n-gram（n个字符或词的序列）预测下一个内容。",
+  "This generator builds a probability model from the input text, then generates new text by randomly selecting the next character or word based on learned probabilities.":
+    "生成器从输入文本建立概率模型，然后根据学到的概率随机选择下一个字符或词。"
+}

@@ -593,14 +593,12 @@
         <section class="how-section">
           <h2>How hash tables work</h2>
           <p>
-            A hash table stores data in an array of <strong>buckets</strong>. To decide which bucket
-            a key goes in, it runs the key through a <strong>hash function</strong> to get a number,
-            then takes that number modulo the bucket count.
+            A hash table stores data in <strong>buckets</strong>. A <strong>hash function</strong>
+            maps each key to a bucket index using modulo.
           </p>
           <p>
-            A <strong>collision</strong> happens when two different keys land in the same bucket.
-            Good hash functions spread keys evenly to minimize collisions. Bad ones (like using
-            string length) create lots of collisions.
+            A <strong>collision</strong> happens when two keys land in the same bucket. Good hash
+            functions spread keys evenly; bad ones (like using string length) cluster them.
           </p>
           <p>Try these experiments:</p>
           <ul>

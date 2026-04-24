@@ -14,7 +14,7 @@
     <div class="container">
       <header class="header">
         <h1>Markov Chain Text Generator</h1>
-        <p>Generate new text based on patterns learned from your input</p>
+        <p>Generate text from learned patterns</p>
       </header>
 
       <main id="main-content" class="main-content">
@@ -90,14 +90,13 @@
         <section class="section info-box">
           <h3>What are Markov Chains?</h3>
           <p>
-            A Markov chain is a mathematical model that predicts the next state based only on the
-            current state, without considering the full history. In text generation, we use n-grams
-            (sequences of n characters or words) to build a model that predicts what comes next
-            based on the current n-gram.
+            A Markov chain predicts the next state based only on the current state, ignoring
+            history. For text generation, we use n-grams (sequences of n characters or words) to
+            predict what comes next.
           </p>
           <p>
-            This generator uses the input text to build a probability model, then generates new text
-            by randomly selecting the next character or word based on the learned probabilities.
+            This generator builds a probability model from the input text, then generates new text
+            by randomly selecting the next character or word based on learned probabilities.
           </p>
         </section>
       </main>

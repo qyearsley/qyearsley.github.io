@@ -1,0 +1,23 @@
+{
+  "_title": "中文笔记",
+  "_description": "中文音译与发音参考",
+
+  "Chinese Language Notes": "中文笔记",
+  "Chinese transliteration and pronunciation references.": "中文音译与发音参考。",
+  "Chinese": "中文",
+  "Resources": "资源",
+
+  "Syllabary": "音节表",
+  "Common characters for transliteration": "常用音译字符",
+  "Tone Table": "声调表",
+  "Visual guide to characters with different tones": "不同声调字符指南",
+  "Pinyin Abbreviations": "拼音缩写",
+  "Underlying rules of pinyin that aren't often taught": "拼音的隐含规则",
+  "Homophones": "同音字",
+  "Explore homophone substitutions during simplification": "简化中的同音替代",
+  "Character Converter": "字符转换",
+  "Convert traditional to simplified Chinese": "繁转简",
+  "Encoding Explorer": "编码浏览器",
+  "See how characters are encoded in UTF-8, UTF-16, and GB2312":
+    "查看UTF-8、UTF-16、GB2312编码"
+}

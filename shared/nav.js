@@ -2,6 +2,80 @@
 ;(function () {
   "use strict"
 
+  // --- Language preference persistence ---
+  var TRANSLATED_PATHS = [
+    "/",
+    "/index.html",
+    "/games/",
+    "/games/index.html",
+    "/javascript/",
+    "/javascript/index.html",
+    "/javascript/logic-engine/",
+    "/javascript/logic-engine/index.html",
+    "/javascript/markov/",
+    "/javascript/markov/index.html",
+    "/javascript/truthtable.html",
+    "/javascript/coinflip.html",
+    "/javascript/seriestest.html",
+    "/javascript/passgen.html",
+    "/javascript/float.html",
+    "/javascript/hashlab.html",
+    "/javascript/automata.html",
+    "/javascript/date.html",
+    "/chinese/",
+    "/chinese/index.html",
+    "/chinese/syllabary.html",
+    "/chinese/tonetable.html",
+    "/chinese/pinyin_abbrev.html",
+    "/chinese/homophone_subs.html",
+    "/chinese/tradsimp.html",
+    "/chinese/encoding.html",
+    "/resume/",
+    "/resume/index.html",
+    "/404.html",
+  ]
+
+  var isZhPage = location.pathname.startsWith("/zh/")
+  var preferredLang = null
+  try {
+    preferredLang = localStorage.getItem("preferred-lang")
+  } catch (e) {
+    /* private browsing */
+  }
+
+  if (isZhPage) {
+    try {
+      localStorage.setItem("preferred-lang", "zh")
+    } catch (e) {
+      /* ignored */
+    }
+    preferredLang = "zh"
+  }
+
+  // Update preference when lang-switch is clicked
+  document.addEventListener("click", function (e) {
+    var link = e.target.closest(".lang-switch")
+    if (!link) return
+    try {
+      localStorage.setItem("preferred-lang", link.getAttribute("lang"))
+    } catch (e) {
+      /* ignored */
+    }
+  })
+
+  // On non-zh pages, rewrite nav links to zh equivalents if user prefers Chinese
+  if (!isZhPage && preferredLang === "zh") {
+    document.addEventListener("DOMContentLoaded", function () {
+      var links = document.querySelectorAll(".breadcrumbs a[href]")
+      for (var i = 0; i < links.length; i++) {
+        var href = links[i].getAttribute("href")
+        if (TRANSLATED_PATHS.indexOf(href) !== -1) {
+          links[i].setAttribute("href", "/zh" + href)
+        }
+      }
+    })
+  }
+
   // Shortcut registry
   var shortcuts = [
     { key: "j", description: "Next link" },
@@ -216,9 +290,10 @@
 
       case "h":
         if (isHelpOpen()) return
-        if (window.location.pathname !== "/") {
+        var homePath = preferredLang === "zh" ? "/zh/" : "/"
+        if (window.location.pathname !== homePath) {
           e.preventDefault()
-          window.location.href = "/"
+          window.location.href = homePath
         }
         return
 

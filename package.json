@@ -9,7 +9,9 @@
     "lint:html": "htmlhint \"**/*.html\" --ignore \"node_modules/**,coverage/**\"",
     "lint:css": "stylelint \"**/*.css\" --ignore-pattern \"node_modules/**\" --ignore-pattern \"coverage/**\"",
     "format": "npx prettier --write .",
-    "start": "http-server -p 8000",
+    "build": "node build.js",
+    "start": "npm run build && http-server dist -p 8000",
+    "dev": "http-server -p 8000",
     "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
     "prepare": "husky"
   },

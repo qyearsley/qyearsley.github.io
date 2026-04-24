@@ -1,0 +1,19 @@
+{
+  "_title": "JavaScript实验",
+  "_description": "JavaScript实验和工具",
+
+  "JavaScript Experiments": "JavaScript实验",
+  "Interactive tools and experiments in JavaScript.": "JavaScript交互工具与实验。",
+  "Experiments": "实验",
+
+  "Experiment with classical rules of inference": "体验经典推理规则",
+  "Generate text using Markov chains": "用马尔可夫链生成文本",
+  "Generate truth tables for logical expressions": "生成逻辑表达式真值表",
+  "Calculate how long you've lived in various units": "用不同单位计算你活了多久",
+  "Visualize probability through coin flipping": "抛硬币可视化概率",
+  "Test mathematical series for convergence": "测试级数收敛性",
+  "Generate random passwords": "生成随机密码",
+  "See the IEEE 754 bit layout of any number": "查看数字的IEEE 754位布局",
+  "Watch strings hash into buckets and see collisions": "观察字符串散列冲突",
+  "Visualize elementary 1D cellular automata rules": "可视化一维细胞自动机"
+}

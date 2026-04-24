@@ -1,0 +1,7 @@
+{
+  "_title": "散列冲突实验室",
+  "_description": "观察字符串散列到桶中的过程",
+
+  "Hash Collision Lab": "散列冲突实验室",
+  "How hash tables work": "散列表的工作原理"
+}

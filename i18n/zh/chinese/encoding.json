@@ -1,0 +1,9 @@
+{
+  "_title": "编码浏览器",
+  "_description": "查看字符在UTF-8、UTF-16和GB2312中的编码",
+
+  "Encoding Explorer": "编码浏览器",
+  "See how characters are encoded in UTF-8, UTF-16, and GB2312":
+    "查看字符在UTF-8、UTF-16和GB2312中的编码",
+  "How encodings work": "编码的工作原理"
+}

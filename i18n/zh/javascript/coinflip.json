@@ -1,0 +1,14 @@
+{
+  "_title": "抛硬币实验",
+  "_description": "观察抛硬币频率如何收敛到期望值",
+
+  "Coin Flips Experiment": "抛硬币实验",
+  "Explore probability convergence interactively": "交互式探索概率收敛",
+  "Coin Flips": "抛硬币",
+  "Experiment": "实验",
+  "About This Experiment": "关于此实验",
+  "Small sample sizes can be misleading. Flip a coin 10 times and you might get 30% or 80% heads. But flip it 10,000 times and the frequency will be very close to 50%.":
+    "小样本可能产生误导。抛10次可能得到30%或80%正面，但抛10,000次频率会非常接近50%。",
+  "Choose a distribution, set the number of trials, and watch observed frequencies converge to expected values as sample size grows.":
+    "选择分布，设置试验次数，观察频率随样本增大收敛到期望值。"
+}

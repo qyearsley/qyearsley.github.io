@@ -1,0 +1,8 @@
+{
+  "_title": "浮点数揭秘",
+  "_description": "查看任意数字的IEEE 754位布局",
+
+  "Floating Point Exposed": "浮点数揭秘",
+  "See the IEEE 754 bit layout of any number": "查看任意数字的IEEE 754位布局",
+  "How IEEE 754 double-precision works": "IEEE 754双精度的工作原理"
+}

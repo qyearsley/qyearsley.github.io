@@ -1,0 +1,15 @@
+{
+  "_title": "逻辑证明引擎",
+  "_description": "用经典命题逻辑规则从前提推导结论",
+
+  "Logic Proof Engine": "逻辑证明引擎",
+  "Derive conclusions from premises using classical logic rules": "用经典逻辑规则从前提推导结论",
+  "Logic Engine": "逻辑引擎",
+  "Add Premises": "添加前提",
+  "Enter premises separated by commas (e.g.,": "输入前提，用逗号分隔（如",
+  "Proof Steps": "证明步骤",
+  "Quick Examples": "快速示例",
+  "Click an example to try it:": "点击示例试试：",
+  "About This Tool": "关于此工具",
+  "Supported Operators": "支持的运算符"
+}
