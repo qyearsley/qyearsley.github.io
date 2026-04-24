@@ -18,7 +18,7 @@
 
   "Experience": "工作经历",
 
-  "August 2023 - Present": "2023年8月至今",
+  "— August 2023 - Present": "— 2023年8月至今",
   "Built tools and automation to improve the efficiency and reliability of device lab operations.":
     "构建工具和自动化，提升设备实验室运营效率和可靠性。",
   "Wrote and maintained technical documentation including API references and onboarding guides":
@@ -34,7 +34,7 @@
   "Built operational Splunk dashboards for device recovery rates, OS rollout tracking, and fleet utilization":
     "构建Splunk仪表盘，跟踪恢复率、OS部署和机群利用率",
 
-  "July 2013 - March 2023": "2013年7月 - 2023年3月",
+  "— July 2013 - March 2023": "— 2013年7月 - 2023年3月",
   "Designed, built, and maintained open-source developer tools and services for the Chromium developer community.":
     "为Chromium社区设计、构建和维护开源开发者工具和服务。",
   "Mentored junior engineers and hosted interns": "指导初级工程师和实习生",

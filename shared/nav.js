@@ -8,6 +8,12 @@
     "/index.html",
     "/games/",
     "/games/index.html",
+    "/games/number-garden/",
+    "/games/number-garden/index.html",
+    "/games/life-garden/",
+    "/games/life-garden/index.html",
+    "/games/turing-tape/",
+    "/games/turing-tape/index.html",
     "/javascript/",
     "/javascript/index.html",
     "/javascript/logic-engine/",
@@ -83,6 +89,7 @@
     { key: "u", description: "Up to section index", condition: "breadcrumb" },
     { key: "?", description: "Show keyboard shortcuts" },
     { key: "h", description: "Go to homepage" },
+    { key: "l", description: "Toggle language", condition: "lang" },
     { key: "t", description: "Cycle theme", condition: "theme" },
     { key: "Escape", description: "Close overlay" },
   ]
@@ -200,6 +207,7 @@
       // Hide conditional shortcuts if their context isn't present
       if (s.condition === "theme" && !window.__themeToggle) return
       if (s.condition === "breadcrumb" && !getParentLink()) return
+      if (s.condition === "lang" && !getLangToggleUrl()) return
 
       var dt = document.createElement("dt")
       dt.innerHTML = "<kbd>" + s.key + "</kbd>"
@@ -241,6 +249,20 @@
 
   // Expose for theme.js
   window.__helpOverlayIsOpen = isHelpOpen
+
+  // Language toggle helper
+  function getLangToggleUrl() {
+    var langSwitch = document.querySelector(".lang-switch")
+    if (langSwitch) return langSwitch.href
+    if (isZhPage) {
+      return location.pathname.replace(/^\/zh\//, "/")
+    }
+    var path = location.pathname
+    if (TRANSLATED_PATHS.indexOf(path) !== -1) {
+      return "/zh" + path
+    }
+    return null
+  }
 
   // Navigation helpers
   function getParentLink() {
@@ -296,6 +318,22 @@
           window.location.href = homePath
         }
         return
+
+      case "l": {
+        if (isHelpOpen()) return
+        var langUrl = getLangToggleUrl()
+        if (langUrl) {
+          e.preventDefault()
+          var targetLang = isZhPage ? "en" : "zh"
+          try {
+            localStorage.setItem("preferred-lang", targetLang)
+          } catch (err) {
+            /* ignored */
+          }
+          window.location.href = langUrl
+        }
+        return
+      }
 
       case "u": {
         if (isHelpOpen()) return

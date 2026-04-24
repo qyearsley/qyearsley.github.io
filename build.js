@@ -11,6 +11,7 @@ import {
 } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { marked } from "marked";
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const DIST = join(ROOT, "dist");
@@ -31,12 +32,17 @@ const SKIP_FILES = new Set([
   "jest.config.cjs",
   "CLAUDE.md",
   "build.js",
+  "build.test.js",
+  "todo.md",
 ]);
 
 const TRANSLATABLE_PAGES = [
   "index.html",
   "resume/index.html",
   "games/index.html",
+  "games/number-garden/index.html",
+  "games/life-garden/index.html",
+  "games/turing-tape/index.html",
   "javascript/index.html",
   "javascript/logic-engine/index.html",
   "javascript/markov/index.html",
@@ -237,12 +243,31 @@ function injectEnglishMeta(html, pagePath) {
   return result;
 }
 
+function generateResume() {
+  const mdPath = join(ROOT, "resume", "resume.md");
+  const templatePath = join(ROOT, "resume", "template.html");
+  if (!existsSync(mdPath) || !existsSync(templatePath)) {
+    console.log("  Skipped (missing resume.md or template.html)");
+    return;
+  }
+  const md = readFileSync(mdPath, "utf-8");
+  const template = readFileSync(templatePath, "utf-8");
+  const html = marked.parse(md);
+  const page = template.replace("{{CONTENT}}", html);
+  const outPath = join(DIST, "resume", "index.html");
+  mkdirSync(dirname(outPath), { recursive: true });
+  writeFileSync(outPath, page);
+}
+
 function build() {
   console.log("Cleaning dist/...");
   clean();
 
   console.log("Copying files...");
   copyTree(ROOT, DIST);
+
+  console.log("Generating resume from markdown...");
+  generateResume();
 
   const allTranslations = loadTranslations();
   if (!allTranslations) {
@@ -291,4 +316,8 @@ function build() {
   console.log("Done.");
 }
 
-build();
+export { escapeRegex, buildTextPattern, translateHtml, injectEnglishMeta, TRANSLATED_URLS };
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  build();
+}
