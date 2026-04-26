@@ -140,6 +140,13 @@ describe("translateHtml", () => {
     expect(result).toContain("English")
   })
 
+  test("wraps language switcher in header-controls div", () => {
+    const html = '<html lang="en"><head></head><body><header></header></body></html>'
+    const result = translateHtml(html, {}, "index.html", emptyCommon)
+    expect(result).toContain('class="header-controls"')
+    expect(result).toMatch(/header-controls[\s\S]*lang-switch/)
+  })
+
   test("handles &amp; in HTML content", () => {
     const html =
       '<html lang="en"><head></head><body><header></header>' +

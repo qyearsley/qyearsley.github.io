@@ -250,7 +250,7 @@ function injectLangMeta(html, pagePath, targetLang) {
   const switchHref = isZh ? enUrl : zhUrl
   const switchLang = isZh ? "en" : "zh"
   const switchLabel = isZh ? "English" : "中文"
-  const switchHtml = `\n        <a href="${switchHref}" class="lang-switch" lang="${switchLang}">${switchLabel}</a>`
+  const switchHtml = `\n        <div class="header-controls">\n          <a href="${switchHref}" class="lang-switch" lang="${switchLang}">${switchLabel}</a>\n        </div>`
   result = result.replace("</header>", `${switchHtml}\n      </header>`)
 
   return result

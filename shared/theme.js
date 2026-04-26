@@ -44,8 +44,6 @@
       "",
       ".theme-popover {",
       "  position: fixed;",
-      "  top: 3.5rem;",
-      "  right: 1rem;",
       "  z-index: 9999;",
       "  background: var(--color-bg-container);",
       "  border: 1px solid var(--color-border);",
@@ -228,11 +226,26 @@
       "</div>" +
       "</fieldset>"
 
-    document.body.appendChild(btn)
+    // Place button in header controls if available, else fall back to body
+    const header = document.querySelector(".header")
+    let controls = header ? header.querySelector(".header-controls") : null
+    if (header && !controls) {
+      controls = document.createElement("div")
+      controls.className = "header-controls"
+      header.appendChild(controls)
+    }
+    if (controls) {
+      controls.appendChild(btn)
+    } else {
+      document.body.appendChild(btn)
+    }
     document.body.appendChild(popover)
 
     // Toggle popover
     function openPopover() {
+      const rect = btn.getBoundingClientRect()
+      popover.style.top = (rect.bottom + 8) + "px"
+      popover.style.right = (window.innerWidth - rect.right) + "px"
       popover.classList.add("open")
       btn.setAttribute("aria-expanded", "true")
     }
