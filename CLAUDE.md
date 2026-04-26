@@ -2,30 +2,24 @@
 
 Context for AI assistants working on this codebase.
 
-## Site Purpose
+For detailed documentation, see:
 
-Personal website showcasing projects and experiments.
+- `docs/development.md` -- build system, commands, adding pages
+- `docs/translations.md` -- i18n system and translation workflow
 
-## Content
-
-- **Recent projects**: Educational games
-- **Legacy content**: JavaScript experiments and Chinese language tools
-  - Most pages are self-contained HTML files with inline/minimal JavaScript
-
-## Development Preferences
-
-- **Documentation**: Keep it brief and useful. READMEs should add value, not document for documentation's sake.
-- **Testing**: Write clear, robust tests with good coverage for non-trivial code.
-- **Code quality**: Follow best practices, use linters, keep things simple.
-- **Architecture**: Prefer self-contained files over complex build systems.
-- **Security**: Be careful about possible vulnerabilities (XSS, injection, etc.).
-
-## Commands
+## Quick Reference
 
 ```bash
+npm run build   # Build site to dist/
+npm start       # Build + serve locally
+npm run dev     # Serve source directly (no build)
 npm test        # Run all tests
-npm start       # Run dev server
 npm run lint    # Run all linters
-npm run format  # Format code
-npm run         # See other options
 ```
+
+## Preferences
+
+- Keep documentation brief and useful.
+- Write clear tests with good coverage for non-trivial code.
+- Follow best practices, use linters, keep things simple.
+- Prefer self-contained HTML files over complex build abstractions.

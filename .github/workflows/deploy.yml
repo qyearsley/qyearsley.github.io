@@ -24,15 +24,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Debug environment
-        run: |
-          node --version
-          npm --version
-          cat package.json | head -5
-      - name: Install dependencies
-        run: |
-          rm -f package-lock.json
-          npm install --registry https://registry.npmjs.org --loglevel verbose 2>&1 | tail -80
+          cache: npm
+      - run: npm ci
       - run: npm run build
       - run: npm test
       - run: npm run lint

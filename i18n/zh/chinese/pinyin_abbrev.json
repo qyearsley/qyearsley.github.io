@@ -5,6 +5,9 @@
   "Hanyu Pinyin Abbreviations": "汉语拼音缩写",
   "Notes on the unintuitive rules of Hanyu Pinyin spelling conventions": "汉语拼音不直观的拼写规则说明",
   "Pinyin Abbreviations": "拼音缩写",
-  "Hanyu Pinyin uses abbreviations that simplify it for experienced readers but can confuse newcomers. Keep in mind: pinyin spellings don't always match pronunciation.":
-    "汉语拼音使用缩写，方便熟练者但容易让初学者困惑。注意：拼写不一定与发音一致。"
+  "Hanyu Pinyin uses abbreviations that simplify it for experienced readers but can confuse newcomers. Keep in mind: pinyin spellings don't always match pronunciation.": "汉语拼音使用缩写，方便熟练者但容易让初学者困惑。注意：拼写不一定与发音一致。",
+  "In three cases, an abbreviation is made by removing a letter:": "有三种情况通过去掉一个字母来缩写：",
+  "Where no ambiguity would arise, vowels with diacritics are written without a diacritic for convenience. The sound [ɛ] (like English r": "在不会产生歧义时，带声调符号的元音可省略符号。音[ɛ]（类似英语r",
+  "d) was originally represented by ê, but everywhere that it occurs, it is replaced.": "d）原本用ê表示，但出现的地方都被替换了。",
+  "It's also important to remember that -i represents a different sound depending on whether the initial is one of {sh, ch, zh, r}, {z, c, s}, or {b, p, m, d, t, n, l, j, q, x}. There are other differences in the sound that one letter represents between different finals, but these are less misleading.": "还需注意，-i代表的音因声母不同而不同：{sh, ch, zh, r}、{z, c, s}或{b, p, m, d, t, n, l, j, q, x}各有区别。不同韵母中同一字母代表的音也有差异，但这些较少引起混淆。"
 }

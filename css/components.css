@@ -1,6 +1,7 @@
-/**
- * Common component styles for legacy content pages
- * Includes dark mode support for tables, info boxes, and other shared elements
+/*
+ * components.css — Specialized styles for interactive tool pages.
+ * Only loaded on pages that need it (experiments, Chinese tools).
+ * Extends style.css with buttons, data tables, logic engine, and status messages.
  */
 
 /* ========================================
@@ -646,8 +647,7 @@ body.logic-engine {
 /* Info Boxes and Legends */
 .legend,
 .data-files,
-.operators,
-.info-box {
+.operators {
   background: var(--color-bg-form);
   padding: 1rem;
   border-radius: 4px;
@@ -656,8 +656,7 @@ body.logic-engine {
 }
 
 .legend h3,
-.data-files h3,
-.info-box h3 {
+.data-files h3 {
   margin-top: 0;
   color: var(--color-text-secondary);
 }

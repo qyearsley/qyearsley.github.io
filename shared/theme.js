@@ -4,15 +4,20 @@
   "use strict"
 
   // Part 1: Apply saved preferences immediately (runs in <head>, blocks render)
-  var theme = localStorage.getItem("theme")
-  var accent = localStorage.getItem("accent")
+  let theme, accent
+  try {
+    theme = localStorage.getItem("theme")
+    accent = localStorage.getItem("accent")
+  } catch (_) {
+    /* localStorage unavailable */
+  }
   if (theme) document.documentElement.dataset.theme = theme
   if (accent) document.documentElement.dataset.accent = accent
 
   // Part 2: UI injection after DOM is ready
   document.addEventListener("DOMContentLoaded", function () {
     // Inject styles
-    var style = document.createElement("style")
+    const style = document.createElement("style")
     style.textContent = [
       ".theme-toggle {",
       "  position: fixed;",
@@ -121,7 +126,7 @@
     document.head.appendChild(style)
 
     // SVG icons
-    var sunIcon =
+    const sunIcon =
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
       '<circle cx="12" cy="12" r="5"/>' +
       '<line x1="12" y1="1" x2="12" y2="3"/>' +
@@ -134,12 +139,12 @@
       '<line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>' +
       "</svg>"
 
-    var moonIcon =
+    const moonIcon =
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
       '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>' +
       "</svg>"
 
-    var autoIcon =
+    const autoIcon =
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
       '<circle cx="12" cy="12" r="10"/>' +
       '<path d="M12 2a10 10 0 0 1 0 20" fill="currentColor"/>' +
@@ -154,27 +159,27 @@
     }
 
     function getIcon() {
-      var t = getTheme()
+      const t = getTheme()
       if (t === "light") return sunIcon
       if (t === "dark") return moonIcon
       return autoIcon
     }
 
     // Create toggle button
-    var btn = document.createElement("button")
+    const btn = document.createElement("button")
     btn.className = "theme-toggle"
     btn.setAttribute("aria-label", "Theme settings")
     btn.setAttribute("aria-expanded", "false")
     btn.innerHTML = getIcon()
 
     // Create popover
-    var popover = document.createElement("div")
+    const popover = document.createElement("div")
     popover.className = "theme-popover"
     popover.setAttribute("role", "dialog")
     popover.setAttribute("aria-label", "Theme settings")
 
-    var themes = ["light", "dark", "system"]
-    var accents = [
+    const themes = ["light", "dark", "system"]
+    const accents = [
       { value: "", label: "Blue", cls: "accent-blue" },
       { value: "green", label: "Green", cls: "accent-green" },
       { value: "amber", label: "Amber", cls: "accent-amber" },
@@ -187,8 +192,8 @@
       '<div class="theme-options">' +
       themes
         .map(function (t) {
-          var active = getTheme() === t ? " active" : ""
-          var label = t.charAt(0).toUpperCase() + t.slice(1)
+          const active = getTheme() === t ? " active" : ""
+          const label = t.charAt(0).toUpperCase() + t.slice(1)
           return (
             '<button class="theme-option' +
             active +
@@ -207,7 +212,7 @@
       '<div class="accent-options">' +
       accents
         .map(function (a) {
-          var active = getAccent() === a.value ? " active" : ""
+          const active = getAccent() === a.value ? " active" : ""
           return (
             '<button class="accent-swatch ' +
             a.cls +
@@ -289,8 +294,8 @@
 
     // Update UI active states
     function updateActiveStates() {
-      var currentTheme = getTheme()
-      var currentAccent = getAccent()
+      const currentTheme = getTheme()
+      const currentAccent = getAccent()
       popover.querySelectorAll(".theme-option").forEach(function (el) {
         el.classList.toggle("active", el.dataset.setTheme === currentTheme)
       })
@@ -301,7 +306,7 @@
 
     // Theme button handlers
     popover.addEventListener("click", function (e) {
-      var target = e.target
+      const target = e.target
       if (target.dataset.setTheme !== undefined) {
         applyTheme(target.dataset.setTheme)
       } else if (target.dataset.setAccent !== undefined) {
@@ -311,9 +316,9 @@
 
     // Cycle theme: system -> light -> dark -> system
     function cycleTheme() {
-      var order = ["system", "light", "dark"]
-      var current = getTheme()
-      var next = order[(order.indexOf(current) + 1) % order.length]
+      const order = ["system", "light", "dark"]
+      const current = getTheme()
+      const next = order[(order.indexOf(current) + 1) % order.length]
       applyTheme(next)
     }
 

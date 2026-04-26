@@ -5,14 +5,14 @@
   "type": "module",
   "scripts": {
     "lint": "npm run lint:js && npm run lint:html && npm run lint:css",
-    "lint:js": "eslint javascript/ games/",
-    "lint:html": "htmlhint \"**/*.html\" --ignore \"node_modules/**,coverage/**\"",
+    "lint:js": "eslint javascript/ games/ shared/ build.js build.test.js",
+    "lint:html": "htmlhint \"**/*.html\" --ignore \"node_modules/**,coverage/**,dist/**\"",
     "lint:css": "stylelint \"**/*.css\" --ignore-pattern \"node_modules/**\" --ignore-pattern \"coverage/**\"",
     "format": "npx prettier --write .",
     "build": "node build.js",
     "start": "npm run build && http-server dist -p 8000",
     "dev": "http-server -p 8000",
-    "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
+    "test": "NODE_OPTIONS='--experimental-vm-modules --no-warnings' jest",
     "prepare": "husky"
   },
   "repository": {
@@ -47,5 +47,52 @@
     "*.css": [
       "stylelint"
     ]
+  },
+  "prettier": {
+    "printWidth": 100,
+    "semi": false
+  },
+  "stylelint": {
+    "extends": "stylelint-config-standard",
+    "rules": {
+      "selector-class-pattern": null,
+      "selector-id-pattern": null,
+      "custom-property-pattern": null,
+      "color-function-notation": "legacy",
+      "alpha-value-notation": "number",
+      "no-descending-specificity": null
+    }
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "testMatch": [
+      "**/*.test.js"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/dist/"
+    ],
+    "silent": true,
+    "collectCoverageFrom": [
+      "build.js",
+      "shared/**/*.js",
+      "javascript/**/*.js",
+      "games/number-garden/**/*.js",
+      "games/turing-tape/**/*.js",
+      "games/life-garden/**/*.js",
+      "games/shared/**/*.js",
+      "!**/*.test.js",
+      "!**/*.html"
+    ],
+    "coverageDirectory": "coverage",
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ],
+    "transform": {},
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
+    }
   }
 }

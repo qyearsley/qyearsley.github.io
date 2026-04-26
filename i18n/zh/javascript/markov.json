@@ -6,10 +6,23 @@
   "Generate text from learned patterns": "从学习的模式生成文本",
   "Markov Chain": "马尔可夫链",
   "Generator": "生成器",
+  "Source Text:": "源文本：",
+  "Shakespeare": "莎士比亚",
+  "Nursery Rhyme": "童谣",
+  "Technical": "技术",
+  "Paste Your Own": "粘贴自定义",
+  "N-gram Type:": "N-gram类型：",
+  "Characters": "字符",
+  "Words": "词",
+  "N-gram Size:": "N-gram大小：",
+  "Output Length:": "输出长度：",
+  "100 characters": "100字符",
+  "200 characters": "200字符",
+  "500 characters": "500字符",
+  "Generate Text": "生成文本",
+  "Generated Output:": "生成结果：",
   "Show Probabilities": "显示概率",
   "What are Markov Chains?": "什么是马尔可夫链？",
-  "A Markov chain predicts the next state based only on the current state, ignoring history. For text generation, we use n-grams (sequences of n characters or words) to predict what comes next.":
-    "马尔可夫链仅基于当前状态预测下一状态，忽略历史。文本生成中，我们用n-gram（n个字符或词的序列）预测下一个内容。",
-  "This generator builds a probability model from the input text, then generates new text by randomly selecting the next character or word based on learned probabilities.":
-    "生成器从输入文本建立概率模型，然后根据学到的概率随机选择下一个字符或词。"
+  "A Markov chain predicts the next state based only on the current state, ignoring history. For text generation, we use n-grams (sequences of n characters or words) to predict what comes next.": "马尔可夫链仅基于当前状态预测下一状态，忽略历史。文本生成中，我们用n-gram（n个字符或词的序列）预测下一个内容。",
+  "This generator builds a probability model from the input text, then generates new text by randomly selecting the next character or word based on learned probabilities.": "生成器从输入文本建立概率模型，然后根据学到的概率随机选择下一个字符或词。"
 }

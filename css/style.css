@@ -1,4 +1,7 @@
-/* Simple, clean CSS */
+/*
+ * style.css — Core layout, typography, and design tokens.
+ * Loaded on every page. See components.css for specialized tool styles.
+ */
 * {
   margin: 0;
   padding: 0;
@@ -234,13 +237,6 @@ body {
 .header.compact h1 {
   font-size: 1.75rem;
   margin-bottom: 0.5rem;
-}
-
-.header .subtitle {
-  font-size: 1rem;
-  opacity: 0.9;
-  max-width: 500px;
-  margin: 0 auto;
 }
 
 .header p {

@@ -1,80 +1,42 @@
-// Keyboard navigation and help overlay
+// Keyboard navigation, language preference, and help overlay
 ;(function () {
   "use strict"
 
   // --- Language preference persistence ---
-  var TRANSLATED_PATHS = [
-    "/",
-    "/index.html",
-    "/games/",
-    "/games/index.html",
-    "/games/number-garden/",
-    "/games/number-garden/index.html",
-    "/games/life-garden/",
-    "/games/life-garden/index.html",
-    "/games/turing-tape/",
-    "/games/turing-tape/index.html",
-    "/javascript/",
-    "/javascript/index.html",
-    "/javascript/logic-engine/",
-    "/javascript/logic-engine/index.html",
-    "/javascript/markov/",
-    "/javascript/markov/index.html",
-    "/javascript/truthtable.html",
-    "/javascript/coinflip.html",
-    "/javascript/seriestest.html",
-    "/javascript/passgen.html",
-    "/javascript/float.html",
-    "/javascript/hashlab.html",
-    "/javascript/automata.html",
-    "/javascript/date.html",
-    "/chinese/",
-    "/chinese/index.html",
-    "/chinese/syllabary.html",
-    "/chinese/tonetable.html",
-    "/chinese/pinyin_abbrev.html",
-    "/chinese/homophone_subs.html",
-    "/chinese/tradsimp.html",
-    "/chinese/encoding.html",
-    "/resume/",
-    "/resume/index.html",
-    "/404.html",
-  ]
+  const TRANSLATED_PATHS = window.__translatedPaths || []
 
-  var isZhPage = location.pathname.startsWith("/zh/")
-  var preferredLang = null
+  const isZhPage = location.pathname.startsWith("/zh/")
+  let preferredLang = null
   try {
     preferredLang = localStorage.getItem("preferred-lang")
-  } catch (e) {
+  } catch (_) {
     /* private browsing */
   }
 
   if (isZhPage) {
     try {
       localStorage.setItem("preferred-lang", "zh")
-    } catch (e) {
+    } catch (_) {
       /* ignored */
     }
     preferredLang = "zh"
   }
 
-  // Update preference when lang-switch is clicked
   document.addEventListener("click", function (e) {
-    var link = e.target.closest(".lang-switch")
+    const link = e.target.closest(".lang-switch")
     if (!link) return
     try {
       localStorage.setItem("preferred-lang", link.getAttribute("lang"))
-    } catch (e) {
+    } catch (_) {
       /* ignored */
     }
   })
 
-  // On non-zh pages, rewrite nav links to zh equivalents if user prefers Chinese
   if (!isZhPage && preferredLang === "zh") {
     document.addEventListener("DOMContentLoaded", function () {
-      var links = document.querySelectorAll(".breadcrumbs a[href]")
-      for (var i = 0; i < links.length; i++) {
-        var href = links[i].getAttribute("href")
+      const links = document.querySelectorAll(".breadcrumbs a[href]")
+      for (let i = 0; i < links.length; i++) {
+        const href = links[i].getAttribute("href")
         if (TRANSLATED_PATHS.indexOf(href) !== -1) {
           links[i].setAttribute("href", "/zh" + href)
         }
@@ -82,8 +44,8 @@
     })
   }
 
-  // Shortcut registry
-  var shortcuts = [
+  // --- Keyboard shortcuts ---
+  const shortcuts = [
     { key: "j", description: "Next link" },
     { key: "k", description: "Previous link" },
     { key: "u", description: "Up to section index", condition: "breadcrumb" },
@@ -95,8 +57,7 @@
   ]
 
   window.__registerShortcut = function (key, description, handler) {
-    // Avoid duplicates
-    for (var i = 0; i < shortcuts.length; i++) {
+    for (let i = 0; i < shortcuts.length; i++) {
       if (shortcuts[i].key === key) {
         shortcuts[i].handler = handler
         return
@@ -105,12 +66,12 @@
     shortcuts.push({ key: key, description: description, handler: handler })
   }
 
-  // Help overlay
-  var overlay = null
+  // --- Help overlay ---
+  let overlay = null
 
   function injectStyles() {
     if (document.getElementById("nav-help-styles")) return
-    var style = document.createElement("style")
+    const style = document.createElement("style")
     style.id = "nav-help-styles"
     style.textContent = [
       ".keyboard-help-backdrop {",
@@ -182,36 +143,35 @@
 
   function buildOverlay() {
     injectStyles()
-    var backdrop = document.createElement("div")
+    const backdrop = document.createElement("div")
     backdrop.className = "keyboard-help-backdrop"
     backdrop.setAttribute("role", "dialog")
     backdrop.setAttribute("aria-modal", "true")
     backdrop.setAttribute("aria-label", "Keyboard shortcuts")
 
-    var panel = document.createElement("div")
+    const panel = document.createElement("div")
     panel.className = "keyboard-help-panel"
 
-    var heading = document.createElement("h2")
+    const heading = document.createElement("h2")
     heading.textContent = "Keyboard Shortcuts"
 
-    var closeBtn = document.createElement("button")
+    const closeBtn = document.createElement("button")
     closeBtn.className = "keyboard-help-close"
     closeBtn.setAttribute("aria-label", "Close")
     closeBtn.innerHTML = "&times;"
     closeBtn.addEventListener("click", hideHelp)
 
-    var dl = document.createElement("dl")
+    const dl = document.createElement("dl")
     dl.className = "shortcut-list"
 
     shortcuts.forEach(function (s) {
-      // Hide conditional shortcuts if their context isn't present
       if (s.condition === "theme" && !window.__themeToggle) return
       if (s.condition === "breadcrumb" && !getParentLink()) return
       if (s.condition === "lang" && !getLangToggleUrl()) return
 
-      var dt = document.createElement("dt")
+      const dt = document.createElement("dt")
       dt.innerHTML = "<kbd>" + s.key + "</kbd>"
-      var dd = document.createElement("dd")
+      const dd = document.createElement("dd")
       dd.textContent = s.description
       dl.appendChild(dt)
       dl.appendChild(dd)
@@ -222,7 +182,6 @@
     panel.appendChild(dl)
     backdrop.appendChild(panel)
 
-    // Close on backdrop click
     backdrop.addEventListener("click", function (e) {
       if (e.target === backdrop) hideHelp()
     })
@@ -247,43 +206,38 @@
     return overlay !== null
   }
 
-  // Expose for theme.js
   window.__helpOverlayIsOpen = isHelpOpen
 
-  // Language toggle helper
+  // --- Language toggle ---
   function getLangToggleUrl() {
-    var langSwitch = document.querySelector(".lang-switch")
+    const langSwitch = document.querySelector(".lang-switch")
     if (langSwitch) return langSwitch.href
     if (isZhPage) {
       return location.pathname.replace(/^\/zh\//, "/")
     }
-    var path = location.pathname
+    const path = location.pathname
     if (TRANSLATED_PATHS.indexOf(path) !== -1) {
       return "/zh" + path
     }
     return null
   }
 
-  // Navigation helpers
+  // --- Navigation helpers ---
   function getParentLink() {
-    // Find the second-to-last breadcrumb link (the parent section)
-    var links = document.querySelectorAll(".breadcrumbs a")
+    const links = document.querySelectorAll(".breadcrumbs a")
     return links.length >= 1 ? links[links.length - 1] : null
   }
 
-  // Link navigation
   function getLinks() {
     return Array.from(document.querySelectorAll(".internal-links a, .game-list a"))
   }
 
   document.addEventListener("keydown", function (e) {
     if (e.target.matches("input, textarea, select")) return
-
-    // Don't handle modified keys (Ctrl+key, etc.) except Shift+?
     if (e.ctrlKey || e.altKey || e.metaKey) return
 
-    var links = getLinks()
-    var currentIndex = links.findIndex(function (link) {
+    const links = getLinks()
+    const currentIndex = links.findIndex(function (link) {
       return link === document.activeElement
     })
 
@@ -303,31 +257,30 @@
           hideHelp()
           return
         }
-        // Also close theme popover if open
         if (window.__themePopoverIsOpen && window.__themePopoverIsOpen()) {
-          // theme.js handles its own Escape
           return
         }
         return
 
-      case "h":
+      case "h": {
         if (isHelpOpen()) return
-        var homePath = preferredLang === "zh" ? "/zh/" : "/"
+        const homePath = preferredLang === "zh" ? "/zh/" : "/"
         if (window.location.pathname !== homePath) {
           e.preventDefault()
           window.location.href = homePath
         }
         return
+      }
 
       case "l": {
         if (isHelpOpen()) return
-        var langUrl = getLangToggleUrl()
+        const langUrl = getLangToggleUrl()
         if (langUrl) {
           e.preventDefault()
-          var targetLang = isZhPage ? "en" : "zh"
+          const targetLang = isZhPage ? "en" : "zh"
           try {
             localStorage.setItem("preferred-lang", targetLang)
-          } catch (err) {
+          } catch (_) {
             /* ignored */
           }
           window.location.href = langUrl
@@ -337,7 +290,7 @@
 
       case "u": {
         if (isHelpOpen()) return
-        var parent = getParentLink()
+        const parent = getParentLink()
         if (parent) {
           e.preventDefault()
           window.location.href = parent.href
@@ -374,9 +327,8 @@
         return
 
       default:
-        // Check registered custom handlers
         if (isHelpOpen()) return
-        for (var i = 0; i < shortcuts.length; i++) {
+        for (let i = 0; i < shortcuts.length; i++) {
           if (shortcuts[i].handler && shortcuts[i].key === e.key) {
             e.preventDefault()
             shortcuts[i].handler(e)

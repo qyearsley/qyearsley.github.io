@@ -3,5 +3,24 @@
   "_description": "观察字符串散列到桶中的过程",
 
   "Hash Collision Lab": "散列冲突实验室",
-  "How hash tables work": "散列表的工作原理"
+  "Watch strings hash into buckets and see collisions happen": "观察字符串散列到桶中并看到冲突发生",
+  "Add": "添加",
+  "Add Batch": "批量添加",
+  "Clear": "清除",
+  "Hash function:": "散列函数：",
+  "Buckets:": "桶数：",
+  "Entries": "条目",
+  "Collisions": "冲突",
+  "Max Depth": "最大深度",
+  "Load Factor": "负载因子",
+  "Hash log": "散列日志",
+  "How hash tables work": "散列表的工作原理",
+  "A hash table stores data in": "散列表将数据存储在",
+  "buckets": "桶",
+  ". A": "中。",
+  "hash function": "散列函数",
+  "maps each key to a bucket index using modulo.": "通过取模将每个键映射到桶索引。",
+  "collision": "冲突",
+  "happens when two keys land in the same bucket. Good hash functions spread keys evenly; bad ones (like using string length) cluster them.": "发生在两个键落入同一个桶时。好的散列函数均匀分布键；差的（如用字符串长度）会聚集。",
+  "Try these experiments:": "试试这些实验："
 }

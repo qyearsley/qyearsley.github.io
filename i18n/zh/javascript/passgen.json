@@ -6,7 +6,20 @@
   "Generate secure random passwords with custom character sets": "用自定义字符集生成安全随机密码",
   "Password Generator": "密码生成器",
   "Generate Password": "生成密码",
+  "Password Length:": "密码长度：",
+  "Character Set (RegEx):": "字符集（正则）：",
+  "Use JavaScript regular expressions to define allowed characters": "用JavaScript正则表达式定义允许的字符",
+  "Generate Password": "生成密码",
   "Common Character Sets": "常用字符集",
   "Click any preset to use it:": "点击预设使用：",
-  "How It Works": "工作原理"
+  "Letters & Numbers": "字母和数字",
+  "Strong (with special chars)": "强密码（含特殊字符）",
+  "Lowercase Only": "仅小写",
+  "Uppercase Only": "仅大写",
+  "PIN (4 digits)": "PIN码（4位）",
+  "Hex (32 chars)": "十六进制（32位）",
+  "Base64-safe": "Base64安全",
+  "All printable ASCII": "所有可打印ASCII",
+  "How It Works": "工作原理",
+  "This password generator creates random strings using JavaScript regular expressions to define character sets. You can specify exactly which characters to include, making it easy to create passwords that meet specific requirements.": "此密码生成器使用JavaScript正则表达式定义字符集来创建随机字符串。可以精确指定包含哪些字符，方便创建符合特定要求的密码。"
 }

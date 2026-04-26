@@ -6,7 +6,7 @@
     <title>Page Not Found</title>
     <meta name="description" content="404 - Page not found" />
     <meta name="theme-color" content="#2d3748" />
-    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/css/style.css" />
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
     <script src="/shared/theme.js"></script>
     <style>
@@ -59,99 +59,11 @@
           <div class="not-found-code">404</div>
           <p class="not-found-message">The page you're looking for doesn't exist.</p>
           <a href="/" class="back-link">Go to homepage</a>
-          <p class="not-found-hint">
-Conway's Game of Life runs in the background.
-          </p>
+          <p class="not-found-hint">Conway's Game of Life runs in the background.</p>
         </section>
       </main>
     </div>
     <script src="/shared/nav.js"></script>
-    <script>
-      "use strict"
-      ;(function () {
-        var canvas = document.getElementById("life-canvas")
-        var ctx = canvas.getContext("2d")
-        var cellSize = 10
-        var cols, rows, grid
-
-        function resize() {
-          canvas.width = window.innerWidth
-          canvas.height = window.innerHeight
-          var newCols = Math.floor(canvas.width / cellSize)
-          var newRows = Math.floor(canvas.height / cellSize)
-          if (newCols !== cols || newRows !== rows) {
-            cols = newCols
-            rows = newRows
-            randomize()
-          }
-        }
-
-        function randomize() {
-          grid = new Uint8Array(cols * rows)
-          for (var i = 0; i < grid.length; i++) {
-            grid[i] = Math.random() < 0.15 ? 1 : 0
-          }
-        }
-
-        function countNeighbors(x, y) {
-          var count = 0
-          for (var dy = -1; dy <= 1; dy++) {
-            for (var dx = -1; dx <= 1; dx++) {
-              if (dx === 0 && dy === 0) continue
-              var nx = (x + dx + cols) % cols
-              var ny = (y + dy + rows) % rows
-              count += grid[ny * cols + nx]
-            }
-          }
-          return count
-        }
-
-        function step() {
-          var next = new Uint8Array(cols * rows)
-          for (var y = 0; y < rows; y++) {
-            for (var x = 0; x < cols; x++) {
-              var idx = y * cols + x
-              var n = countNeighbors(x, y)
-              if (grid[idx]) {
-                next[idx] = n === 2 || n === 3 ? 1 : 0
-              } else {
-                next[idx] = n === 3 ? 1 : 0
-              }
-            }
-          }
-          grid = next
-        }
-
-        function draw() {
-          ctx.clearRect(0, 0, canvas.width, canvas.height)
-          var color =
-            getComputedStyle(document.documentElement).getPropertyValue("--color-primary").trim() ||
-            "#3182ce"
-          ctx.fillStyle = color
-          for (var y = 0; y < rows; y++) {
-            for (var x = 0; x < cols; x++) {
-              if (grid[y * cols + x]) {
-                ctx.fillRect(x * cellSize, y * cellSize, cellSize - 1, cellSize - 1)
-              }
-            }
-          }
-        }
-
-        function tick() {
-          if (document.hidden) {
-            setTimeout(tick, 500)
-            return
-          }
-          step()
-          draw()
-          setTimeout(tick, 200)
-        }
-
-        resize()
-        window.addEventListener("resize", resize)
-        draw()
-        setTimeout(tick, 200)
-      })()
-    </script>
+    <script src="/shared/life-background.js"></script>
   </body>
 </html>

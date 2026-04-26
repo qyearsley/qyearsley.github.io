@@ -3,14 +3,20 @@
   "_description": "为布尔表达式生成真值表（AND、OR、NOT、XOR等）",
 
   "Truth Table Generator": "真值表生成器",
-  "Generate truth tables for boolean expressions (AND, OR, NOT, XOR, and more)":
-    "为布尔表达式生成真值表（AND、OR、NOT、XOR等）",
+  "Generate truth tables for boolean expressions (AND, OR, NOT, XOR, and more)": "为布尔表达式生成真值表（AND、OR、NOT、XOR等）",
   "Truth Table": "真值表",
   "Generate Truth Table": "生成真值表",
+  "Boolean Expression:": "布尔表达式：",
+  "Generate Truth Table": "生成真值表",
   "How It Works": "工作原理",
-  "Enter a boolean expression. The generator shows all variable combinations and outputs.":
-    "输入布尔表达式，生成器显示所有变量组合和结果。",
+  "Enter a boolean expression. The generator shows all variable combinations and outputs.": "输入布尔表达式，生成器显示所有变量组合和结果。",
   "Supported Operators": "支持的运算符",
   "Example Expressions": "示例表达式",
-  "Click any example to try it:": "点击示例试试："
+  "Click any example to try it:": "点击示例试试：",
+  "AND Gate": "与门",
+  "OR Gate": "或门",
+  "NOT Gate": "非门",
+  "XOR Gate": "异或门",
+  "XNOR (Equivalence)": "同或（等价）",
+  "Implication": "蕴含"
 }

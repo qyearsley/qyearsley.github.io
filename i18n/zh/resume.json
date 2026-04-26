@@ -6,8 +6,7 @@
   "Software Engineer": "软件工程师",
 
   "Professional Summary": "职业概述",
-  "13+ years building developer tools, infrastructure, and services at scale. Strong track record of identifying problems, designing solutions, and delivering end-to-end. Focused on reliability, code quality, and team effectiveness.":
-    "13年以上开发者工具、基础设施和服务建设经验。擅长发现问题、设计方案、端到端交付。重视可靠性、代码质量和团队效率。",
+  "13+ years building developer tools, infrastructure, and services at scale. Strong track record of identifying problems, designing solutions, and delivering end-to-end. Focused on reliability, code quality, and team effectiveness.": "13年以上开发者工具、基础设施和服务建设经验。擅长发现问题、设计方案、端到端交付。重视可靠性、代码质量和团队效率。",
 
   "Skills": "技能",
   "Languages:": "编程语言：",
@@ -19,43 +18,26 @@
   "Experience": "工作经历",
 
   "— August 2023 - Present": "— 2023年8月至今",
-  "Built tools and automation to improve the efficiency and reliability of device lab operations.":
-    "构建工具和自动化，提升设备实验室运营效率和可靠性。",
-  "Wrote and maintained technical documentation including API references and onboarding guides":
-    "编写和维护技术文档，包括API参考和入门指南",
-  "Led development from requirements through deployment, replacing a legacy tool; reduced page load times from 20+ seconds to under 2 seconds":
-    "主导全流程开发，替换旧系统；页面加载从20+秒降至2秒内",
-  "Overhauled system: added comprehensive test coverage and improved recovery rates across all hardware models":
-    "全面改造系统：新增测试覆盖，提升所有硬件型号恢复率",
-  "Led qualification and deployment of OS upgrades using orchestration playbooks with preflight checks and post-upgrade verification":
-    "主导OS升级验证和部署，含预检查和升级后验证",
-  "Maintained and improved agent provisioning system: pinned dependencies for reproducibility, standardized logging, added CI pipelines":
-    "改进代理配置系统：固定依赖、标准化日志、添加CI",
-  "Built operational Splunk dashboards for device recovery rates, OS rollout tracking, and fleet utilization":
-    "构建Splunk仪表盘，跟踪恢复率、OS部署和机群利用率",
+  "Built tools and automation to improve the efficiency and reliability of device lab operations.": "构建工具和自动化，提升设备实验室运营效率和可靠性。",
+  "Wrote and maintained technical documentation including API references and onboarding guides": "编写和维护技术文档，包括API参考和入门指南",
+  "Led development from requirements through deployment, replacing a legacy tool; reduced page load times from 20+ seconds to under 2 seconds": "主导全流程开发，替换旧系统；页面加载从20+秒降至2秒内",
+  "Overhauled system: added comprehensive test coverage and improved recovery rates across all hardware models": "全面改造系统：新增测试覆盖，提升所有硬件型号恢复率",
+  "Led qualification and deployment of OS upgrades using orchestration playbooks with preflight checks and post-upgrade verification": "主导OS升级验证和部署，含预检查和升级后验证",
+  "Maintained and improved agent provisioning system: pinned dependencies for reproducibility, standardized logging, added CI pipelines": "改进代理配置系统：固定依赖、标准化日志、添加CI",
+  "Built operational Splunk dashboards for device recovery rates, OS rollout tracking, and fleet utilization": "构建Splunk仪表盘，跟踪恢复率、OS部署和机群利用率",
 
   "— July 2013 - March 2023": "— 2013年7月 - 2023年3月",
-  "Designed, built, and maintained open-source developer tools and services for the Chromium developer community.":
-    "为Chromium社区设计、构建和维护开源开发者工具和服务。",
+  "Designed, built, and maintained open-source developer tools and services for the Chromium developer community.": "为Chromium社区设计、构建和维护开源开发者工具和服务。",
   "Mentored junior engineers and hosted interns": "指导初级工程师和实习生",
-  "Diagnosed and resolved production outages during on-call rotations":
-    "On-call期间诊断和解决生产事故",
-  "Consistently improved maintainability, quality, and documentation of systems":
-    "持续改善系统可维护性、质量和文档",
-  "Co-designed and implemented a scalable presubmit testing service used by thousands of developers daily as a critical part of their workflow":
-    "共同设计可扩展的预提交测试服务，每天数千开发者使用",
-  "Migrated from a legacy system, reducing maintenance burden and enabling new functionality":
-    "从旧系统迁移，降低维护成本并支持新功能",
-  "Built and maintained a system that runs static analysis tools and posts automated feedback on unsubmitted code changes":
-    "构建静态分析系统，自动反馈未提交代码变更",
-  "Grew an ecosystem of analyzers across several major open-source projects, improving code quality across hundreds of changes per day":
-    "在多个开源项目中发展分析器生态，每天提升数百变更的代码质量",
-  "Improved alerting algorithms to reduce noise and surface real regressions, contributing to the detection of 7,000+ performance regressions":
-    "改进告警算法，助力发现7,000+性能回归",
-  "Built tooling enabling developers to easily contribute to and benefit from cross-browser web platform test suites":
-    "构建跨浏览器Web平台测试套件工具",
-  "Designed and implemented a UI plugin allowing developers to selectively rerun failed tests, saving computing resources and developer time":
-    "设计UI插件，支持选择性重跑失败测试，节省资源和时间",
+  "Diagnosed and resolved production outages during on-call rotations": "On-call期间诊断和解决生产事故",
+  "Consistently improved maintainability, quality, and documentation of systems": "持续改善系统可维护性、质量和文档",
+  "Co-designed and implemented a scalable presubmit testing service used by thousands of developers daily as a critical part of their workflow": "共同设计可扩展的预提交测试服务，每天数千开发者使用",
+  "Migrated from a legacy system, reducing maintenance burden and enabling new functionality": "从旧系统迁移，降低维护成本并支持新功能",
+  "Built and maintained a system that runs static analysis tools and posts automated feedback on unsubmitted code changes": "构建静态分析系统，自动反馈未提交代码变更",
+  "Grew an ecosystem of analyzers across several major open-source projects, improving code quality across hundreds of changes per day": "在多个开源项目中发展分析器生态，每天提升数百变更的代码质量",
+  "Improved alerting algorithms to reduce noise and surface real regressions, contributing to the detection of 7,000+ performance regressions": "改进告警算法，助力发现7,000+性能回归",
+  "Built tooling enabling developers to easily contribute to and benefit from cross-browser web platform test suites": "构建跨浏览器Web平台测试套件工具",
+  "Designed and implemented a UI plugin allowing developers to selectively rerun failed tests, saving computing resources and developer time": "设计UI插件，支持选择性重跑失败测试，节省资源和时间",
 
   "Education": "教育背景",
   "B.S. Computer Science | B.A. Linguistics": "计算机科学学士 | 语言学学士",

@@ -5,5 +5,13 @@
   "How Long Have You Lived?": "你活了多久？",
   "Calculate the time elapsed since your birth in various units": "用不同单位计算出生以来的时间",
   "Life Calculator": "寿命计算器",
-  "When were you born?": "你的出生日期？"
+  "When were you born?": "你的出生日期？",
+  "Calculate": "计算",
+  "You have now been alive for:": "你已经存活了：",
+  "years": "年",
+  "months": "月",
+  "weeks": "周",
+  "days": "天",
+  "hours": "小时",
+  "seconds": "秒"
 }

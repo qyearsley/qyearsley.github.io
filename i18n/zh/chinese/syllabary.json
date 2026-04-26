@@ -3,12 +3,22 @@
   "_description": "用于音译外国名字的常用汉字",
 
   "Hanzi Transliteration Syllabary": "汉字音译音节表",
-  "Chinese characters commonly used for transliterating foreign names and words":
-    "用于音译外国名字和词汇的常用汉字",
+  "Chinese characters commonly used for transliterating foreign names and words": "用于音译外国名字和词汇的常用汉字",
   "Transliteration Syllabary": "音译音节表",
   "How It Works": "说明",
-  "This table shows characters commonly used for transliterating foreign names. Mandarin has multiple character options for most sounds, but standard choices exist for names and place names.":
-    "此表展示用于音译外国名字的常用汉字。普通话每个音有多个字可选，但人名和地名有标准用字。",
-  "Characters are chosen for positive meanings or simple strokes. Frequency shows real usage.":
-    "用字通常选取含义好或笔画简单的。频率反映实际使用情况。"
+  "This table shows characters commonly used for transliterating foreign names. Mandarin has multiple character options for most sounds, but standard choices exist for names and place names.": "此表展示用于音译外国名字的常用汉字。普通话每个音有多个字可选，但人名和地名有标准用字。",
+  "Characters are chosen for positive meanings or simple strokes. Frequency shows real usage.": "用字通常选取含义好或笔画简单的。频率反映实际使用情况。",
+  "Legend": "图例",
+  "Frequent": "常用",
+  "- Commonly used in transliterations": "——常用于音译",
+  "Infrequent": "少用",
+  "- Less commonly used": "——较少使用",
+  "Hover over characters to highlight them. Click for pronunciation details.": "悬停查看高亮。点击查看发音详情。",
+  "Data Sources": "数据来源",
+  "This table was generated from analysis of transliteration frequency data:": "此表由音译频率数据分析生成：",
+  "Borrowed words": "外来词",
+  "City transliterations": "城市音译",
+  "Country transliterations": "国家音译",
+  "Name transliterations": "人名音译",
+  "Transliteration Syllabary": "音译音节表"
 }

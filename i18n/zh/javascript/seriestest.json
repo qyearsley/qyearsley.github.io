@@ -6,5 +6,14 @@
   "Test the convergence of infinite series by computing partial sums": "通过计算部分和测试无穷级数收敛性",
   "Series Tester": "级数测试",
   "Calculate Series Sum": "计算级数和",
-  "About Convergent Series": "关于收敛级数"
+  "About Convergent Series": "关于收敛级数",
+  "Presets:": "预设：",
+  "f(n) =": "f(n) =",
+  "N =": "N =",
+  "Number of terms to sum (1-10000)": "求和项数（1-10000）",
+  "A": "一个",
+  "series": "级数",
+  "is the sum of the terms in a sequence. For some sequences, the more terms are added, the closer the sum gets to some finite number. Such series are said to": "是序列各项之和。有些序列加的项越多，总和越接近某个有限数。这样的级数称为",
+  "converge": "收敛",
+  "This tool approximates the sum of an infinite sequence by computing": "此工具通过计算来近似无穷序列之和"
 }

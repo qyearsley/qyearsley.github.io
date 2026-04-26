@@ -2,11 +2,15 @@
   "_title": "中文字符转换器",
   "_description": "繁简中文字符转换",
 
-  "Chinese Character Converter": "中文字符转换器",
+  "Traditional to Simplified Chinese Converter": "繁简中文转换器",
   "Convert between traditional and simplified Chinese characters": "繁简中文字符转换",
   "Character Converter": "字符转换",
   "How It Works": "说明",
+  "Convert traditional Chinese characters to simplified Chinese using a dictionary of common character mappings.": "使用常用字符映射字典将繁体中文转换为简体中文。",
   "Convert Text": "转换文本",
+  "Traditional → Simplified": "繁体→简体",
+  "Simplified → Traditional": "简体→繁体",
+  "Traditional Chinese Text:": "繁体中文：",
   "Example Conversions": "示例转换",
   "Click any example to try it:": "点击示例试试："
 }

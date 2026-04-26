@@ -4,5 +4,10 @@
 
   "Floating Point Exposed": "浮点数揭秘",
   "See the IEEE 754 bit layout of any number": "查看任意数字的IEEE 754位布局",
-  "How IEEE 754 double-precision works": "IEEE 754双精度的工作原理"
+  "Enter a number or expression:": "输入数字或表达式：",
+  "How IEEE 754 double-precision works": "IEEE 754双精度的工作原理",
+  "JavaScript numbers are 64-bit IEEE 754 \"double precision\" floats. The 64 bits are divided into three fields:": "JavaScript数字是64位IEEE 754「双精度」浮点数。64位分为三个字段：",
+  "Sign": "符号位",
+  "Exponent": "指数",
+  "Mantissa": "尾数"
 }

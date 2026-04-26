@@ -1,103 +1,41 @@
 # Future Improvements
 
-This document tracks potential improvements for the site that have been
-considered but deferred.
+Potential improvements, deferred until actually needed.
+
+## Done
+
+- Chinese translation build system (text-matching, hreflang, language switcher)
+- GitHub Actions CI (build, test, lint on push)
+- Sitemap generation
+- Internal link validation
+- Resume rendered from markdown
+- Keyboard shortcuts and theme system
 
 ## Build System & TypeScript
 
-Should we add TypeScript with a build process?
-Consider doing this if:
+Add TypeScript if:
 
 - building a complex multi-file JS project (>500 lines, multiple modules)
 - type-related bugs become frequent
-- IDE support becomes important for development
 
-## Template System / Static Site Generator
+## Template System
 
-Options Considered include:
+See `docs/build-system-options.md` for options and tradeoffs.
 
-- **Jekyll**: Ruby-based, GitHub Pages native support, automatic building
-- **11ty (Eleventy)**: JavaScript-based, modern, flexible templating
+Consider if:
 
-Consider doing this if:
-
-- adding Chinese language versions of all pages (would double page count)
-- navigation structure becomes more complex
 - updating shared elements (header/footer) becomes tedious across many files
-
-## Project Structure for Complex Experiments
-
-Current state is a flat structure in `/javascript/` directory, works for simple
-experiments.
-
-### Proposed Structure for Complex Projects
-
-```
-/javascript/
-  index.html              (directory listing - keep as is)
-
-  # Simple experiments stay flat
-  passgen.html
-  coinflip.html
-  date.html
-
-  # Complex experiments get their own directories
-  truthtable/
-    index.html
-    truthtable.js
-    truthtable.test.js
-
-  # Future complex projects
-  my-complex-app/
-    index.html
-    main.js
-    components/
-      graph.js
-      controls.js
-    utils/
-      helpers.js
-    README.md
-```
+- boilerplate maintenance becomes a real pain point
 
 ## Dependency Management
 
-Current State:
+Current state: Chart.js loaded from CDN, no version pinning.
 
-- Chart.js loaded from CDN (coinflip.html)
-- No version pinning or local copies
-- Vulnerable to CDN downtime or breaking changes
+Options: npm + bundler, self-host, or version-pinned CDN with SRI.
 
-Options:
+Revisit when adding more external dependencies.
 
-1. **Use npm packages + bundler**: Most robust but adds complexity
-2. **Download and self-host**: Simple but requires manual updates
-3. **Version-pinned CDN URLs with SRI**: Good middle ground
+## Project Structure
 
-When to Revisit:
-
-- When adding more external dependencies
-- If CDN reliability becomes an issue
-- When building complex projects that need bundling anyway
-
-## GitHub Actions / CI
-
-Add automated testing and linting on push/PR?
-
-Decision: Tests run locally; not collaborating with others currently.
-
-When to Revisit:
-
-- If collaborating with others
-- To ensure GitHub Pages builds successfully
-- When build process becomes complex enough to benefit from automation
-
-## Summary
-
-The site intentionally maintains simplicity. Add complexity only when:
-
-1. Current approach becomes painful (frequent bugs, tedious updates)
-2. Planning a specific complex project that would benefit
-3. Adding major features (like full i18n support)
-
-The improvements above are documented so they can be implemented when actually
-needed, not prematurely.
+Complex experiments (logic-engine, markov) already have their own directories.
+Simple experiments stay flat. This works well.
