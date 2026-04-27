@@ -2,7 +2,7 @@
   "_title": "中文字符转换器",
   "_description": "繁简中文字符转换",
 
-  "Traditional to Simplified Chinese Converter": "繁简中文转换器",
+  "Chinese Character Converter": "中文字符转换器",
   "Convert between traditional and simplified Chinese characters": "繁简中文字符转换",
   "Character Converter": "字符转换",
   "How It Works": "说明",
@@ -12,5 +12,8 @@
   "Simplified → Traditional": "简体→繁体",
   "Traditional Chinese Text:": "繁体中文：",
   "Example Conversions": "示例转换",
-  "Click any example to try it:": "点击示例试试："
+  "Click any example to try it:": "点击示例试试：",
+  "See also": "另见",
+  "— homophone substitutions during character simplification": "——字符简化中的同音替换",
+  "— see how characters are encoded in UTF-8, UTF-16, and GB2312": "——查看字符在UTF-8、UTF-16和GB2312中的编码"
 }

@@ -27,5 +27,7 @@
   "Resolution": "消解",
   "Adjunction": "合取引入",
   "The indentation shows derivation depth - premises are at the left margin, and conclusions are indented based on how many inference steps they are from the premises.": "缩进表示推导深度——前提在左边距，结论根据与前提的推理步数缩进。",
-  "Supported Operators": "支持的运算符"
+  "Supported Operators": "支持的运算符",
+  "See also": "另见",
+  "— generate truth tables for boolean expressions": "——为布尔表达式生成真值表"
 }

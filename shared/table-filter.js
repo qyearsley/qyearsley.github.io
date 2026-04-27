@@ -1,7 +1,7 @@
 // Generic table filter — looks for #table-filter input and .filterable-table,
 // hides rows that don't match the search query.
-// Handles: tables with <th> in first column (syllabary, tonetable),
-// and tables with rowspan grouping (homophone_subs).
+// Handles: tables with <th> in first column (syllabary, tone-table),
+// and tables with rowspan grouping (homophones).
 ;(function () {
   "use strict"
 

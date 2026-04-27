@@ -18,5 +18,7 @@
   "NOT Gate": "非门",
   "XOR Gate": "异或门",
   "XNOR (Equivalence)": "同或（等价）",
-  "Implication": "蕴含"
+  "Implication": "蕴含",
+  "See also": "另见",
+  "— derive conclusions from premises using inference rules": "——用推理规则从前提推导结论"
 }

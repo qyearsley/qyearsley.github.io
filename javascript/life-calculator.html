@@ -25,6 +25,75 @@
         font-weight: 600;
         font-family: monospace;
       }
+
+      .progress-section {
+        margin: 1.5rem 0;
+        text-align: center;
+      }
+
+      .progress-bar-container {
+        width: 100%;
+        max-width: 400px;
+        margin: 0.5rem auto;
+        background: var(--color-bg-code, #f0f0f0);
+        border-radius: 8px;
+        overflow: hidden;
+        height: 1.5rem;
+      }
+
+      .progress-bar-fill {
+        height: 100%;
+        background: var(--color-accent, #4a90d9);
+        transition: width 1s linear;
+        border-radius: 8px;
+      }
+
+      .progress-label {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+      }
+
+      .progress-note {
+        font-size: 0.85rem;
+        color: var(--color-text-muted, #666);
+        margin-top: 0.25rem;
+      }
+
+      .milestones {
+        margin: 1.5rem auto;
+        max-width: 500px;
+        text-align: left;
+      }
+
+      .milestones h3 {
+        text-align: center;
+      }
+
+      .milestone {
+        padding: 0.4rem 0;
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+
+      .milestone-label {
+        font-weight: 600;
+      }
+
+      .milestone-date {
+        color: var(--color-text-muted, #666);
+        white-space: nowrap;
+      }
+
+      .milestone-past {
+        opacity: 0.7;
+      }
+
+      .milestone-next {
+        border-left: 3px solid var(--color-accent, #4a90d9);
+        padding-left: 0.75rem;
+      }
     </style>
     <script src="/shared/theme.js"></script>
   </head>
@@ -41,7 +110,7 @@
         <nav class="breadcrumbs">
           <a href="/">Home</a>
           <span class="separator">/</span>
-          <a href="/javascript/">JavaScript</a>
+          <a href="/javascript/">Experiments</a>
           <span class="separator">/</span>
           <span class="current">Life Calculator</span>
         </nav>
@@ -60,6 +129,15 @@
               id="age-summary"
               style="font-size: 1.3rem; font-weight: 600; margin-bottom: 1rem; text-align: center"
             ></div>
+
+            <div id="progress-section" class="progress-section">
+              <div class="progress-label" id="progress-label"></div>
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="progress-bar"></div>
+              </div>
+              <div class="progress-note">Based on global average life expectancy of 73 years (WHO)</div>
+            </div>
+
             <h3>You have now been alive for:</h3>
             <table class="results-table">
               <tr>
@@ -87,6 +165,8 @@
                 <td>seconds</td>
               </tr>
             </table>
+
+            <div id="milestones" class="milestones"></div>
           </div>
         </section>
       </main>
@@ -95,10 +175,77 @@
     <script>
       "use strict"
 
-      /**
-       * Initializes the counter if a date is specified in the query string.
-       * Starts a 1-second interval to continuously update the display.
-       */
+      const LIFE_EXPECTANCY_YEARS = 73
+
+      const MILESTONES = [
+        { seconds: 1e9, label: "1 billionth second" },
+        { days: 10000, label: "10,000th day" },
+        { seconds: 2e9, label: "2 billionth second" },
+        { days: 20000, label: "20,000th day" },
+        { seconds: 3e9, label: "3 billionth second" },
+        { days: 30000, label: "30,000th day" },
+      ]
+
+      function addDays(date, n) {
+        const d = new Date(date)
+        d.setDate(d.getDate() + n)
+        return d
+      }
+
+      function addSeconds(date, n) {
+        return new Date(date.getTime() + n * 1000)
+      }
+
+      function formatDate(date) {
+        return date.toLocaleDateString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
+      }
+
+      function computeMilestones(birthday) {
+        const now = new Date()
+        const results = []
+
+        for (const m of MILESTONES) {
+          const date = m.days ? addDays(birthday, m.days) : addSeconds(birthday, m.seconds)
+          const past = date <= now
+          results.push({ label: m.label, date, past })
+        }
+
+        return results
+      }
+
+      function renderMilestones(birthday) {
+        const milestones = computeMilestones(birthday)
+        const container = document.getElementById("milestones")
+
+        const past = milestones.filter((m) => m.past)
+        const future = milestones.filter((m) => !m.past)
+
+        let html = "<h3>Milestones</h3>"
+
+        for (const m of past) {
+          html +=
+            '<div class="milestone milestone-past">' +
+            '<span class="milestone-label">' + m.label + "</span>" +
+            '<span class="milestone-date">' + formatDate(m.date) + "</span>" +
+            "</div>"
+        }
+
+        if (future.length > 0) {
+          const next = future[0]
+          html +=
+            '<div class="milestone milestone-next">' +
+            '<span class="milestone-label">Next: ' + next.label + "</span>" +
+            '<span class="milestone-date">' + formatDate(next.date) + "</span>" +
+            "</div>"
+        }
+
+        container.innerHTML = html
+      }
+
       function init() {
         const params = new URLSearchParams(window.location.search)
         const dateInput = params.get("date")
@@ -109,6 +256,7 @@
         const date = new Date(dateInput)
         if (date.getTime()) {
           update(date)
+          renderMilestones(date)
           document.getElementById("output").style.display = "block"
           setInterval(() => {
             update(date)
@@ -116,12 +264,6 @@
         }
       }
 
-      /**
-       * Handles form submission.
-       * Validates the date and updates the URL with the date parameter.
-       *
-       * @param {Event} event - Form submit event.
-       */
       function handleSubmit(event) {
         event.preventDefault()
 
@@ -140,6 +282,7 @@
           params.set("date", dateInput)
           window.location.search = params.toString()
           update(date)
+          renderMilestones(date)
           document.getElementById("output").style.display = "block"
           errorElement.style.display = "none"
         } else {
@@ -148,11 +291,6 @@
         }
       }
 
-      /**
-       * Updates the counter to show elapsed time since the given date.
-       *
-       * @param {Date} birthday - The birth date to calculate from.
-       */
       function update(birthday) {
         const now = new Date()
         const diff = now.getTime() - birthday.getTime()
@@ -161,7 +299,6 @@
         const days = hours / 24
         const weeks = days / 7
 
-        // Calculate years and months
         let years = now.getFullYear() - birthday.getFullYear()
         let months = now.getMonth() - birthday.getMonth()
         if (months < 0) {
@@ -177,6 +314,11 @@
         }
         const totalMonths = years * 12 + months
 
+        const percent = Math.min(100, (seconds / (LIFE_EXPECTANCY_YEARS * 365.25 * 86400)) * 100)
+        document.getElementById("progress-label").textContent =
+          percent.toFixed(1) + "% of average lifespan"
+        document.getElementById("progress-bar").style.width = percent.toFixed(1) + "%"
+
         document.getElementById("age-summary").textContent =
           years + " years, " + months + " months old"
         document.getElementById("years").textContent = years
@@ -187,7 +329,6 @@
         document.getElementById("seconds").textContent = Math.floor(seconds).toLocaleString()
       }
 
-      // Initialize on page load and set up form handler.
       document.addEventListener("DOMContentLoaded", () => {
         init()
         document.getElementById("form").addEventListener("submit", handleSubmit)

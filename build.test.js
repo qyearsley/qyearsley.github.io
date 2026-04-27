@@ -95,16 +95,16 @@ describe("translateHtml", () => {
   test("replaces longer matches before shorter ones", () => {
     const html =
       '<html lang="en"><head></head><body><header></header>' +
-      "<h2>JavaScript Experiments</h2>" +
-      "<span>JavaScript</span></body></html>"
+      "<h2>Experiments and Tools</h2>" +
+      "<span>Experiments</span></body></html>"
     const result = translateHtml(
       html,
-      { "JavaScript Experiments": "JS实验", JavaScript: "JS" },
+      { "Experiments and Tools": "实验与工具", Experiments: "实验" },
       "test.html",
       emptyCommon,
     )
-    expect(result).toContain(">JS实验<")
-    expect(result).toContain(">JS<")
+    expect(result).toContain(">实验与工具<")
+    expect(result).toContain(">实验<")
   })
 
   test("rewrites internal links to /zh/ equivalents", () => {
@@ -196,7 +196,7 @@ describe("TRANSLATED_URLS", () => {
   })
 
   test("includes non-index HTML pages", () => {
-    expect(TRANSLATED_URLS.has("/javascript/truthtable.html")).toBe(true)
+    expect(TRANSLATED_URLS.has("/javascript/truth-tables.html")).toBe(true)
     expect(TRANSLATED_URLS.has("/404.html")).toBe(true)
   })
 

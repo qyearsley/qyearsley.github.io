@@ -30,5 +30,7 @@
   "Class III — Chaotic": "第三类——混沌",
   "Evolution produces pseudo-random, aperiodic patterns.": "演化产生伪随机、非周期模式。",
   "Class IV — Complex": "第四类——复杂",
-  "Localized structures emerge and interact in complicated ways. Capable of universal computation.": "局部结构出现并以复杂方式互动。能够进行通用计算。"
+  "Localized structures emerge and interact in complicated ways. Capable of universal computation.": "局部结构出现并以复杂方式互动。能够进行通用计算。",
+  "See also": "另见",
+  "— 2D cellular automata (Conway's Game of Life)": "——二维细胞自动机（康威生命游戏）"
 }

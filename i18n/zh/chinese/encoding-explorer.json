@@ -11,5 +11,7 @@
   "UTF-16": "UTF-16",
   "Fixed 2 bytes for characters in the Basic Multilingual Plane (U+0000 to U+FFFF), which includes all common CJK. Characters above U+FFFF use a surrogate pair (4 bytes).": "基本多文种平面（U+0000到U+FFFF）的字符固定2字节，包括所有常用CJK。U+FFFF以上的字符使用代理对（4字节）。",
   "GB2312": "GB2312",
-  "A legacy Chinese encoding from 1980. Maps ~7,000 simplified Chinese characters to 2-byte codes. ASCII characters use 1 byte. This tool shows GB2312 values for a curated set of common characters.": "1980年的传统中文编码。将约7000个简体中文字符映射为2字节码。ASCII字符用1字节。此工具显示一组常用字符的GB2312值。"
+  "A legacy Chinese encoding from 1980. Maps ~7,000 simplified Chinese characters to 2-byte codes. ASCII characters use 1 byte. This tool shows GB2312 values for a curated set of common characters.": "1980年的传统中文编码。将约7000个简体中文字符映射为2字节码。ASCII字符用1字节。此工具显示一组常用字符的GB2312值。",
+  "See also": "另见",
+  "— convert between traditional and simplified Chinese": "——繁简中文字符转换"
 }
