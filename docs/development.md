@@ -44,7 +44,8 @@ shared/
   table-filter.js           Searchable table filtering
   life-background.js        Game of Life animation (404 page)
 
-i18n/zh/                    Chinese translations (see docs/translations.md)
+zh-common.json              Shared translations (see docs/translations.md)
+*.zh.json                   Per-page translations (co-located with HTML)
 docs/                       Development documentation
 dist/                       Build output (gitignored)
 ```
@@ -56,7 +57,7 @@ dist/                       Build output (gitignored)
 1. **Clean** -- delete `dist/`
 2. **Copy** -- copy all static files to `dist/` (skips config files, dev-only dirs)
 3. **Render resume** -- convert `resume/resume.md` to HTML via `marked`, inject into `resume/template.html`
-4. **Translate** -- for each translatable page, generate a Chinese version at `/zh/` using text-matching against `i18n/zh/*.json`
+4. **Translate** -- for each translatable page, generate a Chinese version at `/zh/` using text-matching against co-located `*.zh.json` files
 5. **Inject paths** -- write `window.__translatedPaths` into every HTML file so `nav.js` can persist language preference client-side
 6. **Sitemap** -- generate `dist/sitemap.xml` from all HTML files
 7. **Validate** -- check all internal `href="/..."` links point to existing files
@@ -91,7 +92,7 @@ npm test -- --testPathPatterns build.test
 
 1. Create `section/page-name.html` as a self-contained HTML file
 2. Add the output path to `TRANSLATABLE_PAGES` in `build.js`
-3. Create `i18n/zh/section/page-name.json` with translations
+3. Create `section/page-name.zh.json` with translations
 4. Run `npm run build` -- warnings show unmatched translation keys
 
 See `docs/translations.md` for translation details.

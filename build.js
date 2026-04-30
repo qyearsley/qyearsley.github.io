@@ -26,6 +26,7 @@ import { marked } from "marked"
 
 const ROOT = dirname(fileURLToPath(import.meta.url))
 const DIST = join(ROOT, "dist")
+const VERBOSE = process.argv.includes("--verbose")
 
 const SKIP_DIRS = new Set(["node_modules", "dist", "docs", "coverage", "i18n"])
 
@@ -37,6 +38,7 @@ const SKIP_FILES = new Set([
   "CLAUDE.md",
   "build.js",
   "build.test.js",
+  "zh-common.json",
 ])
 
 // Output paths (in dist/) that have Chinese translations.
@@ -97,6 +99,7 @@ function copyTree(src, dest) {
       copyTree(join(src, name), join(dest, name))
     } else {
       if (SKIP_FILES.has(name)) continue
+      if (name.endsWith(".zh.json")) continue
       copyFileSync(join(src, name), join(dest, name))
     }
   }
@@ -123,23 +126,19 @@ function generateResume() {
 // ── Translation (Chinese) ───────────────────────────────────────
 
 function loadTranslations() {
-  const zhDir = join(ROOT, "i18n", "zh")
-  if (!existsSync(zhDir)) return null
-  const result = loadDir(zhDir, "")
-  return Object.keys(result).length > 0 ? result : null
-}
+  const commonPath = join(ROOT, "zh-common.json")
+  if (!existsSync(commonPath)) return null
+  const common = JSON.parse(readFileSync(commonPath, "utf-8"))
 
-function loadDir(dir, prefix) {
-  const result = {}
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (entry.isDirectory()) {
-      Object.assign(result, loadDir(join(dir, entry.name), prefix + entry.name + "/"))
-    } else if (entry.name.endsWith(".json")) {
-      const key = prefix + entry.name.replace(/\.json$/, "")
-      result[key] = JSON.parse(readFileSync(join(dir, entry.name), "utf-8"))
+  const pages = {}
+  for (const page of TRANSLATABLE_PAGES) {
+    const zhPath = join(ROOT, page.replace(/\.html$/, ".zh.json"))
+    if (existsSync(zhPath)) {
+      pages[page] = JSON.parse(readFileSync(zhPath, "utf-8"))
     }
   }
-  return result
+
+  return { common, pages }
 }
 
 function escapeRegex(str) {
@@ -292,21 +291,46 @@ function findHtmlFiles(dir) {
 function generateSitemap() {
   const baseUrl = "https://qyearsley.github.io"
   const htmlFiles = findHtmlFiles(DIST)
-  const urls = []
+  const zhPaths = new Set()
+  for (const page of TRANSLATABLE_PAGES) {
+    zhPaths.add("/zh/" + page)
+    if (page.endsWith("/index.html")) {
+      zhPaths.add("/zh/" + page.replace(/index\.html$/, ""))
+    }
+    if (page === "index.html") {
+      zhPaths.add("/zh/")
+    }
+  }
 
+  const urls = []
   for (const file of htmlFiles) {
     let urlPath = file.slice(DIST.length).replace(/\\/g, "/")
     if (urlPath.endsWith("/index.html")) {
       urlPath = urlPath.replace(/index\.html$/, "")
     }
-    urls.push(baseUrl + urlPath)
+    if (zhPaths.has(urlPath)) continue
+    urls.push(urlPath)
   }
 
   urls.sort()
+  const xmlns =
+    'xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" ' +
+    'xmlns:xhtml="http://www.w3.org/1999/xhtml"'
+  const entries = urls.map((urlPath) => {
+    const loc = `    <loc>${baseUrl}${urlPath}</loc>`
+    const zhUrlPath = urlPath === "/" ? "/zh/" : "/zh" + urlPath
+    if (zhPaths.has(zhUrlPath) || zhPaths.has("/zh" + urlPath + "index.html")) {
+      const enAlt = `    <xhtml:link rel="alternate" hreflang="en" href="${baseUrl}${urlPath}" />`
+      const zhAlt = `    <xhtml:link rel="alternate" hreflang="zh" href="${baseUrl}${zhUrlPath}" />`
+      return `  <url>\n${loc}\n${enAlt}\n${zhAlt}\n  </url>`
+    }
+    return `  <url>\n${loc}\n  </url>`
+  })
+
   const xml = [
     '<?xml version="1.0" encoding="UTF-8"?>',
-    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-    ...urls.map((url) => `  <url><loc>${url}</loc></url>`),
+    `<urlset ${xmlns}>`,
+    ...entries,
     "</urlset>",
     "",
   ].join("\n")
@@ -382,28 +406,21 @@ function build() {
   console.log("Generating resume from markdown...")
   generateResume()
 
-  const allTranslations = loadTranslations()
-  if (!allTranslations) {
-    console.log("No i18n/zh/ directory found. Skipping translations.")
+  const data = loadTranslations()
+  if (!data) {
+    console.log("No zh-common.json found. Skipping translations.")
     console.log("Done.")
     return
   }
 
-  const common = allTranslations._common || {}
+  const common = data.common
   const commonKeys = new Set(Object.keys(common).filter((k) => !k.startsWith("_")))
 
   console.log("Generating translations...")
   for (const page of TRANSLATABLE_PAGES) {
-    const pageKey =
-      page === "index.html" ? "index" : page.replace(/\/index\.html$/, "").replace(/\.html$/, "")
+    const pageOnly = data.pages[page]
 
-    const pageOnly = allTranslations[pageKey]
-    if (!pageOnly) {
-      console.warn(`  Warning: no translations for "${pageKey}" (${page})`)
-      continue
-    }
-
-    const translations = { ...common, ...pageOnly }
+    const translations = pageOnly ? { ...common, ...pageOnly } : { ...common }
 
     const srcPath = join(DIST, page)
     if (!existsSync(srcPath)) {
@@ -417,7 +434,7 @@ function build() {
     const zhPath = join(DIST, "zh", page)
     mkdirSync(dirname(zhPath), { recursive: true })
     writeFileSync(zhPath, zhHtml)
-    checkUntranslated(zhHtml, page)
+    if (VERBOSE) checkUntranslated(zhHtml, page)
     console.log(`  zh/${page}`)
 
     const enHtml = injectEnglishMeta(html, page)

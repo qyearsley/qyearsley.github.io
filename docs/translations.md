@@ -9,29 +9,26 @@ with its Chinese equivalent.
 
 ## Translation Files
 
-Translation JSON files live in `i18n/zh/`. The directory structure mirrors
-the site:
+Translation files live next to the HTML pages they translate, using the
+naming convention `<name>.zh.json`:
 
 ```
-i18n/zh/
-  _common.json          Shared strings (Home, Skip to content, etc.)
-  index.json            Homepage translations
-  404.json              404 page translations
-  resume.json           Resume translations
-  chinese.json          Chinese section index
-  chinese/
-    syllabary.json      Per-page translations
-    tonetable.json
-    ...
-  javascript.json       JS section index
-  javascript/
-    coinflip.json       Per-page translations
-    ...
-  games.json            Games section index
-  games/
-    number-garden.json  Per-game translations
-    ...
+zh-common.json                       Shared strings + homepage translations
+404.zh.json                          404 page translations
+resume/index.zh.json                 Resume translations
+chinese/index.zh.json                Chinese section index
+chinese/syllabary.zh.json            Per-page translations
+chinese/tone-table.zh.json
+...
+javascript/index.zh.json             JS section index
+javascript/coin-flipper.zh.json      Per-page translations
+...
+games/index.zh.json                  Games section index
+games/number-garden/index.zh.json    Per-game translations
+...
 ```
+
+Run `npm run translations` to list all translation files.
 
 ## JSON Format
 
@@ -47,7 +44,7 @@ Each file maps English text to Chinese:
 
 - Keys starting with `_` are special: `_title` replaces `<title>`, `_description` replaces the meta description.
 - All other keys match text content between HTML tags (`>text<`).
-- Common strings in `_common.json` are merged into every page.
+- Common strings in `zh-common.json` are merged into every page.
 
 ## How Matching Works
 
@@ -59,7 +56,6 @@ Each file maps English text to Chinese:
 ## Adding Translations
 
 1. Add the page to `TRANSLATABLE_PAGES` in `build.js`
-2. Create a JSON file at the matching path under `i18n/zh/`
-3. Run `npm run build` -- the build warns about:
-   - Unmatched keys (no English text found for a translation)
-   - Untranslated text (English that looks like it should be translated)
+2. Create a `<name>.zh.json` file next to the HTML page
+3. Run `npm run build` -- warnings about unmatched keys appear by default
+4. Run `npm run build:verbose` to also see possibly-untranslated English text
