@@ -255,6 +255,24 @@ function injectLangMeta(html, pagePath, targetLang) {
   return result
 }
 
+// Rewrites relative asset paths (script src, ES module imports) to absolute
+// paths so that /zh/ pages can resolve them from the original location.
+function rewriteRelativePaths(html, pagePath) {
+  const baseDir = "/" + pagePath.replace(/[^/]*$/, "")
+
+  // Rewrite src="relative" (not starting with / or http)
+  html = html.replace(/(<script[^>]*\ssrc=")([^/"h][^"]*")/g, (match, prefix, relPath) => {
+    return prefix + baseDir + relPath
+  })
+
+  // Rewrite from "./relative" and from './relative'
+  html = html.replace(/(\bfrom\s+["'])(\.\/)([^"']+["'])/g, (match, prefix, dot, rest) => {
+    return prefix + baseDir + rest
+  })
+
+  return html
+}
+
 // Generates a full Chinese translation of an HTML page.
 function translateHtml(html, translations, pagePath, commonKeys) {
   let result = html
@@ -266,6 +284,7 @@ function translateHtml(html, translations, pagePath, commonKeys) {
     return TRANSLATED_URLS.has(href) ? `href="/zh${href}"` : match
   })
 
+  result = rewriteRelativePaths(result, pagePath)
   result = injectLangMeta(result, pagePath, "zh")
   return result
 }
