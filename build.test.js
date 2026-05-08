@@ -7,6 +7,9 @@ import {
   buildTextPattern,
   translateHtml,
   injectEnglishMeta,
+  rewriteRelativePaths,
+  injectLangMeta,
+  checkUntranslated,
   TRANSLATED_URLS,
 } from "./build.js"
 
@@ -202,5 +205,144 @@ describe("TRANSLATED_URLS", () => {
 
   test("does not include non-existent pages", () => {
     expect(TRANSLATED_URLS.has("/nonexistent.html")).toBe(false)
+  })
+})
+
+describe("checkUntranslated", () => {
+  test("returns empty for fully Chinese content", () => {
+    const html = "<body><p>这是中文内容</p></body>"
+    expect(checkUntranslated(html)).toEqual([])
+  })
+
+  test("flags English sentences in body", () => {
+    const html = "<body><p>This is clearly untranslated English text here</p></body>"
+    const warnings = checkUntranslated(html)
+    expect(warnings.length).toBe(1)
+    expect(warnings[0]).toContain("untranslated English")
+  })
+
+  test("ignores short text fragments", () => {
+    const html = "<body><span>OK fine</span></body>"
+    expect(checkUntranslated(html)).toEqual([])
+  })
+
+  test("ignores URLs", () => {
+    const html = "<body><a>https://example.com/some/long/path/here</a></body>"
+    expect(checkUntranslated(html)).toEqual([])
+  })
+
+  test("ignores identifiers and email-like text", () => {
+    const html = "<body><code>some.module.function.name</code></body>"
+    expect(checkUntranslated(html)).toEqual([])
+  })
+
+  test("ignores text inside script and style tags", () => {
+    const html =
+      "<body><script>const message = 'this should not be flagged at all'</script><p>中文</p></body>"
+    expect(checkUntranslated(html)).toEqual([])
+  })
+
+  test("ignores single-word text even if long", () => {
+    const html = "<body><span>Internationalization</span></body>"
+    expect(checkUntranslated(html)).toEqual([])
+  })
+
+  test("returns empty when no body tag exists", () => {
+    const html = "<div>some random text that is english</div>"
+    expect(checkUntranslated(html)).toEqual([])
+  })
+
+  test("ignores parenthesized word lists", () => {
+    const html = "<body><span>(width, height, depth)</span></body>"
+    expect(checkUntranslated(html)).toEqual([])
+  })
+})
+
+describe("rewriteRelativePaths", () => {
+  test("rewrites relative href to absolute", () => {
+    const html = '<a href="page.html">Link</a>'
+    const result = rewriteRelativePaths(html, "games/index.html")
+    expect(result).toContain('href="/games/page.html"')
+  })
+
+  test("rewrites relative src to absolute", () => {
+    const html = '<img src="logo.png" />'
+    const result = rewriteRelativePaths(html, "javascript/app/index.html")
+    expect(result).toContain('src="/javascript/app/logo.png"')
+  })
+
+  test("does not rewrite absolute paths", () => {
+    const html = '<a href="/games/index.html">Games</a>'
+    const result = rewriteRelativePaths(html, "index.html")
+    expect(result).toContain('href="/games/index.html"')
+  })
+
+  test("does not rewrite protocol URLs", () => {
+    const html = '<a href="https://example.com">External</a>'
+    const result = rewriteRelativePaths(html, "games/index.html")
+    expect(result).toContain('href="https://example.com"')
+  })
+
+  test("does not rewrite fragment-only hrefs", () => {
+    const html = '<a href="#section">Jump</a>'
+    const result = rewriteRelativePaths(html, "games/index.html")
+    expect(result).toContain('href="#section"')
+  })
+
+  test("rewrites ES module from './' imports", () => {
+    const html = `<script type="module">import { foo } from "./utils.js"</script>`
+    const result = rewriteRelativePaths(html, "javascript/app/index.html")
+    expect(result).toContain('from "/javascript/app/utils.js"')
+  })
+
+  test("does not rewrite non-relative module imports", () => {
+    const html = `<script type="module">import { foo } from "/shared/utils.js"</script>`
+    const result = rewriteRelativePaths(html, "games/index.html")
+    expect(result).toContain('from "/shared/utils.js"')
+  })
+})
+
+describe("injectLangMeta", () => {
+  const baseHtml = "<head></head><body><header></header></body>"
+
+  test("adds hreflang tags for en target", () => {
+    const result = injectLangMeta(baseHtml, "games/index.html", "en")
+    expect(result).toContain('hreflang="en" href="/games/index.html"')
+    expect(result).toContain('hreflang="zh" href="/zh/games/index.html"')
+    expect(result).toContain('hreflang="x-default" href="/games/index.html"')
+  })
+
+  test("adds hreflang tags for zh target", () => {
+    const result = injectLangMeta(baseHtml, "index.html", "zh")
+    expect(result).toContain('hreflang="en" href="/index.html"')
+    expect(result).toContain('hreflang="zh" href="/zh/index.html"')
+  })
+
+  test("injects English switcher on zh pages", () => {
+    const result = injectLangMeta(baseHtml, "index.html", "zh")
+    expect(result).toContain("English")
+    expect(result).toContain('lang="en"')
+    expect(result).toContain('href="/index.html"')
+  })
+
+  test("injects Chinese switcher on en pages", () => {
+    const result = injectLangMeta(baseHtml, "index.html", "en")
+    expect(result).toContain("中文")
+    expect(result).toContain('lang="zh"')
+    expect(result).toContain('href="/zh/index.html"')
+  })
+
+  test("places hreflang before closing head tag", () => {
+    const result = injectLangMeta(baseHtml, "index.html", "en")
+    const headEnd = result.indexOf("</head>")
+    const hreflang = result.indexOf("hreflang")
+    expect(hreflang).toBeLessThan(headEnd)
+  })
+
+  test("places switcher before closing header tag", () => {
+    const result = injectLangMeta(baseHtml, "index.html", "en")
+    const headerEnd = result.indexOf("</header>")
+    const switcher = result.indexOf("lang-switch")
+    expect(switcher).toBeLessThan(headerEnd)
   })
 })

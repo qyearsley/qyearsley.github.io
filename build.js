@@ -157,10 +157,15 @@ function buildTextPattern(english) {
 }
 
 // Heuristic check for English text that may have been missed by translation.
-// Only flags text that looks like natural language (2+ lowercase content words).
+// Only flags text that looks like natural language (multiple lowercase content words).
+const MIN_TEXT_LENGTH = 8
+const MIN_ASCII_RATIO = 0.6
+const MIN_LOWERCASE_WORDS = 2
+const MIN_WORD_LENGTH = 3
+
 function checkUntranslated(html, pagePath) {
   const bodyMatch = html.match(/<body[\s>][\s\S]*<\/body>/)
-  if (!bodyMatch) return
+  if (!bodyMatch) return []
   const body = bodyMatch[0]
 
   const cleaned = body
@@ -172,26 +177,28 @@ function checkUntranslated(html, pagePath) {
   let match
   while ((match = textRegex.exec(cleaned)) !== null) {
     const text = match[1].trim()
-    if (text.length < 8) continue
+    if (text.length < MIN_TEXT_LENGTH) continue
     if (/[\u4e00-\u9fff]/.test(text)) continue
     const asciiLetters = (text.match(/[a-zA-Z]/g) || []).length
-    if (asciiLetters / text.length < 0.6) continue
+    if (asciiLetters / text.length < MIN_ASCII_RATIO) continue
     if (/^https?:|^mailto:/.test(text)) continue
     if (/^[\w.@]+$/.test(text)) continue
     if (/^\([\w, ]+\)$/.test(text)) continue
     if (!/\s/.test(text)) continue
-    const lowercaseWords = text.match(/\b[a-z]{3,}\b/g) || []
-    if (lowercaseWords.length < 2) continue
+    const lowercaseWords = text.match(new RegExp(`\\b[a-z]{${MIN_WORD_LENGTH},}\\b`, "g")) || []
+    if (lowercaseWords.length < MIN_LOWERCASE_WORDS) continue
     warnings.push(text)
   }
 
-  if (warnings.length > 0) {
+  if (warnings.length > 0 && pagePath) {
     console.warn(`  Possibly untranslated in zh/${pagePath}:`)
     for (const text of warnings) {
       const preview = text.length > 70 ? text.substring(0, 70) + "..." : text
       console.warn(`    "${preview}"`)
     }
   }
+
+  return warnings
 }
 
 // Replaces English text content between HTML tags with Chinese translations.
@@ -255,13 +262,14 @@ function injectLangMeta(html, pagePath, targetLang) {
   return result
 }
 
-// Rewrites relative asset paths (script src, ES module imports) to absolute
+// Rewrites relative asset paths (href, src, ES module imports) to absolute
 // paths so that /zh/ pages can resolve them from the original location.
 function rewriteRelativePaths(html, pagePath) {
   const baseDir = "/" + pagePath.replace(/[^/]*$/, "")
 
-  // Rewrite src="relative" (not starting with / or http)
-  html = html.replace(/(<script[^>]*\ssrc=")([^/"h][^"]*")/g, (match, prefix, relPath) => {
+  // Rewrite href="relative" and src="relative" (skip absolute, fragment, protocol)
+  html = html.replace(/((?:href|src)=")([^/"#\s][^"]*")/g, (match, prefix, relPath) => {
+    if (/^(https?:|mailto:|data:)/.test(relPath)) return match
     return prefix + baseDir + relPath
   })
 
@@ -377,6 +385,7 @@ function validateLinks() {
   let brokenCount = 0
   for (const file of htmlFiles) {
     const html = readFileSync(file, "utf-8")
+    // Match absolute internal links (starting with /), ignoring fragments
     const linkRegex = /href="(\/[^"#]*?)"/g
     let match
     while ((match = linkRegex.exec(html)) !== null) {
@@ -401,6 +410,7 @@ function validateLinks() {
 function injectTranslatedPaths() {
   const pathsJson = JSON.stringify([...TRANSLATED_URLS])
   const script = `<script>window.__translatedPaths=${pathsJson}</script>`
+  let injected = 0
   for (const file of findHtmlFiles(DIST)) {
     let html = readFileSync(file, "utf-8")
     if (html.includes("/shared/nav.js")) {
@@ -409,7 +419,11 @@ function injectTranslatedPaths() {
         `${script}\n    <script src="/shared/nav.js">`,
       )
       writeFileSync(file, html)
+      injected++
     }
+  }
+  if (injected === 0) {
+    console.warn("  Warning: no files reference nav.js — translated paths not injected")
   }
 }
 
@@ -472,7 +486,16 @@ function build() {
   console.log("Done.")
 }
 
-export { escapeRegex, buildTextPattern, translateHtml, injectEnglishMeta, TRANSLATED_URLS }
+export {
+  escapeRegex,
+  buildTextPattern,
+  translateHtml,
+  injectEnglishMeta,
+  rewriteRelativePaths,
+  injectLangMeta,
+  checkUntranslated,
+  TRANSLATED_URLS,
+}
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   build()

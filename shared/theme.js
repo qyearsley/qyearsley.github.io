@@ -1,5 +1,4 @@
-// Theme switcher — synchronous head portion for FOUC prevention,
-// deferred UI injection on DOMContentLoaded.
+// Runs before first paint to apply saved theme/accent, preventing flash of wrong theme.
 ;(function () {
   "use strict"
 

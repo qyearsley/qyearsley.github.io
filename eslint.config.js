@@ -26,6 +26,10 @@ const browserGlobals = {
   HTMLElement: "readonly",
   HTMLInputElement: "readonly",
   HTMLButtonElement: "readonly",
+}
+
+// Globals exposed by specific page scripts (not browser built-ins)
+const pageScriptGlobals = {
   Chart: "readonly",
   simplify: "readonly",
   TruthTable: "readonly",
@@ -70,7 +74,7 @@ export default [
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "module",
-      globals: { ...browserGlobals, ...jestGlobals, getComputedStyle: "readonly" },
+      globals: { ...browserGlobals, ...pageScriptGlobals, ...jestGlobals, getComputedStyle: "readonly" },
     },
     rules: {
       ...sharedRules,
