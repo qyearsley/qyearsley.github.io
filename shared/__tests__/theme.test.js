@@ -1,5 +1,3 @@
-import { jest } from "@jest/globals"
-
 localStorage.clear()
 
 import "../../shared/theme.js"

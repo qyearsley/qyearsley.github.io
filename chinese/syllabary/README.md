@@ -5,9 +5,8 @@ This directory contains the script and data files for generating the Chinese tra
 ## Files
 
 - `make_syllabary.py` - Python script that generates the HTML table
+- `generate_frequencies.py` - Script that analyzes transliteration data to produce frequency tables
 - `translit_char_freqs_pronunciation.txt` - Data file with character frequencies and pronunciations
-- `borrowed_words.txt` - List of borrowed words used for analysis
-- `city_translit.txt` - City transliterations used for analysis
 - `country_translit.txt` - Country transliterations used for analysis
 - `name_translit.txt` - Name transliterations used for analysis
 
