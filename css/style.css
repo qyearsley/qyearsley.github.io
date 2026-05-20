@@ -577,6 +577,25 @@ td {
   text-align: left;
 }
 
+/* Prose lists inside content sections — restore indent removed by global reset.
+   Scoped with :not([class]) so class-styled lists like .internal-links aren't affected. */
+.section ul:not([class]),
+.section ol:not([class]) {
+  padding-left: 1.5rem;
+  margin: 0.5rem 0 1rem;
+}
+.section ul:not([class]) li,
+.section ol:not([class]) li {
+  margin-bottom: 0.25rem;
+}
+.section ul:not([class]) ul,
+.section ul:not([class]) ol,
+.section ol:not([class]) ul,
+.section ol:not([class]) ol {
+  padding-left: 1.5rem;
+  margin: 0.25rem 0;
+}
+
 /* Form Components */
 .form-container {
   background: var(--color-bg-form);
