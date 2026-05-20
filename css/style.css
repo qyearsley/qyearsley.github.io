@@ -584,10 +584,12 @@ td {
   padding-left: 1.5rem;
   margin: 0.5rem 0 1rem;
 }
+
 .section ul:not([class]) li,
 .section ol:not([class]) li {
   margin-bottom: 0.25rem;
 }
+
 .section ul:not([class]) ul,
 .section ul:not([class]) ol,
 .section ol:not([class]) ul,
