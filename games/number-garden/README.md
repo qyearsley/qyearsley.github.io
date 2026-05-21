@@ -47,17 +47,24 @@ js/
 ├── game.js              # Main game controller (orchestrates all systems)
 ├── GameState.js         # State management and progress persistence
 ├── GameUI.js            # UI rendering and display logic
+├── CastleUI.js          # Castle-specific rendering
 ├── EventManager.js      # Input handling and event coordination
-├── activities.js        # Math problem generation for all topics
+├── activities.js        # Math problem generation entry point
+├── generators/          # Per-topic problem generators
 ├── storage.js           # LocalStorage wrapper for save/load
 ├── rewards.js           # Reward distribution and flower generation
 ├── ProgressionManager.js # Area unlocking and progression logic
-└── ParticleSystem.js    # Visual effects for celebrations
+├── ParticleSystem.js    # Visual effects for celebrations
+├── ProjectVisuals.js    # SVG generation for project completion
+├── SoundManager.js      # Web Audio sound effects
+├── constants.js         # Shared timing and area constants
+└── utils.js             # Shared helpers
 
 styles/
-├── main.css            # Core layout and components
-├── garden.css          # Garden visualization
-└── animations.css      # Keyframe animations
+├── main.css             # Core layout and components
+├── common.css           # Shared base styles
+├── garden.css           # Garden visualization
+└── animations.css       # Keyframe animations
 ```
 
 ### Testing

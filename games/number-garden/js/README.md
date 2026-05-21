@@ -152,17 +152,22 @@ User enters area
 
 ## Testing
 
-Tests are located in `__tests__/` directory. Each major module has corresponding tests:
+Tests are located in the parent `__tests__/` directory. Each major module has corresponding tests:
 
 ### Core Modules
 
 - `GameState.test.js` - State management, progress tracking
+- `GameUI.test.js` - UI rendering
+- `BaseGameUI.test.js` - Shared UI base
+- `EventManager.test.js` - Event routing
 - `storage.test.js` - localStorage operations
 - `SoundManager.test.js` - Audio system
 - `ProgressionManager.test.js` - Difficulty scaling
 - `ParticleSystem.test.js` - Visual effects
+- `ProjectVisuals.test.js` - SVG generation
 - `rewards.test.js` - Reward system
 - `activities.test.js` - Activity structures
+- `utils.test.js` - Shared helpers
 
 ### Generators
 

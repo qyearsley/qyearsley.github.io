@@ -26,7 +26,7 @@ games/
 
 javascript/
   index.html                JS experiments section index
-  coinflip.html             Individual experiments...
+  coin-flipper.html         Individual experiments...
   logic-engine/index.html
 
 chinese/

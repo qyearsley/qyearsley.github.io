@@ -10,6 +10,7 @@ Interactive tools for studying Chinese language and transliteration.
 - **[Character Converter](character-converter.html)** - Convert between traditional and simplified Chinese characters
 - **[Pinyin Abbreviations](pinyin-abbreviations.html)** - Common pinyin abbreviation patterns
 - **[Encoding Explorer](encoding-explorer.html)** - Explore how Chinese characters are encoded in Unicode
+- **[Buddhist Vocabulary](buddhist-vocabulary.html)** - How Indian Buddhist vocabulary was rendered into Chinese, and why
 
 ## Regenerating Pages
 
