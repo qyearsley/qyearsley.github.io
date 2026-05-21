@@ -74,6 +74,9 @@ export default [
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "module",
+      // jestGlobals are included here because *.test.js files coexist with
+      // source files under shared/, javascript/, and games/ rather than
+      // being isolated in a tests/ directory.
       globals: { ...browserGlobals, ...pageScriptGlobals, ...jestGlobals, getComputedStyle: "readonly" },
     },
     rules: {

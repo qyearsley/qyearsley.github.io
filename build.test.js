@@ -56,6 +56,13 @@ describe("buildTextPattern", () => {
     const pattern = buildTextPattern("I am a software engineer.\n    I enjoy building tools.")
     expect("I am a software engineer. I enjoy building tools.").toMatch(new RegExp(pattern))
   })
+
+  test("matches across long whitespace runs and mixed whitespace types", () => {
+    const pattern = buildTextPattern("hello world")
+    expect("hello\t\tworld").toMatch(new RegExp(pattern))
+    expect("hello          world").toMatch(new RegExp(pattern))
+    expect("hello\n\n  \t  world").toMatch(new RegExp(pattern))
+  })
 })
 
 describe("translateHtml", () => {

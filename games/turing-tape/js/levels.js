@@ -123,7 +123,7 @@ export const demos = [
       "Try it on 1001 (palindrome) -- watch it bounce back and forth.",
     tape: ["1", "0", "0", "1", "_"],
     headStart: 0,
-    states: ["A", "B", "C", "D", "Y", "N"],
+    states: ["A", "B", "C", "D", "E", "F", "Y", "N"],
     symbols: ["0", "1", "_"],
     maxSteps: 200,
     // A: read first char. If 1, erase and go right looking for matching 1 at end (state B).

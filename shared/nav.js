@@ -34,11 +34,10 @@
 
   if (!isZhPage && preferredLang === "zh") {
     document.addEventListener("DOMContentLoaded", function () {
-      const links = document.querySelectorAll(".breadcrumbs a[href]")
-      for (let i = 0; i < links.length; i++) {
-        const href = links[i].getAttribute("href")
-        if (TRANSLATED_PATHS.indexOf(href) !== -1) {
-          links[i].setAttribute("href", "/zh" + href)
+      for (const link of document.querySelectorAll(".breadcrumbs a[href]")) {
+        const href = link.getAttribute("href")
+        if (TRANSLATED_PATHS.includes(href)) {
+          link.setAttribute("href", "/zh" + href)
         }
       }
     })
@@ -216,7 +215,7 @@
       return location.pathname.replace(/^\/zh\//, "/")
     }
     const path = location.pathname
-    if (TRANSLATED_PATHS.indexOf(path) !== -1) {
+    if (TRANSLATED_PATHS.includes(path)) {
       return "/zh" + path
     }
     return null

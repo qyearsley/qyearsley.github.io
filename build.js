@@ -229,6 +229,9 @@ function translateContent(html, translations, pagePath, commonKeys) {
     const before = result
     result = result.replace(regex, `$1${chinese}$3`)
 
+    // Page-specific keys that don't match suggest stale translations
+    // (renamed or deleted source text). Common keys often won't match on a
+    // given page, so we skip the warning for those.
     if (result === before && !commonKeys.has(english)) {
       const preview = english.length > 60 ? english.substring(0, 60) + "..." : english
       console.warn(`  Warning: no match for "${preview}" in ${pagePath}`)

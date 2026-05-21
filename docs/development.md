@@ -80,13 +80,27 @@ Tests use Jest with `--experimental-vm-modules` for ESM support.
 - `build.test.js` -- unit tests for build functions (text matching, translation, link rewriting, hreflang)
 - `shared/__tests__/` -- tests for nav.js and theme.js
 - `javascript/*.test.js` -- tests for experiment logic
-- `games/*/__tests__/` -- tests for game logic
+- `games/*/__tests__/` -- tests for game logic and level/preset data
+
+Game `game.js` orchestrators are intentionally untested -- they're DOM-and-canvas-coupled glue. Tests target the underlying components (Grid, GameState, TuringMachine, etc.) and the static data they consume.
 
 Run a specific test file:
 
 ```bash
 npm test -- --testPathPatterns build.test
 ```
+
+Jest's `moduleNameMapper` in `package.json` strips `.js` extensions from relative imports so the same source files work both as native ESM (in the browser, where extensions are required) and under Jest (which resolves without them).
+
+## Lint Configuration
+
+`npm run lint` runs three linters; their notable settings:
+
+- **ESLint** (`eslint.config.js`): `no-console` allows `warn`/`error` -- the build script and shared modules use them for surfacing real problems. `jestGlobals` is included in the browser config because `*.test.js` files live alongside source under `shared/`, `javascript/`, and `games/` rather than in a separate test directory.
+- **Stylelint** (`package.json`): several rules are disabled because the codebase mixes hand-written CSS conventions with design-token patterns that the standard config rejects.
+  - `selector-class-pattern` / `selector-id-pattern` / `custom-property-pattern`: allow descriptive names like `.game-list` and `--color-bg-card` instead of forcing strict BEM.
+  - `no-descending-specificity`: silenced because component CSS frequently overrides base styles in a deliberate cascade order.
+  - `color-function-notation: legacy` and `alpha-value-notation: number`: pin to one notation since both are valid CSS and mixing them is noisier than picking either.
 
 ## Adding a New Page
 
