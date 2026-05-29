@@ -56,11 +56,10 @@
   ]
 
   window.__registerShortcut = function (key, description, handler) {
-    for (let i = 0; i < shortcuts.length; i++) {
-      if (shortcuts[i].key === key) {
-        shortcuts[i].handler = handler
-        return
-      }
+    const existing = shortcuts.find((s) => s.key === key)
+    if (existing) {
+      existing.handler = handler
+      return
     }
     shortcuts.push({ key: key, description: description, handler: handler })
   }
@@ -163,10 +162,10 @@
     const dl = document.createElement("dl")
     dl.className = "shortcut-list"
 
-    shortcuts.forEach(function (s) {
-      if (s.condition === "theme" && !window.__themeToggle) return
-      if (s.condition === "breadcrumb" && !getParentLink()) return
-      if (s.condition === "lang" && !getLangToggleUrl()) return
+    for (const s of shortcuts) {
+      if (s.condition === "theme" && !window.__themeToggle) continue
+      if (s.condition === "breadcrumb" && !getParentLink()) continue
+      if (s.condition === "lang" && !getLangToggleUrl()) continue
 
       const dt = document.createElement("dt")
       dt.innerHTML = "<kbd>" + s.key + "</kbd>"
@@ -174,7 +173,7 @@
       dd.textContent = s.description
       dl.appendChild(dt)
       dl.appendChild(dd)
-    })
+    }
 
     panel.appendChild(heading)
     panel.appendChild(closeBtn)

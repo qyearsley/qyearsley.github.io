@@ -110,3 +110,23 @@ Jest's `moduleNameMapper` in `package.json` strips `.js` extensions from relativ
 4. Run `npm run build` -- warnings show unmatched translation keys
 
 See `docs/translations.md` for translation details.
+
+## Shared Module Contract
+
+The `shared/` scripts are plain `<script>` includes (no bundler), so they
+coordinate through a few `window.__*` globals rather than imports. There is no
+guaranteed load order: each module exposes its API immediately and guards every
+cross-module call, so `nav.js` and `theme.js` work in either order.
+
+| Global | Set by | Read by | Purpose |
+| --- | --- | --- | --- |
+| `__translatedPaths` | `build.js` (injected into each page) | `nav.js` | List of paths that have a `/zh/` version, for language-preference link rewriting |
+| `__registerShortcut(key, description, handler)` | `nav.js` | `theme.js` | Register/override a keyboard shortcut shown in the help overlay |
+| `__helpOverlayIsOpen()` | `nav.js` | tests | Whether the shortcuts overlay is currently open |
+| `__themeToggle()` | `theme.js` | `nav.js` | Cycle light/dark/system; also gates the "t" shortcut's visibility |
+| `__themePopoverIsOpen()` | `theme.js` | `nav.js` | Whether the theme popover is open (so `Escape` closes it first) |
+| `__themePopoverClose()` | `theme.js` | tests | Close the theme popover |
+
+When adding a cross-module global, prefix it with `__`, expose it as soon as the
+module initializes, and guard every read (`if (window.__foo)`) so load order
+never matters.

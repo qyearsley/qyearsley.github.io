@@ -26,6 +26,8 @@ import { marked } from "marked"
 
 const ROOT = dirname(fileURLToPath(import.meta.url))
 const DIST = join(ROOT, "dist")
+// `--verbose` enables the untranslated-text heuristic, which scans each
+// generated /zh/ page and warns about English that looks like it was missed.
 const VERBOSE = process.argv.includes("--verbose")
 
 const SKIP_DIRS = new Set(["node_modules", "dist", "docs", "coverage", "i18n"])
@@ -158,10 +160,12 @@ function buildTextPattern(english) {
 
 // Heuristic check for English text that may have been missed by translation.
 // Only flags text that looks like natural language (multiple lowercase content words).
-const MIN_TEXT_LENGTH = 8
-const MIN_ASCII_RATIO = 0.6
-const MIN_LOWERCASE_WORDS = 2
-const MIN_WORD_LENGTH = 3
+// The thresholds below are deliberately loose to avoid false positives on code,
+// URLs, and short labels; tune them up if real misses slip through.
+const MIN_TEXT_LENGTH = 8 // ignore snippets shorter than this many characters
+const MIN_ASCII_RATIO = 0.6 // fraction of chars that must be ASCII letters (filters mostly-symbol text)
+const MIN_LOWERCASE_WORDS = 2 // require at least this many lowercase words (a sentence, not a label)
+const MIN_WORD_LENGTH = 3 // a "word" must be at least this many letters to count
 
 function checkUntranslated(html, pagePath) {
   const bodyMatch = html.match(/<body[\s>][\s\S]*<\/body>/)
