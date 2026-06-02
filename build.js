@@ -30,7 +30,7 @@ const DIST = join(ROOT, "dist")
 // generated /zh/ page and warns about English that looks like it was missed.
 const VERBOSE = process.argv.includes("--verbose")
 
-const SKIP_DIRS = new Set(["node_modules", "dist", "docs", "coverage", "i18n"])
+const SKIP_DIRS = new Set(["node_modules", "dist", "docs", "coverage"])
 
 const SKIP_FILES = new Set([
   "package.json",
@@ -44,34 +44,27 @@ const SKIP_FILES = new Set([
 ])
 
 // Output paths (in dist/) that have Chinese translations.
+// Discovered from `*.zh.json` files co-located with HTML pages.
 // Used for link rewriting on zh pages and for client-side language persistence.
-const TRANSLATABLE_PAGES = [
-  "index.html",
-  "resume/index.html",
-  "games/index.html",
-  "games/number-garden/index.html",
-  "games/life-garden/index.html",
-  "games/turing-tape/index.html",
-  "javascript/index.html",
-  "javascript/logic-engine/index.html",
-  "javascript/markov/index.html",
-  "javascript/truth-tables.html",
-  "javascript/coin-flipper.html",
-  "javascript/series-tester.html",
-  "javascript/password-generator.html",
-  "javascript/floating-point.html",
-  "javascript/hash-collision-lab.html",
-  "javascript/cellular-automata.html",
-  "javascript/life-calculator.html",
-  "chinese/index.html",
-  "chinese/syllabary.html",
-  "chinese/tone-table.html",
-  "chinese/pinyin-abbreviations.html",
-  "chinese/homophones.html",
-  "chinese/character-converter.html",
-  "chinese/encoding-explorer.html",
-  "404.html",
-]
+function discoverTranslatablePages(rootDir = ROOT) {
+  const pages = []
+  function walk(dir, prefix) {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const name = entry.name
+      if (name.startsWith(".")) continue
+      if (entry.isDirectory()) {
+        if (SKIP_DIRS.has(name)) continue
+        walk(join(dir, name), prefix + name + "/")
+      } else if (name.endsWith(".zh.json")) {
+        pages.push(prefix + name.replace(/\.zh\.json$/, ".html"))
+      }
+    }
+  }
+  walk(rootDir, "")
+  return pages.sort()
+}
+
+const TRANSLATABLE_PAGES = discoverTranslatablePages()
 
 // Build URL set including directory aliases (/games/ for /games/index.html)
 const TRANSLATED_URLS = new Set()
@@ -87,8 +80,8 @@ for (const page of TRANSLATABLE_PAGES) {
 
 // ── File copying ────────────────────────────────────────────────
 
-function clean() {
-  if (existsSync(DIST)) rmSync(DIST, { recursive: true })
+function clean(dir = DIST) {
+  if (existsSync(dir)) rmSync(dir, { recursive: true })
 }
 
 function copyTree(src, dest) {
@@ -113,7 +106,7 @@ function generateResume() {
   const mdPath = join(ROOT, "resume", "resume.md")
   const templatePath = join(ROOT, "resume", "template.html")
   if (!existsSync(mdPath) || !existsSync(templatePath)) {
-    console.log("  Skipped (missing resume.md or template.html)")
+    console.log("  Skipped: resume.md or template.html not found")
     return
   }
   const md = readFileSync(mdPath, "utf-8")
@@ -123,21 +116,20 @@ function generateResume() {
   const outPath = join(DIST, "resume", "index.html")
   mkdirSync(dirname(outPath), { recursive: true })
   writeFileSync(outPath, page)
+  console.log("  Wrote resume/index.html")
 }
 
 // ── Translation (Chinese) ───────────────────────────────────────
 
-function loadTranslations() {
-  const commonPath = join(ROOT, "zh-common.json")
+function loadTranslations(rootDir = ROOT) {
+  const commonPath = join(rootDir, "zh-common.json")
   if (!existsSync(commonPath)) return null
   const common = JSON.parse(readFileSync(commonPath, "utf-8"))
 
   const pages = {}
-  for (const page of TRANSLATABLE_PAGES) {
-    const zhPath = join(ROOT, page.replace(/\.html$/, ".zh.json"))
-    if (existsSync(zhPath)) {
-      pages[page] = JSON.parse(readFileSync(zhPath, "utf-8"))
-    }
+  for (const page of discoverTranslatablePages(rootDir)) {
+    const zhPath = join(rootDir, page.replace(/\.html$/, ".zh.json"))
+    pages[page] = JSON.parse(readFileSync(zhPath, "utf-8"))
   }
 
   return { common, pages }
@@ -304,10 +296,6 @@ function translateHtml(html, translations, pagePath, commonKeys) {
   return result
 }
 
-function injectEnglishMeta(html, pagePath) {
-  return injectLangMeta(html, pagePath, "en")
-}
-
 // ── Sitemap and link validation ─────────────────────────────────
 
 function findHtmlFiles(dir) {
@@ -322,9 +310,9 @@ function findHtmlFiles(dir) {
   return files
 }
 
-function generateSitemap() {
+function generateSitemap(distDir = DIST) {
   const baseUrl = "https://qyearsley.github.io"
-  const htmlFiles = findHtmlFiles(DIST)
+  const htmlFiles = findHtmlFiles(distDir)
   const zhPaths = new Set()
   for (const page of TRANSLATABLE_PAGES) {
     zhPaths.add("/zh/" + page)
@@ -338,7 +326,7 @@ function generateSitemap() {
 
   const urls = []
   for (const file of htmlFiles) {
-    let urlPath = file.slice(DIST.length).replace(/\\/g, "/")
+    let urlPath = file.slice(distDir.length).replace(/\\/g, "/")
     if (urlPath.endsWith("/index.html")) {
       urlPath = urlPath.replace(/index\.html$/, "")
     }
@@ -369,23 +357,23 @@ function generateSitemap() {
     "",
   ].join("\n")
 
-  writeFileSync(join(DIST, "sitemap.xml"), xml)
+  writeFileSync(join(distDir, "sitemap.xml"), xml)
   console.log(`  Generated sitemap.xml (${urls.length} URLs)`)
 }
 
-function validateLinks() {
-  const htmlFiles = findHtmlFiles(DIST)
+function validateLinks(distDir = DIST) {
+  const htmlFiles = findHtmlFiles(distDir)
   const existingPaths = new Set()
 
   for (const file of htmlFiles) {
-    const relPath = file.slice(DIST.length).replace(/\\/g, "/")
+    const relPath = file.slice(distDir.length).replace(/\\/g, "/")
     existingPaths.add(relPath)
     if (relPath.endsWith("/index.html")) {
       existingPaths.add(relPath.replace(/index\.html$/, ""))
     }
   }
 
-  for (const file of readdirSync(DIST, { recursive: true })) {
+  for (const file of readdirSync(distDir, { recursive: true })) {
     existingPaths.add("/" + file.replace(/\\/g, "/"))
   }
 
@@ -398,7 +386,7 @@ function validateLinks() {
     while ((match = linkRegex.exec(html)) !== null) {
       const href = match[1]
       if (!existingPaths.has(href)) {
-        const relFile = file.slice(DIST.length + 1)
+        const relFile = file.slice(distDir.length + 1)
         console.warn(`  Broken link in ${relFile}: ${href}`)
         brokenCount++
       }
@@ -410,21 +398,23 @@ function validateLinks() {
   } else {
     console.log("  All internal links valid.")
   }
+  return brokenCount
 }
 
 // Injects the TRANSLATED_URLS set as a <script> tag into every HTML file
 // so nav.js can rewrite links client-side for language persistence.
-function injectTranslatedPaths() {
+function injectTranslatedPaths(distDir = DIST) {
   const pathsJson = JSON.stringify([...TRANSLATED_URLS])
   const script = `<script>window.__translatedPaths=${pathsJson}</script>`
+  // Match the nav.js script tag tolerating attribute order, extra attributes,
+  // and whitespace variations.
+  const navScriptRegex = /<script\b[^>]*\bsrc="\/shared\/nav\.js"[^>]*><\/script>/
   let injected = 0
-  for (const file of findHtmlFiles(DIST)) {
+  for (const file of findHtmlFiles(distDir)) {
     let html = readFileSync(file, "utf-8")
-    if (html.includes("/shared/nav.js")) {
-      html = html.replace(
-        '<script src="/shared/nav.js">',
-        `${script}\n    <script src="/shared/nav.js">`,
-      )
+    const match = html.match(navScriptRegex)
+    if (match) {
+      html = html.replace(match[0], `${script}\n    ${match[0]}`)
       writeFileSync(file, html)
       injected++
     }
@@ -432,6 +422,7 @@ function injectTranslatedPaths() {
   if (injected === 0) {
     console.warn("  Warning: no files reference nav.js — translated paths not injected")
   }
+  return injected
 }
 
 // ── Build pipeline ──────────────────────────────────────────────
@@ -477,7 +468,7 @@ function build() {
     if (VERBOSE) checkUntranslated(zhHtml, page)
     console.log(`  zh/${page}`)
 
-    const enHtml = injectEnglishMeta(html, page)
+    const enHtml = injectLangMeta(html, page, "en")
     writeFileSync(srcPath, enHtml)
   }
 
@@ -496,11 +487,20 @@ function build() {
 export {
   escapeRegex,
   buildTextPattern,
+  translateContent,
   translateHtml,
-  injectEnglishMeta,
   rewriteRelativePaths,
   injectLangMeta,
   checkUntranslated,
+  clean,
+  copyTree,
+  findHtmlFiles,
+  loadTranslations,
+  discoverTranslatablePages,
+  generateSitemap,
+  validateLinks,
+  injectTranslatedPaths,
+  TRANSLATABLE_PAGES,
   TRANSLATED_URLS,
 }
 

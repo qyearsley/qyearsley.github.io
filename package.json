@@ -12,7 +12,7 @@
     "clean": "rm -rf dist node_modules",
     "build": "node build.js",
     "build:verbose": "node build.js --verbose",
-    "translations": "find . -name '*.zh.json' -o -name 'zh-common.json' | grep -v node_modules | grep -v dist | sort",
+    "translations": "git ls-files '*.zh.json' 'zh-common.json'",
     "start": "npm run build && http-server dist -p 8000",
     "dev": "http-server -p 8000",
     "test": "NODE_OPTIONS='--experimental-vm-modules --no-warnings' jest",

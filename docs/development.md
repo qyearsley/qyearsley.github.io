@@ -105,9 +105,11 @@ Jest's `moduleNameMapper` in `package.json` strips `.js` extensions from relativ
 ## Adding a New Page
 
 1. Create `section/page-name.html` as a self-contained HTML file
-2. Add the output path to `TRANSLATABLE_PAGES` in `build.js`
-3. Create `section/page-name.zh.json` with translations
-4. Run `npm run build` -- warnings show unmatched translation keys
+2. Create `section/page-name.zh.json` with translations -- this opts the page into the Chinese translation pipeline
+3. Run `npm run build` -- warnings show unmatched translation keys
+
+`build.js` discovers translatable pages by walking the source tree for
+`*.zh.json` files; there is no manual list to update.
 
 See `docs/translations.md` for translation details.
 

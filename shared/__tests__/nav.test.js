@@ -116,11 +116,11 @@ describe("nav.js", () => {
       expect(window.__helpOverlayIsOpen()).toBe(true)
     })
 
-    it("injects styles only once", () => {
+    it("re-opening overlay does not duplicate it in the DOM", () => {
       pressKey("?")
       pressKey("?") // close
       pressKey("?") // reopen
-      expect(document.querySelectorAll("#nav-help-styles").length).toBe(1)
+      expect(document.querySelectorAll(".keyboard-help-backdrop").length).toBe(1)
     })
 
     it("shows shortcut descriptions", () => {

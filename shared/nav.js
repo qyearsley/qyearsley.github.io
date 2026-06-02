@@ -65,82 +65,10 @@
   }
 
   // --- Help overlay ---
+  // Styles for .keyboard-help-* and .shortcut-list live in css/style.css.
   let overlay = null
 
-  function injectStyles() {
-    if (document.getElementById("nav-help-styles")) return
-    const style = document.createElement("style")
-    style.id = "nav-help-styles"
-    style.textContent = [
-      ".keyboard-help-backdrop {",
-      "  position: fixed;",
-      "  inset: 0;",
-      "  z-index: 10000;",
-      "  background: rgb(0, 0, 0, 0.5);",
-      "  display: flex;",
-      "  align-items: center;",
-      "  justify-content: center;",
-      "}",
-      ".keyboard-help-panel {",
-      "  background: var(--color-bg-container, #fff);",
-      "  color: var(--color-text, #333);",
-      "  border: 1px solid var(--color-border, #e2e8f0);",
-      "  border-radius: 8px;",
-      "  padding: 1.5rem;",
-      "  max-width: 360px;",
-      "  width: 90vw;",
-      "  box-shadow: 0 8px 32px rgb(0, 0, 0, 0.2);",
-      "  position: relative;",
-      "}",
-      ".keyboard-help-panel h2 {",
-      "  font-size: 1.1rem;",
-      "  font-weight: 600;",
-      "  margin: 0 0 1rem;",
-      "  color: var(--color-text-heading, #2d3748);",
-      "}",
-      ".keyboard-help-close {",
-      "  position: absolute;",
-      "  top: 0.75rem;",
-      "  right: 0.75rem;",
-      "  background: none;",
-      "  border: none;",
-      "  font-size: 1.25rem;",
-      "  color: var(--color-text-muted, #6c757d);",
-      "  cursor: pointer;",
-      "  padding: 0.25rem;",
-      "  line-height: 1;",
-      "}",
-      ".keyboard-help-close:hover { color: var(--color-text, #333); }",
-      ".shortcut-list {",
-      "  display: grid;",
-      "  grid-template-columns: auto 1fr;",
-      "  gap: 0.5rem 1rem;",
-      "  align-items: baseline;",
-      "}",
-      ".shortcut-list dt {",
-      "  text-align: right;",
-      "}",
-      ".shortcut-list dd {",
-      "  margin: 0;",
-      "  color: var(--color-text-secondary, #4a5568);",
-      "  font-size: 0.9rem;",
-      "}",
-      "kbd {",
-      "  display: inline-block;",
-      "  padding: 0.15rem 0.4rem;",
-      "  font-family: monospace;",
-      "  font-size: 0.8rem;",
-      "  background: var(--color-bg-card, #f8fafc);",
-      "  border: 1px solid var(--color-border, #e2e8f0);",
-      "  border-radius: 3px;",
-      "  box-shadow: 0 1px 0 var(--color-border, #e2e8f0);",
-      "}",
-    ].join("\n")
-    document.head.appendChild(style)
-  }
-
   function buildOverlay() {
-    injectStyles()
     const backdrop = document.createElement("div")
     backdrop.className = "keyboard-help-backdrop"
     backdrop.setAttribute("role", "dialog")
