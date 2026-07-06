@@ -80,10 +80,8 @@
       "build.js",
       "shared/**/*.js",
       "javascript/**/*.js",
-      "games/number-garden/**/*.js",
-      "games/turing-tape/**/*.js",
-      "games/life-garden/**/*.js",
-      "games/shared/**/*.js",
+      "chinese/**/*.js",
+      "games/**/*.js",
       "!**/*.test.js",
       "!**/*.html"
     ],

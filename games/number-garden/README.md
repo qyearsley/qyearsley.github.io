@@ -69,9 +69,12 @@ styles/
 
 ### Testing
 
+Tests run from the repository root with the shared toolchain:
+
 ```bash
-npm install
-npm test        # Run all tests
+npm install                                      # from repo root
+npm test                                         # all tests, including this game
+npm test -- --testPathPatterns number-garden     # just this game
 ```
 
 **Quick testing:**

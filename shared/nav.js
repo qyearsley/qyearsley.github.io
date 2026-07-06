@@ -187,9 +187,13 @@
           return
         }
         return
+    }
 
+    // All remaining shortcuts are disabled while the help overlay is open.
+    if (isHelpOpen()) return
+
+    switch (e.key) {
       case "h": {
-        if (isHelpOpen()) return
         const homePath = preferredLang === "zh" ? "/zh/" : "/"
         if (window.location.pathname !== homePath) {
           e.preventDefault()
@@ -199,7 +203,6 @@
       }
 
       case "l": {
-        if (isHelpOpen()) return
         const langUrl = getLangToggleUrl()
         if (langUrl) {
           e.preventDefault()
@@ -215,7 +218,6 @@
       }
 
       case "u": {
-        if (isHelpOpen()) return
         const parent = getParentLink()
         if (parent) {
           e.preventDefault()
@@ -225,7 +227,6 @@
       }
 
       case "t":
-        if (isHelpOpen()) return
         if (window.__themeToggle) {
           e.preventDefault()
           window.__themeToggle()
@@ -233,7 +234,6 @@
         return
 
       case "j":
-        if (isHelpOpen()) return
         e.preventDefault()
         if (currentIndex === -1 && links.length > 0) {
           links[0].focus()
@@ -243,7 +243,6 @@
         return
 
       case "k":
-        if (isHelpOpen()) return
         e.preventDefault()
         if (currentIndex === -1 && links.length > 0) {
           links[0].focus()
@@ -253,7 +252,6 @@
         return
 
       default:
-        if (isHelpOpen()) return
         for (let i = 0; i < shortcuts.length; i++) {
           if (shortcuts[i].handler && shortcuts[i].key === e.key) {
             e.preventDefault()
