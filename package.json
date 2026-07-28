@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "lint": "npm run lint:js && npm run lint:html && npm run lint:css",
-    "lint:js": "eslint javascript/ games/ shared/ build.js build.test.js",
+    "lint:js": "eslint javascript/ games/ shared/ __tests__/ build.js build.test.js",
     "lint:html": "htmlhint \"**/*.html\" --ignore \"node_modules/**,coverage/**,dist/**\"",
     "lint:css": "stylelint \"**/*.css\" --ignore-pattern \"node_modules/**\" --ignore-pattern \"coverage/**\"",
     "format": "npx prettier --write .",

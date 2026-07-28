@@ -103,6 +103,16 @@ export default [
     },
   },
   {
+    // Walks the source tree (node) and parses pages via DOMParser (jsdom).
+    files: ["__tests__/**/*.js"],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: "module",
+      globals: { console: "readonly", process: "readonly", DOMParser: "readonly" },
+    },
+    rules: sharedRules,
+  },
+  {
     files: ["**/*.test.js"],
     languageOptions: {
       globals: { ...jestGlobals, global: "readonly" },
