@@ -14,6 +14,8 @@ const browserGlobals = {
   alert: "readonly",
   prompt: "readonly",
   URLSearchParams: "readonly",
+  fetch: "readonly",
+  FormData: "readonly",
   setInterval: "readonly",
   setTimeout: "readonly",
   clearInterval: "readonly",
@@ -76,7 +78,12 @@ export default [
       // jestGlobals are included here because *.test.js files coexist with
       // source files under shared/, javascript/, and games/ rather than
       // being isolated in a tests/ directory.
-      globals: { ...browserGlobals, ...pageScriptGlobals, ...jestGlobals, getComputedStyle: "readonly" },
+      globals: {
+        ...browserGlobals,
+        ...pageScriptGlobals,
+        ...jestGlobals,
+        getComputedStyle: "readonly",
+      },
     },
     rules: {
       ...sharedRules,

@@ -33,6 +33,9 @@ chinese/
   index.html                Chinese tools section index
   syllabary.html            Individual tools...
 
+contact/
+  index.html                Contact form (see "Contact Form" below)
+
 resume/
   resume.md                 Resume content (markdown)
   template.html             Resume-specific template
@@ -42,6 +45,7 @@ shared/
   nav.js                    Keyboard shortcuts + language persistence
   theme.js                  Dark/light mode + accent colors
   table-filter.js           Searchable table filtering
+  contact-form.js           Contact form submission
   life-background.js        Game of Life animation (404 page)
 
 zh-common.json              Shared translations (see docs/translations.md)
@@ -113,6 +117,29 @@ Jest's `moduleNameMapper` in `package.json` strips `.js` extensions from relativ
 
 See `docs/translations.md` for translation details.
 
+## Contact Form
+
+`contact/index.html` posts to [Formspree](https://formspree.io), which forwards
+submissions by email. This keeps the site static and publishes no email address:
+the form ID in the `action` attribute is public by design, but the destination
+address lives in the Formspree dashboard rather than in this repo.
+
+Notes:
+
+- Submission is progressive enhancement. Without JavaScript the browser POSTs
+  directly and Formspree renders its own confirmation page; with JavaScript the
+  visitor stays on the page and gets inline status.
+- The hidden `_gotcha` field is Formspree's spam honeypot -- bots fill it in,
+  Formspree drops those submissions. It is hidden via `.honeypot` in
+  `css/style.css`.
+- `shared/contact-form.js` refuses to submit if the action still contains the
+  `YOUR_FORM_ID` placeholder, showing "this form isn't connected yet" rather
+  than POSTing to a URL that 404s. This guards a fresh copy of the page; the
+  live form is configured.
+- Status messages live in `shared/contact-form.js`, not in the HTML, so they are
+  **not** translated on the `/zh/` page. Translating them would need a
+  JS-side string table.
+
 ## Shared Module Contract
 
 The `shared/` scripts are plain `<script>` includes (no bundler), so they
@@ -120,14 +147,14 @@ coordinate through a few `window.__*` globals rather than imports. There is no
 guaranteed load order: each module exposes its API immediately and guards every
 cross-module call, so `nav.js` and `theme.js` work in either order.
 
-| Global | Set by | Read by | Purpose |
-| --- | --- | --- | --- |
-| `__translatedPaths` | `build.js` (injected into each page) | `nav.js` | List of paths that have a `/zh/` version, for language-preference link rewriting |
-| `__registerShortcut(key, description, handler)` | `nav.js` | `theme.js` | Register/override a keyboard shortcut shown in the help overlay |
-| `__helpOverlayIsOpen()` | `nav.js` | tests | Whether the shortcuts overlay is currently open |
-| `__themeToggle()` | `theme.js` | `nav.js` | Cycle light/dark/system; also gates the "t" shortcut's visibility |
-| `__themePopoverIsOpen()` | `theme.js` | `nav.js` | Whether the theme popover is open (so `Escape` closes it first) |
-| `__themePopoverClose()` | `theme.js` | tests | Close the theme popover |
+| Global                                          | Set by                               | Read by    | Purpose                                                                          |
+| ----------------------------------------------- | ------------------------------------ | ---------- | -------------------------------------------------------------------------------- |
+| `__translatedPaths`                             | `build.js` (injected into each page) | `nav.js`   | List of paths that have a `/zh/` version, for language-preference link rewriting |
+| `__registerShortcut(key, description, handler)` | `nav.js`                             | `theme.js` | Register/override a keyboard shortcut shown in the help overlay                  |
+| `__helpOverlayIsOpen()`                         | `nav.js`                             | tests      | Whether the shortcuts overlay is currently open                                  |
+| `__themeToggle()`                               | `theme.js`                           | `nav.js`   | Cycle light/dark/system; also gates the "t" shortcut's visibility                |
+| `__themePopoverIsOpen()`                        | `theme.js`                           | `nav.js`   | Whether the theme popover is open (so `Escape` closes it first)                  |
+| `__themePopoverClose()`                         | `theme.js`                           | tests      | Close the theme popover                                                          |
 
 When adding a cross-module global, prefix it with `__`, expose it as soon as the
 module initializes, and guard every read (`if (window.__foo)`) so load order

@@ -754,6 +754,34 @@ td {
   border-radius: 4px;
 }
 
+.success-message {
+  color: var(--color-success-text);
+  font-weight: 600;
+  display: block;
+  margin: 1rem 0;
+  padding: 0.75rem;
+  background: var(--color-success-bg);
+  border: 1px solid var(--color-success-border);
+  border-radius: 4px;
+}
+
+/* Neutral in-progress state; also the resting state of an empty status line,
+   which stays in the DOM so screen readers announce updates to it. */
+.status-message {
+  color: var(--color-text-muted);
+  display: block;
+  margin: 1rem 0;
+}
+
+.status-message:empty {
+  margin: 0;
+}
+
+/* Spam honeypot wrapper — see contact/index.html. */
+.honeypot {
+  display: none;
+}
+
 /* Example Sections */
 .examples {
   display: grid;

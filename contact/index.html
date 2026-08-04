@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact - Quinten Yearsley</title>
+    <meta name="description" content="Send Quinten Yearsley a message" />
+    <meta name="theme-color" content="#2d3748" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <script src="/shared/theme.js"></script>
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="container">
+      <header class="header compact">
+        <h1>Contact</h1>
+        <p>Send me a message.</p>
+      </header>
+
+      <main id="main-content" class="main-content">
+        <nav class="breadcrumbs">
+          <a href="/">Home</a>
+          <span class="separator">/</span>
+          <span class="current">Contact</span>
+        </nav>
+
+        <section class="section">
+          <!--
+            Submissions go to Formspree, which forwards them on by email, so no
+            address is published here. The form ID is public by design; the
+            destination address lives in the Formspree dashboard, not in this
+            repo. See docs/development.md.
+          -->
+          <form
+            id="contact-form"
+            class="form-container"
+            method="POST"
+            action="https://formspree.io/f/mvkppvnl"
+          >
+            <div class="form-group">
+              <label for="contact-name">Name</label>
+              <input type="text" id="contact-name" class="form-input" name="name" required />
+            </div>
+
+            <div class="form-group">
+              <label for="contact-email">Email</label>
+              <input type="email" id="contact-email" class="form-input" name="email" required />
+              <small>So I can reply.</small>
+            </div>
+
+            <div class="form-group">
+              <label for="contact-message">Message</label>
+              <textarea
+                id="contact-message"
+                class="form-textarea"
+                name="message"
+                required
+              ></textarea>
+            </div>
+
+            <input type="hidden" name="_subject" value="Message from qyearsley.github.io" />
+
+            <!-- Spam honeypot: hidden from people, tempting to bots. -->
+            <div class="honeypot" aria-hidden="true">
+              <label for="contact-gotcha">Leave this field empty</label>
+              <input
+                type="text"
+                id="contact-gotcha"
+                name="_gotcha"
+                tabindex="-1"
+                autocomplete="off"
+              />
+            </div>
+
+            <button type="submit" class="submit-btn">Send</button>
+            <p id="contact-status" class="status-message" role="status" aria-live="polite"></p>
+          </form>
+
+          <p>
+            <a href="https://linkedin.com/in/q-yearsley">Reach me on LinkedIn</a>
+          </p>
+        </section>
+      </main>
+    </div>
+    <script src="/shared/nav.js"></script>
+    <script src="/shared/contact-form.js"></script>
+  </body>
+</html>
