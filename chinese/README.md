@@ -14,20 +14,32 @@ Interactive tools for studying Chinese language and transliteration.
 
 ## Regenerating Pages
 
-When updating Chinese language resources, run the appropriate Python script:
+The generator scripts produce an HTML `<table>` fragment, not a full page. None
+of them edit the pages in `chinese/` -- you paste the new table into the
+corresponding `.html` file by hand.
 
 ```bash
-# Regenerate syllabary
+# Syllabary table -- written to stdout, after three progress lines.
+# The table itself starts at the first "<table>" line.
 cd chinese/syllabary
 python3 make_syllabary.py
 
-# Regenerate tone table
-cd chinese/tonetable
-python3 make_tone_table.py
-
-# Regenerate homophone substitutions
+# Homophone substitution table -- written to stdout, progress to stderr,
+# so redirecting stdout gives a clean fragment.
 cd chinese/homophone_subs
 python3 make_homophone_subs_html.py
+
+# Tone table -- written to tone_table.html in the current directory.
+cd chinese/tonetable
+python3 make_tone_table.py
 ```
 
-These scripts read from `.txt` data files in their directories and output HTML files to the parent `chinese/` directory.
+Each script reads the `.txt` data files sitting next to it.
+`chinese/tonetable/make_tone_table.pl` is an older Perl version of the tone
+table generator, kept for reference; use the Python one.
+
+## Shared Logic
+
+`tradsimp.js` holds the traditional/simplified conversion mapping used by
+`character-converter.html`. It has unit tests in `tradsimp.test.js`, run by
+`npm test` from the repository root.

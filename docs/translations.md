@@ -2,10 +2,11 @@
 
 ## Overview
 
-The build script generates Chinese translations for every page listed in
-`TRANSLATABLE_PAGES` (in `build.js`). Translations use text-matching:
-each English string in a JSON file is matched against the HTML and replaced
-with its Chinese equivalent.
+The build script generates a Chinese version of every page that has a
+co-located `*.zh.json` file. `build.js` finds them by walking the source tree,
+so there is no list to maintain. Translation is text-matching: each English
+string in the JSON file is matched against the HTML and replaced with its
+Chinese equivalent.
 
 ## Translation Files
 
@@ -14,8 +15,10 @@ naming convention `<name>.zh.json`:
 
 ```
 zh-common.json                       Shared strings + homepage translations
+index.zh.json                        Opts the homepage in (may be empty)
 404.zh.json                          404 page translations
 resume/index.zh.json                 Resume translations
+contact/index.zh.json                Contact page translations
 chinese/index.zh.json                Chinese section index
 chinese/syllabary.zh.json            Per-page translations
 chinese/tone-table.zh.json
@@ -27,6 +30,10 @@ games/index.zh.json                  Games section index
 games/number-garden/index.zh.json    Per-game translations
 ...
 ```
+
+A page needs its own `*.zh.json` to be translated at all, even when every string
+it uses already lives in `zh-common.json` -- the homepage's `index.zh.json` is
+`{}` for exactly that reason.
 
 Run `npm run translations` to list all translation files.
 
@@ -55,7 +62,7 @@ Each file maps English text to Chinese:
 
 ## Adding Translations
 
-1. Add the page to `TRANSLATABLE_PAGES` in `build.js`
-2. Create a `<name>.zh.json` file next to the HTML page
-3. Run `npm run build` -- warnings about unmatched keys appear by default
-4. Run `npm run build:verbose` to also see possibly-untranslated English text
+1. Create a `<name>.zh.json` file next to the HTML page -- this alone opts the
+   page into the pipeline
+2. Run `npm run build` -- warnings about unmatched keys appear by default
+3. Run `npm run build:verbose` to also see possibly-untranslated English text

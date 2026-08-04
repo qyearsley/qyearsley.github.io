@@ -4,20 +4,23 @@
 
 The Number Garden game uses a modular architecture with clear separation of concerns. The main entry point (`game.js`) orchestrates multiple subsystems through dependency injection.
 
+Class names and file names differ in a few places -- the sections below give the
+file for each class.
+
 ## Core Architecture Pattern
 
 ```
 game.js (NumberGarden class)
-├── GameState         - Manages game data and progress
-├── GameUI            - Handles all DOM manipulation
-├── EventManager      - Coordinates user interactions
+├── GameState          - Manages game data and progress
+├── GameUI             - Handles all DOM manipulation
+├── EventManager       - Coordinates user interactions
 ├── ProgressionManager - Controls level difficulty
-├── ActivityGenerator - Creates math problems
-├── SoundManager      - Manages audio feedback
-├── StorageManager    - Handles localStorage persistence
-├── RewardSystem      - Manages rewards and achievements
-├── ParticleSystem    - Visual effects
-└── ProjectVisuals    - SVG generation for projects
+├── ActivityGenerator  - Creates math problems (activities.js)
+├── SoundManager       - Manages audio feedback
+├── StorageManager     - Handles localStorage persistence (storage.js)
+├── RewardSystem       - Manages rewards and achievements (rewards.js)
+├── ParticleSystem     - Visual effects
+└── ProjectVisuals     - SVG generation for projects
 ```
 
 ## Key Modules
@@ -32,7 +35,7 @@ Single source of truth for game data (progress, stats, settings). Provides metho
 
 ### GameUI.js
 
-Extends BaseGameUI. Responsible for all DOM manipulation and rendering. Receives data from GameState and displays it. Never directly modifies game state.
+Extends `BaseGameUI` (in `games/shared/`). Responsible for all DOM manipulation and rendering. Receives data from GameState and displays it. Never directly modifies game state.
 
 ### EventManager.js
 
@@ -42,17 +45,23 @@ Central event coordination. Attaches event listeners to DOM elements and routes 
 
 Determines appropriate difficulty for activities based on player progress. Ensures steady learning curve.
 
-### ActivityGenerator.js
+### activities.js (ActivityGenerator)
 
-Creates math problems based on difficulty level. Generates questions, answers, and visual representations.
+Creates math problems based on difficulty level. Generates questions, answers, and visual representations by delegating to the per-topic generators in `generators/`.
 
 ### SoundManager.js
 
 Manages Web Audio API for sound effects. Gracefully degrades if audio not supported.
 
-### StorageManager.js
+### storage.js (StorageManager)
 
-Handles localStorage operations with error handling and version management for saving/loading game progress.
+Handles localStorage operations with error handling and version management for saving/loading game progress. Extends the shared base class in `games/shared/StorageManager.js`.
+
+### rewards.js (RewardSystem)
+
+Picks the reward item shown after a correct answer -- each area has its own set
+(flowers, crystals, stars) -- and supplies milestone rewards, encouragement
+messages, and celebration emoji. Star totals themselves live in `GameState`.
 
 ### ProjectVisuals.js
 
@@ -175,7 +184,14 @@ Tests are located in the parent `__tests__/` directory. Each major module has co
 - `TimeGenerator.test.js` - Clock reading, time elapsed
 - `MeasurementAndPatternGenerator.test.js` - Measurement, patterns, sequences
 
-Run tests: `npm test`
+The shared base classes are tested separately in `games/shared/__tests__/`.
+
+Run tests from the repository root:
+
+```bash
+npm test                                      # all tests
+npm test -- --testPathPatterns number-garden  # just this game
+```
 
 ## Design Principles
 

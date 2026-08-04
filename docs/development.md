@@ -14,6 +14,9 @@ index.html                  Homepage
 build.js                    Build script
 build.test.js               Build function tests
 
+__tests__/
+  html.test.js              Structural checks over every source HTML page
+
 css/
   style.css                 Core layout, typography, design tokens (all pages)
   components.css            Specialized styles for tool pages
@@ -23,15 +26,19 @@ games/
   number-garden/            Game (own layout)
   life-garden/              Game (own layout)
   turing-tape/              Game (own layout)
+  shared/                   BaseGameUI, StorageManager (Number Garden + Life Garden)
 
 javascript/
   index.html                JS experiments section index
   coin-flipper.html         Individual experiments...
   logic-engine/index.html
+  truthtable.js             Logic extracted for testing
 
 chinese/
   index.html                Chinese tools section index
   syllabary.html            Individual tools...
+  tradsimp.js               Traditional/simplified conversion logic
+  syllabary/                Python generators + data files (see chinese/README.md)
 
 contact/
   index.html                Contact form (see "Contact Form" below)
@@ -40,6 +47,7 @@ resume/
   resume.md                 Resume content (markdown)
   template.html             Resume-specific template
   resume.css                Resume styles
+  index.html                Generated from resume.md -- do not edit by hand
 
 shared/
   nav.js                    Keyboard shortcuts + language persistence
@@ -50,9 +58,12 @@ shared/
 
 zh-common.json              Shared translations (see docs/translations.md)
 *.zh.json                   Per-page translations (co-located with HTML)
-docs/                       Development documentation
+docs/                       Development documentation (not copied to dist/)
 dist/                       Build output (gitignored)
 ```
+
+`resume/index.html` is committed so `npm run dev` can serve the resume without a
+build, but `npm run build` regenerates it from `resume.md`. Edit the markdown.
 
 ## Build Pipeline
 
@@ -61,7 +72,7 @@ dist/                       Build output (gitignored)
 1. **Clean** -- delete `dist/`
 2. **Copy** -- copy all static files to `dist/` (skips config files, dev-only dirs)
 3. **Render resume** -- convert `resume/resume.md` to HTML via `marked`, inject into `resume/template.html`
-4. **Translate** -- for each translatable page, generate a Chinese version at `/zh/` using text-matching against co-located `*.zh.json` files
+4. **Translate** -- for each translatable page, generate a Chinese version at `/zh/` using text-matching against co-located `*.zh.json` files. Both the `/zh/` and the English copy also get `hreflang` links and a language-switch link in the header.
 5. **Inject paths** -- write `window.__translatedPaths` into every HTML file so `nav.js` can persist language preference client-side
 6. **Sitemap** -- generate `dist/sitemap.xml` from all HTML files
 7. **Validate** -- check all internal `href="/..."` links point to existing files
@@ -70,8 +81,9 @@ dist/                       Build output (gitignored)
 
 ```bash
 npm run build   # Full build to dist/
+npm run build:verbose  # Build, plus warnings about possibly-untranslated text
 npm start       # Build + serve dist/ on port 8000
-npm run dev     # Serve source directly (no build, like before)
+npm run dev     # Serve source directly on port 8000 (no build)
 npm test        # Run all tests (Jest)
 npm run lint    # ESLint + HTMLHint + Stylelint
 npm run format  # Prettier
@@ -82,8 +94,9 @@ npm run format  # Prettier
 Tests use Jest with `--experimental-vm-modules` for ESM support.
 
 - `build.test.js` -- unit tests for build functions (text matching, translation, link rewriting, hreflang)
-- `shared/__tests__/` -- tests for nav.js and theme.js
-- `javascript/*.test.js` -- tests for experiment logic
+- `__tests__/html.test.js` -- structural checks across every source HTML page (unclosed script tags, placeholder SRI hashes, etc.)
+- `shared/__tests__/` -- tests for `nav.js`, `theme.js`, `table-filter.js`, and `contact-form.js`
+- `javascript/*.test.js`, `chinese/*.test.js` -- tests for experiment and tool logic
 - `games/*/__tests__/` -- tests for game logic and level/preset data
 
 Game `game.js` orchestrators are intentionally untested -- they're DOM-and-canvas-coupled glue. Tests target the underlying components (Grid, GameState, TuringMachine, etc.) and the static data they consume.
@@ -100,7 +113,7 @@ Jest's `moduleNameMapper` in `package.json` strips `.js` extensions from relativ
 
 `npm run lint` runs three linters; their notable settings:
 
-- **ESLint** (`eslint.config.js`): `no-console` allows `warn`/`error` -- the build script and shared modules use them for surfacing real problems. `jestGlobals` is included in the browser config because `*.test.js` files live alongside source under `shared/`, `javascript/`, and `games/` rather than in a separate test directory.
+- **ESLint** (`eslint.config.js`): covers `javascript/`, `games/`, `shared/`, `__tests__/`, and the two root build files. `no-console` allows `warn`/`error` -- the build script and shared modules use them for surfacing real problems. `jestGlobals` is included in the browser config because `*.test.js` files live alongside source under `shared/`, `javascript/`, and `games/` rather than in a separate test directory.
 - **Stylelint** (`package.json`): several rules are disabled because the codebase mixes hand-written CSS conventions with design-token patterns that the standard config rejects.
   - `selector-class-pattern` / `selector-id-pattern` / `custom-property-pattern`: allow descriptive names like `.game-list` and `--color-bg-card` instead of forcing strict BEM.
   - `no-descending-specificity`: silenced because component CSS frequently overrides base styles in a deliberate cascade order.

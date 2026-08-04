@@ -52,7 +52,7 @@ Mature tools designed for exactly this problem.
 
 **Cons:**
 
-- Heavy dependency for ~25 mostly-static pages
+- Heavy dependency for ~27 mostly-static pages
 - Learning curve for the tool's conventions
 - Build step required for all development
 - Jekyll (Ruby) or Hugo (Go) add a non-JS dependency
@@ -78,6 +78,6 @@ Use `<script>` or custom elements to inject shared headers/footers client-side.
 ## Recommendation
 
 Keep self-contained HTML until boilerplate maintenance becomes a real problem.
-With ~25 pages that change infrequently, the duplication cost is low. If the
+With ~27 pages that change infrequently, the duplication cost is low. If the
 site grows significantly, 11ty is the natural next step -- it's JavaScript-based,
 handles i18n well, and has a gentle learning curve.

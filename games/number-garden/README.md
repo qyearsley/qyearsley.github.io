@@ -7,7 +7,7 @@ An educational math game for children featuring addition, subtraction, multiplic
 - **6 Themed Areas:** Each area teaches a different math concept
   - 🦄 Flower Meadow (Addition)
   - 🔮 Crystal Cave (Subtraction)
-  - 🌲 Enchanted Forest (Multiplication)
+  - 🧚 Enchanted Forest (Multiplication)
   - 🕰️ Time Temple (Time-telling)
   - 🦊 Measurement Market (Measurement)
   - 🦋 Pattern Path (Patterns & sequences)
@@ -22,7 +22,8 @@ An educational math game for children featuring addition, subtraction, multiplic
 
 Access settings via the ⚙️ button on the garden hub:
 
-- **Answer Mode:** Multiple choice or keyboard typing
+- **Difficulty Level:** Explorer (ages 5-7), Adventurer (ages 7-9), or Master (ages 9-11)
+- **Answer Input:** Multiple choice or typing the answer
 - **Visual Hints:** Toggle pictures on or off
 - **Sound Effects:** Toggle sound effects on or off
 
@@ -49,10 +50,10 @@ js/
 ├── GameUI.js            # UI rendering and display logic
 ├── CastleUI.js          # Castle-specific rendering
 ├── EventManager.js      # Input handling and event coordination
-├── activities.js        # Math problem generation entry point
+├── activities.js        # Math problem generation entry point (ActivityGenerator)
 ├── generators/          # Per-topic problem generators
 ├── storage.js           # LocalStorage wrapper for save/load
-├── rewards.js           # Reward distribution and flower generation
+├── rewards.js           # Reward distribution and flower generation (RewardSystem)
 ├── ProgressionManager.js # Area unlocking and progression logic
 ├── ParticleSystem.js    # Visual effects for celebrations
 ├── ProjectVisuals.js    # SVG generation for project completion
@@ -66,6 +67,9 @@ styles/
 ├── garden.css           # Garden visualization
 └── animations.css       # Keyframe animations
 ```
+
+Base classes shared with Life Garden live one level up in `games/shared/`:
+`BaseGameUI.js` and `StorageManager.js`.
 
 ### Testing
 

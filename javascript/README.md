@@ -23,6 +23,11 @@ Interactive tools and visualizations built with vanilla JavaScript.
 
 ## Testing
 
-Tests are configured with Jest. Test files follow the `*.test.js` pattern (e.g., `truthtable.test.js`).
+Tests use Jest and follow the `*.test.js` pattern, sitting next to the code they
+cover (e.g. `truthtable.js` / `truthtable.test.js`). Run them from the
+repository root:
 
-Run tests: `npm test`
+```bash
+npm test                                   # all tests
+npm test -- --testPathPatterns truthtable  # one file
+```

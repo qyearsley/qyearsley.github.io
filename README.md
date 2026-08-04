@@ -8,6 +8,7 @@ Personal website with educational games, JavaScript experiments, and Chinese lan
 - [`/javascript/`](javascript/) -- Interactive tools exploring CS concepts (automata, hashing, logic, etc.)
 - [`/chinese/`](chinese/) -- Chinese language reference tools (pinyin, tone tables, character encoding)
 - [`/resume/`](resume/) -- Resume (rendered from markdown at build time)
+- [`/contact/`](contact/) -- Contact form (see [docs/development.md](docs/development.md))
 
 The build generates Chinese translations at `/zh/` from co-located `*.zh.json` files.
 This is unrelated to the `/chinese/` directory, which contains English-language tools about Chinese.

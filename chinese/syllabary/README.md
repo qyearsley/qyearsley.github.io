@@ -18,7 +18,10 @@ To regenerate the syllabary table:
 python3 make_syllabary.py
 ```
 
-This will output the updated `syllabary.html` file in the parent `chinese/` directory.
+The script writes the HTML table to **stdout**; it does not modify
+`../syllabary.html`. Three progress lines are printed to stdout ahead of the
+table, and parse warnings go to stderr, so the fragment you want begins at the
+first `<table>` line. Paste it over the existing table in `../syllabary.html`.
 
 ## Data Format
 
@@ -40,12 +43,15 @@ For example:
 
 The script generates an HTML table with:
 
-- Character cells with tooltips showing pinyin and frequency
-- CSS classes for frequent vs. infrequent characters
-- Proper table structure for the syllabary layout
-- Responsive design compatible with the modernized syllabary.html page
+- Character cells with `title` tooltips showing pinyin and frequency
+- `frequent` / `infrequent` CSS classes on each character
+- Table structure matching the layout `../syllabary.html` expects
+
+Styling for those classes lives in `css/components.css`, using the site's design
+tokens so the table follows light and dark mode.
 
 ## Frequency Threshold
 
-Characters with frequency > 10 are marked as "frequent" and displayed in bold black text.
-Characters with frequency ≤ 10 are marked as "infrequent" and displayed in gray text.
+`FREQUENT_THRESHOLD` in `make_syllabary.py` is 10. Characters with frequency > 10
+get the `frequent` class (`--color-text`, semibold); frequency ≤ 10 gets
+`infrequent` (`--color-text-muted`, normal weight).
