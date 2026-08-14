@@ -105,5 +105,99 @@ describe("GameState", () => {
       state.budgetUsed = { [SPECIES.GRASS]: 5, [SPECIES.FLOWER]: 3 }
       expect(state.calculateStars(samplePuzzle)).toBe(1)
     })
+
+    test("1 star when the puzzle has no budget to spend", () => {
+      // A zero total counts as 100% used rather than dividing by zero.
+      const freePuzzle = { ...samplePuzzle, budget: {} }
+      state.startPuzzle(freePuzzle)
+      expect(state.calculateStars(freePuzzle)).toBe(1)
+    })
+
+    test("never returns 0 stars, even over budget", () => {
+      state.startPuzzle(samplePuzzle)
+      state.budgetUsed = { [SPECIES.GRASS]: 20, [SPECIES.FLOWER]: 20 }
+      expect(state.calculateStars(samplePuzzle)).toBe(1)
+    })
+  })
+
+  describe("persistence", () => {
+    test("loadProgress restores completed puzzles and merges settings", () => {
+      const loaded = new GameState({
+        ...mockStorage,
+        loadProgress: () => ({
+          completedPuzzles: { "first-seeds": { stars: 3 } },
+          settings: { speed: "fast" },
+        }),
+      })
+
+      loaded.loadProgress()
+
+      expect(loaded.getStars("first-seeds")).toBe(3)
+      expect(loaded.settings.speed).toBe("fast")
+      // showGrid wasn't saved, so the default must survive the merge.
+      expect(loaded.settings.showGrid).toBe(true)
+    })
+
+    test("loadProgress leaves defaults alone when nothing is saved", () => {
+      state.loadProgress()
+      expect(state.completedPuzzles).toEqual({})
+      expect(state.settings).toEqual({ speed: "normal", showGrid: true })
+    })
+
+    test("saveProgress hands the storage layer both fields", () => {
+      const saved = []
+      const recording = new GameState({
+        ...mockStorage,
+        saveProgress: (completed, settings) => saved.push({ completed, settings }),
+      })
+      recording.completePuzzle("test", 2)
+
+      expect(saved).toEqual([
+        { completed: { test: { stars: 2 } }, settings: { speed: "normal", showGrid: true } },
+      ])
+    })
+
+    test("clearProgress forgets completions and tells storage", () => {
+      let cleared = false
+      const clearing = new GameState({ ...mockStorage, clearProgress: () => (cleared = true) })
+      clearing.completedPuzzles = { test: { stars: 3 } }
+
+      clearing.clearProgress()
+
+      expect(clearing.completedPuzzles).toEqual({})
+      expect(cleared).toBe(true)
+    })
+
+    test("hasSavedProgress reflects the storage layer", () => {
+      expect(new GameState({ ...mockStorage, hasGameState: () => true }).hasSavedProgress()).toBe(
+        true,
+      )
+      expect(new GameState({ ...mockStorage, hasGameState: () => false }).hasSavedProgress()).toBe(
+        false,
+      )
+    })
+  })
+
+  describe("isPuzzleCompleted", () => {
+    test("false before completion, true after", () => {
+      expect(state.isPuzzleCompleted("test")).toBe(false)
+      state.completePuzzle("test", 1)
+      expect(state.isPuzzleCompleted("test")).toBe(true)
+    })
+  })
+
+  test("startPuzzle resets progress from any earlier attempt", () => {
+    state.startPuzzle(samplePuzzle)
+    state.useBudget(SPECIES.GRASS)
+    state.generation = 12
+    state.goalsComplete = true
+    state.phase = PHASE.SIMULATING
+
+    state.startPuzzle(samplePuzzle)
+
+    expect(state.generation).toBe(0)
+    expect(state.goalsComplete).toBe(false)
+    expect(state.phase).toBe(PHASE.PLACING)
+    expect(state.getRemainingBudget(SPECIES.GRASS)).toBe(5)
   })
 })
