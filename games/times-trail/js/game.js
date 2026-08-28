@@ -27,7 +27,7 @@
  *      the marked tiles can actually be seen, and then shows the teaching
  *      scaffold, whose two exits ("Got it" and a computed auto-advance timer) both
  *      run one idempotent `_resolveScaffold()`.
- *   6. After `SESSION.FACTS_PER_SESSION` answers, `_finishSession()` increments
+ *   6. After `settings.sessionLength` answers, `_finishSession()` increments
  *      `sessionsCompleted` and checks milestones BEFORE building the summary
  *      view, so session 1 can actually show the gem it just earned.
  *
@@ -87,7 +87,6 @@ import {
   OPERAND_MAX,
   OPERAND_MIN,
   RESPONSE_TIME,
-  SESSION,
   TIMING,
   TOKEN_EMOJI,
   TRAIL,
@@ -346,7 +345,7 @@ class TimesTrail {
     this.events.initializeEventListeners()
 
     this.ui.updateTitleButtons(loaded !== null)
-    this.ui.renderSettings(this.settings.toJSON())
+    this.ui.renderSettings(this.settings.toJSON(), this.settings.factCount)
     this._refreshHud()
   }
 
@@ -453,10 +452,10 @@ class TimesTrail {
     this.progress = defaultProgress()
     this.store = new MasteryStore(this.progress.facts, this._now)
     // Settings deliberately SURVIVE. The prompt promises the trail, the cards, and
-    // the stars, and says nothing about difficulty -- but rebuilding `Settings`
-    // from the fresh defaults dropped a Master player back to Adventurer and reset
-    // her custom tables without telling her. The live instance stays the
-    // authority, so the fresh progress object is made to agree with it instead.
+    // the stars, and says nothing about which tables are in play -- but rebuilding
+    // `Settings` from the fresh defaults silently turned every table back on and
+    // reset the session length. The live instance stays the authority, so the fresh
+    // progress object is made to agree with it instead.
     this.progress.settings = this.settings.toJSON()
     this.progress.daily = this.scoring.rollDaily(this.progress.daily)
     this.journey = this._buildJourney()
@@ -464,7 +463,7 @@ class TimesTrail {
     this.session = this._createSession(MODE_IDS.QUICK_RECALL)
     this._setGateMessage(null)
 
-    this.ui.renderSettings(this.settings.toJSON())
+    this.ui.renderSettings(this.settings.toJSON(), this.settings.factCount)
     this.ui.updateTitleButtons(false)
     this.showHub()
   }
@@ -618,7 +617,7 @@ class TimesTrail {
    */
   openSettings() {
     this._pauseTimers()
-    this.ui.renderSettings(this.settings.toJSON())
+    this.ui.renderSettings(this.settings.toJSON(), this.settings.factCount)
     this.ui.showSettings()
   }
 
@@ -632,22 +631,22 @@ class TimesTrail {
   }
 
   /**
-   * Apply one setting. Re-rendering the modal is what makes
-   * `#custom-tables-group` appear the instant "Custom" is chosen, and the
-   * journey is rebuilt because region gating is scoped to the active fact pool.
+   * Apply one setting. Re-rendering the modal is what keeps the fact-count
+   * readout in step with the controls, and the journey is rebuilt because region
+   * gating is scoped to the active fact pool.
    * @param {string} key - Settings key
    * @param {*} value - Candidate value; rejected values change nothing
    * @returns {void}
    */
   changeSetting(key, value) {
     if (!this.settings.update(key, value)) return
-    this.ui.renderSettings(this.settings.toJSON())
+    this.ui.renderSettings(this.settings.toJSON(), this.settings.factCount)
     this.journey = this._buildJourney()
     this._save()
   }
 
   /**
-   * Toggle one table in the custom picker. An attempt to clear the last table is
+   * Toggle one table in the picker. An attempt to clear the last table is
    * rejected by `Settings`, and re-rendering restores the control to the state
    * that is actually in force.
    * @param {number} table - Table number, 2-9
@@ -655,15 +654,15 @@ class TimesTrail {
    * @returns {void}
    */
   toggleTable(table, checked) {
-    const tables = new Set(this.settings.toJSON().customTables)
+    const tables = new Set(this.settings.enabledTables)
     if (checked) {
       tables.add(table)
     } else {
       tables.delete(table)
     }
 
-    const applied = this.settings.update("customTables", [...tables])
-    this.ui.renderSettings(this.settings.toJSON())
+    const applied = this.settings.setTables([...tables])
+    this.ui.renderSettings(this.settings.toJSON(), this.settings.factCount)
     if (!applied) return
     this.journey = this._buildJourney()
     this._save()
@@ -677,8 +676,8 @@ class TimesTrail {
    * delay is measured from the wrong origin.
    *
    * The gate message is cleared here and only here on the way in. It is the one
-   * piece of play-screen state that outlives a question, so a stale "master 2 more
-   * facts in Beehive Hollow" from last time must not greet her on question 1.
+   * piece of play-screen state that outlives a question, so a stale "keep
+   * practising 6 × 8" from last time must not greet her on question 1.
    * @param {string} modeId - A `MODE_IDS` value; anything unknown falls back to Quick Recall
    * @returns {void}
    */
@@ -693,7 +692,7 @@ class TimesTrail {
     this._setGateMessage(null)
 
     this.ui.updatePlayHud({ sessionStars: 0, sessionStreak: 0 })
-    this.ui.updateProgressBar(0, SESSION.FACTS_PER_SESSION)
+    this.ui.updateProgressBar(0, this.settings.sessionLength)
     this.ui.showScreen("play-screen")
     this._askNextQuestion()
   }
@@ -851,11 +850,11 @@ class TimesTrail {
     this.progress.totals.factsCorrect += correct ? 1 : 0
 
     this._checkMilestones()
-    this.ui.updateProgressBar(this.session.factsAnswered, SESSION.FACTS_PER_SESSION)
+    this.ui.updateProgressBar(this.session.factsAnswered, this.settings.sessionLength)
     this._save()
 
     if (correct) {
-      const done = this.session.factsAnswered >= SESSION.FACTS_PER_SESSION
+      const done = this.session.factsAnswered >= this.settings.sessionLength
       const holdMs = done ? TIMING.SUMMARY_DELAY_MS : TIMING.CORRECT_FEEDBACK_MS
       this._scheduleAdvance(() => this._advanceAfterAnswer(), holdMs)
       return
@@ -925,8 +924,8 @@ class TimesTrail {
    * The keypad path used to produce no positive feedback whatsoever: nothing was
    * marked `.correct` and the readout was reset to "?" in the same turn, so the 42
    * she typed vanished at the moment she was told it was right. Every strength-3+
-   * fact routes to the keypad on the default difficulty, which made that the
-   * dominant path exactly as she improved.
+   * fact routes to the keypad, which made that the dominant path exactly as she
+   * improved.
    *
    * Ordering matters and is now safe from both ends: `Keypad` no longer empties its
    * buffer on submit, and `GameUI` drops the `.correct` state on the next
@@ -1175,7 +1174,7 @@ class TimesTrail {
    * @private
    */
   _advanceAfterAnswer() {
-    if (this.session.factsAnswered >= SESSION.FACTS_PER_SESSION) {
+    if (this.session.factsAnswered >= this.settings.sessionLength) {
       this._finishSession()
       return
     }
@@ -1278,8 +1277,16 @@ class TimesTrail {
   }
 
   /**
-   * What the gating region still needs, as plain numbers. `GameUI` formats the
+   * Which facts the gating region is still waiting on. `GameUI` formats the
    * sentence, so the wording lives next to the element that shows it.
+   *
+   * It names facts instead of counting them. "Master 2 more facts in Triple
+   * Bridge" was true and unusable: fact selection ignores the token's position,
+   * so twenty correct answers can go by without either gating fact being asked,
+   * and the count sits at 2 the whole time. The facts are ordered
+   * NEAREST-TO-THE-BAR first, so the named ones are the shortest route through the
+   * gate, and only as many are named as the gate actually needs -- a region can
+   * hold eight weak facts while needing five of them strong.
    * @param {string|null} regionId - The gating region, or null at the trail's end
    * @returns {Object} A `GateView`
    * @private
@@ -1289,15 +1296,24 @@ class TimesTrail {
     if (region === null) {
       // No region ahead: only reachable on the last space, where GameUI's
       // formatter falls back to "You have reached the end of the trail".
-      return { regionName: "", mastered: 0, required: 0 }
+      return { regionName: "", factLabels: [] }
     }
     const status = this.journey.regionProgress(regionId, this.progress.facts)
-    // `GateView.mastered` is fed the region's `strong` count. The gate opens at
-    // TRAIL.UNLOCK_MIN_STRENGTH (3) and `status.mastered` is the 4+ count, so
-    // reading `mastered` undercounted: the message said "Master 2 more facts in
-    // Doubling Meadow" when the gate was already open. The key name belongs to
-    // GameUI's view model; renaming it is a GameUI change.
-    return { regionName: region.name, mastered: status.strong, required: status.required }
+    const shortfall = Math.max(0, status.required - status.strong)
+    const factLabels = this.journey
+      .activeFactIdsForRegion(regionId)
+      .map((factId) => ({ factId, strength: this.store.strengthOf(factId) }))
+      // The gate counts facts at UNLOCK_MIN_STRENGTH (3) or better, NOT the
+      // strength-4 "mastered" bar the card collection uses.
+      .filter((entry) => entry.strength < TRAIL.UNLOCK_MIN_STRENGTH)
+      .sort((left, right) => right.strength - left.strength)
+      .slice(0, shortfall)
+      .map((entry) => {
+        const fact = getFact(entry.factId)
+        return fact === null ? "" : `${fact.a} ${TIMES_SIGN} ${fact.b}`
+      })
+      .filter(Boolean)
+    return { regionName: region.name, factLabels }
   }
 
   /**

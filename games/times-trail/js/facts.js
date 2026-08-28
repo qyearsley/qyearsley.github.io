@@ -197,33 +197,35 @@ export function getFactFor(x, y) {
 }
 
 /**
- * The facts belonging to a set of enabled tables. Never throws: entries of
- * `tables` that are not integers in [OPERAND_MIN, OPERAND_MAX] are ignored, and
- * a non-array, empty, or all-invalid `tables` yields `[]`.
+ * The facts belonging to a set of enabled tables, read as table FAMILIES: a fact
+ * is included when EITHER operand is enabled, so enabling 7 gets you 7x2 through
+ * 7x9. That is what "which tables?" means to the person answering it.
+ *
+ * There is deliberately no ceiling mode. Requiring BOTH operands existed for the
+ * difficulty presets, where "2s through 5s" had to exclude 4x8; with the presets
+ * gone the two semantics would only be a way for the settings modal and the fact
+ * pool to disagree.
+ *
+ * Never throws: entries of `tables` that are not integers in
+ * [OPERAND_MIN, OPERAND_MAX] are ignored, and a non-array, empty, or all-invalid
+ * `tables` yields `[]`.
  * @param {number[]} tables - Enabled tables, e.g. `[2, 3, 4, 5]`
- * @param {"both"|"either"} mode - `"either"` includes a fact when either operand
- *   is enabled (custom table-family semantics); anything else, including the
- *   explicit `"both"`, requires both operands (preset-ceiling semantics)
  * @returns {Fact[]} A new array in `FACTS` order
  */
-export function factsForTables(tables, mode) {
+export function factsForTables(tables) {
   if (!Array.isArray(tables)) return []
   const enabled = new Set(tables.filter(_isOperand))
   if (enabled.size === 0) return []
-  if (mode === "either") {
-    return FACTS.filter((fact) => enabled.has(fact.a) || enabled.has(fact.b))
-  }
-  return FACTS.filter((fact) => enabled.has(fact.a) && enabled.has(fact.b))
+  return FACTS.filter((fact) => enabled.has(fact.a) || enabled.has(fact.b))
 }
 
 /**
  * Ids of the facts belonging to a set of enabled tables.
  * @param {number[]} tables - Enabled tables
- * @param {"both"|"either"} mode - See `factsForTables`
  * @returns {string[]} A new array of canonical ids in `FACTS` order
  */
-export function factIdsForTables(tables, mode) {
-  return factsForTables(tables, mode).map((fact) => fact.id)
+export function factIdsForTables(tables) {
+  return factsForTables(tables).map((fact) => fact.id)
 }
 
 /**

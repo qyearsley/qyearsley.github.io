@@ -16,11 +16,10 @@
  *    region whose intersection with the pool is empty is SKIPPED: it counts as
  *    complete and never blocks the regions behind it. Without this the trail is
  *    dead in normal play -- Spider Woods would need 5 of its 7 table-8 facts
- *    strong while Adventurer (tables 2-7) never asks a single one, so the cap
- *    froze at space 34, and the default custom setting of tables [6, 7] froze at
- *    space 4 because Doubling Meadow's only fact, 2x2, is outside that pool.
- *    Every difficulty setting must be able to reach space 39; the test suite
- *    asserts that per pool.
+ *    strong while a pool of tables 2-7 never asks a single one, so the cap froze
+ *    at space 34, and a pool of tables [6, 7] froze at space 4 because Doubling
+ *    Meadow's only fact, 2x2, is outside it. Every table selection must be able
+ *    to reach space 39; the test suite asserts that per pool.
  * 3. Gating is strength-driven, never answer-driven. A region opens when enough
  *    of its active facts have reached TRAIL.UNLOCK_MIN_STRENGTH, not when enough
  *    questions have been answered. That is deliberate: an answer-count gate can
@@ -163,7 +162,7 @@ function _normalizePool(pool) {
  * The trail, its regions, and the strength gates between them.
  *
  * Every instance is bound to one active fact pool. When the player changes
- * difficulty or custom tables, game.js builds a new `Journey` rather than
+ * the tables in play, game.js builds a new `Journey` rather than
  * mutating this one -- the pool is what gating means, so it is not a setter.
  */
 export class Journey {

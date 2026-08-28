@@ -53,7 +53,6 @@
 import { BaseGameUI } from "../../shared/BaseGameUI.js"
 import {
   ALL_TABLES,
-  DIFFICULTY,
   INPUT_MODE,
   KEYPAD,
   MATH,
@@ -159,6 +158,29 @@ const TRAIL_LEGEND_STATES = Object.freeze([
 const DIMMED_FLAME_OPACITY = "0.45"
 
 /**
+ * How many facts the gate sentence names before it falls back to counting the
+ * rest. Three fits one line on a phone; the largest region owns eight facts, so
+ * some form of truncation is needed.
+ * @private
+ * @type {number}
+ */
+const GATE_FACTS_SHOWN = 3
+
+/**
+ * Join a short list into readable prose, with an optional "and N more" tail.
+ * Kept here because the gate sentence is the only place that needs it.
+ * @private
+ * @param {string[]} items - Already-truncated list, at least one entry
+ * @param {number} extra - How many further items were dropped; <= 0 means none
+ * @returns {string} e.g. "2 × 3 and 3 × 3", or "3 × 7, 4 × 7, 6 × 7 and 2 more"
+ */
+function joinWithAnd(items, extra) {
+  const parts = extra > 0 ? [...items, `${extra} more`] : [...items]
+  if (parts.length === 1) return parts[0]
+  return `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}`
+}
+
+/**
  * Fact id -> index in `FACTS`, so the collection can be rendered in the
  * canonical fact order regardless of the order `game.js` happens to build the
  * card views in.
@@ -256,20 +278,21 @@ const FACT_ORDER = new Map(FACT_IDS.map((id, index) => [id, index]))
  */
 
 /**
- * The two settings controls Phase 1 renders.
+ * The two settings controls the modal renders.
  * @typedef {Object} SettingsData
- * @property {string} difficulty - A `DIFFICULTY` value.
- * @property {number[]} customTables - Tables checked in the custom picker.
+ * @property {number[]} tables - Tables checked in the picker.
+ * @property {number} sessionLength - Questions per session.
  */
 
 /**
- * Why the token cannot move on, as plain numbers. `game.js` builds this from the
- * blocking region's progress; `GameUI` formats the sentence so the wording lives
- * next to the element that shows it, without the UI layer importing `Journey.js`.
+ * Why the token cannot move on. `game.js` builds this from the blocking region's
+ * progress; `GameUI` formats the sentence so the wording lives next to the
+ * element that shows it, without the UI layer importing `Journey.js`.
  * @typedef {Object} GateView
  * @property {string} regionName - The blocking region's name.
- * @property {number} mastered - Facts mastered in that region.
- * @property {number} required - Facts needed to pass.
+ * @property {string[]} factLabels - The facts still short of the gate's strength
+ *   bar, nearest-to-the-bar first, already formatted for display ("2 × 3"). Empty
+ *   only at the end of the trail, where there is no gate left.
  */
 
 /**
@@ -416,7 +439,9 @@ export class GameUI extends BaseGameUI {
       summaryGoal: document.getElementById("summary-goal"),
       summaryRegion: document.getElementById("summary-region"),
       summaryMilestones: document.getElementById("summary-milestones"),
+      summaryMilestonesGroup: document.getElementById("summary-milestones-group"),
       summaryCards: document.getElementById("summary-cards"),
+      summaryCardsGroup: document.getElementById("summary-cards-group"),
 
       // Trail screen
       trailScreen: document.getElementById("trail-screen"),
@@ -441,8 +466,8 @@ export class GameUI extends BaseGameUI {
       collectionLegend: document.getElementById("collection-legend"),
 
       // Settings modal
-      difficultySelect: document.getElementById("difficulty-select"),
-      customTablesGroup: document.getElementById("custom-tables-group"),
+      sessionLengthSelect: document.getElementById("session-length-select"),
+      poolSize: document.getElementById("pool-size"),
       tableToggles: ALL_TABLES.map((table) => ({
         table,
         input: document.getElementById(`table-${table}`),
@@ -500,14 +525,14 @@ export class GameUI extends BaseGameUI {
    * the text and so leaves `aria-valuenow` frozen at its markup value -- a
    * screen reader would report 0/20 for the entire session.
    *
-   * `total` defaults to `SESSION.FACTS_PER_SESSION` so `aria-valuemax` is
-   * derived from the session constant rather than the hardcoded `20` in the
-   * markup, which would silently lie if the session length ever changed.
+   * `total` defaults to `SESSION.DEFAULT_LENGTH` only as a floor; the session
+   * length is a setting, so `game.js` passes `settings.sessionLength` and this
+   * default is never what a real session uses.
    * @param {number} current - Questions answered so far
    * @param {number} [total] - Questions in the session
    * @returns {void}
    */
-  updateProgressBar(current, total = SESSION.FACTS_PER_SESSION) {
+  updateProgressBar(current, total = SESSION.DEFAULT_LENGTH) {
     super.updateProgressBar(current, total, MATH.PERCENT_MULTIPLIER)
     const bar = this.elements.progressBar
     if (!bar) return
@@ -959,20 +984,32 @@ export class GameUI extends BaseGameUI {
 
   /**
    * Build the sentence that says what is still needed to pass a gate. Kept here,
-   * next to the element that shows it, and fed plain numbers -- formatting it in
-   * the UI layer is what keeps `GameUI` from importing `Journey.js`.
+   * next to the element that shows it, and fed ready-formatted fact labels --
+   * formatting it in the UI layer is what keeps `GameUI` from importing
+   * `Journey.js`.
+   *
+   * It NAMES THE FACTS rather than counting them. "Master 2 more facts in Triple
+   * Bridge" was accurate and useless: fact selection ignores where the token is,
+   * so a player can answer twenty questions without being asked either of the two
+   * facts the gate is waiting on, and every one of those correct answers leaves
+   * the number at 2. Naming them is the only version of this sentence a player
+   * can act on. See `docs/times-trail-plan.md` for the structural fix.
+   *
+   * It also says "keep practising", not "master". The gate opens at
+   * `TRAIL.UNLOCK_MIN_STRENGTH` (3, "strengthening"), and "mastered" is the
+   * strength-4 bar the card collection uses -- telling the player to master a
+   * fact she only has to strengthen sets the wrong target.
    * @param {GateView} gate - Blocking region's progress
    * @returns {string} The message to display
    */
   formatGateMessage(gate) {
     if (!gate || typeof gate !== "object") return ""
-    const remaining = Number(gate.required) - Number(gate.mastered)
-    if (!Number.isFinite(remaining) || remaining <= 0 || !gate.regionName) {
+    const names = Array.isArray(gate.factLabels) ? gate.factLabels.filter(Boolean) : []
+    if (names.length === 0 || !gate.regionName) {
       // Only reachable at the last space, where there is no blocking region.
       return "You have reached the end of the trail"
     }
-    const facts = `${remaining} more fact${remaining === 1 ? "" : "s"}`
-    return `Master ${facts} in ${gate.regionName} to cross the bridge`
+    return `Keep practising ${joinWithAnd(names.slice(0, GATE_FACTS_SHOWN), names.length - GATE_FACTS_SHOWN)} to open the ${gate.regionName} gate`
   }
 
   /**
@@ -1408,7 +1445,9 @@ export class GameUI extends BaseGameUI {
       summaryGoal,
       summaryRegion,
       summaryMilestones,
+      summaryMilestonesGroup,
       summaryCards,
+      summaryCardsGroup,
     } = this.elements
 
     if (summaryStars) summaryStars.textContent = String(summary.stars)
@@ -1438,37 +1477,41 @@ export class GameUI extends BaseGameUI {
         item.textContent = String(label)
         summaryMilestones.appendChild(item)
       }
-      this.setVisible(summaryMilestones, labels.length > 0)
+      // The GROUP is toggled, not the list: the list's heading is what stops
+      // "1000 stars" reading as a session tally sitting next to "1189 stars".
+      this.setVisible(summaryMilestonesGroup ?? summaryMilestones, labels.length > 0)
     }
 
     if (summaryCards) {
       summaryCards.innerHTML = ""
       const newCards = Array.isArray(summary.newCards) ? summary.newCards.filter(Boolean) : []
       for (const card of newCards) summaryCards.appendChild(this._buildCard(card))
+      // Same reason: four unlabelled cards told the player nothing about why they
+      // were on screen.
+      this.setVisible(summaryCardsGroup ?? summaryCards, newCards.length > 0)
     }
   }
 
   // --------------------------------------------------------- Settings
 
   /**
-   * Reflect the persisted settings into the modal's two controls, and show the
-   * custom table picker if and only if the difficulty is "custom". `game.js`
-   * calls this again from its difficulty handler, so the group appears the
-   * instant "Custom" is chosen.
+   * Reflect the persisted settings into the modal's two controls, and say how
+   * many facts the chosen tables add up to.
+   *
+   * The pool size is shown because the toggles alone hide the consequence:
+   * ticking 7 adds eight facts, not one, and a player who unticks down to a
+   * three-fact pool should be able to see that before wondering why the same
+   * question keeps coming back.
    * @param {SettingsData} settingsData - Current settings
+   * @param {number} [factCount] - Size of the resulting fact pool; omitted leaves
+   *   `#pool-size` as it was
    * @returns {void}
    */
-  renderSettings(settingsData) {
+  renderSettings(settingsData, factCount) {
     if (!settingsData) return
-    const { difficultySelect, customTablesGroup, tableToggles } = this.elements
+    const { sessionLengthSelect, poolSize, tableToggles } = this.elements
 
-    if (difficultySelect && settingsData.difficulty) {
-      difficultySelect.value = settingsData.difficulty
-    }
-
-    const enabled = new Set(
-      Array.isArray(settingsData.customTables) ? settingsData.customTables : [],
-    )
+    const enabled = new Set(Array.isArray(settingsData.tables) ? settingsData.tables : [])
     if (Array.isArray(tableToggles)) {
       for (const toggle of tableToggles) {
         const pressed = enabled.has(toggle.table)
@@ -1479,8 +1522,12 @@ export class GameUI extends BaseGameUI {
       }
     }
 
-    if (customTablesGroup) {
-      this.setVisible(customTablesGroup, settingsData.difficulty === DIFFICULTY.CUSTOM)
+    if (sessionLengthSelect && Number.isFinite(settingsData.sessionLength)) {
+      sessionLengthSelect.value = String(settingsData.sessionLength)
+    }
+
+    if (poolSize && Number.isFinite(factCount)) {
+      poolSize.textContent = `${factCount} fact${factCount === 1 ? "" : "s"} in play`
     }
   }
 }

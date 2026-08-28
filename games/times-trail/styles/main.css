@@ -978,6 +978,25 @@ body {
   color: var(--tt-primary);
 }
 
+/* A labelled block of the summary. The heading is what stops "1000 stars" (a
+   lifetime gem milestone) from reading as a session tally beside "1189 stars",
+   and what tells the player why four cards are on screen. */
+.summary-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.summary-group-heading {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--tt-ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
 .summary-milestones {
   list-style: none;
   font-size: 1.125rem;

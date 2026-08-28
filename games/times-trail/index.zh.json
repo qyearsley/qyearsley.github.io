@@ -24,22 +24,19 @@
   "🎉 Session Complete!": "🎉 本轮练习完成！",
   "Play Again": "再玩一次",
   "Back to Hub": "回到主菜单",
-  "stars": "颗星",
-  "gems": "颗宝石",
+  "stars this session": "颗星（本轮）",
+  "gems this session": "颗宝石（本轮）",
   "Correct:": "答对：",
   "Best streak:": "最长连对：",
+  "💎 New gems earned": "💎 新获得的宝石",
+  "🃏 Cards that grew": "🃏 升级的卡片",
 
   "The Trail": "小径",
   "Fact Cards": "口诀卡片",
 
   "Settings ⚙️": "设置 ⚙️",
-  "Difficulty:": "难度：",
-  "Explorer (2s-5s)": "探险新手（2-5 的乘法表）",
-  "Adventurer (2s-7s)": "探险家（2-7 的乘法表）",
-  "Master (all tables)": "大师（全部乘法表）",
-  "Custom": "自定义",
-  "How much of the trail is in play": "决定练习小径上的多少内容",
   "Which tables?": "练哪些乘法表？",
-  "Pick the times tables to practice": "选择要练习的乘法表",
+  "Tapping 7 practises the whole 7 times table, 7 × 2 up to 7 × 9.": "点 7 就练整个 7 的乘法表，从 7 × 2 到 7 × 9。",
+  "Questions per session:": "每轮题数：",
   "Done": "完成"
 }

@@ -432,7 +432,7 @@ describe("Keypad", () => {
     })
 
     test("form controls keep their native keyboard behavior", () => {
-      const select = document.getElementById("difficulty-select")
+      const select = document.getElementById("session-length-select")
       const checkbox = document.getElementById("table-2")
       expect(keypad.handleKeyDown(keyEvent("5", select))).toBe(false)
       expect(keypad.handleKeyDown(keyEvent("5", checkbox))).toBe(false)

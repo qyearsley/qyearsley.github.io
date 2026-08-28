@@ -692,14 +692,43 @@ describe("Scoring", () => {
       expect(extra.daily.factsToday).toBe(DAILY_GOAL.FACTS + 1)
     })
 
-    test("a full session fires the goal exactly once within the session", () => {
-      expect(SESSION.FACTS_PER_SESSION).toBe(DAILY_GOAL.FACTS)
-      const { flags } = answerTimes(
-        scoringOnDay(),
-        Scoring.createDaily(),
-        SESSION.FACTS_PER_SESSION,
-      )
+    // The goal is deliberately NOT derived from the session length now that the
+    // length is a setting. If it tracked the setting, picking the 10-question
+    // session would halve the goal and every day would still be "done" in one
+    // session -- which is the opposite of what a goal is for. So: the default
+    // session meets it exactly, the long one overshoots, and the short one takes
+    // two. In every case it fires at most once.
+    test("the default session meets the goal exactly", () => {
+      expect(SESSION.DEFAULT_LENGTH).toBe(DAILY_GOAL.FACTS)
+    })
+
+    test("no session length fires the goal more than once", () => {
+      for (const length of SESSION.LENGTH_OPTIONS) {
+        const { flags } = answerTimes(scoringOnDay(), Scoring.createDaily(), length)
+        expect(flags.filter(Boolean).length).toBeLessThanOrEqual(1)
+      }
+    })
+
+    test("a session shorter than the goal does not meet it, and two of them do", () => {
+      const short = Math.min(...SESSION.LENGTH_OPTIONS)
+      expect(short).toBeLessThan(DAILY_GOAL.FACTS)
+
+      const scoring = scoringOnDay()
+      const first = answerTimes(scoring, Scoring.createDaily(), short)
+      expect(first.flags.filter(Boolean)).toHaveLength(0)
+      expect(first.daily.factsToday).toBe(short)
+
+      const second = answerTimes(scoring, first.daily, short)
+      expect(second.flags.filter(Boolean)).toHaveLength(1)
+      expect(second.daily.streakDays).toBe(1)
+    })
+
+    test("a session longer than the goal fires it mid-session, not at the end", () => {
+      const long = Math.max(...SESSION.LENGTH_OPTIONS)
+      expect(long).toBeGreaterThan(DAILY_GOAL.FACTS)
+      const { flags } = answerTimes(scoringOnDay(), Scoring.createDaily(), long)
       expect(flags.filter(Boolean)).toHaveLength(1)
+      expect(flags.indexOf(true)).toBe(DAILY_GOAL.FACTS - 1)
     })
 
     test("takes no second argument; a stray object changes nothing", () => {

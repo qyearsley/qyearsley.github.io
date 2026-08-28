@@ -1,14 +1,7 @@
 import { describe, test, expect } from "@jest/globals"
 import { Journey } from "../js/Journey.js"
 import { FACT_IDS, factIdsForTables, factsForRegionTable } from "../js/facts.js"
-import {
-  ALL_TABLES,
-  DAY_MS,
-  DIFFICULTY_PRESETS,
-  PATTERN_FREE_IDS,
-  REGIONS,
-  TRAIL,
-} from "../js/constants.js"
+import { ALL_TABLES, DAY_MS, PATTERN_FREE_IDS, REGIONS, TRAIL } from "../js/constants.js"
 
 /** A fixed instant, so nothing in these tests depends on the wall clock. */
 const NOW = Date.UTC(2026, 5, 1)
@@ -20,14 +13,26 @@ const fixedNow = () => NOW
 const REGION_IDS = REGIONS.map((region) => region.id)
 
 /**
- * The four difficulty pools, derived from facts.js rather than hand-copied so a
- * change to the fact set cannot leave these fixtures quietly stale.
+ * Four table selections the settings modal can actually produce, derived from
+ * facts.js rather than hand-copied so a change to the fact set cannot leave
+ * these fixtures quietly stale.
+ *
+ * They are chosen to span the gating shapes rather than to be representative:
+ * `all` skips nothing, `sixSeven` skips the first four regions, `sevens` skips
+ * five, and `nines` skips every region but the last -- the extreme case, where
+ * seven consecutive skipped gates have to not block the eighth.
+ *
+ * Note what is NOT here: a pool that empties a HIGH region. Under table-family
+ * semantics that is impossible -- region 9 owns 2x9 through 9x9, so any non-empty
+ * selection puts at least one fact in it. The old "both" ceiling mode could do it
+ * (tables 2-7 emptied Spider Woods and Dragon Peak), which is what the 34-space
+ * cap bug was about.
  */
 const POOLS = {
-  explorer: factIdsForTables(DIFFICULTY_PRESETS.explorer.tables, "both"),
-  adventurer: factIdsForTables(DIFFICULTY_PRESETS.adventurer.tables, "both"),
-  master: factIdsForTables(ALL_TABLES, "both"),
-  custom: factIdsForTables([6, 7], "either"),
+  all: factIdsForTables([...ALL_TABLES]),
+  sixSeven: factIdsForTables([6, 7]),
+  sevens: factIdsForTables([7]),
+  nines: factIdsForTables([9]),
 }
 
 /**
@@ -98,21 +103,25 @@ function fullJourney() {
   return new Journey({ now: fixedNow })
 }
 
-/** A journey over one named difficulty pool. */
+/** A journey over one named table selection. */
 function pooledJourney(poolName) {
   return new Journey({ now: fixedNow, activePool: POOLS[poolName] })
 }
 
 describe("Journey", () => {
   describe("pool fixtures", () => {
-    test("the four difficulty pools have the sizes the presets promise", () => {
-      expect(POOLS.explorer.length).toBe(10)
-      expect(POOLS.adventurer.length).toBe(21)
-      expect(POOLS.master.length).toBe(36)
-      expect(POOLS.custom.length).toBe(15)
-      expect(POOLS.explorer.length).toBe(DIFFICULTY_PRESETS.explorer.poolSize)
-      expect(POOLS.adventurer.length).toBe(DIFFICULTY_PRESETS.adventurer.poolSize)
-      expect(POOLS.master.length).toBe(DIFFICULTY_PRESETS.master.poolSize)
+    test("the four pools have the sizes their table selections imply", () => {
+      expect(POOLS.all.length).toBe(36)
+      // 6 and 7 own eight facts each and share 6x7.
+      expect(POOLS.sixSeven.length).toBe(15)
+      expect(POOLS.sevens.length).toBe(8)
+      expect(POOLS.nines.length).toBe(8)
+    })
+
+    test("every pool is a subset of the fact set, in FACTS order", () => {
+      for (const pool of Object.values(POOLS)) {
+        expect(pool).toEqual(FACT_IDS.filter((id) => pool.includes(id)))
+      }
     })
   })
 
@@ -140,8 +149,8 @@ describe("Journey", () => {
     test("structural region sizes are 1 through 8, independent of the pool", () => {
       const sizes = (journey) => REGION_IDS.map((id) => journey.factIdsForRegion(id).length)
       expect(sizes(fullJourney())).toEqual([1, 2, 3, 4, 5, 6, 7, 8])
-      expect(sizes(pooledJourney("explorer"))).toEqual([1, 2, 3, 4, 5, 6, 7, 8])
-      expect(sizes(pooledJourney("custom"))).toEqual([1, 2, 3, 4, 5, 6, 7, 8])
+      expect(sizes(pooledJourney("nines"))).toEqual([1, 2, 3, 4, 5, 6, 7, 8])
+      expect(sizes(pooledJourney("sixSeven"))).toEqual([1, 2, 3, 4, 5, 6, 7, 8])
     })
 
     test("the regions partition all 36 facts with no overlap", () => {
@@ -242,22 +251,32 @@ describe("Journey", () => {
       expect(journey.activePool.length).toBe(36)
     })
 
-    test("adventurer pool empties Spider Woods and Dragon Peak", () => {
-      const journey = pooledJourney("adventurer")
+    test("the whole fact set fills every region", () => {
+      const journey = pooledJourney("all")
       const sizes = REGION_IDS.map((id) => journey.activeFactIdsForRegion(id).length)
-      expect(sizes).toEqual([1, 2, 3, 4, 5, 6, 0, 0])
-      expect(sizes.reduce((sum, n) => sum + n, 0)).toBe(21)
+      expect(sizes).toEqual([1, 2, 3, 4, 5, 6, 7, 8])
+      expect(sizes.reduce((sum, n) => sum + n, 0)).toBe(36)
     })
 
-    test("explorer pool fills only the first four regions", () => {
-      const journey = pooledJourney("explorer")
+    test("a single high table skips every region but its own", () => {
+      // Tables [9]: region 9 owns all eight of the pool's facts, and no fact whose
+      // larger operand is 2-8 contains a 9. The worst case the gate has to survive.
+      const journey = pooledJourney("nines")
       const sizes = REGION_IDS.map((id) => journey.activeFactIdsForRegion(id).length)
-      expect(sizes).toEqual([1, 2, 3, 4, 0, 0, 0, 0])
-      expect(sizes.reduce((sum, n) => sum + n, 0)).toBe(10)
+      expect(sizes).toEqual([0, 0, 0, 0, 0, 0, 0, 8])
+      expect(journey.activeFactIdsForRegion("dragon-peak")).toEqual(POOLS.nines)
     })
 
-    test("custom [6, 7] pool skips the first four regions and reaches the last two", () => {
-      const journey = pooledJourney("custom")
+    test("tables [7] fill Rainbow Ridge and leave one fact each side of it", () => {
+      const journey = pooledJourney("sevens")
+      const sizes = REGION_IDS.map((id) => journey.activeFactIdsForRegion(id).length)
+      expect(sizes).toEqual([0, 0, 0, 0, 0, 6, 1, 1])
+      expect(journey.activeFactIdsForRegion("spider-woods")).toEqual(["7x8"])
+      expect(journey.activeFactIdsForRegion("dragon-peak")).toEqual(["7x9"])
+    })
+
+    test("tables [6, 7] skip the first four regions and reach the last two", () => {
+      const journey = pooledJourney("sixSeven")
       const sizes = REGION_IDS.map((id) => journey.activeFactIdsForRegion(id).length)
       expect(sizes).toEqual([0, 0, 0, 0, 5, 6, 2, 2])
       expect(sizes.reduce((sum, n) => sum + n, 0)).toBe(15)
@@ -266,7 +285,7 @@ describe("Journey", () => {
     })
 
     test("active ids stay in FACTS order and are a subset of the structural ids", () => {
-      const journey = pooledJourney("custom")
+      const journey = pooledJourney("sixSeven")
       const active = journey.activeFactIdsForRegion("rainbow-ridge")
       expect(active).toEqual(structuralIds(7))
       expect(active).toEqual(["2x7", "3x7", "4x7", "5x7", "6x7", "7x7"])
@@ -394,20 +413,20 @@ describe("Journey", () => {
     })
 
     test("required is scoped to the pool, not to the region's full size", () => {
-      const custom = pooledJourney("custom")
-      const spiderWoods = custom.regionProgress("spider-woods", {})
+      const narrow = pooledJourney("sixSeven")
+      const spiderWoods = narrow.regionProgress("spider-woods", {})
       expect(spiderWoods.total).toBe(2)
       expect(spiderWoods.required).toBe(2)
       expect(spiderWoods.skipped).toBe(false)
 
-      const adventurer = pooledJourney("adventurer")
-      const empty = adventurer.regionProgress("spider-woods", {})
+      const nines = pooledJourney("nines")
+      const empty = nines.regionProgress("spider-woods", {})
       expect(empty.total).toBe(0)
       expect(empty.required).toBe(0)
     })
 
     test("an empty intersection is a skip, complete and 100%, not a hole at 0%", () => {
-      const journey = pooledJourney("adventurer")
+      const journey = pooledJourney("nines")
       const progress = journey.regionProgress("spider-woods", {})
       expect(progress.total).toBe(0)
       expect(progress.strong).toBe(0)
@@ -541,18 +560,27 @@ describe("Journey", () => {
     })
 
     test("a skipped region does not block what follows it", () => {
-      const journey = pooledJourney("custom")
+      const journey = pooledJourney("sixSeven")
       // Regions 1-4 hold no pool facts, so they are complete and Beehive Hollow
       // -- the first region she can actually practise -- is reachable at once.
       expect(journey.unlockedRegionIds({})).toEqual(REGION_IDS.slice(0, 5))
       expect(journey.isRegionUnlocked("beehive-hollow", {})).toBe(true)
       expect(journey.isRegionUnlocked("rainbow-ridge", {})).toBe(false)
     })
+
+    test("seven consecutive skipped regions do not block the eighth", () => {
+      // Tables [9]: the whole trail up to Dragon Peak is skipped, so it is
+      // reachable with no practice at all. A prefix of skips must not accumulate
+      // into a wall.
+      const journey = pooledJourney("nines")
+      expect(journey.unlockedRegionIds({})).toEqual(REGION_IDS)
+      expect(journey.isRegionUnlocked("dragon-peak", {})).toBe(true)
+    })
   })
 
   describe("earnedRegionIds", () => {
     test("excludes skipped regions, so a narrow pool earns nothing for free", () => {
-      const journey = pooledJourney("custom")
+      const journey = pooledJourney("sixSeven")
       // Five regions are reachable with zero practice, four of them only because
       // tables [6, 7] leave them empty. Counting those as earned handed out the
       // regions-4 gem on the very first answer.
@@ -566,11 +594,26 @@ describe("Journey", () => {
       expect(journey.earnedRegionIds(masteredRecords(FACT_IDS))).toEqual(REGION_IDS)
     })
 
-    test("a full run of every pool earns at least the regions-4 milestone", () => {
-      for (const poolName of Object.keys(POOLS)) {
+    test("a wide pool fully mastered earns the regions-4 milestone", () => {
+      for (const poolName of ["all", "sixSeven"]) {
         const journey = pooledJourney(poolName)
         const earned = journey.earnedRegionIds(masteredRecords(POOLS[poolName]))
         expect(earned.length).toBeGreaterThanOrEqual(4)
+      }
+    })
+
+    test("a pool spanning fewer than four regions cannot earn regions-4, by design", () => {
+      // The honest answer, and the one Journey.js documents: a single-table pool
+      // touches three regions at most, so a four-region milestone is out of reach.
+      // She has not walked half a trail of content that is not in her pool. This is
+      // reachable now that the table toggles let anyone pick one table -- the four
+      // difficulty presets were all wide enough to hide it.
+      for (const poolName of ["sevens", "nines"]) {
+        const journey = pooledJourney(poolName)
+        const earned = journey.earnedRegionIds(masteredRecords(POOLS[poolName]))
+        expect(earned.length).toBeLessThan(4)
+        // Still finishes the trail, though: the gem is unreachable, the trail is not.
+        expect(journey.lastUnlockedSpace(masteredRecords(POOLS[poolName]))).toBe(39)
       }
     })
 
@@ -585,29 +628,19 @@ describe("Journey", () => {
       expect(journey.lastUnlockedSpace(masteredRecords(FACT_IDS))).toBe(39)
     })
 
-    test("adventurer pool reaches 39, not the 34 the unscoped gate produced", () => {
-      const journey = pooledJourney("adventurer")
-      const records = masteredRecords(POOLS.adventurer)
+    test("tables [6, 7] reach 39, not the 4 the unscoped gate produced", () => {
+      const journey = pooledJourney("sixSeven")
+      const records = masteredRecords(POOLS.sixSeven)
       expect(journey.lastUnlockedSpace(records)).toBe(39)
-      expect(journey.lastUnlockedSpace(records)).not.toBe(34)
+      expect(journey.lastUnlockedSpace(records)).not.toBe(4)
       expect(journey.isTrailComplete({ space: 39 }, records)).toBe(true)
     })
 
-    test("explorer pool reaches 39", () => {
-      const journey = pooledJourney("explorer")
-      expect(journey.lastUnlockedSpace(masteredRecords(POOLS.explorer))).toBe(39)
-    })
-
-    test("master pool reaches 39", () => {
-      const journey = pooledJourney("master")
-      expect(journey.lastUnlockedSpace(masteredRecords(POOLS.master))).toBe(39)
-    })
-
-    test("custom [6, 7] pool reaches 39, not the 4 the unscoped gate produced", () => {
-      const journey = pooledJourney("custom")
-      const records = masteredRecords(POOLS.custom)
-      expect(journey.lastUnlockedSpace(records)).toBe(39)
-      expect(journey.lastUnlockedSpace(records)).not.toBe(4)
+    test("a single table reaches 39 on eight facts", () => {
+      for (const poolName of ["sevens", "nines"]) {
+        const records = masteredRecords(POOLS[poolName])
+        expect(pooledJourney(poolName).lastUnlockedSpace(records)).toBe(39)
+      }
     })
 
     test.each(Object.keys(POOLS))(
@@ -619,18 +652,18 @@ describe("Journey", () => {
       },
     )
 
-    test("every pool starts capped at the second region's last space", () => {
-      // The start region has no gate, so the first two regions are open before
-      // any practice at all. Except custom [6, 7], whose first four regions are
-      // skipped outright.
-      expect(pooledJourney("explorer").lastUnlockedSpace({})).toBe(9)
-      expect(pooledJourney("adventurer").lastUnlockedSpace({})).toBe(9)
-      expect(pooledJourney("master").lastUnlockedSpace({})).toBe(9)
-      expect(pooledJourney("custom").lastUnlockedSpace({})).toBe(24)
+    test("the starting cap is the last space of the first region with facts in it", () => {
+      // The start region has no gate, so with the whole fact set the first two
+      // regions are open before any practice at all. A pool that skips the early
+      // regions starts further along, because a skipped gate is already open.
+      expect(pooledJourney("all").lastUnlockedSpace({})).toBe(9)
+      expect(pooledJourney("sixSeven").lastUnlockedSpace({})).toBe(24)
+      expect(pooledJourney("sevens").lastUnlockedSpace({})).toBe(29)
+      expect(pooledJourney("nines").lastUnlockedSpace({})).toBe(39)
     })
 
     test("the cap moves correctly under a small pool", () => {
-      const journey = pooledJourney("adventurer")
+      const journey = pooledJourney("all")
       // Triple Bridge, not Doubling Meadow, is the first real gate.
       expect(journey.lastUnlockedSpace(masteredRecords(["2x3", "3x3"]))).toBe(14)
     })
@@ -768,9 +801,9 @@ describe("Journey", () => {
       }
     })
 
-    test("adventurer walks straight through the skipped regions to space 39", () => {
-      const journey = pooledJourney("adventurer")
-      const records = masteredRecords(POOLS.adventurer)
+    test("a narrow pool walks straight through the skipped regions to space 39", () => {
+      const journey = pooledJourney("sixSeven")
+      const records = masteredRecords(POOLS.sixSeven)
       const result = journey.advance({ space: 25 }, 14, records)
       expect(result.trail.space).toBe(39)
       expect(result.blocked).toBe(false)
@@ -801,7 +834,7 @@ describe("Journey", () => {
       // hundred answers. One space per correct answer, so space 4 is left on the
       // fifth.
       let trail = Journey.createTrail()
-      const journey = pooledJourney("adventurer")
+      const journey = pooledJourney("all")
       const spacesAfter = []
       for (let answer = 1; answer <= 6; answer += 1) {
         trail = journey.advance(trail, TRAIL.SPACES_PER_CORRECT, {}).trail
@@ -855,8 +888,8 @@ describe("Journey", () => {
     })
 
     test("skipped regions count as complete", () => {
-      const journey = pooledJourney("adventurer")
-      expect(journey.isTrailComplete({ space: 39 }, masteredRecords(POOLS.adventurer))).toBe(true)
+      const journey = pooledJourney("nines")
+      expect(journey.isTrailComplete({ space: 39 }, masteredRecords(POOLS.nines))).toBe(true)
     })
 
     test("empty records at space 39 is not complete", () => {

@@ -187,15 +187,21 @@
           </button>
         </div>
         <div class="summary-tallies">
-          <p class="summary-tally">⭐ <span id="summary-stars">0</span> stars</p>
-          <p class="summary-tally">💎 <span id="summary-gems">0</span> gems</p>
+          <p class="summary-tally">⭐ <span id="summary-stars">0</span> stars this session</p>
+          <p class="summary-tally">💎 <span id="summary-gems">0</span> gems this session</p>
           <p class="summary-tally">Correct: <span id="summary-correct">0</span></p>
           <p class="summary-tally">Best streak: <span id="summary-streak">0</span></p>
         </div>
         <p id="summary-goal" class="summary-goal hidden"></p>
         <p id="summary-region" class="summary-region hidden"></p>
-        <ul id="summary-milestones" class="summary-milestones hidden"></ul>
-        <div id="summary-cards" class="summary-cards"></div>
+        <div id="summary-milestones-group" class="summary-group hidden">
+          <h3 class="summary-group-heading">💎 New gems earned</h3>
+          <ul id="summary-milestones" class="summary-milestones"></ul>
+        </div>
+        <div id="summary-cards-group" class="summary-group hidden">
+          <h3 class="summary-group-heading">🃏 Cards that grew</h3>
+          <div id="summary-cards" class="summary-cards"></div>
+        </div>
       </div>
 
       <!-- 5. Trail Screen -->
@@ -262,17 +268,6 @@
           <h2>Settings ⚙️</h2>
 
           <div class="setting-group">
-            <label for="difficulty-select">Difficulty:</label>
-            <select id="difficulty-select" class="setting-select">
-              <option value="explorer">Explorer (2s-5s)</option>
-              <option value="adventurer">Adventurer (2s-7s)</option>
-              <option value="master">Master (all tables)</option>
-              <option value="custom">Custom</option>
-            </select>
-            <p class="setting-description">How much of the trail is in play</p>
-          </div>
-
-          <div class="setting-group hidden" id="custom-tables-group">
             <fieldset class="table-toggles">
               <legend>Which tables?</legend>
               <label class="table-toggle" for="table-2">
@@ -308,7 +303,19 @@
                 <span class="table-toggle-face">9</span>
               </label>
             </fieldset>
-            <p class="setting-description">Pick the times tables to practice</p>
+            <p class="setting-description">
+              Tapping 7 practises the whole 7 times table, 7 × 2 up to 7 × 9.
+            </p>
+            <p id="pool-size" class="setting-description" role="status" aria-live="polite"></p>
+          </div>
+
+          <div class="setting-group">
+            <label for="session-length-select">Questions per session:</label>
+            <select id="session-length-select" class="setting-select">
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+            </select>
           </div>
 
           <button id="close-settings" type="button" class="big-button" aria-label="Close settings">

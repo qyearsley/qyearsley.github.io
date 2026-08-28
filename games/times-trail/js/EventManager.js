@@ -266,22 +266,19 @@ export class EventManager {
   }
 
   /**
-   * Wires the only two kinds of settings control that exist: `#difficulty-select`
-   * to `onSettingChange("difficulty", value)` and each `[data-table]` checkbox to
-   * `onTableToggle(table, checked)`. The visible toggle is a `<label>` wrapping
-   * the checkbox, so a tap on its 68px face produces a normal `change` event on
-   * the input and needs no extra click handling.
+   * Wires the only two kinds of settings control that exist: each `[data-table]`
+   * checkbox to `onTableToggle(table, checked)` and `#session-length-select` to
+   * `onSettingChange("sessionLength", value)`. The visible toggle is a `<label>`
+   * wrapping the checkbox, so a tap on its 68px face produces a normal `change`
+   * event on the input and needs no extra click handling.
+   *
+   * The select's value is parsed here rather than in `Settings`, because a
+   * `<select>` always yields a string and `Settings.validate` compares against
+   * the numbers in `SESSION.LENGTH_OPTIONS`.
    *
    * @returns {void}
    */
   setupSettingsControls() {
-    const difficultySelect = this._element("difficultySelect", "difficulty-select")
-    if (difficultySelect) {
-      difficultySelect.addEventListener("change", (event) => {
-        this._invoke("onSettingChange", "difficulty", event.target.value)
-      })
-    }
-
     const checkboxes = document.querySelectorAll('input[type="checkbox"][data-table]')
     checkboxes.forEach((checkbox) => {
       checkbox.addEventListener("change", (event) => {
@@ -290,6 +287,15 @@ export class EventManager {
         this._invoke("onTableToggle", table, event.target.checked)
       })
     })
+
+    const sessionLengthSelect = this._element("sessionLengthSelect", "session-length-select")
+    if (sessionLengthSelect) {
+      sessionLengthSelect.addEventListener("change", (event) => {
+        const length = parseInt(event.target.value, 10)
+        if (Number.isNaN(length)) return
+        this._invoke("onSettingChange", "sessionLength", length)
+      })
+    }
   }
 
   /**

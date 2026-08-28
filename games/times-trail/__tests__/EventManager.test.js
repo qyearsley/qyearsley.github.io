@@ -63,7 +63,7 @@ function makeMockUI() {
       settingsButton: byId("settings-button"),
       playSettingsButton: byId("play-settings-button"),
       closeSettings: byId("close-settings"),
-      difficultySelect: byId("difficulty-select"),
+      sessionLengthSelect: byId("session-length-select"),
     },
   }
 }
@@ -389,19 +389,34 @@ describe("EventManager", () => {
   })
 
   describe("setupSettingsControls", () => {
-    test("#difficulty-select change invokes onSettingChange", () => {
-      const select = document.getElementById("difficulty-select")
-      select.value = "master"
+    // Parsed to a NUMBER here: a <select> always yields a string, and
+    // Settings.validate compares against the numbers in SESSION.LENGTH_OPTIONS,
+    // so passing "30" through would be silently rejected.
+    test("#session-length-select change invokes onSettingChange with a number", () => {
+      const select = document.getElementById("session-length-select")
+      select.value = "30"
       select.dispatchEvent(new Event("change"))
       expect(callbacks.onSettingChange).toHaveBeenCalledTimes(1)
-      expect(callbacks.onSettingChange).toHaveBeenCalledWith("difficulty", "master")
+      expect(callbacks.onSettingChange).toHaveBeenCalledWith("sessionLength", 30)
     })
 
-    test("the four deleted selects are absent from the fixture", () => {
+    test("an unparseable session length invokes nothing", () => {
+      const select = document.getElementById("session-length-select")
+      const option = document.createElement("option")
+      option.value = "lots"
+      select.appendChild(option)
+      select.value = "lots"
+      select.dispatchEvent(new Event("change"))
+      expect(callbacks.onSettingChange).not.toHaveBeenCalled()
+    })
+
+    test("the deleted selects are absent from the fixture", () => {
       expect(document.getElementById("input-mode-select")).toBeNull()
       expect(document.getElementById("scaffolds-select")).toBeNull()
       expect(document.getElementById("sound-select")).toBeNull()
       expect(document.getElementById("reduced-motion-select")).toBeNull()
+      // Retired with the difficulty presets.
+      expect(document.getElementById("difficulty-select")).toBeNull()
     })
 
     test("checking a table checkbox invokes onTableToggle with the number and true", () => {
@@ -517,7 +532,7 @@ describe("EventManager", () => {
 
     test("does nothing when the event target is a select", () => {
       renderTiles([42, 36, 48, 49])
-      pressKey("2", document.getElementById("difficulty-select"))
+      pressKey("2", document.getElementById("session-length-select"))
       expect(callbacks.onAnswerSelected).not.toHaveBeenCalled()
     })
 
@@ -580,8 +595,8 @@ describe("EventManager", () => {
     /** Exercise every wired affordance on a manager built without callbacks. */
     function interactWithEverything() {
       controlIds.forEach(clickId)
-      const select = document.getElementById("difficulty-select")
-      select.value = "explorer"
+      const select = document.getElementById("session-length-select")
+      select.value = "10"
       select.dispatchEvent(new Event("change"))
       const checkbox = document.getElementById("table-6")
       checkbox.checked = true

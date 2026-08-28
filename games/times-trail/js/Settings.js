@@ -1,9 +1,8 @@
 /**
- * Settings for Times Trail -- difficulty presets, the custom per-table picker,
- * and everything derived from them: the active fact pool and the entry mode a
- * given fact strength gets.
+ * Settings for Times Trail -- which tables are in play, how long a session is,
+ * and the fact pool and entry mode derived from them.
  *
- * There are exactly three settings: `difficulty`, `customTables`, and `sound`.
+ * There are exactly three settings: `tables`, `sessionLength`, and `sound`.
  *
  * Philosophy (why the shape is this small):
  *
@@ -17,71 +16,75 @@
  *    `@media (prefers-reduced-motion: reduce)` in `main.css`, so there is
  *    nothing to persist and no `matchMedia` call anywhere in this codebase.
  *
- * 2. **`sound` is persisted but has no Phase 1 control.** Phase 1 ships no
- *    sound manager, and a settings control that changes nothing is worse than
- *    no control. The key stays in the save file so Phase 2 can pick it up
- *    without a migration.
+ * 2. **No difficulty presets.** There used to be four -- Explorer, Adventurer,
+ *    Master, Custom -- in front of the table list, plus a second table picker
+ *    behind Custom. Once every preset shared the same `keypadMinStrength` the
+ *    only thing a preset changed was the table list, so it was a table picker
+ *    under a vaguer name. `tables` is now the one control, and `DEFAULT_TABLES`
+ *    turns all eight on: the spaced-repetition draw is what makes practice
+ *    easier or harder question by question, and the table toggles are for
+ *    scoping ("we are on the 7s in class this week"), not for difficulty.
  *
- * 3. **Two table semantics, deliberately.** Presets mean a ceiling: Explorer's
- *    "2s through 5s" must not include `4x8`, so preset pools require *both*
- *    operands to be enabled. Custom means table families: ticking 7 means "the
- *    7 times table", so a custom pool includes a fact when *either* operand is
- *    enabled. `tableMode` on each preset carries which is which.
+ * 3. **One table semantic.** `tables` reads as families: enabling 7 puts 7x2
+ *    through 7x9 in the pool. The old ceiling semantic ("2s through 5s" must
+ *    exclude 4x8) existed only for the presets, and keeping both would just be a
+ *    way for the modal and the pool to disagree. See `facts.factsForTables`.
+ *
+ * 4. **`sound` is persisted but has no control.** Phase 1 ships no sound
+ *    manager, and a settings control that changes nothing is worse than no
+ *    control. The key stays in the save file so Phase 2 can pick it up without a
+ *    migration.
  *
  * Architecture: pure. No `document`, `window`, `localStorage`, or `setTimeout`,
- * and no clock. Persisted input is untrusted, so nothing here throws: an
- * unknown key, an unknown difficulty, or a junk table list is rejected and the
- * previous (or default) value is kept. No method mutates its argument, and
- * every getter that hands back an array or object hands back a copy, so a
- * caller cannot reach in and reshape the settings or the memoized pool.
+ * and no clock. Persisted input is untrusted, so nothing here throws: an unknown
+ * key, a junk table list, or an unoffered session length is rejected and the
+ * previous (or default) value is kept. No method mutates its argument, and every
+ * getter that hands back an array or object hands back a copy, so a caller
+ * cannot reach in and reshape the settings or the memoized pool.
  *
- * Error Handling: `update`, `setDifficulty`, and `setCustomTables` return a
- * boolean -- `false` means rejected and nothing changed. The one logged path is
- * a fact pool that came out empty, which the public API cannot produce; it
- * warns and falls back to the Adventurer pool rather than handing the game an
- * unplayable session.
+ * Error Handling: `update`, `setTables`, and `setSessionLength` return a boolean
+ * -- `false` means rejected and nothing changed. The one logged path is a fact
+ * pool that came out empty, which the public API cannot produce; it warns and
+ * falls back to every table rather than handing the game an unplayable session.
  */
 
 import {
-  DEFAULT_CUSTOM_TABLES,
-  DEFAULT_DIFFICULTY,
-  DIFFICULTY,
-  DIFFICULTY_PRESETS,
+  ALL_TABLES,
+  DEFAULT_TABLES,
   INPUT_MODE,
+  KEYPAD_MIN_STRENGTH,
   OPERAND_MAX,
   OPERAND_MIN,
+  SESSION,
   STRENGTH,
 } from "./constants.js"
 import { factIdsForTables } from "./facts.js"
 
 /**
  * @typedef {Object} SettingsData
- * @property {"explorer"|"adventurer"|"master"|"custom"} difficulty - Preset id;
- *   default "adventurer"
- * @property {number[]} customTables - Ascending, deduplicated tables in [2, 9];
- *   default [6, 7]. Only meaningful when `difficulty === "custom"`, but always
- *   persisted so switching to Custom and back does not lose the picker state.
- * @property {"on"|"off"} sound - Default "on". Persisted; no Phase 1 control.
- */
-
-/**
- * @typedef {Object} DifficultyPreset
- * @property {string} id
- * @property {string} label
- * @property {readonly number[]|null} tables - `null` for custom (player-chosen)
- * @property {"both"|"either"} tableMode
- * @property {number|null} keypadMinStrength - `null` means never use the keypad
- * @property {number|null} poolSize - Expected pool size; `null` for custom
+ * @property {number[]} tables - Ascending, deduplicated tables in [2, 9]; default
+ *   all eight. Never empty -- clearing the last one is rejected.
+ * @property {number} sessionLength - Questions per session; one of
+ *   `SESSION.LENGTH_OPTIONS`, default `SESSION.DEFAULT_LENGTH`.
+ * @property {"on"|"off"} sound - Default "on". Persisted; no control yet.
  */
 
 /**
  * The settings keys that exist. Anything else is dropped on load and rejected
- * by `update`, which is what retires `inputMode`, `scaffolds`, and
- * `reducedMotion` from saves written by an earlier build.
+ * by `update`, which is what retires `difficulty` and `customTables` from saves
+ * written by an earlier build -- along with `inputMode`, `scaffolds`, and
+ * `reducedMotion` from the build before that.
+ *
+ * A save from the preset era therefore loads as all-eight-tables rather than as
+ * whatever its preset meant. That is a deliberate one-time reset of scope, not a
+ * migration: `customTables` only ever meant anything alongside
+ * `difficulty === "custom"`, so honouring it in isolation would silently narrow
+ * the pool for players who were on a preset. Mastery records, stars, gems, and
+ * trail position are untouched -- see `storage.js`.
  * @private
  * @type {readonly string[]}
  */
-const _KEYS = Object.freeze(["difficulty", "customTables", "sound"])
+const _KEYS = Object.freeze(["tables", "sessionLength", "sound"])
 
 /**
  * Legal values of `sound`.
@@ -115,16 +118,16 @@ function _normalizeTables(tables) {
 }
 
 /**
- * Difficulty, the custom table picker, and the pool and entry mode derived from
- * them. Construct from untrusted persisted data; `toJSON()` gives the plain
- * object to persist back.
+ * The tables in play, the session length, and the fact pool and entry mode
+ * derived from them. Construct from untrusted persisted data; `toJSON()` gives
+ * the plain object to persist back.
  */
 export class Settings {
   /**
-   * @param {Object} [raw] - Persisted (untrusted) settings. Unknown keys,
-   *   unknown difficulties, and junk table lists are ignored, leaving the
-   *   default for that key. A non-object `raw` (`null`, `"x"`, `42`) yields
-   *   pure defaults. Never throws, and `raw` is never mutated.
+   * @param {Object} [raw] - Persisted (untrusted) settings. Unknown keys, junk
+   *   table lists, and unoffered session lengths are ignored, leaving the
+   *   default for that key. A non-object `raw` (`null`, `"x"`, `42`) yields pure
+   *   defaults. Never throws, and `raw` is never mutated.
    */
   constructor(raw = {}) {
     /** @type {SettingsData} The validated settings. */
@@ -132,7 +135,7 @@ export class Settings {
 
     /**
      * Memoized fact pool, or `null` when it must be recomputed. Invalidated by
-     * every mutator that can change `difficulty` or `customTables`.
+     * every mutator that can change `tables`.
      * @private
      * @type {string[]|null}
      */
@@ -151,8 +154,8 @@ export class Settings {
    */
   static defaults() {
     return {
-      difficulty: DEFAULT_DIFFICULTY,
-      customTables: [...DEFAULT_CUSTOM_TABLES],
+      tables: [...DEFAULT_TABLES],
+      sessionLength: SESSION.DEFAULT_LENGTH,
       sound: "on",
     }
   }
@@ -160,7 +163,7 @@ export class Settings {
   /**
    * Whether `key` is one of the three settings that exist.
    * @param {unknown} key - Candidate settings key
-   * @returns {boolean} True for "difficulty", "customTables", "sound"
+   * @returns {boolean} True for "tables", "sessionLength", "sound"
    */
   static isValidKey(key) {
     return typeof key === "string" && _KEYS.includes(key)
@@ -175,55 +178,35 @@ export class Settings {
    */
   static validate(key, value) {
     if (!Settings.isValidKey(key)) return false
-    if (key === "difficulty") {
-      return Object.values(DIFFICULTY).includes(value)
-    }
-    if (key === "customTables") {
+    if (key === "tables") {
       return _normalizeTables(value).length > 0
+    }
+    if (key === "sessionLength") {
+      return SESSION.LENGTH_OPTIONS.includes(value)
     }
     return _SOUND_VALUES.includes(value)
   }
 
   /**
-   * The current difficulty id.
-   * @returns {string} One of the `DIFFICULTY` values
-   */
-  get difficulty() {
-    return this.data.difficulty
-  }
-
-  /**
-   * The preset entry for the current difficulty. Always defined, because
-   * `difficulty` is validated on the way in.
-   * @returns {DifficultyPreset} The frozen `DIFFICULTY_PRESETS` entry
-   */
-  get preset() {
-    return DIFFICULTY_PRESETS[this.data.difficulty]
-  }
-
-  /**
-   * The tables currently in play: the preset's fixed list, or the player's
-   * custom picks. A new array each call, ascending.
+   * The tables currently in play. A new array each call, ascending.
    * @returns {number[]} Ascending table list, never empty
    */
   get enabledTables() {
-    const { tables } = this.preset
-    return tables === null ? [...this.data.customTables] : [...tables]
+    return [...this.data.tables]
   }
 
   /**
-   * How `enabledTables` selects facts: `"both"` (preset ceiling) or `"either"`
-   * (custom table families).
-   * @returns {"both"|"either"} The current preset's table semantics
+   * How many questions a session asks.
+   * @returns {number} One of `SESSION.LENGTH_OPTIONS`
    */
-  get tableMode() {
-    return this.preset.tableMode
+  get sessionLength() {
+    return this.data.sessionLength
   }
 
   /**
    * The canonical fact ids currently being practiced, in `FACTS` order.
-   * Recomputed only when difficulty or the custom tables change; the memo is
-   * private, so this returns a copy the caller may sort or splice freely.
+   * Recomputed only when the tables change; the memo is private, so this returns
+   * a copy the caller may sort or splice freely.
    * @returns {string[]} A new array of canonical fact ids, never empty
    */
   get factPool() {
@@ -239,7 +222,7 @@ export class Settings {
   }
 
   /**
-   * Set one setting. `"difficulty"` and `"customTables"` route through their
+   * Set one setting. `"tables"` and `"sessionLength"` route through their
    * dedicated setters, so validation and memo invalidation cannot diverge.
    * @param {unknown} key - Settings key; unknown keys are rejected
    * @param {unknown} value - Candidate value
@@ -247,42 +230,41 @@ export class Settings {
    *   nothing changed
    */
   update(key, value) {
-    if (key === "difficulty") return this.setDifficulty(value)
-    if (key === "customTables") return this.setCustomTables(value)
+    if (key === "tables") return this.setTables(value)
+    if (key === "sessionLength") return this.setSessionLength(value)
     if (!Settings.validate(key, value)) return false
     this.data = { ...this.data, [key]: value }
     return true
   }
 
   /**
-   * Switch difficulty. Rejects anything that is not a `DIFFICULTY` value; the
-   * custom table list is left untouched either way, so switching to Custom and
-   * back preserves the picker.
-   * @param {unknown} difficulty - Candidate difficulty id
-   * @returns {boolean} `true` if applied, `false` if rejected
+   * Replace the table list. The argument is normalized (integers in [2, 9],
+   * deduplicated, ascending) and copied, never aliased or mutated -- so a later
+   * change to the caller's array cannot reshape the pool. An empty result is
+   * rejected rather than silently reset, because "no tables selected" is a UI
+   * state the player can produce and the previous list is the better answer than
+   * a surprise default.
+   * @param {unknown} tables - Candidate table list, e.g. `[8, 9]`
+   * @returns {boolean} `true` if applied, `false` if nothing valid was in it
    */
-  setDifficulty(difficulty) {
-    if (!Settings.validate("difficulty", difficulty)) return false
-    this.data = { ...this.data, difficulty: /** @type {string} */ (difficulty) }
+  setTables(tables) {
+    const normalized = _normalizeTables(tables)
+    if (normalized.length === 0) return false
+    this.data = { ...this.data, tables: normalized }
     this._pool = null
     return true
   }
 
   /**
-   * Replace the custom table list. The argument is normalized (integers in
-   * [2, 9], deduplicated, ascending) and copied, never aliased or mutated -- so
-   * a later change to the caller's array cannot reshape the pool. An empty
-   * result is rejected rather than silently reset, because "no tables selected"
-   * is a UI state the player can produce and the previous list is the better
-   * answer than a surprise default.
-   * @param {unknown} tables - Candidate table list, e.g. `[8, 9]`
-   * @returns {boolean} `true` if applied, `false` if nothing valid was in it
+   * Set the number of questions per session. Rejects anything not offered in
+   * `SESSION.LENGTH_OPTIONS`, so a hand-edited save cannot produce a
+   * 500-question session.
+   * @param {unknown} length - Candidate session length
+   * @returns {boolean} `true` if applied, `false` if rejected
    */
-  setCustomTables(tables) {
-    const normalized = _normalizeTables(tables)
-    if (normalized.length === 0) return false
-    this.data = { ...this.data, customTables: normalized }
-    this._pool = null
+  setSessionLength(length) {
+    if (!Settings.validate("sessionLength", length)) return false
+    this.data = { ...this.data, sessionLength: /** @type {number} */ (length) }
     return true
   }
 
@@ -293,16 +275,15 @@ export class Settings {
    * is no override to check first.
    * @param {number} strength - The fact's (decayed) strength; rounded and
    *   clamped to [0, 5], and a non-finite value is treated as 0
-   * @returns {"tiles"|"keypad"} `INPUT_MODE.KEYPAD` once `strength` reaches the
-   *   preset's `keypadMinStrength`, else `INPUT_MODE.TILES`
+   * @returns {"tiles"|"keypad"} `INPUT_MODE.KEYPAD` once `strength` reaches
+   *   `KEYPAD_MIN_STRENGTH`, else `INPUT_MODE.TILES`
    */
   inputModeFor(strength) {
-    const min = this.preset.keypadMinStrength
-    if (min === null) return INPUT_MODE.TILES
+    if (KEYPAD_MIN_STRENGTH === null) return INPUT_MODE.TILES
     const clamped = Number.isFinite(strength)
       ? Math.min(STRENGTH.MAX, Math.max(STRENGTH.MIN, Math.round(strength)))
       : STRENGTH.MIN
-    return clamped >= min ? INPUT_MODE.KEYPAD : INPUT_MODE.TILES
+    return clamped >= KEYPAD_MIN_STRENGTH ? INPUT_MODE.KEYPAD : INPUT_MODE.TILES
   }
 
   /**
@@ -313,8 +294,8 @@ export class Settings {
    */
   toJSON() {
     return {
-      difficulty: this.data.difficulty,
-      customTables: [...this.data.customTables],
+      tables: [...this.data.tables],
+      sessionLength: this.data.sessionLength,
       sound: this.data.sound,
     }
   }
@@ -333,20 +314,20 @@ export class Settings {
   }
 
   /**
-   * Derive the pool from the current tables and table mode.
+   * Derive the pool from the current tables.
    *
-   * The empty-pool branch is unreachable through the public API -- both preset
-   * and custom table lists are guaranteed non-empty -- but an empty pool would
-   * hand `FactSelector` nothing to draw and stall the game, so it warns and
-   * falls back to Adventurer instead of failing silently.
+   * The empty-pool branch is unreachable through the public API -- `setTables`
+   * guarantees a non-empty, in-range list -- but an empty pool would hand
+   * `FactSelector` nothing to draw and stall the game, so it warns and falls
+   * back to every table instead of failing silently.
    * @private
    * @returns {string[]} A new array of canonical fact ids in `FACTS` order
    */
   _computePool() {
-    const pool = factIdsForTables(this.enabledTables, this.tableMode)
+    const pool = factIdsForTables(this.enabledTables)
     if (pool.length === 0) {
-      console.warn("Settings: empty fact pool, falling back to adventurer")
-      return factIdsForTables([...DIFFICULTY_PRESETS.adventurer.tables], "both")
+      console.warn("Settings: empty fact pool, falling back to every table")
+      return factIdsForTables([...ALL_TABLES])
     }
     return pool
   }

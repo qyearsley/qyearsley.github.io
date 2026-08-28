@@ -124,8 +124,8 @@ tomorrow.
 on a table family. Your token advances one space per correct answer within a
 session. Regions unlock on **mastery**, not on answer count, so the trail cannot
 be walked by grinding 2x2 -- but the unlock only counts facts that are actually
-in the current difficulty's pool, or a narrow custom setting would wall the token
-off at space 4 forever.
+in the enabled tables, or a narrow table selection would wall the token off at
+space 4 forever.
 
 A compact strip showing the current region and the token sits on the play screen
 itself, so movement is visible where she is actually looking rather than only on
@@ -182,15 +182,11 @@ precision, and it drills the reverse direction that division readiness needs.
 
 ## Difficulty
 
-Follows the Number Garden convention (`explorer` / `adventurer` / `master` in
-`GameState`) plus a custom option:
-
-- **Explorer** -- 2s through 5s; multiple choice throughout; array and
-  skip-count scaffolds weighted up
-- **Adventurer** -- 2s through 7s; the 3rd-grade default
-- **Master** -- all 36 facts; keypad entry sooner
-- **Custom** -- per-table checkboxes, to match whatever her class is on this
-  week. Likely the most-used setting in practice.
+**Superseded (2026-08-28).** The plan called for Number Garden's
+`explorer` / `adventurer` / `master` presets plus a custom option. They shipped
+and were then removed -- see "Retire the difficulty presets" below. What is left
+is the per-table picker, which this section already predicted would be "likely
+the most-used setting in practice".
 
 <a id="ipad-constraints"></a>
 
@@ -312,8 +308,9 @@ the code; everything else is a proposal with its tradeoffs, not a commitment.
 
 ### Keypad only, no multiple choice -- **done, as a trial**
 
-Every preset now has `keypadMinStrength: 0`, so the tiles never appear. Revert by
-restoring 3 / 2 / 3 and `null` on Explorer; nothing else needs changing.
+`KEYPAD_MIN_STRENGTH` is 0, so the tiles never appear. Revert by setting it to 3;
+nothing else needs changing. (It was a per-preset value when this was written;
+the presets are gone and it is now one constant.)
 
 - **For:** typing is the only honest signal of recall, and the plan already said
   so -- tiles carry a 25% guessing floor that muddies the mastery data. One entry
@@ -330,7 +327,6 @@ restoring 3 / 2 / 3 and `null` on Explorer; nothing else needs changing.
   keyboard listener in `EventManager`, `SCORING.KEYPAD_BONUS` (a meaningless
   constant offset once every answer is typed), and `INPUT_MODE.TILES` itself.
   These are deliberately still in place so a revert stays a one-line change.
-  Explorer's label lost "tiles only" but the preset still needs a new meaning.
 - **Cost already paid:** two `Settings` tests lost their observable. Rounding and
   non-finite-to-0 in `inputModeFor` used to be visible through the tiles/keypad
   boundary; with every preset at 0 the return value cannot distinguish sanitised
@@ -448,3 +444,78 @@ Still open, in rough value order: make the trail token visibly hop on the
 play-screen strip, since advancing is currently silent and the trail is the whole
 progress metaphor; scale-pulse the correct answer; escalate the message at streak
 milestones instead of always "Yes!".
+
+### Retire the difficulty presets -- **done**
+
+Feedback from the second play session (2026-08-28) was that Settings was "not
+very useful". It was right, and for a sharper reason than it looked: once the
+keypad-only trial set every preset's `keypadMinStrength` to 0, the only thing a
+preset changed was which tables were in the pool. It was a table picker under a
+vaguer name, with a real table picker hidden behind its fourth option.
+
+Settings is now two controls: eight table toggles (all on by default, with the
+resulting pool size shown) and a questions-per-session select of 10 / 20 / 30.
+
+- **Knock-on, good:** the two table semantics collapsed into one. Presets meant a
+  ceiling (both operands enabled, so Explorer excluded `4x8`); custom meant table
+  families (either operand). Toggles read as families, which is what "which
+  tables?" means to whoever is answering it, so `factsForTables` lost its `mode`
+  argument and the modal can no longer disagree with the pool.
+- **Knock-on, awkward:** because each fact belongs to two families, unticking a
+  low table barely narrows anything -- unticking the 2s removes only `2x2`, since
+  `2x3` is still in the 3 times table. Narrowing works by unticking everything
+  _except_ what you want, which is fine for "just the 7s" and useless for "not
+  the 2s". Living with it: the alternative is bringing back a second semantic.
+- **Migration:** a preset-era save loads with all eight tables on. `customTables`
+  only ever meant anything alongside `difficulty === "custom"`, so honouring it in
+  isolation would silently narrow the pool for someone who was on a preset.
+  Mastery, stars, gems, and trail position are untouched.
+- **The daily goal did not follow the session length.** `DAILY_GOAL.FACTS` stays
+  at 20, so the 10-question session takes two to meet it and the 30 overshoots. A
+  goal that shrinks when you pick the short session is not a goal.
+
+### Say what the gate is actually waiting for -- **done**
+
+"Master 2 more facts in Triple Bridge to cross the bridge" was wrong twice over
+and useless a third time.
+
+- It said **master**, but the gate opens at `TRAIL.UNLOCK_MIN_STRENGTH` (3,
+  "strengthening"); mastery is the strength-4 bar the card collection uses. The
+  view model even carried the `strong` count in a field named `mastered`.
+- **"cross the bridge"** was hardcoded, so Beehive Hollow and Dragon Peak had
+  bridges too.
+- Worst: the count never moved. Fact selection ignores the token's position, so
+  twenty correct answers can go by without either gating fact being asked.
+
+It now names the facts -- "Keep practising 2 × 3 and 3 × 3 to open the Triple
+Bridge gate" -- ordered nearest-to-the-bar first, capped at three with an "and N
+more" tail. That is a patch on the symptom; the cause is the next section.
+
+### Label the session summary -- **done**
+
+The summary showed "⭐ 1189 stars" and "Correct: 20/20" directly above the bare
+strings "1000 stars" and "10 facts right", which are _lifetime_ gem milestones,
+and then four unexplained green cards. Nothing said which numbers were the
+session and which were the account.
+
+The tallies now say "stars this session" / "gems this session", the milestones
+sit under a "💎 New gems earned" heading, and the cards under "🃏 Cards that
+grew". Both groups hide when empty.
+
+### Reconsider the trail visualisation and the correct-answer reward -- **open**
+
+Asked for in the same feedback round, deliberately not attempted yet: it depends
+on whether the trail keeps its current structure. Rebuilding the visualisation
+around eight table regions and then replacing those regions with themed trails
+would be two redesigns.
+
+Decide "Themed trails instead of one trail with themed regions" (above) first.
+That section is still the most promising open item, and the "why is it Triple
+Bridge? it's not just 3x tables" reaction is exactly the incoherence it
+describes: a region owns the facts whose _larger_ operand is its table, so Triple
+Bridge is `2x3` and `3x3`.
+
+Once the structure is settled, the reward ideas already listed under "More reward
+for a correct answer" apply either way -- the token hop on the play-screen strip
+is the biggest one, since advancing is currently silent and the trail is the whole
+progress metaphor.

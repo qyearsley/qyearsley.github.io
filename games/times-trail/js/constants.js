@@ -28,9 +28,8 @@ export const TOTAL_FACTS = 36
  * looks like, and whether its region counts it as mastered.
  *
  * The tier names are the whole vocabulary; the entry mode a tier gets is NOT
- * fixed here, because it is a per-preset question. Each preset's
- * `keypadMinStrength` decides where the keypad starts, so a tier's entry mode
- * is a question for DIFFICULTY_PRESETS rather than for this table.
+ * fixed here. `KEYPAD_MIN_STRENGTH` decides where the keypad starts, so a
+ * tier's entry mode is a question for that constant rather than for this table.
  */
 export const STRENGTH = Object.freeze({
   MIN: 0,
@@ -114,83 +113,47 @@ export const DISTRACTORS = Object.freeze({
   PRIORITY_WINDOW: 6, // shuffle only the top N near-misses
 })
 
-/** Difficulty identifiers. Also the keys of DIFFICULTY_PRESETS. */
-export const DIFFICULTY = Object.freeze({
-  EXPLORER: "explorer",
-  ADVENTURER: "adventurer",
-  MASTER: "master",
-  CUSTOM: "custom",
-})
-
-/**
- * The difficulty presets.
- *
- * tableMode semantics:
- *   "both"   - a fact is in the pool only if BOTH operands are enabled.
- *              Preset ceilings ("2s through 5s" means nothing above 5).
- *   "either" - a fact is in the pool if EITHER operand is enabled.
- *              Custom table-family semantics (checking 7 means the 7 times table).
- * keypadMinStrength: the strength at which a fact switches to keypad entry.
- *   null means never use the keypad. TRIAL (2026-08-27): every preset is 0, so
- *   the keypad is the only entry path and the multiple-choice tiles never
- *   appear. Typing is the only honest signal of recall -- tiles carry a 25%
- *   guessing floor that muddies the mastery data. Restore 3 / 2 / 3 (and null
- *   on Explorer) to get the adaptive tiles-then-keypad behaviour back; nothing
- *   else needs changing. See "Possible changes after first play" in
- *   docs/times-trail-plan.md.
- * poolSize: the expected pool size, present so constants.test.js and
- *   facts.test.js can cross-check facts.js against it. null where the pool
- *   depends on player-chosen tables.
- */
-export const DIFFICULTY_PRESETS = Object.freeze({
-  explorer: Object.freeze({
-    id: "explorer",
-    label: "Explorer",
-    tables: Object.freeze([2, 3, 4, 5]),
-    tableMode: "both",
-    keypadMinStrength: 0,
-    poolSize: 10,
-  }),
-  adventurer: Object.freeze({
-    id: "adventurer",
-    label: "Adventurer",
-    tables: Object.freeze([2, 3, 4, 5, 6, 7]),
-    tableMode: "both",
-    keypadMinStrength: 0,
-    poolSize: 21,
-  }),
-  master: Object.freeze({
-    id: "master",
-    label: "Master",
-    tables: Object.freeze([2, 3, 4, 5, 6, 7, 8, 9]),
-    tableMode: "both",
-    keypadMinStrength: 0,
-    poolSize: 36,
-  }),
-  custom: Object.freeze({
-    id: "custom",
-    label: "Custom",
-    tables: null,
-    tableMode: "either",
-    keypadMinStrength: 0,
-    poolSize: null,
-  }),
-})
-
-/** The preset a brand-new player starts on. */
-export const DEFAULT_DIFFICULTY = "adventurer"
-
-/** Tables pre-checked when the player first opens the custom picker. */
-export const DEFAULT_CUSTOM_TABLES = Object.freeze([6, 7])
-
 /** Every table the game covers, ascending. */
 export const ALL_TABLES = Object.freeze([2, 3, 4, 5, 6, 7, 8, 9])
 
 /**
- * How the player enters an answer. Derived from the fact's strength, never
- * chosen by the player, so there is no matching setting. TILES is retained only
- * so a revert of the keypad-only trial does not have to reintroduce it; nothing
- * currently produces it.
+ * Tables enabled for a brand-new player: all of them.
+ *
+ * There are no difficulty presets. "Explorer / Adventurer / Master / Custom"
+ * used to sit in front of this list, but once every preset shared the same
+ * `keypadMinStrength` the only thing a preset changed was which tables were in
+ * play -- so it was a table picker wearing a second, vaguer name, with a real
+ * table picker hidden behind its fourth option. One row of eight toggles says
+ * the same thing without the indirection, and "difficulty" stops being a claim
+ * the game cannot keep (a 2s-only pool is not easier per question; it is
+ * shorter).
+ *
+ * Dropping the presets also collapsed the two table semantics into one. Presets
+ * meant a CEILING (both operands enabled: "2s through 5s" excluded 4x8), custom
+ * meant table FAMILIES (either operand: ticking 7 meant the 7 times table).
+ * Toggles read as families -- ticking 7 gets you 7x2 through 7x9 -- which is
+ * what "which tables?" means to anyone answering it, so `factsForTables` has one
+ * behaviour and no mode argument.
+ */
+export const DEFAULT_TABLES = ALL_TABLES
+
+/**
+ * The strength at which a fact switches from multiple-choice tiles to keypad
+ * entry. `null` would mean never use the keypad.
+ *
+ * TRIAL (2026-08-27): 0, so the keypad is the only entry path and the tiles
+ * never appear. Typing is the only honest signal of recall -- tiles carry a 25%
+ * guessing floor that muddies the mastery data. Set it to 3 to get the adaptive
+ * tiles-then-keypad behaviour back; nothing else needs changing. See "Possible
+ * changes after first play" in docs/times-trail-plan.md.
+ */
+export const KEYPAD_MIN_STRENGTH = 0
+
+/**
+ * How the player enters an answer. Derived from the fact's strength via
+ * `KEYPAD_MIN_STRENGTH`, never chosen by the player, so there is no matching
+ * setting. TILES is retained only so a revert of the keypad-only trial does not
+ * have to reintroduce it; nothing currently produces it.
  */
 export const INPUT_MODE = Object.freeze({ TILES: "tiles", KEYPAD: "keypad" })
 
@@ -204,9 +167,23 @@ export const MODE_LABELS = Object.freeze({
   [MODE_IDS.QUICK_RECALL]: "Quick Recall",
 })
 
-/** Session shape. FACTS_PER_SESSION is also #progress-bar's aria-valuemax. */
+/**
+ * Session shape. The length is a setting, so `#progress-bar`'s aria-valuemax is
+ * written from `Settings.sessionLength` on every session start and DEFAULT_LENGTH
+ * is only the value in the markup.
+ *
+ * LENGTH_OPTIONS is short on purpose: a free-entry number is a knob a child can
+ * set to 200. Three lengths cover "I have two minutes", the default, and "let me
+ * keep going".
+ *
+ * DAILY_GOAL.FACTS is deliberately NOT derived from this. The goal is a day's
+ * worth of practice; if it tracked the session length, picking the 10-question
+ * session would halve the goal and every day would still be "done" in one
+ * session, which is the opposite of what a goal is for.
+ */
 export const SESSION = Object.freeze({
-  FACTS_PER_SESSION: 20,
+  LENGTH_OPTIONS: Object.freeze([10, 20, 30]),
+  DEFAULT_LENGTH: 20,
 })
 
 /**
@@ -317,8 +294,9 @@ export const STARS = Object.freeze({
  *
  * Grouped by metric, thresholds ascending within each metric, so a single pass
  * can award every newly crossed milestone. The smallest factsCorrect threshold
- * is deliberately below SESSION.FACTS_PER_SESSION so a first session earns a
- * gem mid-play rather than promising one weeks away.
+ * is deliberately below the shortest SESSION.LENGTH_OPTIONS entry so even a
+ * 10-question first session earns a gem mid-play rather than promising one
+ * weeks away.
  */
 export const GEM_MILESTONES = Object.freeze([
   Object.freeze({

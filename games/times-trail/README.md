@@ -29,11 +29,16 @@ that is going.
 - **Speed is measured, never shown.** The clock runs from the question appearing
   to the first tap or keypress, not to submit. A correct-but-slow answer is
   capped below mastered, because counting up is not recall.
-- **The trail.** 40 spaces across 8 regions, one region per table family. The
-  token moves one space per correct answer. A region opens when 60% of its facts
-  are mastered -- so the trail cannot be walked by grinding 2×2 -- and when the
-  token is held at a gate the game says what is still needed. Regions with no
-  facts in the current difficulty are skipped rather than blocking the way.
+- **The trail.** 40 spaces across 8 regions. The token moves one space per
+  correct answer. A region opens when 60% of its facts reach "strengthening" --
+  so the trail cannot be walked by grinding 2×2 -- and when the token is held at
+  a gate the game names the facts it is waiting on. Regions with no facts in the
+  enabled tables are skipped rather than blocking the way.
+
+  A region owns the facts whose _larger_ operand is its table, so Triple Bridge
+  is `2×3` and `3×3`, not the 3 times table. The names promise themed practice
+  the engine does not deliver -- see the design plan's "Themed trails" section.
+
 - **Stars and gems.** Stars pay most for the facts the player knows least, with a
   bonus for typing the answer and a streak multiplier up to 3×. Gems come from
   milestones and are permanent trophies -- nothing spends them, and neither
@@ -62,20 +67,25 @@ sound arrives.
 Open settings with the ⚙️ button on the hub or on the play screen. There are
 exactly two controls:
 
-- **Difficulty:**
-  - Explorer -- tables 2-5 (10 facts)
-  - Adventurer -- tables 2-7 (21 facts), the default
-  - Master -- all 36 facts
-  - Custom -- pick the tables yourself
+- **Which tables?** -- eight toggles, all on by default, with the resulting pool
+  size shown underneath. Tables mean _families_: ticking 7 includes every fact
+  with a 7 in it, `7×2` through `7×9`.
 
-  Difficulty currently changes which facts are in the pool and nothing else.
-  It used to decide where keypad entry began, which is moot now that every
-  answer is typed.
+  A consequence worth knowing: because each fact belongs to two families,
+  unticking a low table barely narrows anything. Unticking the 2s removes only
+  `2×2`, since `2×3` is still in the 3 times table. Narrowing works by unticking
+  everything _except_ what you want. The last enabled table cannot be unticked.
 
-- **Which tables?** -- eight toggles, shown only when difficulty is Custom.
-  Custom means table families, so ticking 7 includes every fact with a 7 in it.
-  The presets mean a ceiling instead: Explorer excludes `4×8` because 8 is not
-  enabled. The last enabled table cannot be unticked.
+- **Questions per session** -- 10, 20 (the default), or 30. The daily goal stays
+  at 20 facts regardless, so the short session takes two to meet it; a goal that
+  shrank with the setting would not be a goal.
+
+There is deliberately no difficulty control. Four presets used to sit in front of
+the table list, but once every preset shared the same entry mode the only thing a
+preset changed was which tables were in play -- a table picker under a vaguer
+name, with a real table picker hidden behind its fourth option. Spaced repetition
+is what makes practice easier or harder question by question; the toggles are for
+scoping ("we are on the 7s in class this week").
 
 A `sound` value is persisted in the save file but has no control and nothing
 reads it, because there is no audio yet.

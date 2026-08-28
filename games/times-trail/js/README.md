@@ -68,7 +68,8 @@ instead of leaving it blank.
 ### constants.js
 
 Every value more than one module needs: operand bounds, strength boundaries and
-intervals, decay and selection tuning, difficulty presets, the eight regions,
+intervals, decay and selection tuning, the default tables and session lengths,
+the eight regions,
 star and gem tables, flame stages, card tiers, timings, the storage key, and the
 keypad layout. Imports nothing and exports only frozen literals, so importing it
 can never be order-dependent.
@@ -125,9 +126,9 @@ penalty, and gems are only ever added. The daily goal counts facts, not minutes.
 
 ### Settings.js
 
-The three persisted settings (`difficulty`, `customTables`, `sound`) and
-everything derived from them: the active fact pool, memoized, and
-`inputModeFor(strength)`, which decides tiles versus keypad. Persisted input is
+The three persisted settings (`tables`, `sessionLength`, `sound`) and everything
+derived from them: the active fact pool, memoized, and `inputModeFor(strength)`,
+which decides tiles versus keypad. Persisted input is
 untrusted, so nothing throws -- a rejected update returns `false` and changes
 nothing.
 

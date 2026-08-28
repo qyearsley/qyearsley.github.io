@@ -140,10 +140,12 @@ const CONTRACT_IDS = [
   "collection-cards",
   "collection-legend",
   "settings-modal",
-  "difficulty-select",
-  "custom-tables-group",
+  "session-length-select",
+  "pool-size",
   ...ALL_TABLES.map((table) => `table-${table}`),
   "close-settings",
+  "summary-milestones-group",
+  "summary-cards-group",
 ]
 
 /** Ids the settings decisions deleted; none may reappear. */
@@ -153,6 +155,9 @@ const DELETED_IDS = [
   "scaffolds-select",
   "sound-select",
   "reduced-motion-select",
+  // Retired with the difficulty presets: the dropdown and the picker it revealed.
+  "difficulty-select",
+  "custom-tables-group",
 ]
 
 /**
@@ -413,13 +418,25 @@ describe("GameUI", () => {
       expect(bar.style.width).toBe("100%")
     })
 
-    test("derives aria-valuemax from the session constant when total is omitted", () => {
+    test("falls back to the default session length when total is omitted", () => {
+      // game.js always passes settings.sessionLength, so this default is a floor
+      // rather than a value a real session uses.
       ui.updateProgressBar(3)
       const bar = document.getElementById("progress-bar")
-      expect(bar.getAttribute("aria-valuemax")).toBe(String(SESSION.FACTS_PER_SESSION))
+      expect(bar.getAttribute("aria-valuemax")).toBe(String(SESSION.DEFAULT_LENGTH))
       expect(document.getElementById("progress-text").textContent).toBe(
-        `3/${SESSION.FACTS_PER_SESSION}`,
+        `3/${SESSION.DEFAULT_LENGTH}`,
       )
+    })
+
+    test("tracks a non-default session length", () => {
+      for (const total of SESSION.LENGTH_OPTIONS) {
+        ui.updateProgressBar(total, total)
+        const bar = document.getElementById("progress-bar")
+        expect(bar.getAttribute("aria-valuemax")).toBe(String(total))
+        expect(bar.getAttribute("aria-valuenow")).toBe(String(total))
+        expect(bar.style.width).toBe("100%")
+      }
     })
   })
 
@@ -608,7 +625,7 @@ describe("GameUI", () => {
     test("leaves the gate message alone -- it is persistent state, not feedback", () => {
       // Clearing it here wiped the game's only explanation of why the trail
       // stopped one feedback hold after it appeared. game.js owns clearing it.
-      const message = "Master 2 more facts in Doubling Meadow to cross the bridge"
+      const message = "Keep practising 2 × 3 and 3 × 3 to open the Triple Bridge gate"
       ui.showGateMessage(message)
       ui.renderQuestion(keypadChallenge())
       ui.renderQuestion(tilesChallenge())
@@ -1043,20 +1060,65 @@ describe("GameUI", () => {
   })
 
   describe("formatGateMessage", () => {
-    test("names the number of facts and the region", () => {
+    // It NAMES the facts rather than counting them. "Master 2 more facts in Triple
+    // Bridge" was accurate and useless: selection ignores the token's position, so
+    // twenty correct answers can go by without either gating fact being asked and
+    // the number sits at 2 the whole time.
+    test("names the facts and the region", () => {
       expect(
-        ui.formatGateMessage({ regionName: "Doubling Meadow", mastered: 3, required: 5 }),
-      ).toBe("Master 2 more facts in Doubling Meadow to cross the bridge")
+        ui.formatGateMessage({ regionName: "Triple Bridge", factLabels: ["2 × 3", "3 × 3"] }),
+      ).toBe("Keep practising 2 × 3 and 3 × 3 to open the Triple Bridge gate")
     })
 
-    test("uses the singular for one remaining fact", () => {
-      expect(ui.formatGateMessage({ regionName: "Triple Bridge", mastered: 4, required: 5 })).toBe(
-        "Master 1 more fact in Triple Bridge to cross the bridge",
+    test("reads naturally for a single fact", () => {
+      expect(ui.formatGateMessage({ regionName: "Doubling Meadow", factLabels: ["2 × 2"] })).toBe(
+        "Keep practising 2 × 2 to open the Doubling Meadow gate",
       )
     })
 
-    test("says the trail has ended when nothing is required", () => {
-      expect(ui.formatGateMessage({ regionName: null, mastered: 5, required: 5 })).toBe(
+    // "Master" is the strength-4 bar the card collection uses; the gate opens at
+    // strength 3. Naming the wrong bar sets the wrong target.
+    test("does not tell the player to master anything", () => {
+      const message = ui.formatGateMessage({
+        regionName: "Triple Bridge",
+        factLabels: ["2 × 3", "3 × 3"],
+      })
+      expect(message.toLowerCase()).not.toContain("master")
+    })
+
+    test("counts the tail past the third fact instead of listing eight", () => {
+      expect(
+        ui.formatGateMessage({
+          regionName: "Dragon Peak",
+          factLabels: ["6 × 9", "7 × 9", "8 × 9", "9 × 9", "5 × 9"],
+        }),
+      ).toBe("Keep practising 6 × 9, 7 × 9, 8 × 9 and 2 more to open the Dragon Peak gate")
+    })
+
+    test("names exactly three without a tail when there are exactly three", () => {
+      expect(
+        ui.formatGateMessage({
+          regionName: "Dragon Peak",
+          factLabels: ["6 × 9", "7 × 9", "8 × 9"],
+        }),
+      ).toBe("Keep practising 6 × 9, 7 × 9 and 8 × 9 to open the Dragon Peak gate")
+    })
+
+    test("says the trail has ended when there is no gate left", () => {
+      expect(ui.formatGateMessage({ regionName: null, factLabels: [] })).toBe(
+        "You have reached the end of the trail",
+      )
+      expect(ui.formatGateMessage({ regionName: "Dragon Peak", factLabels: [] })).toBe(
+        "You have reached the end of the trail",
+      )
+    })
+
+    test("tolerates a malformed view model without throwing", () => {
+      for (const gate of [null, undefined, "x", 42, {}, { regionName: "X" }]) {
+        expect(() => ui.formatGateMessage(gate)).not.toThrow()
+      }
+      expect(ui.formatGateMessage(null)).toBe("")
+      expect(ui.formatGateMessage({ regionName: "X", factLabels: [null, ""] })).toBe(
         "You have reached the end of the trail",
       )
     })
@@ -1064,7 +1126,7 @@ describe("GameUI", () => {
 
   describe("showGateMessage", () => {
     test("shows the exact string and reveals the element", () => {
-      const message = "Master 2 more facts in Doubling Meadow to cross the bridge"
+      const message = "Keep practising 2 × 3 and 3 × 3 to open the Triple Bridge gate"
       ui.showGateMessage(message)
       const el = document.getElementById("gate-message")
       expect(el.textContent).toBe(message)
@@ -1073,9 +1135,9 @@ describe("GameUI", () => {
     })
 
     test("accepts a plain gate view model and formats it", () => {
-      ui.showGateMessage({ regionName: "Doubling Meadow", mastered: 3, required: 5 })
+      ui.showGateMessage({ regionName: "Triple Bridge", factLabels: ["2 × 3", "3 × 3"] })
       expect(document.getElementById("gate-message").textContent).toBe(
-        "Master 2 more facts in Doubling Meadow to cross the bridge",
+        "Keep practising 2 × 3 and 3 × 3 to open the Triple Bridge gate",
       )
     })
 
@@ -1418,15 +1480,34 @@ describe("GameUI", () => {
       expect(document.getElementById("summary-region").textContent).toBe("")
     })
 
-    test("writes one list item per milestone and hides the list when empty", () => {
+    // The GROUP is what gets hidden, not the bare list: the group carries the
+    // heading, and without it "1000 stars" (a lifetime gem milestone) read as a
+    // session tally sitting under "⭐ 1189 stars".
+    test("writes one list item per milestone and hides the labelled group when empty", () => {
       ui.renderSessionSummary(summaryView())
       const list = document.getElementById("summary-milestones")
+      const group = document.getElementById("summary-milestones-group")
       expect(list.querySelectorAll("li")).toHaveLength(2)
-      expect(list.classList.contains("hidden")).toBe(false)
+      expect(group.classList.contains("hidden")).toBe(false)
       expect(list.textContent).toContain("10 facts right")
+      expect(group.textContent).toContain("New gems earned")
+
       ui.renderSessionSummary(summaryView({ milestoneLabels: [] }))
       expect(document.getElementById("summary-milestones").querySelectorAll("li")).toHaveLength(0)
-      expect(document.getElementById("summary-milestones").classList.contains("hidden")).toBe(true)
+      expect(document.getElementById("summary-milestones-group").classList.contains("hidden")).toBe(
+        true,
+      )
+    })
+
+    test("hides the card group when no card grew, so four unlabelled cards never appear alone", () => {
+      ui.renderSessionSummary(summaryView())
+      const group = document.getElementById("summary-cards-group")
+      expect(group.classList.contains("hidden")).toBe(false)
+      expect(group.textContent).toContain("Cards that grew")
+
+      ui.renderSessionSummary(summaryView({ newCards: [] }))
+      expect(document.querySelectorAll("#summary-cards .fact-card")).toHaveLength(0)
+      expect(document.getElementById("summary-cards-group").classList.contains("hidden")).toBe(true)
     })
 
     test("shows the goal line only when the goal was just met", () => {
@@ -1447,13 +1528,8 @@ describe("GameUI", () => {
   })
 
   describe("renderSettings", () => {
-    test("sets the difficulty select's value", () => {
-      ui.renderSettings({ difficulty: "master", customTables: [] })
-      expect(document.getElementById("difficulty-select").value).toBe("master")
-    })
-
     test("presses exactly the named tables", () => {
-      ui.renderSettings({ difficulty: "custom", customTables: [6, 7] })
+      ui.renderSettings({ tables: [6, 7], sessionLength: 20 })
       for (const table of ALL_TABLES) {
         const expected = table === 6 || table === 7
         const input = document.getElementById(`table-${table}`)
@@ -1464,8 +1540,8 @@ describe("GameUI", () => {
     })
 
     test("un-presses tables that were dropped", () => {
-      ui.renderSettings({ difficulty: "custom", customTables: [6, 7] })
-      ui.renderSettings({ difficulty: "custom", customTables: [9] })
+      ui.renderSettings({ tables: [6, 7], sessionLength: 20 })
+      ui.renderSettings({ tables: [9], sessionLength: 20 })
       expect(document.getElementById("table-6").checked).toBe(false)
       expect(document.getElementById("table-9").checked).toBe(true)
       expect(document.querySelector('label[for="table-6"]').getAttribute("aria-pressed")).toBe(
@@ -1473,14 +1549,51 @@ describe("GameUI", () => {
       )
     })
 
-    test("shows #custom-tables-group only for the custom difficulty", () => {
-      const group = document.getElementById("custom-tables-group")
-      ui.renderSettings({ difficulty: "custom", customTables: [6] })
-      expect(group.classList.contains("hidden")).toBe(false)
-      ui.renderSettings({ difficulty: "adventurer", customTables: [6] })
-      expect(group.classList.contains("hidden")).toBe(true)
-      ui.renderSettings({ difficulty: "custom", customTables: [6] })
-      expect(group.classList.contains("hidden")).toBe(false)
+    test("the table picker is always visible, with no difficulty gate in front of it", () => {
+      ui.renderSettings({ tables: [6], sessionLength: 20 })
+      for (const table of ALL_TABLES) {
+        expect(document.getElementById(`table-${table}`)).not.toBeNull()
+      }
+      expect(document.getElementById("difficulty-select")).toBeNull()
+      expect(document.getElementById("custom-tables-group")).toBeNull()
+    })
+
+    test("selects the session length", () => {
+      for (const length of SESSION.LENGTH_OPTIONS) {
+        ui.renderSettings({ tables: [6], sessionLength: length })
+        expect(document.getElementById("session-length-select").value).toBe(String(length))
+      }
+    })
+
+    // The toggles hide the consequence: ticking 7 adds eight facts, not one.
+    test("says how many facts the chosen tables add up to", () => {
+      ui.renderSettings({ tables: [6, 7], sessionLength: 20 }, 15)
+      expect(document.getElementById("pool-size").textContent).toBe("15 facts in play")
+    })
+
+    test("uses the singular for a one-fact pool", () => {
+      ui.renderSettings({ tables: [2], sessionLength: 20 }, 1)
+      expect(document.getElementById("pool-size").textContent).toBe("1 fact in play")
+    })
+
+    test("leaves the fact count alone when it is not supplied", () => {
+      ui.renderSettings({ tables: [6, 7], sessionLength: 20 }, 15)
+      ui.renderSettings({ tables: [6], sessionLength: 20 })
+      expect(document.getElementById("pool-size").textContent).toBe("15 facts in play")
+    })
+
+    test("ignores a non-finite fact count rather than writing NaN", () => {
+      ui.renderSettings({ tables: [6, 7], sessionLength: 20 }, 15)
+      for (const count of [NaN, Infinity, "15", null]) {
+        ui.renderSettings({ tables: [6], sessionLength: 20 }, count)
+        expect(document.getElementById("pool-size").textContent).toBe("15 facts in play")
+      }
+    })
+
+    test("tolerates a missing session length without clearing the select", () => {
+      ui.renderSettings({ tables: [6], sessionLength: 30 })
+      ui.renderSettings({ tables: [6] })
+      expect(document.getElementById("session-length-select").value).toBe("30")
     })
   })
 
@@ -1594,7 +1707,7 @@ describe("GameUI", () => {
         bare.renderMasteryGrid(masteryCells())
         bare.renderCollection(cardViews())
         bare.renderSessionSummary(summaryView())
-        bare.renderSettings({ difficulty: "custom", customTables: [6] })
+        bare.renderSettings({ tables: [6], sessionLength: 20 }, 8)
       }).not.toThrow()
       warn.mockRestore()
     })

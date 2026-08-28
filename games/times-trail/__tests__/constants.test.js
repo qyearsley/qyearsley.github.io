@@ -6,15 +6,13 @@ import {
   DAILY_GOAL,
   DAY_MS,
   DECAY,
-  DEFAULT_CUSTOM_TABLES,
-  DEFAULT_DIFFICULTY,
-  DIFFICULTY,
-  DIFFICULTY_PRESETS,
+  DEFAULT_TABLES,
   DISTRACTORS,
   FLAME_STAGES,
   GEM_MILESTONES,
   INPUT_MODE,
   KEYPAD,
+  KEYPAD_MIN_STRENGTH,
   MATH,
   MINUTE_MS,
   MODE_IDS,
@@ -237,7 +235,7 @@ describe("SELECTION", () => {
     })
 
     test("the delay span fits inside a session", () => {
-      expect(SELECTION.RETRY_DELAY_MAX).toBeLessThan(SESSION.FACTS_PER_SESSION)
+      expect(SELECTION.RETRY_DELAY_MAX).toBeLessThan(Math.min(...SESSION.LENGTH_OPTIONS))
     })
   })
 
@@ -260,53 +258,7 @@ describe("DISTRACTORS", () => {
   })
 })
 
-describe("DIFFICULTY_PRESETS", () => {
-  const presetEntries = Object.entries(DIFFICULTY_PRESETS)
-
-  describe("keys", () => {
-    test("cover every DIFFICULTY value with no extras", () => {
-      expect(Object.keys(DIFFICULTY_PRESETS).sort()).toEqual(Object.values(DIFFICULTY).sort())
-    })
-
-    test("each preset's id matches the key it is stored under", () => {
-      for (const [key, preset] of presetEntries) {
-        expect(preset.id).toBe(key)
-      }
-    })
-
-    test("every DIFFICULTY value is a kebab-case id", () => {
-      for (const id of Object.values(DIFFICULTY)) {
-        expect(id).toMatch(KEBAB_ID)
-      }
-    })
-  })
-
-  describe("tableMode", () => {
-    test("is only ever the two modes facts.js understands", () => {
-      for (const [, preset] of presetEntries) {
-        expect(["both", "either"]).toContain(preset.tableMode)
-      }
-    })
-  })
-
-  describe("tables", () => {
-    test("every listed table exists in ALL_TABLES, ascending and unique", () => {
-      for (const [, preset] of presetEntries) {
-        if (preset.tables === null) continue
-        expect(new Set(preset.tables).size).toBe(preset.tables.length)
-        expect(isStrictlyIncreasing([...preset.tables])).toBe(true)
-        for (const table of preset.tables) {
-          expect(ALL_TABLES).toContain(table)
-        }
-      }
-    })
-
-    test("only the custom preset defers its tables to the player", () => {
-      const deferred = presetEntries.filter(([, preset]) => preset.tables === null).map(([k]) => k)
-      expect(deferred).toEqual([DIFFICULTY.CUSTOM])
-    })
-  })
-
+describe("table settings", () => {
   // Pinned by name, not just by shape: GRID was removed with the array builder
   // and four JSDoc `entry` unions went on advertising it, because nothing failed.
   describe("INPUT_MODE membership", () => {
@@ -315,52 +267,33 @@ describe("DIFFICULTY_PRESETS", () => {
     })
   })
 
-  describe("keypadMinStrength", () => {
-    test("every preset starts on the keypad (keypad-only trial)", () => {
-      for (const [, preset] of presetEntries) {
-        expect(preset.keypadMinStrength).toBe(STRENGTH.MIN)
-      }
+  describe("KEYPAD_MIN_STRENGTH", () => {
+    test("starts every fact on the keypad (keypad-only trial)", () => {
+      expect(KEYPAD_MIN_STRENGTH).toBe(STRENGTH.MIN)
     })
 
     test("is null or a valid strength", () => {
-      for (const [, preset] of presetEntries) {
-        if (preset.keypadMinStrength === null) continue
-        expect(Number.isInteger(preset.keypadMinStrength)).toBe(true)
-        expect(preset.keypadMinStrength).toBeGreaterThanOrEqual(STRENGTH.MIN)
-        expect(preset.keypadMinStrength).toBeLessThanOrEqual(STRENGTH.MAX)
-      }
+      if (KEYPAD_MIN_STRENGTH === null) return
+      expect(Number.isInteger(KEYPAD_MIN_STRENGTH)).toBe(true)
+      expect(KEYPAD_MIN_STRENGTH).toBeGreaterThanOrEqual(STRENGTH.MIN)
+      expect(KEYPAD_MIN_STRENGTH).toBeLessThanOrEqual(STRENGTH.MAX)
     })
   })
 
-  describe("poolSize", () => {
-    test('matches the "both" pairing arithmetic on the preset tables', () => {
-      for (const [, preset] of presetEntries) {
-        if (preset.tables === null) {
-          expect(preset.poolSize).toBeNull()
-          continue
-        }
-        expect(preset.tableMode).toBe("both")
-        const n = preset.tables.length
-        expect(preset.poolSize).toBe((n * (n + 1)) / 2)
-      }
-    })
-
-    test("the master preset covers the whole fact set", () => {
-      expect(DIFFICULTY_PRESETS[DIFFICULTY.MASTER].tables).toEqual([...ALL_TABLES])
-      expect(DIFFICULTY_PRESETS[DIFFICULTY.MASTER].poolSize).toBe(TOTAL_FACTS)
-    })
-  })
-
-  describe("defaults", () => {
-    test("DEFAULT_DIFFICULTY names an existing preset", () => {
-      expect(Object.keys(DIFFICULTY_PRESETS)).toContain(DEFAULT_DIFFICULTY)
-    })
-
-    test("DEFAULT_CUSTOM_TABLES is a non-empty subset of ALL_TABLES", () => {
-      expect(DEFAULT_CUSTOM_TABLES.length).toBeGreaterThan(0)
-      for (const table of DEFAULT_CUSTOM_TABLES) {
+  describe("DEFAULT_TABLES", () => {
+    test("is a non-empty subset of ALL_TABLES, ascending and unique", () => {
+      expect(DEFAULT_TABLES.length).toBeGreaterThan(0)
+      expect(new Set(DEFAULT_TABLES).size).toBe(DEFAULT_TABLES.length)
+      expect(isStrictlyIncreasing([...DEFAULT_TABLES])).toBe(true)
+      for (const table of DEFAULT_TABLES) {
         expect(ALL_TABLES).toContain(table)
       }
+    })
+
+    // The whole point of dropping the difficulty presets: a new player gets the
+    // entire fact set and the toggles are for narrowing it, not for opting in.
+    test("turns every table on", () => {
+      expect([...DEFAULT_TABLES]).toEqual([...ALL_TABLES])
     })
   })
 })
@@ -413,14 +346,25 @@ describe("MODE_LABELS", () => {
 })
 
 describe("SESSION", () => {
-  describe("FACTS_PER_SESSION", () => {
-    test("is a positive integer", () => {
-      expect(Number.isInteger(SESSION.FACTS_PER_SESSION)).toBe(true)
-      expect(SESSION.FACTS_PER_SESSION).toBeGreaterThan(0)
+  describe("LENGTH_OPTIONS", () => {
+    test("every option is a positive integer, ascending and unique", () => {
+      expect(SESSION.LENGTH_OPTIONS.length).toBeGreaterThan(0)
+      expect(new Set(SESSION.LENGTH_OPTIONS).size).toBe(SESSION.LENGTH_OPTIONS.length)
+      expect(isStrictlyIncreasing([...SESSION.LENGTH_OPTIONS])).toBe(true)
+      for (const length of SESSION.LENGTH_OPTIONS) {
+        expect(Number.isInteger(length)).toBe(true)
+        expect(length).toBeGreaterThan(0)
+      }
     })
 
-    test("a full session is enough to meet the daily goal", () => {
-      expect(SESSION.FACTS_PER_SESSION).toBeGreaterThanOrEqual(DAILY_GOAL.FACTS)
+    test("DEFAULT_LENGTH is one of the offered options", () => {
+      expect(SESSION.LENGTH_OPTIONS).toContain(SESSION.DEFAULT_LENGTH)
+    })
+
+    // Not every option: the point of the 10-question session is that it is
+    // shorter than a day's practice, so the goal takes two of them.
+    test("the default session is enough to meet the daily goal", () => {
+      expect(SESSION.DEFAULT_LENGTH).toBeGreaterThanOrEqual(DAILY_GOAL.FACTS)
     })
   })
 })
@@ -472,7 +416,7 @@ describe("TRAIL", () => {
     })
 
     test("a full session can walk the whole trail at most once", () => {
-      expect(SESSION.FACTS_PER_SESSION * TRAIL.SPACES_PER_CORRECT).toBeLessThanOrEqual(
+      expect(Math.max(...SESSION.LENGTH_OPTIONS) * TRAIL.SPACES_PER_CORRECT).toBeLessThanOrEqual(
         TRAIL.TOTAL_SPACES,
       )
     })
@@ -598,7 +542,7 @@ describe("STARS", () => {
 
     test("the top tier is reachable inside a single session", () => {
       const last = STARS.STREAK_MULTIPLIERS[STARS.STREAK_MULTIPLIERS.length - 1]
-      expect(last.minStreak).toBeLessThanOrEqual(SESSION.FACTS_PER_SESSION)
+      expect(last.minStreak).toBeLessThanOrEqual(Math.min(...SESSION.LENGTH_OPTIONS))
     })
   })
 })
@@ -668,7 +612,7 @@ describe("GEM_MILESTONES", () => {
         (m) => m.threshold,
       )
       expect(thresholds.length).toBeGreaterThan(0)
-      expect(Math.min(...thresholds)).toBeLessThanOrEqual(SESSION.FACTS_PER_SESSION)
+      expect(Math.min(...thresholds)).toBeLessThanOrEqual(Math.min(...SESSION.LENGTH_OPTIONS))
     })
 
     test("the region milestone is reachable on the trail as laid out", () => {
@@ -884,7 +828,6 @@ describe("module surface", () => {
     test.each([
       ["REGIONS", REGIONS],
       ["GEM_MILESTONES", GEM_MILESTONES],
-      ["DIFFICULTY_PRESETS", DIFFICULTY_PRESETS],
       ["STRENGTH_INTERVALS_MS", STRENGTH_INTERVALS_MS],
       ["PATTERN_FREE_IDS", PATTERN_FREE_IDS],
       ["REGIONS[0]", REGIONS[0]],
@@ -921,12 +864,12 @@ describe("module surface", () => {
       expect(REGIONS[0].name).toBe(before)
     })
 
-    test("mutating a frozen preset does not change it", () => {
-      const before = DIFFICULTY_PRESETS.explorer.poolSize
+    test("mutating a nested frozen entry does not change it", () => {
+      const before = REGIONS[0].spaces
       expect(() => {
-        DIFFICULTY_PRESETS.explorer.poolSize = 999
+        REGIONS[0].spaces = 999
       }).toThrow(TypeError)
-      expect(DIFFICULTY_PRESETS.explorer.poolSize).toBe(before)
+      expect(REGIONS[0].spaces).toBe(before)
     })
   })
 })
