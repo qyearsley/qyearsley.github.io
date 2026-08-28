@@ -243,8 +243,8 @@
     // Toggle popover
     function openPopover() {
       const rect = btn.getBoundingClientRect()
-      popover.style.top = (rect.bottom + 8) + "px"
-      popover.style.right = (window.innerWidth - rect.right) + "px"
+      popover.style.top = rect.bottom + 8 + "px"
+      popover.style.right = window.innerWidth - rect.right + "px"
       popover.classList.add("open")
       btn.setAttribute("aria-expanded", "true")
     }

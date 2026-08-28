@@ -135,7 +135,9 @@
               <div class="progress-bar-container">
                 <div class="progress-bar-fill" id="progress-bar"></div>
               </div>
-              <div class="progress-note">Based on global average life expectancy of 73 years (WHO)</div>
+              <div class="progress-note">
+                Based on global average life expectancy of 73 years (WHO)
+              </div>
             </div>
 
             <h3>You have now been alive for:</h3>
@@ -229,8 +231,12 @@
         for (const m of past) {
           html +=
             '<div class="milestone milestone-past">' +
-            '<span class="milestone-label">' + m.label + "</span>" +
-            '<span class="milestone-date">' + formatDate(m.date) + "</span>" +
+            '<span class="milestone-label">' +
+            m.label +
+            "</span>" +
+            '<span class="milestone-date">' +
+            formatDate(m.date) +
+            "</span>" +
             "</div>"
         }
 
@@ -238,8 +244,12 @@
           const next = future[0]
           html +=
             '<div class="milestone milestone-next">' +
-            '<span class="milestone-label">Next: ' + next.label + "</span>" +
-            '<span class="milestone-date">' + formatDate(next.date) + "</span>" +
+            '<span class="milestone-label">Next: ' +
+            next.label +
+            "</span>" +
+            '<span class="milestone-date">' +
+            formatDate(next.date) +
+            "</span>" +
             "</div>"
         }
 

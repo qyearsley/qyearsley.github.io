@@ -473,7 +473,7 @@ describe("copyTree", () => {
   test("skips translation source files (*.zh.json, zh-common.json)", () => {
     writeFile(src, "zh-common.json", '{"a":"b"}')
     writeFile(src, "page.zh.json", '{"_title":"中文"}')
-    writeFile(src, "nested/sub.zh.json", '{}')
+    writeFile(src, "nested/sub.zh.json", "{}")
     writeFile(src, "page.html", "<p>ok</p>")
 
     copyTree(src, dest)
@@ -510,7 +510,9 @@ describe("findHtmlFiles", () => {
     writeFile(tmp, "a/b.html", "")
     writeFile(tmp, "a/c/d.html", "")
 
-    const files = findHtmlFiles(tmp).map((f) => f.slice(tmp.length).replace(/\\/g, "/")).sort()
+    const files = findHtmlFiles(tmp)
+      .map((f) => f.slice(tmp.length).replace(/\\/g, "/"))
+      .sort()
 
     expect(files).toEqual(["/a/b.html", "/a/c/d.html", "/index.html"])
   })
