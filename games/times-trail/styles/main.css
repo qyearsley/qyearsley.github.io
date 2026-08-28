@@ -464,8 +464,8 @@ body {
   position: relative;
 }
 
-/* Named areas, not auto-placement: renderQuestion hides two of the three
-   entry affordances on every question, and with implicit placement each
+/* Named areas, not auto-placement: renderQuestion hides the entry
+   affordances it is not using on every question, and with implicit placement each
    hidden child shifted every later child up a cell. */
 #question-text {
   grid-area: question;
@@ -1234,20 +1234,47 @@ body {
 
 /* ==================== Responsive: Landscape ==================== */
 @media (orientation: landscape) {
-  /* Question full width across the top -- a half-width column forced
-     "7 × 8 = ?" onto two lines -- entry bottom-right under the right thumb,
-     with its readout directly above it, and supporting content bottom-left
-     where it does not cover the keys. The gate sentence spans the full width
-     under both. */
+  /* Normal play is a single centred column, same shape as portrait. It used to
+     be two columns with the entry bottom-right "under the right thumb", which
+     cost every question a keypad pushed off to the right and a "Yes!" rendered
+     in the column opposite the one being looked at. */
   .play-area {
-    grid-template:
-      "question question" auto
-      "extra readout" auto
-      "extra entry" 1fr
-      "gate gate" auto
-      / 1fr 1fr;
-    align-items: center;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "question"
+      "readout"
+      "entry"
+      "extra"
+      "gate";
+    align-content: center;
+    justify-items: center;
     gap: 24px;
+  }
+
+  /* Teaching stays in one column and keeps the FULL width. The scaffold is both
+     the tallest and the widest thing the game draws -- a 9x9 dot array with a
+     nine-number skip-count row under it, about 460px across -- and in a
+     half-width column that row wraps, which makes the scaffold taller rather
+     than shorter. What it gets instead is tighter row gaps, because a round may
+     not scroll and landscape has only 768px of height. Safe to reclaim the
+     entry row: `_showScaffold` hides both the keypad and the readout, so
+     nothing competes with the scaffold while it teaches. */
+  .play-area.teaching {
+    gap: 12px;
+  }
+}
+
+/* Short viewports -- landscape iPad is 768px high -- shrink the scaffold's dots
+   and count chips instead of letting a 9x9 array push "Got it" out of view.
+   Scoped to `.teaching` so the keypad's own sizing is untouched. */
+@media (height <= 820px) {
+  .play-area.teaching {
+    --tt-cell-size: 22px;
+  }
+
+  .play-area.teaching .skip-count {
+    min-width: 34px;
+    padding: 2px 6px;
   }
 }
 

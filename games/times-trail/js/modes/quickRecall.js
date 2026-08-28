@@ -79,7 +79,7 @@ import { buildScaffold } from "./shared.js"
  * @property {number} right               - Right operand as displayed
  * @property {number} answer              - `left * right`, i.e. `fact.product`
  * @property {string} prompt              - e.g. `"7 × 6 = ?"` (U+00D7, not the letter x)
- * @property {"tiles"|"keypad"|"grid"} entry - The one authority on the entry affordance
+ * @property {"tiles"|"keypad"} entry - The one authority on the entry affordance
  * @property {number[]|null} options      - Distinct integers including `answer` when
  *   `entry === "tiles"`; `null` otherwise
  * @property {ExpressionVisual} visual    - Mode-specific render data

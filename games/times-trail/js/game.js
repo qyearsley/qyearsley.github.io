@@ -167,7 +167,7 @@ const SAVE_FAILED_TEXT =
  * @property {number|null} firstInteractionAt - Epoch ms of the first touch of it
  * @property {number} strengthAtAsk       - Decayed strength before this answer
  * @property {string} tierAtAsk           - Card tier before this answer
- * @property {"tiles"|"keypad"|"grid"} entry - `challenge.entry`, never recomputed
+ * @property {"tiles"|"keypad"} entry - `challenge.entry`, never recomputed
  * @property {Object|null} challenge      - The live `Challenge`, or null between questions
  * @property {boolean} goalJustMetThisSession - Today's goal was met during this session
  * @property {string|null} newRegionName  - Region newly entered this session
@@ -327,6 +327,7 @@ class TimesTrail {
       onStart: () => this.startSession(MODE_IDS.QUICK_RECALL),
       onContinue: () => this.startSession(MODE_IDS.QUICK_RECALL),
       onStartFresh: () => this.startFresh(),
+      onShowProgress: () => this.showHub(),
       onHome: () => this.showTitle(),
       onBack: (sourceScreenId) => this.goBack(sourceScreenId),
       onModeSelect: (modeId) => this.startSession(modeId),
@@ -1091,7 +1092,7 @@ class TimesTrail {
    * Tiles, if ever restored, are FROZEN rather than removed, so the tile
    * marked `.correct` and the one marked `.incorrect` are still readable while the
    * scaffold teaches -- they occupy the `entry` grid area and the scaffold occupies
-   * `extra`, so both fit. On a keypad or grid question there are no tiles to keep,
+   * `extra`, so both fit. On a keypad question there are no tiles to keep,
    * and an empty-but-visible `#answer-tiles` would take a row for nothing, so that
    * path still clears and hides.
    *

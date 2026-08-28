@@ -355,10 +355,16 @@ restoring 3 / 2 / 3 and `null` on Explorer; nothing else needs changing.
 
 Play and Keep Going now start a session directly. The hub survives as the
 progress and navigation screen -- stars, gems, streak, and the buttons for Trail,
-Fact Map, and Cards -- reached by going Back from play or Back to Hub from the
-summary, rather than as a toll gate on the way in. Its heading changed from
-"Choose a mode" to "Your progress" and it keeps one Practise button, so it is
-still a place you can start from.
+Fact Map, and Cards -- rather than as a toll gate on the way in. Its heading
+changed from "Choose a mode" to "Your progress" and it keeps one Practise button,
+so it is still a place you can start from.
+
+It also needed a third title-screen button, `#progress-button`. Without one the
+only routes to the hub were finishing a session or tapping Back mid-round, and
+Back always raises the "Leave this round?" confirm, because a session counts as
+in progress from the moment question 1 renders. Looking at your own card
+collection should not require abandoning a round. Like Continue and Start Fresh
+it is hidden until a save exists.
 
 ### Themed trails instead of one trail with themed regions -- **open, and the most promising**
 
@@ -405,19 +411,32 @@ decomposition is exact -- 36 facts, no gaps:
   6x6 and 7x7, which are squares, and omits 3x4 and 3x6. The genuine leftover set
   is the ten in the table above. Either the name or the list is wrong.
 
-### Centre the play area in landscape -- **open**
+### Centre the play area in landscape -- **done**
 
-Landscape is a two-column grid with entry bottom-right ("under the right thumb")
-and the left column reserved for the scaffold, so the tiles sit off to the right
-during normal play and the "Yes!" feedback renders in the opposite column from
-where the player is looking. Portrait already centres.
+Landscape was a two-column grid with entry bottom-right ("under the right
+thumb") and the left column reserved for the scaffold, so the keypad sat off to
+the right during normal play and the "Yes!" rendered in the column opposite the
+one being looked at. Portrait already centred.
 
-Keypad-only removes the justification entirely -- the split existed so the
-scaffold could sit beside the frozen tiles, and with no tiles landscape can be a
-single centred column like portrait. **Not done because it needs a real viewport:**
-stacking question, readout, keypad, and scaffold in one column on a 768px-tall
-landscape iPad may overflow, and "no scrolling during a round" is a hard
-constraint. jsdom cannot answer this.
+Landscape is now a single centred column in every state, including while the
+post-miss scaffold teaches. A first attempt gave the scaffold its own column, on
+the theory that it was too tall to sit under the question; measuring the
+stylesheet showed that was the wrong trade. The scaffold's widest row is its
+skip-count strip -- nine chips at `min-width: 44px` plus eight 8px gaps, about
+460px -- against a half-width column of roughly 480px on a 1024px-wide landscape
+iPad, and less than 400px on a landscape phone. Wrapping that strip makes the
+scaffold _taller_, which is the opposite of the goal.
+
+What the height actually needed was less furniture, so `GameUI` now marks
+`#play-area` with `.teaching` while the scaffold is up and the stylesheet uses it
+to tighten row gaps and, below 820px of viewport height, shrink the array dots
+and count chips. `showScaffold` also hides the keypad readout, which was still
+displaying the digits of the miss -- a second, wrong answer sitting in the
+player's eyeline beside an array teaching the right one.
+
+Still worth a look on a real iPad: every number above is computed from the
+stylesheet, not measured. jsdom has no layout, so no test in the repo can check
+this.
 
 ### More reward for a correct answer -- **partly done**
 

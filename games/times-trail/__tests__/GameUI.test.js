@@ -75,6 +75,7 @@ const CONTRACT_IDS = [
   "start-button",
   "continue-button",
   "start-fresh-button",
+  "progress-button",
   "hub-screen",
   "hub-heading",
   "home-button",
@@ -97,6 +98,7 @@ const CONTRACT_IDS = [
   "progress-bar",
   "progress-text",
   "play-trail-strip",
+  "play-area",
   "question-text",
   "answer-tiles",
   "answer-display",
@@ -605,7 +607,7 @@ describe("GameUI", () => {
 
     test("leaves the gate message alone -- it is persistent state, not feedback", () => {
       // Clearing it here wiped the game's only explanation of why the trail
-      // stopped 450ms after it appeared. game.js owns clearing it.
+      // stopped one feedback hold after it appeared. game.js owns clearing it.
       const message = "Master 2 more facts in Doubling Meadow to cross the bridge"
       ui.showGateMessage(message)
       ui.renderQuestion(keypadChallenge())
@@ -913,6 +915,60 @@ describe("GameUI", () => {
       ui.showScaffold({ rows: 2, cols: 2, product: 4, skipCounts: [2, 4], text: "x" })
       ui.hideScaffold()
       expect(document.getElementById("scaffold-area").classList.contains("hidden")).toBe(true)
+    })
+  })
+
+  // The landscape stylesheet lays the play area out in one centred column during
+  // normal play and two columns only while the scaffold teaches. The class is the
+  // whole contract between GameUI and that stylesheet.
+  describe("the teaching class", () => {
+    const SCAFFOLD = { rows: 2, cols: 2, product: 4, skipCounts: [2, 4], text: "x" }
+    const teaching = () => document.getElementById("play-area").classList.contains("teaching")
+
+    test("is absent before anything is shown", () => {
+      expect(teaching()).toBe(false)
+    })
+
+    test("showScaffold adds it and hideScaffold removes it", () => {
+      ui.showScaffold(SCAFFOLD)
+      expect(teaching()).toBe(true)
+      ui.hideScaffold()
+      expect(teaching()).toBe(false)
+    })
+
+    test("a scaffold that is not shown does not claim the layout", () => {
+      ui.showScaffold(null)
+      expect(teaching()).toBe(false)
+    })
+
+    test("teaching hides the readout, so the miss is not left on screen", () => {
+      ui.renderQuestion({ prompt: "2 × 6 = ?", entry: "keypad", options: null })
+      ui.setAnswerDisplay("13")
+      expect(document.getElementById("answer-display").classList.contains("hidden")).toBe(false)
+      ui.showScaffold(SCAFFOLD)
+      expect(document.getElementById("answer-display").classList.contains("hidden")).toBe(true)
+    })
+
+    test("rendering the next question clears it, so the split cannot outlive the miss", () => {
+      ui.showScaffold(SCAFFOLD)
+      expect(teaching()).toBe(true)
+      ui.renderQuestion({ prompt: "6 × 7 = ?", entry: "keypad", options: null })
+      expect(teaching()).toBe(false)
+    })
+
+    test("leaving the play screen clears it, even without hideScaffold", () => {
+      ui.showScaffold(SCAFFOLD)
+      ui.showScreen("hub-screen")
+      expect(teaching()).toBe(false)
+    })
+
+    test("repeated calls stay idempotent", () => {
+      ui.showScaffold(SCAFFOLD)
+      ui.showScaffold(SCAFFOLD)
+      expect(document.getElementById("play-area").className).toBe("play-area teaching")
+      ui.hideScaffold()
+      ui.hideScaffold()
+      expect(document.getElementById("play-area").className).toBe("play-area")
     })
   })
 
@@ -1436,11 +1492,18 @@ describe("GameUI", () => {
       expect(document.getElementById("settings-modal").classList.contains("hidden")).toBe(true)
     })
 
-    test("updateTitleButtons toggles the continue and reset buttons", () => {
+    // All three are save-dependent: a fresh player has nothing to continue, no
+    // progress to look at, and nothing to reset.
+    test("updateTitleButtons toggles continue, progress, and reset together", () => {
+      const ids = ["continue-button", "progress-button", "start-fresh-button"]
       ui.updateTitleButtons(true)
-      expect(document.getElementById("continue-button").classList.contains("hidden")).toBe(false)
+      for (const id of ids) {
+        expect(document.getElementById(id).classList.contains("hidden")).toBe(false)
+      }
       ui.updateTitleButtons(false)
-      expect(document.getElementById("continue-button").classList.contains("hidden")).toBe(true)
+      for (const id of ids) {
+        expect(document.getElementById(id).classList.contains("hidden")).toBe(true)
+      }
     })
   })
 

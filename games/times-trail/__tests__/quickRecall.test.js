@@ -297,7 +297,7 @@ describe("quickRecall", () => {
     })
 
     test("a policy returning something unrecognised falls back to tiles", () => {
-      for (const returned of [INPUT_MODE.GRID, "TILES", "", null, undefined, 1, {}]) {
+      for (const returned of ["grid", "TILES", "", null, undefined, 1, {}]) {
         const challenge = createChallenge(
           SIX_BY_SEVEN,
           { strength: 5, inputModeFor: () => returned },

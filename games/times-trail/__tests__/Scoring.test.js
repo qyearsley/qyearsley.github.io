@@ -239,7 +239,7 @@ describe("Scoring", () => {
     test("a mastered fact pays strictly less than a weak one at every streak and input mode", () => {
       const scoring = scoringOnDay()
       for (const streak of [0, 1, 2, 3, 5, 6, 9, 10, 20]) {
-        for (const inputMode of [INPUT_MODE.TILES, INPUT_MODE.KEYPAD, INPUT_MODE.GRID]) {
+        for (const inputMode of [INPUT_MODE.TILES, INPUT_MODE.KEYPAD, "grid"]) {
           const weak = scoring.starsForCorrect({ strength: 0, streak, inputMode })
           const strengthening = scoring.starsForCorrect({ strength: 3, streak, inputMode })
           const mastered = scoring.starsForCorrect({ strength: 5, streak, inputMode })
@@ -266,8 +266,8 @@ describe("Scoring", () => {
         streak: 1,
         inputMode: INPUT_MODE.TILES,
       })
-      const grid = scoring.starsForCorrect({ strength: 0, streak: 1, inputMode: INPUT_MODE.GRID })
-      expect(grid).toBe(tiles)
+      const unknown = scoring.starsForCorrect({ strength: 0, streak: 1, inputMode: "grid" })
+      expect(unknown).toBe(tiles)
     })
 
     test.each([
@@ -310,7 +310,7 @@ describe("Scoring", () => {
       const scoring = scoringOnDay()
       for (let strength = -1; strength <= 6; strength += 1) {
         for (let streak = -1; streak <= 15; streak += 1) {
-          for (const inputMode of [INPUT_MODE.TILES, INPUT_MODE.KEYPAD, INPUT_MODE.GRID]) {
+          for (const inputMode of [INPUT_MODE.TILES, INPUT_MODE.KEYPAD, "grid"]) {
             const stars = scoring.starsForCorrect({ strength, streak, inputMode })
             expect(Number.isInteger(stars)).toBe(true)
             expect(stars).toBeGreaterThanOrEqual(0)

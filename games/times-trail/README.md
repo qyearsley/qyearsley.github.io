@@ -18,9 +18,6 @@ that is going.
 - **Typed answers only.** Every answer is typed on the on-screen keypad. Multiple
   choice was cut because a one-in-four guess muddies the mastery data, and
   because the input then changed under the player mid-session.
-- **Deliberate wrong answers.** Tile distractors are near-misses drawn from the
-  same tables (`6×7` → 36, 42, 48, 49), so guessing by number sense does not
-  work.
 - **Misses teach.** A wrong answer reveals the product, then shows the fact as a
   rows-of-columns array with the skip-count ticking through it. The same fact
   comes back three or four questions later. No points are ever lost.
@@ -66,10 +63,15 @@ Open settings with the ⚙️ button on the hub or on the play screen. There are
 exactly two controls:
 
 - **Difficulty:**
-  - Explorer -- tables 2-5 (10 facts), tiles only, never the keypad
+  - Explorer -- tables 2-5 (10 facts)
   - Adventurer -- tables 2-7 (21 facts), the default
-  - Master -- all 36 facts, keypad from strength 2 rather than 3
+  - Master -- all 36 facts
   - Custom -- pick the tables yourself
+
+  Difficulty currently changes which facts are in the pool and nothing else.
+  It used to decide where keypad entry began, which is moot now that every
+  answer is typed.
+
 - **Which tables?** -- eight toggles, shown only when difficulty is Custom.
   Custom means table families, so ticking 7 includes every fact with a 7 in it.
   The presets mean a ceiling instead: Explorer excludes `4×8` because 8 is not
@@ -86,7 +88,6 @@ teaching, and reduced motion is an OS preference handled in CSS.
 
 Touch is the primary input; the keyboard is an accessibility fallback.
 
-- **1, 2, 3, 4** -- select the matching answer tile
 - **0-9** -- type a digit on the keypad (two digits maximum; the largest product
   is 81)
 - **Enter** -- submit the typed answer
@@ -163,8 +164,9 @@ npm test -- --testPathPatterns times-trail      # just this game
 ```
 
 Every module has a test file except `js/game.js`, which is DOM glue and is
-untested by repo convention -- the same split Number Garden uses. The other 15
-modules are covered by 15 suites in `__tests__/`.
+untested by repo convention -- the same split Number Garden uses -- and
+`js/modes/shared.js`, whose one export is asserted through the modes that return
+it. That leaves 14 suites in `__tests__/`.
 
 There are no debug or unlock query parameters; the game reads nothing from the
 URL.

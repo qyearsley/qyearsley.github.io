@@ -33,6 +33,8 @@
  *     with nothing announced. This focuses the new screen's heading.
  *   - `updateProgressBar`: the base writes width and text only, leaving
  *     `aria-valuenow` frozen at its markup value for the whole session.
+ *   - `updateTitleButtons`: the base knows only about Continue and Start Fresh,
+ *     and this game has a third save-dependent title button.
  *
  * Error Handling: every method looks its target element up defensively and
  * returns without throwing when it is absent, matching `BaseGameUI`'s style.
@@ -285,7 +287,7 @@ const FACT_ORDER = new Map(FACT_IDS.map((id, index) => [id, index]))
  * `check` and the rest belong to `game.js`.
  * @typedef {Object} Challenge
  * @property {string} prompt - e.g. "7 × 6 = ?".
- * @property {"tiles"|"keypad"|"grid"} entry - Which entry affordance to show.
+ * @property {"tiles"|"keypad"} entry - Which entry affordance to show.
  * @property {number[]|null} options - Four distinct integers for tiles, else `null`.
  */
 
@@ -374,7 +376,6 @@ export class GameUI extends BaseGameUI {
       flameDisplay: document.getElementById("flame-display"),
       hubRegionName: document.getElementById("hub-region-name"),
       modeQuickRecall: document.getElementById("mode-quick-recall"),
-      modeArrayBuilder: document.getElementById("mode-array-builder"),
       trailButton: document.getElementById("trail-button"),
       mapButton: document.getElementById("map-button"),
       collectionButton: document.getElementById("collection-button"),
@@ -388,15 +389,12 @@ export class GameUI extends BaseGameUI {
       progressBar: document.getElementById("progress-bar"),
       progressText: document.getElementById("progress-text"),
       playTrailStrip: document.getElementById("play-trail-strip"),
+      playArea: document.getElementById("play-area"),
+      progressButton: document.getElementById("progress-button"),
       questionText: document.getElementById("question-text"),
       answerTiles: document.getElementById("answer-tiles"),
       answerDisplay: document.getElementById("answer-display"),
       keypad: document.getElementById("keypad"),
-      rowsMinus: document.getElementById("rows-minus"),
-      rowsPlus: document.getElementById("rows-plus"),
-      colsMinus: document.getElementById("cols-minus"),
-      colsPlus: document.getElementById("cols-plus"),
-      arraySubmit: document.getElementById("array-submit"),
       scaffoldArea: document.getElementById("scaffold-area"),
       scaffoldArray: document.getElementById("scaffold-array"),
       scaffoldCounts: document.getElementById("scaffold-counts"),
@@ -518,6 +516,23 @@ export class GameUI extends BaseGameUI {
   }
 
   /**
+   * OVERRIDES `BaseGameUI.updateTitleButtons`, which toggles only Continue and
+   * Start Fresh.
+   *
+   * `#progress-button` is the title screen's route to the hub, and it exists
+   * because Play now starts a session directly: without it the trail, cards, and
+   * fact map were reachable only by finishing a session or by abandoning one
+   * through the "Leave this round?" confirm. It is hidden on a fresh save for the
+   * same reason Continue is -- there is no progress to look at yet.
+   * @param {boolean} hasSavedProgress - Whether a save exists
+   * @returns {void}
+   */
+  updateTitleButtons(hasSavedProgress) {
+    super.updateTitleButtons(hasSavedProgress)
+    this.setVisible(this.elements.progressButton, Boolean(hasSavedProgress))
+  }
+
+  /**
    * Show the "+N ⭐" reward rising out of the play area. The CSS transition does
    * the movement; this only toggles classes and schedules the reset. A pending
    * flight is cancelled and restarted so a fast second correct answer cannot
@@ -569,6 +584,10 @@ export class GameUI extends BaseGameUI {
    */
   showScreen(screenId) {
     super.showScreen(screenId)
+    // Belt and braces: every route out of a live scaffold goes through
+    // hideScaffold today, but a screen change with `.teaching` stranded would
+    // silently compact the next scaffold's layout forever.
+    if (screenId !== "play-screen") this._setTeaching(false)
     const screen = document.getElementById(screenId)
     if (!screen) return
     const heading = screen.querySelector("h1, h2")
@@ -586,12 +605,12 @@ export class GameUI extends BaseGameUI {
    * `#answer-tiles` still occupied its `.play-area` row and pushed the keypad
    * off centre, and stale tiles left in place stayed clickable through a keypad
    * question. `#answer-display` is hidden the same way: it is the keypad's
-   * readout, and left visible it printed a 3rem "?" over the tiles and grid
-   * questions, where nothing types into it.
+   * readout, and left visible it printed a 3rem "?" on tile questions, where
+   * nothing types into it.
    *
    * The gate message is deliberately NOT cleared here. It says why the token
    * stopped, which is persistent state rather than per-answer feedback; clearing
-   * it on the next render wiped the sentence 450ms after it appeared. `game.js`
+   * it on the next render wiped the sentence one feedback hold after it appeared. `game.js`
    * calls `showGateMessage(null)` when the token moves again.
    * @param {Challenge} challenge - The question to show
    * @returns {void}
@@ -721,7 +740,7 @@ export class GameUI extends BaseGameUI {
 
   /**
    * Show or hide the keypad readout. Only the keypad types into it, so on a
-   * tiles or grid question it is a meaningless 3rem "?" taking up a row.
+   * tiles question it would be a meaningless 3rem "?" taking up a row.
    * @param {boolean} visible - Whether the keypad is the active affordance
    * @returns {void}
    */
@@ -829,8 +848,13 @@ export class GameUI extends BaseGameUI {
     const text = this.elements.scaffoldText
     if (text) text.textContent = scaffold.text ? String(scaffold.text) : ""
 
+    // The readout still holds the digits of the miss. Leaving "13" on screen
+    // beside an array teaching 2 x 6 = 12 is a second, wrong answer in the
+    // player's eyeline, and it costs a row of height the scaffold needs.
+    this.setAnswerDisplayVisible(false)
     this.setVisible(this.elements.scaffoldContinue, true)
     this.setVisible(this.elements.scaffoldArea, true)
+    this._setTeaching(true)
   }
 
   /**
@@ -840,6 +864,26 @@ export class GameUI extends BaseGameUI {
    */
   hideScaffold() {
     this.setVisible(this.elements.scaffoldArea, false)
+    this._setTeaching(false)
+  }
+
+  /**
+   * Mark the play area as teaching. The stylesheet keys the scaffold's tighter
+   * row gaps and its short-viewport dot sizing off this class.
+   *
+   * It exists because the scaffold is the largest thing the game draws -- a 9x9
+   * dot array, a nine-number skip-count row, a sentence, and a button -- and
+   * "no scrolling during a round" is a hard constraint on a 768px-high landscape
+   * iPad. The compaction is scoped to the class so the keypad, which is never on
+   * screen at the same time, keeps its full-size keys.
+   * @param {boolean} teaching - Whether the scaffold owns the play area
+   * @returns {void}
+   * @private
+   */
+  _setTeaching(teaching) {
+    const area = this.elements.playArea
+    if (!area) return
+    area.classList.toggle("teaching", Boolean(teaching))
   }
 
   /**

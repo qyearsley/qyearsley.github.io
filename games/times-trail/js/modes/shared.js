@@ -1,7 +1,7 @@
 /**
  * The one scaffold builder, shared by every mode.
  *
- * Both modes carry a post-miss teaching array (§ 12.5) and both used to build it
+ * Every mode carries a post-miss teaching array (§ 12.5) and both used to build it
  * from their own displayed orientation, which made the quality of the explanation
  * -- and how long the child had to sit through it -- a coin flip. `2 × 9` and
  * `9 × 2` are the same fact, but as scaffolds they were not:
@@ -25,7 +25,7 @@
  *
  * Purity: no DOM, no clock, no randomness, and no argument is mutated. Imports
  * nothing at all, so it sits beside `constants.js` at the root of the dependency
- * graph and cannot introduce a cycle between the two mode modules.
+ * graph and cannot introduce a cycle between mode modules.
  */
 
 /**

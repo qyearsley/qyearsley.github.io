@@ -22,6 +22,7 @@ function makeCallbacks() {
     onStart: jest.fn(),
     onContinue: jest.fn(),
     onStartFresh: jest.fn(),
+    onShowProgress: jest.fn(),
     onHome: jest.fn(),
     onBack: jest.fn(),
     onModeSelect: jest.fn(),
@@ -160,6 +161,7 @@ describe("EventManager", () => {
         "setupStartButton",
         "setupContinueButton",
         "setupStartFreshButton",
+        "setupProgressButton",
         "setupHomeButton",
         "setupBackButton",
         "setupModeButtons",
@@ -197,6 +199,13 @@ describe("EventManager", () => {
     })
   })
 
+  describe("setupProgressButton", () => {
+    test("#progress-button invokes onShowProgress once", () => {
+      clickId("progress-button")
+      expect(callbacks.onShowProgress).toHaveBeenCalledTimes(1)
+    })
+  })
+
   describe("setupStartFreshButton", () => {
     test("#start-fresh-button invokes onStartFresh once", () => {
       clickId("start-fresh-button")
@@ -223,11 +232,6 @@ describe("EventManager", () => {
     test("#mode-quick-recall invokes onModeSelect with its data-mode", () => {
       clickId("mode-quick-recall")
       expect(callbacks.onModeSelect).toHaveBeenCalledTimes(1)
-      expect(callbacks.onModeSelect).toHaveBeenCalledWith("quick-recall")
-    })
-
-    test("#mode-quick-recall invokes onModeSelect with its data-mode", () => {
-      clickId("mode-quick-recall")
       expect(callbacks.onModeSelect).toHaveBeenCalledWith("quick-recall")
     })
   })
@@ -555,6 +559,7 @@ describe("EventManager", () => {
       "start-button",
       "continue-button",
       "start-fresh-button",
+      "progress-button",
       "home-button",
       "back-button",
       "mode-quick-recall",

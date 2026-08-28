@@ -307,6 +307,14 @@ describe("DIFFICULTY_PRESETS", () => {
     })
   })
 
+  // Pinned by name, not just by shape: GRID was removed with the array builder
+  // and four JSDoc `entry` unions went on advertising it, because nothing failed.
+  describe("INPUT_MODE membership", () => {
+    test("is exactly TILES and KEYPAD", () => {
+      expect(Object.keys(INPUT_MODE).sort()).toEqual(["KEYPAD", "TILES"])
+    })
+  })
+
   describe("keypadMinStrength", () => {
     test("every preset starts on the keypad (keypad-only trial)", () => {
       for (const [, preset] of presetEntries) {

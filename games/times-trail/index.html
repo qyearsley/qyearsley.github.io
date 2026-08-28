@@ -49,6 +49,14 @@
             Keep Going
           </button>
           <button
+            id="progress-button"
+            type="button"
+            class="secondary-button hidden"
+            aria-label="See your trail, cards, and fact map"
+          >
+            Progress
+          </button>
+          <button
             id="start-fresh-button"
             type="button"
             class="secondary-button hidden"
@@ -143,7 +151,7 @@
           <div id="progress-text" class="progress-text">0/20</div>
         </div>
         <div id="play-trail-strip" class="play-trail-strip" aria-label="Trail position"></div>
-        <div class="play-area">
+        <div id="play-area" class="play-area">
           <p id="question-text" class="question" role="status" aria-live="polite"></p>
           <div id="answer-tiles" class="answer-tiles"></div>
           <!-- Not a live region: this readout is reset to "?" on every question

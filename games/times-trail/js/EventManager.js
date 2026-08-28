@@ -28,6 +28,7 @@
  * @typedef {Object} EventCallbacks
  * @property {() => void} [onStart]
  * @property {() => void} [onContinue]
+ * @property {() => void} [onShowProgress]
  * @property {() => void} [onStartFresh]
  * @property {() => void} [onHome]
  * @property {(sourceScreenId: string) => void} [onBack]
@@ -73,6 +74,7 @@ export class EventManager {
     this.setupStartButton()
     this.setupContinueButton()
     this.setupStartFreshButton()
+    this.setupProgressButton()
     this.setupHomeButton()
     this.setupBackButton()
     this.setupModeButtons()
@@ -155,6 +157,11 @@ export class EventManager {
     this._wireClick("startButton", "start-button", "onStart")
   }
 
+  /** Wires `#progress-button` to `onShowProgress`. @returns {void} */
+  setupProgressButton() {
+    this._wireClick("progressButton", "progress-button", "onShowProgress")
+  }
+
   /** Wires `#continue-button` to `onContinue`. @returns {void} */
   setupContinueButton() {
     this._wireClick("continueButton", "continue-button", "onContinue")
@@ -176,9 +183,10 @@ export class EventManager {
   }
 
   /**
-   * Wires each `.mode-button` to `onModeSelect(dataset.mode)`. The two mode
-   * buttons are static markup with no writer, so one listener each is enough
-   * and a nested element inside a button still resolves via `currentTarget`.
+   * Wires each `.mode-button` to `onModeSelect(dataset.mode)`. The mode buttons
+   * are static markup with no writer -- there is one today -- so a single
+   * listener each is enough, and a nested element inside a button still resolves
+   * via `currentTarget`.
    *
    * @returns {void}
    */

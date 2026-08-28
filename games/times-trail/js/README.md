@@ -52,9 +52,8 @@ Two edges are forbidden on purpose:
   `modes/` touches `document`, `window`, `localStorage`, or a timer.
 - **`GameUI` never imports a mode.** It imports only `BaseGameUI`,
   `constants.js`, and `facts.js`, so it cannot recompute -- and therefore cannot
-  disagree with -- anything a mode or a core module decided. That is why
-  `stepDimension` takes numbers and returns a number: `game.js` calls it and
-  hands `GameUI` the already-clamped integers.
+  disagree with -- anything a mode or a core module decided. `GameUI` is handed
+  already-decided numbers and renders them.
 
 ## Key Modules
 
@@ -198,24 +197,24 @@ and is deliberately not duplicated.
 Every mode returns the same eleven keys, so `game.js` has no mode-specific branch
 in its answer path:
 
-| key        | meaning                                                    |
-| ---------- | ---------------------------------------------------------- |
-| `modeId`   | The `MODE_IDS` value of the mode that built it             |
-| `factId`   | Canonical fact id, e.g. `"6x7"`                            |
-| `left`     | Left operand as displayed                                  |
-| `right`    | Right operand as displayed                                 |
-| `answer`   | `left * right`                                             |
-| `prompt`   | The question, ready to render                              |
-| `entry`    | `"tiles" \| "keypad" \| "grid"` -- the one entry authority |
-| `options`  | `number[]` when `entry === "tiles"`, else `null`           |
-| `visual`   | Mode-specific render data, discriminated by `visual.kind`  |
-| `check`    | `(input) => boolean` -- the one correctness authority      |
-| `scaffold` | The post-miss teaching array                               |
+| key        | meaning                                                   |
+| ---------- | --------------------------------------------------------- |
+| `modeId`   | The `MODE_IDS` value of the mode that built it            |
+| `factId`   | Canonical fact id, e.g. `"6x7"`                           |
+| `left`     | Left operand as displayed                                 |
+| `right`    | Right operand as displayed                                |
+| `answer`   | `left * right`                                            |
+| `prompt`   | The question, ready to render                             |
+| `entry`    | `"tiles" \| "keypad"` -- the one entry authority          |
+| `options`  | `number[]` when `entry === "tiles"`, else `null`          |
+| `visual`   | Mode-specific render data, discriminated by `visual.kind` |
+| `check`    | `(input) => boolean` -- the one correctness authority     |
+| `scaffold` | The post-miss teaching array                              |
 
 `game.js` renders by `entry`, scores by `entry`, and decides correctness with
 `check`. It never recomputes the entry mode and never compares an input to
-`answer` itself -- the three entry paths deliver different types (a number, a
-digit string, a `{rows, cols}` pair) and only `check` knows the difference.
+`answer` itself -- the entry paths deliver different types (a digit string from
+the keypad, a number from a tile) and only `check` knows the difference.
 
 ## Data Flow
 
@@ -243,13 +242,13 @@ _askNextQuestion()
    ├─► Keypad.setEnabled(entry === keypad)   │
    └─► session.askedAt = now()   ← stamped LAST, after the DOM is written
                                             │
-                first tap / first digit / first stepper
+                first tap / first digit
                                             │
                                             ▼
                             session.firstInteractionAt   (once)
                                             │
-                                     tile tap, keypad
-                                     enter, or "Check"
+                                      tile tap or
+                                      keypad enter
                                             ▼
                                    _handleAnswer(input)
                                             │
@@ -299,16 +298,16 @@ recorded here.
    correct.
 2. **Every non-mutating call's return value must be assigned.**
    `Journey.advance`, `Journey.normalizeTrail`, `Scoring.applyAnswer`,
-   `Scoring.rollDaily`, `Scoring.checkMilestones`, and `stepDimension` all return
-   new values and touch nothing. A dropped return silently kills the feature:
+   `Scoring.rollDaily`, and `Scoring.checkMilestones` all return new values and
+   touch nothing. A dropped return silently kills the feature:
    every answer still scores, and the token simply never moves.
    `store.apply()` is the one call that needs no assignment, per invariant 1.
 
 ## Testing
 
-Tests live in the parent `__tests__/` directory -- 15 suites covering every
+Tests live in the parent `__tests__/` directory -- 14 suites covering every
 module except `game.js` (DOM glue) and `modes/shared.js` (asserted through the
-three mode suites):
+two mode suites):
 
 - `constants.test.js` -- the shared tables and their cross-checks
 - `facts.test.js` -- the fact set, canonicalization, filtering
@@ -348,7 +347,7 @@ npm test -- --testPathPatterns times-trail  # just this game
   timer outside `game.js`, `GameUI.js`, and `Keypad.js`.
 - **`GameUI` never imports a mode.** The UI layer cannot reach `Journey`,
   `Scoring`, `MasteryModel`, or `modes/`, so it cannot recompute what they
-  decided. `stepDimension` is `game.js`'s to call.
+  decided.
 - **One authority per decision.** `challenge.entry` decides the entry affordance
   and `challenge.check` decides correctness. Neither is ever recomputed at a call
   site, and no answer key is written into the markup.
