@@ -15,12 +15,11 @@
  *      and card tier BEFORE the answer, builds a `Challenge` through
  *      `modes/index.js`, renders it, and arms the response clock last -- after
  *      the DOM is written, so the player is not charged for the render.
- *   3. Any of the three entry paths (a tile tap, the first keypad digit, the
- *      first array stepper tap) stamps `session.firstInteractionAt` exactly
- *      once. That stamp, not the submit, is the end of the measured thinking
- *      time -- typing two digits must not cost more than tapping one tile, or
- *      keypad facts could never reach mastery.
- *   4. All three entry paths converge on `_handleAnswer(input)`, which holds the
+ *   3. The first keypad digit stamps `session.firstInteractionAt` exactly once.
+ *      That stamp, not the submit, is the end of the measured thinking time --
+ *      charging the player for the motor time of typing made mastery
+ *      unreachable on the keypad path.
+ *   4. The entry path converges on `_handleAnswer(input)`, which holds the
  *      single double-submit guard, asks `challenge.check(input)` (the sole
  *      authority on correctness), and then updates records, stars, the trail,
  *      the daily goal, milestones, and the save file.
@@ -51,7 +50,7 @@
  *     while the screen still looks right.
  *   - **Every non-mutating call's return value is assigned.** `Journey.advance`,
  *     `Scoring.applyAnswer`, `Scoring.rollDaily`, `Scoring.checkMilestones`,
- *     `Journey.normalizeTrail`, and `stepDimension` all return new values and
+ *     and `Journey.normalizeTrail` all return new values and
  *     touch nothing. A dropped return reads exactly like working code and
  *     silently kills the feature. `store.apply()` is the one call that needs no
  *     assignment, because the store writes through the aliased map.
@@ -104,7 +103,6 @@ import { Keypad } from "./Keypad.js"
 import { GameUI } from "./GameUI.js"
 import { EventManager } from "./EventManager.js"
 import { createChallenge, getMode } from "./modes/index.js"
-import { stepDimension } from "./modes/arrayBuilder.js"
 
 /**
  * Card tier id -> position in `CARD_TIERS`, so "did this fact's card improve?"
@@ -171,8 +169,6 @@ const SAVE_FAILED_TEXT =
  * @property {string} tierAtAsk           - Card tier before this answer
  * @property {"tiles"|"keypad"|"grid"} entry - `challenge.entry`, never recomputed
  * @property {Object|null} challenge      - The live `Challenge`, or null between questions
- * @property {number} rows                - Array builder's live row count
- * @property {number} cols                - Array builder's live column count
  * @property {boolean} goalJustMetThisSession - Today's goal was met during this session
  * @property {string|null} newRegionName  - Region newly entered this session
  */
@@ -269,7 +265,7 @@ class TimesTrail {
     /** @type {SessionState} */
     this.session = this._createSession(MODE_IDS.QUICK_RECALL)
 
-    /** @type {boolean} The ONE double-submit guard, covering all three entry paths. @private */
+    /** @type {boolean} The ONE double-submit guard, covering every entry path. @private */
     this._isProcessingAnswer = false
 
     /**
@@ -326,15 +322,15 @@ class TimesTrail {
 
     /** @type {EventManager} */
     this.events = new EventManager(this.ui, {
-      onStart: () => this.showHub(),
-      onContinue: () => this.showHub(),
+      // Play and Keep Going both go straight into a session. There is one mode,
+      // so a hub visit before practice was a screen that asked nothing.
+      onStart: () => this.startSession(MODE_IDS.QUICK_RECALL),
+      onContinue: () => this.startSession(MODE_IDS.QUICK_RECALL),
       onStartFresh: () => this.startFresh(),
       onHome: () => this.showTitle(),
       onBack: (sourceScreenId) => this.goBack(sourceScreenId),
       onModeSelect: (modeId) => this.startSession(modeId),
       onAnswerSelected: (answer, buttonEl) => this._handleTileAnswer(answer, buttonEl),
-      onArrayStep: (dimension, delta) => this._stepArrayDimension(dimension, delta),
-      onArraySubmit: () => this._handleArraySubmit(),
       onScaffoldContinue: () => this._resolveScaffold(),
       onShowTrail: () => this.showTrail(),
       onShowMap: () => this.showMap(),
@@ -735,17 +731,12 @@ class TimesTrail {
     this.session.strengthAtAsk = strengthAtAsk
     this.session.tierAtAsk = this.store.cardTierOf(factId)
     // `challenge.entry` is the single authority on the entry affordance. Deriving
-    // it a second time here is what let an Array Builder answer collect the
+    // it a second time here is what let a non-keypad answer collect the
     // keypad honesty bonus.
     this.session.entry = challenge.entry
     this.session.challenge = challenge
-    this.session.rows = this._startDimension(challenge.visual, "startRows")
-    this.session.cols = this._startDimension(challenge.visual, "startCols")
 
     this.ui.renderQuestion(challenge)
-    if (challenge.entry === INPUT_MODE.GRID) {
-      this.ui.renderArrayBuilder(challenge.visual, this.session.rows, this.session.cols)
-    }
 
     // Unconditional, every render: both Keypad and EventManager listen on
     // `document`, so this is what keeps exactly one of them acting on a digit.
@@ -761,9 +752,8 @@ class TimesTrail {
   }
 
   /**
-   * Stamp the first interaction with this question, once. Called from all three
-   * entry paths: a tile tap, the keypad's first digit or clear, and the array
-   * builder's first stepper tap -- never from a submit.
+   * Stamp the first interaction with this question, once. Called from the
+   * keypad's first digit or clear -- never from a submit.
    * @returns {void}
    * @private
    */
@@ -815,40 +805,9 @@ class TimesTrail {
   }
 
   /**
-   * The array builder's "Check" button. The steppers already stamped the first
-   * interaction; submitting must not.
-   * @returns {void}
-   * @private
-   */
-  _handleArraySubmit() {
-    if (this.session.entry !== INPUT_MODE.GRID) return
-    this._handleAnswer({ rows: this.session.rows, cols: this.session.cols })
-  }
-
-  /**
-   * Move one array-builder dimension and redraw the rectangle.
-   * @param {"rows"|"cols"} dimension - Which dimension the stepper drives
-   * @param {number} delta - Signed step, normally +1 or -1
-   * @returns {void}
-   * @private
-   */
-  _stepArrayDimension(dimension, delta) {
-    if (dimension !== "rows" && dimension !== "cols") return
-    if (this._isProcessingAnswer) return
-    const challenge = this.session.challenge
-    if (challenge === null || challenge.entry !== INPUT_MODE.GRID) return
-
-    this._markFirstInteraction()
-    // Assigned back: stepDimension is numbers in, a number out.
-    this.session[dimension] = stepDimension(this.session[dimension], delta, OPERAND_MAX)
-    this.ui.renderArrayBuilder(challenge.visual, this.session.rows, this.session.cols)
-  }
-
-  /**
-   * The one answer handler, shared by tiles, keypad, and array builder, and the
-   * one place the double-submit guard lives. A guard on the tile path alone left
-   * a fast double-tap on the keypad's checkmark or on `#array-submit` scoring
-   * twice, because those paths never pass through it.
+   * The one answer handler, and the one place the double-submit guard lives. A
+   * guard on the tile path alone left a fast double-tap on the keypad's
+   * checkmark scoring twice, because that path never passed through it.
    *
    * `challenge.check(input)` is the sole authority on correctness -- the input
    * types differ per path (a number, a digit string, a `{rows, cols}` pair) and
@@ -1126,10 +1085,10 @@ class TimesTrail {
 
   /**
    * Show the post-miss teaching array. The scaffold owns the play area while it
-   * is up: the array builder and the keypad go away, the keypad goes inert, and it
-   * becomes the only live region so a screen reader narrates one thing.
+   * is up: the keypad goes inert and the scaffold becomes the only live region,
+   * so a screen reader narrates one thing.
    *
-   * The tiles are the exception. They are FROZEN rather than removed, so the tile
+   * Tiles, if ever restored, are FROZEN rather than removed, so the tile
    * marked `.correct` and the one marked `.incorrect` are still readable while the
    * scaffold teaches -- they occupy the `entry` grid area and the scaffold occupies
    * `extra`, so both fit. On a keypad or grid question there are no tiles to keep,
@@ -1152,7 +1111,6 @@ class TimesTrail {
     }
 
     this._scaffoldResolved = false
-    this.ui.setArrayBuilderVisible(false)
     if (challenge.entry === INPUT_MODE.TILES) {
       this.ui.freezeTiles()
     } else {
@@ -1414,23 +1372,9 @@ class TimesTrail {
       tierAtAsk: CARD_TIERS[0].id,
       entry: INPUT_MODE.TILES,
       challenge: null,
-      rows: 1,
-      cols: 1,
       goalJustMetThisSession: false,
       newRegionName: null,
     }
-  }
-
-  /**
-   * The array builder's opening dimension, read off the mode's visual.
-   * @param {Object} visual - The challenge's `visual`
-   * @param {string} key - "startRows" or "startCols"
-   * @returns {number} A positive integer, defaulting to 1
-   * @private
-   */
-  _startDimension(visual, key) {
-    const value = visual === null || typeof visual !== "object" ? null : visual[key]
-    return Number.isInteger(value) && value > 0 ? value : 1
   }
 
   /**

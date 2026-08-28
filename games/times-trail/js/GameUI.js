@@ -271,14 +271,6 @@ const FACT_ORDER = new Map(FACT_IDS.map((id, index) => [id, index]))
  */
 
 /**
- * Data the array builder draws itself from. Plain data, never a DOM node.
- * @typedef {Object} ArrayBuilderVisual
- * @property {number} targetProduct - The product she is building.
- * @property {number} maxRows - Row ceiling.
- * @property {number} maxCols - Column ceiling.
- */
-
-/**
  * The post-miss teaching array.
  * @typedef {Object} Scaffold
  * @property {number} rows - Equals the challenge's `left`.
@@ -400,9 +392,6 @@ export class GameUI extends BaseGameUI {
       answerTiles: document.getElementById("answer-tiles"),
       answerDisplay: document.getElementById("answer-display"),
       keypad: document.getElementById("keypad"),
-      arrayBuilder: document.getElementById("array-builder"),
-      arrayGrid: document.getElementById("array-grid"),
-      arrayDims: document.getElementById("array-dims"),
       rowsMinus: document.getElementById("rows-minus"),
       rowsPlus: document.getElementById("rows-plus"),
       colsMinus: document.getElementById("cols-minus"),
@@ -618,7 +607,6 @@ export class GameUI extends BaseGameUI {
     this.clearTiles()
     this.setTilesVisible(false)
     this.setKeypadVisible(false)
-    this.setArrayBuilderVisible(false)
     this.setAnswerDisplay(KEYPAD.EMPTY_DISPLAY)
     this.setAnswerDisplayVisible(false)
 
@@ -628,8 +616,6 @@ export class GameUI extends BaseGameUI {
     } else if (challenge.entry === INPUT_MODE.KEYPAD) {
       this.setAnswerDisplayVisible(true)
       this.setKeypadVisible(true)
-    } else if (challenge.entry === INPUT_MODE.GRID) {
-      this.setArrayBuilderVisible(true)
     } else {
       // A question with no way to answer it is a bug worth a warning, not a
       // silently blank screen.
@@ -719,15 +705,6 @@ export class GameUI extends BaseGameUI {
   }
 
   /**
-   * Show or hide the array builder.
-   * @param {boolean} visible - Whether the grid is the active affordance
-   * @returns {void}
-   */
-  setArrayBuilderVisible(visible) {
-    this.setVisible(this.elements.arrayBuilder, visible)
-  }
-
-  /**
    * Write the keypad readout, clearing any `.correct` state from the previous
    * answer. `#answer-display` is a `<p>`, never an `<input>`, so the iOS system
    * keyboard is never invoked; without this readout a tap on the keypad changed
@@ -771,45 +748,6 @@ export class GameUI extends BaseGameUI {
     if (text !== null && text !== undefined) el.textContent = String(text)
     this.setAnswerDisplayVisible(true)
     el.classList.add("correct")
-  }
-
-  /**
-   * Draw the array builder's current rectangle and its dimension readout.
-   * `rows` and `cols` arrive already clamped -- `game.js` owns them and calls
-   * `stepDimension` itself, because a mode module is not something the UI layer
-   * is allowed to import.
-   * @param {ArrayBuilderVisual} visual - Mode-supplied render data
-   * @param {number} rows - Current row count, an integer >= 1
-   * @param {number} cols - Current column count, an integer >= 1
-   * @returns {void}
-   */
-  renderArrayBuilder(visual, rows, cols) {
-    const rowCount = positiveIntOr(rows, 1)
-    const colCount = positiveIntOr(cols, 1)
-
-    const grid = this.elements.arrayGrid
-    if (grid) {
-      grid.innerHTML = ""
-      // The cells are a fixed 28px square in CSS, so `auto` tracks give the
-      // right width for any column count without repeating the size here.
-      grid.style.gridTemplateColumns = `repeat(${colCount}, auto)`
-      for (let i = 0; i < rowCount * colCount; i += 1) {
-        const cell = document.createElement("div")
-        cell.className = "array-cell"
-        grid.appendChild(cell)
-      }
-      const target =
-        visual && Number.isFinite(Number(visual.targetProduct))
-          ? Number(visual.targetProduct)
-          : rowCount * colCount
-      grid.setAttribute(
-        "aria-label",
-        `${rowCount} by ${colCount} rectangle, ${rowCount * colCount} of ${target} squares`,
-      )
-    }
-
-    const dims = this.elements.arrayDims
-    if (dims) dims.textContent = `${rowCount} × ${colCount}`
   }
 
   // ------------------------------------------------------------ Feedback

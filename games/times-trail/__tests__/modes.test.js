@@ -48,9 +48,6 @@ const QUICK_RECALL_TILES_RNG_CALLS = 9
 /** RNG calls a Quick Recall keypad challenge consumes: the orientation roll only. */
 const QUICK_RECALL_KEYPAD_RNG_CALLS = 1
 
-/** RNG calls an Array Builder challenge consumes: the orientation roll only. */
-const ARRAY_BUILDER_RNG_CALLS = 1
-
 /**
  * An rng that always returns `value`, counting its calls so the dispatcher can be
  * shown to pass `rng` straight through rather than substituting its own.
@@ -138,13 +135,13 @@ function expectUniformChallenge(challenge, fact, modeId) {
   expect(scaffold.text).toBe(`${scaffold.rows} rows of ${scaffold.cols} makes ${scaffold.product}`)
 }
 
-/** Every (mode id, fact id) pair: 2 modes x 36 facts. */
+/** Every (mode id, fact id) pair: 1 mode x 36 facts. */
 const MODE_FACT_PAIRS = FACTS.flatMap((fact) => MODES.map((mode) => [mode.id, fact.id]))
 
 describe("modes/index", () => {
   describe("MODES", () => {
     test("has one entry per mode, in the documented menu order", () => {
-      expect(MODES.map((mode) => mode.id)).toEqual([MODE_IDS.QUICK_RECALL, MODE_IDS.ARRAY_BUILDER])
+      expect(MODES.map((mode) => mode.id)).toEqual([MODE_IDS.QUICK_RECALL])
     })
 
     test("every entry has an id, a label, and a createChallenge function", () => {
@@ -189,7 +186,6 @@ describe("modes/index", () => {
   describe("getMode", () => {
     test("returns the definition for each registered id", () => {
       expect(getMode(MODE_IDS.QUICK_RECALL)).toBe(MODES[0])
-      expect(getMode(MODE_IDS.ARRAY_BUILDER)).toBe(MODES[1])
     })
 
     test("returns null for an unknown id", () => {
@@ -219,7 +215,7 @@ describe("modes/index", () => {
 
   describe("modeIds", () => {
     test("returns the ids in menu order", () => {
-      expect(modeIds()).toEqual([MODE_IDS.QUICK_RECALL, MODE_IDS.ARRAY_BUILDER])
+      expect(modeIds()).toEqual([MODE_IDS.QUICK_RECALL])
     })
 
     test("returns a fresh array each call", () => {
@@ -227,8 +223,8 @@ describe("modes/index", () => {
       const second = modeIds()
       expect(first).not.toBe(second)
       first.push("nope")
-      expect(modeIds()).toEqual([MODE_IDS.QUICK_RECALL, MODE_IDS.ARRAY_BUILDER])
-      expect(MODES).toHaveLength(2)
+      expect(modeIds()).toEqual([MODE_IDS.QUICK_RECALL])
+      expect(MODES).toHaveLength(1)
     })
 
     test("every id resolves through getMode", () => {
@@ -243,13 +239,6 @@ describe("modes/index", () => {
       const challenge = createChallenge(MODE_IDS.QUICK_RECALL, SIX_BY_SEVEN, {}, () => 0)
       expect(challenge.modeId).toBe(MODE_IDS.QUICK_RECALL)
       expect(challenge.visual.kind).toBe("expression")
-    })
-
-    test("dispatches to Array Builder", () => {
-      const challenge = createChallenge(MODE_IDS.ARRAY_BUILDER, SIX_BY_SEVEN, {}, () => 0)
-      expect(challenge.modeId).toBe(MODE_IDS.ARRAY_BUILDER)
-      expect(challenge.entry).toBe(INPUT_MODE.GRID)
-      expect(challenge.visual.kind).toBe("array-builder")
     })
 
     test("forwards settings positionally, so the entry policy is honoured", () => {
@@ -271,10 +260,6 @@ describe("modes/index", () => {
       const keypadRng = countingRng(0.3)
       createChallenge(MODE_IDS.QUICK_RECALL, SIX_BY_SEVEN, KEYPAD_CONTEXT, keypadRng)
       expect(keypadRng.calls).toBe(QUICK_RECALL_KEYPAD_RNG_CALLS)
-
-      const gridRng = countingRng(0.3)
-      createChallenge(MODE_IDS.ARRAY_BUILDER, SIX_BY_SEVEN, {}, gridRng)
-      expect(gridRng.calls).toBe(ARRAY_BUILDER_RNG_CALLS)
     })
 
     test("is deterministic for a given rng", () => {
@@ -296,7 +281,6 @@ describe("modes/index", () => {
       const settings = { strength: 3, inputModeFor: KEYPAD_CONTEXT.inputModeFor }
       const before = { ...settings }
       createChallenge(MODE_IDS.QUICK_RECALL, SIX_BY_SEVEN, settings, () => 0)
-      createChallenge(MODE_IDS.ARRAY_BUILDER, SIX_BY_SEVEN, settings, () => 0)
       expect(settings).toEqual(before)
     })
 
@@ -388,13 +372,10 @@ describe("modes/index", () => {
     test("both entry branches of the options invariant are actually exercised", () => {
       const tiles = createChallenge(MODE_IDS.QUICK_RECALL, SIX_BY_SEVEN, {}, () => 0.5)
       const keypad = createChallenge(MODE_IDS.QUICK_RECALL, SIX_BY_SEVEN, KEYPAD_CONTEXT, () => 0.5)
-      const grid = createChallenge(MODE_IDS.ARRAY_BUILDER, SIX_BY_SEVEN, {}, () => 0.5)
       expect(tiles.entry).toBe(INPUT_MODE.TILES)
       expect(tiles.options).not.toBeNull()
       expect(keypad.entry).toBe(INPUT_MODE.KEYPAD)
       expect(keypad.options).toBeNull()
-      expect(grid.entry).toBe(INPUT_MODE.GRID)
-      expect(grid.options).toBeNull()
     })
 
     test("returns a fresh challenge each call, sharing nothing with the last", () => {

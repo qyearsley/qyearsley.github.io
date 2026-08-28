@@ -325,18 +325,18 @@ restoring 3 / 2 / 3 and `null` on Explorer; nothing else needs changing.
   tiles at least offer recognition. The counter-argument is that the miss path
   already handles not-knowing: wrong answer, then the array and skip-count teach
   that fact, then it returns a few questions later.
-- **If kept, then delete:** `distractors.js` and its tests, tile rendering and
-  the freeze-and-reveal miss choreography in `GameUI`, the tile keyboard
-  listener in `EventManager`, `SCORING.KEYPAD_BONUS` (a meaningless constant
-  offset once every answer is typed), and `INPUT_MODE.TILES` itself. Explorer
-  also needs a new meaning, since "multiple choice throughout" was its
-  definition.
+- **Still to delete if the trial sticks:** `distractors.js` and its tests, tile
+  rendering and the freeze-and-reveal miss choreography in `GameUI`, the tile
+  keyboard listener in `EventManager`, `SCORING.KEYPAD_BONUS` (a meaningless
+  constant offset once every answer is typed), and `INPUT_MODE.TILES` itself.
+  These are deliberately still in place so a revert stays a one-line change.
+  Explorer's label lost "tiles only" but the preset still needs a new meaning.
 - **Cost already paid:** two `Settings` tests lost their observable. Rounding and
   non-finite-to-0 in `inputModeFor` used to be visible through the tiles/keypad
   boundary; with every preset at 0 the return value cannot distinguish sanitised
   input from unsanitised. Marked `COVERAGE LOSS` in `Settings.test.js`.
 
-### Cut Array Builder -- **decided, not yet done**
+### Cut Array Builder -- **done**
 
 - **For:** the array scaffold in the miss path already teaches the area model, on
   the exact fact just missed, at the moment it is wanted. Array Builder does it
@@ -351,11 +351,14 @@ restoring 3 / 2 / 3 and `null` on Explorer; nothing else needs changing.
   for a 3rd grader, not a loss. The mode registry stays -- Phase 2 has five modes
   queued behind it.
 
-### Start straight into practice -- **decided, not yet done**
+### Start straight into practice -- **done**
 
-Skip the mode chooser entirely. Trail, Fact Map, and Cards still need a home;
-either keep a slimmer hub reachable from the play screen, or hang them off the
-title screen. Undecided.
+Play and Keep Going now start a session directly. The hub survives as the
+progress and navigation screen -- stars, gems, streak, and the buttons for Trail,
+Fact Map, and Cards -- reached by going Back from play or Back to Hub from the
+summary, rather than as a toll gate on the way in. Its heading changed from
+"Choose a mode" to "Your progress" and it keeps one Practise button, so it is
+still a place you can start from.
 
 ### Themed trails instead of one trail with themed regions -- **open, and the most promising**
 

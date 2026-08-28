@@ -194,7 +194,7 @@ export function normalizeRecord(raw) {
 /**
  * Classify thinking time into a speed band. `responseMs` is measured from the
  * question becoming interactive to the first interaction, never to submit, so
- * the band means the same thing on tiles, keypad, and array builder.
+ * the band means the same thing on every entry path.
  * @param {number|null|undefined} responseMs - Thinking time in milliseconds
  * @returns {SpeedBand} The band; "unknown" when the answer was not measured
  */

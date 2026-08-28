@@ -106,7 +106,6 @@ body {
 .answer-btn,
 .keypad-key,
 .mode-button,
-.stepper-button,
 .big-button,
 .secondary-button,
 .nav-button,
@@ -134,7 +133,6 @@ body {
 .hub-nav,
 .mode-choices,
 .summary-buttons,
-.array-steppers,
 .header .stats,
 .table-toggles {
   display: flex;
@@ -383,19 +381,11 @@ body {
   text-align: center;
 }
 
-.stepper-button {
-  font-size: 2rem;
-  background-color: var(--tt-surface-alt);
-  color: var(--tt-ink);
-  border: 2px solid var(--tt-border);
-}
-
 /* Disabled controls (BaseGameUI.disableButton / disableAnswerButtons). */
 .big-button:disabled,
 .secondary-button:disabled,
 .answer-btn:disabled,
 .keypad-key:disabled,
-.stepper-button:disabled,
 .disabled {
   opacity: 0.5;
   pointer-events: none;
@@ -416,8 +406,7 @@ body {
   .secondary-button:hover,
   .nav-button:hover,
   .icon-button:hover,
-  .text-button:hover,
-  .stepper-button:hover {
+  .text-button:hover {
     filter: brightness(1.08);
   }
 }
@@ -425,7 +414,6 @@ body {
 .answer-btn:active,
 .keypad-key:active,
 .mode-button:active,
-.stepper-button:active,
 .big-button:active,
 .secondary-button:active,
 .nav-button:active,
@@ -492,8 +480,7 @@ body {
 }
 
 #answer-tiles,
-#keypad,
-#array-builder {
+#keypad {
   grid-area: entry;
 }
 
@@ -605,39 +592,15 @@ body {
   animation: pop 0.3s ease;
 }
 
-/* ==================== Array Builder ==================== */
-.array-builder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--tt-tap-gap);
-}
-
-.array-steppers {
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.array-dims {
-  min-width: 96px;
-  font-size: 1.5rem;
-  font-weight: 700;
-  text-align: center;
-  color: var(--tt-ink);
-}
-
 /* Pinned cell sizes: 9 columns x 28px + 8 gaps x 4px = 284px, so a 9x9
-   array fits the narrowest supported column instead of growing to fill it
-   and pushing the steppers off screen. */
-.array-grid,
+   scaffold array fits the narrowest supported column instead of growing to
+   fill it. */
 .scaffold-array {
   display: grid;
   gap: 4px;
   justify-content: center;
 }
 
-.array-cell,
 .array-dot {
   width: var(--tt-cell-size);
   height: var(--tt-cell-size);

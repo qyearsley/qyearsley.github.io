@@ -13,7 +13,7 @@
  *
  * Statelessness: this class holds no `isProcessingAnswer` flag and exposes no
  * `resetAnswerProcessing()`. The double-submit guard lives in `game.js`, at the
- * single point where the tile, keypad, and array-builder answer paths converge.
+ * single point where the answer paths converge.
  * Guarding only the tile path here left the other two unguarded, so the same
  * question could be answered twice while feedback was on screen.
  *
@@ -33,8 +33,6 @@
  * @property {(sourceScreenId: string) => void} [onBack]
  * @property {(modeId: string) => void} [onModeSelect]
  * @property {(answer: number, buttonEl: HTMLElement) => void} [onAnswerSelected]
- * @property {(dimension: "rows"|"cols", delta: number) => void} [onArrayStep]
- * @property {() => void} [onArraySubmit]
  * @property {() => void} [onScaffoldContinue]
  * @property {() => void} [onShowTrail]
  * @property {() => void} [onShowMap]
@@ -79,7 +77,6 @@ export class EventManager {
     this.setupBackButton()
     this.setupModeButtons()
     this.setupAnswerTiles()
-    this.setupArraySteppers()
     this.setupScaffoldContinue()
     this.setupNavButtons()
     this.setupSummaryButtons()
@@ -214,30 +211,6 @@ export class EventManager {
       if (Number.isNaN(answer)) return
       this._invoke("onAnswerSelected", answer, tile)
     })
-  }
-
-  /**
-   * Wires the four array-builder steppers to `onArrayStep(dimension, delta)`
-   * and `#array-submit` to `onArraySubmit`.
-   *
-   * @returns {void}
-   */
-  setupArraySteppers() {
-    /** @type {Array<[string, string, "rows"|"cols", number]>} */
-    const steppers = [
-      ["rowsMinus", "rows-minus", "rows", -1],
-      ["rowsPlus", "rows-plus", "rows", 1],
-      ["colsMinus", "cols-minus", "cols", -1],
-      ["colsPlus", "cols-plus", "cols", 1],
-    ]
-    steppers.forEach(([cacheKey, elementId, dimension, delta]) => {
-      const button = this._element(cacheKey, elementId)
-      if (!button) return
-      button.addEventListener("click", () => {
-        this._invoke("onArrayStep", dimension, delta)
-      })
-    })
-    this._wireClick("arraySubmit", "array-submit", "onArraySubmit")
   }
 
   /** Wires `#scaffold-continue` ("Got it") to `onScaffoldContinue`. @returns {void} */

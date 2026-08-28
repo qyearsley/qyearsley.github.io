@@ -188,21 +188,20 @@ export const ALL_TABLES = Object.freeze([2, 3, 4, 5, 6, 7, 8, 9])
 
 /**
  * How the player enters an answer. Derived from the fact's strength, never
- * chosen by the player, so there is no matching setting. "grid" is the array
- * builder's row/column stepper.
+ * chosen by the player, so there is no matching setting. TILES is retained only
+ * so a revert of the keypad-only trial does not have to reintroduce it; nothing
+ * currently produces it.
  */
-export const INPUT_MODE = Object.freeze({ TILES: "tiles", KEYPAD: "keypad", GRID: "grid" })
+export const INPUT_MODE = Object.freeze({ TILES: "tiles", KEYPAD: "keypad" })
 
 /** Practice mode identifiers. */
 export const MODE_IDS = Object.freeze({
   QUICK_RECALL: "quick-recall",
-  ARRAY_BUILDER: "array-builder",
 })
 
 /** Human-readable mode names. One entry per MODE_IDS value. */
 export const MODE_LABELS = Object.freeze({
   [MODE_IDS.QUICK_RECALL]: "Quick Recall",
-  [MODE_IDS.ARRAY_BUILDER]: "Array Builder",
 })
 
 /** Session shape. FACTS_PER_SESSION is also #progress-bar's aria-valuemax. */

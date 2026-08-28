@@ -37,8 +37,8 @@
         <h1 id="title-heading" class="game-title" tabindex="-1">🥾 Times Trail</h1>
         <p class="game-tagline">Walk the trail. Learn the times tables.</p>
         <div class="title-buttons">
-          <button id="start-button" type="button" class="big-button" aria-label="Start new game">
-            Start
+          <button id="start-button" type="button" class="big-button" aria-label="Start practising">
+            Play
           </button>
           <button
             id="continue-button"
@@ -46,7 +46,7 @@
             class="big-button hidden"
             aria-label="Continue saved game"
           >
-            Continue
+            Keep Going
           </button>
           <button
             id="start-fresh-button"
@@ -85,7 +85,7 @@
             </button>
           </div>
         </div>
-        <h2 id="hub-heading" tabindex="-1">Choose a mode</h2>
+        <h2 id="hub-heading" tabindex="-1">Your progress</h2>
         <p class="hub-region" id="hub-region-name"></p>
         <div class="mode-choices">
           <button
@@ -93,18 +93,9 @@
             type="button"
             class="mode-button"
             data-mode="quick-recall"
-            aria-label="Play Quick Recall"
+            aria-label="Start practising"
           >
-            ⚡ Quick Recall
-          </button>
-          <button
-            id="mode-array-builder"
-            type="button"
-            class="mode-button"
-            data-mode="array-builder"
-            aria-label="Play Array Builder"
-          >
-            🔢 Array Builder
+            ⚡ Practise
           </button>
         </div>
         <div class="hub-nav">
@@ -161,30 +152,6 @@
                are omitted rather than just the attribute. -->
           <p id="answer-display" class="answer-display hidden">?</p>
           <div id="keypad" class="keypad hidden" role="group" aria-label="Number keypad"></div>
-          <div id="array-builder" class="array-builder hidden">
-            <div id="array-grid" class="array-grid"></div>
-            <div class="array-steppers">
-              <button id="rows-minus" type="button" class="stepper-button" aria-label="Fewer rows">
-                −
-              </button>
-              <span id="array-dims" class="array-dims">1 × 1</span>
-              <button id="rows-plus" type="button" class="stepper-button" aria-label="More rows">
-                +
-              </button>
-              <button
-                id="cols-minus"
-                type="button"
-                class="stepper-button"
-                aria-label="Fewer columns"
-              >
-                −
-              </button>
-              <button id="cols-plus" type="button" class="stepper-button" aria-label="More columns">
-                +
-              </button>
-              <button id="array-submit" type="button" class="big-button">Check</button>
-            </div>
-          </div>
           <div id="scaffold-area" class="scaffold-area hidden" aria-live="polite">
             <div id="scaffold-array" class="scaffold-array"></div>
             <div id="scaffold-counts" class="scaffold-counts"></div>
@@ -347,7 +314,6 @@
     <script type="module" src="js/game.js"></script>
     <script>
       if (window.__registerShortcut) {
-        window.__registerShortcut("1-4", "Select answer")
         window.__registerShortcut("0-9", "Type answer")
         window.__registerShortcut("Enter", "Submit answer")
         window.__registerShortcut("Backspace", "Clear entry")

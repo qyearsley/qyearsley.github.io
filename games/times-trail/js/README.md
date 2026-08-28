@@ -35,7 +35,6 @@ root; `game.js` is the only module that knows about all of them.
       ├──────────┴──► Settings.js      │
       │                                │
       ├──► modes/quickRecall.js ◄───────┘
-      ├──► modes/arrayBuilder.js
       │         │
       │         ├──► modes/shared.js  (the one scaffold builder; imports nothing)
       │         └──► modes/index.js   (registry and dispatcher)
@@ -155,24 +154,17 @@ back.
 entry affordance, the tile options when there are any, the post-miss scaffold, and
 a `check` closure. No DOM at all.
 
-### modes/arrayBuilder.js
-
-The same contract for the area model: the target product, the grid's starting and
-maximum dimensions, and a hint rectangle. Also exports `stepDimension`, the
-clamped arithmetic behind the +/- steppers. `check` accepts either orientation,
-because turning the rectangle on its side does not change its area.
-
 ### modes/shared.js
 
-`buildScaffold(a, b)`, the single post-miss teaching array both modes return.
+`buildScaffold(a, b)`, the post-miss teaching array every mode returns.
 Rows are always `min(a, b)`, so the same fact always teaches the same picture --
 built from the displayed orientation, `9 × 2` produced a nine-row array, the
 sentence "9 rows of 2 makes 18", and a 5450 ms wait instead of 2300 ms, half the
 time at random. Imports nothing, so it sits beside `constants.js` at the root of
-the graph and cannot create a cycle between the two modes. It has no test file of
-its own: `quickRecall.test.js`, `arrayBuilder.test.js`, and `modes.test.js` each
-assert the scaffold contract through the mode that produced it, which is where a
-regression would actually show up.
+the graph and cannot create a cycle between modes. It has no test file of its own:
+`quickRecall.test.js` and `modes.test.js` each assert the scaffold contract
+through the mode that produced it, which is where a regression would actually
+show up.
 
 ### GameUI.js
 
@@ -328,7 +320,6 @@ three mode suites):
 - `Settings.test.js` -- presets, custom tables, fact pool, entry mode
 - `storage.test.js` -- save shape, normalization, load failures
 - `quickRecall.test.js` -- the Quick Recall challenge
-- `arrayBuilder.test.js` -- the Array Builder challenge and `stepDimension`
 - `modes.test.js` -- the registry and dispatcher
 - `Keypad.test.js` -- buffer transitions, rendering, keyboard fallback
 - `GameUI.test.js` -- rendering, against the real `index.html`

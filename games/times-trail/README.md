@@ -13,14 +13,11 @@ that is going.
 - **36 facts, not 78.** Operands 2 through 9 only, canonicalized so `7×8` and
   `8×7` share one record. Both orientations are still shown at random. 1s and
   10s are excluded -- they are rules, not recall.
-- **Two practice modes:**
-  - ⚡ **Quick Recall** -- `7 × 6 = ?`, answered on tiles or the keypad
-  - 🔢 **Array Builder** -- grow a rectangle until it holds the target number of
-    squares, which is the area model
-- **Adaptive answer entry.** A weak fact gets four large multiple-choice tiles; a
-  stronger fact gets the on-screen keypad, because picking one of four options
-  proves less. This is derived from the fact's strength, never chosen by the
-  player.
+- **One thing to do.** Play goes straight into `7 × 6 = ?`; there is no mode
+  menu to get through first.
+- **Typed answers only.** Every answer is typed on the on-screen keypad. Multiple
+  choice was cut because a one-in-four guess muddies the mastery data, and
+  because the input then changed under the player mid-session.
 - **Deliberate wrong answers.** Tile distractors are near-misses drawn from the
   same tables (`6×7` → 36, 42, 48, 49), so guessing by number sense does not
   work.
@@ -110,8 +107,7 @@ The game is built for a shared iPad. Tap targets are 68px (64px on narrow
 screens) with 16px gaps, the play area is sized with `100dvh` so Safari's
 toolbars cannot cause scrolling mid-round, and double-tap zoom, tap highlight,
 text selection, and rubber-band scroll are all suppressed. Every control has a
-visible pressed state, and the Array Builder resizes with +/- steppers rather
-than a drag.
+visible pressed state.
 
 The page contains no text field. Answers are typed on a keypad drawn in the
 page, so iOS never has anything to focus and never raises the system keyboard
@@ -147,8 +143,7 @@ js/
 ├── EventManager.js      # DOM listeners to callbacks
 └── modes/
     ├── index.js         # Mode registry and dispatcher
-    ├── quickRecall.js   # "7 × 6 = ?"
-    └── arrayBuilder.js  # Build a rectangle of N squares
+    └── quickRecall.js   # "7 × 6 = ?"
 
 styles/
 └── main.css             # The whole stylesheet, light and dark

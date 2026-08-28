@@ -26,8 +26,6 @@ function makeCallbacks() {
     onBack: jest.fn(),
     onModeSelect: jest.fn(),
     onAnswerSelected: jest.fn(),
-    onArrayStep: jest.fn(),
-    onArraySubmit: jest.fn(),
     onScaffoldContinue: jest.fn(),
     onShowTrail: jest.fn(),
     onShowMap: jest.fn(),
@@ -52,11 +50,6 @@ function makeMockUI() {
       homeButton: byId("home-button"),
       backButton: byId("back-button"),
       answerTiles: byId("answer-tiles"),
-      rowsMinus: byId("rows-minus"),
-      rowsPlus: byId("rows-plus"),
-      colsMinus: byId("cols-minus"),
-      colsPlus: byId("cols-plus"),
-      arraySubmit: byId("array-submit"),
       scaffoldContinue: byId("scaffold-continue"),
       trailButton: byId("trail-button"),
       mapButton: byId("map-button"),
@@ -171,7 +164,6 @@ describe("EventManager", () => {
         "setupBackButton",
         "setupModeButtons",
         "setupAnswerTiles",
-        "setupArraySteppers",
         "setupScaffoldContinue",
         "setupNavButtons",
         "setupSummaryButtons",
@@ -234,9 +226,9 @@ describe("EventManager", () => {
       expect(callbacks.onModeSelect).toHaveBeenCalledWith("quick-recall")
     })
 
-    test("#mode-array-builder invokes onModeSelect with its data-mode", () => {
-      clickId("mode-array-builder")
-      expect(callbacks.onModeSelect).toHaveBeenCalledWith("array-builder")
+    test("#mode-quick-recall invokes onModeSelect with its data-mode", () => {
+      clickId("mode-quick-recall")
+      expect(callbacks.onModeSelect).toHaveBeenCalledWith("quick-recall")
     })
   })
 
@@ -307,34 +299,6 @@ describe("EventManager", () => {
       tiles[0].click()
       tiles[0].click()
       expect(callbacks.onAnswerSelected).toHaveBeenCalledTimes(2)
-    })
-  })
-
-  describe("setupArraySteppers", () => {
-    test("#rows-plus invokes onArrayStep with rows and +1", () => {
-      clickId("rows-plus")
-      expect(callbacks.onArrayStep).toHaveBeenCalledTimes(1)
-      expect(callbacks.onArrayStep).toHaveBeenCalledWith("rows", 1)
-    })
-
-    test("#rows-minus invokes onArrayStep with rows and -1", () => {
-      clickId("rows-minus")
-      expect(callbacks.onArrayStep).toHaveBeenCalledWith("rows", -1)
-    })
-
-    test("#cols-plus invokes onArrayStep with cols and +1", () => {
-      clickId("cols-plus")
-      expect(callbacks.onArrayStep).toHaveBeenCalledWith("cols", 1)
-    })
-
-    test("#cols-minus invokes onArrayStep with cols and -1", () => {
-      clickId("cols-minus")
-      expect(callbacks.onArrayStep).toHaveBeenCalledWith("cols", -1)
-    })
-
-    test("#array-submit invokes onArraySubmit once", () => {
-      clickId("array-submit")
-      expect(callbacks.onArraySubmit).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -594,12 +558,6 @@ describe("EventManager", () => {
       "home-button",
       "back-button",
       "mode-quick-recall",
-      "mode-array-builder",
-      "rows-minus",
-      "rows-plus",
-      "cols-minus",
-      "cols-plus",
-      "array-submit",
       "scaffold-continue",
       "trail-button",
       "map-button",

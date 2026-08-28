@@ -1,12 +1,11 @@
 /**
  * Mode registry and dispatcher for Times Trail
  *
- * One question, asked two ways. `modes/quickRecall.js` shows "7 × 6 = ?" and
- * `modes/arrayBuilder.js` asks for a rectangle of 42 squares, and both answer the
- * same question about the same fact. This module is the single place that maps a
- * **mode id** to the implementation behind it, so `game.js` can say "give me a
- * challenge for `6x7` in `array-builder`" and get one back without ever importing
- * a mode, naming a mode function, or branching on which mode is active.
+ * One registered mode today: `modes/quickRecall.js`, which shows "7 × 6 = ?".
+ * This module is the single place that maps a **mode id** to the implementation
+ * behind it, so `game.js` can say "give me a challenge for `6x7` in
+ * `quick-recall`" and get one back without ever importing a mode, naming a mode
+ * function, or branching on which mode is active. Phase 2 adds the rest.
  *
  * Architecture: a frozen registry (`MODES`) of `ModeDefinition` records plus three
  * thin lookups over it -- `getMode`, `modeIds`, and a `createChallenge` that
@@ -36,7 +35,7 @@
  * | `right`   | number                      | Right operand as displayed                                |
  * | `answer`  | number                      | `left * right`                                            |
  * | `prompt`  | string                      | The question, ready to render                             |
- * | `entry`   | `"tiles"\|"keypad"\|"grid"` | The one authority on the entry affordance                 |
+ * | `entry`   | `"tiles"\|"keypad"`         | The one authority on the entry affordance                 |
  * | `options` | `number[]\|null`            | Non-null **iff** `entry === "tiles"`                      |
  * | `visual`  | Object                      | Mode-specific render data, discriminated by `visual.kind` |
  * | `check`   | `(input: *) => boolean`     | The one authority on correctness                          |
@@ -47,20 +46,18 @@
  * `challenge.visual.kind`, scores by `challenge.entry`, and decides correctness
  * with `challenge.check` -- never by recomputing an entry mode or comparing an
  * input to `challenge.answer` itself, because the input types differ per entry
- * path (a tile yields a number, the keypad a digit string, the grid a
- * `{rows, cols}` pair) and only `check` knows the difference.
+ * path (the keypad yields a digit string) and only `check` knows the
+ * difference.
  *
  * Determinism and purity: this module holds no state, reads no clock, and consumes
  * no randomness of its own. `settings` and `rng` are passed straight through,
  * positionally and unchanged, so a mode's documented rng-call count is also the
- * dispatcher's (1 call for Array Builder, 1 on Quick Recall's keypad path, 9 on
- * its tiles path). No `document`, `window`, `localStorage`, or `setTimeout`, and no
- * argument is ever mutated.
+ * dispatcher's (1 call on Quick Recall's keypad path). No `document`, `window`,
+ * `localStorage`, or `setTimeout`, and no argument is ever mutated.
  */
 
 import { MODE_IDS, MODE_LABELS } from "../constants.js"
 import { createChallenge as createQuickRecallChallenge } from "./quickRecall.js"
-import { createChallenge as createArrayBuilderChallenge } from "./arrayBuilder.js"
 
 /**
  * @typedef {import("../facts.js").Fact} Fact
@@ -86,8 +83,9 @@ import { createChallenge as createArrayBuilderChallenge } from "./arrayBuilder.j
  */
 
 /**
- * Every mode the game can ask for, in menu order: Quick Recall first because it is
- * the default and the plainest question, Array Builder second.
+ * Every mode the game can ask for, in menu order. Quick Recall is the only one:
+ * Array Builder was cut because the post-miss array scaffold already teaches the
+ * area model, on the fact just missed, in fewer taps.
  *
  * Frozen, array and entries alike, so a UI or mode module cannot rewrite the
  * registry it was handed. Labels come from `MODE_LABELS` rather than being spelled
@@ -99,11 +97,6 @@ export const MODES = Object.freeze([
     id: MODE_IDS.QUICK_RECALL,
     label: MODE_LABELS[MODE_IDS.QUICK_RECALL],
     createChallenge: createQuickRecallChallenge,
-  }),
-  Object.freeze({
-    id: MODE_IDS.ARRAY_BUILDER,
-    label: MODE_LABELS[MODE_IDS.ARRAY_BUILDER],
-    createChallenge: createArrayBuilderChallenge,
   }),
 ])
 

@@ -85,7 +85,6 @@ const CONTRACT_IDS = [
   "hub-region-name",
   "settings-button",
   "mode-quick-recall",
-  "mode-array-builder",
   "trail-button",
   "map-button",
   "collection-button",
@@ -102,14 +101,6 @@ const CONTRACT_IDS = [
   "answer-tiles",
   "answer-display",
   "keypad",
-  "array-builder",
-  "array-grid",
-  "array-dims",
-  "rows-minus",
-  "rows-plus",
-  "cols-minus",
-  "cols-plus",
-  "array-submit",
   "scaffold-area",
   "scaffold-array",
   "scaffold-counts",
@@ -180,19 +171,11 @@ function keypadChallenge() {
 }
 
 /**
- * A grid (array builder) challenge.
- * @returns {Object} Challenge-shaped object
- */
-function gridChallenge() {
-  return { prompt: "Build a rectangle with 42 squares", entry: "grid", options: null }
-}
-
-/**
- * Which of the three entry affordances are currently visible.
+ * Which of the entry affordances are currently visible.
  * @returns {string[]} Ids of the affordances lacking `.hidden`
  */
 function visibleAffordances() {
-  return ["answer-tiles", "keypad", "array-builder"].filter(
+  return ["answer-tiles", "keypad"].filter(
     (id) => !document.getElementById(id).classList.contains("hidden"),
   )
 }
@@ -566,14 +549,12 @@ describe("GameUI", () => {
       expect(document.querySelectorAll("#answer-tiles .answer-btn")).toHaveLength(4)
       expect(document.getElementById("answer-tiles").classList.contains("hidden")).toBe(false)
       expect(document.getElementById("keypad").classList.contains("hidden")).toBe(true)
-      expect(document.getElementById("array-builder").classList.contains("hidden")).toBe(true)
       expect(document.getElementById("scaffold-area").classList.contains("hidden")).toBe(true)
       expect(document.getElementById("answer-display").textContent).toBe(KEYPAD.EMPTY_DISPLAY)
     })
 
     test.each([
       ["tiles", tilesChallenge(), true],
-      ["grid", gridChallenge(), true],
       ["keypad", keypadChallenge(), false],
     ])("the keypad readout is hidden for entry %s: %s", (_entry, challenge, hidden) => {
       ui.renderQuestion(challenge)
@@ -594,30 +575,18 @@ describe("GameUI", () => {
       expect(tiles.children).toHaveLength(0)
       expect(tiles.classList.contains("hidden")).toBe(true)
       expect(document.getElementById("keypad").classList.contains("hidden")).toBe(false)
-      expect(document.getElementById("array-builder").classList.contains("hidden")).toBe(true)
-    })
-
-    test("a grid question leaves the tiles empty and hidden and the keypad hidden", () => {
-      ui.renderQuestion(tilesChallenge())
-      ui.renderQuestion(gridChallenge())
-      const tiles = document.getElementById("answer-tiles")
-      expect(tiles.children).toHaveLength(0)
-      expect(tiles.classList.contains("hidden")).toBe(true)
-      expect(document.getElementById("keypad").classList.contains("hidden")).toBe(true)
-      expect(document.getElementById("array-builder").classList.contains("hidden")).toBe(false)
     })
 
     test.each([
       ["tiles", tilesChallenge()],
       ["keypad", keypadChallenge()],
-      ["grid", gridChallenge()],
     ])("exactly one affordance is visible for entry %s", (_entry, challenge) => {
       ui.renderQuestion(challenge)
       expect(visibleAffordances()).toHaveLength(1)
     })
 
     test("switching entry types back to back never accumulates tiles", () => {
-      const sequence = [tilesChallenge(), keypadChallenge(), gridChallenge(), tilesChallenge()]
+      const sequence = [tilesChallenge(), keypadChallenge(), tilesChallenge()]
       for (const challenge of sequence) {
         ui.renderQuestion(challenge)
         expect(visibleAffordances()).toHaveLength(1)
@@ -646,7 +615,7 @@ describe("GameUI", () => {
       expect(el.classList.contains("hidden")).toBe(false)
     })
 
-    test("an unknown entry mode leaves all three hidden and warns", () => {
+    test("an unknown entry mode leaves every affordance hidden and warns", () => {
       const warn = jest.spyOn(console, "warn").mockImplementation(() => {})
       ui.renderQuestion(tilesChallenge())
       ui.renderQuestion(tilesChallenge({ entry: "telepathy" }))
@@ -827,30 +796,6 @@ describe("GameUI", () => {
       const el = document.getElementById("answer-display")
       expect(el.textContent).toBe("<b>42</b>")
       expect(el.querySelector("b")).toBeNull()
-    })
-  })
-
-  describe("setArrayBuilderVisible", () => {
-    test("toggles .hidden on #array-builder", () => {
-      ui.setArrayBuilderVisible(true)
-      expect(document.getElementById("array-builder").classList.contains("hidden")).toBe(false)
-      ui.setArrayBuilderVisible(false)
-      expect(document.getElementById("array-builder").classList.contains("hidden")).toBe(true)
-    })
-  })
-
-  describe("renderArrayBuilder", () => {
-    test("renders rows * cols cells and the dimension readout", () => {
-      ui.renderArrayBuilder({ targetProduct: 42, maxRows: 9, maxCols: 9 }, 3, 4)
-      expect(document.querySelectorAll("#array-grid .array-cell")).toHaveLength(12)
-      expect(document.getElementById("array-dims").textContent).toBe("3 × 4")
-    })
-
-    test("rebuilds rather than appends", () => {
-      ui.renderArrayBuilder({ targetProduct: 42 }, 3, 4)
-      ui.renderArrayBuilder({ targetProduct: 42 }, 2, 2)
-      expect(document.querySelectorAll("#array-grid .array-cell")).toHaveLength(4)
-      expect(document.getElementById("array-dims").textContent).toBe("2 × 2")
     })
   })
 
@@ -1560,17 +1505,14 @@ describe("GameUI", () => {
         bare.showScreen("hub-screen")
         bare.renderQuestion(tilesChallenge())
         bare.renderQuestion(keypadChallenge())
-        bare.renderQuestion(gridChallenge())
         bare.renderTiles([1, 2, 3, 4])
         bare.clearTiles()
         bare.setTilesVisible(true)
         bare.setKeypadVisible(true)
-        bare.setArrayBuilderVisible(true)
         bare.setAnswerDisplay("42")
         bare.setAnswerDisplayVisible(true)
         bare.markAnswerDisplayCorrect("42")
         bare.freezeTiles()
-        bare.renderArrayBuilder({ targetProduct: 42 }, 3, 4)
         bare.showFeedback("m", "correct")
         bare.hideFeedback()
         bare.showScaffold({ rows: 2, cols: 2, product: 4, skipCounts: [2, 4], text: "x" })
@@ -1600,7 +1542,6 @@ describe("GameUI", () => {
         ui.updatePlayHud(null)
         ui.renderQuestion(null)
         ui.renderTiles(null)
-        ui.renderArrayBuilder(null, null, null)
         ui.showScaffold(null)
         ui.renderPlayTrailStrip(null)
         ui.renderTrail(null)

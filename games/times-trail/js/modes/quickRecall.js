@@ -18,7 +18,7 @@
  *
  *   - Entry must never be recomputed by the caller. An earlier draft had
  *     `game.js` derive the entry mode a second time when scoring, which let an
- *     answer entered on the Array Builder's grid collect Quick Recall's keypad
+ *     answer entered on another mode's affordance collect Quick Recall's keypad
  *     honesty bonus. `game.js` reads `challenge.entry` and nothing else.
  *   - `check` must never be second-guessed by comparing `input` to
  *     `challenge.answer` at the call site, because the two input paths deliver
@@ -145,7 +145,7 @@ function _clampStrength(strength) {
  *
  * Calls `context.inputModeFor(strength)` only when that property is a function,
  * and only honours `"tiles"` or `"keypad"` in return. Anything else -- a typo, a
- * stubbed policy, `"grid"` (which belongs to the Array Builder, not here) --
+ * stubbed policy, or an unrecognised entry mode --
  * falls back to `"tiles"`. That keeps two invariants true for every challenge
  * this module returns: `entry` is always a value `game.js` recognises, and
  * `options` is non-null exactly when `entry === "tiles"`.
