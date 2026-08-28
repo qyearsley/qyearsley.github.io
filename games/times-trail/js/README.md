@@ -16,6 +16,12 @@ the fact pool. A `GameState` class in the middle would only forward calls, and
 the save shape it would own already lives in `storage.js` next to the
 normalization that guards it.
 
+**The tiles path is currently off.** `KEYPAD_MIN_STRENGTH` is 0 as a trial, so
+every question routes to the keypad and `INPUT_MODE.TILES` is never produced.
+Everything below still describes the tiles path, because reverting the trial is
+a one-line change to that constant and nothing else -- see "Keypad only, no
+multiple choice" in `docs/times-trail-plan.md`.
+
 ## Dependency graph
 
 Arrows point from importer to import. `constants.js` imports nothing and is the
@@ -59,11 +65,11 @@ Two edges are forbidden on purpose:
 
 ### game.js
 
-The page entry point and session orchestrator, and the only module with no test
-file (DOM glue, per repo convention). Owns the live state, injects every
+The page entry point and session orchestrator. Owns the live state, injects every
 collaborator, runs the session loop, and stamps the response clock. Boots on
 `DOMContentLoaded` inside a `try/catch` that puts a readable message on the page
-instead of leaving it blank.
+instead of leaving it blank. It exports nothing, so `game.test.js` drives it
+black-box through the real `index.html` rather than constructing anything.
 
 ### constants.js
 
@@ -156,15 +162,16 @@ a `check` closure. No DOM at all.
 
 ### modes/shared.js
 
-`buildScaffold(a, b)`, the post-miss teaching array every mode returns.
-Rows are always `min(a, b)`, so the same fact always teaches the same picture --
-built from the displayed orientation, `9 × 2` produced a nine-row array, the
-sentence "9 rows of 2 makes 18", and a 5450 ms wait instead of 2300 ms, half the
-time at random. Imports nothing, so it sits beside `constants.js` at the root of
-the graph and cannot create a cycle between modes. It has no test file of its own:
-`quickRecall.test.js` and `modes.test.js` each assert the scaffold contract
-through the mode that produced it, which is where a regression would actually
-show up.
+`buildScaffold(a, b)`, the post-miss teaching array every mode returns. Rows are
+always `min(a, b)` regardless of how the question was displayed, so the same fact
+always teaches the same picture. Built from the displayed orientation instead,
+`9 × 2` produced a nine-row array, the sentence "9 rows of 2 makes 18", and a
+5450 ms wait instead of 2300 ms -- the worse explanation and the longer sit,
+half the time at random. Imports nothing, so it sits beside `constants.js` at the
+root of the graph and cannot create a cycle between modes. It has no test file of
+its own: `quickRecall.test.js` and `modes.test.js` each assert the scaffold
+contract through the mode that produced it, which is where a regression would
+actually show up.
 
 ### GameUI.js
 
@@ -173,8 +180,9 @@ game. Takes plain view models built from already-decided numbers and contains no
 game rules. Five base-class methods are overridden because the base behaviour is
 wrong for this page: `showFeedback` and `hideFeedback` (the base destroys class
 names and leaves stale text in an `aria-live` region), `showScreen` (the base
-loses focus to `<body>`), and `updateProgressBar` (the base leaves
-`aria-valuenow` frozen).
+loses focus to `<body>`), `updateProgressBar` (the base leaves `aria-valuenow`
+frozen), and `updateTitleButtons` (the base knows only Continue and Start Fresh,
+and this game has a third save-dependent title button).
 
 ### Keypad.js
 
@@ -189,9 +197,11 @@ physical keyboard as an accessibility fallback.
 
 Attaches every DOM listener and translates each event into a callback supplied by
 `game.js`. Holds no state and no game logic, and never decides whether an answer
-is right -- it reports the tapped value and the tapped element. Also binds the
-`1`-`4` tile shortcuts; digit, Enter, and Backspace handling belongs to `Keypad`
-and is deliberately not duplicated.
+is right -- it reports the tapped value and the tapped element. It owns two
+`document` key listeners: the `1`-`4` tile shortcuts, and `Escape` to close the
+settings dialog. Digit, Enter, and Backspace handling belongs to `Keypad` and is
+deliberately not duplicated; `Keypad` also owns `Escape` as clear-all, and the
+two never collide because each bails in exactly the state the other acts in.
 
 ## Challenge contract
 
@@ -214,8 +224,10 @@ in its answer path:
 
 `game.js` renders by `entry`, scores by `entry`, and decides correctness with
 `check`. It never recomputes the entry mode and never compares an input to
-`answer` itself -- the entry paths deliver different types (a digit string from
-the keypad, a number from a tile) and only `check` knows the difference.
+`answer` itself -- the entry paths can deliver different types and only `check`
+knows the difference. `Keypad` submits a `Number`, and so does a tile tap;
+`check` also accepts a digit string, so a mode or a future entry path that
+reports raw digits needs no special case at the call site.
 
 ## Data Flow
 
@@ -306,9 +318,8 @@ recorded here.
 
 ## Testing
 
-Tests live in the parent `__tests__/` directory -- 14 suites covering every
-module except `game.js` (DOM glue) and `modes/shared.js` (asserted through the
-two mode suites):
+Tests live in the parent `__tests__/` directory -- 15 suites covering every
+module except `modes/shared.js`, which is asserted through the two mode suites:
 
 - `constants.test.js` -- the shared tables and their cross-checks
 - `facts.test.js` -- the fact set, canonicalization, filtering
@@ -317,17 +328,19 @@ two mode suites):
 - `distractors.test.js` -- near-miss candidates and option generation
 - `Journey.test.js` -- regions, gates, pool scoping, the advance cap
 - `Scoring.test.js` -- stars, gems, daily goal, streak calendar
-- `Settings.test.js` -- presets, custom tables, fact pool, entry mode
+- `Settings.test.js` -- table toggles, fact pool, session length, entry mode
 - `storage.test.js` -- save shape, normalization, load failures
 - `quickRecall.test.js` -- the Quick Recall challenge
 - `modes.test.js` -- the registry and dispatcher
 - `Keypad.test.js` -- buffer transitions, rendering, keyboard fallback
 - `GameUI.test.js` -- rendering, against the real `index.html`
 - `EventManager.test.js` -- event routing, against the real `index.html`
+- `game.test.js` -- the settings path and the session loop's entry points,
+  driven black-box through the real `index.html`
 
-`GameUI.test.js` and `EventManager.test.js` read `games/times-trail/index.html`
-from disk rather than hardcoding markup, so a renamed id fails the tests instead
-of surfacing during manual play.
+`GameUI.test.js`, `EventManager.test.js`, and `game.test.js` read
+`games/times-trail/index.html` from disk rather than hardcoding markup, so a
+renamed id fails the tests instead of surfacing during manual play.
 
 The shared base classes are tested separately in `games/shared/__tests__/`.
 

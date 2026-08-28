@@ -7,8 +7,9 @@
  *
  * 1. Region ownership is structural. A region owns every canonical fact whose
  *    LARGER operand equals its table, so each of the 36 facts belongs to exactly
- *    one region and region sizes run 1, 2, 3, 4, 5, 6, 7, 8 -- the trail ends in
- *    the hard neighbourhood. This partition never depends on settings, and it is
+ *    one region. Every region is 5 trail spaces wide, but the number of FACTS
+ *    they own runs 1, 2, 3, 4, 5, 6, 7, 8 -- the trail ends in the hard
+ *    neighbourhood. This partition never depends on settings, and it is
  *    what the mastery map and the collection read.
  * 2. Gating is scoped to the ACTIVE FACT POOL. A `Journey` is constructed with
  *    the pool the player is actually practising, and a region's unlock

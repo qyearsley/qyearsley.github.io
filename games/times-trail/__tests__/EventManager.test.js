@@ -171,6 +171,7 @@ describe("EventManager", () => {
         "setupSummaryButtons",
         "setupSettingsButtons",
         "setupSettingsControls",
+        "setupSettingsDismiss",
         "setupKeyboardShortcuts",
       ]
       setupMethods.forEach((method) => {
@@ -384,6 +385,44 @@ describe("EventManager", () => {
 
     test("#close-settings invokes onSettingsClose once", () => {
       clickId("close-settings")
+      expect(callbacks.onSettingsClose).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe("setupSettingsDismiss", () => {
+    /** Open the settings dialog the way GameUI.showSettings does. */
+    function openSettings() {
+      document.getElementById("settings-modal").classList.remove("hidden")
+    }
+
+    test("Escape closes an open dialog", () => {
+      openSettings()
+      pressKey("Escape")
+      expect(callbacks.onSettingsClose).toHaveBeenCalledTimes(1)
+    })
+
+    test("Escape does nothing while the dialog is closed", () => {
+      // Keypad owns Escape as clear-all in this state, so EventManager must
+      // stay out of the way or a stray Escape would "close" a dialog that is
+      // not open and resume timers that were never paused.
+      pressKey("Escape")
+      expect(callbacks.onSettingsClose).not.toHaveBeenCalled()
+    })
+
+    test("other keys never close the dialog", () => {
+      openSettings()
+      for (const key of ["Enter", "Esc", "escape", "Backspace", "7"]) {
+        pressKey(key)
+      }
+      expect(callbacks.onSettingsClose).not.toHaveBeenCalled()
+    })
+
+    test("Escape from inside the dialog closes it", () => {
+      // The listener is on `document` rather than the dialog precisely because
+      // focus can sit on the <select>, which swallows keys before an element
+      // listener on the dialog would see them.
+      openSettings()
+      pressKey("Escape", document.getElementById("session-length-select"))
       expect(callbacks.onSettingsClose).toHaveBeenCalledTimes(1)
     })
   })

@@ -154,6 +154,19 @@ describe("game", () => {
     expect([Number(left), Number(right)]).toContain(7)
   })
 
+  // Escape is the dialog's second exit and must route through the same
+  // closeSettings the Done button does, or the countdown openSettings paused
+  // stays paused and the round never advances.
+  test("Escape closes the settings modal", () => {
+    click("start-button")
+    click("play-settings-button")
+    expect(byId("settings-modal").classList.contains("hidden")).toBe(false)
+
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))
+    expect(byId("settings-modal").classList.contains("hidden")).toBe(true)
+    expect(byId("play-screen").classList.contains("active")).toBe(true)
+  })
+
   test("settings persist across a reload", () => {
     click("settings-button")
     const select = byId("session-length-select")

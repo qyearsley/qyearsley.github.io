@@ -224,8 +224,9 @@ export const TOKEN_EMOJI = "🥾"
  * The eight regions of the trail, in walking order.
  *
  * A region owns every canonical fact whose LARGER operand equals its table,
- * so each of the 36 facts belongs to exactly one region and region sizes run
- * 1, 2, 3, 4, 5, 6, 7, 8 -- the trail therefore ends in the hard neighbourhood.
+ * so each of the 36 facts belongs to exactly one region. Every region is the
+ * same 5 spaces wide, but the number of FACTS they own runs 1, 2, 3, 4, 5, 6,
+ * 7, 8 -- the trail therefore ends in the hard neighbourhood.
  * Each region object is frozen as well as the array.
  */
 export const REGIONS = Object.freeze([

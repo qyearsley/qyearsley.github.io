@@ -3,10 +3,11 @@
  * DOM here, and this is the only module that writes game *content* into the
  * page. It is not the only module that touches `document`: `EventManager.js`
  * binds the listeners, `Keypad.js` builds and owns its own twelve keys, and
- * `game.js` reaches into the document in three narrow places (finding the tapped
- * tile by value, toggling `aria-live` while a scaffold teaches, and looking up
- * the `#keypad` container once). The rule is narrower than "nothing else touches
- * `document`": nothing else renders a view model.
+ * `game.js` reaches into the document in four narrow places (finding the tapped
+ * tile by value, toggling `aria-live` while a scaffold teaches, looking up the
+ * `#keypad` container once, and building the one-time save-failure banner). The
+ * rule is narrower than "nothing else touches `document`": nothing else renders
+ * a view model.
  *
  * Architecture: `GameUI` extends the shared `BaseGameUI` and contains no game
  * rules whatsoever. `game.js` computes, then hands this class plain view models
@@ -23,8 +24,8 @@
  * the draw toward those facts instead, so the gate opens on its own and needs no
  * sentence.
  *
- * Four methods deliberately override the base class, each because the base
- * behaviour is wrong for this page rather than merely incomplete:
+ * The overrides below exist because the base behaviour is wrong for this page
+ * rather than merely incomplete:
  *   - `showFeedback` / `hideFeedback`: the base assigns `className`, which
  *     destroys `.feedback-area` and `.hidden`, and hides by setting inline
  *     opacity, which leaves stale text in the layout and in the `aria-live`
@@ -263,10 +264,12 @@ const FACT_ORDER = new Map(FACT_IDS.map((id, index) => [id, index]))
  */
 
 /**
- * The post-miss teaching array.
+ * The post-miss teaching array. Deliberately NOT tied to the challenge's `left`
+ * and `right`: the scaffold is built from `min`/`max` of the fact's operands, so
+ * a question shown as `9 × 2` teaches a two-row array. See `modes/shared.js`.
  * @typedef {Object} Scaffold
- * @property {number} rows - Equals the challenge's `left`.
- * @property {number} cols - Equals the challenge's `right`.
+ * @property {number} rows - The smaller operand, so the array is never nine rows tall.
+ * @property {number} cols - The larger operand.
  * @property {number} product - rows * cols.
  * @property {number[]} skipCounts - `[cols, 2*cols, ..., rows*cols]`.
  * @property {string} text - e.g. "6 rows of 7 makes 42".

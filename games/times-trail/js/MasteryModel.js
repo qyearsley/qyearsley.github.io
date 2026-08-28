@@ -25,10 +25,11 @@
  *    counting up to the answer still earns progress but does not read as
  *    fluent recall. A correct answer never demotes, with one exception: a
  *    "slow" answer to a fact already above SLOW_CAP steps it down by exactly
- *    one, settling a fact that used to be fluent at 4 rather than collapsing
- *    it. Note that this leaves it AT STRENGTH.MASTERED_MIN, so a mastered fact
- *    answered slowly stays mastered; SLOW_CAP bounds where a slow answer can
- *    lift a fact TO, not where a mastered fact can be held.
+ *    one, settling a fact that used to be fluent rather than collapsing it --
+ *    5 becomes 4, and 4 becomes 3. So a slow answer CAN cost a fact its
+ *    "mastered" standing, which is deliberate: the foiled card is for fluency,
+ *    and a fact she now has to work for is not fluent. SLOW_CAP bounds where a
+ *    slow answer can lift a fact TO, not where a fact already above it lands.
  * 2. Decay is computed on read and never written back, so there is no
  *    background job and no migration. `decayedStrength` subtracts one point per
  *    full DECAY.PERIOD_MS the fact is overdue, floored at DECAY.FLOOR_SEEN for
@@ -280,7 +281,7 @@ function _promote(base, band) {
   if (band === "slow") {
     // Correct but hesitant: promote, capped at SLOW_CAP, and never drop more
     // than one box -- so a fact already above the cap settles one step down
-    // (5 becomes 4) rather than collapsing to the cap.
+    // (5 becomes 4, 4 becomes 3) rather than collapsing to the cap.
     return Math.max(base - 1, Math.min(STRENGTH.SLOW_CAP, base + 1))
   }
   if (band === "counting") {

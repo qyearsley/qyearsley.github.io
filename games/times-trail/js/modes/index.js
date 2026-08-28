@@ -45,9 +45,8 @@
  * mode-specific branch in its answer path: it renders by `challenge.entry` and
  * `challenge.visual.kind`, scores by `challenge.entry`, and decides correctness
  * with `challenge.check` -- never by recomputing an entry mode or comparing an
- * input to `challenge.answer` itself, because the input types differ per entry
- * path (the keypad yields a digit string) and only `check` knows the
- * difference.
+ * input to `challenge.answer` itself. A mode is free to accept more input types
+ * than the entry paths currently produce, and only `check` knows which.
  *
  * Determinism and purity: this module holds no state, reads no clock, and consumes
  * no randomness of its own. `settings` and `rng` are passed straight through,

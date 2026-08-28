@@ -81,6 +81,9 @@ exactly two controls:
   at 20 facts regardless, so the short session takes two to meet it; a goal that
   shrank with the setting would not be a goal.
 
+Close the dialog with **Done** or **Escape**. Opening it mid-round pauses the
+scaffold countdown, and closing it starts that countdown again.
+
 There is deliberately no difficulty control. Four presets used to sit in front of
 the table list, but once every preset shared the same entry mode the only thing a
 preset changed was which tables were in play -- a table picker under a vaguer
@@ -105,13 +108,13 @@ Touch is the primary input; the keyboard is an accessibility fallback.
 - **Backspace** or **Delete** -- delete the last digit, the same as the pad's
   **⌫** key
 - **Escape** -- clear the whole entry (the only clear-all; there is no key for it
-  on the pad)
+  on the pad), or close the settings dialog when it is open
 - **Tab** -- move between controls; **Enter/Space** activates a focused button
 - **j/k** -- move between page links (a site-wide shortcut; press **?** for the
   full list)
 
-The tile and keypad shortcuts only fire while the play screen is showing, the
-settings dialog is closed, and that entry method is the visible one.
+The keypad shortcuts only fire while the play screen is showing and the settings
+dialog is closed.
 
 ## iPad notes
 
@@ -148,7 +151,7 @@ js/
 ├── distractors.js       # Near-miss options for the tiles
 ├── Journey.js           # Trail spaces, regions, mastery gates
 ├── Scoring.js           # Stars, gems, daily goal, streak calendar
-├── Settings.js          # Difficulty presets and the active fact pool
+├── Settings.js          # Table toggles, session length, and the active fact pool
 ├── storage.js           # Save shape plus localStorage via games/shared/
 ├── GameUI.js            # All DOM rendering
 ├── Keypad.js            # The in-page numeric keypad
@@ -174,10 +177,10 @@ npm test                                        # all tests, including this game
 npm test -- --testPathPatterns times-trail      # just this game
 ```
 
-Every module has a test file except `js/game.js`, which is DOM glue and is
-untested by repo convention -- the same split Number Garden uses -- and
-`js/modes/shared.js`, whose one export is asserted through the modes that return
-it. That leaves 14 suites in `__tests__/`.
+Every module has its own test file except `js/modes/shared.js`, whose one export
+is asserted through the modes that return it. `js/game.js` exports nothing, so
+`game.test.js` drives it black-box through the real `index.html` instead of
+constructing anything. That makes 15 suites in `__tests__/`.
 
 There are no debug or unlock query parameters; the game reads nothing from the
 URL.

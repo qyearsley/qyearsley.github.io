@@ -613,7 +613,9 @@ class TimesTrail {
   }
 
   /**
-   * Close the settings modal and restart whatever `openSettings` paused.
+   * Close the settings modal and restart whatever `openSettings` paused. Both
+   * exits -- the Done button and `Escape` -- route here, so neither can leave a
+   * countdown down.
    * @returns {void}
    */
   closeSettings() {
@@ -821,10 +823,11 @@ class TimesTrail {
    * guard on the tile path alone left a fast double-tap on the keypad's
    * checkmark scoring twice, because that path never passed through it.
    *
-   * `challenge.check(input)` is the sole authority on correctness -- the input
-   * types differ per path (a number, a digit string, a `{rows, cols}` pair) and
-   * only `check` knows the difference. Nothing reads a `data-correct` attribute,
-   * because the markup carries none.
+   * `challenge.check(input)` is the sole authority on correctness. Nothing here
+   * compares `input` to `challenge.answer`, and nothing reads a `data-correct`
+   * attribute, because the markup carries none. `check` absorbs the type
+   * differences between entry paths on its own, so no call site has to know
+   * which one fired.
    * @param {*} input - Whatever the entry path collected
    * @param {HTMLElement|null} [buttonEl] - The tapped tile, when there was one
    * @returns {void}
@@ -1370,7 +1373,7 @@ class TimesTrail {
   }
 
   /**
-   * Set `aria-live` on the two regions the scaffold silences. One of the three
+   * Set `aria-live` on the two regions the scaffold silences. One of the four
    * places this module touches `document` directly; `GameUI` owns the content of
    * these elements, this owns their announcement policy for the scaffold's
    * duration.

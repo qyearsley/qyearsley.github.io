@@ -21,10 +21,10 @@
  *     answer entered on another mode's affordance collect Quick Recall's keypad
  *     honesty bonus. `game.js` reads `challenge.entry` and nothing else.
  *   - `check` must never be second-guessed by comparing `input` to
- *     `challenge.answer` at the call site, because the two input paths deliver
- *     different types: a tile hands back a `number`, the keypad hands back a
- *     `string` of digits. `check` absorbs that difference (see its own JSDoc for
- *     the exact coercion rules) so no caller has to know which path fired.
+ *     `challenge.answer` at the call site. `Keypad` submits a `Number` today and
+ *     so does a tile tap, but `check` also accepts a digit string, so a future
+ *     entry path that reports raw digits needs no change anywhere else. See its
+ *     own JSDoc for the exact coercion rules.
  *
  * Determinism: every random choice comes from the injected `rng`. A challenge
  * consumes exactly **1** `rng()` call on the keypad path (the orientation roll)
@@ -214,21 +214,22 @@ export function createChallenge(fact, settings = {}, rng = Math.random) {
      * Is this input the right answer? The single authority on correctness for
      * this challenge -- callers must not compare against `answer` themselves.
      *
-     * The two entry paths deliver different types, so the coercion rules are
-     * fixed here and nowhere else:
+     * Both shipped entry paths hand over a `number`: a tile tap reports its
+     * value and `Keypad` submits `Number(buffer)`. The string rules are here so
+     * an entry path that reports raw digits stays a drop-in, and so that
+     * whatever arrives is coerced in exactly one place:
      *
      *   - a **number** counts only when finite and exactly equal to the answer.
      *     `42.0` is `42` in JavaScript, so a "float" tile value passes; `41.5`,
      *     `NaN` and `Infinity` do not.
      *   - a **string** is trimmed, then must be digits only. `"42"` and `" 42 "`
      *     pass, and `"042"` passes deliberately: this is a numeric comparison,
-     *     not a text one, and a keypad that let a leading zero through has still
-     *     been told 42. `""`, `"42abc"`, `"4 2"`, `"+42"`, `"42.0"` and `"4e1"`
+     *     not a text one. `""`, `"42abc"`, `"4 2"`, `"+42"`, `"42.0"` and `"4e1"`
      *     are all rejected -- rejecting them here is cheaper than reasoning
      *     about what `Number()` would have done with them.
      *   - **everything else** is `false`: `null`, `undefined`, booleans, arrays,
      *     objects, symbols. There is no truthiness anywhere in this function.
-     * @param {*} input - A number from a tile, or a digit string from the keypad
+     * @param {*} input - Whatever the entry path collected
      * @returns {boolean} Whether the input is the correct answer
      */
     check(input) {

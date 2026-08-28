@@ -84,6 +84,7 @@ export class EventManager {
     this.setupSummaryButtons()
     this.setupSettingsButtons()
     this.setupSettingsControls()
+    this.setupSettingsDismiss()
     this.setupKeyboardShortcuts()
   }
 
@@ -296,6 +297,33 @@ export class EventManager {
         this._invoke("onSettingChange", "sessionLength", length)
       })
     }
+  }
+
+  /**
+   * Wires `Escape` to `onSettingsClose` while the settings dialog is open.
+   *
+   * `#settings-modal` is a real `aria-modal` dialog with a focus trap, and
+   * Escape is what closes one of those everywhere else; without this the Done
+   * button was the only way out, which is a trap for a keyboard user and a
+   * surprise for everyone else. The listener is on `document` rather than the
+   * dialog because focus can sit on the dialog's `<select>`, whose own key
+   * handling swallows the event before it reaches an element listener.
+   *
+   * There is no conflict with `Keypad`, which owns Escape as clear-all: its
+   * `handleKeyDown` bails while the modal is open, so exactly one of the two
+   * acts on any given press. `game.js` resumes the paused scaffold countdown
+   * from `closeSettings`, so this exit is the same exit the Done button takes.
+   *
+   * @returns {void}
+   */
+  setupSettingsDismiss() {
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return
+      const modal = document.getElementById("settings-modal")
+      if (!modal || modal.classList.contains("hidden")) return
+      event.preventDefault()
+      this._invoke("onSettingsClose")
+    })
   }
 
   /**
