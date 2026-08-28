@@ -121,15 +121,36 @@ function generateResume() {
 
 // ── Translation (Chinese) ───────────────────────────────────────
 
+// JSON.parse silently keeps the last of any repeated key, so a duplicate is
+// invisible at runtime but leaves a dead line in the file. Scan the raw text
+// for top-level keys and warn on repeats.
+function findDuplicateKeys(json) {
+  const seen = new Set()
+  const duplicates = []
+  for (const [, key] of json.matchAll(/^\s*"((?:[^"\\]|\\.)*)"\s*:/gm)) {
+    if (seen.has(key)) duplicates.push(key)
+    else seen.add(key)
+  }
+  return duplicates
+}
+
+function parseTranslationFile(path, label) {
+  const raw = readFileSync(path, "utf-8")
+  for (const key of findDuplicateKeys(raw)) {
+    console.warn(`  Warning: duplicate key "${key}" in ${label}`)
+  }
+  return JSON.parse(raw)
+}
+
 function loadTranslations(rootDir = ROOT) {
   const commonPath = join(rootDir, "zh-common.json")
   if (!existsSync(commonPath)) return null
-  const common = JSON.parse(readFileSync(commonPath, "utf-8"))
+  const common = parseTranslationFile(commonPath, "zh-common.json")
 
   const pages = {}
   for (const page of discoverTranslatablePages(rootDir)) {
-    const zhPath = join(rootDir, page.replace(/\.html$/, ".zh.json"))
-    pages[page] = JSON.parse(readFileSync(zhPath, "utf-8"))
+    const relPath = page.replace(/\.html$/, ".zh.json")
+    pages[page] = parseTranslationFile(join(rootDir, relPath), relPath)
   }
 
   return { common, pages }
@@ -487,6 +508,7 @@ function build() {
 export {
   escapeRegex,
   buildTextPattern,
+  findDuplicateKeys,
   translateContent,
   translateHtml,
   rewriteRelativePaths,

@@ -11,6 +11,7 @@ import {
   clean,
   copyTree,
   discoverTranslatablePages,
+  findDuplicateKeys,
   findHtmlFiles,
   generateSitemap,
   injectLangMeta,
@@ -82,6 +83,33 @@ describe("buildTextPattern", () => {
     expect("hello\t\tworld").toMatch(new RegExp(pattern))
     expect("hello          world").toMatch(new RegExp(pattern))
     expect("hello\n\n  \t  world").toMatch(new RegExp(pattern))
+  })
+})
+
+describe("findDuplicateKeys", () => {
+  test("returns nothing for a file with unique keys", () => {
+    const json = '{\n  "a": "1",\n  "b": "2"\n}'
+    expect(findDuplicateKeys(json)).toEqual([])
+  })
+
+  test("finds a repeated key", () => {
+    const json = '{\n  "Generate": "生成",\n  "Other": "其他",\n  "Generate": "生成"\n}'
+    expect(findDuplicateKeys(json)).toEqual(["Generate"])
+  })
+
+  test("finds several repeated keys", () => {
+    const json = '{\n  "a": "1",\n  "b": "2",\n  "a": "1",\n  "b": "2"\n}'
+    expect(findDuplicateKeys(json)).toEqual(["a", "b"])
+  })
+
+  test("ignores keys appearing in values", () => {
+    const json = '{\n  "a": "see \\"a\\" above",\n  "b": "2"\n}'
+    expect(findDuplicateKeys(json)).toEqual([])
+  })
+
+  test("handles keys containing escaped quotes", () => {
+    const json = '{\n  "say \\"hi\\"": "1",\n  "say \\"hi\\"": "1"\n}'
+    expect(findDuplicateKeys(json)).toEqual(['say \\"hi\\"'])
   })
 })
 

@@ -7,7 +7,6 @@
   "Truth Table": "真值表",
   "Generate Truth Table": "生成真值表",
   "Boolean Expression:": "布尔表达式：",
-  "Generate Truth Table": "生成真值表",
   "How It Works": "工作原理",
   "Enter a boolean expression. The generator shows all variable combinations and outputs.": "输入布尔表达式，生成器显示所有变量组合和结果。",
   "Supported Operators": "支持的运算符",
