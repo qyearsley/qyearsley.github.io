@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Times Trail</title>
+    <meta
+      name="description"
+      content="Practice the multiplication facts from 2x2 to 9x9 along a trail"
+    />
+    <meta name="theme-color" content="#2f7d4f" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Times Trail" />
+    <link rel="manifest" href="manifest.json" />
+    <!-- iOS ignores SVG for apple-touch-icon, so Add to Home Screen falls back to
+         a page snapshot until a 180x180 PNG replaces this. -->
+    <link rel="apple-touch-icon" href="icon.svg" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="styles/main.css" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <script src="/shared/theme.js"></script>
+  </head>
+  <body>
+    <a href="#game-container" class="skip-link">Skip to main content</a>
+    <div id="game-container">
+      <!-- 1. Title Screen -->
+      <div id="title-screen" class="screen active">
+        <nav class="breadcrumbs">
+          <a href="/">Home</a>
+          <span class="separator">/</span>
+          <a href="/games/">Games</a>
+          <span class="separator">/</span>
+          <span class="current">Times Trail</span>
+        </nav>
+        <h1 id="title-heading" class="game-title" tabindex="-1">🥾 Times Trail</h1>
+        <p class="game-tagline">Walk the trail. Learn the times tables.</p>
+        <div class="title-buttons">
+          <button id="start-button" type="button" class="big-button" aria-label="Start new game">
+            Start
+          </button>
+          <button
+            id="continue-button"
+            type="button"
+            class="big-button hidden"
+            aria-label="Continue saved game"
+          >
+            Continue
+          </button>
+          <button
+            id="start-fresh-button"
+            type="button"
+            class="secondary-button hidden"
+            aria-label="Reset and start over"
+          >
+            Start Fresh
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. Hub Screen -->
+      <div id="hub-screen" class="screen">
+        <div class="header">
+          <button
+            id="home-button"
+            type="button"
+            class="text-button"
+            aria-label="Return to start screen"
+          >
+            ← Home
+          </button>
+          <div class="stats" id="hud">
+            <span class="stat" aria-label="Stars earned">⭐ <span id="star-count">0</span></span>
+            <span class="stat" aria-label="Gems earned">💎 <span id="gem-count">0</span></span>
+            <span class="stat" id="flame-display" aria-label="Daily streak">·</span>
+            <button
+              id="settings-button"
+              type="button"
+              class="icon-button"
+              title="Settings"
+              aria-label="Open settings"
+            >
+              ⚙️
+            </button>
+          </div>
+        </div>
+        <h2 id="hub-heading" tabindex="-1">Choose a mode</h2>
+        <p class="hub-region" id="hub-region-name"></p>
+        <div class="mode-choices">
+          <button
+            id="mode-quick-recall"
+            type="button"
+            class="mode-button"
+            data-mode="quick-recall"
+            aria-label="Play Quick Recall"
+          >
+            ⚡ Quick Recall
+          </button>
+          <button
+            id="mode-array-builder"
+            type="button"
+            class="mode-button"
+            data-mode="array-builder"
+            aria-label="Play Array Builder"
+          >
+            🔢 Array Builder
+          </button>
+        </div>
+        <div class="hub-nav">
+          <button id="trail-button" type="button" class="secondary-button">Trail</button>
+          <button id="map-button" type="button" class="secondary-button">Fact Map</button>
+          <button id="collection-button" type="button" class="secondary-button">Cards</button>
+        </div>
+      </div>
+
+      <!-- 3. Play Screen -->
+      <div id="play-screen" class="screen">
+        <h2 id="play-heading" class="visually-hidden" tabindex="-1">Practice</h2>
+        <div class="header">
+          <button id="back-button" type="button" class="nav-button" aria-label="Return to hub">
+            ← Back
+          </button>
+          <div class="stats">
+            <span class="stat" aria-label="Stars this session"
+              >⭐ <span id="play-star-count">0</span></span
+            >
+            <span class="stat" id="play-streak">Streak 0</span>
+            <button
+              id="play-settings-button"
+              type="button"
+              class="icon-button"
+              title="Settings"
+              aria-label="Open settings"
+            >
+              ⚙️
+            </button>
+          </div>
+        </div>
+        <div class="progress-container">
+          <div class="progress-bar-bg">
+            <div
+              id="progress-bar"
+              class="progress-bar"
+              role="progressbar"
+              aria-valuenow="0"
+              aria-valuemin="0"
+              aria-valuemax="20"
+              aria-label="Session progress"
+            ></div>
+          </div>
+          <div id="progress-text" class="progress-text">0/20</div>
+        </div>
+        <div id="play-trail-strip" class="play-trail-strip" aria-label="Trail position"></div>
+        <div class="play-area">
+          <p id="question-text" class="question" role="status" aria-live="polite"></p>
+          <div id="answer-tiles" class="answer-tiles"></div>
+          <!-- Not a live region: this readout is reset to "?" on every question
+               render, and the play screen already has four competing live
+               regions. `role="status"` carries an implicit aria-live, so both
+               are omitted rather than just the attribute. -->
+          <p id="answer-display" class="answer-display hidden">?</p>
+          <div id="keypad" class="keypad hidden" role="group" aria-label="Number keypad"></div>
+          <div id="array-builder" class="array-builder hidden">
+            <div id="array-grid" class="array-grid"></div>
+            <div class="array-steppers">
+              <button id="rows-minus" type="button" class="stepper-button" aria-label="Fewer rows">
+                −
+              </button>
+              <span id="array-dims" class="array-dims">1 × 1</span>
+              <button id="rows-plus" type="button" class="stepper-button" aria-label="More rows">
+                +
+              </button>
+              <button
+                id="cols-minus"
+                type="button"
+                class="stepper-button"
+                aria-label="Fewer columns"
+              >
+                −
+              </button>
+              <button id="cols-plus" type="button" class="stepper-button" aria-label="More columns">
+                +
+              </button>
+              <button id="array-submit" type="button" class="big-button">Check</button>
+            </div>
+          </div>
+          <div id="scaffold-area" class="scaffold-area hidden" aria-live="polite">
+            <div id="scaffold-array" class="scaffold-array"></div>
+            <div id="scaffold-counts" class="scaffold-counts"></div>
+            <p id="scaffold-text" class="scaffold-text"></p>
+            <button id="scaffold-continue" type="button" class="big-button">Got it</button>
+          </div>
+          <div
+            id="feedback-area"
+            class="feedback-area hidden"
+            role="status"
+            aria-live="polite"
+          ></div>
+          <p id="gate-message" class="gate-message hidden" role="status" aria-live="polite"></p>
+          <span id="star-fly" class="star-fly hidden" aria-hidden="true"></span>
+        </div>
+      </div>
+
+      <!-- 4. Session Summary Screen -->
+      <div id="summary-screen" class="screen" role="region" aria-label="Session summary">
+        <h2 id="summary-title" tabindex="-1">🎉 Session Complete!</h2>
+        <div class="summary-buttons">
+          <button id="play-again-button" type="button" class="big-button">Play Again</button>
+          <button id="summary-hub-button" type="button" class="secondary-button">
+            Back to Hub
+          </button>
+        </div>
+        <div class="summary-tallies">
+          <p class="summary-tally">⭐ <span id="summary-stars">0</span> stars</p>
+          <p class="summary-tally">💎 <span id="summary-gems">0</span> gems</p>
+          <p class="summary-tally">Correct: <span id="summary-correct">0</span></p>
+          <p class="summary-tally">Best streak: <span id="summary-streak">0</span></p>
+        </div>
+        <p id="summary-goal" class="summary-goal hidden"></p>
+        <p id="summary-region" class="summary-region hidden"></p>
+        <ul id="summary-milestones" class="summary-milestones hidden"></ul>
+        <div id="summary-cards" class="summary-cards"></div>
+      </div>
+
+      <!-- 5. Trail Screen -->
+      <div id="trail-screen" class="screen">
+        <div class="header">
+          <button
+            id="trail-back-button"
+            type="button"
+            class="nav-button"
+            aria-label="Return to hub"
+          >
+            ← Back
+          </button>
+          <h2 id="trail-heading" tabindex="-1">The Trail</h2>
+        </div>
+        <div id="trail-spaces" class="trail-spaces"></div>
+        <div id="trail-legend" class="trail-legend"></div>
+      </div>
+
+      <!-- 6. Fact Map Screen -->
+      <div id="map-screen" class="screen">
+        <div class="header">
+          <button id="map-back-button" type="button" class="nav-button" aria-label="Return to hub">
+            ← Back
+          </button>
+          <h2 id="map-heading" tabindex="-1">Fact Map</h2>
+        </div>
+        <div
+          id="mastery-grid"
+          class="mastery-grid"
+          role="table"
+          aria-label="Fact mastery map"
+        ></div>
+        <div id="mastery-legend" class="mastery-legend"></div>
+      </div>
+
+      <!-- 7. Collection Screen -->
+      <div id="collection-screen" class="screen">
+        <div class="header">
+          <button
+            id="collection-back-button"
+            type="button"
+            class="nav-button"
+            aria-label="Return to hub"
+          >
+            ← Back
+          </button>
+          <h2 id="collection-heading" tabindex="-1">Fact Cards</h2>
+        </div>
+        <p id="collection-count" class="collection-count"></p>
+        <div id="collection-cards" class="collection-cards"></div>
+        <div id="collection-legend" class="collection-legend"></div>
+      </div>
+
+      <!-- 8. Settings Modal -->
+      <div
+        id="settings-modal"
+        class="modal hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Settings"
+      >
+        <div class="modal-content">
+          <h2>Settings ⚙️</h2>
+
+          <div class="setting-group">
+            <label for="difficulty-select">Difficulty:</label>
+            <select id="difficulty-select" class="setting-select">
+              <option value="explorer">Explorer (2s-5s)</option>
+              <option value="adventurer">Adventurer (2s-7s)</option>
+              <option value="master">Master (all tables)</option>
+              <option value="custom">Custom</option>
+            </select>
+            <p class="setting-description">How much of the trail is in play</p>
+          </div>
+
+          <div class="setting-group hidden" id="custom-tables-group">
+            <fieldset class="table-toggles">
+              <legend>Which tables?</legend>
+              <label class="table-toggle" for="table-2">
+                <input id="table-2" class="visually-hidden" type="checkbox" data-table="2" />
+                <span class="table-toggle-face">2</span>
+              </label>
+              <label class="table-toggle" for="table-3">
+                <input id="table-3" class="visually-hidden" type="checkbox" data-table="3" />
+                <span class="table-toggle-face">3</span>
+              </label>
+              <label class="table-toggle" for="table-4">
+                <input id="table-4" class="visually-hidden" type="checkbox" data-table="4" />
+                <span class="table-toggle-face">4</span>
+              </label>
+              <label class="table-toggle" for="table-5">
+                <input id="table-5" class="visually-hidden" type="checkbox" data-table="5" />
+                <span class="table-toggle-face">5</span>
+              </label>
+              <label class="table-toggle" for="table-6">
+                <input id="table-6" class="visually-hidden" type="checkbox" data-table="6" />
+                <span class="table-toggle-face">6</span>
+              </label>
+              <label class="table-toggle" for="table-7">
+                <input id="table-7" class="visually-hidden" type="checkbox" data-table="7" />
+                <span class="table-toggle-face">7</span>
+              </label>
+              <label class="table-toggle" for="table-8">
+                <input id="table-8" class="visually-hidden" type="checkbox" data-table="8" />
+                <span class="table-toggle-face">8</span>
+              </label>
+              <label class="table-toggle" for="table-9">
+                <input id="table-9" class="visually-hidden" type="checkbox" data-table="9" />
+                <span class="table-toggle-face">9</span>
+              </label>
+            </fieldset>
+            <p class="setting-description">Pick the times tables to practice</p>
+          </div>
+
+          <button id="close-settings" type="button" class="big-button" aria-label="Close settings">
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="/shared/nav.js"></script>
+    <script type="module" src="js/game.js"></script>
+    <script>
+      if (window.__registerShortcut) {
+        window.__registerShortcut("1-4", "Select answer")
+        window.__registerShortcut("0-9", "Type answer")
+        window.__registerShortcut("Enter", "Submit answer")
+        window.__registerShortcut("Backspace", "Clear entry")
+      }
+    </script>
+  </body>
+</html>

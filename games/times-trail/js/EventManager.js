@@ -1,0 +1,359 @@
+/**
+ * Event wiring for Times Trail.
+ *
+ * Purpose: attach every DOM listener the game needs and translate each event
+ * into a call on a callback supplied by `game.js`. There is no game logic here
+ * and no state at all -- this class reads the DOM, never the model.
+ *
+ * Architecture: one `setupXButton()` method per control, each null-guarding both
+ * its element and its callback before invoking, all driven from a single
+ * `initializeEventListeners()`. Elements are looked up through `ui.elements`
+ * when the cache has them and `document.getElementById` otherwise, so the class
+ * works against a bare `{ elements: {} }` stub as well as a real `GameUI`.
+ *
+ * Statelessness: this class holds no `isProcessingAnswer` flag and exposes no
+ * `resetAnswerProcessing()`. The double-submit guard lives in `game.js`, at the
+ * single point where the tile, keypad, and array-builder answer paths converge.
+ * Guarding only the tile path here left the other two unguarded, so the same
+ * question could be answered twice while feedback was on screen.
+ *
+ * Correctness: `EventManager` never decides whether an answer is right. It
+ * reports the tapped value and the tapped element; `game.js` asks
+ * `challenge.check()`. Nothing here reads a `data-correct` attribute -- the
+ * markup does not carry one, and an answer key in the page is both a second
+ * source of truth and readable by anyone who opens the inspector.
+ */
+
+/**
+ * @typedef {Object} EventCallbacks
+ * @property {() => void} [onStart]
+ * @property {() => void} [onContinue]
+ * @property {() => void} [onStartFresh]
+ * @property {() => void} [onHome]
+ * @property {(sourceScreenId: string) => void} [onBack]
+ * @property {(modeId: string) => void} [onModeSelect]
+ * @property {(answer: number, buttonEl: HTMLElement) => void} [onAnswerSelected]
+ * @property {(dimension: "rows"|"cols", delta: number) => void} [onArrayStep]
+ * @property {() => void} [onArraySubmit]
+ * @property {() => void} [onScaffoldContinue]
+ * @property {() => void} [onShowTrail]
+ * @property {() => void} [onShowMap]
+ * @property {() => void} [onShowCollection]
+ * @property {() => void} [onPlayAgain]
+ * @property {() => void} [onSummaryHub]
+ * @property {() => void} [onSettingsOpen]
+ * @property {() => void} [onSettingsClose]
+ * @property {(key: string, value: string) => void} [onSettingChange]
+ * @property {(table: number, checked: boolean) => void} [onTableToggle]
+ */
+
+/** Digit keys that map onto answer tiles 1-4. */
+const TILE_SHORTCUT_KEY = /^[1-4]$/
+
+/** Tags whose own keyboard behavior must never be hijacked. */
+const TEXT_ENTRY_TAGS = new Set(["INPUT", "TEXTAREA", "SELECT"])
+
+export class EventManager {
+  /**
+   * @param {Object|null} ui - GameUI instance (or any object with an `elements` map)
+   * @param {EventCallbacks} [callbacks] - Defaults to `{}`; every callback is optional
+   */
+  constructor(ui, callbacks = {}) {
+    /** @type {Object|null} The UI whose `elements` cache is consulted first. */
+    this.ui = ui
+    /** @type {EventCallbacks} Never undefined, so every `this.callbacks.x` guard is safe. */
+    this.callbacks = callbacks || {}
+  }
+
+  /**
+   * Attach every listener. Safe to call against an empty document: each setup
+   * method returns early when its element is missing.
+   *
+   * @returns {void}
+   */
+  initializeEventListeners() {
+    this.setupStartButton()
+    this.setupContinueButton()
+    this.setupStartFreshButton()
+    this.setupHomeButton()
+    this.setupBackButton()
+    this.setupModeButtons()
+    this.setupAnswerTiles()
+    this.setupArraySteppers()
+    this.setupScaffoldContinue()
+    this.setupNavButtons()
+    this.setupSummaryButtons()
+    this.setupSettingsButtons()
+    this.setupSettingsControls()
+    this.setupKeyboardShortcuts()
+  }
+
+  /**
+   * Resolve an element from the UI's cache, falling back to the document.
+   *
+   * @private
+   * @param {string} cacheKey - Property name on `ui.elements`
+   * @param {string} elementId - DOM id to fall back to
+   * @returns {HTMLElement|null}
+   */
+  _element(cacheKey, elementId) {
+    const elements = this.ui && this.ui.elements ? this.ui.elements : null
+    const cached = elements ? elements[cacheKey] : null
+    return cached || document.getElementById(elementId)
+  }
+
+  /**
+   * Invoke a callback if it was supplied. A missing callback is a silent no-op.
+   *
+   * @private
+   * @param {string} name - Callback name on `this.callbacks`
+   * @param {...*} args - Arguments to forward
+   * @returns {void}
+   */
+  _invoke(name, ...args) {
+    if (this.callbacks[name]) {
+      this.callbacks[name](...args)
+    }
+  }
+
+  /**
+   * Wire one element's `click` to one argument-less callback.
+   *
+   * @private
+   * @param {string} cacheKey - Property name on `ui.elements`
+   * @param {string} elementId - DOM id
+   * @param {string} callbackName - Callback to invoke on click
+   * @returns {void}
+   */
+  _wireClick(cacheKey, elementId, callbackName) {
+    const element = this._element(cacheKey, elementId)
+    if (!element) return
+    element.addEventListener("click", () => {
+      this._invoke(callbackName)
+    })
+  }
+
+  /**
+   * Wire one back button to `onBack`, passing the id of the screen it leaves.
+   * The id is read from the button's own `.screen` ancestor so `game.js` can
+   * route without inspecting which screen happens to be active.
+   *
+   * @private
+   * @param {string} cacheKey - Property name on `ui.elements`
+   * @param {string} elementId - DOM id of the back button
+   * @param {string} fallbackScreenId - Used when the button has no `.screen` ancestor
+   * @returns {void}
+   */
+  _wireBackButton(cacheKey, elementId, fallbackScreenId) {
+    const button = this._element(cacheKey, elementId)
+    if (!button) return
+    button.addEventListener("click", (event) => {
+      const screen = event.currentTarget.closest(".screen")
+      this._invoke("onBack", screen && screen.id ? screen.id : fallbackScreenId)
+    })
+  }
+
+  /** Wires `#start-button` to `onStart`. @returns {void} */
+  setupStartButton() {
+    this._wireClick("startButton", "start-button", "onStart")
+  }
+
+  /** Wires `#continue-button` to `onContinue`. @returns {void} */
+  setupContinueButton() {
+    this._wireClick("continueButton", "continue-button", "onContinue")
+  }
+
+  /** Wires `#start-fresh-button` to `onStartFresh`. @returns {void} */
+  setupStartFreshButton() {
+    this._wireClick("startFreshButton", "start-fresh-button", "onStartFresh")
+  }
+
+  /** Wires `#home-button` to `onHome`. @returns {void} */
+  setupHomeButton() {
+    this._wireClick("homeButton", "home-button", "onHome")
+  }
+
+  /** Wires the play screen's `#back-button` to `onBack("play-screen")`. @returns {void} */
+  setupBackButton() {
+    this._wireBackButton("backButton", "back-button", "play-screen")
+  }
+
+  /**
+   * Wires each `.mode-button` to `onModeSelect(dataset.mode)`. The two mode
+   * buttons are static markup with no writer, so one listener each is enough
+   * and a nested element inside a button still resolves via `currentTarget`.
+   *
+   * @returns {void}
+   */
+  setupModeButtons() {
+    const buttons = document.querySelectorAll(".mode-button")
+    buttons.forEach((button) => {
+      button.addEventListener("click", (event) => {
+        const modeId = event.currentTarget.dataset.mode
+        if (!modeId) return
+        this._invoke("onModeSelect", modeId)
+      })
+    })
+  }
+
+  /**
+   * Wires `#answer-tiles` to `onAnswerSelected(answer, buttonEl)` by delegation.
+   * Tiles are re-rendered every question, so per-button listeners would leak.
+   * The tapped value comes from `data-answer`; a non-numeric value does not
+   * fire. Correctness is `game.js`'s call, so no third argument is passed.
+   *
+   * @returns {void}
+   */
+  setupAnswerTiles() {
+    const container = this._element("answerTiles", "answer-tiles")
+    if (!container) return
+    container.addEventListener("click", (event) => {
+      const tile = event.target.closest(".answer-btn")
+      if (!tile || !container.contains(tile)) return
+      const answer = parseInt(tile.dataset.answer, 10)
+      if (Number.isNaN(answer)) return
+      this._invoke("onAnswerSelected", answer, tile)
+    })
+  }
+
+  /**
+   * Wires the four array-builder steppers to `onArrayStep(dimension, delta)`
+   * and `#array-submit` to `onArraySubmit`.
+   *
+   * @returns {void}
+   */
+  setupArraySteppers() {
+    /** @type {Array<[string, string, "rows"|"cols", number]>} */
+    const steppers = [
+      ["rowsMinus", "rows-minus", "rows", -1],
+      ["rowsPlus", "rows-plus", "rows", 1],
+      ["colsMinus", "cols-minus", "cols", -1],
+      ["colsPlus", "cols-plus", "cols", 1],
+    ]
+    steppers.forEach(([cacheKey, elementId, dimension, delta]) => {
+      const button = this._element(cacheKey, elementId)
+      if (!button) return
+      button.addEventListener("click", () => {
+        this._invoke("onArrayStep", dimension, delta)
+      })
+    })
+    this._wireClick("arraySubmit", "array-submit", "onArraySubmit")
+  }
+
+  /** Wires `#scaffold-continue` ("Got it") to `onScaffoldContinue`. @returns {void} */
+  setupScaffoldContinue() {
+    this._wireClick("scaffoldContinue", "scaffold-continue", "onScaffoldContinue")
+  }
+
+  /**
+   * Wires the three hub nav buttons to their show callbacks and the three list
+   * screens' back buttons to `onBack`, each carrying its own screen id.
+   *
+   * @returns {void}
+   */
+  setupNavButtons() {
+    this._wireClick("trailButton", "trail-button", "onShowTrail")
+    this._wireClick("mapButton", "map-button", "onShowMap")
+    this._wireClick("collectionButton", "collection-button", "onShowCollection")
+    this._wireBackButton("trailBackButton", "trail-back-button", "trail-screen")
+    this._wireBackButton("mapBackButton", "map-back-button", "map-screen")
+    this._wireBackButton("collectionBackButton", "collection-back-button", "collection-screen")
+  }
+
+  /**
+   * Wires `#play-again-button` to `onPlayAgain` and `#summary-hub-button` to
+   * `onSummaryHub` -- its own named callback, not a reuse of `onBack`.
+   *
+   * @returns {void}
+   */
+  setupSummaryButtons() {
+    this._wireClick("playAgainButton", "play-again-button", "onPlayAgain")
+    this._wireClick("summaryHubButton", "summary-hub-button", "onSummaryHub")
+  }
+
+  /**
+   * Wires both settings entry points (`#settings-button` on the hub,
+   * `#play-settings-button` on the play screen) to `onSettingsOpen`, and
+   * `#close-settings` to `onSettingsClose`.
+   *
+   * @returns {void}
+   */
+  setupSettingsButtons() {
+    this._wireClick("settingsButton", "settings-button", "onSettingsOpen")
+    this._wireClick("playSettingsButton", "play-settings-button", "onSettingsOpen")
+    this._wireClick("closeSettings", "close-settings", "onSettingsClose")
+  }
+
+  /**
+   * Wires the only two kinds of settings control that exist: `#difficulty-select`
+   * to `onSettingChange("difficulty", value)` and each `[data-table]` checkbox to
+   * `onTableToggle(table, checked)`. The visible toggle is a `<label>` wrapping
+   * the checkbox, so a tap on its 68px face produces a normal `change` event on
+   * the input and needs no extra click handling.
+   *
+   * @returns {void}
+   */
+  setupSettingsControls() {
+    const difficultySelect = this._element("difficultySelect", "difficulty-select")
+    if (difficultySelect) {
+      difficultySelect.addEventListener("change", (event) => {
+        this._invoke("onSettingChange", "difficulty", event.target.value)
+      })
+    }
+
+    const checkboxes = document.querySelectorAll('input[type="checkbox"][data-table]')
+    checkboxes.forEach((checkbox) => {
+      checkbox.addEventListener("change", (event) => {
+        const table = parseInt(event.target.dataset.table, 10)
+        if (Number.isNaN(table)) return
+        this._invoke("onTableToggle", table, event.target.checked)
+      })
+    })
+  }
+
+  /**
+   * Report whether answer tiles are the affordance the player is currently
+   * looking at. This is the guard shared with `Keypad.handleKeyDown` (the
+   * `#play-screen` active / `#settings-modal` hidden pair) plus one extra term:
+   * `#answer-tiles` must itself be visible.
+   *
+   * The extra term is what keeps the two `document` keydown listeners out of
+   * each other's way. `renderQuestion` shows exactly one affordance, so when the
+   * keypad is up the tile container is hidden and only `Keypad` acts on digits.
+   *
+   * @private
+   * @returns {boolean} True when 1-4 should select a tile
+   */
+  _isTileEntryActive() {
+    const playScreen = document.getElementById("play-screen")
+    const modal = document.getElementById("settings-modal")
+    const tiles = document.getElementById("answer-tiles")
+    const active = Boolean(playScreen && playScreen.classList.contains("active"))
+    const modalOpen = Boolean(modal && !modal.classList.contains("hidden"))
+    const tilesShowing = Boolean(tiles && !tiles.classList.contains("hidden"))
+    return active && !modalOpen && tilesShowing
+  }
+
+  /**
+   * Wires one `document` `keydown` listener so keys 1-4 click the matching
+   * answer tile. Gated by `_isTileEntryActive()` and skipped when the event
+   * target is a text-entry element. Digit/Enter/Backspace handling for the
+   * keypad belongs to `Keypad.handleKeyDown` and is deliberately not duplicated.
+   *
+   * @returns {void}
+   */
+  setupKeyboardShortcuts() {
+    document.addEventListener("keydown", (event) => {
+      if (!TILE_SHORTCUT_KEY.test(event.key)) return
+      if (!this._isTileEntryActive()) return
+      const target = event.target
+      if (target && TEXT_ENTRY_TAGS.has(target.tagName)) return
+
+      event.preventDefault()
+      const tiles = document.querySelectorAll("#answer-tiles .answer-btn")
+      const tile = tiles[parseInt(event.key, 10) - 1]
+      if (!tile || tile.classList.contains("disabled")) return
+      tile.click()
+    })
+  }
+}

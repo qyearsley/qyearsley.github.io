@@ -26,7 +26,8 @@ games/
   number-garden/            Game (own layout)
   life-garden/              Game (own layout)
   turing-tape/              Game (own layout)
-  shared/                   BaseGameUI, StorageManager (Number Garden + Life Garden)
+  times-trail/              Game (own layout)
+  shared/                   BaseGameUI, StorageManager (Number Garden, Life Garden, Times Trail)
 
 javascript/
   index.html                JS experiments section index

@@ -1,0 +1,14 @@
+{
+  "name": "Times Trail",
+  "short_name": "Times Trail",
+  "description": "Practice the multiplication facts from 2x2 to 9x9 along a trail",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f4efe4",
+  "theme_color": "#2f7d4f",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

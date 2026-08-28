@@ -1,0 +1,1333 @@
+/**
+ * Times Trail -- game stylesheet
+ *
+ * Single sheet for games/times-trail/index.html. Loaded after the site sheet
+ * (/css/style.css), so anything inherited from there that fights a full-screen
+ * touch game (body padding, background pattern, scrolling) is reset below.
+ *
+ * Design constraints this file exists to satisfy (docs/times-trail-plan.md,
+ * "iPad constraints"): 64-72px tap targets with 16px gaps, no scrolling during
+ * a round, 100dvh sizing, suppressed browser gestures, no hover-only
+ * affordances, and a layout that cannot reflow when a child is hidden.
+ */
+
+/* ==================== Reset and Base ==================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ==================== Theme Custom Properties ==================== */
+:root {
+  --tt-bg: #f4efe4;
+  --tt-surface: #fff;
+  --tt-surface-alt: #efe7d8;
+  --tt-ink: #2f3a2f;
+  --tt-ink-muted: #6b7a6b;
+  --tt-border: #d8cdb8;
+  --tt-trail: #c8a97e;
+  --tt-primary: #2f7d4f;
+  --tt-primary-dark: #205937;
+  --tt-accent: #e0902f;
+  --tt-correct: #2f7d4f;
+  --tt-incorrect: #b05a3c;
+  --tt-star: #f0b429;
+  --tt-gem: #4a9bd1;
+  --tt-locked: #b8b8b0;
+  --tt-strength-0: #e4ded1;
+  --tt-strength-1: #d3e0c8;
+  --tt-strength-2: #b6d2a6;
+  --tt-strength-3: #8dbd7d;
+  --tt-strength-4: #58a05a;
+  --tt-strength-5: #2f7d4f;
+  --tt-tap-size: 68px;
+  --tt-tap-gap: 16px;
+  --tt-cell-size: 28px;
+  --tt-radius: 16px;
+  --tt-shadow: 0 4px 12px rgb(0, 0, 0, 0.12);
+  --tt-font: "Quicksand", -apple-system, "BlinkMacSystemFont", "Segoe UI", "Roboto", sans-serif;
+}
+
+/* Dark theme, form 1: the OS preference. Scoped so an explicit light choice
+   made through /shared/theme.js still wins. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --tt-bg: #1f241f;
+    --tt-surface: #2a312a;
+    --tt-surface-alt: #333b33;
+    --tt-ink: #e6ece6;
+    --tt-ink-muted: #a3b0a3;
+    --tt-border: #46503f;
+    --tt-shadow: 0 4px 12px rgb(0, 0, 0, 0.4);
+  }
+}
+
+/* Dark theme, form 2: the explicit choice /shared/theme.js writes onto
+   <html data-theme="dark">. Written out in full rather than referenced,
+   because a comment-only block is an empty block and fails stylelint.
+   If a variable is added to one of these two blocks, add it to the other. */
+:root[data-theme="dark"] {
+  --tt-bg: #1f241f;
+  --tt-surface: #2a312a;
+  --tt-surface-alt: #333b33;
+  --tt-ink: #e6ece6;
+  --tt-ink-muted: #a3b0a3;
+  --tt-border: #46503f;
+  --tt-shadow: 0 4px 12px rgb(0, 0, 0, 0.4);
+}
+
+/* ==================== iPad and Touch Base ==================== */
+html,
+body {
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+body {
+  font-family: var(--tt-font);
+  background-color: var(--tt-bg);
+  background-image: none;
+  color: var(--tt-ink);
+  min-height: 100vh;
+  min-height: 100dvh; /* iPad Safari toolbars change the viewport height */
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+/* Every interactive class gets the same 68px floor. The header controls
+   (back arrow, gear, "Home") used to be the three smallest targets on
+   screen and are tapped on every screen. */
+.answer-btn,
+.keypad-key,
+.mode-button,
+.stepper-button,
+.big-button,
+.secondary-button,
+.nav-button,
+.icon-button,
+.text-button,
+.table-toggle {
+  min-width: var(--tt-tap-size);
+  min-height: var(--tt-tap-size);
+  border: none;
+  border-radius: var(--tt-radius);
+  font-family: inherit;
+  font-size: 1.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Every container of tap targets keeps them 16px apart. */
+.title-buttons,
+.hub-nav,
+.mode-choices,
+.summary-buttons,
+.array-steppers,
+.header .stats,
+.table-toggles {
+  display: flex;
+  gap: var(--tt-tap-gap);
+  align-items: center;
+}
+
+/* ==================== Layout ==================== */
+#game-container {
+  width: 100%;
+  max-width: 1180px;
+  height: 100vh;
+  height: 100dvh; /* iPad Safari toolbars change the viewport height */
+  max-height: 100vh;
+  max-height: 100dvh;
+  margin: 0 auto;
+  background-color: var(--tt-surface);
+  overflow: hidden;
+  position: relative;
+}
+
+.screen {
+  display: none;
+  position: absolute;
+  inset: 0;
+  padding: 20px;
+  overflow: hidden; /* no scrolling during a round */
+}
+
+.screen.active {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Screens that are lists rather than rounds may scroll. `overscroll-behavior`
+   belongs HERE, on the elements that actually scroll -- setting it only on
+   html/body does nothing for an inner scroll container, so a rubber-band drag
+   inside the trail or collection still bounced the whole page on iOS. */
+#trail-screen.active,
+#map-screen.active,
+#collection-screen.active,
+#summary-screen.active {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ==================== Header and HUD ==================== */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--tt-tap-gap);
+  flex-shrink: 0;
+  padding-bottom: 6px;
+  margin-bottom: 10px;
+  border-bottom: 2px solid var(--tt-border);
+}
+
+.stats {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.stat {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--tt-ink);
+  background-color: var(--tt-surface-alt);
+  border-radius: 999px;
+  padding: 6px 14px;
+  white-space: nowrap;
+}
+
+#star-count,
+#play-star-count {
+  color: var(--tt-star);
+}
+
+#gem-count {
+  color: var(--tt-gem);
+}
+
+#flame-display {
+  font-size: 1.5rem;
+}
+
+/* ==================== Progress Bar ==================== */
+.progress-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  margin-bottom: 10px;
+}
+
+.progress-bar-bg {
+  flex: 1;
+  height: 20px;
+  background-color: var(--tt-surface-alt);
+  border: 2px solid var(--tt-border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background-color: var(--tt-primary);
+  transition: width 0.4s ease;
+}
+
+.progress-text {
+  min-width: 64px;
+  font-size: 1rem;
+  line-height: 1.2;
+  font-weight: 700;
+  text-align: center;
+  color: var(--tt-ink-muted);
+}
+
+/* ==================== Play Trail Strip ==================== */
+.play-trail-strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  min-height: 36px;
+  margin-bottom: 10px;
+}
+
+.strip-region {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.strip-region-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--tt-ink-muted);
+  margin-right: 4px;
+  white-space: nowrap;
+}
+
+.strip-space {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border: 2px solid var(--tt-border);
+  border-radius: 50%;
+  background-color: var(--tt-surface-alt);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.strip-space-current {
+  background-color: var(--tt-trail);
+  border-color: var(--tt-primary-dark);
+}
+
+/* A gate is "not yet", not "not here": square rather than round, so the
+   difference from a plain space survives a colour-blind reading. */
+.strip-space-gate {
+  background-color: var(--tt-surface);
+  border: 3px dashed var(--tt-incorrect);
+  border-radius: 4px;
+}
+
+.strip-token {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+/* ==================== Title Screen ==================== */
+#title-screen {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+}
+
+.game-title {
+  font-size: 3rem;
+  color: var(--tt-primary);
+}
+
+.game-tagline {
+  font-size: 1.25rem;
+  color: var(--tt-ink-muted);
+  margin-bottom: 12px;
+}
+
+.title-buttons {
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* ==================== Buttons ==================== */
+.big-button {
+  padding: 0 32px;
+  background-color: var(--tt-primary);
+  color: #fff;
+  box-shadow: var(--tt-shadow);
+}
+
+.secondary-button {
+  padding: 0 24px;
+  font-size: 1.25rem;
+  background-color: var(--tt-surface);
+  color: var(--tt-primary);
+  border: 2px solid var(--tt-primary);
+}
+
+.nav-button {
+  padding: 0 20px;
+  font-size: 1.25rem;
+  background-color: var(--tt-surface-alt);
+  color: var(--tt-ink);
+}
+
+.icon-button {
+  font-size: 1.5rem;
+  background-color: var(--tt-surface-alt);
+  color: var(--tt-ink);
+  border-radius: 50%;
+}
+
+.text-button {
+  padding: 0 16px;
+  font-size: 1.125rem;
+  background-color: transparent;
+  color: var(--tt-primary);
+}
+
+.mode-button {
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 112px;
+  padding: 16px;
+  font-size: 1.5rem;
+  background-color: var(--tt-surface-alt);
+  color: var(--tt-ink);
+  border: 2px solid var(--tt-border);
+  text-align: center;
+}
+
+.stepper-button {
+  font-size: 2rem;
+  background-color: var(--tt-surface-alt);
+  color: var(--tt-ink);
+  border: 2px solid var(--tt-border);
+}
+
+/* Disabled controls (BaseGameUI.disableButton / disableAnswerButtons). */
+.big-button:disabled,
+.secondary-button:disabled,
+.answer-btn:disabled,
+.keypad-key:disabled,
+.stepper-button:disabled,
+.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Hover is an enhancement only -- gated so a touch device never inherits a
+   sticky hover state, and every control below has an unconditional :active. */
+@media (hover: hover) and (pointer: fine) {
+  .answer-btn:hover,
+  .keypad-key:hover,
+  .mode-button:hover,
+  .table-toggle:hover {
+    background-color: var(--tt-surface-alt);
+    border-color: var(--tt-primary);
+  }
+
+  .big-button:hover,
+  .secondary-button:hover,
+  .nav-button:hover,
+  .icon-button:hover,
+  .text-button:hover,
+  .stepper-button:hover {
+    filter: brightness(1.08);
+  }
+}
+
+.answer-btn:active,
+.keypad-key:active,
+.mode-button:active,
+.stepper-button:active,
+.big-button:active,
+.secondary-button:active,
+.nav-button:active,
+.icon-button:active,
+.text-button:active,
+.table-toggle:active {
+  transform: scale(0.95);
+  background-color: var(--tt-primary-dark);
+  color: #fff;
+}
+
+/* ==================== Hub Screen ==================== */
+#hub-screen {
+  gap: 12px;
+}
+
+#hub-heading {
+  font-size: 1.75rem;
+  color: var(--tt-primary);
+  text-align: center;
+}
+
+.hub-region {
+  font-size: 1.125rem;
+  color: var(--tt-ink-muted);
+  text-align: center;
+}
+
+.mode-choices {
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: stretch;
+  margin: 12px 0;
+}
+
+.hub-nav {
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: auto;
+}
+
+/* ==================== Play Area and Question ==================== */
+.play-area {
+  flex: 1;
+  display: grid;
+  gap: 20px;
+  min-height: 0; /* lets the grid shrink inside a flex column */
+  position: relative;
+}
+
+/* Named areas, not auto-placement: renderQuestion hides two of the three
+   entry affordances on every question, and with implicit placement each
+   hidden child shifted every later child up a cell. */
+#question-text {
+  grid-area: question;
+}
+
+/* The keypad's readout gets its own row directly above the entry area. It
+   used to share `extra` with #gate-message -- align-self: end against
+   align-self: start inside one 56px row -- so the orange gate sentence painted
+   on top of the 3rem "?". */
+#answer-display {
+  grid-area: readout;
+}
+
+#answer-tiles,
+#keypad,
+#array-builder {
+  grid-area: entry;
+}
+
+/* #scaffold-area and #feedback-area share `extra` on purpose: the scaffold
+   covers that cell and the one-line feedback stays legible on top of it
+   (.scaffold-area reserves the feedback's height as padding). Nothing else is
+   placed there. */
+#scaffold-area,
+#feedback-area {
+  grid-area: extra;
+}
+
+#scaffold-area {
+  z-index: 1;
+}
+
+#feedback-area {
+  z-index: 2;
+  align-self: start;
+}
+
+/* The gate message is persistent state, not per-answer feedback, so it can be
+   on screen at the same time as the feedback line and needs its own row. */
+#gate-message {
+  grid-area: gate;
+}
+
+.question {
+  font-size: 2.5rem;
+  line-height: 1.2;
+  font-weight: 700;
+  text-align: center;
+  color: var(--tt-ink);
+}
+
+/* ==================== Answer Tiles ==================== */
+.answer-tiles {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--tt-tap-gap);
+  width: min(560px, 100%); /* an actual width, not just a ceiling */
+  margin: 0 auto;
+  align-content: center;
+}
+
+.answer-btn {
+  min-height: 88px;
+  font-size: 2.5rem;
+  background-color: var(--tt-surface);
+  color: var(--tt-primary);
+  border: 3px solid var(--tt-primary);
+  box-shadow: var(--tt-shadow);
+}
+
+/* The miss reveal: the tiles stay on screen while the scaffold teaches
+   (GameUI.freezeTiles), inert, with the two tiles that carry the answer --
+   the one she tapped and the right one -- at full strength and the two
+   irrelevant tiles pushed back. */
+.answer-tiles-frozen {
+  pointer-events: none;
+}
+
+.answer-tiles-frozen .answer-btn:not(.correct, .incorrect) {
+  opacity: 0.4;
+}
+
+/* ==================== Keypad ==================== */
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--tt-tap-gap);
+  width: 320px; /* an actual width, not just a ceiling */
+  max-width: 100%;
+  margin: 0 auto;
+  align-content: center;
+}
+
+.keypad-key {
+  width: 100%;
+  font-size: 2rem;
+  background-color: var(--tt-surface-alt);
+  color: var(--tt-ink);
+  border: 2px solid var(--tt-border);
+}
+
+.keypad-key-clear {
+  color: var(--tt-incorrect);
+}
+
+.keypad-key-enter {
+  background-color: var(--tt-primary);
+  color: #fff;
+  border-color: var(--tt-primary-dark);
+}
+
+.answer-display {
+  font-size: 3rem;
+  font-weight: 700;
+  text-align: center;
+  min-height: 3.5rem; /* reserve the line so "?" -> "42" never shifts the keypad */
+  color: var(--tt-ink);
+}
+
+/* The one piece of positive feedback on the keypad path: her own digits,
+   green, held for the feedback beat (GameUI.markAnswerDisplayCorrect). Scoped
+   to the id so it cannot repaint .feedback-area.correct or a tile. */
+#answer-display.correct {
+  color: var(--tt-correct);
+  animation: pop 0.3s ease;
+}
+
+/* ==================== Array Builder ==================== */
+.array-builder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--tt-tap-gap);
+}
+
+.array-steppers {
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.array-dims {
+  min-width: 96px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--tt-ink);
+}
+
+/* Pinned cell sizes: 9 columns x 28px + 8 gaps x 4px = 284px, so a 9x9
+   array fits the narrowest supported column instead of growing to fill it
+   and pushing the steppers off screen. */
+.array-grid,
+.scaffold-array {
+  display: grid;
+  gap: 4px;
+  justify-content: center;
+}
+
+.array-cell,
+.array-dot {
+  width: var(--tt-cell-size);
+  height: var(--tt-cell-size);
+  border-radius: 50%;
+  background-color: var(--tt-accent);
+}
+
+/* ==================== Scaffold ==================== */
+.scaffold-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding-top: 3rem; /* clears the height .feedback-area reserves above it */
+  background-color: var(--tt-surface);
+}
+
+.scaffold-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.skip-count {
+  min-width: 44px;
+  padding: 2px 8px;
+  font-size: 1rem;
+  line-height: 1.2;
+  font-weight: 700;
+  text-align: center;
+  color: var(--tt-ink-muted);
+  background-color: var(--tt-surface-alt);
+  border-radius: 999px;
+}
+
+.skip-count.active {
+  background-color: var(--tt-accent);
+  color: #fff;
+  animation: tick 0.3s ease;
+}
+
+.scaffold-text {
+  font-size: 1rem;
+  line-height: 1.2;
+  font-weight: 600;
+  text-align: center;
+  color: var(--tt-ink);
+}
+
+/* ==================== Feedback and Gate Message ==================== */
+.feedback-area {
+  min-height: 3rem; /* reserve the height so the first answer of a session
+                       does not shove the play area upward */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Only the two outcome types get a colour of their own. `info` and
+   `encourage` inherit --tt-ink from the body, so they need no rule -- and the
+   rules they used to have were dead, since nothing produced those types. */
+.feedback-area.correct {
+  color: var(--tt-correct);
+}
+
+.feedback-area.incorrect {
+  color: var(--tt-incorrect);
+}
+
+.gate-message {
+  min-height: 3rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--tt-accent);
+}
+
+/* 600ms matches TIMING.STAR_FLY_MS; if either changes, both change.
+   The reward rises and fades where it appears instead of flying into
+   #play-star-count: the counter lives in the header, outside .play-area's
+   positioning context, and sits in a different place in portrait than in
+   landscape, so the old fixed translate(120px, -180px) landed nowhere near it
+   in either orientation. A vertical rise reads as "you earned this" without
+   claiming a destination it cannot hit. translateX(-50%) is part of the start
+   state so `left: 50%` actually centres the text. */
+.star-fly {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--tt-star);
+  pointer-events: none;
+  z-index: 3;
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+  transition:
+    transform 600ms ease-out,
+    opacity 600ms ease-out;
+}
+
+.star-fly-active {
+  transform: translate(-50%, -120px) scale(1.25);
+  opacity: 0;
+}
+
+/* ==================== Trail Screen ==================== */
+.header h2 {
+  font-size: 1.75rem;
+  color: var(--tt-primary);
+}
+
+.trail-spaces {
+  display: grid;
+  grid-template-rows: repeat(8, auto); /* one row per region */
+  gap: 12px;
+}
+
+.trail-region-row {
+  display: grid;
+  grid-template-columns: auto repeat(5, 1fr); /* label + 5 spaces */
+  gap: 8px;
+  align-items: center;
+}
+
+.trail-region-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--tt-ink-muted);
+  min-width: 9rem;
+  white-space: nowrap;
+}
+
+.trail-space {
+  height: 48px;
+  border: 2px solid var(--tt-border);
+  border-radius: var(--tt-radius);
+  background-color: var(--tt-trail);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Scoped to .trail-space, so "you are here" wins wherever it is declared.
+   As a bare single-class selector it lost to .trail-space-skipped and
+   .trail-space-locked below at equal specificity, and the token's own space
+   painted transparent or grey in a skipped or locked region. */
+.trail-space.trail-space-current {
+  border: 3px solid var(--tt-primary-dark);
+  background-color: var(--tt-accent);
+}
+
+.trail-space-locked {
+  background-color: var(--tt-locked);
+  opacity: 0.6;
+}
+
+.trail-space-skipped {
+  background-color: transparent;
+  border-style: dashed;
+}
+
+.trail-token {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.trail-legend,
+.mastery-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-size: 0.85rem;
+  color: var(--tt-ink);
+  background-color: var(--tt-surface-alt);
+  border: 2px solid var(--tt-border);
+  border-radius: 999px;
+}
+
+/* ==================== Mastery Map ==================== */
+.mastery-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr); /* 1 header column + 8 fact columns */
+  gap: 4px;
+  max-width: 560px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.mastery-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--tt-ink-muted);
+}
+
+.mastery-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  border-radius: 6px;
+  background-color: var(--tt-strength-0);
+  color: var(--tt-ink);
+}
+
+.mastery-cell-square {
+  outline: 2px solid var(--tt-accent);
+  outline-offset: -2px;
+}
+
+/* The pip is the non-colour strength indicator; colour alone must not carry
+   the meaning. CSS targets the class, never [data-strength]. */
+.mastery-pip {
+  font-size: 0.7rem;
+  line-height: 1;
+  text-align: center;
+}
+
+.strength-0 {
+  background-color: var(--tt-strength-0);
+}
+
+.strength-1 {
+  background-color: var(--tt-strength-1);
+}
+
+.strength-2 {
+  background-color: var(--tt-strength-2);
+}
+
+.strength-3 {
+  background-color: var(--tt-strength-3);
+}
+
+.strength-4 {
+  background-color: var(--tt-strength-4);
+  color: #fff;
+}
+
+.strength-5 {
+  background-color: var(--tt-strength-5);
+  color: #fff;
+}
+
+/* ==================== Collection ==================== */
+.collection-count {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--tt-ink-muted);
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.collection-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: var(--tt-tap-gap);
+}
+
+.collection-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.fact-card {
+  aspect-ratio: 3 / 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  border: 2px solid var(--tt-border);
+  border-radius: var(--tt-radius);
+  text-align: center;
+}
+
+/* The pip is the non-colour tier cue: grey and colored cards are otherwise the
+   same card in two colours. Same reasoning as .mastery-pip. */
+.card-pip {
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+/* A small stand-in for a card in #collection-legend. A real .fact-card is
+   aspect-ratio 3/4 and would blow the legend row apart. */
+.card-swatch {
+  width: 18px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  border: 2px solid var(--tt-border);
+  border-radius: 4px;
+}
+
+.card-grey {
+  background-color: var(--tt-surface-alt);
+  color: var(--tt-ink-muted);
+}
+
+.card-colored {
+  background-color: var(--tt-strength-2);
+  color: var(--tt-ink);
+}
+
+.card-foiled {
+  background-color: var(--tt-primary);
+  border-color: var(--tt-star);
+  color: #fff;
+  box-shadow: var(--tt-shadow);
+}
+
+.card-new {
+  outline: 3px solid var(--tt-accent);
+  outline-offset: 2px;
+}
+
+/* ==================== Summary Screen ==================== */
+#summary-screen {
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+}
+
+#summary-title {
+  font-size: 1.75rem;
+  color: var(--tt-primary);
+}
+
+.summary-buttons {
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.summary-tallies {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 24px;
+}
+
+.summary-tally {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.summary-goal,
+.summary-region {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--tt-primary);
+}
+
+.summary-milestones {
+  list-style: none;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--tt-accent);
+}
+
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: var(--tt-tap-gap);
+  width: 100%;
+  max-width: 560px;
+}
+
+#summary-stars {
+  color: var(--tt-star);
+}
+
+#summary-gems {
+  color: var(--tt-gem);
+}
+
+/* ==================== Settings Modal ==================== */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background-color: rgb(0, 0, 0, 0.5);
+}
+
+/* Without max-height and overflow-y the modal overflowed off the bottom of
+   an iPad in landscape with no way to reach #close-settings -- and the
+   inherited focus trap kept Tab inside it. */
+.modal-content {
+  max-height: 90dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  width: min(520px, 92vw);
+  padding: 24px;
+  background-color: var(--tt-surface);
+  border-radius: var(--tt-radius);
+  box-shadow: var(--tt-shadow);
+}
+
+.modal-content h2 {
+  font-size: 1.75rem;
+  color: var(--tt-primary);
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.setting-group {
+  margin-bottom: 24px;
+}
+
+.setting-group label {
+  display: block;
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.setting-select {
+  width: 100%;
+  min-height: var(--tt-tap-size);
+  padding: 0 12px;
+  font-family: inherit;
+  font-size: 1.25rem;
+  color: var(--tt-ink);
+  background-color: var(--tt-surface);
+  border: 2px solid var(--tt-border);
+  border-radius: var(--tt-radius);
+  cursor: pointer;
+}
+
+.setting-description {
+  margin-top: 6px;
+  font-size: 0.9rem;
+  color: var(--tt-ink-muted);
+}
+
+.table-toggles {
+  flex-wrap: wrap;
+  justify-content: center;
+  border: none;
+}
+
+.table-toggles legend {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+/* A 20px native checkbox is the smallest thing on an iPad screen. The real
+   control stays a .visually-hidden checkbox inside a 68px label. */
+.table-toggle {
+  position: relative;
+  background-color: var(--tt-surface-alt);
+  color: var(--tt-ink);
+  border: 2px solid var(--tt-border);
+}
+
+.table-toggle[aria-pressed="true"],
+.table-toggle:has(input:checked) {
+  background-color: var(--tt-primary);
+  border-color: var(--tt-primary-dark);
+  color: #fff;
+}
+
+.table-toggle-face {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* ==================== Utility ==================== */
+.hidden {
+  display: none !important;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ==================== Focus Styles (Accessibility) ==================== */
+:focus-visible {
+  outline: 3px solid var(--tt-accent);
+  outline-offset: 2px;
+}
+
+/* The table toggle's real control is visually hidden, so its focus ring has
+   to be drawn on the label the player can see. */
+.table-toggle:has(input:focus-visible) {
+  outline: 3px solid var(--tt-accent);
+  outline-offset: 2px;
+}
+
+/* ==================== Animations ==================== */
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20%,
+  60% {
+    transform: translateX(-8px);
+  }
+
+  40%,
+  80% {
+    transform: translateX(8px);
+  }
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.12);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes tick {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.25);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.shake {
+  animation: shake 0.5s ease;
+}
+
+/* Scoped to .answer-btn: BaseGameUI's markButtonCorrect / markButtonIncorrect
+   add these classes to answer buttons, and an unscoped .correct would also
+   repaint .feedback-area.correct as a solid block.
+
+   `opacity: 1` on both is required, not decorative: every tile is disabled
+   (`.disabled`, opacity 0.5) before these classes are added, so without it the
+   revealed correct answer looked exactly as faded as the three wrong ones. */
+.answer-btn.correct {
+  background-color: var(--tt-correct);
+  border-color: var(--tt-correct);
+  color: #fff;
+  opacity: 1;
+  animation: pop 0.3s ease;
+}
+
+.answer-btn.incorrect {
+  background-color: var(--tt-incorrect);
+  border-color: var(--tt-incorrect);
+  color: #fff;
+  opacity: 1;
+}
+
+/* ==================== Reduced Motion ==================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ==================== Responsive: Portrait ==================== */
+@media (orientation: portrait) {
+  .play-area {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "question"
+      "readout"
+      "entry"
+      "extra"
+      "gate";
+    align-content: center;
+    justify-items: center;
+  }
+
+  .trail-region-label {
+    min-width: 6rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* ==================== Responsive: Landscape ==================== */
+@media (orientation: landscape) {
+  /* Question full width across the top -- a half-width column forced
+     "7 × 8 = ?" onto two lines -- entry bottom-right under the right thumb,
+     with its readout directly above it, and supporting content bottom-left
+     where it does not cover the keys. The gate sentence spans the full width
+     under both. */
+  .play-area {
+    grid-template:
+      "question question" auto
+      "extra readout" auto
+      "extra entry" 1fr
+      "gate gate" auto
+      / 1fr 1fr;
+    align-items: center;
+    gap: 24px;
+  }
+}
+
+/* ==================== Responsive: Narrow Phones ==================== */
+@media (width <= 600px) {
+  :root {
+    --tt-tap-size: 64px;
+    --tt-cell-size: 24px;
+  }
+
+  .screen {
+    padding: 12px;
+  }
+
+  .question {
+    font-size: 1.75rem;
+  }
+
+  .answer-btn {
+    min-height: 72px;
+    font-size: 2rem;
+  }
+
+  .keypad {
+    width: 100%;
+    max-width: 288px;
+  }
+
+  .answer-display {
+    font-size: 2.25rem;
+    min-height: 2.75rem;
+  }
+
+  .stat {
+    font-size: 1rem;
+    padding: 4px 10px;
+  }
+
+  .game-title {
+    font-size: 2.25rem;
+  }
+
+  .trail-region-label {
+    min-width: 0;
+  }
+}

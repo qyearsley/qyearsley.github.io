@@ -1,0 +1,46 @@
+{
+  "_title": "Times Trail",
+  "_description": "沿着小径练习 2×2 到 9×9 的乘法口诀",
+
+  "🥾 Times Trail": "🥾 乘法小径",
+  "Times Trail": "乘法小径",
+  "Walk the trail. Learn the times tables.": "走上小径，学会乘法表。",
+  "Start": "开始",
+  "Continue": "继续",
+  "Start Fresh": "重新开始",
+
+  "← Home": "← 首页",
+  "← Back": "← 返回",
+  "Choose a mode": "选择模式",
+  "⚡ Quick Recall": "⚡ 快速抢答",
+  "🔢 Array Builder": "🔢 摆方阵",
+  "Trail": "小径",
+  "Fact Map": "口诀地图",
+  "Cards": "卡片",
+
+  "Practice": "练习",
+  "Check": "检查",
+  "Got it": "明白了",
+
+  "🎉 Session Complete!": "🎉 本轮练习完成！",
+  "Play Again": "再玩一次",
+  "Back to Hub": "回到主菜单",
+  "stars": "颗星",
+  "gems": "颗宝石",
+  "Correct:": "答对：",
+  "Best streak:": "最长连对：",
+
+  "The Trail": "小径",
+  "Fact Cards": "口诀卡片",
+
+  "Settings ⚙️": "设置 ⚙️",
+  "Difficulty:": "难度：",
+  "Explorer (2s-5s, tiles only)": "探险新手（2-5 的乘法表，只有选择题）",
+  "Adventurer (2s-7s)": "探险家（2-7 的乘法表）",
+  "Master (all tables)": "大师（全部乘法表）",
+  "Custom": "自定义",
+  "How much of the trail is in play": "决定练习小径上的多少内容",
+  "Which tables?": "练哪些乘法表？",
+  "Pick the times tables to practice": "选择要练习的乘法表",
+  "Done": "完成"
+}

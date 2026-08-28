@@ -4,7 +4,7 @@ Personal website with educational games, JavaScript experiments, and Chinese lan
 
 ## Site Structure
 
-- [`/games/`](games/) -- Educational games (Number Garden, Life Garden, Turing Tape)
+- [`/games/`](games/) -- Educational games (Number Garden, Life Garden, Turing Tape, Times Trail)
 - [`/javascript/`](javascript/) -- Interactive tools exploring CS concepts (automata, hashing, logic, etc.)
 - [`/chinese/`](chinese/) -- Chinese language reference tools (pinyin, tone tables, character encoding)
 - [`/resume/`](resume/) -- Resume (rendered from markdown at build time)
