@@ -44,6 +44,22 @@ function cyclingRng(values) {
 }
 
 /**
+ * A tiny deterministic PRNG (a 32-bit LCG), for tests that need a realistic
+ * SPREAD of values rather than a scripted sequence. `cyclingRng` repeats a short
+ * cycle, which makes the weighted draw land in the same place every time and so
+ * cannot sample a distribution at all.
+ * @param {number} seed - Any integer; the same seed always gives the same stream
+ * @returns {() => number} Values in [0, 1)
+ */
+function seededRng(seed) {
+  let state = seed >>> 0
+  return () => {
+    state = (Math.imul(state, 1664525) + 1013904223) >>> 0
+    return state / 4294967296
+  }
+}
+
+/**
  * Build a record map from a terse spec. Defaults produce a record that is NOT
  * due (dueAt one day out) and has been answered before, so `decayedStrength`
  * returns the stored strength and bucket membership is easy to read. Pass
@@ -574,6 +590,108 @@ describe("FactSelector", () => {
       }
       expect(selector.questionIndex).toBe(4)
       expect(selector.peekRetryQueue()).toEqual([])
+    })
+  })
+
+  describe("setPriorityFacts", () => {
+    // The bias that ties selection to the trail. Without it selection ignored the
+    // token's position, so the facts a gate was waiting on might not come up for
+    // twenty questions and the trail stopped for no visible reason.
+    const POOL = ["2x2", "2x3", "3x3", "6x7"]
+    const EVEN = recordsFrom({ "2x2": {}, "2x3": {}, "3x3": {}, "6x7": {} })
+
+    test("defaults to empty and reads back what was set", () => {
+      const selector = new FactSelector({ now: fixedNow })
+      expect(selector.priorityFactIds).toEqual([])
+      selector.setPriorityFacts(["2x3", "3x3"])
+      expect(selector.priorityFactIds.sort()).toEqual(["2x3", "3x3"])
+    })
+
+    test("replaces rather than merges, so a moved gate cannot leave a stale set", () => {
+      const selector = new FactSelector({ now: fixedNow })
+      selector.setPriorityFacts(["2x3"])
+      selector.setPriorityFacts(["6x7"])
+      expect(selector.priorityFactIds).toEqual(["6x7"])
+    })
+
+    test("junk clears the set instead of corrupting it", () => {
+      const selector = new FactSelector({ now: fixedNow })
+      for (const junk of [null, undefined, "2x3", 42, {}]) {
+        selector.setPriorityFacts(["2x3"])
+        selector.setPriorityFacts(junk)
+        expect(selector.priorityFactIds).toEqual([])
+      }
+    })
+
+    test("drops non-string entries and duplicates", () => {
+      const selector = new FactSelector({ now: fixedNow })
+      selector.setPriorityFacts(["2x3", "2x3", 7, null, "3x3"])
+      expect(selector.priorityFactIds.sort()).toEqual(["2x3", "3x3"])
+    })
+
+    test("returns a copy, so mutating it cannot change the bias", () => {
+      const selector = new FactSelector({ now: fixedNow })
+      selector.setPriorityFacts(["2x3"])
+      const ids = selector.priorityFactIds
+      ids.push("9x9")
+      expect(selector.priorityFactIds).toEqual(["2x3"])
+    })
+
+    // The whole point: it must not cost an extra rng call, because the "exactly
+    // two per selection" contract is what every trace test in this file counts on.
+    test("costs no extra rng call", () => {
+      const rng = scriptedRng([0.1, 0, 0.9, 0, 0.4, 0.8])
+      const selector = new FactSelector({ rng, now: fixedNow })
+      selector.setPriorityFacts(["2x3", "3x3"])
+
+      for (let index = 1; index <= 3; index += 1) {
+        selector.selectNext(POOL, EVEN)
+        expect(rng.calls).toBe(index * 2)
+      }
+    })
+
+    test("a prioritized fact is drawn more often than an identical unprioritized one", () => {
+      const draw = (priority) => {
+        const selector = new FactSelector({ rng: seededRng(12345), now: fixedNow })
+        selector.setPriorityFacts(priority)
+        const counts = {}
+        for (let index = 0; index < 400; index += 1) {
+          const factId = selector.selectNext(POOL, EVEN)
+          counts[factId] = (counts[factId] || 0) + 1
+        }
+        return counts
+      }
+
+      // Every fact has identical records, so any difference is the gate bonus.
+      const without = draw([])
+      const with3x3 = draw(["3x3"])
+      expect(with3x3["3x3"] || 0).toBeGreaterThan(without["3x3"] || 0)
+    })
+
+    test("biases without excluding: everything in the pool is still reachable", () => {
+      const selector = new FactSelector({ rng: seededRng(99), now: fixedNow })
+      selector.setPriorityFacts(["3x3"])
+      const seen = new Set()
+      for (let index = 0; index < 500; index += 1) {
+        seen.add(selector.selectNext(POOL, EVEN))
+      }
+      expect([...seen].sort()).toEqual([...POOL].sort())
+    })
+
+    test("a fact outside the pool is simply never drawn", () => {
+      const selector = new FactSelector({ rng: seededRng(7), now: fixedNow })
+      selector.setPriorityFacts(["9x9"])
+      for (let index = 0; index < 50; index += 1) {
+        expect(POOL).toContain(selector.selectNext(POOL, EVEN))
+      }
+    })
+
+    // Derived from the trail and the records, both of which outlive a session.
+    test("survives reset, so question 1 of a session is already biased", () => {
+      const selector = new FactSelector({ now: fixedNow })
+      selector.setPriorityFacts(["2x3"])
+      selector.reset()
+      expect(selector.priorityFactIds).toEqual(["2x3"])
     })
   })
 })

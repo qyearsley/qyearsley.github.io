@@ -9,8 +9,8 @@
  *
  *   1. `startSession(modeId)` resets `this.session`, calls `selector.reset()`
  *      (so a miss from the previous session cannot fire on question 1), rebuilds
- *      `this.journey` with the current fact pool, clears the gate message, and
- *      shows the play screen.
+ *      `this.journey` with the current fact pool, points selection at the facts
+ *      the next gate needs, and shows the play screen.
  *   2. `_askNextQuestion()` picks a fact (`FactSelector`), captures its strength
  *      and card tier BEFORE the answer, builds a `Challenge` through
  *      `modes/index.js`, renders it, and arms the response clock last -- after
@@ -296,14 +296,6 @@ class TimesTrail {
     /** @type {boolean} Idempotence guard so a tap and the timer cannot both advance. @private */
     this._scaffoldResolved = true
 
-    /**
-     * The gate sentence currently on screen, or null when there is none.
-     * Persistent state, not per-answer feedback -- see `_updateGateMessage`.
-     * @type {string|null}
-     * @private
-     */
-    this._gateMessage = null
-
     /** @type {boolean} True once a save has failed and the player has been told. @private */
     this._saveFailed = false
 
@@ -461,7 +453,6 @@ class TimesTrail {
     this.journey = this._buildJourney()
     this.selector.reset()
     this.session = this._createSession(MODE_IDS.QUICK_RECALL)
-    this._setGateMessage(null)
 
     this.ui.renderSettings(this.settings.toJSON(), this.settings.factCount)
     this.ui.updateTitleButtons(false)
@@ -634,6 +625,19 @@ class TimesTrail {
    * Apply one setting. Re-rendering the modal is what keeps the fact-count
    * readout in step with the controls, and the journey is rebuilt because region
    * gating is scoped to the active fact pool.
+   *
+   * The progress bar is redrawn because the session length is allowed to change
+   * MID-SESSION. Every read of `settings.sessionLength` is live, so shortening
+   * the round already took effect immediately in the logic -- but the bar is only
+   * written on answer and on session start, so it went on claiming "7/20" until
+   * the next question and read as a setting that had not applied.
+   *
+   * `current` is clamped to the new length: dropping to 10 after 15 answers would
+   * otherwise paint a 150%-wide bar and set `aria-valuenow` above `aria-valuemax`.
+   * The round then ends on the next answer via `_advanceAfterAnswer`, which is
+   * deliberate -- finishing it here would show the summary underneath the open
+   * `aria-modal` settings dialog, the exact failure `_pauseTimers` exists to
+   * prevent.
    * @param {string} key - Settings key
    * @param {*} value - Candidate value; rejected values change nothing
    * @returns {void}
@@ -642,6 +646,11 @@ class TimesTrail {
     if (!this.settings.update(key, value)) return
     this.ui.renderSettings(this.settings.toJSON(), this.settings.factCount)
     this.journey = this._buildJourney()
+    if (key === "sessionLength") {
+      const length = this.settings.sessionLength
+      this.ui.updateProgressBar(Math.min(this.session.factsAnswered, length), length)
+    }
+    this._reseedGatePriority()
     this._save()
   }
 
@@ -665,6 +674,7 @@ class TimesTrail {
     this.ui.renderSettings(this.settings.toJSON(), this.settings.factCount)
     if (!applied) return
     this.journey = this._buildJourney()
+    this._reseedGatePriority()
     this._save()
   }
 
@@ -675,9 +685,11 @@ class TimesTrail {
    * missed at the end of the last session fires immediately and every retry
    * delay is measured from the wrong origin.
    *
-   * The gate message is cleared here and only here on the way in. It is the one
-   * piece of play-screen state that outlives a question, so a stale "keep
-   * practising 6 × 8" from last time must not greet her on question 1.
+   * The gate priority is seeded here rather than left to the first scored answer,
+   * so question 1 of a session is already weighted toward the facts the trail is
+   * waiting on. `_updateGatePriority` takes an `AdvanceResult`, so it is fed a
+   * zero-space advance -- which reports the current `gatingRegionId` without
+   * moving the token.
    * @param {string} modeId - A `MODE_IDS` value; anything unknown falls back to Quick Recall
    * @returns {void}
    */
@@ -688,8 +700,8 @@ class TimesTrail {
     this.session = this._createSession(mode === null ? MODE_IDS.QUICK_RECALL : mode.id)
     this.selector.reset()
     this.journey = this._buildJourney()
+    this._reseedGatePriority()
     this._isProcessingAnswer = false
-    this._setGateMessage(null)
 
     this.ui.updatePlayHud({ sessionStars: 0, sessionStreak: 0 })
     this.ui.updateProgressBar(0, this.settings.sessionLength)
@@ -913,7 +925,7 @@ class TimesTrail {
       const region = this.journey.getRegion(result.enteredRegionId)
       if (region !== null) this.session.newRegionName = region.name
     }
-    this._updateGateMessage(result)
+    this._updateGatePriority(result)
 
     this._notePossibleNewCard(factId)
   }
@@ -941,43 +953,49 @@ class TimesTrail {
   }
 
   /**
-   * Keep the gate sentence in step with the token, and no more often than that.
+   * Point selection at the facts the next gate is waiting on.
    *
-   * The gate message is the game's only explanation of why the trail stopped, so
-   * it is persistent state rather than per-answer feedback. Once the token sits at
-   * the cap, `advance` reports `blocked` for every subsequent correct answer;
-   * re-showing it per answer flashed the sentence and re-announced it to VoiceOver
-   * roughly fifteen times a session, which is unreadable. It is written exactly
-   * when it changes: on the first block, then not again until the token moves.
+   * This replaces the gate MESSAGE, which was the wrong tool. The sentence tried
+   * to explain a stopped trail in words -- and the honest version of those words
+   * named two facts the game then did not ask, because selection ignored the
+   * token's position. Naming facts the player never sees is worse than saying
+   * nothing: it reads as an instruction she cannot follow. Biasing the draw makes
+   * the explanation unnecessary, because the gate opens on its own.
    *
-   * `gatingRegionId`, not the locked region ahead: the first INCOMPLETE region is
-   * the one whose facts actually open the gate, and naming the region beyond it
-   * told the player to practise facts she has not been offered.
+   * Recomputed whenever the gating region can have moved: after a scored answer,
+   * and after any change to the fact pool, since a region with no active facts is
+   * skipped and a narrower pool moves the gate. A zero-space advance is the way to
+   * ask for the current `gatingRegionId` without moving the token.
+   * @returns {void}
+   * @private
+   */
+  _reseedGatePriority() {
+    this._updateGatePriority(this.journey.advance(this.progress.trail, 0, this.progress.facts))
+  }
+
+  /**
+   * Point selection at the facts the gate `result` reports, if any.
+   *
+   * `gatingRegionId` is the first INCOMPLETE region -- the one whose facts
+   * actually open the way -- not the locked region beyond it, whose facts do
+   * nothing for the gate. `setPriorityFacts` replaces the set, so there is
+   * nothing to invalidate.
    * @param {Object} result - The `AdvanceResult` `Journey.advance` just returned
    * @returns {void}
    * @private
    */
-  _updateGateMessage(result) {
-    if (result.spacesMoved > 0) {
-      this._setGateMessage(null)
+  _updateGatePriority(result) {
+    const regionId = result.gatingRegionId
+    if (regionId === null) {
+      this.selector.setPriorityFacts([])
       return
     }
-    if (!result.blocked) return
-    this._setGateMessage(this.ui.formatGateMessage(this._buildGateView(result.gatingRegionId)))
-  }
-
-  /**
-   * Write the gate sentence, but only when it differs from the one already there.
-   * `#gate-message` is an `aria-live` region, so an unchanged rewrite is a
-   * re-announcement for no new information.
-   * @param {string|null} text - The sentence, or null to clear it
-   * @returns {void}
-   * @private
-   */
-  _setGateMessage(text) {
-    if (this._gateMessage === text) return
-    this._gateMessage = text
-    this.ui.showGateMessage(text)
+    // Only the facts still short of the bar: one already strong enough needs no
+    // more practice to open this gate.
+    const pending = this.journey
+      .activeFactIdsForRegion(regionId)
+      .filter((factId) => this.store.strengthOf(factId) < TRAIL.UNLOCK_MIN_STRENGTH)
+    this.selector.setPriorityFacts(pending)
   }
 
   /**
@@ -1205,29 +1223,7 @@ class TimesTrail {
     this._save()
 
     this.ui.renderSessionSummary(this._buildSummaryView())
-    this._showGateMessageOnSummary()
     this.ui.showScreen("summary-screen")
-  }
-
-  /**
-   * Repeat the gate sentence on the summary screen, so the one explanation of why
-   * the token stopped is still readable once the play screen is gone.
-   *
-   * `#summary-region` is the summary's single line of trail news, and
-   * `renderSessionSummary` has just written it, so this fills it only when there is
-   * no new region to report -- reaching one is the better news, and the gate
-   * sentence is still on the play screen when she taps Play Again. Writing it here
-   * rather than through the summary view model is deliberate: the summary screen has
-   * no gate element for `GameUI` to own, and adding one is markup work rather than
-   * session-loop work.
-   * @returns {void}
-   * @private
-   */
-  _showGateMessageOnSummary() {
-    if (this._gateMessage === null) return
-    if (this.session.newRegionName !== null) return
-    this.ui.setText("summary-region", this._gateMessage)
-    this.ui.setVisible(this.ui.elements.summaryRegion, true)
   }
 
   // ---------------------------------------------------------- View models
@@ -1274,46 +1270,6 @@ class TimesTrail {
       indexInRegion: space - startSpace,
       gated: space >= lastUnlocked,
     }
-  }
-
-  /**
-   * Which facts the gating region is still waiting on. `GameUI` formats the
-   * sentence, so the wording lives next to the element that shows it.
-   *
-   * It names facts instead of counting them. "Master 2 more facts in Triple
-   * Bridge" was true and unusable: fact selection ignores the token's position,
-   * so twenty correct answers can go by without either gating fact being asked,
-   * and the count sits at 2 the whole time. The facts are ordered
-   * NEAREST-TO-THE-BAR first, so the named ones are the shortest route through the
-   * gate, and only as many are named as the gate actually needs -- a region can
-   * hold eight weak facts while needing five of them strong.
-   * @param {string|null} regionId - The gating region, or null at the trail's end
-   * @returns {Object} A `GateView`
-   * @private
-   */
-  _buildGateView(regionId) {
-    const region = regionId === null ? null : this.journey.getRegion(regionId)
-    if (region === null) {
-      // No region ahead: only reachable on the last space, where GameUI's
-      // formatter falls back to "You have reached the end of the trail".
-      return { regionName: "", factLabels: [] }
-    }
-    const status = this.journey.regionProgress(regionId, this.progress.facts)
-    const shortfall = Math.max(0, status.required - status.strong)
-    const factLabels = this.journey
-      .activeFactIdsForRegion(regionId)
-      .map((factId) => ({ factId, strength: this.store.strengthOf(factId) }))
-      // The gate counts facts at UNLOCK_MIN_STRENGTH (3) or better, NOT the
-      // strength-4 "mastered" bar the card collection uses.
-      .filter((entry) => entry.strength < TRAIL.UNLOCK_MIN_STRENGTH)
-      .sort((left, right) => right.strength - left.strength)
-      .slice(0, shortfall)
-      .map((entry) => {
-        const fact = getFact(entry.factId)
-        return fact === null ? "" : `${fact.a} ${TIMES_SIGN} ${fact.b}`
-      })
-      .filter(Boolean)
-    return { regionName: region.name, factLabels }
   }
 
   /**

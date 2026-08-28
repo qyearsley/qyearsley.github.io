@@ -101,6 +101,42 @@ export class FactSelector {
     this._retryQueue = []
     /** @type {number} Facts served since the last reset(). @private */
     this._questionIndex = 0
+    /** @type {Set<string>} Facts the next gate is waiting on. @private */
+    this._priority = new Set()
+  }
+
+  /**
+   * The facts currently weighted up, as a copy.
+   * @returns {string[]} Canonical fact ids; empty when nothing is prioritized
+   */
+  get priorityFactIds() {
+    return [...this._priority]
+  }
+
+  /**
+   * Weight a set of facts up in every subsequent draw -- in practice, the facts
+   * standing between the token and the next trail gate.
+   *
+   * This is what makes the trail cohere. Selection used to ignore the token's
+   * position entirely, so a player could answer twenty questions without being
+   * asked either of the two facts her gate was waiting on, and the trail simply
+   * stopped for no visible reason. The bias is applied as a weight multiplier
+   * inside the existing draw rather than as a separate bucket, so it changes the
+   * odds without changing the rng contract or excluding anything.
+   *
+   * Replaces the previous set rather than adding to it: the gating region moves
+   * as facts strengthen, and a stale priority set would go on pushing facts whose
+   * gate is already open. Non-strings are dropped and the `Set` dedupes, and a
+   * non-array clears the set, so an untrusted or absent caller cannot corrupt it.
+   * Ids are NOT checked against the fact set -- an id outside the pool simply
+   * never matches, so validating it would buy nothing.
+   * @param {string[]} factIds - Canonical fact ids to weight up; `[]` clears
+   * @returns {void}
+   */
+  setPriorityFacts(factIds) {
+    this._priority = new Set(
+      Array.isArray(factIds) ? factIds.filter((id) => typeof id === "string") : [],
+    )
   }
 
   /**
@@ -216,6 +252,11 @@ export class FactSelector {
     this._lastFactId = null
     this._retryQueue = []
     this._questionIndex = 0
+    // The priority set is deliberately NOT cleared. It is derived from the trail
+    // and the mastery records, both of which outlive a session, so clearing it
+    // here would only leave the first question of every session unbiased until
+    // `game.js` set it again. `setPriorityFacts` replaces rather than merges, so
+    // it cannot go stale.
   }
 
   /**
@@ -282,10 +323,10 @@ export class FactSelector {
   }
 
   /**
-   * Draw one fact from a bucket, weighted by `selectionWeight`. Consumes exactly
-   * one rng call. Weights are always >= 1, so the total is positive and every
-   * member is reachable; the trailing return is the floating-point guard for a
-   * `target` that rounds up to the total.
+   * Draw one fact from a bucket, weighted by `selectionWeight` and then by the
+   * gate bonus. Consumes exactly one rng call. Weights are always >= 1, so the
+   * total is positive and every member is reachable; the trailing return is the
+   * floating-point guard for a `target` that rounds up to the total.
    * @private
    * @param {string[]} bucket - Non-empty list of fact ids
    * @param {unknown} records - factId -> MasteryRecord map
@@ -293,7 +334,9 @@ export class FactSelector {
    * @returns {string} The chosen fact id
    */
   _weightedPick(bucket, records, now) {
-    const weights = bucket.map((factId) => selectionWeight(_recordFor(records, factId), now))
+    const weights = bucket.map(
+      (factId) => selectionWeight(_recordFor(records, factId), now) * this._gateFactorFor(factId),
+    )
     const total = weights.reduce((sum, weight) => sum + weight, 0)
     const target = this._rng() * total
     let accumulated = 0
@@ -302,6 +345,24 @@ export class FactSelector {
       if (target < accumulated) return bucket[index]
     }
     return bucket[bucket.length - 1]
+  }
+
+  /**
+   * The multiplier a fact gets for standing between the token and the next gate.
+   *
+   * A MULTIPLIER inside the existing weighted draw, not a separate branch, and
+   * deliberately so: it consumes no extra rng call, so the "exactly two calls per
+   * selection" contract the tests depend on is untouched, and it cannot starve
+   * anything. A priority fact is `SELECTION.GATE_WEIGHT_BONUS` times likelier
+   * than it would otherwise be; a fact that is weak AND gating compounds both,
+   * which is the right ordering. Nothing is excluded, so interleaving survives
+   * and a gate over facts she already knows does not hijack the whole session.
+   * @private
+   * @param {string} factId - Canonical fact id
+   * @returns {number} `SELECTION.GATE_WEIGHT_BONUS` when prioritized, else 1
+   */
+  _gateFactorFor(factId) {
+    return this._priority.has(factId) ? SELECTION.GATE_WEIGHT_BONUS : 1
   }
 
   /**

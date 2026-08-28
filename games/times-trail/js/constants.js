@@ -95,12 +95,21 @@ export const DECAY = Object.freeze({
 /**
  * How FactSelector picks the next fact: a weighted draw from a weak/due
  * bucket most of the time, plus the delay before a missed fact is re-asked.
+ *
+ * GATE_WEIGHT_BONUS is what ties selection to the trail. Without it selection
+ * ignored the token's position completely, so the two facts a gate was waiting
+ * on might not come up for twenty questions and the trail stopped for no visible
+ * reason. It is a multiplier inside the existing weighted draw, not a separate
+ * bucket: it costs no extra rng call, it compounds with the weak/due weighting
+ * rather than overriding it, and it excludes nothing -- so interleaving survives
+ * and a gate cannot hijack a session.
  */
 export const SELECTION = Object.freeze({
   WEAK_RATIO: 0.7, // P(draw from the weak/due bucket)
   RETRY_DELAY_MIN: 3, // a missed fact returns after 3..4 OTHER questions
   RETRY_DELAY_MAX: 4,
   DUE_WEIGHT_BONUS: 2, // multiplier applied to a due fact's weight
+  GATE_WEIGHT_BONUS: 3, // multiplier applied to a fact the next gate waits on
 })
 
 /**
@@ -402,12 +411,19 @@ export const CARD_TIERS = Object.freeze([
  * worth marking if the scaffold replaces the play area in the same synchronous
  * turn. It is longer than CORRECT_FEEDBACK_MS because a wrong answer is the one
  * moment the player needs time to look before being taught.
+ *
+ * SCAFFOLD_DWELL_MS is the quiet time AFTER the last skip-count number lights,
+ * so it is thinking time, not animation time -- the array and the whole
+ * skip-count row are already on screen and still. 1400ms was not enough to read
+ * "6, 12, 18, 24, 30, 36, 42" and connect it to the 7x6 array above it, and the
+ * auto-advance took the answer away mid-thought. "Got it" is always there for a
+ * player who is done sooner, so the cost of being generous here is nil.
  */
 export const TIMING = Object.freeze({
   CORRECT_FEEDBACK_MS: 700, // hold after a correct answer before the next question
   WRONG_FEEDBACK_MS: 900, // hold after a miss so the marked answer can be seen
   SKIP_COUNT_TICK_MS: 450, // one skip-count number lights per tick
-  SCAFFOLD_DWELL_MS: 1400, // quiet time after the last skip-count number
+  SCAFFOLD_DWELL_MS: 3500, // quiet time after the last skip-count number
   STAR_FLY_MS: 600, // "+40 star" travel time into the counter
   SUMMARY_DELAY_MS: 1200,
 })

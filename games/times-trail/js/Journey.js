@@ -106,9 +106,10 @@ import { createRecord, decayedStrength, isMastered } from "./MasteryModel.js"
  *
  * There is deliberately no `blockedRegionId`. It used to report the locked region
  * *ahead* of the gate, which is the one region whose facts do nothing to open it:
- * fed to a gate message it produced "Master 2 more facts in Triple Bridge" when
- * the truth was "1 more fact in Doubling Meadow". `gatingRegionId` is the field a
- * gate message wants.
+ * pointed at the region beyond the gate, it sent the player after facts that do
+ * not open it. `gatingRegionId` is the field a consumer wants -- it is what
+ * `game.js` feeds to `FactSelector.setPriorityFacts`, so getting it wrong now
+ * biases practice toward the wrong facts rather than merely mislabelling them.
  * @typedef {Object} AdvanceResult
  * @property {Trail} trail                  - The new position (never the input object)
  * @property {boolean} blocked              - Movement was capped by a locked region

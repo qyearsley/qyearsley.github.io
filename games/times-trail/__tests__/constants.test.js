@@ -737,9 +737,17 @@ describe("TIMING", () => {
 
     test("the computed duration outlasts its own skip count at both extremes", () => {
       const durationFor = (rows) => rows * TIMING.SKIP_COUNT_TICK_MS + TIMING.SCAFFOLD_DWELL_MS
-      expect(durationFor(OPERAND_MAX)).toBe(5450)
-      expect(durationFor(OPERAND_MIN)).toBe(2300)
+      expect(durationFor(OPERAND_MAX)).toBe(7550)
+      expect(durationFor(OPERAND_MIN)).toBe(4400)
       expect(durationFor(OPERAND_MAX)).toBeGreaterThan(OPERAND_MAX * TIMING.SKIP_COUNT_TICK_MS)
+    })
+
+    // The dwell is thinking time after the animation stops, so it is the part
+    // that has to be generous: a 2x2 array with two skip-count numbers finishes
+    // animating in under a second and the player still has to read it.
+    test("the quiet dwell is the majority of the shortest scaffold", () => {
+      const shortest = OPERAND_MIN * TIMING.SKIP_COUNT_TICK_MS + TIMING.SCAFFOLD_DWELL_MS
+      expect(TIMING.SCAFFOLD_DWELL_MS).toBeGreaterThan(shortest / 2)
     })
   })
 })

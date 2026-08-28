@@ -471,10 +471,8 @@ body {
   grid-area: question;
 }
 
-/* The keypad's readout gets its own row directly above the entry area. It
-   used to share `extra` with #gate-message -- align-self: end against
-   align-self: start inside one 56px row -- so the orange gate sentence painted
-   on top of the 3rem "?". */
+/* The keypad's readout gets its own row directly above the entry area, rather
+   than sharing a cell with anything else. */
 #answer-display {
   grid-area: readout;
 }
@@ -500,12 +498,6 @@ body {
 #feedback-area {
   z-index: 2;
   align-self: start;
-}
-
-/* The gate message is persistent state, not per-answer feedback, so it can be
-   on screen at the same time as the feedback line and needs its own row. */
-#gate-message {
-  grid-area: gate;
 }
 
 .question {
@@ -672,14 +664,6 @@ body {
 
 .feedback-area.incorrect {
   color: var(--tt-incorrect);
-}
-
-.gate-message {
-  min-height: 3rem;
-  font-size: 1.125rem;
-  font-weight: 600;
-  text-align: center;
-  color: var(--tt-accent);
 }
 
 /* 600ms matches TIMING.STAR_FLY_MS; if either changes, both change.
@@ -1233,14 +1217,20 @@ body {
 
 /* ==================== Responsive: Portrait ==================== */
 @media (orientation: portrait) {
+  /* Row sizes are part of the shorthand so the `extra` track is RESERVED rather
+     than auto. `.feedback-area` sets min-height: 3rem so the first "Yes!" of a
+     session does not shove the play area upward -- but `.hidden` is
+     `display: none`, so between answers the row collapsed to zero anyway and
+     `align-content: center` re-centred the column. The keypad rose and fell by
+     half that on every single answer. Sizing the track keeps the space whether
+     or not the child is in the flow. */
   .play-area {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "question"
-      "readout"
-      "entry"
-      "extra"
-      "gate";
+    grid-template:
+      "question" auto
+      "readout" auto
+      "entry" auto
+      "extra" minmax(3rem, auto)
+      / 1fr;
     align-content: center;
     justify-items: center;
   }
@@ -1258,13 +1248,12 @@ body {
      cost every question a keypad pushed off to the right and a "Yes!" rendered
      in the column opposite the one being looked at. */
   .play-area {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "question"
-      "readout"
-      "entry"
-      "extra"
-      "gate";
+    grid-template:
+      "question" auto
+      "readout" auto
+      "entry" auto
+      "extra" minmax(3rem, auto)
+      / 1fr;
     align-content: center;
     justify-items: center;
     gap: 24px;

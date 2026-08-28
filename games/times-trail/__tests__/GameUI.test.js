@@ -109,7 +109,6 @@ const CONTRACT_IDS = [
   "scaffold-text",
   "scaffold-continue",
   "feedback-area",
-  "gate-message",
   "star-fly",
   "summary-screen",
   "summary-title",
@@ -622,18 +621,6 @@ describe("GameUI", () => {
       expect(document.getElementById("scaffold-area").classList.contains("hidden")).toBe(true)
     })
 
-    test("leaves the gate message alone -- it is persistent state, not feedback", () => {
-      // Clearing it here wiped the game's only explanation of why the trail
-      // stopped one feedback hold after it appeared. game.js owns clearing it.
-      const message = "Keep practising 2 × 3 and 3 × 3 to open the Triple Bridge gate"
-      ui.showGateMessage(message)
-      ui.renderQuestion(keypadChallenge())
-      ui.renderQuestion(tilesChallenge())
-      const el = document.getElementById("gate-message")
-      expect(el.textContent).toBe(message)
-      expect(el.classList.contains("hidden")).toBe(false)
-    })
-
     test("an unknown entry mode leaves every affordance hidden and warns", () => {
       const warn = jest.spyOn(console, "warn").mockImplementation(() => {})
       ui.renderQuestion(tilesChallenge())
@@ -1056,104 +1043,6 @@ describe("GameUI", () => {
       )
       expect(document.querySelectorAll("#play-trail-strip .strip-space-gate")).toHaveLength(1)
       expect(document.querySelectorAll("#play-trail-strip .strip-region")).toHaveLength(1)
-    })
-  })
-
-  describe("formatGateMessage", () => {
-    // It NAMES the facts rather than counting them. "Master 2 more facts in Triple
-    // Bridge" was accurate and useless: selection ignores the token's position, so
-    // twenty correct answers can go by without either gating fact being asked and
-    // the number sits at 2 the whole time.
-    test("names the facts and the region", () => {
-      expect(
-        ui.formatGateMessage({ regionName: "Triple Bridge", factLabels: ["2 × 3", "3 × 3"] }),
-      ).toBe("Keep practising 2 × 3 and 3 × 3 to open the Triple Bridge gate")
-    })
-
-    test("reads naturally for a single fact", () => {
-      expect(ui.formatGateMessage({ regionName: "Doubling Meadow", factLabels: ["2 × 2"] })).toBe(
-        "Keep practising 2 × 2 to open the Doubling Meadow gate",
-      )
-    })
-
-    // "Master" is the strength-4 bar the card collection uses; the gate opens at
-    // strength 3. Naming the wrong bar sets the wrong target.
-    test("does not tell the player to master anything", () => {
-      const message = ui.formatGateMessage({
-        regionName: "Triple Bridge",
-        factLabels: ["2 × 3", "3 × 3"],
-      })
-      expect(message.toLowerCase()).not.toContain("master")
-    })
-
-    test("counts the tail past the third fact instead of listing eight", () => {
-      expect(
-        ui.formatGateMessage({
-          regionName: "Dragon Peak",
-          factLabels: ["6 × 9", "7 × 9", "8 × 9", "9 × 9", "5 × 9"],
-        }),
-      ).toBe("Keep practising 6 × 9, 7 × 9, 8 × 9 and 2 more to open the Dragon Peak gate")
-    })
-
-    test("names exactly three without a tail when there are exactly three", () => {
-      expect(
-        ui.formatGateMessage({
-          regionName: "Dragon Peak",
-          factLabels: ["6 × 9", "7 × 9", "8 × 9"],
-        }),
-      ).toBe("Keep practising 6 × 9, 7 × 9 and 8 × 9 to open the Dragon Peak gate")
-    })
-
-    test("says the trail has ended when there is no gate left", () => {
-      expect(ui.formatGateMessage({ regionName: null, factLabels: [] })).toBe(
-        "You have reached the end of the trail",
-      )
-      expect(ui.formatGateMessage({ regionName: "Dragon Peak", factLabels: [] })).toBe(
-        "You have reached the end of the trail",
-      )
-    })
-
-    test("tolerates a malformed view model without throwing", () => {
-      for (const gate of [null, undefined, "x", 42, {}, { regionName: "X" }]) {
-        expect(() => ui.formatGateMessage(gate)).not.toThrow()
-      }
-      expect(ui.formatGateMessage(null)).toBe("")
-      expect(ui.formatGateMessage({ regionName: "X", factLabels: [null, ""] })).toBe(
-        "You have reached the end of the trail",
-      )
-    })
-  })
-
-  describe("showGateMessage", () => {
-    test("shows the exact string and reveals the element", () => {
-      const message = "Keep practising 2 × 3 and 3 × 3 to open the Triple Bridge gate"
-      ui.showGateMessage(message)
-      const el = document.getElementById("gate-message")
-      expect(el.textContent).toBe(message)
-      expect(el.classList.contains("hidden")).toBe(false)
-      expect(el.getAttribute("aria-live")).toBe("polite")
-    })
-
-    test("accepts a plain gate view model and formats it", () => {
-      ui.showGateMessage({ regionName: "Triple Bridge", factLabels: ["2 × 3", "3 × 3"] })
-      expect(document.getElementById("gate-message").textContent).toBe(
-        "Keep practising 2 × 3 and 3 × 3 to open the Triple Bridge gate",
-      )
-    })
-
-    test("null hides the element and clears the text", () => {
-      ui.showGateMessage("Blocked")
-      ui.showGateMessage(null)
-      const el = document.getElementById("gate-message")
-      expect(el.textContent).toBe("")
-      expect(el.classList.contains("hidden")).toBe(true)
-    })
-
-    test("writes the message as text, never as markup", () => {
-      ui.showGateMessage("<img src=x onerror=1>")
-      const el = document.getElementById("gate-message")
-      expect(el.textContent).toBe("<img src=x onerror=1>")
-      expect(el.querySelector("img")).toBeNull()
     })
   })
 
@@ -1637,9 +1526,8 @@ describe("GameUI", () => {
       expect(cssRule("#answer-display.correct")).toContain("color: var(--tt-correct)")
     })
 
-    test("the readout, the feedback, and the gate message do not share a cell", () => {
+    test("the readout and the feedback do not share a cell", () => {
       expect(cssRule("#answer-display")).toContain("grid-area: readout")
-      expect(cssRule("#gate-message")).toContain("grid-area: gate")
 
       const landscapeAt = MAIN_CSS.indexOf("@media (orientation: landscape)")
       const portrait = MAIN_CSS.slice(
@@ -1647,10 +1535,27 @@ describe("GameUI", () => {
         landscapeAt,
       )
       const landscape = MAIN_CSS.slice(landscapeAt)
-      for (const area of ["question", "readout", "entry", "extra", "gate"]) {
+      for (const area of ["question", "readout", "entry", "extra"]) {
         expect(portrait).toContain(area)
         expect(landscape).toContain(area)
       }
+    })
+
+    // The `extra` row is sized rather than auto. `.feedback-area` reserves 3rem,
+    // but `.hidden` is `display: none`, so the row collapsed between answers and
+    // `align-content: center` re-centred the column -- the keypad moved on every
+    // single answer.
+    test("the feedback row is reserved so the keypad cannot move under it", () => {
+      const landscapeAt = MAIN_CSS.indexOf("@media (orientation: landscape)")
+      const portrait = MAIN_CSS.slice(
+        MAIN_CSS.indexOf("@media (orientation: portrait)"),
+        landscapeAt,
+      )
+      const landscape = MAIN_CSS.slice(landscapeAt)
+      for (const block of [portrait, landscape]) {
+        expect(block).toContain('"extra" minmax(3rem, auto)')
+      }
+      expect(cssRule(".feedback-area")).toContain("min-height: 3rem")
     })
 
     test("the star reward has a visible start state to transition from", () => {
@@ -1701,8 +1606,6 @@ describe("GameUI", () => {
           indexInRegion: 0,
           gated: true,
         })
-        bare.showGateMessage("blocked")
-        bare.showGateMessage(null)
         bare.renderTrail(trailView())
         bare.renderMasteryGrid(masteryCells())
         bare.renderCollection(cardViews())

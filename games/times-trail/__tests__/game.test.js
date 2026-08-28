@@ -105,6 +105,44 @@ describe("game", () => {
     expect(byId("progress-text").textContent).toBe("0/10")
   })
 
+  // Every read of settings.sessionLength was already live, but the bar is only
+  // written on answer and on session start, so mid-session it went on claiming
+  // "/20" until the next question and read as a setting that had not applied.
+  test("changing the session length mid-session redraws the bar at once", () => {
+    click("start-button")
+    expect(byId("progress-text").textContent).toBe("0/20")
+
+    click("play-settings-button")
+    const select = byId("session-length-select")
+    select.value = "30"
+    select.dispatchEvent(new Event("change", { bubbles: true }))
+
+    expect(byId("progress-text").textContent).toBe("0/30")
+    expect(byId("progress-bar").getAttribute("aria-valuemax")).toBe("30")
+  })
+
+  test("the gate message is gone -- the trail explains itself by what it asks", () => {
+    click("start-button")
+    expect(byId("gate-message")).toBeNull()
+  })
+
+  // Narrowing the pool rebuilds the journey, which can move the gating region --
+  // a region with no active facts is skipped outright. Without reseeding, the
+  // selector went on pushing the old region's facts until the next correct
+  // answer, and on a narrowed pool those may not be in the pool at all.
+  test("changing the tables mid-session keeps asking from the new pool", () => {
+    click("start-button")
+    click("play-settings-button")
+    for (const table of [2, 3, 4, 5, 6, 8, 9]) toggleTable(table, false)
+    click("close-settings")
+
+    // Tables [7]: every remaining fact contains a 7, so a question that does not
+    // is a question drawn against the old pool.
+    click("start-button")
+    const [, left, right] = byId("question-text").textContent.match(/^(\d+) × (\d+)/)
+    expect([Number(left), Number(right)]).toContain(7)
+  })
+
   test("the narrowed pool is what actually gets asked", () => {
     click("settings-button")
     for (const table of [2, 3, 4, 5, 6, 8, 9]) toggleTable(table, false)

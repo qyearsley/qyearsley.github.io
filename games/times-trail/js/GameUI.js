@@ -17,10 +17,11 @@
  * -- and therefore cannot disagree with -- anything the core modules decided.
  *
  * Lifetimes: per-answer feedback (`showFeedback`, `flyStars`) is cleared by the
- * next `renderQuestion`. The gate message is NOT -- it is persistent state that
- * explains why the token stopped, so `game.js` owns clearing it by calling
- * `showGateMessage(null)` when the token moves again. A `renderQuestion` that
- * wiped it made the trail's only explanation unreadable.
+ * next `renderQuestion`. There is deliberately no gate message: explaining a
+ * stopped trail in words meant naming facts the game then did not ask, because
+ * selection ignores the token's position. `FactSelector.setPriorityFacts` biases
+ * the draw toward those facts instead, so the gate opens on its own and needs no
+ * sentence.
  *
  * Four methods deliberately override the base class, each because the base
  * behaviour is wrong for this page rather than merely incomplete:
@@ -158,29 +159,6 @@ const TRAIL_LEGEND_STATES = Object.freeze([
 const DIMMED_FLAME_OPACITY = "0.45"
 
 /**
- * How many facts the gate sentence names before it falls back to counting the
- * rest. Three fits one line on a phone; the largest region owns eight facts, so
- * some form of truncation is needed.
- * @private
- * @type {number}
- */
-const GATE_FACTS_SHOWN = 3
-
-/**
- * Join a short list into readable prose, with an optional "and N more" tail.
- * Kept here because the gate sentence is the only place that needs it.
- * @private
- * @param {string[]} items - Already-truncated list, at least one entry
- * @param {number} extra - How many further items were dropped; <= 0 means none
- * @returns {string} e.g. "2 × 3 and 3 × 3", or "3 × 7, 4 × 7, 6 × 7 and 2 more"
- */
-function joinWithAnd(items, extra) {
-  const parts = extra > 0 ? [...items, `${extra} more`] : [...items]
-  if (parts.length === 1) return parts[0]
-  return `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}`
-}
-
-/**
  * Fact id -> index in `FACTS`, so the collection can be rendered in the
  * canonical fact order regardless of the order `game.js` happens to build the
  * card views in.
@@ -282,17 +260,6 @@ const FACT_ORDER = new Map(FACT_IDS.map((id, index) => [id, index]))
  * @typedef {Object} SettingsData
  * @property {number[]} tables - Tables checked in the picker.
  * @property {number} sessionLength - Questions per session.
- */
-
-/**
- * Why the token cannot move on. `game.js` builds this from the blocking region's
- * progress; `GameUI` formats the sentence so the wording lives next to the
- * element that shows it, without the UI layer importing `Journey.js`.
- * @typedef {Object} GateView
- * @property {string} regionName - The blocking region's name.
- * @property {string[]} factLabels - The facts still short of the gate's strength
- *   bar, nearest-to-the-bar first, already formatted for display ("2 × 3"). Empty
- *   only at the end of the trail, where there is no gate left.
  */
 
 /**
@@ -424,7 +391,6 @@ export class GameUI extends BaseGameUI {
       scaffoldText: document.getElementById("scaffold-text"),
       scaffoldContinue: document.getElementById("scaffold-continue"),
       feedbackArea: document.getElementById("feedback-area"),
-      gateMessage: document.getElementById("gate-message"),
       starFly: document.getElementById("star-fly"),
 
       // Summary screen
@@ -632,11 +598,6 @@ export class GameUI extends BaseGameUI {
    * question. `#answer-display` is hidden the same way: it is the keypad's
    * readout, and left visible it printed a 3rem "?" on tile questions, where
    * nothing types into it.
-   *
-   * The gate message is deliberately NOT cleared here. It says why the token
-   * stopped, which is persistent state rather than per-answer feedback; clearing
-   * it on the next render wiped the sentence one feedback hold after it appeared. `game.js`
-   * calls `showGateMessage(null)` when the token moves again.
    * @param {Challenge} challenge - The question to show
    * @returns {void}
    */
@@ -980,57 +941,6 @@ export class GameUI extends BaseGameUI {
     gate.dataset.index = String(total)
     gate.setAttribute("aria-hidden", "true")
     container.appendChild(gate)
-  }
-
-  /**
-   * Build the sentence that says what is still needed to pass a gate. Kept here,
-   * next to the element that shows it, and fed ready-formatted fact labels --
-   * formatting it in the UI layer is what keeps `GameUI` from importing
-   * `Journey.js`.
-   *
-   * It NAMES THE FACTS rather than counting them. "Master 2 more facts in Triple
-   * Bridge" was accurate and useless: fact selection ignores where the token is,
-   * so a player can answer twenty questions without being asked either of the two
-   * facts the gate is waiting on, and every one of those correct answers leaves
-   * the number at 2. Naming them is the only version of this sentence a player
-   * can act on. See `docs/times-trail-plan.md` for the structural fix.
-   *
-   * It also says "keep practising", not "master". The gate opens at
-   * `TRAIL.UNLOCK_MIN_STRENGTH` (3, "strengthening"), and "mastered" is the
-   * strength-4 bar the card collection uses -- telling the player to master a
-   * fact she only has to strengthen sets the wrong target.
-   * @param {GateView} gate - Blocking region's progress
-   * @returns {string} The message to display
-   */
-  formatGateMessage(gate) {
-    if (!gate || typeof gate !== "object") return ""
-    const names = Array.isArray(gate.factLabels) ? gate.factLabels.filter(Boolean) : []
-    if (names.length === 0 || !gate.regionName) {
-      // Only reachable at the last space, where there is no blocking region.
-      return "You have reached the end of the trail"
-    }
-    return `Keep practising ${joinWithAnd(names.slice(0, GATE_FACTS_SHOWN), names.length - GATE_FACTS_SHOWN)} to open the ${gate.regionName} gate`
-  }
-
-  /**
-   * Show or clear the gate message. A generic "you cannot go further yet" tells
-   * her nothing and reads as a malfunction, so the message always names the
-   * number of facts and the region.
-   * @param {string|GateView|null} message - Ready text, a `GateView` to format, or `null` to hide
-   * @returns {void}
-   */
-  showGateMessage(message) {
-    const el = this.elements.gateMessage
-    if (!el) return
-
-    if (message === null || message === undefined || message === "") {
-      el.textContent = ""
-      el.classList.add("hidden")
-      return
-    }
-
-    el.textContent = typeof message === "string" ? message : this.formatGateMessage(message)
-    el.classList.remove("hidden")
   }
 
   // ------------------------------------------------------- Trail screen

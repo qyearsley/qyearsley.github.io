@@ -32,8 +32,9 @@ that is going.
 - **The trail.** 40 spaces across 8 regions. The token moves one space per
   correct answer. A region opens when 60% of its facts reach "strengthening" --
   so the trail cannot be walked by grinding 2×2 -- and when the token is held at
-  a gate the game names the facts it is waiting on. Regions with no facts in the
-  enabled tables are skipped rather than blocking the way.
+  a gate, selection weights the facts it is waiting on up by
+  `SELECTION.GATE_WEIGHT_BONUS` so it opens on its own. Regions with no facts in
+  the enabled tables are skipped rather than blocking the way.
 
   A region owns the facts whose _larger_ operand is its table, so Triple Bridge
   is `2×3` and `3×3`, not the 3 times table. The names promise themed practice

@@ -519,3 +519,63 @@ Once the structure is settled, the reward ideas already listed under "More rewar
 for a correct answer" apply either way -- the token hop on the play-screen strip
 is the biggest one, since advancing is currently silent and the trail is the whole
 progress metaphor.
+
+### Bias selection toward the gate instead of explaining it -- **done**
+
+The gate message is gone. Naming the facts (above) made it honest but not
+actionable: selection ignored the token's position, so the two facts named were
+often not asked for another twenty questions, and an instruction the player
+cannot follow is worse than silence.
+
+`FactSelector.setPriorityFacts` now weights those facts up by
+`SELECTION.GATE_WEIGHT_BONUS` (3x), so the gate opens on its own and needs no
+sentence. Implementation notes worth keeping:
+
+- It is a MULTIPLIER inside the existing weighted draw, not a separate bucket, so
+  it costs no extra rng call -- the "exactly two calls per selection" contract
+  every trace test depends on is untouched.
+- It compounds with the weak/due weighting rather than overriding it, so a fact
+  that is both weak and gating comes up most, which is the right ordering.
+- It excludes nothing, so interleaving survives and a gate over facts she already
+  knows cannot hijack a session.
+- The set survives `reset()` and is reseeded at `startSession`, so question 1 is
+  already biased; it is recomputed after every scored answer, since the gating
+  region moves as facts strengthen.
+
+This is a real fix rather than a patch, but it does NOT resolve the underlying
+incoherence -- the regions still own facts by larger operand, so Triple Bridge is
+still `2x3` and `3x3`. See "Themed trails" above.
+
+### Two play-screen fixes from the same session
+
+**The keypad moved on every answer.** `.feedback-area` sets `min-height: 3rem`
+with a comment saying it reserves the space, but `.hidden` is `display: none`, so
+between answers the `extra` grid row collapsed to zero and `align-content: center`
+re-centred the whole column. The row is now sized in the `grid-template`
+shorthand as `minmax(3rem, auto)`, so the space is held whether or not the child
+is in the flow.
+
+**The post-miss explanation went by too fast.** `SCAFFOLD_DWELL_MS` 1400 -> 3500.
+That is the quiet time AFTER the last skip-count number lights, so it is reading
+time, not animation time -- the array and the numbers are already still. "Got it"
+still skips it, so being generous costs nothing.
+
+### Player profiles and reaction-time stats -- **open**
+
+Wanted (2026-08-28), not started, and bigger than it looks: both need a storage
+schema change, so they should land together.
+
+- **A name and a "practising since" date.** The fact map, the card collection,
+  and the hub totals are all cumulative across every session ever, and nothing on
+  screen says so. A name and a start date would make those numbers legible.
+- **Multiple players.** The save is a single object under one localStorage key,
+  so this means a profiles map plus an active-profile pointer, and a picker
+  somewhere before the hub. Everything downstream of `progress` is already
+  profile-shaped -- `MasteryStore` aliases whatever map it is handed -- so the
+  work is in `storage.js` and the bootstrap, not in the game logic.
+- **Reaction times per player.** Already recorded per fact (`lastMs`), already
+  used to cap a correct-but-slow answer below mastered, and deliberately not
+  shown. Worth surfacing somewhere quiet -- a grown-up view rather than the
+  child's, since "you are slow at 7x8" is the wrong message for the player.
+  Keeping a rolling median per player rather than only per fact would be the
+  cheap version.
