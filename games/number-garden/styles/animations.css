@@ -218,3 +218,19 @@
     opacity: 0;
   }
 }
+
+/* Reduced Motion
+   Lives here because animations.css is the last stylesheet linked in
+   index.html, so this block comes after everything it overrides. The
+   `!important` is still required: `*` has zero specificity, so without it a
+   rule like `.particle { animation: float-up ... }` would win on specificity
+   no matter what the source order is. Same approach as times-trail. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -10,12 +10,29 @@ export class ParticleSystem {
   }
 
   /**
+   * Whether the user has asked the OS to reduce motion.
+   * The CSS media query clamps the particles' animation, but the elements
+   * would still be created and removed, so skip the work entirely.
+   * @returns {boolean} True if reduced motion is preferred
+   */
+  prefersReducedMotion() {
+    // jsdom does not implement matchMedia, so treat its absence as "no preference".
+    return (
+      typeof window !== "undefined" &&
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    )
+  }
+
+  /**
    * Create particle effects at a specific location
    * @param {number} centerX - X coordinate
    * @param {number} centerY - Y coordinate
    * @param {HTMLElement} container - Container element for particles
    */
   createParticles(centerX, centerY, container) {
+    if (this.prefersReducedMotion()) return
+
     for (let i = 0; i < this.particleCount; i++) {
       setTimeout(() => {
         const particle = this.createParticle(centerX, centerY)
@@ -35,6 +52,8 @@ export class ParticleSystem {
   createParticle(x, y) {
     const particle = document.createElement("div")
     particle.className = "particle"
+    // Purely decorative emoji, so keep it out of the accessibility tree.
+    particle.setAttribute("aria-hidden", "true")
     particle.textContent = this.emojis[Math.floor(Math.random() * this.emojis.length)]
     particle.style.left = x + "px"
     particle.style.top = y + "px"

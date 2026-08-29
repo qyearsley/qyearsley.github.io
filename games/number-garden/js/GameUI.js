@@ -185,7 +185,10 @@ export class GameUI extends BaseGameUI {
       button.className = "answer-button"
       button.textContent = option
       button.dataset.answer = option
-      button.dataset.correct = option == correctAnswer ? "true" : "false"
+      // Options and correctAnswer may be numbers or numeric strings (e.g. "3:30"
+      // times), and dataset values are strings anyway, so compare as strings
+      // rather than relying on implicit coercion.
+      button.dataset.correct = String(option) === String(correctAnswer) ? "true" : "false"
       button.dataset.keyboardHint = `${index + 1}`
       button.setAttribute("aria-label", `Answer ${index + 1}: ${option}`)
       button.setAttribute("tabindex", "0")

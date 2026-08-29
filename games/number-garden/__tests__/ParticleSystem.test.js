@@ -34,6 +34,12 @@ describe("ParticleSystem", () => {
       expect(["✨", "⭐"]).toContain(particle.textContent)
     })
 
+    test("hides decorative particles from assistive technology", () => {
+      const particle = particleSystem.createParticle(0, 0)
+
+      expect(particle.getAttribute("aria-hidden")).toBe("true")
+    })
+
     test("sets random translation", () => {
       const particle = particleSystem.createParticle(0, 0)
       const translation = particle.style.getPropertyValue("--tx")
@@ -72,5 +78,57 @@ describe("ParticleSystem", () => {
         done()
       }, 250)
     }, 10000) // Increase test timeout
+  })
+
+  describe("reduced motion", () => {
+    // jsdom does not implement window.matchMedia, so stub it per test.
+    let queries
+
+    beforeEach(() => {
+      queries = []
+    })
+
+    afterEach(() => {
+      delete window.matchMedia
+    })
+
+    const stubMatchMedia = (matches) => {
+      window.matchMedia = (query) => {
+        queries.push(query)
+        return { matches }
+      }
+    }
+
+    test("treats missing matchMedia as no preference", () => {
+      expect(window.matchMedia).toBeUndefined()
+      expect(particleSystem.prefersReducedMotion()).toBe(false)
+    })
+
+    test("reports the media query result", () => {
+      stubMatchMedia(true)
+
+      expect(particleSystem.prefersReducedMotion()).toBe(true)
+      expect(queries).toEqual(["(prefers-reduced-motion: reduce)"])
+    })
+
+    test("creates no particles when reduced motion is preferred", (done) => {
+      stubMatchMedia(true)
+      particleSystem.createParticles(150, 150, container)
+
+      setTimeout(() => {
+        expect(container.querySelectorAll(".particle").length).toBe(0)
+        done()
+      }, 500)
+    })
+
+    test("still creates particles when reduced motion is not preferred", (done) => {
+      stubMatchMedia(false)
+      particleSystem.createParticles(150, 150, container)
+
+      setTimeout(() => {
+        expect(container.querySelectorAll(".particle").length).toBe(5)
+        done()
+      }, 500)
+    })
   })
 })

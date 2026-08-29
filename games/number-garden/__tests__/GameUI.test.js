@@ -263,6 +263,20 @@ describe("GameUI", () => {
       expect(buttons[1].dataset.correct).toBe("true")
     })
 
+    test("matches numeric options against string answers and vice versa", () => {
+      gameUI.displayAnswerOptions([10, 20, 30], "20")
+
+      let buttons = document.querySelectorAll(".answer-button")
+      expect(buttons[1].dataset.correct).toBe("true")
+      expect(buttons[0].dataset.correct).toBe("false")
+
+      gameUI.displayAnswerOptions(["3:00", "3:30"], "3:30")
+
+      buttons = document.querySelectorAll(".answer-button")
+      expect(buttons[0].dataset.correct).toBe("false")
+      expect(buttons[1].dataset.correct).toBe("true")
+    })
+
     test("sets keyboard hints", () => {
       gameUI.displayAnswerOptions([1, 2, 3], 1)
 
