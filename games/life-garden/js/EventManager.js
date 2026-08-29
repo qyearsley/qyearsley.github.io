@@ -115,7 +115,10 @@ export class EventManager {
 
   _setupKeyboard() {
     document.addEventListener("keydown", (e) => {
-      if (e.target.matches("input, textarea, select")) return
+      // Leave keys alone when a control is focused: Space activates a focused
+      // button, and arrows move through a select. `closest` needs an Element,
+      // and the target can be the document, so call it defensively.
+      if (e.target?.closest?.("button, input, textarea, select")) return
 
       switch (e.key) {
         case " ":
@@ -123,6 +126,7 @@ export class EventManager {
           this.cb.onTogglePlay?.()
           break
         case "r":
+        case "R":
           this.cb.onReset?.()
           break
         case "ArrowRight":

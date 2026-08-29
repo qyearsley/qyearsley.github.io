@@ -34,7 +34,7 @@
           </div>
           <span id="generation-display" class="gen-display">Gen 0</span>
         </div>
-        <div id="main-content" class="game-main">
+        <main id="main-content" class="game-main">
           <div class="game-sidebar">
             <div class="sidebar-section">
               <h3>Species</h3>
@@ -76,7 +76,7 @@
                 <li><kbd>&#x2192;</kbd> Step forward</li>
                 <li><kbd>&#x2190;</kbd> Step back</li>
                 <li><kbd>R</kbd> Clear grid</li>
-                <li><kbd>1</kbd> <kbd>2</kbd> Select species</li>
+                <li><kbd>1</kbd>&ndash;<kbd>4</kbd> Select species</li>
                 <li>Click to place, drag to paint</li>
               </ul>
             </div>
@@ -84,7 +84,7 @@
           <div class="canvas-wrapper">
             <canvas id="game-canvas" width="640" height="640"></canvas>
           </div>
-        </div>
+        </main>
       </div>
     </div>
 
@@ -96,7 +96,7 @@
         window.__registerShortcut("ArrowRight", "Step forward")
         window.__registerShortcut("ArrowLeft", "Step back")
         window.__registerShortcut("r", "Reset grid")
-        window.__registerShortcut("1-9", "Select species")
+        window.__registerShortcut("1-4", "Select species")
       }
     </script>
   </body>

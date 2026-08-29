@@ -28,11 +28,3 @@ export const PHASE = {
   SIMULATING: "simulating",
   PAUSED: "paused",
 }
-
-// Goal types
-export const GOAL_TYPE = {
-  SURVIVE: "survive",
-  SUSTAIN: "sustain",
-  FILL_ZONE: "fill-zone",
-  REACH: "reach",
-}

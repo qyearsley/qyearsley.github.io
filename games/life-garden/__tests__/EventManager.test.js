@@ -190,7 +190,7 @@ describe("EventManager", () => {
     function press(key) {
       // Dispatch on body, as a browser does when nothing is focused, and let it
       // bubble to the document listener. Dispatching on `document` directly
-      // would make e.target the Document, which has no .matches().
+      // would make e.target the Document, which has no .closest().
       const event = new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true })
       document.body.dispatchEvent(event)
       return event
@@ -199,6 +199,7 @@ describe("EventManager", () => {
     test.each([
       [" ", "onTogglePlay"],
       ["r", "onReset"],
+      ["R", "onReset"],
       ["ArrowRight", "onStep"],
       ["ArrowLeft", "onStepBack"],
     ])("%s calls %s", (key, callbackName) => {
@@ -225,6 +226,30 @@ describe("EventManager", () => {
     test("shortcuts are ignored while typing in a field", () => {
       const field = document.getElementById("text-field")
       field.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }))
+      expect(callbacks.onTogglePlay).not.toHaveBeenCalled()
+    })
+
+    test("space on a focused button activates the button, not the shortcut", () => {
+      // The browser turns Space on a focused button into a click, so the
+      // shortcut handler must keep its hands off both the callback and the
+      // default action.
+      const button = document.getElementById("reset-btn")
+      const event = new KeyboardEvent("keydown", { key: " ", bubbles: true, cancelable: true })
+      button.dispatchEvent(event)
+
+      expect(callbacks.onTogglePlay).not.toHaveBeenCalled()
+      expect(event.defaultPrevented).toBe(false)
+    })
+
+    test("arrow keys on a focused button do not step the simulation", () => {
+      const button = document.getElementById("reset-btn")
+      button.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }))
+      expect(callbacks.onStep).not.toHaveBeenCalled()
+    })
+
+    test("shortcuts are ignored for elements inside a button", () => {
+      const inner = document.querySelector(".species-btn span")
+      inner.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }))
       expect(callbacks.onTogglePlay).not.toHaveBeenCalled()
     })
   })
