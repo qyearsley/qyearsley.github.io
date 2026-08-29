@@ -30,16 +30,16 @@ const DIST = join(ROOT, "dist")
 // generated /zh/ page and warns about English that looks like it was missed.
 const VERBOSE = process.argv.includes("--verbose")
 
-const SKIP_DIRS = new Set(["node_modules", "dist", "docs", "coverage"])
+const SKIP_DIRS = new Set(["node_modules", "dist", "docs", "coverage", "__tests__"])
 
+// Named dev-only files. Files matching an extension rule in `copyTree`
+// (`*.test.js`, `*.md`, `*.zh.json`) don't need an entry here.
 const SKIP_FILES = new Set([
   "package.json",
   "package-lock.json",
   "eslint.config.js",
   ".htmlhintrc",
-  "CLAUDE.md",
   "build.js",
-  "build.test.js",
   "zh-common.json",
 ])
 
@@ -94,6 +94,11 @@ function copyTree(src, dest) {
       copyTree(join(src, name), join(dest, name))
     } else {
       if (SKIP_FILES.has(name)) continue
+      // Tests and markdown are for the repo, not the deployed site. resume.md
+      // is read from the source tree by generateResume(), so dropping it here
+      // does not affect the rendered resume page.
+      if (name.endsWith(".test.js")) continue
+      if (name.endsWith(".md")) continue
       if (name.endsWith(".zh.json")) continue
       copyFileSync(join(src, name), join(dest, name))
     }

@@ -2,7 +2,15 @@
  * @jest-environment node
  */
 import { afterEach, beforeEach, describe, expect, jest, test } from "@jest/globals"
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import {
@@ -456,11 +464,13 @@ describe("copyTree", () => {
     expect(existsSync(join(dest, "keep.html"))).toBe(true)
   })
 
-  test("skips dev-only directories (node_modules, dist, docs, coverage)", () => {
+  test("skips dev-only directories (node_modules, dist, docs, coverage, __tests__)", () => {
     writeFile(src, "node_modules/foo/package.json", "{}")
     writeFile(src, "dist/old.html", "stale")
     writeFile(src, "docs/development.md", "# Dev")
     writeFile(src, "coverage/index.html", "report")
+    writeFile(src, "__tests__/helper.js", "// helper")
+    writeFile(src, "games/life-garden/__tests__/grid.test.js", "// test")
     writeFile(src, "site.html", "<p>ok</p>")
 
     copyTree(src, dest)
@@ -469,6 +479,8 @@ describe("copyTree", () => {
     expect(existsSync(join(dest, "dist"))).toBe(false)
     expect(existsSync(join(dest, "docs"))).toBe(false)
     expect(existsSync(join(dest, "coverage"))).toBe(false)
+    expect(existsSync(join(dest, "__tests__"))).toBe(false)
+    expect(existsSync(join(dest, "games/life-garden/__tests__"))).toBe(false)
     expect(existsSync(join(dest, "site.html"))).toBe(true)
   })
 
@@ -510,6 +522,76 @@ describe("copyTree", () => {
     expect(existsSync(join(dest, "page.zh.json"))).toBe(false)
     expect(existsSync(join(dest, "nested/sub.zh.json"))).toBe(false)
     expect(existsSync(join(dest, "page.html"))).toBe(true)
+  })
+
+  test("skips test files at any depth", () => {
+    writeFile(src, "build.test.js", "// tests")
+    writeFile(src, "shared/utils.test.js", "// tests")
+    writeFile(src, "games/life-garden/js/grid.test.js", "// tests")
+    writeFile(src, "shared/utils.js", "export {}")
+
+    copyTree(src, dest)
+
+    expect(existsSync(join(dest, "build.test.js"))).toBe(false)
+    expect(existsSync(join(dest, "shared/utils.test.js"))).toBe(false)
+    expect(existsSync(join(dest, "games/life-garden/js/grid.test.js"))).toBe(false)
+    expect(existsSync(join(dest, "shared/utils.js"))).toBe(true)
+  })
+
+  test("skips markdown files at any depth", () => {
+    writeFile(src, "README.md", "# Site")
+    writeFile(src, "CLAUDE.md", "# Notes")
+    writeFile(src, "javascript/ideas.md", "# Personal notes")
+    writeFile(src, "games/times-trail/README.md", "# Game")
+    writeFile(src, "index.html", "<p>ok</p>")
+
+    copyTree(src, dest)
+
+    for (const f of [
+      "README.md",
+      "CLAUDE.md",
+      "javascript/ideas.md",
+      "games/times-trail/README.md",
+    ]) {
+      expect(existsSync(join(dest, f))).toBe(false)
+    }
+    expect(existsSync(join(dest, "index.html"))).toBe(true)
+  })
+
+  test("skips resume.md but keeps its template (resume is rendered from the source tree)", () => {
+    writeFile(src, "resume/resume.md", "# Resume")
+    writeFile(src, "resume/template.html", "{{CONTENT}}")
+
+    copyTree(src, dest)
+
+    expect(existsSync(join(dest, "resume/resume.md"))).toBe(false)
+    expect(existsSync(join(dest, "resume/template.html"))).toBe(true)
+  })
+
+  test("keeps extensionless files such as LICENSE", () => {
+    writeFile(src, "LICENSE", "MIT")
+
+    copyTree(src, dest)
+
+    expect(readFileSync(join(dest, "LICENSE"), "utf-8")).toBe("MIT")
+  })
+
+  test("leaves no test file, __tests__ directory, or markdown anywhere in the output", () => {
+    writeFile(src, "index.html", "<p>ok</p>")
+    writeFile(src, "README.md", "# Site")
+    writeFile(src, "shared/nav.js", "export {}")
+    writeFile(src, "shared/nav.test.js", "// tests")
+    writeFile(src, "shared/__tests__/nav.spec.js", "// tests")
+    writeFile(src, "games/number-garden/js/README.md", "# Notes")
+
+    copyTree(src, dest)
+
+    const copied = readdirSync(dest, { recursive: true }).map((p) => p.replace(/\\/g, "/"))
+    expect(copied.filter((p) => p.endsWith(".test.js"))).toEqual([])
+    expect(copied.filter((p) => p.endsWith(".md"))).toEqual([])
+    expect(copied.filter((p) => p.split("/").includes("__tests__"))).toEqual([])
+    expect(copied).toContain("index.html")
+    expect(copied).toContain("shared/nav.js")
   })
 
   test("creates the destination directory if it does not exist", () => {
@@ -926,11 +1008,12 @@ describe("discoverTranslatablePages", () => {
     expect(discoverTranslatablePages(tmp)).toEqual(["page.html"])
   })
 
-  test("skips dev-only directories (node_modules, dist, docs, coverage)", () => {
+  test("skips dev-only directories (node_modules, dist, docs, coverage, __tests__)", () => {
     writeFile(tmp, "node_modules/foo/x.zh.json", "{}")
     writeFile(tmp, "dist/old.zh.json", "{}")
     writeFile(tmp, "docs/x.zh.json", "{}")
     writeFile(tmp, "coverage/x.zh.json", "{}")
+    writeFile(tmp, "__tests__/x.zh.json", "{}")
     writeFile(tmp, "real.zh.json", "{}")
 
     expect(discoverTranslatablePages(tmp)).toEqual(["real.html"])
