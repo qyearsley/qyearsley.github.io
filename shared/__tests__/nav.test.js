@@ -139,6 +139,121 @@ describe("nav.js", () => {
     })
   })
 
+  describe("help overlay focus management", () => {
+    /** Adds a second focusable element to the panel, after the close button. */
+    function addPanelLink() {
+      const link = document.createElement("a")
+      link.href = "/docs"
+      link.textContent = "More"
+      document.querySelector(".shortcut-list").appendChild(link)
+      return link
+    }
+
+    it("moves focus to the close button when opened", () => {
+      pressKey("?")
+      expect(document.activeElement).toBe(document.querySelector(".keyboard-help-close"))
+    })
+
+    it("Tab from the last focusable wraps to the first", () => {
+      pressKey("?")
+      const closeBtn = document.querySelector(".keyboard-help-close")
+      const link = addPanelLink()
+
+      link.focus()
+      const event = pressKey("Tab")
+      expect(event.defaultPrevented).toBe(true)
+      expect(document.activeElement).toBe(closeBtn)
+    })
+
+    it("Shift+Tab from the first focusable wraps to the last", () => {
+      pressKey("?")
+      const link = addPanelLink()
+
+      document.querySelector(".keyboard-help-close").focus()
+      const event = pressKey("Tab", { shiftKey: true })
+      expect(event.defaultPrevented).toBe(true)
+      expect(document.activeElement).toBe(link)
+    })
+
+    it("Tab in the middle of the panel is left to the browser", () => {
+      pressKey("?")
+      addPanelLink()
+
+      document.querySelector(".keyboard-help-close").focus()
+      const event = pressKey("Tab")
+      expect(event.defaultPrevented).toBe(false)
+    })
+
+    it("keeps focus on the only focusable element when it is Tabbed", () => {
+      pressKey("?")
+      const closeBtn = document.querySelector(".keyboard-help-close")
+
+      expect(pressKey("Tab").defaultPrevented).toBe(true)
+      expect(document.activeElement).toBe(closeBtn)
+
+      expect(pressKey("Tab", { shiftKey: true }).defaultPrevented).toBe(true)
+      expect(document.activeElement).toBe(closeBtn)
+    })
+
+    it("pulls focus back into the panel when it has escaped", () => {
+      const link = document.querySelectorAll(".internal-links a")[0]
+      pressKey("?")
+      link.focus() // as if the browser had moved focus behind the overlay
+
+      pressKey("Tab")
+      expect(document.activeElement).toBe(document.querySelector(".keyboard-help-close"))
+    })
+
+    it("does not trap Tab when the overlay is closed", () => {
+      const event = pressKey("Tab")
+      expect(event.defaultPrevented).toBe(false)
+    })
+
+    it("restores focus to the opener when closed with Escape", () => {
+      const opener = document.querySelectorAll(".internal-links a")[1]
+      opener.focus()
+
+      pressKey("?")
+      expect(document.activeElement).not.toBe(opener)
+
+      pressKey("Escape")
+      expect(document.activeElement).toBe(opener)
+    })
+
+    it("restores focus to the opener when closed with the close button", () => {
+      const opener = document.querySelectorAll(".internal-links a")[2]
+      opener.focus()
+
+      pressKey("?")
+      document.querySelector(".keyboard-help-close").click()
+
+      expect(window.__helpOverlayIsOpen()).toBe(false)
+      expect(document.activeElement).toBe(opener)
+    })
+
+    it("restores focus to the opener when closed by backdrop click", () => {
+      const opener = document.querySelectorAll(".internal-links a")[0]
+      opener.focus()
+
+      pressKey("?")
+      document.querySelector(".keyboard-help-backdrop").click()
+
+      expect(document.activeElement).toBe(opener)
+    })
+
+    it("does not throw when the opener has left the DOM", () => {
+      const opener = document.createElement("button")
+      document.body.appendChild(opener)
+      opener.focus()
+
+      pressKey("?")
+      opener.remove()
+
+      expect(() => pressKey("Escape")).not.toThrow()
+      expect(window.__helpOverlayIsOpen()).toBe(false)
+    })
+  })
+
   describe("link navigation", () => {
     it("j focuses first link when nothing focused", () => {
       pressKey("j")

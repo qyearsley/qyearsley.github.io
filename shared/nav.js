@@ -67,6 +67,17 @@
   // --- Help overlay ---
   // Styles for .keyboard-help-* and .shortcut-list live in css/style.css.
   let overlay = null
+  // Element that had focus when the overlay opened, so it can be restored.
+  let previouslyFocused = null
+
+  const FOCUSABLE_SELECTOR = [
+    "a[href]",
+    "button:not([disabled])",
+    "input:not([disabled])",
+    "select:not([disabled])",
+    "textarea:not([disabled])",
+    '[tabindex]:not([tabindex="-1"])',
+  ].join(", ")
 
   function buildOverlay() {
     const backdrop = document.createElement("div")
@@ -115,8 +126,44 @@
     return backdrop
   }
 
+  // Queried at trap time, not cached at build time, so shortcut-list content
+  // added later is included.
+  function getFocusable() {
+    if (!overlay) return []
+    const panel = overlay.querySelector(".keyboard-help-panel")
+    if (!panel) return []
+    return Array.from(panel.querySelectorAll(FOCUSABLE_SELECTOR)).filter(function (el) {
+      return !el.hasAttribute("hidden") && el.getAttribute("aria-hidden") !== "true"
+    })
+  }
+
+  // Keeps Tab / Shift+Tab inside the panel, so aria-modal is not a lie. With a
+  // single focusable element both ends are the same element and focus stays put.
+  function trapTab(e) {
+    const focusable = getFocusable()
+    if (focusable.length === 0) {
+      e.preventDefault()
+      return
+    }
+    const first = focusable[0]
+    const last = focusable[focusable.length - 1]
+    const active = document.activeElement
+    const inside = overlay.contains(active)
+
+    if (e.shiftKey) {
+      if (!inside || active === first) {
+        e.preventDefault()
+        last.focus()
+      }
+    } else if (!inside || active === last) {
+      e.preventDefault()
+      first.focus()
+    }
+  }
+
   function showHelp() {
     if (overlay) return
+    previouslyFocused = document.activeElement
     overlay = buildOverlay()
     document.body.appendChild(overlay)
     overlay.querySelector(".keyboard-help-close").focus()
@@ -126,6 +173,13 @@
     if (!overlay) return
     overlay.remove()
     overlay = null
+
+    const restoreTo = previouslyFocused
+    previouslyFocused = null
+    // The opener may have been removed from the page while the overlay was up.
+    if (restoreTo && document.contains(restoreTo) && typeof restoreTo.focus === "function") {
+      restoreTo.focus()
+    }
   }
 
   function isHelpOpen() {
@@ -159,6 +213,13 @@
   }
 
   document.addEventListener("keydown", function (e) {
+    // Handled before the filters below: the trap has to hold even when focus is
+    // on a form field the overlay may grow later.
+    if (e.key === "Tab" && isHelpOpen() && !e.ctrlKey && !e.altKey && !e.metaKey) {
+      trapTab(e)
+      return
+    }
+
     if (e.target.matches("input, textarea, select")) return
     if (e.ctrlKey || e.altKey || e.metaKey) return
 
