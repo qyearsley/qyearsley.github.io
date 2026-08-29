@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Seasons</title>
+    <meta
+      name="description"
+      content="Walk a trail through four seasons, answering maths questions to collect what the snake woman demands"
+    />
+    <meta name="theme-color" content="#2d3748" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="styles/main.css" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="manifest" href="manifest.json" />
+    <script src="/shared/theme.js"></script>
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <div class="game-layout">
+      <div class="game-top-bar">
+        <a href="/games/" class="icon-btn" title="Back to games">&larr;</a>
+        <span class="level-title" id="season-name">Seasons</span>
+        <button id="restart" class="icon-btn" type="button" title="Start over">&#x21ba;</button>
+      </div>
+
+      <main id="main-content" class="game-main">
+        <!-- Screen 1: choose an animal -->
+        <section id="screen-character" class="screen active">
+          <h1 class="screen-heading">Choose who makes the journey</h1>
+          <p class="screen-intro">
+            Four seasons. A snake woman who wants what each one grows, and does not like to be kept
+            waiting. Every animal travels differently — pick the one you want to be.
+          </p>
+          <div id="character-grid" class="character-grid"></div>
+        </section>
+
+        <!-- Screen 2: the trail -->
+        <section id="screen-play" class="screen">
+          <h2 class="visually-hidden">The trail</h2>
+
+          <div class="demand-bar">
+            <div id="villain-portrait" class="villain-portrait"></div>
+            <div class="demand-copy">
+              <p id="demand-line" class="demand-line"></p>
+              <p class="demand-count">
+                <strong id="item-count">0</strong>
+                <span class="demand-of">of</span>
+                <strong id="item-demand">0</strong>
+                <span id="item-label">Roses</span>
+              </p>
+              <p id="wilt-note" class="note note-wilt hidden" aria-live="polite"></p>
+              <p id="perk-note" class="note note-perk hidden"></p>
+            </div>
+          </div>
+
+          <div id="trail" class="trail"></div>
+
+          <div class="question-block">
+            <p id="question-tag" class="question-tag hidden"></p>
+            <p id="question-prompt" class="question-prompt" aria-live="polite"></p>
+            <div id="timer-wrap" class="timer-wrap">
+              <div class="timer-track"><div id="timer-bar" class="timer-bar"></div></div>
+              <span id="timer" class="timer" aria-hidden="true">0</span>
+            </div>
+            <div id="choices" class="choices"></div>
+            <p id="feedback" class="feedback" aria-live="polite"></p>
+          </div>
+        </section>
+
+        <!-- Screen 3: how the season ended -->
+        <section id="screen-result" class="screen">
+          <h2 id="result-title" class="screen-heading"></h2>
+          <p id="result-text" class="result-text"></p>
+          <div id="result-summary" class="result-summary"></div>
+          <div id="result-actions" class="result-actions"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/shared/nav.js"></script>
+    <script type="module" src="js/game.js"></script>
+    <script>
+      if (window.__registerShortcut) {
+        window.__registerShortcut("1-4", "Choose an answer")
+      }
+    </script>
+  </body>
+</html>

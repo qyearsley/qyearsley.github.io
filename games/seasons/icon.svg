@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Seasons">
+  <rect width="100" height="100" rx="18" fill="#f6f3ec" />
+  <path d="M8 62 C28 46 40 74 58 58 C72 46 84 60 92 52" stroke="#3f7d5c" stroke-width="6"
+    stroke-linecap="round" fill="none" />
+  <circle cx="26" cy="30" r="11" fill="#e8657f" />
+  <path d="M62 18 L74 30 L62 44 L50 30 Z" fill="#7fd8f0" />
+  <path d="M84 74 C74 68 74 54 84 48 C94 54 94 68 84 74 Z" fill="#d97b28" />
+  <path d="M14 84 L22 84 L19 70 L18 62 L17 70 Z" fill="#bfe6f5" />
+</svg>

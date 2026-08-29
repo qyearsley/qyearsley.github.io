@@ -8,3 +8,4 @@ Educational web games built with JavaScript.
 - **[Life Garden](life-garden/)** - Cellular automata sandbox with a gardening theme
 - **[Turing Tape](turing-tape/)** - Interactive Turing machine simulator
 - **[Times Trail](times-trail/)** - Multiplication facts practice (2x2 through 9x9) with a mastery engine
+- **[Seasons](seasons/)** - A journey through spring, summer, autumn, and winter; choose an animal and collect what the snake woman demands

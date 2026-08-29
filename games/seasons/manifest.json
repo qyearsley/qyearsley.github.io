@@ -1,0 +1,14 @@
+{
+  "name": "Seasons",
+  "short_name": "Seasons",
+  "description": "Walk a trail through four seasons, collecting what the snake woman demands",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f6f3ec",
+  "theme_color": "#3f7d5c",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
