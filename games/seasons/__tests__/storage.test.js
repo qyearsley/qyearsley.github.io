@@ -16,7 +16,7 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals"
 import { StorageManager as BaseStorageManager } from "../../shared/StorageManager.js"
 import { CHARACTERS, DEFAULT_CHARACTER } from "../js/characters.js"
-import { PHASE, SEASON_ORDER, STORAGE } from "../js/constants.js"
+import { BOSS_TRIES, PHASE, SEASON_ORDER, STORAGE } from "../js/constants.js"
 import { defaultSave, normalizeSave, StorageManager, toSavedRun } from "../js/storage.js"
 
 /** The three keys a save always has, before the base class stamps its two. */
@@ -28,6 +28,8 @@ const RUN_KEYS = [
   "characterId",
   "seasonId",
   "seed",
+  "attempt",
+  "bossTriesLeft",
   "position",
   "items",
   "wilting",
@@ -54,6 +56,8 @@ function populatedSave() {
       characterId: "phoenix",
       seasonId: "autumn",
       seed: 987654,
+      attempt: 2,
+      bossTriesLeft: 1,
       position: 7,
       items: 12,
       wilting: 1,
@@ -121,6 +125,8 @@ describe("defaultSave", () => {
         characterId: DEFAULT_CHARACTER.id,
         seasonId: null,
         seed: 1,
+        attempt: 0,
+        bossTriesLeft: BOSS_TRIES,
         position: 0,
         items: 0,
         wilting: 0,
@@ -326,6 +332,8 @@ describe("normalizeSave", () => {
           bestStreak: -7,
           questionsAsked: -8,
           correctCount: -9,
+          attempt: -2,
+          bossTriesLeft: -1,
         },
       })
       expect(run).toMatchObject({
@@ -338,6 +346,8 @@ describe("normalizeSave", () => {
         bestStreak: 0,
         questionsAsked: 0,
         correctCount: 0,
+        attempt: 0,
+        bossTriesLeft: BOSS_TRIES,
       })
     })
 
@@ -459,6 +469,56 @@ describe("normalizeSave", () => {
       // Journey.normalizePosition is the semantic authority; this layer is
       // structural only.
       expect(normalizeSave({ run: { seasonId: "spring", position: 500 } }).run.position).toBe(500)
+    })
+
+    it("keeps a usable attempt and bossTriesLeft", () => {
+      // `attempt` feeds the question seed and `bossTriesLeft` is how many shots
+      // at the boss are left, so both have to survive a reload intact -- losing
+      // the attempt hands a replaying player the questions they just failed,
+      // and losing the tries takes away a chance the game already promised.
+      const { run } = normalizeSave({ run: { attempt: 3, bossTriesLeft: 2 } })
+      expect(run.attempt).toBe(3)
+      expect(run.bossTriesLeft).toBe(2)
+    })
+
+    it.each([
+      ["NaN", NaN],
+      ["Infinity", Infinity],
+      ["-Infinity", -Infinity],
+      ["a negative", -4],
+      ["a string", "2"],
+      ["null", null],
+      ["undefined", undefined],
+      ["an object", {}],
+      ["an array", []],
+      ["true", true],
+    ])("reads a %s attempt as zero and restores a full boss allowance", (_label, value) => {
+      const { run } = normalizeSave({ run: { attempt: value, bossTriesLeft: value } })
+      expect(run.attempt).toBe(0)
+      // Unusable input means "we do not know", and the safe reading for a shot
+      // count is a full allowance, not none -- zero would end a season on the
+      // first boss miss. `attempt` has no such floor because 0 is a valid value.
+      expect(run.bossTriesLeft).toBe(BOSS_TRIES)
+      expect(Number.isInteger(run.attempt)).toBe(true)
+      expect(Number.isInteger(run.bossTriesLeft)).toBe(true)
+    })
+
+    it("floors a fractional attempt and bossTriesLeft", () => {
+      const { run } = normalizeSave({ run: { attempt: 2.9, bossTriesLeft: 1.5 } })
+      expect(run.attempt).toBe(2)
+      expect(run.bossTriesLeft).toBe(1)
+    })
+
+    it("gives a save that predates the boss tries a full allowance", () => {
+      // The migration case, and the reason `bossTriesLeft` has a `|| BOSS_TRIES`
+      // fallback where the other counters do not. STORAGE.VERSION was not bumped
+      // when the field was added, so real saves in the wild have no such key.
+      // Coerced to 0 they would give the player no shot at the boss at all --
+      // the first miss would end the season -- and `?? BOSS_TRIES` cannot help,
+      // because the coercion produces 0 and 0 is not nullish.
+      const legacy = { phase: PHASE.TRAIL, seasonId: "spring", position: 4, items: 4 }
+      expect(normalizeSave({ run: legacy }).run.bossTriesLeft).toBe(BOSS_TRIES)
+      expect(normalizeSave({ run: legacy }).run.attempt).toBe(0)
     })
   })
 
@@ -591,6 +651,27 @@ describe("toSavedRun", () => {
     const saved = toSavedRun(state)
     expect(saved.collected).not.toBe(state.collected)
   })
+
+  it("carries the attempt and the boss tries off a live state", () => {
+    // Both are live GameState fields, not derived ones, so `toSavedRun` has to
+    // persist them rather than letting them fall back to zero on the next load.
+    const saved = toSavedRun({
+      ...populatedSave().run,
+      attempt: 4,
+      bossTriesLeft: 2,
+      question: { prompt: "48 ÷ 6", answer: 8 },
+    })
+    expect(saved.attempt).toBe(4)
+    expect(saved.bossTriesLeft).toBe(2)
+  })
+
+  it("coerces a nonsense attempt and boss tries off a live state", () => {
+    const saved = toSavedRun({ ...populatedSave().run, attempt: -1, bossTriesLeft: Number.NaN })
+    expect(saved.attempt).toBe(0)
+    // Unusable shot counts restore a full allowance rather than none; see the
+    // migration test above for why zero is the dangerous reading.
+    expect(saved.bossTriesLeft).toBe(BOSS_TRIES)
+  })
 })
 
 describe("StorageManager", () => {
@@ -676,6 +757,29 @@ describe("StorageManager", () => {
 
       manager.saveRun(save)
       expect(manager.loadRun()).toMatchObject(save)
+    })
+
+    it("round-trips the attempt and the boss tries through localStorage", () => {
+      const save = defaultSave()
+      save.run.phase = PHASE.BOSS
+      save.run.seasonId = "winter"
+      save.run.attempt = 3
+      save.run.bossTriesLeft = 1
+      expect(manager.saveRun(save)).toBe(true)
+
+      const loaded = manager.loadRun()
+      expect(loaded.run.attempt).toBe(3)
+      expect(loaded.run.bossTriesLeft).toBe(1)
+    })
+
+    it("coerces a hostile attempt and boss tries off localStorage", () => {
+      writeRaw({
+        run: { attempt: -7, bossTriesLeft: "lots" },
+        version: STORAGE.VERSION,
+      })
+      const loaded = manager.loadRun()
+      expect(loaded.run.attempt).toBe(0)
+      expect(loaded.run.bossTriesLeft).toBe(BOSS_TRIES)
     })
 
     it("normalizes a hostile payload written straight to localStorage", () => {

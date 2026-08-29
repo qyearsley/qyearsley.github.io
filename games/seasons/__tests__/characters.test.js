@@ -22,16 +22,28 @@ import {
   getEffects,
 } from "../js/characters.js"
 
-/** The roster as it stands, in display order. */
+/**
+ * The roster as it stands, in display order.
+ *
+ * The one deliberately hard-coded list in this file, and the only line to touch
+ * when Ella adds an animal. Everything below sweeps `CHARACTERS` itself, so a
+ * fifth character costs exactly this edit -- the pin is here so that adding one
+ * is a decision someone confirms, not a shape check thirty tests re-litigate.
+ */
 const EXPECTED_IDS = ["banana-slug", "sloth", "phoenix", "porcupine"]
+
+/** Every id actually on the roster, for the sweeps below. */
+const ROSTER_IDS = CHARACTERS.map((character) => character.id)
+
+/** How long the roster is at load, for proving a failed write did not grow it. */
+const ROSTER_SIZE = CHARACTERS.length
 
 /** Every key a merged effects object must have. */
 const EFFECT_KEYS = Object.keys(DEFAULT_EFFECTS)
 
 describe("the roster", () => {
-  it("has exactly four characters with the expected ids in display order", () => {
-    expect(CHARACTERS).toHaveLength(4)
-    expect(CHARACTERS.map((character) => character.id)).toEqual(EXPECTED_IDS)
+  it("has exactly the expected characters, in display order", () => {
+    expect(ROSTER_IDS).toEqual(EXPECTED_IDS)
   })
 
   it("has unique ids", () => {
@@ -40,7 +52,7 @@ describe("the roster", () => {
   })
 
   it("exposes the same ids through CHARACTER_IDS", () => {
-    expect([...CHARACTER_IDS].sort()).toEqual([...EXPECTED_IDS].sort())
+    expect([...CHARACTER_IDS].sort()).toEqual([...ROSTER_IDS].sort())
     expect(CHARACTER_IDS.size).toBe(CHARACTERS.length)
   })
 
@@ -49,7 +61,7 @@ describe("the roster", () => {
     expect(DEFAULT_CHARACTER.id).toBe("banana-slug")
   })
 
-  it.each(EXPECTED_IDS)("%s has readable copy", (id) => {
+  it.each(ROSTER_IDS)("%s has readable copy", (id) => {
     const character = getCharacter(id)
     for (const field of ["name", "perkName", "perkText"]) {
       expect(typeof character[field]).toBe("string")
@@ -59,7 +71,7 @@ describe("the roster", () => {
     expect(typeof character.costText).toBe("string")
   })
 
-  it.each(EXPECTED_IDS)("%s has an effects object with every default key", (id) => {
+  it.each(ROSTER_IDS)("%s has an effects object with every default key", (id) => {
     const { effects } = getCharacter(id)
     expect(effects).not.toBeNull()
     expect(typeof effects).toBe("object")
@@ -68,7 +80,7 @@ describe("the roster", () => {
     expect(Object.keys(effects).sort()).toEqual([...EFFECT_KEYS].sort())
   })
 
-  it.each(EXPECTED_IDS)("%s matches the type of every default effect", (id) => {
+  it.each(ROSTER_IDS)("%s matches the type of every default effect", (id) => {
     const { effects } = getCharacter(id)
     for (const key of EFFECT_KEYS) {
       expect(typeof effects[key]).toBe(typeof DEFAULT_EFFECTS[key])
@@ -110,11 +122,11 @@ describe("immutability", () => {
     expect(() => {
       CHARACTERS[0] = { id: "unicorn" }
     }).toThrow(TypeError)
-    expect(CHARACTERS).toHaveLength(4)
-    expect(CHARACTERS[0].id).toBe("banana-slug")
+    expect(CHARACTERS).toHaveLength(ROSTER_SIZE)
+    expect(CHARACTERS[0].id).toBe(DEFAULT_CHARACTER.id)
   })
 
-  it.each(EXPECTED_IDS)("freezes %s and its effects", (id) => {
+  it.each(ROSTER_IDS)("freezes %s and its effects", (id) => {
     const character = getCharacter(id)
     expect(Object.isFrozen(character)).toBe(true)
     expect(Object.isFrozen(character.effects)).toBe(true)
@@ -143,7 +155,7 @@ describe("immutability", () => {
 })
 
 describe("getCharacter", () => {
-  it.each(EXPECTED_IDS)("returns %s for its own id", (id) => {
+  it.each(ROSTER_IDS)("returns %s for its own id", (id) => {
     expect(getCharacter(id).id).toBe(id)
     expect(getCharacter(id)).toBe(CHARACTERS.find((character) => character.id === id))
   })
@@ -162,17 +174,59 @@ describe("getCharacter", () => {
   ])("falls back to the default character for %s", (_label, id) => {
     expect(getCharacter(id)).toBe(DEFAULT_CHARACTER)
   })
-
-  it("never returns null or undefined", () => {
-    for (const id of [undefined, null, "", "nope", 7]) {
-      expect(getCharacter(id)).toBeTruthy()
-    }
-  })
 })
 
 describe("getEffects", () => {
-  it.each(EXPECTED_IDS)("returns the merged effects for %s", (id) => {
-    expect(getEffects(id)).toEqual(getCharacter(id).effects)
+  // Written out in full rather than compared to `getCharacter(id).effects`.
+  // getEffects *is* that expression, so the old assertion was `x === x` and said
+  // nothing about the merge its name promises. These rows are the merge: each
+  // character's own overrides plus the DEFAULT_EFFECTS values it never mentions.
+  // Written out in full: these are the merge results, not a re-derivation of
+  // it. A new character does not need a row -- add one only if its perk is
+  // worth pinning.
+  it.each([
+    [
+      "banana-slug",
+      {
+        penaltyScale: 0,
+        glowingItems: 2,
+        extraSeconds: 0,
+        forgivenessPerSeason: 0,
+        comebackBonus: false,
+      },
+    ],
+    [
+      "sloth",
+      {
+        penaltyScale: 1,
+        glowingItems: 3,
+        extraSeconds: 10,
+        forgivenessPerSeason: 0,
+        comebackBonus: false,
+      },
+    ],
+    [
+      "phoenix",
+      {
+        penaltyScale: 2,
+        glowingItems: 3,
+        extraSeconds: 0,
+        forgivenessPerSeason: 1,
+        comebackBonus: false,
+      },
+    ],
+    [
+      "porcupine",
+      {
+        penaltyScale: 1,
+        glowingItems: 3,
+        extraSeconds: 0,
+        forgivenessPerSeason: 0,
+        comebackBonus: true,
+      },
+    ],
+  ])("returns the merged effects for %s", (id, expected) => {
+    expect(getEffects(id)).toEqual(expected)
   })
 
   it.each([
@@ -180,18 +234,15 @@ describe("getEffects", () => {
     ["null", null],
     ["undefined", undefined],
     ["a number", 3],
+    ["an empty string", ""],
+    ["an object", {}],
+    ["an array", []],
+    ["true", true],
   ])("returns the default character's effects for %s", (_label, id) => {
+    // `toBe` on the shared frozen object, which is stronger than checking the
+    // result is non-null and carries every key: it pins the identity too.
     expect(getEffects(id)).toBe(DEFAULT_CHARACTER.effects)
   })
-
-  it.each([undefined, null, "", "nope", 7, {}, []])(
-    "never returns null and always has every key for %p",
-    (id) => {
-      const effects = getEffects(id)
-      expect(effects).not.toBeNull()
-      expect(Object.keys(effects).sort()).toEqual([...EFFECT_KEYS].sort())
-    },
-  )
 })
 
 describe("balance", () => {

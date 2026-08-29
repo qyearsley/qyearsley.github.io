@@ -6,9 +6,13 @@
     <title>Seasons</title>
     <meta
       name="description"
-      content="Walk a trail through four seasons, answering maths questions to collect what the snake woman demands"
+      content="Walk a trail through four seasons, answering maths questions to gather what the snake woman needs for her potion"
     />
-    <meta name="theme-color" content="#2d3748" />
+    <meta name="theme-color" content="#3f7d5c" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Seasons" />
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="styles/main.css" />
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
@@ -30,8 +34,9 @@
         <section id="screen-character" class="screen active">
           <h1 class="screen-heading">Choose who makes the journey</h1>
           <p class="screen-intro">
-            Four seasons. A snake woman who wants what each one grows, and does not like to be kept
-            waiting. Every animal travels differently — pick the one you want to be.
+            A snake woman is making a potion. She needs one thing from every season, and she has set
+            you a quest to fetch it all. Each animal travels differently — pick the one you want to
+            be.
           </p>
           <div id="character-grid" class="character-grid"></div>
         </section>
@@ -44,13 +49,13 @@
             <div id="villain-portrait" class="villain-portrait"></div>
             <div class="demand-copy">
               <p id="demand-line" class="demand-line"></p>
-              <p class="demand-count">
-                <strong id="item-count">0</strong>
-                <span class="demand-of">of</span>
-                <strong id="item-demand">0</strong>
-                <span id="item-label">Roses</span>
-              </p>
-              <p id="wilt-note" class="note note-wilt hidden" aria-live="polite"></p>
+              <p id="item-count" class="demand-count" role="status">0</p>
+              <div id="item-track" class="item-track" aria-hidden="true"></div>
+              <!-- Not a live region: #feedback already announces the same
+                   sentence when the wilt happens, and two polite regions
+                   carrying near-identical text queue up and read twice. This
+                   is the persistent indicator, not the event. -->
+              <p id="wilt-note" class="note note-wilt hidden"></p>
               <p id="perk-note" class="note note-perk hidden"></p>
             </div>
           </div>

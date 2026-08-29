@@ -1,25 +1,31 @@
 /**
  * Seasons placeholder art pack -- flat vector shapes, drawn in code.
  *
- * Architecture: the reference implementation of the art-pack contract described
- * in art/index.js. Every export here is the signature a replacement pack must
+ * The reference implementation of the art-pack contract described in
+ * art/index.js. Every export here is the signature a replacement pack must
  * match.
  *
- * This pack exists so the game is playable and legible before any art
- * decision has been made. It is deliberately geometric: layered paths and flat
- * fills, no gradients, no external files, no emoji. The bar it is trying to
- * clear is "clearly a porcupine and not embarrassing", not "finished".
+ * It exists so the game is playable and legible before any art decision has
+ * been made. It is deliberately geometric: layered paths and flat fills, no
+ * gradients, no external files, no emoji. The bar it is trying to clear is
+ * "clearly a porcupine and not embarrassing", not "finished".
  *
  * Gradients are avoided on purpose. They need `<defs>` with document-unique
- * ids, and these drawings are rendered many times on one page (four character
- * cards, twenty trail markers), so ids would either collide or need a counter
- * threaded through every function. Flat fills with layered opacity get most of
- * the depth for none of that.
+ * ids, and a single drawing here is rendered many times on one page -- one
+ * `character()` per card on the select screen, one `item()` per slot in the HUD
+ * item track -- so ids would either collide or need a counter threaded through
+ * every function. Flat fills with layered opacity get most of the depth for
+ * none of that.
  *
- * Replacing this pack: write a module exporting the same eight names, register
- * it in art/index.js, and point constants.ART.PACK at it. A pack backed by
- * image files would return `<image>` elements from the same functions; nothing
- * about the contract assumes the art is drawn rather than loaded.
+ * Replacing this pack: write a module exporting the same names, register it in
+ * art/index.js (an import line and a PACKS entry), and point constants.ART.PACK
+ * at it. A pack backed by image files would return `<image>` elements from the
+ * same functions; nothing about the contract assumes the art is drawn rather
+ * than loaded. See ../README.md for the full recipe.
+ *
+ * Note that `svg` is imported from art/index.js, which imports this file back.
+ * That cycle is safe only while nothing here calls `svg` at module scope; see
+ * the header of art/index.js.
  *
  * Error Handling: every function tolerates an unknown id and returns a neutral
  * shape rather than throwing, so a typo shows up as a grey blob on screen
@@ -43,6 +49,12 @@ const UNIT_VIEWBOX = "0 0 100 100"
 /**
  * Season palettes, as CSS custom properties. GameUI sets these on the root
  * element and the stylesheet reads them, so the CSS never names a season.
+ *
+ * Each season carries three accents, not one, because the colour that looks
+ * right painting a trail is usually too light to be legible as text:
+ * `--season-accent` paints, and `--season-accent-text` / `-dark` are tuned to
+ * clear 4.5:1 against the light and dark surfaces respectively. The stylesheet
+ * picks between the two text values; a pack cannot know which theme is active.
  * @private
  */
 const PALETTES = {
@@ -51,7 +63,8 @@ const PALETTES = {
     "--season-far": "#a8d5ba",
     "--season-ground": "#6fae82",
     "--season-accent": "#e8657f",
-    "--season-item": "#e8657f",
+    "--season-accent-text": "#e02c50",
+    "--season-accent-text-dark": "#e86680",
     "--season-glow": "#fff2a8",
     "--season-ink": "#2b3d31",
   },
@@ -60,7 +73,8 @@ const PALETTES = {
     "--season-far": "#8fcfe8",
     "--season-ground": "#f0c36b",
     "--season-accent": "#4aa3d4",
-    "--season-item": "#7fd8f0",
+    "--season-accent-text": "#297dab",
+    "--season-accent-text-dark": "#4aa3d4",
     "--season-glow": "#fff3c4",
     "--season-ink": "#26404d",
   },
@@ -69,7 +83,8 @@ const PALETTES = {
     "--season-far": "#e0a96d",
     "--season-ground": "#b5703a",
     "--season-accent": "#c94f2c",
-    "--season-item": "#d97b28",
+    "--season-accent-text": "#c94f2c",
+    "--season-accent-text-dark": "#da7558",
     "--season-glow": "#ffd98a",
     "--season-ink": "#43281a",
   },
@@ -78,7 +93,8 @@ const PALETTES = {
     "--season-far": "#b8cbdd",
     "--season-ground": "#8fa6bd",
     "--season-accent": "#4f6f96",
-    "--season-item": "#bfe6f5",
+    "--season-accent-text": "#4f6f96",
+    "--season-accent-text-dark": "#7794b7",
     "--season-glow": "#ffffff",
     "--season-ink": "#22303f",
   },
@@ -97,7 +113,7 @@ const NEUTRAL = "#9aa5ad"
  * @returns {Object<string, string>} Custom properties; spring's if unknown
  */
 export function palette(seasonId) {
-  return PALETTES[seasonId] ?? PALETTES.spring
+  return Object.hasOwn(PALETTES, seasonId) ? PALETTES[seasonId] : PALETTES.spring
 }
 
 /**
@@ -170,12 +186,11 @@ const CHARACTERS = {
       fill: "none",
       "stroke-linecap": "round",
     }),
-    // Arms last, so they hang in FRONT of the body and head. Drawn before them
-    // they were almost entirely covered, and the sloth read as a generic round
-    // animal with no visible reason to be up a tree.
+    // Arms last, so they hang in FRONT of the body and head. Behind them the
+    // sloth reads as a generic round animal with no reason to be up a tree.
     //
-    // Filled bands rather than thick strokes, for the same reason as the
-    // villain's coils: a stroke-only path disappears in renderers that treat
+    // Filled bands rather than thick strokes, for the same reason as the snake
+    // woman's coils: a stroke-only path disappears in renderers that treat
     // `stroke-width` loosely, and the arms are too much of the silhouette to
     // risk that.
     svg("path", { d: "M43 59 C29 53 25 32 31 14 L22 15 C17 33 21 54 35 63 Z", fill: "#8a7259" }),
@@ -255,7 +270,10 @@ const CHARACTERS = {
  * @returns {import("./index.js").Drawing} The drawing; a neutral blob if unknown
  */
 export function character(characterId) {
-  const draw = CHARACTERS[characterId]
+  // Object.hasOwn, not a bare lookup: `character("constructor")` off a
+  // corrupted save would otherwise reach Object.prototype and throw, and
+  // this file's header promises an unknown id degrades to a neutral shape.
+  const draw = Object.hasOwn(CHARACTERS, characterId) ? CHARACTERS[characterId] : null
   if (!draw) return _drawing([svg("circle", { cx: 50, cy: 55, r: 30, fill: NEUTRAL })])
   return _drawing(draw())
 }
@@ -304,9 +322,8 @@ const ITEMS = {
   ],
   winter: (rare) => [
     // Winter's palette is the palest of the four, and an icicle drawn in ice
-    // colours vanished into it -- the rare version was white on near-white.
-    // The saturated cap and the shaded facet are what give it an edge without
-    // relying on a stroke.
+    // colours vanishes into it. The saturated cap and the shaded facet are what
+    // give it an edge without relying on a stroke.
     svg("rect", { x: 30, y: 4, width: 40, height: 8, rx: 3, fill: rare ? "#7fc9e8" : "#4f9ec4" }),
     svg("path", { d: "M34 10 L66 10 L55 60 L50 94 L45 60 Z", fill: rare ? "#d8f4ff" : "#8fd4ee" }),
     svg("path", { d: "M34 10 L50 10 L48 58 L45 60 Z", fill: "#4f9ec4", "fill-opacity": 0.45 }),
@@ -322,7 +339,7 @@ const ITEMS = {
  * @returns {import("./index.js").Drawing} The drawing; a neutral disc if unknown
  */
 export function item(seasonId, rare = false) {
-  const draw = ITEMS[seasonId]
+  const draw = Object.hasOwn(ITEMS, seasonId) ? ITEMS[seasonId] : null
   if (!draw) return _drawing([svg("circle", { cx: 50, cy: 50, r: 26, fill: NEUTRAL })])
   return _drawing(draw(rare))
 }
@@ -355,13 +372,13 @@ export function scenery(seasonId) {
 }
 
 /**
- * The snake woman. A coiled serpent with a crowned head -- she is a collector
- * and a threat, so the shape leans regal rather than monstrous.
+ * The snake woman. A coiled serpent with a crowned head -- she is a
+ * potion-maker who sets the quest, not a threat, so the shape leans regal and
+ * composed rather than monstrous.
  *
- * Built almost entirely from filled shapes rather than thick strokes. The coils
- * were originally stroked paths, which look identical in a browser but vanish
- * in any renderer that treats `stroke-width` loosely; filled shapes render the
- * same everywhere, and the coil reads better as a solid body anyway.
+ * Built almost entirely from filled shapes rather than thick strokes: a stroked
+ * path looks identical in a browser but vanishes in any renderer that treats
+ * `stroke-width` loosely, and the coil reads better as a solid body anyway.
  *
  * @returns {import("./index.js").Drawing} The drawing
  */
@@ -388,7 +405,7 @@ export function villain() {
     }),
     // Head.
     svg("ellipse", { cx: 58, cy: 28, rx: 13, ry: 14, fill: "#8fc39b" }),
-    // Crown of the collector.
+    // Her crown.
     svg("path", { d: "M45 17 L49 6 L54 15 L58 2 L62 15 L67 6 L71 17 Z", fill: "#e8c34a" }),
     svg("circle", { cx: 58, cy: 4, r: 2.2, fill: "#f5e08a" }),
     // Eyes, slit pupils.

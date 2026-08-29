@@ -1,28 +1,27 @@
 /**
- * Seasons arithmetic challenge -- the first (and so far only) challenge type.
+ * Seasons arithmetic challenge -- generates and checks maths questions.
  *
- * Architecture: a challenge module, conforming to the contract in
- * challenges/index.js. It exports `generate` and `check` and nothing else, and
- * it knows nothing about seasons, characters, trails, or the DOM. It is handed
- * a list of forms and an Rng, and hands back a question.
+ * A challenge module, conforming to the contract in challenges/index.js. It
+ * exports `generate` and `check` and nothing else, and it knows nothing about
+ * seasons, characters, trails, or the DOM. It is handed a list of forms and an
+ * Rng, and hands back a question.
  *
  * A *form* describes a shape of question rather than a specific one, so a
  * season can say "two-digit subtraction that needs regrouping" once and get a
  * different question every time. seasons.js owns which forms a season uses;
- * this file owns what each form means. The five kinds:
+ * this file owns what each form means. The kinds, one per entry in GENERATORS:
  *
  * - `add`     {max, borrow}       a + b, sum at most max. `borrow` forces a carry.
  * - `sub`     {max, borrow}       a - b, never negative. `borrow` forces regrouping.
  * - `mul`     {tables, upTo, twoDigit}  one operand from `tables`; the other 2..upTo,
  *                                 or 10..upTo when `twoDigit` is set.
  * - `div`     {tables, upTo}      exact division only; the quotient is 2..upTo.
- * - `twoStep` {tables, upTo, max} a x b then + or - c, result 0..max.
+ * - `twoStep` {tables, upTo, max} a × b then + or - c, result 0..max.
  *
  * Answers are multiple choice (see PLAY.CHOICE_COUNT), so every question also
- * carries distractors. Those are generated as near misses -- the answer to the
- * wrong operation, an off-by-one operand, a digit slip -- rather than random
- * numbers, because a random distractor is trivially eliminated and teaches
- * nothing. A plausible wrong answer is what makes the question worth reading.
+ * carries distractors. Those are near misses rather than random numbers,
+ * because a random distractor is trivially eliminated and teaches nothing. They
+ * are derived from the answer alone -- see `_candidates` for the exact list.
  *
  * Error Handling: every generator clamps its own inputs, so a mistyped form in
  * seasons.js produces an easy question rather than an infinite loop or a NaN.
@@ -39,7 +38,7 @@ import { PLAY } from "../constants.js"
  *
  * @typedef {Object} Question
  * @property {string} kind      - The form kind that produced it
- * @property {string} prompt    - The question text, e.g. "7 x 8"
+ * @property {string} prompt    - The question text, e.g. "7 × 8"
  * @property {number} answer    - The correct answer
  * @property {number[]} choices - CHOICE_COUNT distinct options including the answer
  */
@@ -75,9 +74,8 @@ function _tables(tables) {
  * which is the whole difficulty of multi-digit addition for a third grader.
  *
  * The carrying pair is chosen first and the tens are then sized to whatever is
- * left under `max`, rather than the other way round. Sizing the tens first is
- * what let an early version ignore a small `max` completely and return sums of
- * 20-38 for `max: 10`.
+ * left under `max`. Sizing the tens first lets a small `max` be ignored
+ * entirely, because the carrying pair still has to be added on top of them.
  *
  * @private
  * @param {Object} form - {max, borrow}
@@ -176,12 +174,12 @@ function _div(form, rng) {
  * is only offered when it keeps the result at or above zero.
  *
  * The second operand is capped so the product leaves room for the second step
- * under `max`. An early version floored `max` at `product + 2`, which let the
- * floor override a smaller `max` and pushed spring's boss question over 100.
+ * under `max`. The cap must not be given a floor above `max`, or the floor
+ * silently overrides the bound the form asked for.
  *
- * The one case that can still exceed `max` is a form whose smallest possible
- * product already does -- `{tables: [9], max: 10}`, which no season uses. The
- * clamps below keep it returning a valid question rather than looping.
+ * One case can still exceed `max`: a form whose smallest possible product
+ * already does, such as `{tables: [9], max: 10}`. The clamps below keep that
+ * returning a valid question rather than looping forever.
  *
  * @private
  * @param {Object} form - {tables, upTo, max}
@@ -217,8 +215,15 @@ const GENERATORS = {
 
 /**
  * Plausible wrong answers, in roughly decreasing order of how tempting they
- * are. Every candidate is a mistake a real player makes: off by one, off by
- * ten, the operands added instead of multiplied, a reversed pair of digits.
+ * are: off by one, off by two, off by ten, double, half, and the digits
+ * reversed.
+ *
+ * Note what this function is *not* given: the operands. It sees the answer and
+ * the form kind, so it cannot offer "the operands added instead of multiplied"
+ * or the answer to the wrong operation. Those would need `generate` to hand the
+ * operands over, which would widen this module's contract for one extra
+ * distractor. The kind only reorders the list.
+ *
  * @private
  * @param {number} answer - The correct answer
  * @param {string} kind - The form kind, so the slips can suit the operation
@@ -305,7 +310,11 @@ export function generate(forms, rng) {
  */
 export function check(question, given) {
   if (!question || !Number.isFinite(question.answer)) return false
-  if (given === null || given === undefined || typeof given === "boolean") return false
+  // Allow-list the two input shapes a real answer can have, rather than
+  // block-listing the coercions that go wrong. There are too many values that
+  // coerce to 0 to enumerate -- `Number([])` is one -- and each one missed is a
+  // wrong answer scored as correct on a question whose answer is 0.
+  if (typeof given !== "number" && typeof given !== "string") return false
   if (typeof given === "string" && given.trim() === "") return false
   const value = Number(given)
   return Number.isFinite(value) && value === question.answer

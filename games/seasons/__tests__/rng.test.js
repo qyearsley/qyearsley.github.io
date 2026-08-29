@@ -5,9 +5,16 @@
  * mulberry32 is gameplay randomness, so these tests assert three things: a seed
  * pins a sequence, the bounds `int` advertises are the bounds it produces, and
  * no seed at all -- missing, non-finite, zero, or a string -- can yield NaN or a
- * generator stuck on a single value. Distribution is deliberately not tested.
- * The only fairness claim made is that `int` can actually reach both ends of its
- * range, which is a correctness property rather than a statistical one.
+ * generator stuck on a single value. The distribution of `next` is deliberately
+ * not tested; the only fairness claim made about it is that `int` can actually
+ * reach both ends of its range, which is a correctness property rather than a
+ * statistical one.
+ *
+ * `shuffle` is the exception, because there the distribution *is* the
+ * correctness property: the two usual Fisher-Yates off-by-ones produce a
+ * shuffle that reorders, preserves the multiset, and is deterministic, so
+ * nothing short of counting orderings can see them. See the bias test at the
+ * end of the file for how that is kept deterministic.
  *
  * Two non-obvious decisions:
  *
@@ -74,6 +81,12 @@ describe("createRng", () => {
     })
 
     it("advances on every call, so a generator does not repeat itself", () => {
+      // 200 distinct values out of 200 is a birthday-collision property, not a
+      // guarantee: over 2^32 outputs, 200 draws collide by chance about one run
+      // in 230000. It is only safe to assert exactly because the seed is pinned
+      // -- this sequence has been checked and has no collision, and it cannot
+      // change without the algorithm changing. Do not reseed this test
+      // arbitrarily; use a different seed only after checking the same way.
       const values = draws(createRng("advance"), 200)
       expect(new Set(values).size).toBe(200)
     })
@@ -146,12 +159,15 @@ describe("createRng", () => {
 
   describe("next", () => {
     it("stays in [0, 1) across many draws and many seeds", () => {
+      // One assertion per seed, collecting the draws that broke the bound,
+      // rather than three `expect` calls per draw. 105,000 assertions cost over
+      // a second of the suite's total runtime, and a failure read "expected 1
+      // to be less than 1" without saying which seed or which draw produced it.
       for (const seed of ["spring", "summer", "autumn", "winter", 0, 1, 999999]) {
-        for (const value of draws(createRng(seed), 5000)) {
-          expect(Number.isFinite(value)).toBe(true)
-          expect(value).toBeGreaterThanOrEqual(0)
-          expect(value).toBeLessThan(1)
-        }
+        const outOfRange = draws(createRng(seed), 5000).flatMap((value, draw) =>
+          Number.isFinite(value) && value >= 0 && value < 1 ? [] : [{ seed, draw, value }],
+        )
+        expect(outOfRange).toEqual([])
       }
     })
 
@@ -172,11 +188,13 @@ describe("createRng", () => {
 
     it("never leaves the requested range", () => {
       const values = intDraws(createRng("range"), 2000, -5, 5)
-      for (const value of values) {
-        expect(Number.isInteger(value)).toBe(true)
-        expect(value).toBeGreaterThanOrEqual(-5)
-        expect(value).toBeLessThanOrEqual(5)
-      }
+      // The offending draws, not the first one to trip an assertion, so a
+      // failure says which values escaped and how far.
+      expect(
+        values.flatMap((value, draw) =>
+          Number.isInteger(value) && value >= -5 && value <= 5 ? [] : [{ draw, value }],
+        ),
+      ).toEqual([])
       expect(values).toContain(-5)
       expect(values).toContain(5)
     })
@@ -227,11 +245,10 @@ describe("createRng", () => {
     })
 
     it("only ever returns an element of the input", () => {
-      const items = ["rose", "diamond", "leaf", "icicle"]
+      const items = ["alpha", "beta", "gamma", "delta"]
       const rng = createRng("pick-members")
-      for (let i = 0; i < 1000; i += 1) {
-        expect(items).toContain(rng.pick(items))
-      }
+      const picked = Array.from({ length: 1000 }, () => rng.pick(items))
+      expect(picked.filter((value) => !items.includes(value))).toEqual([])
     })
 
     it("can return every element, including the first and last", () => {
@@ -312,10 +329,57 @@ describe("createRng", () => {
     it("keeps every element in place as a multiset across many shuffles", () => {
       const items = Array.from({ length: 40 }, (_, index) => index)
       const rng = createRng("large")
-      for (let i = 0; i < 100; i += 1) {
+      const wrong = Array.from({ length: 100 }, (_, round) => {
         const result = rng.shuffle(items)
-        expect(result.length).toBe(40)
-        expect([...result].sort((a, b) => a - b)).toEqual(items)
+        const sorted = [...result].sort((a, b) => a - b)
+        return sorted.length === items.length && sorted.every((v, i) => v === items[i])
+          ? null
+          : { round, result }
+      }).filter(Boolean)
+      expect(wrong).toEqual([])
+    })
+
+    it("deals every ordering about equally often, so Fisher-Yates is unbiased", () => {
+      // The property none of the tests above can see. Two classic off-by-ones
+      // pass all of them -- they reorder, they preserve the multiset, they are
+      // deterministic -- while dealing a skewed hand:
+      //
+      // - j = int(0, length - 1) picks from the whole array rather than the
+      //   unshuffled head. Measured on this generator it deals "012" 13381
+      //   times against "102" 6662, a 2:1 skew.
+      // - j = int(0, i - 1) is Sattolo's algorithm: only cyclic permutations,
+      //   so two of the six orderings below never appear at all.
+      //
+      // Deterministic by construction: one pinned seed, one fixed run length,
+      // fixed bounds. 60000 shuffles over 6 orderings expects 10000 each; the
+      // observed spread for the real implementation is 9868..10185, and the
+      // +-6% band is about 6.5 standard deviations of sampling noise, so the
+      // margin is wide while both bugs above land far outside it.
+      const rng = createRng("bias")
+      const counts = new Map()
+      for (let i = 0; i < 60000; i += 1) {
+        const ordering = rng.shuffle([0, 1, 2]).join("")
+        counts.set(ordering, (counts.get(ordering) ?? 0) + 1)
+      }
+      expect([...counts.keys()].sort()).toEqual(["012", "021", "102", "120", "201", "210"])
+      for (const [ordering, count] of counts) {
+        // Paired with the label so a failure names the skewed ordering.
+        expect([ordering, count > 9400 && count < 10600]).toEqual([ordering, true])
+      }
+    })
+
+    it("puts every element in every position, over many shuffles", () => {
+      // The marginal version of the check above, on a longer array: a shuffle
+      // that can never move element 0 out of slot 0, or never reach the last
+      // slot, is a fixed-point bug the multiset tests cannot see.
+      const items = [0, 1, 2, 3, 4, 5, 6, 7]
+      const rng = createRng("positions")
+      const seen = items.map(() => new Set())
+      for (let i = 0; i < 2000; i += 1) {
+        rng.shuffle(items).forEach((value, position) => seen[value].add(position))
+      }
+      for (const [value, positions] of seen.entries()) {
+        expect([value, positions.size]).toEqual([value, items.length])
       }
     })
   })

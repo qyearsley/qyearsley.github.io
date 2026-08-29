@@ -1,25 +1,25 @@
 /**
  * Seasons storage -- persistence, plus the canonical save shape.
  *
- * Architecture: the game-specific storage layer, following the same split Times
- * Trail uses.
- * - Extends games/shared/StorageManager.js, which owns every localStorage call,
- *   the version stamp, and the version-mismatch-clears-the-key policy. Nothing
- *   in this file touches localStorage directly. The base is aliased on import
- *   as `BaseStorageManager` so the subclass can keep the plain name; game code
- *   imports *this* class, never the base.
+ * The game-specific layer over games/shared/StorageManager.js, which owns every
+ * localStorage call, the version stamp, and the version-mismatch-clears-the-key
+ * policy. Nothing here touches localStorage directly. The base is aliased on
+ * import as `BaseStorageManager` so the subclass can keep the plain name; game
+ * code imports *this* class, never the base.
+ *
  * - `defaultSave` and `normalizeSave` are exported pure functions -- no
  *   storage, no clock, no mutation of their input -- so the shape can be tested
  *   on its own and game.js can normalize an in-memory value without a round
  *   trip through the browser.
  * - The saved run deliberately omits `question`. A question is a pure function
- *   of the seed, the season, and `questionsAsked` (see GameState), so persisting
- *   it would store a value that could contradict the fields it derives from.
- *   `GameState.rehydrate` regenerates it on load instead.
- * - `position` is only *structurally* normalized here. Journey.normalizePosition
- *   is the semantic authority, because it needs the season, and
- *   `GameState.rehydrate` applies it on load. This file cannot import Journey
- *   without a cycle through seasons.js.
+ *   of the seed, the season, the attempt, and `questionsAsked` (see GameState),
+ *   so persisting it would store a value that could contradict the fields it
+ *   derives from. `GameState.rehydrate` regenerates it on load instead.
+ * - `position` is only *structurally* normalized here (a non-negative integer).
+ *   The semantic bound needs the season, which is Journey's business, so
+ *   `Journey.normalizePosition` is the authority and `GameState.rehydrate`
+ *   applies it on load. Importing Journey here would be legal -- there is no
+ *   cycle -- but it would put a rule in the persistence layer.
  *
  * Error Handling: follows the base class's contract exactly.
  * - `saveRun` and `clearRun` return a boolean and never throw.
@@ -27,14 +27,14 @@
  *   version has moved on (the base clears the key in that case).
  * - `defaultSave` and `normalizeSave` never throw for any input. Saved data
  *   comes off a real device -- a half-written save, a hand-edited one, or one
- *   from a build six months old -- so every field is coerced back into range
- *   rather than trusted, and unknown keys are dropped rather than copied
- *   through.
+ *   from an old build -- so every field is coerced back into range rather than
+ *   rejected, and unknown keys are dropped rather than copied through. A child
+ *   mid-journey should never be shown an error because a byte moved.
  */
 
 import { StorageManager as BaseStorageManager } from "../../shared/StorageManager.js"
 import { CHARACTER_IDS, DEFAULT_CHARACTER } from "./characters.js"
-import { PHASE, SEASON_ORDER, STORAGE } from "./constants.js"
+import { BOSS_TRIES, PHASE, SEASON_ORDER, STORAGE } from "./constants.js"
 
 /**
  * Every valid phase value, for coercing a persisted `phase`.
@@ -58,6 +58,8 @@ const SEASON_IDS = new Set(SEASON_ORDER)
  * @property {string} characterId
  * @property {string|null} seasonId
  * @property {number} seed
+ * @property {number} attempt
+ * @property {number} bossTriesLeft
  * @property {number} position
  * @property {number} items
  * @property {number} wilting
@@ -78,7 +80,11 @@ const SEASON_IDS = new Set(SEASON_ORDER)
  *
  * @typedef {Object} SaveState
  * @property {SavedRun} run       - The run in progress
- * @property {string[]} unlocked  - Season ids reachable from the season picker
+ * @property {string[]} unlocked  - Season ids cleared so far. game.js appends
+ *                                to it, but nothing shows it to the player --
+ *                                there is no season picker yet. Kept because
+ *                                the ledger is cheap and a picker is the
+ *                                obvious next feature.
  * @property {Object} totals      - Lifetime counters
  */
 
@@ -138,7 +144,7 @@ function _normalizeUnlocked(raw) {
       if (SEASON_IDS.has(value)) ids.add(value)
     }
   }
-  // Return in play order rather than insertion order, so the picker is stable.
+  // Return in play order rather than insertion order, so the list is stable.
   return SEASON_ORDER.filter((id) => ids.has(id))
 }
 
@@ -162,6 +168,14 @@ function _normalizeRun(raw) {
     characterId: CHARACTER_IDS.has(source.characterId) ? source.characterId : DEFAULT_CHARACTER.id,
     seasonId: SEASON_IDS.has(source.seasonId) ? source.seasonId : null,
     seed: _nonNegativeInt(source.seed) || 1,
+    attempt: _nonNegativeInt(source.attempt),
+    // Falls back to a full allowance rather than 0. A save written before
+    // BOSS_TRIES existed has no such key, and a plain _nonNegativeInt would
+    // load it with zero shots at the boss -- the first miss would end the
+    // season. `?? BOSS_TRIES` would not help: the coercion returns 0, which is
+    // not nullish. STORAGE.VERSION is deliberately not bumped for this, since
+    // the fallback makes old saves loadable rather than discardable.
+    bossTriesLeft: _nonNegativeInt(source.bossTriesLeft) || BOSS_TRIES,
     position: _nonNegativeInt(source.position),
     items: _nonNegativeInt(source.items),
     wilting: _nonNegativeInt(source.wilting),

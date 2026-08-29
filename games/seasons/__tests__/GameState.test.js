@@ -8,23 +8,35 @@
  * Two techniques carry most of the file.
  *
  * 1. The two undecided design switches live in the mutable `RULES` object in
- *    constants.js, which is deliberately not frozen. Each describe block sets
- *    the rule it is about in `beforeEach` and restores the original value in
- *    `afterEach`, so all three WRONG_ANSWER options and all three BOSS_FAILURE
- *    options are covered without any module mocking, and the defaults are back
- *    in place for the next block whichever order Jest runs them in.
+ *    constants.js, which is deliberately not frozen.
+ *    `restoreRulesBetweenTests` snapshots both switches and puts them back
+ *    after every test, and `useRules` is the only way a describe block changes
+ *    them. That covers all three WRONG_ANSWER options and all three
+ *    BOSS_FAILURE options without any module mocking, and -- unlike the
+ *    per-block save/restore this file used to repeat ten times -- a new block
+ *    cannot forget its restore and silently corrupt whatever Jest runs next.
+ *    Both helpers live in helpers.js now, because GameUI.test.js and
+ *    game.test.js need exactly the same protection.
  *
- * 2. Questions are a pure function of the state's seed, season, and
+ * 2. Questions are a pure function of the state's seed, season, `attempt` and
  *    `questionsAsked`, so a test can simply read `state.question.answer`.
  *    `answerRight` passes that value and `answerWrong` passes it plus one,
  *    which keeps long scripted sequences ("three right, one wrong, one right")
  *    readable and free of hand-written arithmetic.
  */
 
-import { afterEach, beforeEach, describe, expect, it } from "@jest/globals"
+import { describe, expect, it } from "@jest/globals"
 
 import { getCharacter } from "../js/characters.js"
-import { BOSS_FAILURE, PHASE, PLAY, RULES, SEASON_ORDER, WRONG_ANSWER } from "../js/constants.js"
+import {
+  BOSS_FAILURE,
+  BOSS_TRIES,
+  PHASE,
+  PLAY,
+  RULES,
+  SEASON_ORDER,
+  WRONG_ANSWER,
+} from "../js/constants.js"
 import {
   advance,
   answer,
@@ -37,6 +49,7 @@ import {
   retry,
 } from "../js/GameState.js"
 import { getSeason } from "../js/seasons.js"
+import { itWithASecondTry, restoreRulesBetweenTests, useRules } from "./helpers.js"
 
 /** A fixed run seed. Every question in this file derives from it. */
 const SEED = 20240229
@@ -58,9 +71,13 @@ const ZERO_OUTCOME = {
   reachedBoss: false,
   wasBoss: false,
   rescued: 0,
+  bossTriesLeft: 0,
   shortfall: 0,
   phase: PHASE.CHARACTER_SELECT,
 }
+
+/** The single save/restore for the whole file. See helpers.js. */
+restoreRulesBetweenTests()
 
 /**
  * Answer the current question correctly, by reading the answer off the state.
@@ -143,6 +160,38 @@ function atSpringBoss(characterId, overrides = {}) {
   return { ...playToBoss(startAs(characterId)), ...overrides }
 }
 
+/**
+ * Answer the boss wrongly `count` times.
+ *
+ * A single wrong boss answer does not resolve the season while `BOSS_TRIES`
+ * leaves another one, so a test that wants the resolution has to spend them all.
+ *
+ * @param {Object} state - A state in PHASE.BOSS
+ * @param {number} [count] - How many wrong answers; defaults to every try
+ * @returns {{state: Object, outcome: Object}} The result of the last answer
+ */
+function missBoss(state, count = BOSS_TRIES) {
+  let result = { state, outcome: null }
+  for (let index = 0; index < count; index += 1) result = answerWrong(result.state)
+  return result
+}
+
+/**
+ * The prompts of the next `count` questions, answered correctly as it goes.
+ * @param {Object} state - A state showing a question
+ * @param {number} count - How many prompts to collect
+ * @returns {string[]} The prompts, in the order they were shown
+ */
+function promptsFrom(state, count) {
+  const prompts = []
+  let current = state
+  for (let index = 0; index < count; index += 1) {
+    prompts.push(current.question.prompt)
+    current = answerRight(current).state
+  }
+  return prompts
+}
+
 describe("createState", () => {
   it("returns the documented defaults", () => {
     expect(createState()).toEqual({
@@ -150,6 +199,8 @@ describe("createState", () => {
       characterId: "banana-slug",
       seasonId: null,
       seed: 1,
+      attempt: 0,
+      bossTriesLeft: BOSS_TRIES,
       position: 0,
       items: 0,
       wilting: 0,
@@ -213,15 +264,7 @@ describe("chooseCharacter", () => {
 })
 
 describe("answer purity", () => {
-  const original = RULES.WRONG_ANSWER
-
-  beforeEach(() => {
-    RULES.WRONG_ANSWER = WRONG_ANSWER.WILT
-  })
-
-  afterEach(() => {
-    RULES.WRONG_ANSWER = original
-  })
+  useRules({ wrongAnswer: WRONG_ANSWER.WILT })
 
   it("does not mutate the state it is given on a correct answer", () => {
     const state = rightTimes(startAs("sloth"), 4)
@@ -316,15 +359,7 @@ describe("correct answers", () => {
 })
 
 describe("WRONG_ANSWER.GENTLE", () => {
-  const original = RULES.WRONG_ANSWER
-
-  beforeEach(() => {
-    RULES.WRONG_ANSWER = WRONG_ANSWER.GENTLE
-  })
-
-  afterEach(() => {
-    RULES.WRONG_ANSWER = original
-  })
+  useRules({ wrongAnswer: WRONG_ANSWER.GENTLE })
 
   it("takes nothing away", () => {
     const state = rightTimes(startAs("sloth"), 3)
@@ -368,15 +403,7 @@ describe("WRONG_ANSWER.GENTLE", () => {
 })
 
 describe("WRONG_ANSWER.WILT", () => {
-  const original = RULES.WRONG_ANSWER
-
-  beforeEach(() => {
-    RULES.WRONG_ANSWER = WRONG_ANSWER.WILT
-  })
-
-  afterEach(() => {
-    RULES.WRONG_ANSWER = original
-  })
+  useRules({ wrongAnswer: WRONG_ANSWER.WILT })
 
   it("moves penaltyScale items into wilting and loses nothing yet", () => {
     const state = rightTimes(startAs("sloth"), 3)
@@ -446,15 +473,7 @@ describe("WRONG_ANSWER.WILT", () => {
 })
 
 describe("WRONG_ANSWER.STEP_BACK", () => {
-  const original = RULES.WRONG_ANSWER
-
-  beforeEach(() => {
-    RULES.WRONG_ANSWER = WRONG_ANSWER.STEP_BACK
-  })
-
-  afterEach(() => {
-    RULES.WRONG_ANSWER = original
-  })
+  useRules({ wrongAnswer: WRONG_ANSWER.STEP_BACK })
 
   it("steps back one space and loses one item outright", () => {
     const state = rightTimes(startAs("sloth"), 3)
@@ -503,12 +522,6 @@ describe("WRONG_ANSWER.STEP_BACK", () => {
 })
 
 describe("banana slug", () => {
-  const original = RULES.WRONG_ANSWER
-
-  afterEach(() => {
-    RULES.WRONG_ANSWER = original
-  })
-
   it.each([WRONG_ANSWER.GENTLE, WRONG_ANSWER.WILT, WRONG_ANSWER.STEP_BACK])(
     "takes no penalty at all under %s",
     (rule) => {
@@ -533,15 +546,7 @@ describe("banana slug", () => {
 })
 
 describe("phoenix", () => {
-  const original = RULES.WRONG_ANSWER
-
-  beforeEach(() => {
-    RULES.WRONG_ANSWER = WRONG_ANSWER.WILT
-  })
-
-  afterEach(() => {
-    RULES.WRONG_ANSWER = original
-  })
+  useRules({ wrongAnswer: WRONG_ANSWER.WILT })
 
   it("waves the first wrong answer of the season away for free", () => {
     const state = rightTimes(startAs("phoenix"), 3)
@@ -570,6 +575,35 @@ describe("phoenix", () => {
     expect(next.wilting).toBe(2)
   })
 
+  it("does not spend the free pass on a wrong answer with nothing to wilt", () => {
+    // The untested half of "don't burn a free pass on a free mistake", on the
+    // shipped default rule. The GENTLE case covers a rule that never costs
+    // anything; this covers a rule that does, on a turn where there happens to
+    // be nothing to take. Both must leave the pass unspent, or a player who
+    // slips on the very first question of a season loses their perk to it.
+    const state = startAs("phoenix")
+    expect(state.items).toBe(0)
+    expect(state.forgivenessLeft).toBe(1)
+    const { state: next, outcome } = answerWrong(state)
+    expect(outcome.forgiven).toBe(false)
+    expect(next.forgivenessLeft).toBe(1)
+    expect(next.items).toBe(0)
+    expect(next.wilting).toBe(0)
+    expect(next.lost).toBe(0)
+  })
+
+  it("does not spend the free pass at the boss, where a miss costs nothing", () => {
+    // The boss applies no penalty at all now, so there is nothing for the pass
+    // to wave away. Spending it there would silently cost the player their perk
+    // for the rest of the season in exchange for nothing.
+    const boss = atSpringBoss("phoenix")
+    expect(boss.forgivenessLeft).toBe(1)
+    const { state: next, outcome } = answerWrong(boss)
+    expect(outcome.wasBoss).toBe(true)
+    expect(outcome.forgiven).toBe(false)
+    expect(next.forgivenessLeft).toBe(1)
+  })
+
   it("gets its forgiveness back when a new season starts", () => {
     // Collect something first. With no items banked there is nothing to wilt,
     // so the wrong answer below would cost nothing and the free pass would
@@ -587,15 +621,7 @@ describe("phoenix", () => {
 })
 
 describe("porcupine", () => {
-  const original = RULES.WRONG_ANSWER
-
-  beforeEach(() => {
-    RULES.WRONG_ANSWER = WRONG_ANSWER.WILT
-  })
-
-  afterEach(() => {
-    RULES.WRONG_ANSWER = original
-  })
+  useRules({ wrongAnswer: WRONG_ANSWER.WILT })
 
   it("doubles the correct answer that follows a wrong one", () => {
     const wrong = answerWrong(startAs("porcupine")).state
@@ -683,10 +709,17 @@ describe("reaching the boss", () => {
 
   it("draws the boss question from boss.forms", () => {
     const boss = playToBoss(startAs("sloth"))
-    // Spring's boss asks two-step problems and nothing else.
-    expect(SPRING.boss.forms.map((form) => form.kind)).toEqual(["twoStep"])
-    expect(boss.question.kind).toBe("twoStep")
+    // Division is reserved for the glowing spaces and the boss -- Ella's
+    // "division as the hardest one in a level" -- so every boss asks div and
+    // nothing else.
+    expect(SPRING.boss.forms.map((form) => form.kind)).toEqual(["div"])
+    expect(boss.question.kind).toBe("div")
     expect(boss.question.choices).toHaveLength(PLAY.CHOICE_COUNT)
+  })
+
+  it("arrives at the boss with a full set of tries", () => {
+    const boss = playToBoss(startAs("sloth"))
+    expect(boss.bossTriesLeft).toBe(BOSS_TRIES)
   })
 
   it("collects a perfect trail's worth of items on the way", () => {
@@ -698,17 +731,7 @@ describe("reaching the boss", () => {
 })
 
 describe("boss resolution", () => {
-  const originalBoss = RULES.BOSS_FAILURE
-  const originalWrong = RULES.WRONG_ANSWER
-
-  beforeEach(() => {
-    RULES.BOSS_FAILURE = BOSS_FAILURE.RETRY_SEASON
-  })
-
-  afterEach(() => {
-    RULES.BOSS_FAILURE = originalBoss
-    RULES.WRONG_ANSWER = originalWrong
-  })
+  useRules({ bossFailure: BOSS_FAILURE.RETRY_SEASON })
 
   it("adds the season's rescue and reports it", () => {
     const boss = atSpringBoss("sloth", { items: 5, lost: 0, wilting: 0 })
@@ -742,9 +765,13 @@ describe("boss resolution", () => {
   })
 
   it("writes off anything still wilting at resolution", () => {
+    // Rewritten: this used to bank 18 items and let a wrong boss answer wilt
+    // one of them, which is exactly the penalty the boss no longer applies.
+    // The wilting item is now staged, and it takes every try to reach the
+    // resolution that writes it off.
     RULES.WRONG_ANSWER = WRONG_ANSWER.WILT
-    const boss = atSpringBoss("sloth", { items: 18, wilting: 0, lost: 0 })
-    const { state: next } = answerWrong(boss)
+    const boss = atSpringBoss("sloth", { items: 17, wilting: 1, lost: 0 })
+    const { state: next } = missBoss(boss)
     expect(next.phase).toBe(PHASE.SEASON_WON)
     expect(next.items).toBe(17)
     expect(next.wilting).toBe(0)
@@ -753,10 +780,12 @@ describe("boss resolution", () => {
   })
 
   it("does not count wilting items toward the demand", () => {
+    // Rewritten for the same reason: the old version put exactly the demand in
+    // `items` and relied on the boss taking one away. It now stages the gap --
+    // one short, with one item wilting that cannot close it.
     RULES.WRONG_ANSWER = WRONG_ANSWER.WILT
-    // Exactly the demand, then a wrong boss answer wilts one of them away.
-    const boss = atSpringBoss("sloth", { items: SPRING.demand, wilting: 0, lost: 0 })
-    const { state: next, outcome } = answerWrong(boss)
+    const boss = atSpringBoss("sloth", { items: SPRING.demand - 1, wilting: 1, lost: 0 })
+    const { state: next, outcome } = missBoss(boss)
     expect(outcome.shortfall).toBe(1)
     expect(next.items).toBe(SPRING.demand - 1)
     expect(next.wilting).toBe(0)
@@ -772,19 +801,114 @@ describe("boss resolution", () => {
   })
 })
 
+describe("a missed boss question", () => {
+  useRules({ wrongAnswer: WRONG_ANSWER.WILT, bossFailure: BOSS_FAILURE.RETRY_SEASON })
+
+  it.each(["sloth", "phoenix"])(
+    "keeps a season the %s had already won when the boss question is missed",
+    (characterId) => {
+      // The regression test for the lost-a-won-season bug. `_applyPenalty` used
+      // to run at the boss *before* `_resolveSeason` judged the demand, so
+      // arriving with exactly the demand and then missing the boss wilted an
+      // item and turned a won season into a lost one. The boss is the last
+      // chance to close a gap, never a way to open one. The phoenix is included
+      // because penaltyScale 2 made the old bug cost two items rather than one.
+      const boss = atSpringBoss(characterId, { items: SPRING.demand, wilting: 0, lost: 0 })
+      const { state: next, outcome } = missBoss(boss)
+      expect(outcome.correct).toBe(false)
+      expect(outcome.wiltedNow).toBe(0)
+      expect(outcome.lostNow).toBe(0)
+      expect(outcome.shortfall).toBe(0)
+      expect(next.phase).toBe(PHASE.SEASON_WON)
+      expect(next.items).toBe(SPRING.demand)
+      expect(next.wilting).toBe(0)
+      expect(next.lost).toBe(0)
+      expect(next.collected).toEqual({ spring: SPRING.demand })
+    },
+  )
+
+  itWithASecondTry("stays at the boss with a fresh question while tries remain", () => {
+    // Ella's rule: "if you miss the boss question you get a chance to go back
+    // and try again." A miss with tries left must not resolve the season.
+    const boss = atSpringBoss("sloth", { items: 0, wilting: 0, lost: 0 })
+    expect(boss.bossTriesLeft).toBe(BOSS_TRIES)
+    const { state: next, outcome } = answerWrong(boss)
+    expect(next.phase).toBe(PHASE.BOSS)
+    expect(outcome.phase).toBe(PHASE.BOSS)
+    expect(next.bossTriesLeft).toBe(BOSS_TRIES - 1)
+    expect(outcome.bossTriesLeft).toBe(BOSS_TRIES - 1)
+    // Not resolved: nothing banked, nothing written off, still a question up.
+    expect(outcome.shortfall).toBe(0)
+    expect(next.collected).toEqual({})
+    expect(next.question).not.toBeNull()
+    expect(next.position).toBe(SPRING.spaces)
+  })
+
+  itWithASecondTry("issues a different boss question on the second try", () => {
+    const boss = atSpringBoss("sloth")
+    const again = answerWrong(boss).state
+    expect(again.question).not.toEqual(boss.question)
+    expect(again.question.kind).toBe("div")
+    expect(again.question.choices).toContain(again.question.answer)
+  })
+
+  itWithASecondTry("can still be rescued by getting the second try right", () => {
+    const boss = atSpringBoss("sloth", { items: 0, wilting: 0, lost: 0 })
+    const second = answerWrong(boss).state
+    const { state: next, outcome } = answerRight(second)
+    expect(outcome.rescued).toBe(SPRING.boss.rescue)
+    expect(outcome.bossTriesLeft).toBe(0)
+    expect(next.items).toBe(SPRING.boss.rescue)
+    expect(next.phase).toBe(PHASE.SEASON_LOST)
+  })
+
+  it.each([BOSS_FAILURE.RETRY_SEASON, BOSS_FAILURE.ALWAYS_PASS, BOSS_FAILURE.END_RUN])(
+    "resolves normally under %s once the tries run out",
+    (rule) => {
+      RULES.BOSS_FAILURE = rule
+      const boss = atSpringBoss("sloth", { items: 0, wilting: 0, lost: 0 })
+      const { state: next, outcome } = missBoss(boss)
+      expect(outcome.bossTriesLeft).toBe(0)
+      expect(next.bossTriesLeft).toBe(0)
+      expect(next.question).toBeNull()
+      // No rescue on a missed boss question, so the whole demand is short.
+      expect(outcome.shortfall).toBe(SPRING.demand)
+      if (rule === BOSS_FAILURE.ALWAYS_PASS) {
+        expect(next.phase).toBe(PHASE.SEASON_WON)
+        expect(next.runOver).toBe(false)
+        expect(next.collected).toEqual({ spring: 0 })
+      } else {
+        expect(next.phase).toBe(PHASE.SEASON_LOST)
+        expect(next.runOver).toBe(rule === BOSS_FAILURE.END_RUN)
+        expect(next.collected).toEqual({})
+      }
+    },
+  )
+
+  it("reports every try left as it counts down", () => {
+    let state = atSpringBoss("sloth", { items: 0 })
+    for (let spent = 1; spent <= BOSS_TRIES; spent += 1) {
+      const result = answerWrong(state)
+      expect(result.outcome.bossTriesLeft).toBe(BOSS_TRIES - spent)
+      state = result.state
+    }
+    expect(state.phase).not.toBe(PHASE.BOSS)
+  })
+
+  it("reports no tries left once the boss question is answered right", () => {
+    // A correct answer ends the boss outright, so the count goes to zero rather
+    // than reporting the try that was never spent. Nothing reads it after this
+    // point -- the season is resolved on the same call.
+    const { state: next, outcome } = answerRight(atSpringBoss("sloth"))
+    expect(outcome.bossTriesLeft).toBe(0)
+    expect(next.bossTriesLeft).toBe(0)
+    expect(next.phase).toBe(PHASE.SEASON_WON)
+  })
+})
+
 describe("BOSS_FAILURE rules", () => {
-  const originalBoss = RULES.BOSS_FAILURE
-  const originalWrong = RULES.WRONG_ANSWER
-
-  beforeEach(() => {
-    // Gentle, so the shortfall under test comes only from the staged item count.
-    RULES.WRONG_ANSWER = WRONG_ANSWER.GENTLE
-  })
-
-  afterEach(() => {
-    RULES.BOSS_FAILURE = originalBoss
-    RULES.WRONG_ANSWER = originalWrong
-  })
+  // Gentle, so the shortfall under test comes only from the staged item count.
+  useRules({ wrongAnswer: WRONG_ANSWER.GENTLE })
 
   /** A boss with nothing banked: even a rescue leaves the demand unmet. */
   const emptyHanded = () => atSpringBoss("sloth", { items: 0, wilting: 0, lost: 0 })
@@ -829,8 +953,10 @@ describe("BOSS_FAILURE rules", () => {
   )
 
   it("also resolves the season when the boss question is answered wrongly", () => {
+    // Rewritten for BOSS_TRIES: one wrong answer used to resolve the season,
+    // and now it takes the last try to do it.
     RULES.BOSS_FAILURE = BOSS_FAILURE.RETRY_SEASON
-    const { state: next, outcome } = answerWrong(atSpringBoss("sloth", { items: 0 }))
+    const { state: next, outcome } = missBoss(atSpringBoss("sloth", { items: 0 }))
     expect(outcome.correct).toBe(false)
     expect(outcome.rescued).toBe(0)
     expect(next.phase).toBe(PHASE.SEASON_LOST)
@@ -871,12 +997,34 @@ describe("advance", () => {
     expect(summer.characterId).toBe("sloth")
   })
 
-  it("completes the run after winter", () => {
-    const won = { ...wonSpring(), seasonId: "winter" }
+  it("completes the run after the last season", () => {
+    const won = { ...wonSpring(), seasonId: SEASON_ORDER.at(-1) }
     const done = advance(won)
     expect(done.phase).toBe(PHASE.RUN_COMPLETE)
     expect(done.question).toBeNull()
     expect(done.collected).toEqual(won.collected)
+  })
+
+  it("falls back to CHARACTER_SELECT for an unknown season rather than finishing", () => {
+    // `nextSeason` returns null both for "after winter" and for "no such
+    // season", so a save naming a season that has since been renamed would read
+    // as a completed run and hand out the ending screen. It has to fall out to
+    // character select instead.
+    const won = { ...wonSpring(), seasonId: "monsoon" }
+    const next = advance(won)
+    expect(next.phase).toBe(PHASE.CHARACTER_SELECT)
+    expect(next.phase).not.toBe(PHASE.RUN_COMPLETE)
+    expect(next.seasonId).toBeNull()
+    expect(next.question).toBeNull()
+    // The rest of the run survives, so nothing is silently thrown away.
+    expect(next.collected).toEqual(won.collected)
+    expect(next.bestStreak).toBe(won.bestStreak)
+  })
+
+  it("resets the attempt counter for the season it starts", () => {
+    // A new season is always a first attempt, whatever the last one cost.
+    const won = { ...wonSpring(), attempt: 3 }
+    expect(advance(won).attempt).toBe(0)
   })
 
   it("is a no-op outside SEASON_WON", () => {
@@ -939,6 +1087,51 @@ describe("retry", () => {
     expect(again.characterId).toBe("sloth")
   })
 
+  it("counts the attempt, and keeps counting through a run-over restart", () => {
+    const first = retry(lostSpring())
+    expect(first.attempt).toBe(1)
+    const second = retry({ ...lostSpring(), attempt: first.attempt })
+    expect(second.attempt).toBe(2)
+    // A run-over restart carries the counter rather than resetting it. Reset to
+    // zero it would hand the player spring's original question list again, so a
+    // run that ended in winter would open with the exact questions it opened
+    // with the first time -- the same staleness `attempt` exists to prevent.
+    expect(retry(lostSpring({ attempt: 5, runOver: true })).attempt).toBe(6)
+  })
+
+  it("asks different questions on the replay", () => {
+    // Without `attempt` in the question seed, a child who failed winter got the
+    // same twenty questions back in the same order, which makes a retry
+    // worthless as practice. Same seed, same season, different questions.
+    const firstAttempt = startAs("sloth")
+    const replay = retry(lostSpring())
+    expect(replay.seed).toBe(firstAttempt.seed)
+    expect(replay.seasonId).toBe(firstAttempt.seasonId)
+    expect(replay.attempt).toBe(firstAttempt.attempt + 1)
+
+    const before = promptsFrom(firstAttempt, 6)
+    const after = promptsFrom(replay, 6)
+    expect(after).not.toEqual(before)
+    // Still deterministic: the same attempt replays identically.
+    expect(promptsFrom(retry(lostSpring()), 6)).toEqual(after)
+  })
+
+  it("gives the next season a clean attempt counter", () => {
+    // `startSeason` defaults `attempt` to 0, so winning a replayed season does
+    // not carry its attempt number into the next one.
+    const replay = retry(lostSpring())
+    expect(replay.attempt).toBe(1)
+    const won = answerRight(playToBoss(replay)).state
+    expect(won.phase).toBe(PHASE.SEASON_WON)
+    const summer = advance(won)
+    expect(summer.seasonId).toBe("summer")
+    expect(summer.attempt).toBe(0)
+  })
+
+  it("hands back a full set of boss tries", () => {
+    expect(retry(lostSpring({ bossTriesLeft: 0 })).bossTriesLeft).toBe(BOSS_TRIES)
+  })
+
   it("is a no-op outside SEASON_LOST", () => {
     const trail = startAs("sloth")
     expect(retry(trail)).toBe(trail)
@@ -982,18 +1175,13 @@ describe("answer guards", () => {
   })
 
   it("treats a timeout, delivered as null, as an ordinary wrong answer", () => {
-    const originalRule = RULES.WRONG_ANSWER
     RULES.WRONG_ANSWER = WRONG_ANSWER.WILT
-    try {
-      const state = rightTimes(startAs("sloth"), 3)
-      const { state: next, outcome } = answer(state, null)
-      expect(outcome.correct).toBe(false)
-      expect(outcome.wiltedNow).toBe(1)
-      expect(next.streak).toBe(0)
-      expect(next.wilting).toBe(1)
-    } finally {
-      RULES.WRONG_ANSWER = originalRule
-    }
+    const state = rightTimes(startAs("sloth"), 3)
+    const { state: next, outcome } = answer(state, null)
+    expect(outcome.correct).toBe(false)
+    expect(outcome.wiltedNow).toBe(1)
+    expect(next.streak).toBe(0)
+    expect(next.wilting).toBe(1)
   })
 })
 
@@ -1009,6 +1197,8 @@ describe("rehydrate", () => {
       characterId: "sloth",
       seasonId: "spring",
       seed: SEED,
+      attempt: 0,
+      bossTriesLeft: BOSS_TRIES,
       position: 3,
       items: 3,
       wilting: 0,
@@ -1037,7 +1227,17 @@ describe("rehydrate", () => {
     const restored = rehydrate(saved({ phase: PHASE.BOSS, position: SPRING.spaces }))
     expect(restored.phase).toBe(PHASE.BOSS)
     expect(restored.question).not.toBeNull()
-    expect(restored.question.kind).toBe("twoStep")
+    // Division is the boss form in every season now.
+    expect(restored.question.kind).toBe("div")
+  })
+
+  it("restores the question of the attempt that was saved", () => {
+    // `attempt` is part of the question seed, so a save made on a replay has to
+    // come back showing that replay's question rather than the first attempt's.
+    const first = rehydrate(saved({ attempt: 0 }))
+    const replay = rehydrate(saved({ attempt: 1 }))
+    expect(replay.attempt).toBe(1)
+    expect(replay.question).not.toEqual(first.question)
   })
 
   it.each([PHASE.CHARACTER_SELECT, PHASE.SEASON_WON, PHASE.SEASON_LOST, PHASE.RUN_COMPLETE])(
@@ -1058,7 +1258,14 @@ describe("rehydrate", () => {
     const restored = rehydrate(saved({ phase: PHASE.TRAIL, position: SPRING.spaces }))
     expect(restored.phase).toBe(PHASE.BOSS)
     expect(restored.position).toBe(SPRING.spaces)
-    expect(restored.question.kind).toBe("twoStep")
+    expect(restored.question.kind).toBe("div")
+  })
+
+  it("keeps the boss tries a save was carrying", () => {
+    const restored = rehydrate(
+      saved({ phase: PHASE.BOSS, position: SPRING.spaces, bossTriesLeft: 1 }),
+    )
+    expect(restored.bossTriesLeft).toBe(1)
   })
 
   it("demotes a BOSS save that is not actually at the end back to TRAIL", () => {
@@ -1125,12 +1332,6 @@ describe("remainingDemand", () => {
 })
 
 describe("a full playthrough", () => {
-  const original = RULES.BOSS_FAILURE
-
-  afterEach(() => {
-    RULES.BOSS_FAILURE = original
-  })
-
   it("clears spring by answering every question correctly", () => {
     const { state, outcome } = answerRight(playToBoss(startAs("sloth")))
     expect(state.phase).toBe(PHASE.SEASON_WON)
@@ -1174,6 +1375,39 @@ describe("a full playthrough", () => {
       // The streak resets with each season, so the best is the longest season
       // plus its boss.
       expect(state.bestStreak).toBe(longestSeason + 1)
+    },
+  )
+
+  itWithASecondTry.each(["sloth", "banana-slug", "phoenix", "porcupine"])(
+    "can be completed by the %s even after missing every boss question once",
+    (characterId) => {
+      // The boss slot now asks division, the hardest form in the level, and
+      // gives more than one try. A player who fumbles the first try of every
+      // boss and recovers on the next must still finish the run under END_RUN
+      // -- otherwise the extra try is decoration.
+      RULES.BOSS_FAILURE = BOSS_FAILURE.END_RUN
+      let state = startAs(characterId)
+      for (const seasonId of SEASON_ORDER) {
+        const season = getSeason(seasonId)
+        expect(state.seasonId).toBe(seasonId)
+        expect(state.attempt).toBe(0)
+
+        const boss = playToBoss(state)
+        expect(boss.question.kind).toBe("div")
+
+        const missed = answerWrong(boss)
+        expect(missed.state.phase).toBe(PHASE.BOSS)
+        expect(missed.state.bossTriesLeft).toBe(BOSS_TRIES - 1)
+
+        const { state: resolved, outcome } = answerRight(missed.state)
+        expect(outcome.rescued).toBe(season.boss.rescue)
+        expect(resolved.phase).toBe(PHASE.SEASON_WON)
+        expect(resolved.items).toBeGreaterThanOrEqual(season.demand)
+
+        state = advance(resolved)
+      }
+      expect(state.phase).toBe(PHASE.RUN_COMPLETE)
+      expect(state.runOver).toBe(false)
     },
   )
 })

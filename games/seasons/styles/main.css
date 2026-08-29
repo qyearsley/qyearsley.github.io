@@ -33,14 +33,20 @@
   --sn-surface: #fff;
   --sn-surface-alt: #efeae0;
   --sn-ink: #2d3330;
-  --sn-ink-muted: #6b736e;
+  --sn-ink-muted: #69716c;
   --sn-border: #ddd6c8;
   --sn-primary: #3f7d5c;
   --sn-primary-ink: #fff;
-  --sn-correct: #2f8f52;
+  --sn-correct: #2c864d;
   --sn-correct-bg: #e6f5ea;
   --sn-wrong: #c0453b;
   --sn-wrong-bg: #fbe9e7;
+
+  /* The marked answer buttons put their own colour on their own tint, which is
+     a darker pairing than either is against the page. Separate values so the
+     text clears 4.5:1 there without dulling the borders and feedback line. */
+  --sn-correct-on-tint: #1f6b3b;
+  --sn-wrong-on-tint: #a3352c;
   --sn-tap: 64px;
   --sn-radius: 14px;
 
@@ -49,13 +55,21 @@
   --season-far: #a8d5ba;
   --season-ground: #6fae82;
   --season-accent: #e8657f;
-  --season-item: #e8657f;
   --season-glow: #fff2a8;
   --season-ink: #2b3d31;
+  --season-accent-text: #e02c50;
+  --season-accent-text-dark: #e86680;
+
+  /* The accent that paints the trail is usually too light to read as text, so
+     the art pack supplies a tuned pair and this resolves which one applies.
+     Everything that draws text uses --season-accent-ink; only shapes use
+     --season-accent. */
+  --season-accent-ink: var(--season-accent-text);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
+    --season-accent-ink: var(--season-accent-text-dark);
     --sn-bg: #1c211f;
     --sn-surface: #262c2a;
     --sn-surface-alt: #2f3634;
@@ -75,6 +89,7 @@
    rather than referenced, because a CSS custom property cannot be aliased
    across two different selectors. */
 :root[data-theme="dark"] {
+  --season-accent-ink: var(--season-accent-text-dark);
   --sn-bg: #1c211f;
   --sn-surface: #262c2a;
   --sn-surface-alt: #2f3634;
@@ -102,6 +117,8 @@ body {
     sans-serif;
   overscroll-behavior: none;
   text-size-adjust: 100%;
+  user-select: none;
+  -webkit-touch-callout: none;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
@@ -187,9 +204,14 @@ body {
   text-align: center;
 }
 
+/* Each screen change focuses its heading so a screen reader announces where it
+   landed. Inline-block so the focus ring hugs the words: on a block-level
+   heading it drew a full-width rectangle across the page on every transition,
+   which reads as a rendering fault rather than a focus indicator. */
 .screen-heading:focus-visible {
+  display: inline-block;
   outline: 3px solid var(--sn-primary);
-  outline-offset: 4px;
+  outline-offset: 6px;
 }
 
 .screen-intro {
@@ -201,10 +223,26 @@ body {
 }
 
 /* ==================== Character select ==================== */
+
+/* Explicit column counts rather than auto-fit. There are exactly four
+   characters, and auto-fit picked three columns at tablet widths, which left
+   the fourth card alone on its own row. */
 .character-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
+}
+
+@media (width >= 900px) {
+  .character-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (width <= 430px) {
+  .character-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .character-card {
@@ -307,17 +345,44 @@ body {
 
 .demand-count {
   margin-top: 4px;
-  font-size: 1.1rem;
-  color: var(--sn-ink);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--season-accent-ink);
 }
 
-.demand-count strong {
-  font-size: 1.35rem;
-  color: var(--season-accent);
+/* One slot per item she asked for. Earned slots hold the season's collectible,
+   wilting ones are drained and dropped, and the rest are empty outlines -- so
+   the goal, the progress and the shortfall all read at a glance instead of
+   being arithmetic on a counter. */
+.item-track {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 6px;
 }
 
-.demand-of {
-  color: var(--sn-ink-muted);
+.item-pip {
+  display: block;
+  width: 19px;
+  height: 19px;
+  border: 2px dashed var(--sn-border);
+  border-radius: 50%;
+}
+
+.item-pip.is-earned,
+.item-pip.is-wilting {
+  border: 0;
+}
+
+.item-pip.is-wilting {
+  opacity: 0.4;
+  filter: grayscale(85%);
+  transform: translateY(3px) rotate(12deg);
+}
+
+.item-svg {
+  width: 100%;
+  height: 100%;
 }
 
 .note {
@@ -380,12 +445,16 @@ body {
 }
 
 .marker-glow {
+  transform-box: fill-box;
+  transform-origin: center;
   fill: var(--season-glow);
   fill-opacity: 0.5;
   animation: seasons-pulse 2.4s ease-in-out infinite;
 }
 
 .marker-glow-inner {
+  transform-box: fill-box;
+  transform-origin: center;
   fill: var(--season-glow);
   fill-opacity: 0.85;
 }
@@ -420,7 +489,7 @@ body {
   margin-bottom: 6px;
   font-size: 0.82rem;
   font-weight: 700;
-  color: var(--season-accent);
+  color: var(--season-accent-ink);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -485,9 +554,12 @@ body.is-glowing-question .question-prompt {
   margin: 18px auto 0;
 }
 
+/* Bordered in the primary green, not the hairline border colour: at 1.45:1
+   against the page the old border was below the 3:1 that a control boundary
+   needs, and the buttons read as faint tinted rectangles. */
 .choice {
   min-height: var(--sn-tap);
-  border: 2px solid var(--sn-border);
+  border: 2px solid var(--sn-primary);
   border-radius: var(--sn-radius);
   background: var(--sn-surface-alt);
   color: var(--sn-ink);
@@ -510,20 +582,44 @@ body.is-glowing-question .question-prompt {
   transform: scale(0.95);
 }
 
-.choice:disabled {
+.choice.is-locked {
   cursor: default;
+}
+
+/* Dim the two buttons that are neither right nor the one just pressed, so
+   only the meaningful ones stay lit. */
+.choice.is-locked:not(.is-correct, .is-wrong) {
+  opacity: 0.45;
 }
 
 .choice.is-correct {
   border-color: var(--sn-correct);
   background: var(--sn-correct-bg);
-  color: var(--sn-correct);
+  color: var(--sn-correct-on-tint);
 }
 
 .choice.is-wrong {
   border-color: var(--sn-wrong);
   background: var(--sn-wrong-bg);
-  color: var(--sn-wrong);
+  color: var(--sn-wrong-on-tint);
+}
+
+/* A glyph as well as a hue. Red/green alone fails for the ~1 boy in 12 with a
+   colour vision deficiency, and the shake that used to carry the difference is
+   switched off under prefers-reduced-motion -- which left hue as the only
+   signal for exactly the users least able to use it. */
+.choice.is-correct::after,
+.choice.is-wrong::after {
+  margin-left: 0.4em;
+  font-size: 0.8em;
+}
+
+.choice.is-correct::after {
+  content: "✓";
+}
+
+.choice.is-wrong::after {
+  content: "✗";
 }
 
 .feedback {

@@ -48,8 +48,10 @@ function timerBound(season) {
 }
 
 describe("SEASON_LIST", () => {
-  it("has four seasons in SEASON_ORDER order", () => {
-    expect(SEASON_LIST).toHaveLength(4)
+  // The one deliberately hard-coded list in this file, and the only line to
+  // touch when Ella adds a season. Everything below sweeps SEASON_LIST, so a
+  // fifth season costs exactly this edit.
+  it("is the published set of seasons, in play order", () => {
     expect(SEASON_LIST.map((season) => season.id)).toEqual(SEASON_ORDER)
     expect(SEASON_ORDER).toEqual(["spring", "summer", "autumn", "winter"])
   })
@@ -84,7 +86,11 @@ describe.each(SEASON_LIST.map((season) => [season.id, season]))("%s", (_id, seas
   })
 
   it("has either no timer or a positive one", () => {
-    if (season.timerSeconds !== null) {
+    if (season.timerSeconds === null) {
+      // The `else` matters: without it the untimed season runs zero assertions
+      // and passes vacuously, so name which season is allowed to be untimed.
+      expect(season.id).toBe("spring")
+    } else {
       expect(typeof season.timerSeconds).toBe("number")
       expect(season.timerSeconds).toBeGreaterThan(0)
     }
@@ -95,6 +101,19 @@ describe.each(SEASON_LIST.map((season) => [season.id, season]))("%s", (_id, seas
     expect(season.forms.length).toBeGreaterThan(0)
     expect(Array.isArray(season.glowingForms)).toBe(true)
     expect(season.glowingForms.length).toBeGreaterThan(0)
+  })
+
+  it("keeps division off the ordinary spaces, per Ella's rule", () => {
+    // "Addition, subtraction, multiplication, maybe with division as the
+    // hardest one in a level." Division is reserved for the glowing spaces and
+    // the boss, so meeting one always means the player reached a hard space.
+    // Encoded here because the rule lives in a file comment otherwise, and a
+    // retune that drops a `div` into `forms` would break nothing else.
+    expect(season.forms.map((form) => form.kind)).not.toContain("div")
+    expect(season.glowingForms.map((form) => form.kind)).toContain("div")
+    for (const form of season.boss.forms) {
+      expect(form.kind).toBe("div")
+    }
   })
 
   it("has a boss with a positive rescue and at least one form", () => {
@@ -222,12 +241,6 @@ describe("getSeason", () => {
 })
 
 describe("nextSeason", () => {
-  it("walks the order", () => {
-    expect(nextSeason("spring").id).toBe("summer")
-    expect(nextSeason("summer").id).toBe("autumn")
-    expect(nextSeason("autumn").id).toBe("winter")
-  })
-
   it("agrees with SEASON_ORDER for every step", () => {
     for (let i = 0; i < SEASON_ORDER.length - 1; i += 1) {
       expect(nextSeason(SEASON_ORDER[i]).id).toBe(SEASON_ORDER[i + 1])
@@ -235,8 +248,7 @@ describe("nextSeason", () => {
   })
 
   it("returns null after the last season", () => {
-    expect(nextSeason("winter")).toBeNull()
-    expect(nextSeason(SEASON_ORDER[SEASON_ORDER.length - 1])).toBeNull()
+    expect(nextSeason(SEASON_ORDER.at(-1))).toBeNull()
   })
 
   it.each([
@@ -251,8 +263,8 @@ describe("nextSeason", () => {
   })
 
   it("reaches every season by walking from the first", () => {
-    const walked = ["spring"]
-    let current = getSeason("spring")
+    const walked = [SEASON_ORDER[0]]
+    let current = getSeason(SEASON_ORDER[0])
     while (nextSeason(current.id)) {
       current = nextSeason(current.id)
       walked.push(current.id)
@@ -295,17 +307,30 @@ describe("maxItems", () => {
     expect(maxItems(spring, 0)).toBe(12)
   })
 
-  it("defaults to three items per glowing space", () => {
-    for (const season of SEASON_LIST) {
-      expect(maxItems(season)).toBe(maxItems(season, 3))
-    }
-  })
-
-  it("matches the general formula for every season", () => {
-    for (const season of SEASON_LIST) {
-      const glowing = season.glowingAt.length
-      expect(maxItems(season, 2)).toBe(season.spaces - glowing + glowing * 2)
-    }
+  // Deliberate literals. Retuning a season is *meant* to fail these -- they are
+  // the one place a hand-computed number checks maxItems, and every reachability
+  // test above is built on maxItems. Recompute them from seasons.js by hand;
+  // do not derive them from the formula.
+  //
+  // Hand-computed from the trail lengths and glowing counts in seasons.js:
+  // spring 12 ordinary + 2 glowing, summer 13 + 3, autumn 14 + 4, winter 15 + 5.
+  //
+  // Literals rather than the formula. The two tests these replaced compared
+  // maxItems either to its own body (`spaces - glowing + glowing * 2`) or to
+  // itself (`maxItems(season)` vs `maxItems(season, 3)`), so both passed for any
+  // implementation at all -- including one that returned 0 for everything.
+  // Retuning a season is meant to fail these; that is what makes them worth
+  // having, because the reachability tests above are all built on maxItems.
+  it.each([
+    ["spring", 18, 16],
+    ["summer", 22, 19],
+    ["autumn", 26, 22],
+    ["winter", 30, 25],
+  ])("counts %s at %i items by default, %i for the Banana Slug", (id, byDefault, forSlug) => {
+    const season = getSeason(id)
+    expect(maxItems(season)).toBe(byDefault)
+    expect(maxItems(season, 3)).toBe(byDefault)
+    expect(maxItems(season, 2)).toBe(forSlug)
   })
 
   it.each([
@@ -317,8 +342,10 @@ describe("maxItems", () => {
     expect(maxItems(season)).toBe(0)
   })
 
-  it("rises with the character's glowing value", () => {
-    const winter = getSeason("winter")
-    expect(maxItems(winter, 2)).toBeLessThan(maxItems(winter, 3))
-  })
+  it.each(SEASON_LIST.map((season) => [season.id, season]))(
+    "%s rises with the character's glowing value",
+    (_id, season) => {
+      expect(maxItems(season, 2)).toBeLessThan(maxItems(season, 3))
+    },
+  )
 })

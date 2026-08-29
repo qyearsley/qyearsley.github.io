@@ -16,10 +16,12 @@
  * file plus one string in constants.ART.PACK, which only works if "implements
  * the contract" is checkable. The contract block below walks every character id
  * in characters.js and every season id in SEASON_ORDER and asserts a real
- * drawing comes back for each -- an SVG element with something in it, and a
- * viewBox the caller can actually size against. That is what stops a future pack
- * from shipping with, say, no winter item: the game would render an empty box
- * and nothing else would complain.
+ * drawing comes back for each -- an SVG element with something in it, a viewBox
+ * the caller can actually size against, and, crucially, markup that is neither
+ * the unknown-id fallback nor any other id's drawing. The structural checks
+ * alone are not enough: the fallback grey blob satisfies every one of them, so a
+ * pack shipping with no winter item would render a grey disc and pass. The
+ * distinctness assertions are what make this block able to fail.
  *
  * Non-obvious setup: none. These modules build DOM through `document`, which the
  * jsdom test environment already provides, and they hold no state between calls.
@@ -69,6 +71,9 @@ function parseViewBox(viewBox) {
 /**
  * Assert a value is a usable Drawing: a populated SVG element in the SVG
  * namespace, plus a viewBox with positive extent.
+ *
+ * Structure only. The unknown-id fallback passes every check in here, so a
+ * caller testing a specific id has to compare against the fallback as well.
  * @param {unknown} drawing - The value a pack function returned
  */
 function expectDrawing(drawing) {
@@ -80,6 +85,15 @@ function expectDrawing(drawing) {
   const [, , width, height] = parseViewBox(viewBox)
   expect(width).toBeGreaterThan(0)
   expect(height).toBeGreaterThan(0)
+}
+
+/**
+ * A drawing's markup, for comparing one id's art against another's.
+ * @param {{element: Element}} drawing - A Drawing
+ * @returns {string} The serialized element
+ */
+function markup(drawing) {
+  return drawing.element.outerHTML
 }
 
 describe("svg", () => {
@@ -189,7 +203,10 @@ describe("the registry", () => {
 
   it("the active pack is the one constants.ART.PACK names", () => {
     const warn = jest.spyOn(console, "warn").mockImplementation(() => {})
-    expect(activePack()).toBe(getPack(ART.PACK))
+    // Named module, not `getPack(ART.PACK)` -- activePack's whole body is
+    // `return getPack(ART.PACK)`, so that comparison could not fail.
+    expect(activePack()).toBe(placeholder)
+    expect(ART.PACK).toBe("placeholder")
     expect(activePack().id).toBe(ART.PACK)
     // A configured pack that does not exist would be a silent downgrade.
     expect(warn).not.toHaveBeenCalled()
@@ -218,27 +235,54 @@ describe("the placeholder pack fulfils the art-pack contract", () => {
   })
 
   it.each(CHARACTER_IDS)("draws the character %s", (characterId) => {
-    expectDrawing(pack.character(characterId))
+    const drawing = pack.character(characterId)
+    expectDrawing(drawing)
+    // Not the unknown-id blob. Without this the test passes on a pack that has
+    // never heard of this character, because the fallback is a real drawing.
+    expect(markup(drawing)).not.toBe(markup(pack.character("nope")))
+  })
+
+  it("draws a different character for each id, so no two share art", () => {
+    const drawn = CHARACTER_IDS.map((characterId) => markup(pack.character(characterId)))
+    expect(new Set(drawn).size).toBe(CHARACTER_IDS.length)
   })
 
   it.each(SEASON_ORDER)("draws the ordinary item for %s", (seasonId) => {
-    expectDrawing(pack.item(seasonId, false))
+    const drawing = pack.item(seasonId, false)
+    expectDrawing(drawing)
+    expect(markup(drawing)).not.toBe(markup(pack.item("nope")))
   })
 
   it.each(SEASON_ORDER)("draws the rare item for %s", (seasonId) => {
-    expectDrawing(pack.item(seasonId, true))
+    const drawing = pack.item(seasonId, true)
+    expectDrawing(drawing)
+    expect(markup(drawing)).not.toBe(markup(pack.item("nope")))
+  })
+
+  it("draws a distinct item for every season, plain and rare alike", () => {
+    const drawn = SEASON_ORDER.flatMap((seasonId) => [
+      markup(pack.item(seasonId, false)),
+      markup(pack.item(seasonId, true)),
+    ])
+    expect(new Set(drawn).size).toBe(SEASON_ORDER.length * 2)
   })
 
   it("the rare item differs from the ordinary one, or the glow means nothing", () => {
     for (const seasonId of SEASON_ORDER) {
-      const plain = pack.item(seasonId, false).element.outerHTML
-      const rare = pack.item(seasonId, true).element.outerHTML
-      expect(rare).not.toBe(plain)
+      expect(markup(pack.item(seasonId, true))).not.toBe(markup(pack.item(seasonId, false)))
     }
   })
 
   it.each(SEASON_ORDER)("draws the scenery for %s", (seasonId) => {
     expectDrawing(pack.scenery(seasonId))
+  })
+
+  it("draws different scenery for each season", () => {
+    // No fallback comparison here, unlike the character and item cases: an
+    // unknown season's scenery is deliberately spring's, so `scenery("nope")`
+    // is a real season's drawing rather than a distinguishable blob.
+    const drawn = SEASON_ORDER.map((seasonId) => markup(pack.scenery(seasonId)))
+    expect(new Set(drawn).size).toBe(SEASON_ORDER.length)
   })
 
   it("draws the villain", () => {

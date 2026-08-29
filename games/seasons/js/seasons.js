@@ -1,39 +1,35 @@
 /**
  * Seasons content -- the four levels, their collectibles, and their difficulty.
  *
- * Architecture: this is the content file. It is the one place to change how
- * hard the game is, and it is meant to be edited often.
+ * The one place to change how hard the game is, and meant to be edited often.
+ * The difficulty table and the demand tuning are written up in ../README.md;
+ * what follows is only what an editor of this file needs.
+ *
  * - A season names a challenge *type* rather than importing a generator, so a
  *   matching game or a word puzzle can become a season's challenge by changing
  *   one string once the module exists in challenges/. See challenges/index.js.
  * - `forms` and `glowingForms` are passed straight to that challenge module.
  *   Their shape is the challenge's business, not this file's; arithmetic.js
  *   documents the arithmetic forms.
- * - Difficulty escalates on both axes at once, which is the decision behind the
- *   numbers below: the maths gets harder *and* the timer tightens, the demand
- *   rises, and more of the trail is glowing.
+ * - Difficulty escalates on every axis at once: the maths gets harder, the
+ *   timer tightens, the demand rises, and more of the trail is glowing. The
+ *   target is third grade.
+ * - Keep two-digit multiplication to a small first operand and a second operand
+ *   in the low tens. Anything larger is a written, vertical-maths question
+ *   rather than a mental one, which is not what this format can fairly ask
+ *   against a countdown.
+ * - Ella's rule for the operations: "addition, subtraction, multiplication,
+ *   maybe with division as the hardest one in a level." So division never
+ *   appears in a season's ordinary `forms`; it is reserved for `glowingForms`
+ *   and the boss. Meeting a division question always means you reached one of
+ *   the hard spaces. seasons.test.js enforces this.
  *
- * Difficulty target: third grade. Spring is addition and subtraction within 100
- * plus the 2s, 5s, and 10s; winter is two-step problems against a 15-second
- * clock. If the whole thing is pitched wrong, this file is the only one to fix.
- *
- * Reachability: `maxItems` below is what a perfect run collects. Every demand
- * sits near 70% of it *for the Banana Slug*, who collects 2 from a glowing
- * space rather than 3 -- and therefore around 60% for everyone else.
- *
- * Tuning against the slug rather than the default character is the point. Her
- * handicap is one item per glowing space, and the number of glowing spaces
- * grows every season, so a demand tuned to the 3-item characters squeezes her
- * hardest exactly where the maths is already hardest. An earlier set of demands
- * did that: winter left her four missable questions out of twenty.
- *
- * The demand ratio therefore eases slightly across the year while the demand
- * *number* rises. That is deliberate -- the escalation a player feels comes
- * from harder maths and a tighter clock, and needing a higher hit rate on top
- * of both is what makes a level unfair rather than hard.
- *
- * seasons.test.js asserts every demand is reachable by every character with at
- * least 25% headroom, so a retune cannot quietly undo any of this.
+ * Reachability: `maxItems` below is what a perfect run collects. Demands are
+ * tuned against the Banana Slug, who takes fewer items from a glowing space, so
+ * she is always the binding constraint -- and her handicap grows with the
+ * number of glowing spaces, which grows every season. seasons.test.js asserts
+ * every demand is reachable by every character with headroom to spare, so a
+ * retune cannot quietly make a season impossible.
  *
  * Error Handling: `getSeason` returns null for an unknown id. Unlike a
  * character, there is no sensible fallback season -- playing spring when the
@@ -75,7 +71,7 @@ const SEASONS = {
     itemName: "Rose",
     itemPlural: "Roses",
     rareItemName: "Everlasting Rose",
-    demandText: "Bring me eleven roses. I want the ones that never die.",
+    demandText: "Eleven roses for my potion, please. The ones that never wilt.",
     spaces: 14,
     glowingAt: [4, 9],
     demand: 11,
@@ -88,11 +84,11 @@ const SEASONS = {
     ],
     glowingForms: [
       { kind: "mul", tables: [2, 5, 10], upTo: 12 },
-      { kind: "sub", max: 100, borrow: true },
+      { kind: "div", tables: [2, 5, 10], upTo: 6 },
     ],
     boss: {
       rescue: 3,
-      forms: [{ kind: "twoStep", tables: [2, 5, 10], upTo: 10, max: 100 }],
+      forms: [{ kind: "div", tables: [2, 5, 10], upTo: 10 }],
     },
   },
 
@@ -102,7 +98,7 @@ const SEASONS = {
     itemName: "Diamond",
     itemPlural: "Diamonds",
     rareItemName: "Blazing Diamond",
-    demandText: "Thirteen diamonds. Bright ones. Do not disappoint me.",
+    demandText: "Thirteen diamonds next. My potion needs something that catches light.",
     spaces: 16,
     glowingAt: [3, 8, 13],
     demand: 13,
@@ -110,15 +106,16 @@ const SEASONS = {
     challenge: "arithmetic",
     forms: [
       { kind: "mul", tables: [2, 3, 4, 5, 6, 7, 8, 9, 10], upTo: 10 },
-      { kind: "div", tables: [2, 3, 4, 5, 6, 7, 8, 9, 10], upTo: 10 },
+      { kind: "add", max: 200, borrow: true },
+      { kind: "sub", max: 200, borrow: true },
     ],
     glowingForms: [
       { kind: "mul", tables: [6, 7, 8, 9], upTo: 12 },
-      { kind: "div", tables: [6, 7, 8, 9], upTo: 12 },
+      { kind: "div", tables: [2, 3, 4, 5, 6, 7, 8, 9, 10], upTo: 10 },
     ],
     boss: {
       rescue: 4,
-      forms: [{ kind: "twoStep", tables: [2, 3, 4, 5, 6, 7, 8, 9, 10], upTo: 10, max: 200 }],
+      forms: [{ kind: "div", tables: [6, 7, 8, 9], upTo: 10 }],
     },
   },
 
@@ -128,24 +125,24 @@ const SEASONS = {
     itemName: "Leaf",
     itemPlural: "Leaves",
     rareItemName: "Golden Leaf",
-    demandText: "Fifteen leaves before they all fall. Gold ones count for more.",
+    demandText: "Fifteen leaves, before they all fall. The gold ones are strongest.",
     spaces: 18,
     glowingAt: [3, 7, 11, 15],
     demand: 15,
     timerSeconds: 18,
     challenge: "arithmetic",
     forms: [
-      { kind: "mul", tables: [2, 3, 4, 5, 6, 7, 8, 9], upTo: 20, twoDigit: true },
+      { kind: "mul", tables: [2, 3, 4, 5], upTo: 15, twoDigit: true },
       { kind: "add", max: 1000, borrow: true },
       { kind: "sub", max: 1000, borrow: true },
     ],
     glowingForms: [
-      { kind: "mul", tables: [6, 7, 8, 9], upTo: 40, twoDigit: true },
-      { kind: "twoStep", tables: [2, 3, 4, 5, 6, 7, 8, 9], upTo: 10, max: 300 },
+      { kind: "mul", tables: [2, 3, 4, 5], upTo: 20, twoDigit: true },
+      { kind: "div", tables: [3, 4, 6, 7, 8, 9], upTo: 12 },
     ],
     boss: {
       rescue: 5,
-      forms: [{ kind: "twoStep", tables: [3, 4, 6, 7, 8, 9], upTo: 12, max: 400 }],
+      forms: [{ kind: "div", tables: [4, 6, 7, 8, 9], upTo: 12 }],
     },
   },
 
@@ -155,7 +152,7 @@ const SEASONS = {
     itemName: "Icicle",
     itemPlural: "Icicles",
     rareItemName: "Frostfire Icicle",
-    demandText: "Seventeen icicles. The winter is long, and I am not patient.",
+    demandText: "Seventeen icicles and the potion is finished. This is the hard part.",
     spaces: 20,
     glowingAt: [3, 7, 11, 15, 18],
     demand: 17,
@@ -163,16 +160,16 @@ const SEASONS = {
     challenge: "arithmetic",
     forms: [
       { kind: "twoStep", tables: [2, 3, 4, 5, 6, 7, 8, 9], upTo: 12, max: 300 },
-      { kind: "mul", tables: [3, 4, 6, 7, 8, 9], upTo: 50, twoDigit: true },
-      { kind: "div", tables: [3, 4, 6, 7, 8, 9], upTo: 12 },
+      { kind: "mul", tables: [2, 3, 4, 5, 6], upTo: 20, twoDigit: true },
+      { kind: "sub", max: 1000, borrow: true },
     ],
     glowingForms: [
+      { kind: "div", tables: [3, 4, 6, 7, 8, 9], upTo: 12 },
       { kind: "twoStep", tables: [4, 6, 7, 8, 9], upTo: 12, max: 500 },
-      { kind: "mul", tables: [6, 7, 8, 9], upTo: 90, twoDigit: true },
     ],
     boss: {
       rescue: 6,
-      forms: [{ kind: "twoStep", tables: [4, 6, 7, 8, 9], upTo: 12, max: 600 }],
+      forms: [{ kind: "div", tables: [6, 7, 8, 9], upTo: 12 }],
     },
   },
 }
@@ -235,12 +232,13 @@ export function isGlowing(season, index) {
  * quietly impossible.
  *
  * @param {Season} season - The season to measure
- * @param {number} [glowingItems] - Items per glowing space; defaults to 3
+ * @param {number} [glowingItems] - Items per glowing space; defaults to the
+ *   unmodified PLAY.ITEMS_PER_GLOWING_SPACE value
  * @returns {number} Items collected by answering every space correctly, before
  *   the boss's rescue
  */
 export function maxItems(season, glowingItems = 3) {
-  if (!season) return 0
+  if (!season || !Array.isArray(season.glowingAt) || !Number.isFinite(season.spaces)) return 0
   const glowing = season.glowingAt.length
   const ordinary = season.spaces - glowing
   return ordinary + glowing * glowingItems

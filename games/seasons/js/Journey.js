@@ -1,26 +1,25 @@
 /**
  * Seasons journey -- the trail a character walks through a season.
  *
- * Architecture: pure geometry and bookkeeping, no state and no DOM.
- * - A trail is derived from a season, never stored. `buildTrail` is a pure
- *   function of a Season, so the save file records a position and nothing else;
- *   retuning a season's length in seasons.js cannot leave a stale trail behind.
- * - This module owns *what* a space is worth and *where* the boss sits. It does
- *   not own the player's position -- that lives in GameState -- and it does not
- *   own the curve the trail is drawn along, which is the art pack's business.
- *   The separation matters: the shape on screen can change completely without
- *   touching a rule.
+ * Pure geometry and bookkeeping: no state, no DOM, no randomness. This module
+ * owns what a space is worth and where the boss sits. It does not own the
+ * player's position (GameState does) or the curve the trail is drawn along (the
+ * art pack does), so the shape on screen can change completely without touching
+ * a rule.
+ *
+ * - A trail is derived, never stored. `buildTrail` is a pure function of a
+ *   Season, so a save records a position and nothing else, and retuning a
+ *   season's length cannot leave a stale trail behind.
  * - Positions run 0 .. spaces. Position `spaces` is one past the last space and
  *   means "at the boss"; `isAtBoss` is the only correct way to ask.
+ * - `normalizePosition` is the semantic authority on that bound. storage.js
+ *   normalizes a position only structurally, because the bound needs the
+ *   season; `GameState.rehydrate` applies this one on load.
  *
  * Error Handling: every function tolerates a null season and an out-of-range
- * position, returning a safe zero-ish value rather than throwing. Positions
- * come from a save file and are only structurally normalized by storage.js;
- * `normalizePosition` here is the semantic authority and GameState runs it on
- * load.
+ * position, returning a safe zero-ish value rather than throwing.
  */
 
-import { PLAY } from "./constants.js"
 import { isGlowing } from "./seasons.js"
 
 /**
@@ -28,9 +27,12 @@ import { isGlowing } from "./seasons.js"
  *
  * @typedef {Object} Space
  * @property {number} index    - 0-based position along the trail
- * @property {boolean} glowing - Whether this is one of Ella's glowing challenges
- * @property {number} items    - Items a correct answer here collects, before
- *                               any character or comeback modifier
+ * @property {boolean} glowing - Whether this is a glowing space; the label the
+ *                               player sees is "Glowing challenge"
+ *
+ * Deliberately no `items` field. What a space pays depends on the character's
+ * `glowingItems`, so a payout recorded here would disagree with the number the
+ * player actually receives. `GameState.answer` is the single authority.
  */
 
 /**
@@ -42,14 +44,10 @@ import { isGlowing } from "./seasons.js"
 export function buildTrail(season) {
   if (!season || !Number.isFinite(season.spaces)) return []
   const count = Math.max(0, Math.floor(season.spaces))
-  return Array.from({ length: count }, (_, index) => {
-    const glowing = isGlowing(season, index)
-    return {
-      index,
-      glowing,
-      items: glowing ? PLAY.ITEMS_PER_GLOWING_SPACE : PLAY.ITEMS_PER_SPACE,
-    }
-  })
+  return Array.from({ length: count }, (_, index) => ({
+    index,
+    glowing: isGlowing(season, index),
+  }))
 }
 
 /**
@@ -107,7 +105,7 @@ export function spaceAt(season, position) {
 
 /**
  * Whether the current space is a glowing one. A convenience over `spaceAt`,
- * because this is the question GameState and GameUI both ask most often.
+ * because callers almost always want the flag rather than the space.
  *
  * @param {import("./seasons.js").Season|null} season - The season being played
  * @param {number} position - Current position

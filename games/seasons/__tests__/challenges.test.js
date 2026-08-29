@@ -2,14 +2,19 @@
  * Tests for the Seasons challenge registry (js/challenges/index.js).
  *
  * The registry is the seam between a season and what it asks the player to do,
- * so these tests cover the two things that seam promises: a lookup returns a
- * module honouring the `generate` / `check` contract, and an unknown type falls
- * back to arithmetic rather than returning null -- loudly, via console.warn, so
- * a typo in seasons.js does not stay invisible.
+ * so these tests cover the two things that seam promises: a lookup returns the
+ * module it names, and an unknown type falls back to arithmetic rather than
+ * returning null -- loudly, via console.warn, so a typo in seasons.js does not
+ * stay invisible.
  *
  * The last test is the one with teeth: every season in seasons.js must name a
  * challenge type that is actually registered. Without it a typo would only show
  * up as a warning in the console during play.
+ *
+ * Scope: this file does not sweep season content. Generating a question from
+ * each of the twelve real form lists duplicates the far more thorough sweep in
+ * arithmetic.test.js, so content sweeps live there; this file owns only the
+ * lookup and the "every season names a registered type" check.
  */
 
 import { describe, expect, it, jest } from "@jest/globals"
@@ -65,19 +70,11 @@ describe("challenges registry", () => {
 
   describe("getChallenge", () => {
     it("returns a module with both generate and check for the arithmetic type", () => {
+      // Identity, not `typeof === "function"`: a registry of no-op stubs would
+      // satisfy a typeof check while returning the wrong module for every type.
       const challenge = getChallenge("arithmetic")
-      expect(typeof challenge.generate).toBe("function")
-      expect(typeof challenge.check).toBe("function")
       expect(challenge.generate).toBe(arithmetic.generate)
       expect(challenge.check).toBe(arithmetic.check)
-    })
-
-    it("returns a module for every registered type", () => {
-      for (const type of challengeTypes()) {
-        const challenge = getChallenge(type)
-        expect(typeof challenge.generate).toBe("function")
-        expect(typeof challenge.check).toBe("function")
-      }
     })
 
     it("does not warn for a known type", () => {
@@ -129,21 +126,6 @@ describe("challenges registry", () => {
       for (const season of SEASON_LIST) {
         expect(typeof season.challenge).toBe("string")
         expect(types).toContain(season.challenge)
-      }
-    })
-
-    it("every season's forms work with the module its challenge names", () => {
-      for (const season of SEASON_LIST) {
-        const { generate, check } = getChallenge(season.challenge)
-        for (const [label, forms] of [
-          ["forms", season.forms],
-          ["glowingForms", season.glowingForms],
-          ["boss.forms", season.boss.forms],
-        ]) {
-          const question = generate(forms, createRng(`${season.id}-${label}`))
-          expect(question.choices).toHaveLength(PLAY.CHOICE_COUNT)
-          expect(check(question, question.answer)).toBe(true)
-        }
       }
     })
   })

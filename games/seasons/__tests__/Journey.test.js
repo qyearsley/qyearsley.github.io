@@ -30,7 +30,7 @@ import {
   spaceAt,
 } from "../js/Journey.js"
 import { PLAY } from "../js/constants.js"
-import { SEASON_LIST } from "../js/seasons.js"
+import { maxItems, SEASON_LIST } from "../js/seasons.js"
 
 /** The real seasons, as [name, season] pairs for it.each. */
 const SEASONS = SEASON_LIST.map((season) => [season.name, season])
@@ -63,9 +63,14 @@ describe("buildTrail", () => {
     expect(new Set(season.glowingAt).size).toBe(season.glowingAt.length)
   })
 
-  it.each(SEASONS)("%s pays the right item value per space", (_name, season) => {
+  it.each(SEASONS)("%s carries only an index and a glowing flag", (_name, season) => {
+    // A space deliberately does not say what it is worth. It used to carry an
+    // `items` field set from PLAY.ITEMS_PER_GLOWING_SPACE, which disagreed with
+    // what the player actually collected -- the Banana Slug gets 2 from a
+    // glowing space, not 3 -- so the number was both dead and wrong.
+    // GameState.answer is the single authority on payout.
     for (const space of buildTrail(season)) {
-      expect(space.items).toBe(space.glowing ? PLAY.ITEMS_PER_GLOWING_SPACE : PLAY.ITEMS_PER_SPACE)
+      expect(Object.keys(space).sort()).toEqual(["glowing", "index"])
     }
   })
 
@@ -100,7 +105,18 @@ describe("buildTrail", () => {
 describe("bossPosition", () => {
   it.each(SEASONS)("%s puts the boss one past the last space", (_name, season) => {
     expect(bossPosition(season)).toBe(season.spaces)
-    expect(bossPosition(season)).toBe(buildTrail(season).length)
+  })
+
+  it("puts the boss at the published length of each real season", () => {
+    // `season.spaces` rather than `buildTrail(season).length`, which recomputes
+    // Math.max(0, Math.floor(season.spaces)) exactly as bossPosition does and so
+    // would agree with it however both drift. Reading the published number
+    // straight off the season is a real assertion -- an off-by-one or a clamp
+    // applied to the wrong value still fails -- and it survives a retune, which
+    // a list of literals here did not.
+    expect(SEASON_LIST.map((season) => bossPosition(season))).toEqual(
+      SEASON_LIST.map((season) => season.spaces),
+    )
   })
 
   it("is 0 for a null season or an unusable length", () => {
@@ -121,9 +137,12 @@ describe("normalizePosition", () => {
   })
 
   it.each(SEASONS)("%s clamps a position past the end to the boss", (_name, season) => {
-    expect(normalizePosition(season, season.spaces + 1)).toBe(bossPosition(season))
-    expect(normalizePosition(season, 10000)).toBe(bossPosition(season))
-    expect(normalizePosition(season, Number.MAX_SAFE_INTEGER)).toBe(bossPosition(season))
+    // season.spaces, not bossPosition(season): normalizePosition is implemented
+    // in terms of bossPosition, so comparing the two would still pass if both
+    // collapsed to 0.
+    expect(normalizePosition(season, season.spaces + 1)).toBe(season.spaces)
+    expect(normalizePosition(season, 10000)).toBe(season.spaces)
+    expect(normalizePosition(season, Number.MAX_SAFE_INTEGER)).toBe(season.spaces)
   })
 
   it.each(SEASONS)("%s returns 0 for a non-finite position", (_name, season) => {
@@ -223,6 +242,9 @@ describe("spaceAt", () => {
 
 describe("isGlowingAt", () => {
   it.each(SEASONS)("%s agrees with the season's glowingAt list", (_name, season) => {
+    // Against season.glowingAt, which is data. Comparing isGlowingAt to
+    // buildTrail's own `glowing` flag would be the same array element on both
+    // sides -- isGlowingAt reads exactly that -- and could not fail.
     for (let position = 0; position < season.spaces; position += 1) {
       expect(isGlowingAt(season, position)).toBe(season.glowingAt.includes(position))
     }
@@ -231,13 +253,6 @@ describe("isGlowingAt", () => {
   it.each(SEASONS)("%s is false at the boss, where there is no space", (_name, season) => {
     expect(isGlowingAt(season, season.spaces)).toBe(false)
     expect(isGlowingAt(season, season.spaces + 3)).toBe(false)
-  })
-
-  it.each(SEASONS)("%s matches the trail it was built from", (_name, season) => {
-    const trail = buildTrail(season)
-    expect(trail.map((space) => isGlowingAt(season, space.index))).toEqual(
-      trail.map((space) => space.glowing),
-    )
   })
 
   it("is false for a null or zero-length season", () => {
@@ -306,12 +321,16 @@ describe("cross-function invariants over the real seasons", () => {
   })
 
   it.each(SEASONS)("%s: walking every space collects maxItems", (_name, season) => {
-    // buildTrail is where item values come from, so it has to agree with the
-    // reachability figure seasons.js publishes for its demands.
-    const total = buildTrail(season).reduce((sum, space) => sum + space.items, 0)
-    const glowing = season.glowingAt.length
-    const expected = season.spaces - glowing + glowing * PLAY.ITEMS_PER_GLOWING_SPACE
-    expect(total).toBe(expected)
+    // The trail's shape has to agree with the reachability figure seasons.js
+    // publishes for its demands. Payout lives in GameState, so this values the
+    // spaces the same way it does. `maxItems` is called rather than its formula
+    // copied: a copy would let the two drift apart and stay green, which is the
+    // opposite of what this test is for.
+    const total = buildTrail(season).reduce(
+      (sum, space) => sum + (space.glowing ? PLAY.ITEMS_PER_GLOWING_SPACE : PLAY.ITEMS_PER_SPACE),
+      0,
+    )
+    expect(total).toBe(maxItems(season, PLAY.ITEMS_PER_GLOWING_SPACE))
     expect(total).toBeGreaterThanOrEqual(season.demand)
   })
 })

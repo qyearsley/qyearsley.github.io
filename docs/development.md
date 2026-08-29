@@ -101,7 +101,7 @@ Tests use Jest with `--experimental-vm-modules` for ESM support.
 - `javascript/*.test.js`, `chinese/*.test.js` -- tests for experiment and tool logic
 - `games/*/__tests__/` -- tests for game logic and level/preset data
 
-Game `game.js` orchestrators are intentionally untested -- they're DOM-and-canvas-coupled glue. Tests target the underlying components (Grid, GameState, TuringMachine, etc.) and the static data they consume.
+Most game logic is tested through its underlying components (Grid, GameState, TuringMachine, etc.) and the static data they consume. Seasons and Times Trail additionally drive their `game.js` orchestrators black-box, loading the real `index.html` into jsdom and clicking through it; the other games' orchestrators remain untested DOM-and-canvas glue.
 
 Run a specific test file:
 

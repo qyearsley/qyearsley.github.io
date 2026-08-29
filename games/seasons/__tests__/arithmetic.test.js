@@ -181,9 +181,12 @@ describe("arithmetic", () => {
       expect(invariantProblems({ ...good, answer: -1 }, "negative")).not.toEqual([])
     })
 
-    it("sweeps all twelve form lists, so no season is silently skipped", () => {
-      expect(FORM_LISTS).toHaveLength(12)
-      expect(FORM_LISTS.map(([label]) => label)).toContain("winter.boss.forms")
+    it("sweeps every form list, so no season is silently skipped", () => {
+      // Three lists per season -- forms, glowingForms and boss.forms -- and the
+      // last season's boss named explicitly, because that is the one a loop
+      // that stops early would drop.
+      expect(FORM_LISTS).toHaveLength(SEASON_LIST.length * 3)
+      expect(FORM_LISTS.map(([label]) => label)).toContain(`${SEASON_LIST.at(-1).id}.boss.forms`)
       for (const [, forms] of FORM_LISTS) {
         expect(Array.isArray(forms) && forms.length).toBeGreaterThan(0)
       }
@@ -436,15 +439,24 @@ describe("arithmetic", () => {
     })
 
     it("offers near misses rather than arbitrary numbers", () => {
+      // The tolerance here used to be Math.max(10, answer), which for an answer
+      // of 90 admitted anything in [0, 180] -- uniform random distractors would
+      // have passed it, so it could not fail for the thing it is named after.
+      //
+      // Plain addition's distractors come from the +-1 / +-2 band and nothing
+      // else (its answer is never below 3, so none of those four candidates is
+      // rejected for going negative), which is why the band is the assertion.
+      let distractors = 0
       for (let seed = 0; seed < 100; seed += 1) {
         const question = generate([{ kind: "add", max: 100 }], createRng(`near-${seed}`))
         for (const value of question.choices) {
           if (value === question.answer) continue
-          expect(Math.abs(value - question.answer)).toBeLessThanOrEqual(
-            Math.max(10, question.answer),
-          )
+          expect(Math.abs(value - question.answer)).toBeLessThanOrEqual(2)
+          distractors += 1
         }
       }
+      // The loop asserts nothing when a question has no distractors, so count.
+      expect(distractors).toBe(100 * (PLAY.CHOICE_COUNT - 1))
     })
   })
 
@@ -468,6 +480,21 @@ describe("arithmetic", () => {
       const question = { kind: "add", prompt: "40 + 2", answer: 42, choices: [42, 41, 43, 52] }
       for (const given of [null, undefined, NaN, "", "  ", "forty-two", {}, [], Infinity]) {
         expect(check(question, given)).toBe(false)
+      }
+    })
+
+    it("rejects a timeout on a question whose answer is 0", () => {
+      // The only shape that can catch the guard `check` opens with. `Number(null)`,
+      // `Number("")`, `Number("  ")` and `Number(false)` are all 0, and a timeout
+      // arrives as null -- so with the guard deleted, this question scores every
+      // one of them as correct. The 42-answer case above passes either way,
+      // because 0 !== 42, which is why it needs this companion.
+      const zero = { kind: "sub", prompt: "5 - 5", answer: 0, choices: [0, 1, 2, 3] }
+      expect(check(zero, 0)).toBe(true)
+      expect(check(zero, "0")).toBe(true)
+      expect(check(zero, " 0 ")).toBe(true)
+      for (const given of [null, undefined, "", "  ", "\t\n", false, true]) {
+        expect(check(zero, given)).toBe(false)
       }
     })
 
@@ -553,17 +580,24 @@ describe("generators respect the max their form declares", () => {
 
   it("holds for every form list the real seasons use", () => {
     const overshoots = []
+    let checked = 0
     for (const [label, forms] of FORM_LISTS) {
       for (const form of forms) {
         if (!Number.isFinite(form.max)) continue
         for (let seed = 0; seed < 150; seed += 1) {
           const question = generate([form], createRng(`bounds-${label}-${seed}`))
+          checked += 1
           if (question.answer > form.max || largestIn(question.prompt) > form.max) {
             overshoots.push(`${label} ${form.kind} max=${form.max}: ${question.prompt}`)
           }
         }
       }
     }
+    // The sweep collects inside the loop and asserts outside it, so it would
+    // pass having generated nothing at all -- if FORM_LISTS were empty, or if
+    // every real form lost its `max`. Nine of the twelve lists carry a bounded
+    // form today, at 150 seeds each.
+    expect(checked).toBeGreaterThan(1000)
     expect(overshoots.slice(0, 10)).toEqual([])
   })
 })

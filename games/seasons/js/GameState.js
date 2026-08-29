@@ -1,32 +1,28 @@
 /**
  * Seasons game state -- every rule in the game, as pure functions.
  *
- * Architecture: this module is the whole rulebook, and it never touches the DOM,
- * the clock, or `Math.random()`.
+ * The whole rulebook. It never touches the DOM, the clock, or `Math.random()`.
+ * See ../README.md for what the rules mean to a player, and js/README.md for
+ * how this module sits among the others.
+ *
  * - Every exported function takes a state and returns a *new* state. Nothing
  *   here mutates its argument, so the UI can hold on to the previous state to
  *   animate the difference between the two.
- * - Randomness is derived, not stored. The state carries a `seed` and a
- *   `questionsAsked` counter, and the question for a given state is
- *   `createRng(seed:season:questionsAsked)`. That makes the state fully
- *   serializable -- there is no generator object to persist -- and it makes a
- *   whole season reproducible from a single number, which is what lets
- *   GameState.test.js assert on real generated questions.
+ * - Randomness is derived, not stored: the question for a state comes from
+ *   `createRng(seed:seasonId:attempt:questionsAsked)`. That keeps the state
+ *   fully serializable -- there is no generator object to persist -- and makes
+ *   a season reproducible from a single number, which is what lets the tests
+ *   assert on real generated questions.
  * - Time is not modelled. `questionSeconds` reports how long a question should
  *   be allowed, and the UI owns the countdown. A timeout is delivered as
  *   `answer(state, null)`, which is simply a wrong answer -- there is no
  *   separate timeout path to keep in sync with the wrong-answer rules.
- * - The two undecided design rules (constants.RULES) are implemented here in
- *   full, all three options each. `_applyPenalty` is the only place a wrong
- *   answer costs anything, and `_resolveSeason` the only place a season ends.
- *
- * The wilt rule, in detail, because it is the subtle one: a wrong answer moves
- * items from `items` into `wilting`, where they stop counting toward the demand.
- * The next correct answer moves them back. A *second* wrong answer first flushes
- * whatever is already wilting into `lost`, which is permanent. So one mistake
- * costs nothing if you recover immediately, and two in a row cost you an item
- * for good. That is the "challenging but not discouraging" line Ella asked for,
- * and it is why `wilting` and `lost` are separate fields.
+ * - The undecided design rules (constants.RULES) are implemented here, every
+ *   option of each. `_applyPenalty` is the only place the WRONG_ANSWER rule is
+ *   applied, and `_resolveSeason` the only place a season ends.
+ * - The boss is answered up to `constants.BOSS_TRIES` times. A miss draws a
+ *   fresh boss question and applies no penalty at all; only the last miss
+ *   reaches `_resolveSeason` and RULES.BOSS_FAILURE.
  *
  * Error Handling: `answer` is a no-op returning the same state when called in a
  * phase that takes no answers, so a double-click cannot double-score. A state
@@ -35,7 +31,15 @@
  */
 
 import { getCharacter, getEffects } from "./characters.js"
-import { BOSS_FAILURE, PHASE, PLAY, RULES, SEASON_ORDER, WRONG_ANSWER } from "./constants.js"
+import {
+  BOSS_FAILURE,
+  BOSS_TRIES,
+  PHASE,
+  PLAY,
+  RULES,
+  SEASON_ORDER,
+  WRONG_ANSWER,
+} from "./constants.js"
 import { bossPosition, isAtBoss, isGlowingAt, normalizePosition } from "./Journey.js"
 import { getChallenge } from "./challenges/index.js"
 import { createRng } from "./rng.js"
@@ -50,6 +54,8 @@ import { getSeason, nextSeason } from "./seasons.js"
  * @property {string} characterId     - The chosen animal
  * @property {string|null} seasonId   - The season in play, null before one starts
  * @property {number} seed            - Run seed; every question derives from it
+ * @property {number} attempt         - How many times this season has been replayed
+ * @property {number} bossTriesLeft   - Shots remaining at the boss question
  * @property {number} position        - 0 .. season.spaces; the last value is the boss
  * @property {number} items           - Items banked and safe this season
  * @property {number} wilting         - Items at risk; revived by the next correct answer
@@ -82,6 +88,7 @@ import { getSeason, nextSeason } from "./seasons.js"
  * @property {boolean} reachedBoss  - Whether this answer arrived at the boss
  * @property {boolean} wasBoss      - Whether this was the boss question
  * @property {number} rescued       - Items the boss question awarded
+ * @property {number} bossTriesLeft - Shots left at the boss after this answer
  * @property {number} shortfall     - Items still owed at resolution, else 0
  * @property {string} phase         - The phase after this answer
  */
@@ -107,6 +114,7 @@ function _noOutcome(phase) {
     reachedBoss: false,
     wasBoss: false,
     rescued: 0,
+    bossTriesLeft: 0,
     shortfall: 0,
     phase,
   }
@@ -120,7 +128,7 @@ function _noOutcome(phase) {
  * @returns {import("./rng.js").Rng} A generator for this question
  */
 function _questionRng(state) {
-  return createRng(`${state.seed}:${state.seasonId}:${state.questionsAsked}`)
+  return createRng(`${state.seed}:${state.seasonId}:${state.attempt}:${state.questionsAsked}`)
 }
 
 /**
@@ -155,6 +163,8 @@ export function createState(seed = 1) {
     characterId: getCharacter(null).id,
     seasonId: null,
     seed: Number.isFinite(seed) ? Math.floor(seed) : 1,
+    attempt: 0,
+    bossTriesLeft: BOSS_TRIES,
     position: 0,
     items: 0,
     wilting: 0,
@@ -177,10 +187,14 @@ export function createState(seed = 1) {
  *
  * @param {GameState} state - The current state
  * @param {string} seasonId - The season to start
+ * @param {number} [attempt] - Which run through this season this is. Folded
+ *   into the question seed, so replaying a season asks a different set of
+ *   questions; without it a retry is worthless as practice, because it repeats
+ *   the exact list the player just failed.
  * @returns {GameState} A new state in PHASE.TRAIL with its first question, or
  *   an unchanged state if the season id is unknown
  */
-export function startSeason(state, seasonId) {
+export function startSeason(state, seasonId, attempt = 0) {
   const season = getSeason(seasonId)
   if (!season) return state
   const effects = getEffects(state.characterId)
@@ -188,6 +202,8 @@ export function startSeason(state, seasonId) {
     ...state,
     phase: PHASE.TRAIL,
     seasonId,
+    attempt: Math.max(0, Math.floor(attempt) || 0),
+    bossTriesLeft: BOSS_TRIES,
     position: 0,
     items: 0,
     wilting: 0,
@@ -232,8 +248,8 @@ export function questionSeconds(state) {
  * mistake costs something.
  *
  * The character's `penaltyScale` multiplies the cost rather than naming it, so
- * every character stays meaningful under all three rules. A scale of 0 exits
- * early: the Banana Slug is immune to whichever rule is active.
+ * every character stays meaningful whichever rule is active. A scale of 0 exits
+ * early: that character is immune to whichever rule is active.
  *
  * @private
  * @param {GameState} state - State before the penalty
@@ -379,6 +395,11 @@ export function answer(state, given) {
       wilting: 0,
       position: wasBoss ? state.position : state.position + 1,
     }
+  } else if (wasBoss) {
+    // A missed boss question costs nothing beyond the rescue it did not award.
+    // No penalty runs here on purpose: the boss is the last chance to close a
+    // gap, never a way to open one. Charging for a miss before `_resolveSeason`
+    // judges the demand can lose a season that was already won.
   } else {
     // Work out the penalty before deciding whether to spend a free pass. A
     // perk that says "a wrong answer costs you nothing at all" should not burn
@@ -395,17 +416,22 @@ export function answer(state, given) {
       outcome.wiltedNow = penalty.wiltedNow
       outcome.lostNow = penalty.lostNow
       outcome.steppedBack = penalty.steppedBack
-      // At the boss there is no space to step back from -- the season is about
-      // to resolve, and moving the token off the boss space would only make the
-      // result screen draw it a space short.
-      const changes = wasBoss ? { ...penalty.changes, position: state.position } : penalty.changes
-      next = { ...next, ...changes }
-      if (wasBoss) outcome.steppedBack = 0
+      next = { ...next, ...penalty.changes }
     }
   }
 
   if (wasBoss) {
-    const resolved = _resolveSeason(next, season)
+    const triesLeft = correct ? 0 : Math.max(0, (state.bossTriesLeft ?? BOSS_TRIES) - 1)
+    outcome.bossTriesLeft = triesLeft
+    if (!correct && triesLeft > 0) {
+      // Ella's rule: a missed boss question is not the end of the season. Draw
+      // a fresh one and stay put. `questionsAsked` has already advanced, so the
+      // replacement is a different question rather than the same one again.
+      const again = { ...next, bossTriesLeft: triesLeft }
+      outcome.phase = PHASE.BOSS
+      return { state: { ...again, question: _makeQuestion(again) }, outcome }
+    }
+    const resolved = _resolveSeason({ ...next, bossTriesLeft: triesLeft }, season)
     outcome.shortfall = resolved.shortfall
     outcome.phase = resolved.state.phase
     return { state: resolved.state, outcome }
@@ -450,9 +476,13 @@ export function advance(state) {
 export function retry(state) {
   if (!state || state.phase !== PHASE.SEASON_LOST) return state
   if (state.runOver) {
-    return startSeason({ ...state, collected: {}, bestStreak: 0 }, SEASON_ORDER[0])
+    // Carry the attempt counter forward rather than resetting it, so a restart
+    // asks fresh questions. Resetting it replays the first season's opening
+    // question list verbatim.
+    const next = (state.attempt ?? 0) + 1
+    return startSeason({ ...state, collected: {}, bestStreak: 0 }, SEASON_ORDER[0], next)
   }
-  return startSeason(state, state.seasonId)
+  return startSeason(state, state.seasonId, (state.attempt ?? 0) + 1)
 }
 
 /**
@@ -463,8 +493,8 @@ export function retry(state) {
  * - `position` goes through `Journey.normalizePosition`, the semantic authority
  *   on the bound. storage.js only guarantees a non-negative integer, and a save
  *   written before a season was shortened can point past the end of the trail.
- *   Journey also rejects the non-finite and fractional values storage would
- *   have caught -- doing the clamp inline here missed those.
+ *   Journey also rejects non-finite and fractional values, which an inline
+ *   clamp here would let through.
  * - `question` is regenerated from the seed. It is never persisted, so this is
  *   the only way a reloaded page shows the question it was showing before.
  *

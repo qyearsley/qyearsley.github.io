@@ -2,15 +2,16 @@
  * Seasons constants -- every shared value in the game. This module imports
  * nothing, so it can be read by any other module without a cycle.
  *
- * Architecture: this is the tuning surface. Two groups of values matter most:
+ * This is the tuning surface. `RULES.WRONG_ANSWER` and `RULES.BOSS_FAILURE` are
+ * the undecided design questions, exposed as switches rather than baked into
+ * GameState: change the constant, reload, play. GameState implements every
+ * option and GameState.test.js covers every option, so flipping one is a
+ * one-line change and not a rewrite. ../README.md is the canonical description
+ * of what each option means to a player; the enums below carry a one-line
+ * reminder each.
  *
- * - `RULES.WRONG_ANSWER` and `RULES.BOSS_FAILURE` are the two undecided design
- *   questions, exposed as switches rather than baked into GameState. Both are
- *   deliberately playtestable: change the constant, reload, play. GameState
- *   implements every option, and GameState.test.js covers every option, so
- *   flipping one is a one-line change and not a rewrite.
- * - Season difficulty lives in seasons.js, not here, because it is content
- *   rather than mechanism.
+ * Season difficulty lives in seasons.js, not here, because it is content rather
+ * than mechanism.
  *
  * Error Handling: none needed -- this module is data with no behaviour.
  */
@@ -27,22 +28,19 @@ export const STORAGE = {
 
 /**
  * The four seasons in play order. seasons.js defines each one; this array is
- * the authority on their sequence, and on which season follows which.
+ * the authority on their sequence.
  * @type {string[]}
  */
 export const SEASON_ORDER = ["spring", "summer", "autumn", "winter"]
 
 /**
- * What a wrong answer costs. Ella has not settled this yet, so all three are
- * implemented and any of them can be the active rule.
+ * What a wrong answer costs. Ella has not settled this yet, so every option is
+ * implemented and any of them can be the active rule. ../README.md explains
+ * each in full.
  *
- * - GENTLE:    nothing happens. You stay on the space and the question changes.
- *              Nothing is ever taken away. Use this for a bad day, or for a
- *              younger player.
- * - WILT:      your most recent item wilts -- it stops counting toward the
- *              snake woman's demand, but the *next* correct answer revives it.
- *              Two wrong answers in a row and the first one is gone for good.
- *              Visible, recoverable, and it still stings.
+ * - GENTLE:    nothing happens; you stay put and the question changes.
+ * - WILT:      your most recent item stops counting, and the *next* correct
+ *              answer revives it. Two wrong in a row and it is gone for good.
  * - STEP_BACK: you move back a space and lose an item outright.
  *
  * @enum {string}
@@ -54,12 +52,12 @@ export const WRONG_ANSWER = {
 }
 
 /**
- * What happens when the demand is missed and the boss question is missed too.
- * Also undecided, also implemented three ways.
+ * What happens when the demand is missed *and* every boss try (BOSS_TRIES) has
+ * been used up. Also undecided, also implemented every way; ../README.md
+ * explains each in full.
  *
- * - RETRY_SEASON: the season restarts. The frog is a joke, not an ending.
- * - ALWAYS_PASS:  you continue with fewer items banked and an annoyed snake
- *                 woman. No frustration, and no tension either.
+ * - RETRY_SEASON: the season restarts, with fresh questions.
+ * - ALWAYS_PASS:  you continue with fewer items banked.
  * - END_RUN:      the whole run ends and you start from spring.
  *
  * @enum {string}
@@ -71,7 +69,7 @@ export const BOSS_FAILURE = {
 }
 
 /**
- * The active rules. These are the two switches described in the file header.
+ * The active rules -- the two switches described in the file header.
  *
  * WILT and RETRY_SEASON are the starting defaults because they are the middle
  * option of each set: they have real stakes without ending anything. Change
@@ -81,6 +79,16 @@ export const RULES = {
   WRONG_ANSWER: WRONG_ANSWER.WILT,
   BOSS_FAILURE: BOSS_FAILURE.RETRY_SEASON,
 }
+
+/**
+ * How many shots you get at the boss question.
+ *
+ * Ella's rule: "if you miss the boss question you get a chance to go back and
+ * try again." So a miss is not the end of the season -- you face a fresh boss
+ * question, and only running out of tries hands over to RULES.BOSS_FAILURE.
+ * Set to 1 to make the boss single-shot again.
+ */
+export const BOSS_TRIES = 2
 
 /**
  * Values that apply to every season regardless of difficulty.

@@ -1,12 +1,14 @@
 /**
  * Seasons RNG -- a small seeded pseudo-random number generator.
  *
- * Architecture: this is the only source of randomness in the game.
- * - Every module that needs a random value takes an Rng as an argument rather
- *   than calling `Math.random()`. That makes question generation, distractor
- *   choice, and trail layout reproducible: the same seed always produces the
- *   same season, which is what lets GameState be tested without stubbing
- *   globals and lets a bug report be reproduced from a seed alone.
+ * The only source of randomness in the game. Every module that needs a random
+ * value takes an Rng as an argument rather than calling `Math.random()`, which
+ * makes question generation and distractor choice reproducible: the same seed
+ * always produces the same season. That is what lets GameState be tested
+ * without stubbing globals, and lets a bug report be reproduced from a seed
+ * alone. (The trail's shape is not random at all -- the art pack's
+ * `trailPath()` is fixed geometry and uses no rng.)
+ *
  * - The algorithm is mulberry32: 32-bit state, one multiply-xorshift round per
  *   value. It is not cryptographically secure and must never be used for
  *   anything but gameplay.
