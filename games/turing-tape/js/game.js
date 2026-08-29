@@ -174,14 +174,12 @@ function updateDisplay() {
 }
 
 function highlightMatches() {
-  const target = currentLevel.target
+  // matchMask aligns the tape with the goal exactly the way matchesTape does,
+  // so the colours can't disagree with the win/lose message.
+  const mask = machine.matchMask(currentLevel.target)
   const cells = activeTapeEl.children
-  for (let i = 0; i < cells.length && i < target.length; i++) {
-    if (machine.tape[i] === target[i]) {
-      cells[i].classList.add("match")
-    } else {
-      cells[i].classList.add("mismatch")
-    }
+  for (let i = 0; i < cells.length && i < mask.length; i++) {
+    cells[i].classList.add(mask[i] ? "match" : "mismatch")
   }
 }
 
@@ -308,10 +306,14 @@ function doStep() {
 function togglePlay() {
   if (playTimer) {
     stopPlay()
-  } else {
-    playBtn.innerHTML = '<span class="btn-icon">&#x23f8;</span> Pause <kbd>Enter</kbd>'
-    playTimer = setInterval(doStep, PLAY_INTERVAL_MS)
+    return
   }
+  // A halted machine can't step, so a timer here would tick uselessly forever
+  // with the button stuck reading "Pause". Reachable via the Enter shortcut
+  // even though the button itself is disabled.
+  if (machine.halted) return
+  playBtn.innerHTML = '<span class="btn-icon">&#x23f8;</span> Pause <kbd>Enter</kbd>'
+  playTimer = setInterval(doStep, PLAY_INTERVAL_MS)
 }
 
 function stopPlay() {
@@ -387,7 +389,13 @@ resetBtn.addEventListener("click", doReset)
 addRuleBtn.addEventListener("click", () => addRuleRow())
 
 document.addEventListener("keydown", (e) => {
-  if (e.target.tagName === "SELECT" || e.target.tagName === "INPUT") return
+  // Leave focused controls alone: Space and Enter activate a focused button,
+  // and form controls handle these keys themselves. e.target can be the
+  // document, which has no closest().
+  const target = e.target
+  if (typeof target?.closest === "function" && target.closest("button, select, input, textarea")) {
+    return
+  }
 
   if (e.key === " ") {
     e.preventDefault()

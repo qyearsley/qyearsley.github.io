@@ -176,6 +176,107 @@ describe("TuringMachine", () => {
     })
   })
 
+  describe("matchMask", () => {
+    test("reports one entry per tape cell", () => {
+      const tm = new TuringMachine(["1", "0", "1"], new Map())
+      expect(tm.matchMask(["1", "0", "1"])).toEqual([true, true, true])
+    })
+
+    test("flags only the cells that differ", () => {
+      const tm = new TuringMachine(["1", "1", "1"], new Map())
+      expect(tm.matchMask(["1", "0", "1"])).toEqual([true, false, true])
+    })
+
+    test("treats trailing blanks as padding, not mismatches", () => {
+      const tm = new TuringMachine(["1", "0", "_", "_"], new Map())
+      expect(tm.matchMask(["1", "0"])).toEqual([true, true, true, true])
+    })
+
+    test("treats leading blanks as padding and shifts the alignment", () => {
+      const tm = new TuringMachine(["_", "1", "0"], new Map())
+      expect(tm.matchMask(["1", "0"])).toEqual([true, true, true])
+    })
+
+    test("aligns content even when both sides are padded differently", () => {
+      const tm = new TuringMachine(["_", "_", "1", "0", "_"], new Map())
+      expect(tm.matchMask(["_", "1", "0", "_", "_"])).toEqual([true, true, true, true, true])
+      expect(tm.matchMask(["_", "0", "1", "_", "_"])).toEqual([true, true, false, false, true])
+    })
+
+    test("flags content past the end of the goal", () => {
+      const tm = new TuringMachine(["1", "0", "1"], new Map())
+      expect(tm.matchMask(["1", "0"])).toEqual([true, true, false])
+    })
+
+    test("an all-blank tape has nothing to flag", () => {
+      const tm = new TuringMachine(["_", "_"], new Map())
+      expect(tm.matchMask(["1"])).toEqual([true, true])
+    })
+
+    test("a blank prepended by a left move at position 0 is not a mismatch", () => {
+      // step() unshifts a blank when the head moves left from index 0, which
+      // shifts every cell right by one. Comparing cell-by-cell against the
+      // goal without re-aligning would paint the whole tape red.
+      const rules = makeRules([
+        ["A", "1", "1", "L", "B"],
+        ["B", "_", "_", "S", "HALT"],
+      ])
+      const tm = new TuringMachine(["1", "0"], rules, "A", 0)
+      tm.run()
+
+      expect(tm.tape).toEqual(["_", "1", "0"])
+      expect(tm.matchesTape(["1", "0"])).toBe(true)
+      expect(tm.matchMask(["1", "0"])).toEqual([true, true, true])
+    })
+
+    test("a solved tape is never shown with a mismatched cell", () => {
+      // The invariant the UI depends on: colours must not contradict the
+      // "Solved!" message.
+      const cases = [
+        [
+          ["1", "0"],
+          ["1", "0"],
+        ],
+        [
+          ["_", "1", "0"],
+          ["1", "0"],
+        ],
+        [
+          ["1", "0", "_", "_"],
+          ["1", "0"],
+        ],
+        [
+          ["_", "1", "0", "_"],
+          ["_", "_", "1", "0"],
+        ],
+        [["_"], ["_"]],
+      ]
+      for (const [tape, target] of cases) {
+        const tm = new TuringMachine(tape, new Map())
+        expect(tm.matchesTape(target)).toBe(true)
+        expect(tm.matchMask(target).every(Boolean)).toBe(true)
+      }
+    })
+
+    test("agrees with matchesTape on the level solutions", () => {
+      const rules = makeRules([
+        ["A", "1", "0", "R", "A"],
+        ["A", "0", "1", "R", "A"],
+        ["A", "_", "_", "S", "HALT"],
+      ])
+      const tm = new TuringMachine(["1", "0", "1", "_"], rules, "A", 0)
+      tm.run()
+      expect(tm.matchesTape(["0", "1", "0"])).toBe(true)
+      expect(tm.matchMask(["0", "1", "0"])).toEqual([true, true, true, true])
+    })
+
+    test("does not mutate the tape", () => {
+      const tm = new TuringMachine(["_", "1", "_"], new Map())
+      tm.matchMask(["1"])
+      expect(tm.tape).toEqual(["_", "1", "_"])
+    })
+  })
+
   describe("level solutions", () => {
     test("Level 1: Write One", () => {
       const rules = makeRules([["A", "_", "1", "S", "HALT"]])

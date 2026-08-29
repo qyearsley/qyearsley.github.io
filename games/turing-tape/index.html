@@ -21,6 +21,9 @@
       <div class="game-top-bar">
         <a href="/games/" class="icon-btn" title="Back to games">&larr;</a>
         <span class="level-title" id="level-title">Turing Tape</span>
+        <!-- Not a live region: Play advances the machine every 400ms for up to
+             500 steps, so announcing the counter would drown out the result
+             message. Same reasoning for #current-state below. -->
         <span class="step-display" id="step-display">Steps: 0</span>
       </div>
 
@@ -68,8 +71,12 @@
           </div>
         </div>
 
-        <!-- Result message -->
-        <div id="result-msg" class="result-msg hidden"></div>
+        <!-- Result message. The one live region on the page: it changes only
+             when the machine halts, so it never talks over itself. `role="status"`
+             carries an implicit aria-live="polite", so that attribute is omitted.
+             `.hidden` is `display: none`, so nothing is announced until a result
+             is actually shown. -->
+        <div id="result-msg" class="result-msg hidden" role="status"></div>
 
         <!-- Rule table -->
         <div class="rule-section">
