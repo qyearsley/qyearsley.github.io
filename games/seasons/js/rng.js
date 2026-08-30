@@ -6,8 +6,8 @@
  * makes question generation and distractor choice reproducible: the same seed
  * always produces the same season. That is what lets GameState be tested
  * without stubbing globals, and lets a bug report be reproduced from a seed
- * alone. (The trail's shape is not random at all -- the art pack's
- * `trailPath()` is fixed geometry and uses no rng.)
+ * alone. (The trail is not random at all -- the art pack's `layout()` computes
+ * fixed geometry from the season's route and uses no rng.)
  *
  * - The algorithm is mulberry32: 32-bit state, one multiply-xorshift round per
  *   value. It is not cryptographically secure and must never be used for

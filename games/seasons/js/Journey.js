@@ -3,9 +3,9 @@
  *
  * Pure geometry and bookkeeping: no state, no DOM, no randomness. This module
  * owns what a space is worth and where the boss sits. It does not own the
- * player's position (GameState does) or the curve the trail is drawn along (the
- * art pack does), so the shape on screen can change completely without touching
- * a rule.
+ * player's position (GameState does), what an obstacle kind means (obstacles.js
+ * does), or how the trail is drawn and crossed (the art pack does), so the shape
+ * on screen can change completely without touching a rule.
  *
  * - A trail is derived, never stored. `buildTrail` is a pure function of a
  *   Season, so a save records a position and nothing else, and retuning a
@@ -20,15 +20,20 @@
  * position, returning a safe zero-ish value rather than throwing.
  */
 
-import { isGlowing } from "./seasons.js"
+import { getObstacle } from "./obstacles.js"
+import { obstacleAt } from "./seasons.js"
 
 /**
  * One space on the trail.
  *
  * @typedef {Object} Space
  * @property {number} index    - 0-based position along the trail
+ * @property {string} kind     - The obstacle standing here; see obstacles.js
  * @property {boolean} glowing - Whether this is a glowing space; the label the
- *                               player sees is "Glowing challenge"
+ *                               player sees is "Glowing challenge". Derived
+ *                               from the obstacle, because the mountain is the
+ *                               hard one -- which is also how the picture
+ *                               reads.
  *
  * Deliberately no `items` field. What a space pays depends on the character's
  * `glowingItems`, so a payout recorded here would disagree with the number the
@@ -44,10 +49,10 @@ import { isGlowing } from "./seasons.js"
 export function buildTrail(season) {
   if (!season || !Number.isFinite(season.spaces)) return []
   const count = Math.max(0, Math.floor(season.spaces))
-  return Array.from({ length: count }, (_, index) => ({
-    index,
-    glowing: isGlowing(season, index),
-  }))
+  return Array.from({ length: count }, (_, index) => {
+    const obstacle = getObstacle(obstacleAt(season, index))
+    return { index, kind: obstacle.kind, glowing: obstacle.hard }
+  })
 }
 
 /**
@@ -104,6 +109,17 @@ export function spaceAt(season, position) {
 }
 
 /**
+ * The obstacle kind at the player's position.
+ *
+ * @param {import("./seasons.js").Season|null} season - The season being played
+ * @param {number} position - Current position
+ * @returns {string|null} The kind id, or null when at the boss or off the trail
+ */
+export function kindAt(season, position) {
+  return spaceAt(season, position)?.kind ?? null
+}
+
+/**
  * Whether the current space is a glowing one. A convenience over `spaceAt`,
  * because callers almost always want the flag rather than the space.
  *
@@ -116,8 +132,12 @@ export function isGlowingAt(season, position) {
 }
 
 /**
- * How far along the trail the player is, as a fraction. Used to place the
- * character on the drawn path and to size the progress bar.
+ * How far along the trail the player is, as a fraction.
+ *
+ * Nothing in `js/` calls this any more: the trail used to reveal a walked path
+ * by dash offset, and now the art pack's `layout` gives absolute stop positions
+ * instead. Kept because "how far through the season am I" is the obvious thing
+ * a progress indicator or a summary screen would want, and it is one line.
  *
  * A missing season reads as 0, not 1. "No season" is not started, not
  * finished -- returning 1 would tell a caller drawing a completion bar that a

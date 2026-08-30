@@ -20,7 +20,7 @@
 import { describe, expect, it } from "@jest/globals"
 import { CHARACTERS } from "../js/characters.js"
 import { SEASON_ORDER } from "../js/constants.js"
-import { getSeason, isGlowing, maxItems, nextSeason, SEASON_LIST } from "../js/seasons.js"
+import { getSeason, maxItems, nextSeason, SEASON_LIST } from "../js/seasons.js"
 
 /**
  * How much slack a demand must leave: a season should be winnable without a
@@ -270,31 +270,6 @@ describe("nextSeason", () => {
       walked.push(current.id)
     }
     expect(walked).toEqual(SEASON_ORDER)
-  })
-})
-
-describe("isGlowing", () => {
-  it.each(SEASON_ORDER)("agrees with %s's glowingAt for every space", (id) => {
-    const season = getSeason(id)
-    for (let index = 0; index < season.spaces; index += 1) {
-      expect(isGlowing(season, index)).toBe(season.glowingAt.includes(index))
-    }
-  })
-
-  it("is false off the ends of the trail", () => {
-    const spring = getSeason("spring")
-    expect(isGlowing(spring, -1)).toBe(false)
-    expect(isGlowing(spring, spring.spaces)).toBe(false)
-    expect(isGlowing(spring, 999)).toBe(false)
-  })
-
-  it.each([
-    ["null", null],
-    ["undefined", undefined],
-    ["a number", 0],
-  ])("is false for %s rather than throwing", (_label, season) => {
-    expect(() => isGlowing(season, 4)).not.toThrow()
-    expect(isGlowing(season, 4)).toBe(false)
   })
 })
 

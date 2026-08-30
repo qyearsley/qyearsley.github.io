@@ -12,15 +12,16 @@
  * - Nothing here uses `innerHTML`. Every node is built with `createElement` or
  *   the art pack's `createElementNS` helper, and every string is written with
  *   `textContent`. `BaseGameUI.setHTML` exists but is deliberately unused.
- * - No drawing decision lives here. Characters, items, scenery, the snake
- *   woman, the trail curve, and the palette all come from the active art pack,
- *   so this file works unchanged when the art is replaced.
- * - Trail markers are placed by walking the art pack's path with
- *   `getPointAtLength`, so a new pack can hand back a spiral instead of a wave
- *   and the layout follows. jsdom implements no SVG geometry, so `_pointsAlong`
- *   falls back to an evenly spaced line when the method is missing; that keeps
- *   the class constructible under test without a test-only branch in the
- *   caller.
+ * - No drawing decision lives here. Characters, items, obstacles, the backdrop,
+ *   the snake woman, the trail's geometry, the motion of each crossing, and the
+ *   palette all come from the active art pack, so this file works unchanged when
+ *   the art is replaced.
+ * - The trail is wider than the screen and scrolls by panning a camera group,
+ *   because a `viewBox` cannot be animated and a transform can. Both the
+ *   geometry and the crossing animations come from the art pack, so a pack could
+ *   hand back a spiral, or swap sprite frames where this one arcs a transform,
+ *   and nothing here changes. No SVG geometry is measured, so the class works
+ *   under jsdom without a test-only branch.
  * - The countdown lives here rather than in GameState, because a clock is not a
  *   rule. `startTimer` owns the interval and `stopTimer` is safe to call at any
  *   time, including when no timer is running.
@@ -35,7 +36,8 @@ import { BaseGameUI } from "../../shared/BaseGameUI.js"
 import { activePack, svg } from "./art/index.js"
 import { CHARACTERS, getCharacter } from "./characters.js"
 import { PLAY, RULES, WRONG_ANSWER } from "./constants.js"
-import { buildTrail, progress } from "./Journey.js"
+import { buildTrail } from "./Journey.js"
+import { getObstacle } from "./obstacles.js"
 
 /**
  * How long the correct/incorrect flash stays on an answer button, in
@@ -50,6 +52,14 @@ const FLASH_MS = 900
  * @private
  */
 const TICK_MS = 100
+
+/**
+ * How long the camera takes to follow the character to the next stop. Slightly
+ * longer than most traversals so the landscape keeps drifting for a beat after
+ * the character lands, which reads as momentum rather than a jump cut.
+ * @private
+ */
+const CAMERA_MS = 900
 
 /**
  * Ceiling on drawn item slots. Comfortably above anything a real run reaches;
@@ -192,163 +202,244 @@ export class GameUI extends BaseGameUI {
     }
   }
 
-  /**
-   * Space markers evenly spaced along the trail path.
-   *
-   * Uses the real path geometry when the browser provides it. jsdom does not
-   * implement `getPointAtLength`, so the fallback spreads the markers along a
-   * straight line -- the numbers are wrong but the structure is right, which is
-   * all a test needs.
-   *
-   * @private
-   * @param {SVGPathElement} path - The trail path
-   * @param {number} count - How many points to place
-   * @param {number} width - Path viewBox width, for the fallback
-   * @param {number} height - Path viewBox height, for the fallback
-   * @returns {Array<{x: number, y: number}>} One point per space, plus the boss
-   */
-  _pointsAlong(path, count, width, height) {
-    const total = count > 1 ? count - 1 : 1
-    const supported = typeof path?.getTotalLength === "function"
-    let length = 0
-    if (supported) {
-      try {
-        length = path.getTotalLength()
-      } catch {
-        length = 0
-      }
-    }
-    if (!length) {
-      return Array.from({ length: count }, (_, i) => ({
-        x: (width / total) * i,
-        y: height / 2,
-      }))
-    }
-    return Array.from({ length: count }, (_, i) => {
-      const point = path.getPointAtLength((length / total) * i)
-      return { x: point.x, y: point.y }
-    })
-  }
-
-  /**
-   * Draw the trail: scenery, the path, one marker per space, the boss marker,
-   * and the character token at its current position.
-   *
-   * @param {import("./seasons.js").Season|null} season - The season being played
-   * @param {number} position - The player's position, 0 .. season.spaces
-   * @param {string} characterId - Which animal to draw as the token
-   */
   renderTrail(season, position, characterId) {
     const host = this.elements.trail
     if (!host || !season) return
 
-    // Built once per season+character, then only moved. The CSS transitions on
-    // `.trail-token` and `.trail-walked` need an element that persists while
-    // its value changes; rebuilding the SVG every question makes them dead code
-    // and the token teleports instead of walking.
+    // Built once per season+character, then only moved. The camera pan and the
+    // traversal animation both need elements that persist while their transforms
+    // change; rebuilding the scene every question would make the character
+    // teleport and the landscape jump.
     const key = `${season.id}:${characterId}`
     if (this._trailKey === key && this._trail?.canvas.isConnected) {
-      this._updateTrail(season, position)
+      this._placeToken(position, { animate: false })
       return
     }
 
-    const { d, viewBox, width, height } = this.pack.trailPath(season)
+    const plan = this.pack.layout(season)
     host.replaceChildren()
 
-    const canvas = svg("svg", {
-      viewBox,
-      class: "trail-svg",
-      role: "img",
-    })
+    const canvas = svg("svg", { viewBox: plan.viewBox, class: "trail-svg", role: "img" })
 
-    // Scenery sits behind everything, in the same coordinate system.
-    canvas.append(this.pack.scenery(season.id).element)
+    // Everything inside the camera group; panning it is what scrolls the trail.
+    // `viewBox` would be the obvious thing to move instead, but it is not
+    // animatable, and a transform is.
+    const camera = svg("g", { class: "trail-camera" })
+    canvas.append(camera)
 
-    // The walked part of the path is drawn over the whole path, so the trail
-    // visibly fills in as the journey goes on. `pathLength="1"` renormalizes
-    // the curve to a length of 1, which lets the stylesheet express the dash
-    // offset as a plain fraction whatever shape the art pack hands back.
-    const track = svg("path", { d, class: "trail-track", fill: "none" })
-    canvas.append(track)
-    const walked = svg("path", { d, class: "trail-walked", fill: "none", pathLength: "1" })
-    canvas.append(walked)
+    camera.append(this.pack.backdrop(season.id, plan.width).element)
 
-    const spaces = buildTrail(season)
+    for (const d of plan.groundSegments) {
+      camera.append(svg("path", { d, class: "trail-ground" }))
+    }
 
-    const markers = spaces.map((space) => {
-      const marker = svg("g", {
-        class: `trail-marker${space.glowing ? " is-glowing" : ""}`,
+    // One obstacle per space, each sitting on the ground where layout put it.
+    buildTrail(season).forEach((space, index) => {
+      const spot = plan.obstacles[index]
+      if (!spot) return
+      const group = svg("g", {
+        class: `trail-obstacle${space.glowing ? " is-glowing" : ""}`,
+        transform: `translate(${spot.x} ${spot.y})`,
       })
       if (space.glowing) {
-        // Ella's "light where it's pretty and glowing".
-        marker.append(svg("circle", { r: 17, class: "marker-glow" }))
-        marker.append(svg("circle", { r: 11, class: "marker-glow-inner" }))
+        // Ella's "light where it's pretty and glowing" -- now behind a mountain
+        // rather than a dot, so it haloes the thing being climbed.
+        group.append(svg("circle", { ...plan.glow, class: "obstacle-glow" }))
       }
-      marker.append(svg("circle", { r: space.glowing ? 8 : 6, class: "marker-dot" }))
-      canvas.append(marker)
-      return marker
+      group.append(this.pack.obstacle(space.kind, season.id).element)
+      camera.append(group)
     })
 
     const boss = svg("g", { class: "trail-boss" })
     const bossArt = this.pack.villain().element
-    bossArt.setAttribute("transform", "translate(-26 -52) scale(0.52)")
+    bossArt.setAttribute("transform", plan.bossTransform)
     boss.append(bossArt)
-    canvas.append(boss)
+    const bossStop = plan.stops[plan.stops.length - 1]
+    boss.setAttribute("transform", `translate(${bossStop.x + plan.bossOffset} ${bossStop.y})`)
+    camera.append(boss)
 
     const token = svg("g", { class: "trail-token" })
-    const tokenArt = this.pack.character(characterId).element
-    tokenArt.setAttribute("transform", "scale(0.44)")
+    const tokenArt = this.pack.character(characterId, true).element
+    tokenArt.setAttribute("transform", `scale(${plan.tokenScale})`)
     token.append(tokenArt)
-    canvas.append(token)
+    camera.append(token)
 
-    // Append before measuring. `getTotalLength()` on a detached path returns 0
-    // in some engines, and `_pointsAlong` reads 0 as "unsupported" and silently
-    // drops to the straight-line fallback meant for jsdom -- which would put
-    // every marker in a row across a wavy path, with no error anywhere.
     host.append(canvas)
 
-    const points = this._pointsAlong(track, spaces.length + 1, width, height)
-    markers.forEach((marker, index) => {
-      marker.setAttribute("transform", `translate(${points[index].x} ${points[index].y})`)
-    })
-    const bossPoint = points[points.length - 1]
-    boss.setAttribute("transform", `translate(${bossPoint.x} ${bossPoint.y})`)
-
     this._trailKey = key
-    this._trail = { canvas, walked, token, markers, points }
-    this._updateTrail(season, position)
+    this._trail = { canvas, camera, token, plan, season }
+    this._placeToken(position, { animate: false })
   }
 
   /**
-   * Move the token, extend the walked path, and re-mark the spaces already
-   * passed, without rebuilding anything. This is the half that animates.
+   * Put the character at a position and point the camera at it.
+   *
+   * With `animate: false` both snap, which is what a fresh draw or a reloaded
+   * save wants. `crossObstacle` is the animated path.
    *
    * @private
-   * @param {import("./seasons.js").Season} season - The season being played
-   * @param {number} position - The player's position
+   * @param {number} position - Which stop to stand on
+   * @param {{animate: boolean}} options - Whether to move or jump
    */
-  _updateTrail(season, position) {
+  _placeToken(position, { animate }) {
     const t = this._trail
     if (!t) return
+    const index = Math.max(0, Math.min(position, t.plan.stops.length - 1))
+    const stop = t.plan.stops[index]
+    // Clear any finished crossing first. Every traversal is played with
+    // `fill: "forwards"`, and a filling animation outranks inline style in the
+    // cascade -- so writing `style.transform` here was silently ignored and the
+    // character stayed wherever it last walked to. That stranded the animal
+    // beside the snake woman when a season was retried, since the reuse branch
+    // of `renderTrail` calls this and nothing else.
+    this._cancelAnimations()
+    t.token.style.transform = this.pack.standing(stop)
+    this._panCamera(stop, { animate })
+    this._describeTrail(position)
+  }
 
-    const here = t.points[Math.min(position, t.points.length - 1)]
-    // Stand to the LEFT of the boss rather than on top of her: the last point
-    // belongs to both the snake woman and the arriving character, and drawn at
-    // the same offset the two illustrations sit inside one another.
-    const shoulder = position >= t.points.length - 1 ? 62 : 22
-    // `style.transform` rather than the presentation attribute: the attribute
-    // is animatable in current browsers but the style property is the reliable
-    // one, and it wins the cascade either way.
-    t.token.style.transform = `translate(${here.x - shoulder}px, ${here.y - 44}px)`
-    t.walked.style.setProperty("--walked", String(progress(season, position)))
-    t.markers.forEach((marker, index) => {
-      marker.classList.toggle("is-done", index < position)
-    })
+  /**
+   * Drop any animations still applying to the token or the camera.
+   *
+   * Separate from `skipTraversal`, which *finishes* a running crossing on
+   * purpose. This throws the results away, so an inline transform can take
+   * effect again.
+   * @private
+   */
+  _cancelAnimations() {
+    const t = this._trail
+    if (!t) return
+    for (const element of [t.token, t.camera]) {
+      if (typeof element.getAnimations !== "function") continue
+      for (const animation of element.getAnimations()) animation.cancel()
+    }
+    this._crossing = null
+  }
+
+  /**
+   * Scroll the trail so the character sits comfortably in view, clamped so the
+   * camera never runs off either end of the landscape.
+   *
+   * @private
+   * @param {{x: number, y: number}} stop - Where the character is
+   * @param {{animate: boolean}} options - Whether to pan or jump
+   * @returns {Animation|null} The pan, if one was started
+   */
+  _panCamera(stop, { animate }) {
+    const t = this._trail
+    if (!t) return null
+    // A third of the way in rather than centred: the player is walking left to
+    // right, so what is ahead matters more than what is behind.
+    const ideal = stop.x - t.plan.viewportWidth / 3
+    const furthest = Math.max(0, t.plan.width - t.plan.viewportWidth)
+    const target = `translateX(${-Math.max(0, Math.min(ideal, furthest))}px)`
+    if (!animate || this._prefersReducedMotion() || typeof t.camera.animate !== "function") {
+      t.camera.style.transform = target
+      return null
+    }
+    const pan = t.camera.animate(
+      [{ transform: t.camera.style.transform || target }, { transform: target }],
+      {
+        duration: CAMERA_MS,
+        easing: "ease-in-out",
+        fill: "forwards",
+      },
+    )
+    t.camera.style.transform = target
+    return pan
+  }
+
+  /**
+   * Animate the character across the obstacle it is standing in front of.
+   *
+   * The motion comes from the art pack, so a sprite pack could swap frames
+   * where this one arcs a transform, and nothing here needs to know. Returns a
+   * promise so the caller can wait before asking the next question, and
+   * `skipTraversal` can cut it short if the player is faster than the animation.
+   *
+   * @param {number} from - The stop being left
+   * @param {string} kind - The obstacle kind being crossed
+   * @returns {Promise<void>} Resolves when the character has arrived
+   */
+  crossObstacle(from, kind) {
+    const t = this._trail
+    if (!t) return Promise.resolve()
+    const stops = t.plan.stops
+    const start = stops[Math.max(0, Math.min(from, stops.length - 1))]
+    const finish = stops[Math.max(0, Math.min(from + 1, stops.length - 1))]
+
+    this._describeTrail(from + 1)
+    if (this._prefersReducedMotion() || typeof t.token.animate !== "function") {
+      this._placeToken(from + 1, { animate: false })
+      return Promise.resolve()
+    }
+
+    // Everything from here on is wrapped, and the wrap is load-bearing rather
+    // than decorative. The caller holds its "an answer is being processed" flag
+    // until this promise settles, so a throw escaping this method would leave
+    // that flag stuck on and the game would accept no further answers until the
+    // page was reloaded. A pack handing back keyframes a browser rejects is
+    // exactly the kind of thing a future sprite pack could do.
+    let move
+    try {
+      const { keyframes, options } = this.pack.traversal(kind, start, finish)
+      move = t.token.animate(keyframes, { ...options, fill: "forwards" })
+    } catch (error) {
+      console.error("GameUI.crossObstacle: could not animate the crossing", error)
+      this._crossing = null
+      this._placeToken(from + 1, { animate: false })
+      return Promise.resolve()
+    }
+
+    const pan = this._panCamera(finish, { animate: true })
+    this._crossing = { move, pan }
+    t.token.style.transform = this.pack.standing(finish)
+
+    return move.finished
+      .catch(() => {})
+      .then(() => {
+        this._crossing = null
+      })
+  }
+
+  /**
+   * Cut a crossing short and land the character. Safe to call when nothing is
+   * animating, which is what lets a tap anywhere skip it.
+   */
+  skipTraversal() {
+    if (!this._crossing) return
+    for (const animation of [this._crossing.move, this._crossing.pan]) {
+      if (animation && animation.playState === "running") animation.finish()
+    }
+    this._crossing = null
+  }
+
+  /**
+   * Whether the player has asked for less motion. Read per call rather than
+   * cached, because it can change while the game is open.
+   * @private
+   * @returns {boolean} True when motion should be minimal
+   */
+  _prefersReducedMotion() {
+    return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true
+  }
+
+  /**
+   * Update the trail's accessible label to say where the player is and what is
+   * in the way.
+   * @private
+   * @param {number} position - The position being described
+   */
+  _describeTrail(position) {
+    const t = this._trail
+    if (!t) return
+    const season = t.season
+    const space = buildTrail(season)[position]
     t.canvas.setAttribute(
       "aria-label",
-      position >= season.spaces
-        ? `${season.name} trail complete — you have reached the snake woman`
-        : `${season.name} trail, space ${position + 1} of ${season.spaces}`,
+      space
+        ? `${season.name} trail, space ${position + 1} of ${season.spaces}: a ${getObstacle(space.kind).name.toLowerCase()} to cross`
+        : `${season.name} trail complete — you have reached the snake woman`,
     )
   }
 
@@ -453,21 +544,23 @@ export class GameUI extends BaseGameUI {
    * Draw the question and its answer buttons.
    *
    * @param {Object} state - The current GameState
-   * @param {boolean} glowing - Whether this is a glowing-space question
-   * @param {boolean} isBoss - Whether this is the boss question
+   * @param {{tag?: string, lit?: boolean}} label - The line above the question,
+   *   and whether to give the prompt its glow. Composed by the caller.
    * @param {function(number, HTMLButtonElement): void} onAnswer - Called with the
    *   chosen value and the button that was pressed
    */
-  renderQuestion(state, glowing, isBoss, onAnswer) {
+  renderQuestion(state, { tag = "", lit = false } = {}, onAnswer) {
     const question = state?.question
     const choices = this.elements.choices
     if (!question || !choices) return
 
     this.setText("question-prompt", question.prompt)
-    const tag = isBoss ? "Boss challenge" : glowing ? "Glowing challenge" : ""
+    // The caller supplies the label rather than this file deriving it. Player
+    // copy lives in game.js, and the boss label has to say how many tries are
+    // left and what the question is worth -- neither of which the UI knows.
     this.setText("question-tag", tag)
     this.setVisible("question-tag", tag !== "")
-    document.body.classList.toggle("is-glowing-question", glowing || isBoss)
+    document.body.classList.toggle("is-glowing-question", lit)
 
     choices.replaceChildren()
     question.choices.slice(0, PLAY.CHOICE_COUNT).forEach((value, index) => {

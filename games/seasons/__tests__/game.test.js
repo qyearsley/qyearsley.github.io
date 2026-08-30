@@ -35,8 +35,24 @@
  * screen the current load owns.
  *
  * Spring is untimed, so no countdown interferes there; fake timers are here for
- * the 900ms answer flash, which is what gates the next question, and for the
- * countdown in the seasons that do have one.
+ * the 900ms answer flash, which is one of the two things gating the next
+ * question, and for the countdown in the seasons that do have one.
+ *
+ * The other gate is the crossing. Every space is an obstacle, and a correct
+ * answer gets the character over the one it was standing at, so `_onAnswer`
+ * waits on the promise `GameUI.crossObstacle` returns before it asks anything
+ * else. Fake timers do not touch the microtask queue, so advancing past the
+ * flash is no longer enough on its own: `landAnswer` below is the one place that
+ * knows the cycle has two waits in it, which is why every helper that answers
+ * correctly is `async` and every call to one has to be awaited. A wrong answer
+ * crosses nothing and stays synchronous on purpose -- see `answerWrongly`.
+ *
+ * jsdom implements no Web Animations API at all, so left alone `crossObstacle`
+ * takes its no-animation fallback and hands back an already-resolved promise.
+ * That would make "during the crossing" a window one microtask wide and would
+ * leave the path a real browser takes untested, so this file installs a small
+ * fake `Element.animate` instead and holds the crossing open for exactly as long
+ * as a test needs it. See `installFakeAnimations`.
  *
  * Finally, nothing here may inherit a rule. `RULES.WRONG_ANSWER` and
  * `RULES.BOSS_FAILURE` are undecided design switches, so a test that depends on
@@ -56,6 +72,8 @@ import {
   WRONG_ANSWER,
 } from "../js/constants.js"
 import { createState, rehydrate, startSeason } from "../js/GameState.js"
+import { GameUI } from "../js/GameUI.js"
+import { isHardKind } from "../js/obstacles.js"
 import { getSeason } from "../js/seasons.js"
 import { toSavedRun } from "../js/storage.js"
 import {
@@ -110,6 +128,91 @@ function perfectRun(season) {
 
 const PERFECT_SPRING = perfectRun(SPRING)
 
+/** The answer flash, in ms: what `GameUI.flashDuration` reports and a player waits. */
+const FLASH_MS = 900
+
+/** Every fake animation the current test has created, oldest first. */
+let animations = []
+
+/**
+ * Give jsdom enough of the Web Animations API for a crossing to be watched.
+ *
+ * jsdom implements none of it, so without this `GameUI.crossObstacle` takes its
+ * no-animation fallback: the character teleports and the promise it returns is
+ * already resolved. These fakes stay running until a test finishes them, which
+ * is what lets the guard cases below be about the animation rather than about
+ * promise scheduling, and it means the tests drive the path a browser really
+ * takes.
+ *
+ * Only what GameUI touches is implemented -- `finished`, `playState`, `finish()`
+ * -- and nothing here knows how long a crossing lasts. The durations belong to
+ * the art pack, and to art.test.js.
+ */
+function installFakeAnimations() {
+  animations = []
+  // Reached through `window` rather than the bare global, which the lint config
+  // does not list: `Element` is not a global any page script here needs.
+  window.Element.prototype.animate = function fakeAnimate() {
+    let land
+    const animation = {
+      playState: "running",
+      finished: new Promise((resolve) => {
+        land = resolve
+      }),
+      finish() {
+        this.playState = "finished"
+        land(this)
+      },
+    }
+    animations.push(animation)
+    return animation
+  }
+}
+
+/** Take the fake API away again, so nothing outside this file ever sees it. */
+function removeFakeAnimations() {
+  delete window.Element.prototype.animate
+  animations = []
+}
+
+/** Whether a crossing is still playing. */
+const isCrossing = () => animations.some((animation) => animation.playState === "running")
+
+/** Land the character now, the way the end of the real animation would. */
+function finishCrossing() {
+  for (const animation of animations) {
+    if (animation.playState === "running") animation.finish()
+  }
+}
+
+/**
+ * Let the crossing's promise chain run out.
+ *
+ * There is nothing to advance: fake timers do not fake microtasks, so the chain
+ * only needs turns. Three is what it costs today -- the `catch` and the `then`
+ * inside `crossObstacle`, then the `then` in `_onAnswer` -- and the loop runs a
+ * couple more so that adding a link to that chain does not turn this whole file
+ * red.
+ */
+async function settleCrossing() {
+  for (let i = 0; i < 5; i += 1) {
+    await Promise.resolve()
+  }
+}
+
+/**
+ * Watch the crossings the game starts, without changing them: the spy calls
+ * through, so the animation still runs and the promise still gates the next
+ * question.
+ *
+ * `crossObstacle` is the boundary between the orchestrator and the screen, which
+ * makes it the honest place to ask what game.js decided to cross -- there is
+ * nothing on the page that says which obstacle an animation was for.
+ *
+ * @returns {Object} The spy, on the prototype so it catches the live instance
+ */
+const watchCrossings = () => jest.spyOn(GameUI.prototype, "crossObstacle")
+
 /** Bumped per load so each import gets a fresh module instance. */
 let loadCount = 0
 
@@ -142,6 +245,58 @@ const feedback = () => byId("feedback").textContent
 
 /** How many item slots are filled in. */
 const earnedPips = () => document.querySelectorAll("#item-track .item-pip.is-earned").length
+
+/**
+ * Where the trail says the character is standing.
+ *
+ * Every space is an obstacle now, drawn once per season, and nothing is ticked
+ * off as the player goes past it -- the token moves and the accessible label
+ * follows. So this label is what a test reads to see the character travel, and
+ * it is the only thing on the play screen that says so.
+ *
+ * @returns {{space: number, of: number}|null} The 1-based space and the trail's
+ *   length, or null once the trail is behind them and the label says that instead
+ */
+function trailSpace() {
+  const label = document.querySelector("#trail .trail-svg")?.getAttribute("aria-label") ?? ""
+  const match = /space (\d+) of (\d+)/.exec(label)
+  return match ? { space: Number(match[1]), of: Number(match[2]) } : null
+}
+
+/**
+ * The first space in a season's route standing at the given obstacle, and with
+ * something else after it.
+ *
+ * Asked of the real route rather than remembered: Ella reorders the obstacles
+ * and adds kinds, so a test that knows "space 4 is the mountain" is a test that
+ * breaks when she does. The "something else after it" half matters just as much
+ * -- with two of a kind in a row, crossing the obstacle behind you and crossing
+ * the one ahead of you look identical.
+ *
+ * @param {Object} season - The season to search
+ * @param {string} kind - An obstacle kind id, from obstacles.js
+ * @returns {number} The 0-based space index
+ */
+function spaceFacing(season, kind) {
+  const index = season.route.findIndex(
+    (entry, i) => entry === kind && i + 1 < season.route.length && season.route[i + 1] !== kind,
+  )
+  expect(index).toBeGreaterThanOrEqual(0)
+  return index
+}
+
+/**
+ * An ordinary space: no hard obstacle, so no glow, and far enough along that a
+ * step backwards from it is a real move rather than a clamp at zero.
+ *
+ * @param {Object} season - The season to search
+ * @returns {number} The 0-based space index
+ */
+function ordinarySpace(season) {
+  const index = season.route.findIndex((kind, i) => i > 0 && !isHardKind(kind))
+  expect(index).toBeGreaterThanOrEqual(1)
+  return index
+}
 
 /** The save the game has written, parsed. */
 const saved = () => JSON.parse(localStorage.getItem(STORAGE.KEY))
@@ -187,16 +342,37 @@ function tapWrong() {
   return answer
 }
 
-/** Tap the right answer and let the flash run out, so the next question lands. */
-function answerCorrectly() {
-  tapRight()
-  jest.advanceTimersByTime(900)
+/**
+ * Wait out the flash, land the character, and let the next screen be drawn. The
+ * one place that knows the answer cycle has two waits in it.
+ */
+async function landAnswer() {
+  jest.advanceTimersByTime(FLASH_MS)
+  finishCrossing()
+  await settleCrossing()
 }
 
-/** Tap a wrong answer and let the flash run out. */
+/**
+ * Tap the right answer and let the whole cycle finish, so that the next question
+ * -- or the result screen -- is on the page once this resolves. Must be awaited.
+ */
+async function answerCorrectly() {
+  tapRight()
+  await landAnswer()
+}
+
+/**
+ * Tap a wrong answer and let the flash run out.
+ *
+ * Synchronous, unlike `answerCorrectly`, and that is the point: a wrong answer
+ * crosses nothing, so `_onAnswer` asks the next question from inside the flash
+ * timeout with no promise in between. If a wrong answer ever does start a
+ * crossing, every sequence built on this helper stops finding its buttons rather
+ * than quietly drifting.
+ */
 function answerWrongly() {
   tapWrong()
-  jest.advanceTimersByTime(900)
+  jest.advanceTimersByTime(FLASH_MS)
 }
 
 /**
@@ -214,9 +390,9 @@ function missEveryBossTry() {
  * Play the season on screen without missing anything, until the result screen
  * takes over. The cap is a guard against an infinite loop, not a real bound.
  */
-function playSeasonPerfectly(limit = 40) {
+async function playSeasonPerfectly(limit = 40) {
   for (let i = 0; i < limit && isActive("screen-play"); i += 1) {
-    answerCorrectly()
+    await answerCorrectly()
   }
   expect(isActive("screen-result")).toBe(true)
 }
@@ -256,6 +432,7 @@ restoreRulesBetweenTests()
 
 beforeEach(async () => {
   jest.useFakeTimers()
+  installFakeAnimations()
   localStorage.clear()
   await boot()
 })
@@ -264,6 +441,7 @@ afterEach(() => {
   jest.clearAllTimers()
   jest.useRealTimers()
   jest.restoreAllMocks()
+  removeFakeAnimations()
 })
 
 describe("first load", () => {
@@ -312,9 +490,14 @@ describe("choosing a character", () => {
 
   it("draws the trail with the token at the start", () => {
     chooseCharacter("phoenix")
-    expect(document.querySelectorAll("#trail .trail-marker")).toHaveLength(SPRING.spaces)
-    expect(document.querySelectorAll("#trail .trail-marker.is-done")).toHaveLength(0)
+    // One obstacle per space, and the glowing ones are wherever the route puts
+    // its hard obstacles -- both derived, so retuning a route costs this nothing.
+    expect(document.querySelectorAll("#trail .trail-obstacle")).toHaveLength(SPRING.spaces)
+    expect(document.querySelectorAll("#trail .trail-obstacle.is-glowing")).toHaveLength(
+      SPRING.glowingAt.length,
+    )
     expect(document.querySelector("#trail .trail-token")).not.toBeNull()
+    expect(trailSpace()).toEqual({ space: 1, of: SPRING.spaces })
   })
 
   it("records the choice in the save", () => {
@@ -366,14 +549,23 @@ describe("answering", () => {
     expect(document.activeElement).toBe(pressed)
   })
 
-  it("the next question arrives after the flash, not before", () => {
+  it("the next question arrives after the flash and the crossing, not before", async () => {
     tapRight()
     expect(saved().run.questionsAsked).toBe(1)
 
-    jest.advanceTimersByTime(800)
+    jest.advanceTimersByTime(FLASH_MS - 100)
     expect(choices().every((button) => button.getAttribute("aria-disabled") === "true")).toBe(true)
 
     jest.advanceTimersByTime(100)
+    await settleCrossing()
+    // The flash is over, but the character is mid-leap over the obstacle it was
+    // standing at, and the buttons stay locked for the whole of it.
+    expect(isCrossing()).toBe(true)
+    expect(choices().every((button) => button.getAttribute("aria-disabled") === "true")).toBe(true)
+
+    finishCrossing()
+    await settleCrossing()
+
     expect(choices()).toHaveLength(PLAY.CHOICE_COUNT)
     expect(choices().every((button) => button.getAttribute("aria-disabled") === null)).toBe(true)
     expect(choices().every((button) => button.classList.contains("is-locked") === false)).toBe(true)
@@ -382,24 +574,145 @@ describe("answering", () => {
     // legitimately be identical, which made that assertion flake.
     expect(saved().run.questionsAsked).toBe(1)
     expect(byId("question-prompt").textContent).not.toBe("")
-    expect(document.querySelectorAll("#trail .trail-marker.is-done")).toHaveLength(1)
+    expect(trailSpace()).toEqual({ space: 2, of: SPRING.spaces })
   })
 
-  it("three correct answers in a row collect three items", () => {
+  it("three correct answers in a row collect three items", async () => {
     for (let i = 0; i < 3; i += 1) {
-      answerCorrectly()
+      await answerCorrectly()
     }
     expect(hudCount()).toMatchObject({ items: 3 })
     expect(earnedPips()).toBe(3)
     expect(saved().run.position).toBe(3)
+    expect(trailSpace()).toEqual({ space: 4, of: SPRING.spaces })
   })
 
-  it("counts every answer against the lifetime totals", () => {
-    answerCorrectly()
+  it("counts every answer against the lifetime totals", async () => {
+    await answerCorrectly()
     answerWrongly()
-    answerCorrectly()
+    await answerCorrectly()
     expect(saved().totals.questionsAnswered).toBe(3)
     expect(saved().totals.questionsCorrect).toBe(2)
+  })
+})
+
+// Every space is an obstacle, and a correct answer is what gets the character
+// over the one in its way. The crossing sits between the answer and the next
+// question -- the only asynchronous step in the cycle -- so it has its own block.
+describe("crossing the obstacle in the way", () => {
+  it("crosses the obstacle it was standing at, not the one it lands in front of", async () => {
+    // A mountain on purpose. It is the only hard kind, so it is also the glowing
+    // space, and it is where crossing the arrival obstacle instead of the
+    // departure one would look most plausible.
+    const mountain = spaceFacing(SPRING, "mountain")
+    // Which is the glowing space, by the same token: the mountain is the only
+    // hard kind, so this case covers both at once.
+    expect(SPRING.glowingAt).toContain(mountain)
+    await bootInto({ position: mountain })
+    const crossings = watchCrossings()
+
+    await answerCorrectly()
+
+    expect(crossings).toHaveBeenCalledTimes(1)
+    expect(crossings).toHaveBeenCalledWith(mountain, "mountain")
+    // Which `spaceFacing` guarantees is a different kind, so the assertion above
+    // really did distinguish the two.
+    expect(SPRING.route[mountain + 1]).not.toBe("mountain")
+    expect(saved().run.position).toBe(mountain + 1)
+    expect(trailSpace()).toEqual({ space: mountain + 2, of: SPRING.spaces })
+  })
+
+  // Pinned to the gentle rule so that "where it was" can be exact: the step-back
+  // rule moves the token *backwards*, which is what "what a wrong answer costs"
+  // covers. What matters here is that no rule crosses anything.
+  describe("a wrong answer", () => {
+    useRules({ wrongAnswer: WRONG_ANSWER.GENTLE })
+
+    it("crosses nothing and leaves the character where it was", async () => {
+      const start = ordinarySpace(SPRING)
+      await bootInto({ position: start, items: 2, forgivenessLeft: 0 })
+      const crossings = watchCrossings()
+
+      answerWrongly()
+
+      expect(crossings).not.toHaveBeenCalled()
+      expect(isCrossing()).toBe(false)
+      expect(saved().run.position).toBe(start)
+      expect(trailSpace()).toEqual({ space: start + 1, of: SPRING.spaces })
+      // And the next question is already up: there was nothing to wait for.
+      expect(saved().run.questionsAsked).toBe(1)
+      expect(choices().every((button) => button.getAttribute("aria-disabled") === null)).toBe(true)
+    })
+  })
+
+  it("crosses nothing at the boss, where there is no obstacle past the last space", async () => {
+    await bootInto({ phase: PHASE.BOSS, position: SPRING.spaces, items: SPRING.demand })
+    const crossings = watchCrossings()
+
+    await answerCorrectly()
+
+    expect(crossings).not.toHaveBeenCalled()
+    expect(isCrossing()).toBe(false)
+    expect(isActive("screen-result")).toBe(true)
+    expect(byId("result-title").textContent).toBe(TITLE.seasonComplete(SPRING))
+  })
+
+  // The guard that matters most. `answering` covers the crossing as well as the
+  // flash, so a child who taps while the character is in the air cannot score
+  // against a question they have not been shown yet.
+  it("holds both the next question and a second answer until the character lands", async () => {
+    const start = ordinarySpace(SPRING)
+    await bootInto({ position: start, items: 0 })
+    const crossings = watchCrossings()
+
+    tapRight()
+    jest.advanceTimersByTime(FLASH_MS)
+    await settleCrossing()
+
+    expect(crossings).toHaveBeenCalledTimes(1)
+    expect(isCrossing()).toBe(true)
+    expect(choices().every((button) => button.getAttribute("aria-disabled") === "true")).toBe(true)
+
+    // A tap mid-leap. The buttons are not `disabled`, so it really does reach
+    // game.js -- the probe proves that rather than leaving the DOM to refuse it.
+    const probe = jest.fn()
+    choices()[0].addEventListener("click", probe)
+    choices()[0].click()
+    expect(probe).toHaveBeenCalledTimes(1)
+    pressKey("1")
+    await settleCrossing()
+
+    expect(saved().run.questionsAsked).toBe(1)
+    expect(saved().run.correctCount).toBe(1)
+    expect(saved().run.items).toBe(1)
+    expect(saved().totals.questionsAnswered).toBe(1)
+    expect(hudCount()).toMatchObject({ items: 1 })
+
+    finishCrossing()
+    await settleCrossing()
+
+    expect(isCrossing()).toBe(false)
+    expect(choices().every((button) => button.getAttribute("aria-disabled") === null)).toBe(true)
+    expect(trailSpace()).toEqual({ space: start + 2, of: SPRING.spaces })
+  })
+
+  // Anyone who taps faster than the animation should not have to wait for it.
+  it("lands the character early when the page is tapped", async () => {
+    const start = ordinarySpace(SPRING)
+    await bootInto({ position: start, items: 0 })
+
+    tapRight()
+    jest.advanceTimersByTime(FLASH_MS)
+    expect(isCrossing()).toBe(true)
+
+    document.dispatchEvent(new Event("pointerdown"))
+    await settleCrossing()
+
+    // Unlocked buttons without `finishCrossing`: the tap, and nothing else,
+    // ended the animation and released the next question.
+    expect(isCrossing()).toBe(false)
+    expect(choices().every((button) => button.getAttribute("aria-disabled") === null)).toBe(true)
+    expect(trailSpace()).toEqual({ space: start + 2, of: SPRING.spaces })
   })
 })
 
@@ -517,8 +830,8 @@ describe("the double-tap guard", () => {
     expect(hudCount()).toMatchObject({ items: 1 })
   })
 
-  it("the guard lifts once the flash is over", () => {
-    answerCorrectly()
+  it("the guard lifts once the flash and the crossing are over", async () => {
+    await answerCorrectly()
     tapRight()
     expect(saved().run.questionsAsked).toBe(2)
     expect(hudCount()).toMatchObject({ items: 2 })
@@ -656,7 +969,7 @@ describe("the verdict under the question", () => {
 
   it("is cleared again when the next question arrives", async () => {
     await bootInto({ position: 0, items: 0 })
-    answerCorrectly()
+    await answerCorrectly()
     expect(feedback()).toBe("")
   })
 
@@ -705,7 +1018,7 @@ describe("what a wrong answer costs", () => {
       expect(saved().run.position).toBe(2)
       expect(byId("wilt-note").classList.contains("hidden")).toBe(false)
 
-      answerCorrectly()
+      await answerCorrectly()
       expect(hudCount()).toMatchObject({ items: 3 })
       expect(saved().run.wilting).toBe(0)
       expect(saved().run.lost).toBe(0)
@@ -727,7 +1040,11 @@ describe("what a wrong answer costs", () => {
       expect(earnedPips()).toBe(1)
       // Nothing is wilting, so nothing is promised back.
       expect(byId("wilt-note").classList.contains("hidden")).toBe(true)
-      expect(document.querySelectorAll("#trail .trail-marker.is-done")).toHaveLength(1)
+      // The drawn trail has to agree with the save. `_onAnswer` used to redraw
+      // only the HUD, so the token stayed a space ahead of where the player
+      // actually was -- visible only under this rule, since it is the one that
+      // moves you backwards.
+      expect(trailSpace()).toMatchObject({ space: 2 })
     })
   })
 })
@@ -736,9 +1053,9 @@ describe("what a wrong answer costs", () => {
 // season at all, so `_renderResult`, `_unlockAfter`, `_onAdvance`, `_onRetry`,
 // `_startNewRun` and the totals bookkeeping were all untested.
 describe("playing a season to the end", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     chooseCharacter("sloth")
-    playSeasonPerfectly()
+    await playSeasonPerfectly()
   })
 
   it("hands over to the result screen with the season's figures", () => {
@@ -833,10 +1150,10 @@ describe("finishing the whole journey", () => {
    * Play every season perfectly, pressing on at each result screen. The last
    * press is "Finish the journey", which is what ends the run.
    */
-  function playWholeRun() {
+  async function playWholeRun() {
     chooseCharacter("sloth")
     for (let i = 0; i < SEASON_ORDER.length; i += 1) {
-      playSeasonPerfectly()
+      await playSeasonPerfectly()
       resultButtons()[0].click()
     }
   }
@@ -859,14 +1176,14 @@ describe("finishing the whole journey", () => {
   }
 
   /** Answer the last season's boss and press through to the end of the run. */
-  function finishLastSeason() {
-    answerCorrectly()
+  async function finishLastSeason() {
+    await answerCorrectly()
     expect(byId("result-title").textContent).toBe(TITLE.seasonComplete(LAST_SEASON))
     resultButtons()[0].click()
   }
 
-  it("ends the run once the last season is cleared, played all the way through", () => {
-    playWholeRun()
+  it("ends the run once the last season is cleared, played all the way through", async () => {
+    await playWholeRun()
 
     expect(isActive("screen-result")).toBe(true)
     expect(isActive("screen-play")).toBe(false)
@@ -883,8 +1200,8 @@ describe("finishing the whole journey", () => {
 
   // The headline: one row per season, from `state.collected`, and emphatically
   // not the default summary of winter's counters.
-  it("summarises every season played rather than the last one over and over", () => {
-    playWholeRun()
+  it("summarises every season played rather than the last one over and over", async () => {
+    await playWholeRun()
 
     expect(summaryRows()).toEqual([
       ...SEASON_ORDER.map((id, index) => [seasonRowLabel(id), String(PERFECT[index])]),
@@ -906,11 +1223,11 @@ describe("finishing the whole journey", () => {
     ])
   })
 
-  it("counts the completed run once, and not at the end of each season", () => {
+  it("counts the completed run once, and not at the end of each season", async () => {
     chooseCharacter("sloth")
     const perSeason = []
     for (let i = 0; i < SEASON_ORDER.length; i += 1) {
-      playSeasonPerfectly()
+      await playSeasonPerfectly()
       perSeason.push(saved().totals.runsCompleted)
       resultButtons()[0].click()
     }
@@ -925,7 +1242,7 @@ describe("finishing the whole journey", () => {
       await bootIntoLastBoss(
         Object.fromEntries(EARLIER_SEASONS.map((id, index) => [id, PERFECT[index]])),
       )
-      finishLastSeason()
+      await finishLastSeason()
     })
 
     it("shows each season's own tally, the last from the boss it just answered", () => {
@@ -995,7 +1312,7 @@ describe("finishing the whole journey", () => {
   // ones render as "undefined".
   it("lists only the seasons that were actually cleared", async () => {
     await bootIntoLastBoss({ [SEASON_ORDER[0]]: PERFECT[0] })
-    finishLastSeason()
+    await finishLastSeason()
 
     expect(summaryRows()).toEqual([
       [seasonRowLabel(SEASON_ORDER[0]), String(PERFECT[0])],
@@ -1143,10 +1460,10 @@ describe("the boss question", () => {
 // iPad the next child to pick it up would otherwise erase a half-finished run
 // with one tap, so it asks first.
 describe("the restart button", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     chooseCharacter("sloth")
-    answerCorrectly()
-    answerCorrectly()
+    await answerCorrectly()
+    await answerCorrectly()
   })
 
   it("erases the run once the confirm is accepted", () => {
@@ -1236,7 +1553,7 @@ describe("persistence", () => {
   it("a reload resumes the trail rather than asking for a character again", async () => {
     chooseCharacter("phoenix")
     for (let i = 0; i < 2; i += 1) {
-      answerCorrectly()
+      await answerCorrectly()
     }
     expect(hudCount()).toMatchObject({ items: 2 })
 
@@ -1247,7 +1564,7 @@ describe("persistence", () => {
     expect(isActive("screen-character")).toBe(false)
     expect(hudCount()).toMatchObject({ items: 2 })
     expect(byId("season-name").textContent).toBe("Spring")
-    expect(document.querySelectorAll("#trail .trail-marker.is-done")).toHaveLength(2)
+    expect(trailSpace()).toEqual({ space: 3, of: SPRING.spaces })
     expect(choices()).toHaveLength(PLAY.CHOICE_COUNT)
   })
 
@@ -1262,10 +1579,10 @@ describe("persistence", () => {
   // only say the run really is mid-trail.
   it("a reload puts back the whole screen, not just parts of it", async () => {
     chooseCharacter("porcupine")
-    answerCorrectly()
+    await answerCorrectly()
     answerWrongly()
-    answerCorrectly()
-    answerCorrectly()
+    await answerCorrectly()
+    await answerCorrectly()
 
     const before = {
       prompt: byId("question-prompt").textContent,
@@ -1273,7 +1590,7 @@ describe("persistence", () => {
       labels: choices().map((button) => button.getAttribute("aria-label")),
       count: hudCount().line,
       pips: earnedPips(),
-      done: document.querySelectorAll("#trail .trail-marker.is-done").length,
+      where: trailSpace(),
       run: saved().run,
     }
     expect(before.run.questionsAsked).toBe(4)
@@ -1288,7 +1605,7 @@ describe("persistence", () => {
     expect(choices().map((button) => button.getAttribute("aria-label"))).toEqual(before.labels)
     expect(hudCount().line).toBe(before.count)
     expect(earnedPips()).toBe(before.pips)
-    expect(document.querySelectorAll("#trail .trail-marker.is-done")).toHaveLength(before.done)
+    expect(trailSpace()).toEqual(before.where)
     expect(saved().run).toEqual(before.run)
     // ...and the restored question is still answerable, with the same answer.
     tapRight()
@@ -1318,5 +1635,46 @@ describe("persistence", () => {
     await boot()
     expect(isActive("screen-character")).toBe(true)
     expect(cards()).toHaveLength(CHARACTERS.length)
+  })
+})
+
+/**
+ * The boss label and the missed-boss line. Both exist because Ella designed two
+ * things the screen never told the player: that a missed boss question earns
+ * another go, and that answering it makes up for items missed earlier. Before
+ * this, both were only discoverable by getting it right.
+ */
+describe("the boss says what is at stake", () => {
+  it("says what the question is worth, before it is answered", async () => {
+    await bootInto({ phase: PHASE.BOSS, position: SPRING.spaces, items: 4 })
+    const tag = byId("question-tag").textContent
+    expect(tag).toContain(String(SPRING.boss.rescue))
+    expect(tag).toContain(SPRING.itemPlural.toLowerCase())
+    expect(byId("question-tag").classList.contains("hidden")).toBe(false)
+  })
+
+  it("says it is the last try once the spare one is gone", async () => {
+    await bootInto({ phase: PHASE.BOSS, position: SPRING.spaces, items: 4, bossTriesLeft: 1 })
+    expect(byId("question-tag").textContent).toMatch(/last try/i)
+  })
+
+  it("does not say last try while a spare remains", async () => {
+    await bootInto({ phase: PHASE.BOSS, position: SPRING.spaces, items: 4, bossTriesLeft: 2 })
+    expect(byId("question-tag").textContent).not.toMatch(/last try/i)
+  })
+
+  it("offers another go after a miss, rather than the generic line", async () => {
+    await bootInto({ phase: PHASE.BOSS, position: SPRING.spaces, items: 4, bossTriesLeft: 2 })
+    const answer = tapWrong()
+    expect(feedback()).toBe(`Not quite. The answer was ${answer}. One more go!`)
+    expect(saved().run.phase).toBe(PHASE.BOSS)
+    expect(saved().run.bossTriesLeft).toBe(1)
+  })
+
+  it("drops the offer once the tries are spent", async () => {
+    await bootInto({ phase: PHASE.BOSS, position: SPRING.spaces, items: 4, bossTriesLeft: 1 })
+    const answer = tapWrong()
+    expect(feedback()).not.toMatch(/one more go/i)
+    expect(feedback()).toContain(`The answer was ${answer}.`)
   })
 })

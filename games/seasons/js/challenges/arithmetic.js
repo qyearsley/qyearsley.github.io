@@ -34,6 +34,28 @@
 import { PLAY } from "../constants.js"
 
 /**
+ * Above this answer, a slip of a whole factor (ten out, or doubled) is the
+ * believable mistake and makes the better distractor. At or below it, being one
+ * or two out is, and the scaled candidates stop resembling anything a child
+ * would actually write down.
+ * @private
+ */
+const SCALED_SLIP_FROM = 20
+
+/**
+ * Above this answer, a slip of a whole factor is the believable mistake for
+ * *any* operation, not just the ones where a factor is involved.
+ *
+ * Three-digit column arithmetic with neighbours one and two away means no
+ * choice can be ruled out by estimating -- the whole sum has to be carried out
+ * exactly and then four three-digit numbers read and compared, which is a
+ * reading test on top of a maths one. Ten out is what a real carry error looks
+ * like at that size.
+ * @private
+ */
+const BIG_ANSWER = 100
+
+/**
  * A generated question, ready to render.
  *
  * @typedef {Object} Question
@@ -234,11 +256,19 @@ function _candidates(answer, kind) {
   const scaled = [answer + 10, answer - 10, answer * 2, Math.floor(answer / 2)]
   const digits = String(answer)
   const swapped = digits.length > 1 ? [Number(digits.split("").reverse().join(""))] : []
-  // Multiplication and division slip by a whole factor far more often than by
-  // one, so those candidates come first for those kinds.
-  return kind === "mul" || kind === "div" || kind === "twoStep"
-    ? [...scaled, ...near, ...swapped]
-    : [...near, ...scaled, ...swapped]
+
+  // Ordered by the size of the answer, not by the operation.
+  //
+  // Ordering by operation put the scaled candidates first for every
+  // multiplication and division, which is right for a large product -- someone
+  // who slips a whole factor lands ten or double away -- but produces nonsense
+  // for a small quotient. "6 divided by 2" was offering 13 and 1 alongside the
+  // answer 3, neither of which anybody would arrive at by miscounting, so three
+  // of the four buttons could be dismissed without doing the maths. Below the
+  // threshold the believable mistake is being one or two out.
+  const factorKind = kind === "mul" || kind === "div" || kind === "twoStep"
+  const preferScaled = answer >= BIG_ANSWER || (answer >= SCALED_SLIP_FROM && factorKind)
+  return preferScaled ? [...scaled, ...near, ...swapped] : [...near, ...scaled, ...swapped]
 }
 
 /**

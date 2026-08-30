@@ -10,15 +10,20 @@
  * timing matters:
  *
  *   1. stop the countdown, so a timeout cannot fire during the flash
- *   2. ask GameState what the answer did
- *   3. save immediately -- progress survives a closed tab mid-flash
- *   4. flash the result on the buttons for `flashDuration`
- *   5. draw whatever comes next: the following question, or the result screen
+ *   2. note where the character stands and what it is facing, before the answer
+ *      moves it
+ *   3. ask GameState what the answer did
+ *   4. save immediately -- progress survives a closed tab mid-flash
+ *   5. flash the result on the buttons for `flashDuration`
+ *   6. animate the character across the obstacle it just got past, if it did
+ *   7. draw whatever comes next: the following question, or the result screen
  *
- * The module-level `answering` flag guards the whole cycle. Without it a fast
- * double-tap, or a tap landing in the same frame as a timeout, would score
- * twice. `aria-disabled` on the buttons only announces that; this is what
- * enforces it.
+ * The module-level `answering` flag guards the whole cycle, the crossing
+ * included. Without it a fast double-tap, or a tap landing in the same frame as
+ * a timeout, would score twice -- and a tap mid-crossing would answer a question
+ * that is not on screen yet. `aria-disabled` on the buttons only announces that;
+ * this is what enforces it. A `pointerdown` anywhere cuts the crossing short
+ * rather than shortening the guard.
  *
  * This file exports nothing and calls `start()` at the bottom, so importing it
  * starts the game -- which is why index.html needs no bootstrap call, and why
@@ -42,7 +47,7 @@ import {
   rehydrate,
   retry,
 } from "./GameState.js"
-import { isGlowingAt } from "./Journey.js"
+import { isGlowingAt, kindAt } from "./Journey.js"
 import { getCharacter } from "./characters.js"
 import { getSeason } from "./seasons.js"
 import { StorageManager, defaultSave, toSavedRun } from "./storage.js"
@@ -68,12 +73,23 @@ let answering = false
  */
 let flashTimer = null
 
-/** Cancel a pending flash. Safe to call when none is scheduled. */
+/**
+ * Bumped whenever the run is torn down mid-cycle. The crossing animation
+ * finishes asynchronously, so its callback has to be able to tell that the
+ * season it belonged to is gone -- otherwise a restart during a crossing draws
+ * a question over the character screen.
+ * @type {number}
+ */
+let cycle = 0
+
+/** Cancel a pending flash and orphan any crossing. Safe to call at any time. */
 function _cancelFlash() {
   if (flashTimer !== null) {
     clearTimeout(flashTimer)
     flashTimer = null
   }
+  cycle += 1
+  ui.skipTraversal()
   answering = false
 }
 
@@ -137,12 +153,11 @@ function render() {
     ui.applyPalette(season)
     ui.renderHud(state, season)
     const wasElsewhere = !document.getElementById("screen-play")?.classList.contains("active")
-    // Reveal before drawing. The trail measures its own path with
-    // getTotalLength() to place the markers, and that is not dependable inside
-    // a `display: none` subtree -- a 0 there reads as "geometry unsupported"
-    // and falls back to a straight line. Since the scene is now built once per
-    // season and only updated afterwards, one bad measurement would persist for
-    // the whole season instead of self-correcting on the next answer.
+    // Reveal before drawing. This used to be load-bearing: the trail measured
+    // its own path with getTotalLength() to place markers, and that is not
+    // dependable inside a `display: none` subtree. Nothing measures geometry
+    // any more -- every coordinate comes from the art pack's layout(), which is
+    // arithmetic -- so the order is no longer load-bearing, just harmless.
     ui.showScreen("screen-play")
     ui.renderTrail(season, state.position, state.characterId)
     // Only on arrival, not between questions: moving focus every question would
@@ -168,11 +183,40 @@ function _askQuestion() {
   const season = getSeason(state.seasonId)
   const isBoss = state.phase === PHASE.BOSS
   const glowing = !isBoss && isGlowingAt(season, state.position)
-  ui.renderQuestion(state, glowing, isBoss, _onAnswer)
+  ui.renderQuestion(
+    state,
+    { tag: _questionTag(season, isBoss, glowing), lit: isBoss || glowing },
+    _onAnswer,
+  )
   // The flash timeout can land while the tab is hidden, which would start a
   // clock on a question nobody is looking at. `visibilitychange` starts it when
   // the page comes back.
   if (!document.hidden) ui.startTimer(questionSeconds(state), () => _onAnswer(null, null))
+}
+
+/**
+ * The line above the question.
+ *
+ * The boss label carries two things Ella designed and the screen never said:
+ * that a miss earns another go ("if you miss the boss question you get a chance
+ * to go back and try again"), and that answering it makes up for items missed
+ * earlier. Both were only discoverable by getting it right, which is the wrong
+ * order -- they matter most while she is short and deciding how hard to think.
+ *
+ * @private
+ * @param {import("./seasons.js").Season} season - The season being played
+ * @param {boolean} isBoss - Whether this is the boss question
+ * @param {boolean} glowing - Whether this is a glowing space
+ * @returns {string} The label, or "" for an ordinary space
+ */
+function _questionTag(season, isBoss, glowing) {
+  if (isBoss) {
+    const worth = `worth ${season.boss.rescue} more ${season.itemPlural.toLowerCase()}`
+    // Not "her last question" for the first attempt: that reads as "last try",
+    // which is what the other branch says, so the two got confused.
+    return state.bossTriesLeft > 1 ? `The snake woman's question — ${worth}` : `Last try — ${worth}`
+  }
+  return glowing ? "Glowing challenge" : ""
 }
 
 /**
@@ -213,6 +257,9 @@ function _feedbackFor(outcome, season, timedOut) {
   // One clause, not several. A child has 900ms to read it.
   const answer = outcome.correctAnswer
   const right = answer === undefined ? "" : ` The answer was ${answer}.`
+  // A missed boss question with a try in hand is the one miss that is not a
+  // setback, so it gets its own line instead of the generic one.
+  if (outcome.wasBoss && outcome.bossTriesLeft > 0) return `Not quite.${right} One more go!`
   if (timedOut) return `Time ran out!${right}`
   if (outcome.forgiven) return `${getCharacter(state.characterId).perkName} saved you!${right}`
   if (outcome.lostNow > 0) return `Lost ${outcome.lostNow} ${name(outcome.lostNow)}.${right}`
@@ -236,7 +283,15 @@ function _onAnswer(value, button) {
 
   const season = getSeason(state.seasonId)
   const correctValue = state.question?.answer
+  // Captured before the answer is applied, because the crossing is *from* where
+  // the character was standing, over the obstacle that was in the way.
+  const wasAt = state.position
+  const facing = kindAt(season, wasAt)
   const result = applyAnswer(state, value)
+  const crossed =
+    result.outcome.correct && !result.outcome.wasBoss && facing
+      ? { from: wasAt, kind: facing }
+      : null
   state = result.state
   save = {
     ...save,
@@ -258,15 +313,33 @@ function _onAnswer(value, button) {
 
   flashTimer = setTimeout(() => {
     flashTimer = null
-    answering = false
     if (state.phase === PHASE.SEASON_WON) _unlockAfter(season.id)
     if (state.phase === PHASE.SEASON_WON || state.phase === PHASE.SEASON_LOST) {
+      answering = false
       _save()
       render()
       return
     }
-    ui.renderTrail(getSeason(state.seasonId), state.position, state.characterId)
-    _askQuestion()
+    // A correct answer got the character across the obstacle it was facing, so
+    // play that before asking the next question. `answering` stays true for the
+    // duration, which is what stops a fast tapper answering mid-leap.
+    if (crossed === null) {
+      // Redraw before asking: a wrong answer can still move the character.
+      // Under the step-back rule the save said one position while the drawn
+      // token and the trail's label still showed the old one, because nothing
+      // else runs between two questions.
+      ui.renderTrail(getSeason(state.seasonId), state.position, state.characterId)
+      answering = false
+      _askQuestion()
+      return
+    }
+    const generation = cycle
+    ui.crossObstacle(crossed.from, crossed.kind).then(() => {
+      // Stale if the run was torn down while the character was still moving.
+      if (generation !== cycle) return
+      answering = false
+      _askQuestion()
+    })
   }, ui.flashDuration)
 }
 
@@ -421,6 +494,8 @@ function start() {
     save = loaded
     state = rehydrate(loaded.run)
   }
+  // Anyone who taps faster than the animation should not have to wait for it.
+  document.addEventListener("pointerdown", () => ui.skipTraversal())
   document.addEventListener("keydown", _onKeyDown)
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {

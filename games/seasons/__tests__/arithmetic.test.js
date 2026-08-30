@@ -438,17 +438,19 @@ describe("arithmetic", () => {
       expect(positions.has(-1)).toBe(false)
     })
 
-    it("offers near misses rather than arbitrary numbers", () => {
+    it("offers near misses rather than arbitrary numbers, below the big-answer mark", () => {
       // The tolerance here used to be Math.max(10, answer), which for an answer
       // of 90 admitted anything in [0, 180] -- uniform random distractors would
       // have passed it, so it could not fail for the thing it is named after.
       //
-      // Plain addition's distractors come from the +-1 / +-2 band and nothing
-      // else (its answer is never below 3, so none of those four candidates is
-      // rejected for going negative), which is why the band is the assertion.
+      // Capped at max 90 so every answer stays under BIG_ANSWER. Above that the
+      // ordering deliberately flips to whole-factor slips, because +-1 and +-2
+      // on a three-digit sum leave nothing to estimate with -- there is a
+      // separate group covering that.
       let distractors = 0
       for (let seed = 0; seed < 100; seed += 1) {
-        const question = generate([{ kind: "add", max: 100 }], createRng(`near-${seed}`))
+        const question = generate([{ kind: "add", max: 90 }], createRng(`near-${seed}`))
+        expect(question.answer).toBeLessThan(100)
         for (const value of question.choices) {
           if (value === question.answer) continue
           expect(Math.abs(value - question.answer)).toBeLessThanOrEqual(2)
@@ -599,5 +601,82 @@ describe("generators respect the max their form declares", () => {
     // form today, at 150 seeds each.
     expect(checked).toBeGreaterThan(1000)
     expect(overshoots.slice(0, 10)).toEqual([])
+  })
+})
+
+/**
+ * Distractor plausibility, which is a quality property rather than a
+ * correctness one: every choice has to be a number a child could actually
+ * arrive at. Nothing guarded this, and division was offering 13 and 1 against
+ * an answer of 3 -- three of four buttons dismissable without doing the maths.
+ */
+describe("distractors stay believable for the size of the answer", () => {
+  /**
+   * Generate until an answer falls in the wanted range, so the assertion is
+   * about the size of the answer rather than about a particular seed.
+   * @param {Object} form - A single form to generate from
+   * @param {function(number): boolean} wanted - Predicate on the answer
+   * @returns {Object|null} A matching question, or null if none turned up
+   */
+  function findQuestion(form, wanted) {
+    for (let seed = 0; seed < 400; seed += 1) {
+      const question = generate([form], createRng(`plausible-${seed}`))
+      if (wanted(question.answer)) return question
+    }
+    return null
+  }
+
+  it("keeps small answers within a couple of the truth", () => {
+    // A quotient of 3 invites 2 and 4, never 13. The old ordering put the
+    // off-by-ten and halved candidates first for every division regardless of
+    // how small the answer was.
+    const question = findQuestion({ kind: "div", tables: [2, 5, 10], upTo: 6 }, (a) => a <= 6)
+    expect(question).not.toBeNull()
+    for (const choice of question.choices) {
+      expect(Math.abs(choice - question.answer)).toBeLessThanOrEqual(4)
+    }
+  })
+
+  it("still offers whole-factor slips for large answers", () => {
+    // For a real product the believable mistake is a whole factor out, so at
+    // least one choice should be further away than a near miss.
+    const question = findQuestion({ kind: "mul", tables: [6, 7, 8, 9], upTo: 12 }, (a) => a >= 40)
+    expect(question).not.toBeNull()
+    const distances = question.choices.map((c) => Math.abs(c - question.answer))
+    expect(Math.max(...distances)).toBeGreaterThan(4)
+  })
+
+  it("never offers a negative or a duplicate, whatever the answer's size", () => {
+    for (const form of [
+      { kind: "div", tables: [2, 5, 10], upTo: 6 },
+      { kind: "mul", tables: [6, 7, 8, 9], upTo: 12 },
+      { kind: "sub", max: 100 },
+      { kind: "twoStep", tables: [4, 6, 7, 8, 9], upTo: 12, max: 600 },
+    ]) {
+      for (let seed = 0; seed < 120; seed += 1) {
+        const { choices, answer } = generate([form], createRng(`safe-${form.kind}-${seed}`))
+        expect(new Set(choices).size).toBe(choices.length)
+        expect(choices).toContain(answer)
+        for (const choice of choices) expect(choice).toBeGreaterThanOrEqual(0)
+      }
+    }
+  })
+})
+
+describe("big answers get whole-factor distractors, whatever the operation", () => {
+  it("spreads the choices for three-digit column arithmetic", () => {
+    // Three-digit addition with neighbours one and two away cannot be narrowed
+    // by estimating: the sum has to be carried out exactly, then four
+    // three-digit numbers read and compared. Ten out is what a real carry slip
+    // looks like at that size, and it leaves something to reason about.
+    let checked = 0
+    for (let seed = 0; seed < 300; seed += 1) {
+      const question = generate([{ kind: "add", max: 400, borrow: true }], createRng(`big-${seed}`))
+      if (question.answer < 100) continue
+      const spread = Math.max(...question.choices.map((c) => Math.abs(c - question.answer)))
+      expect(spread).toBeGreaterThan(4)
+      checked += 1
+    }
+    expect(checked).toBeGreaterThan(20)
   })
 })

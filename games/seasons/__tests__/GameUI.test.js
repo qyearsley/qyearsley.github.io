@@ -10,13 +10,14 @@
  *
  * Two pieces of setup are worth knowing about:
  *
- * - jsdom implements no SVG geometry, so `SVGPathElement.getTotalLength` does
- *   not exist. `GameUI._pointsAlong` has a documented fallback for exactly this,
- *   spreading the markers along a straight line. The trail tests therefore
- *   assert structure and finite coordinates rather than specific positions --
- *   the numbers are jsdom's, but the shape of the output is the real thing. The
- *   `_pointsAlong` group hands the method fake path objects so the real-browser
- *   branch, and its error handling, are covered too.
+ * - jsdom implements no Web Animations API, so `window.Element.prototype.animate` does
+ *   not exist. `crossObstacle` and `_panCamera` both check for it and place
+ *   things instantly instead, so that fallback is what runs by default here and
+ *   the trail group asserts against it. The animated path is covered too, by the
+ *   crossing group, which installs an `animate` stub returning a fake animation
+ *   it can inspect and finish on demand. No SVG geometry is measured anywhere in
+ *   the source any more -- `layout` returns positions outright -- so the
+ *   coordinates asserted below are the real ones a browser would use.
  * - The countdown runs on `setInterval`, so its group uses fake timers. Every
  *   other group uses real ones, because `shakeElement`'s stray timeout is
  *   harmless and faking time globally would hide it.
@@ -36,7 +37,8 @@ import { afterEach, beforeEach, describe, expect, it, jest } from "@jest/globals
 import { CHARACTERS, getCharacter } from "../js/characters.js"
 import { PLAY, WRONG_ANSWER } from "../js/constants.js"
 import { GameUI } from "../js/GameUI.js"
-import { buildTrail } from "../js/Journey.js"
+import { buildTrail, kindAt } from "../js/Journey.js"
+import { getObstacle, isHardKind } from "../js/obstacles.js"
 import { getSeason, SEASON_LIST } from "../js/seasons.js"
 import {
   choiceButtons,
@@ -154,17 +156,71 @@ function translateOf(element) {
   return [Number(match[1]), Number(match[2])]
 }
 
+/** The trail's `<svg>`, which is also the node carrying the accessible label. */
+const trailCanvas = () => document.querySelector("#trail svg.trail-svg")
+
+/** The one group everything on the trail lives in; panning it scrolls. */
+const trailCamera = () => document.querySelector("#trail .trail-camera")
+
+/** The character's group on the trail. */
+const trailToken = () => document.querySelector("#trail .trail-token")
+
+/** One group per space, in the order they were drawn. */
+const trailObstacles = () => Array.from(document.querySelectorAll("#trail .trail-obstacle"))
+
 /**
- * The `translate(Xpx, Ypx)` the token was moved with. The token moves via
- * `style.transform`, not the presentation attribute, because that is the half
- * the CSS transition animates.
- * @param {Element} element - The trail token
- * @returns {number[]} [x, y]
+ * How far the camera has scrolled the landscape, in user units. Negative means
+ * panned to the right, which is the only direction the walk goes; 0 is the start
+ * of the trail.
+ * @returns {number} The signed shift
  */
-function styleTranslateOf(element) {
-  const match = /translate\(\s*(-?[\d.]+)px[\s,]+(-?[\d.]+)px\s*\)/.exec(element.style.transform)
+function cameraShift() {
+  const match = /translateX\(\s*(-?[\d.]+)px\s*\)/.exec(trailCamera().style.transform)
   expect(match).not.toBeNull()
-  return [Number(match[1]), Number(match[2])]
+  return Number(match[1])
+}
+
+/**
+ * A season-shaped object with a route this file owns.
+ *
+ * `madeUpSeason` predates routes, and the real seasons derive `spaces` and
+ * `glowingAt` from theirs at module load -- a hand-made one has to do the same
+ * derivation or the three fields disagree, which is the bug the derivation
+ * exists to prevent. Used wherever a test pins an exact sentence or an exact
+ * order of obstacles, for the reason MADE_UP exists at all.
+ *
+ * @param {string[]} route - One obstacle kind per space
+ * @param {Object} [overrides] - Any other season field to replace
+ * @returns {Object} A Season-shaped object
+ */
+function routedSeason(route, overrides = {}) {
+  return madeUpSeason({
+    route,
+    spaces: route.length,
+    glowingAt: route.flatMap((kind, index) => (isHardKind(kind) ? [index] : [])),
+    ...overrides,
+  })
+}
+
+/**
+ * Swap the UI's art pack for a copy whose functions can be watched.
+ *
+ * `ui.pack` is an ES module namespace object, whose properties are read-only, so
+ * `jest.spyOn` cannot touch it. Spreading it into a plain object gives something
+ * mutable that still runs the real implementations.
+ *
+ * @param {GameUI} target - The instance to re-pack
+ * @returns {Object<string, Function>} The watched functions, by name
+ */
+function watchPack(target) {
+  const spies = {
+    layout: jest.fn(target.pack.layout),
+    obstacle: jest.fn(target.pack.obstacle),
+    traversal: jest.fn(target.pack.traversal),
+    standing: jest.fn(target.pack.standing),
+  }
+  target.pack = { ...target.pack, ...spies }
+  return spies
 }
 
 /** The single save/restore for the whole file. See helpers.js. */
@@ -283,47 +339,101 @@ describe("renderCharacterCards", () => {
 })
 
 describe("renderTrail", () => {
-  it("does not throw under jsdom, which implements no SVG geometry", () => {
-    expect(
-      typeof document.createElementNS("http://www.w3.org/2000/svg", "path").getTotalLength,
-    ).toBe("undefined")
+  it("draws a canvas under jsdom, which implements no Web Animations API", () => {
+    // The absent `animate` is what makes instant placement the branch this
+    // group exercises; the crossing group installs a stub for the other one.
+    expect(typeof document.createElementNS("http://www.w3.org/2000/svg", "g").animate).toBe(
+      "undefined",
+    )
     expect(() => ui.renderTrail(SPRING, 0, "sloth")).not.toThrow()
-    expect(document.querySelector("#trail svg.trail-svg")).not.toBeNull()
+    expect(trailCanvas()).not.toBeNull()
+  })
+
+  // Panning one group is how the trail scrolls, because a viewBox cannot be
+  // animated and a transform can. Anything left outside that group would sit
+  // still while the landscape moved past it.
+  it("puts the whole scene inside a single camera group", () => {
+    ui.renderTrail(SPRING, 0, "sloth")
+    const cameras = document.querySelectorAll("#trail .trail-camera")
+    expect(cameras).toHaveLength(1)
+    expect(Array.from(trailCanvas().children)).toEqual([cameras[0]])
+    for (const selector of [".trail-ground", ".trail-obstacle", ".trail-boss", ".trail-token"]) {
+      const nodes = Array.from(document.querySelectorAll(`#trail ${selector}`))
+      expect(nodes.length).toBeGreaterThan(0)
+      for (const node of nodes) expect(node.parentElement).toBe(cameras[0])
+    }
   })
 
   it.each([
     ["spring", SPRING],
     ["winter", WINTER],
-  ])("draws one marker per space for %s", (_id, season) => {
+  ])("draws one obstacle per space for %s, the kinds its route names", (_id, season) => {
     ui.renderTrail(season, 0, "sloth")
-    expect(document.querySelectorAll("#trail .trail-marker")).toHaveLength(season.spaces)
+    const groups = trailObstacles()
+    expect(groups).toHaveLength(season.spaces)
     expect(buildTrail(season)).toHaveLength(season.spaces)
+    groups.forEach((group, index) => {
+      // The drawing is the group's last child; a glowing space puts a halo
+      // behind it. Compared as markup, because the pack hands back a fresh
+      // element every call, and comparing it is the only thing that can fail
+      // when a trail draws the same obstacle everywhere.
+      expect(group.lastElementChild.outerHTML).toBe(
+        ui.pack.obstacle(season.route[index], season.id).element.outerHTML,
+      )
+    })
   })
 
-  it("marks exactly the glowing spaces", () => {
+  it("stands each obstacle exactly where the layout put it", () => {
+    const plan = ui.pack.layout(SPRING)
     ui.renderTrail(SPRING, 0, "sloth")
-    const markers = Array.from(document.querySelectorAll("#trail .trail-marker"))
-    const glowing = markers.flatMap((marker, index) =>
-      marker.classList.contains("is-glowing") ? [index] : [],
+    expect(trailObstacles().map((group) => translateOf(group))).toEqual(
+      plan.obstacles.map((spot) => [spot.x, spot.y]),
     )
-    expect(glowing).toEqual(SPRING.glowingAt)
-    // A glowing marker also gets the two halo circles Ella asked for.
-    expect(document.querySelectorAll("#trail .marker-glow")).toHaveLength(SPRING.glowingAt.length)
   })
 
-  it.each([0, 1, 7, 14])("marks the %i spaces already walked as done", (position) => {
-    ui.renderTrail(SPRING, position, "sloth")
-    const markers = Array.from(document.querySelectorAll("#trail .trail-marker"))
-    const done = markers.flatMap((marker, index) =>
-      marker.classList.contains("is-done") ? [index] : [],
+  // `glowing` is a property of the obstacle kind now, not of the space: the
+  // mountain is the hard one, so a season's glowing spaces are wherever its
+  // route puts mountains.
+  it("glows exactly the hard obstacles, and haloes only those", () => {
+    ui.renderTrail(SPRING, 0, "sloth")
+    const groups = trailObstacles()
+    const glowing = groups.flatMap((group, index) =>
+      group.classList.contains("is-glowing") ? [index] : [],
     )
-    expect(done).toEqual(Array.from({ length: Math.min(position, SPRING.spaces) }, (_, i) => i))
+    expect(glowing.length).toBeGreaterThan(0)
+    expect(glowing).toEqual(SPRING.glowingAt)
+    for (const index of glowing) expect(isHardKind(SPRING.route[index])).toBe(true)
+
+    groups.forEach((group, index) => {
+      expect(group.querySelectorAll(".obstacle-glow")).toHaveLength(glowing.includes(index) ? 1 : 0)
+    })
+    expect(document.querySelectorAll("#trail .obstacle-glow")).toHaveLength(glowing.length)
+  })
+
+  // One path per unbroken stretch of ground. Winter's route has gaps in it, and
+  // a gap is an absence of ground rather than a dark shape drawn on top of it.
+  it("draws the ground as the layout's segments, break and all", () => {
+    const plan = ui.pack.layout(WINTER)
+    ui.renderTrail(WINTER, 0, "sloth")
+    const ground = Array.from(document.querySelectorAll("#trail .trail-ground"))
+    expect(ground.map((path) => path.getAttribute("d"))).toEqual(plan.groundSegments)
+    expect(ground.length).toBeGreaterThan(1)
+  })
+
+  // At the trail's width, not the viewport's: the backdrop scrolls with
+  // everything else, so a viewport-sized one would run out halfway along.
+  it("puts the backdrop behind everything, at the trail's full width", () => {
+    const plan = ui.pack.layout(SPRING)
+    ui.renderTrail(SPRING, 0, "sloth")
+    expect(trailCamera().firstElementChild.outerHTML).toBe(
+      ui.pack.backdrop(SPRING.id, plan.width).element.outerHTML,
+    )
   })
 
   it("includes a boss group and a character token", () => {
     ui.renderTrail(SPRING, 3, "phoenix")
     const boss = document.querySelector("#trail .trail-boss")
-    const token = document.querySelector("#trail .trail-token")
+    const token = trailToken()
     expect(boss).not.toBeNull()
     expect(token).not.toBeNull()
     expect(boss.childElementCount).toBeGreaterThan(0)
@@ -332,12 +442,26 @@ describe("renderTrail", () => {
     expect(token.firstElementChild.getAttribute("transform")).toContain("scale")
   })
 
-  // The fallback's numbers are jsdom's, not the browser's. What matters is that
-  // they are numbers: an NaN here puts every marker in the same corner.
-  it("gives every marker and the boss finite coordinates", () => {
+  it("draws the chosen character in the token", () => {
+    ui.renderTrail(SPRING, 0, "phoenix")
+    const art = trailToken().firstElementChild
+    expect(art.innerHTML).toBe(ui.pack.character("phoenix").element.innerHTML)
+    expect(art.innerHTML).not.toBe(ui.pack.character("sloth").element.innerHTML)
+  })
+
+  it("waits at the end of the trail with the boss, past the last stop", () => {
+    const plan = ui.pack.layout(SPRING)
+    ui.renderTrail(SPRING, 0, "sloth")
+    const [x] = translateOf(document.querySelector("#trail .trail-boss"))
+    expect(x).toBeGreaterThanOrEqual(plan.stops[plan.stops.length - 1].x)
+    expect(x).toBeLessThanOrEqual(plan.width)
+  })
+
+  // A single NaN here stacks the whole trail in one corner, with no error.
+  it("gives every obstacle and the boss finite coordinates", () => {
     ui.renderTrail(WINTER, 9, "porcupine")
     const positioned = Array.from(
-      document.querySelectorAll("#trail .trail-marker, #trail .trail-boss"),
+      document.querySelectorAll("#trail .trail-obstacle, #trail .trail-boss"),
     )
     expect(positioned).toHaveLength(WINTER.spaces + 1)
     for (const node of positioned) {
@@ -347,60 +471,120 @@ describe("renderTrail", () => {
     }
   })
 
-  // The token is placed with `style.transform`, not the presentation attribute,
-  // so that the CSS transition on `.trail-token` has a property to animate.
-  it("moves the token with a style transform, not the attribute", () => {
-    ui.renderTrail(WINTER, 9, "porcupine")
-    const token = document.querySelector("#trail .trail-token")
-    expect(token.getAttribute("transform")).toBeNull()
-    const [x, y] = styleTranslateOf(token)
-    expect(Number.isFinite(x)).toBe(true)
-    expect(Number.isFinite(y)).toBe(true)
+  // The token moves with `style.transform`, not the presentation attribute:
+  // that is the half the pack's transforms and the crossing animation both
+  // write, and mixing the two would have them fight.
+  it.each([0, 1, 7, 14])("stands the token on stop %i, where the pack says", (position) => {
+    const plan = ui.pack.layout(SPRING)
+    ui.renderTrail(SPRING, position, "sloth")
+    expect(trailToken().getAttribute("transform")).toBeNull()
+    expect(trailToken().style.transform).toBe(ui.pack.standing(plan.stops[position]))
   })
 
-  it("sets the walked fraction the stylesheet animates", () => {
-    ui.renderTrail(SPRING, 7, "sloth")
-    const walked = document.querySelector("#trail .trail-walked")
-    expect(walked.getAttribute("pathLength")).toBe("1")
-    expect(Number(walked.style.getPropertyValue("--walked"))).toBeCloseTo(7 / SPRING.spaces)
+  it("asks the pack where to stand rather than working it out here", () => {
+    const spies = watchPack(ui)
+    ui.renderTrail(SPRING, 6, "sloth")
+    expect(spies.standing).toHaveBeenCalledWith(ui.pack.layout(SPRING).stops[6])
   })
 
-  it("labels the trail for a screen reader", () => {
-    ui.renderTrail(SPRING, 4, "sloth")
-    const canvas = document.querySelector("#trail svg.trail-svg")
-    expect(canvas.getAttribute("role")).toBe("img")
-    expect(canvas.getAttribute("aria-label")).toBe(`Spring trail, space 5 of ${SPRING.spaces}`)
+  it.each([[SPRING.spaces + 3], [-4]])("clamps the off-trail position %i", (position) => {
+    const plan = ui.pack.layout(SPRING)
+    ui.renderTrail(SPRING, position, "sloth")
+    const stop = position < 0 ? plan.stops[0] : plan.stops[plan.stops.length - 1]
+    expect(trailToken().style.transform).toBe(ui.pack.standing(stop))
   })
+
+  // The camera is clamped at both ends. Without the near clamp, standing at the
+  // start pans the landscape the wrong way and shows blank canvas to the left
+  // of the trail; without the far clamp, the last stop scrolls off the end of
+  // it. Neither throws, and neither is visible in a test that only checks the
+  // character is somewhere on screen.
+  it("never pans back past the start of the trail", () => {
+    ui.renderTrail(SPRING, 0, "sloth")
+    expect(cameraShift()).toBe(0)
+  })
+
+  it("never pans on past the end of the trail", () => {
+    const plan = ui.pack.layout(SPRING)
+    ui.renderTrail(SPRING, SPRING.spaces, "sloth")
+    expect(cameraShift()).toBe(-(plan.width - plan.viewportWidth))
+  })
+
+  it("keeps the character in view at every stop, both ends included", () => {
+    const plan = ui.pack.layout(SPRING)
+    for (let position = 0; position <= SPRING.spaces; position += 1) {
+      ui.renderTrail(SPRING, position, "sloth")
+      const shift = cameraShift()
+      expect(shift).toBeLessThanOrEqual(0)
+      expect(shift).toBeGreaterThanOrEqual(-(plan.width - plan.viewportWidth))
+      const onScreen = plan.stops[position].x + shift
+      expect(onScreen).toBeGreaterThanOrEqual(0)
+      expect(onScreen).toBeLessThanOrEqual(plan.viewportWidth)
+    }
+  })
+
+  it("labels the trail with the obstacle standing at the current space", () => {
+    // The exact sentence, pinned against a season this file owns.
+    const season = routedSeason(["hill", "river", "mountain"])
+    ui.renderTrail(season, 1, "sloth")
+    expect(trailCanvas().getAttribute("role")).toBe("img")
+    expect(trailCanvas().getAttribute("aria-label")).toBe(
+      "Testing trail, space 2 of 3: a river to cross",
+    )
+  })
+
+  it.each(SEASON_LIST.map((season) => [season.id, season]))(
+    "names %s's own obstacle at whichever space the player is on",
+    (_id, season) => {
+      for (const position of [0, 1, season.spaces - 1]) {
+        ui.renderTrail(season, position, "sloth")
+        const label = trailCanvas().getAttribute("aria-label")
+        expect(label).toContain(season.name)
+        expect(label).toContain(`space ${position + 1} of ${season.spaces}`)
+        expect(label).toContain(getObstacle(kindAt(season, position)).name.toLowerCase())
+      }
+    },
+  )
 
   // At the boss there is no space 15 of 14 to stand on. Repeating "space 14 of
   // 14" said nothing had changed at the one moment everything had.
   it("says the trail is complete once the boss is reached", () => {
-    ui.renderTrail(SPRING, SPRING.spaces, "sloth")
-    expect(document.querySelector("#trail svg.trail-svg").getAttribute("aria-label")).toBe(
-      "Spring trail complete — you have reached the snake woman",
+    const season = routedSeason(["hill", "river", "mountain"])
+    ui.renderTrail(season, season.spaces, "sloth")
+    expect(trailCanvas().getAttribute("aria-label")).toBe(
+      "Testing trail complete — you have reached the snake woman",
     )
   })
 
-  // Rebuilding the SVG every question is what made the CSS transitions on
-  // `.trail-token` and `.trail-walked` dead code -- a transition needs an
-  // element that survives while its value changes. The scene must therefore be
-  // built once per season+character and only moved afterwards.
+  // Rebuilding the scene every question would make the character teleport and
+  // the landscape jump: both the camera pan and the crossing animation need
+  // elements that survive while their transforms change. So it is built once
+  // per season+character and only moved afterwards.
   it("reuses the canvas when only the position changed", () => {
+    const plan = ui.pack.layout(SPRING)
     ui.renderTrail(SPRING, 0, "sloth")
-    const canvas = document.querySelector("#trail svg.trail-svg")
-    const token = document.querySelector("#trail .trail-token")
-    const walked = document.querySelector("#trail .trail-walked")
-    const before = styleTranslateOf(token)
+    const canvas = trailCanvas()
+    const camera = trailCamera()
+    const token = trailToken()
 
     ui.renderTrail(SPRING, 5, "sloth")
 
-    expect(document.querySelector("#trail svg.trail-svg")).toBe(canvas)
-    expect(document.querySelector("#trail .trail-token")).toBe(token)
+    expect(trailCanvas()).toBe(canvas)
+    expect(trailCamera()).toBe(camera)
+    expect(trailToken()).toBe(token)
     expect(document.querySelectorAll("#trail svg")).toHaveLength(1)
-    // Same node, new value -- which is exactly what a transition needs.
-    expect(styleTranslateOf(token)[0]).toBeGreaterThan(before[0])
-    expect(Number(walked.style.getPropertyValue("--walked"))).toBeCloseTo(5 / SPRING.spaces)
-    expect(document.querySelectorAll("#trail .trail-marker.is-done")).toHaveLength(5)
+    // Same nodes, new values -- which is exactly what an animation needs.
+    expect(token.style.transform).toBe(ui.pack.standing(plan.stops[5]))
+    expect(cameraShift()).toBeLessThan(0)
+  })
+
+  it("builds the scene once, not once per question", () => {
+    const spies = watchPack(ui)
+    ui.renderTrail(SPRING, 0, "sloth")
+    expect(spies.obstacle).toHaveBeenCalledTimes(SPRING.spaces)
+    ui.renderTrail(SPRING, 1, "sloth")
+    ui.renderTrail(SPRING, 2, "sloth")
+    expect(spies.obstacle).toHaveBeenCalledTimes(SPRING.spaces)
   })
 
   it.each([
@@ -408,9 +592,9 @@ describe("renderTrail", () => {
     ["the season changes", () => ui.renderTrail(WINTER, 5, "sloth")],
   ])("rebuilds the canvas when %s", (_what, rerender) => {
     ui.renderTrail(SPRING, 0, "sloth")
-    const canvas = document.querySelector("#trail svg.trail-svg")
+    const canvas = trailCanvas()
     rerender()
-    expect(document.querySelector("#trail svg.trail-svg")).not.toBe(canvas)
+    expect(trailCanvas()).not.toBe(canvas)
     expect(document.querySelectorAll("#trail svg")).toHaveLength(1)
   })
 
@@ -419,37 +603,16 @@ describe("renderTrail", () => {
     document.getElementById("trail").replaceChildren()
     ui.renderTrail(SPRING, 1, "sloth")
     expect(document.querySelectorAll("#trail svg.trail-svg")).toHaveLength(1)
-    expect(document.querySelectorAll("#trail .trail-marker")).toHaveLength(SPRING.spaces)
-  })
-
-  // `getTotalLength()` on a detached path returns 0 in some engines, and
-  // `_pointsAlong` reads 0 as "unsupported" and drops to the straight-line
-  // fallback meant for jsdom -- putting every marker in a row across a wavy
-  // path, with no error anywhere. So the canvas has to be in the document first.
-  it("measures the path only after the canvas is in the document", () => {
-    // Read at call time, not afterwards: by the time the assertion runs the
-    // canvas is attached either way, so a spy that only records the argument
-    // would pass whichever order the source used.
-    const original = ui._pointsAlong.bind(ui)
-    let connectedWhenMeasured = null
-    jest.spyOn(ui, "_pointsAlong").mockImplementation((path, ...rest) => {
-      connectedWhenMeasured = path.isConnected
-      return original(path, ...rest)
-    })
-
-    ui.renderTrail(SPRING, 0, "sloth")
-
-    expect(ui._pointsAlong).toHaveBeenCalledTimes(1)
-    expect(connectedWhenMeasured).toBe(true)
-    ui._pointsAlong.mockRestore()
+    expect(trailObstacles()).toHaveLength(SPRING.spaces)
   })
 
   it("rebuilds rather than appends", () => {
     ui.renderTrail(SPRING, 0, "sloth")
-    ui.renderTrail(SPRING, 5, "sloth")
+    ui.renderTrail(WINTER, 5, "sloth")
     expect(document.querySelectorAll("#trail svg")).toHaveLength(1)
-    expect(document.querySelectorAll("#trail .trail-marker")).toHaveLength(SPRING.spaces)
+    expect(document.querySelectorAll("#trail .trail-camera")).toHaveLength(1)
     expect(document.querySelectorAll("#trail .trail-token")).toHaveLength(1)
+    expect(trailObstacles()).toHaveLength(WINTER.spaces)
   })
 
   it("draws nothing at all for a null season, rather than an empty frame", () => {
@@ -458,89 +621,292 @@ describe("renderTrail", () => {
     // The previous trail is left alone: a missing season is a caller bug, and
     // wiping the screen would hide it behind a blank page.
     expect(document.querySelectorAll("#trail svg")).toHaveLength(1)
+    expect(trailObstacles()).toHaveLength(SPRING.spaces)
   })
 })
 
-// `_pointsAlong` is the one place the game depends on real SVG geometry, and
-// jsdom provides none -- so without a fake path the only branch these tests
-// ever reached was the straight-line fallback. These hand the method path-shaped
-// stubs so the measured branch, the zero-length branch, and the catch around
-// `getTotalLength` are all exercised.
-describe("_pointsAlong", () => {
-  /**
-   * A path stub that reports geometry the way a browser would.
-   * @param {number} total - What `getTotalLength` should report
-   * @returns {Object} A path-shaped stub
-   */
-  function fakePath(total) {
-    return {
-      getTotalLength: () => total,
-      // A straight diagonal, so a point is trivially predictable from its
-      // distance along the path.
-      getPointAtLength: (length) => ({ x: length, y: length * 2 }),
+// The animated half of the trail. jsdom implements no Web Animations API at all
+// -- `window.Element.prototype.animate` is simply absent -- and the source checks for
+// it and places things instantly instead. Both branches ship, so both are
+// covered: the fallback as this environment gives it, and the animated path
+// against a stub that hands back an animation a test can hold open, finish, or
+// cancel.
+describe("crossing an obstacle", () => {
+  /** The stop spring's first obstacle is crossed from. */
+  const FIRST = 0
+
+  describe("with no Web Animations API, as jsdom has none", () => {
+    it("lands the character on the next stop and resolves", async () => {
+      const plan = ui.pack.layout(SPRING)
+      const spies = watchPack(ui)
+      ui.renderTrail(SPRING, 2, "sloth")
+
+      await expect(ui.crossObstacle(2, kindAt(SPRING, 2))).resolves.toBeUndefined()
+
+      expect(trailToken().style.transform).toBe(ui.pack.standing(plan.stops[3]))
+      // Nothing can be animated, so nothing is asked of the pack's motion.
+      expect(spies.traversal).not.toHaveBeenCalled()
+    })
+
+    it("follows with the camera, just instantly", async () => {
+      const plan = ui.pack.layout(SPRING)
+      ui.renderTrail(SPRING, 5, "sloth")
+      const before = cameraShift()
+
+      await ui.crossObstacle(5, kindAt(SPRING, 5))
+
+      expect(cameraShift()).toBeLessThan(before)
+      expect(plan.stops[6].x + cameraShift()).toBeLessThanOrEqual(plan.viewportWidth)
+    })
+
+    it("resolves rather than throwing when no trail has been drawn", async () => {
+      await expect(ui.crossObstacle(0, "hill")).resolves.toBeUndefined()
+    })
+  })
+
+  describe("with the Web Animations API a browser provides", () => {
+    /** Every animation started since the test began, oldest first. */
+    let started = []
+
+    /**
+     * A stand-in for what `Element.animate` returns. It stays "running" until
+     * something finishes or cancels it, which is what lets a test hold a
+     * crossing open and then assert on `skipTraversal`.
+     *
+     * @param {Element} element - The node being animated
+     * @param {Array<Object>} keyframes - The keyframes it was handed
+     * @param {Object} options - The timing it was handed
+     * @returns {Object} An Animation-shaped stub
+     */
+    function fakeAnimation(element, keyframes, options) {
+      let settle
+      let fail
+      const animation = {
+        element,
+        keyframes,
+        options,
+        playState: "running",
+        finished: new Promise((resolve, reject) => {
+          settle = resolve
+          fail = reject
+        }),
+        finish: jest.fn(() => {
+          animation.playState = "finished"
+          settle()
+        }),
+        // A real cancel rejects `finished` with an AbortError, which is what
+        // the catch in `crossObstacle` is there for.
+        cancel: jest.fn(() => {
+          animation.playState = "idle"
+          fail(new Error("AbortError"))
+        }),
+      }
+      return animation
     }
-  }
 
-  it("walks the real path geometry when the browser provides it", () => {
-    const points = ui._pointsAlong(fakePath(100), 5, 1000, 220)
-    expect(points).toEqual([
-      { x: 0, y: 0 },
-      { x: 25, y: 50 },
-      { x: 50, y: 100 },
-      { x: 75, y: 150 },
-      { x: 100, y: 200 },
-    ])
+    /** The animation running on a node, if one was started for it. */
+    const animationOn = (element) => started.find((animation) => animation.element === element)
+
+    beforeEach(() => {
+      started = []
+      window.Element.prototype.animate = jest.fn(function (keyframes, options) {
+        const animation = fakeAnimation(this, keyframes, options)
+        started.push(animation)
+        return animation
+      })
+    })
+
+    afterEach(() => {
+      delete window.Element.prototype.animate
+    })
+
+    it("does not animate the first draw, which has nothing to move from", () => {
+      ui.renderTrail(SPRING, 4, "sloth")
+      expect(window.Element.prototype.animate).not.toHaveBeenCalled()
+      expect(started).toHaveLength(0)
+    })
+
+    it("asks the pack to cross the kind in the way, between the two right stops", async () => {
+      const plan = ui.pack.layout(SPRING)
+      const spies = watchPack(ui)
+      ui.renderTrail(SPRING, FIRST, "sloth")
+
+      const crossing = ui.crossObstacle(FIRST, kindAt(SPRING, FIRST))
+
+      expect(spies.traversal).toHaveBeenCalledTimes(1)
+      expect(spies.traversal).toHaveBeenCalledWith(
+        SPRING.route[FIRST],
+        plan.stops[FIRST],
+        plan.stops[FIRST + 1],
+      )
+      const move = animationOn(trailToken())
+      expect(move.keyframes).toEqual(
+        ui.pack.traversal(SPRING.route[FIRST], plan.stops[FIRST], plan.stops[FIRST + 1]).keyframes,
+      )
+      // Held at the end, or the token snaps back the moment it lands.
+      expect(move.options.fill).toBe("forwards")
+
+      move.finish()
+      await expect(crossing).resolves.toBeUndefined()
+    })
+
+    it("pans the camera alongside the character and leaves it where it lands", async () => {
+      ui.renderTrail(SPRING, 5, "sloth")
+      const before = cameraShift()
+
+      const crossing = ui.crossObstacle(5, kindAt(SPRING, 5))
+
+      const pan = animationOn(trailCamera())
+      expect(pan).toBeDefined()
+      expect(pan.options.fill).toBe("forwards")
+      // From where the camera is to where it is going.
+      expect(pan.keyframes).toHaveLength(2)
+      const landed = cameraShift()
+      expect(landed).toBeLessThan(before)
+
+      animationOn(trailToken()).finish()
+      pan.finish()
+      await crossing
+      expect(cameraShift()).toBe(landed)
+    })
+
+    it("does not resolve until the crossing has actually finished", async () => {
+      ui.renderTrail(SPRING, FIRST, "sloth")
+      let arrived = false
+      const crossing = ui.crossObstacle(FIRST, kindAt(SPRING, FIRST)).then(() => {
+        arrived = true
+      })
+
+      await Promise.resolve()
+      expect(arrived).toBe(false)
+
+      animationOn(trailToken()).finish()
+      await crossing
+      expect(arrived).toBe(true)
+    })
+
+    // game.js waits on this promise before asking the next question, so a
+    // rejection would end the season on the spot.
+    it("resolves rather than rejecting when the animation is cancelled", async () => {
+      ui.renderTrail(SPRING, FIRST, "sloth")
+      const crossing = ui.crossObstacle(FIRST, kindAt(SPRING, FIRST))
+      animationOn(trailToken()).cancel()
+      await expect(crossing).resolves.toBeUndefined()
+    })
+
+    it("describes the space it is heading for as soon as the crossing starts", async () => {
+      const season = routedSeason(["hill", "river", "mountain"])
+      ui.renderTrail(season, 0, "sloth")
+
+      const crossing = ui.crossObstacle(0, "hill")
+
+      expect(trailCanvas().getAttribute("aria-label")).toBe(
+        "Testing trail, space 2 of 3: a river to cross",
+      )
+      animationOn(trailToken()).finish()
+      await crossing
+    })
+
+    it("skipTraversal finishes a crossing that is still running", async () => {
+      const plan = ui.pack.layout(SPRING)
+      ui.renderTrail(SPRING, FIRST, "sloth")
+      const crossing = ui.crossObstacle(FIRST, kindAt(SPRING, FIRST))
+      const move = animationOn(trailToken())
+      const pan = animationOn(trailCamera())
+      expect([move.playState, pan.playState]).toEqual(["running", "running"])
+
+      ui.skipTraversal()
+
+      expect(move.finish).toHaveBeenCalledTimes(1)
+      expect(pan.finish).toHaveBeenCalledTimes(1)
+      await crossing
+      // Skipping lands the character rather than abandoning it mid-air.
+      expect(trailToken().style.transform).toBe(ui.pack.standing(plan.stops[FIRST + 1]))
+    })
+
+    it("skipTraversal is safe with nothing running, and cannot skip the same crossing twice", async () => {
+      ui.renderTrail(SPRING, FIRST, "sloth")
+      // Before any crossing at all -- which is the case every tap on the screen
+      // outside a crossing hits.
+      expect(() => ui.skipTraversal()).not.toThrow()
+
+      const crossing = ui.crossObstacle(FIRST, kindAt(SPRING, FIRST))
+      const move = animationOn(trailToken())
+      ui.skipTraversal()
+      ui.skipTraversal()
+      expect(move.finish).toHaveBeenCalledTimes(1)
+
+      await crossing
+      expect(() => ui.skipTraversal()).not.toThrow()
+      expect(move.finish).toHaveBeenCalledTimes(1)
+    })
+
+    it("skipTraversal leaves an animation that has already stopped alone", async () => {
+      ui.renderTrail(SPRING, FIRST, "sloth")
+      const crossing = ui.crossObstacle(FIRST, kindAt(SPRING, FIRST))
+      const move = animationOn(trailToken())
+      const pan = animationOn(trailCamera())
+      // A real pan can end before the character lands, and finishing something
+      // that has already stopped is what the playState guard avoids.
+      pan.playState = "finished"
+
+      ui.skipTraversal()
+
+      expect(pan.finish).not.toHaveBeenCalled()
+      expect(move.finish).toHaveBeenCalledTimes(1)
+      await crossing
+    })
   })
 
-  it("asks for a single point at the start when only one is wanted", () => {
-    expect(ui._pointsAlong(fakePath(100), 1, 1000, 220)).toEqual([{ x: 0, y: 0 }])
-  })
+  describe("when the player has asked for less motion", () => {
+    /** @type {typeof window.matchMedia|undefined} */
+    let realMatchMedia
 
-  // A detached path reports 0 in some engines, and a season could in principle
-  // hand back a degenerate curve. Either way the markers must still land
-  // somewhere sensible rather than all on top of each other.
-  it("falls back to an even line when the path measures zero", () => {
-    const points = ui._pointsAlong(fakePath(0), 3, 900, 200)
-    expect(points).toEqual([
-      { x: 0, y: 100 },
-      { x: 450, y: 100 },
-      { x: 900, y: 100 },
-    ])
-  })
+    beforeEach(() => {
+      // An assignment rather than a spy: jsdom provides no matchMedia at all,
+      // which is also why every other group here takes the full-motion path.
+      realMatchMedia = window.matchMedia
+      window.matchMedia = jest.fn((query) => ({
+        media: query,
+        matches: query === "(prefers-reduced-motion: reduce)",
+        addEventListener: () => {},
+        removeEventListener: () => {},
+      }))
+      // A trap rather than a stub. Under reduced motion nothing should reach it,
+      // so anything that does fails loudly instead of quietly animating.
+      window.Element.prototype.animate = jest.fn(() => {
+        throw new Error("animate() must not be called under reduced motion")
+      })
+    })
 
-  // Firefox throws on `getTotalLength()` for a path that has never been laid
-  // out. The catch around it is real error handling, and an uncaught throw here
-  // would take the whole trail down mid-season.
-  it("falls back rather than propagating a throwing getTotalLength", () => {
-    const exploding = {
-      getTotalLength: () => {
-        throw new Error("NS_ERROR_FAILURE")
-      },
-      getPointAtLength: () => {
-        throw new Error("should never be reached")
-      },
-    }
-    let points
-    expect(() => {
-      points = ui._pointsAlong(exploding, 3, 900, 200)
-    }).not.toThrow()
-    expect(points).toEqual([
-      { x: 0, y: 100 },
-      { x: 450, y: 100 },
-      { x: 900, y: 100 },
-    ])
-  })
+    afterEach(() => {
+      delete window.Element.prototype.animate
+      if (realMatchMedia === undefined) delete window.matchMedia
+      else window.matchMedia = realMatchMedia
+    })
 
-  it.each([[null], [undefined], [{}]])(
-    "falls back for %p, which has no geometry at all",
-    (path) => {
-      const points = ui._pointsAlong(path, 2, 400, 100)
-      expect(points).toEqual([
-        { x: 0, y: 50 },
-        { x: 400, y: 50 },
-      ])
-    },
-  )
+    it("starts no animation and still lands the character on the next stop", async () => {
+      const plan = ui.pack.layout(SPRING)
+      const spies = watchPack(ui)
+      ui.renderTrail(SPRING, 3, "sloth")
+
+      await expect(ui.crossObstacle(3, kindAt(SPRING, 3))).resolves.toBeUndefined()
+
+      expect(window.Element.prototype.animate).not.toHaveBeenCalled()
+      expect(spies.traversal).not.toHaveBeenCalled()
+      expect(trailToken().style.transform).toBe(ui.pack.standing(plan.stops[4]))
+    })
+
+    it("still moves the camera, and still clamps it at both ends", () => {
+      const plan = ui.pack.layout(SPRING)
+      ui.renderTrail(SPRING, 0, "sloth")
+      expect(cameraShift()).toBe(0)
+
+      ui.renderTrail(SPRING, SPRING.spaces, "sloth")
+      expect(cameraShift()).toBe(-(plan.width - plan.viewportWidth))
+      expect(window.Element.prototype.animate).not.toHaveBeenCalled()
+    })
+  })
 })
 
 describe("renderHud", () => {
@@ -793,7 +1159,7 @@ describe("renderItemTrack", () => {
 
 describe("renderQuestion", () => {
   it("writes the prompt and one button per choice", () => {
-    ui.renderQuestion(questionState(), false, false, () => {})
+    ui.renderQuestion(questionState(), {}, () => {})
     expect(document.getElementById("question-prompt").textContent).toBe("27 + 46")
     const buttons = choiceButtons()
     expect(buttons).toHaveLength(PLAY.CHOICE_COUNT)
@@ -806,7 +1172,7 @@ describe("renderQuestion", () => {
   })
 
   it("renders no more than CHOICE_COUNT buttons even if the question offers more", () => {
-    ui.renderQuestion(questionState({ choices: [1, 2, 3, 4, 5, 6] }), false, false, () => {})
+    ui.renderQuestion(questionState({ choices: [1, 2, 3, 4, 5, 6] }), {}, () => {})
     expect(choiceButtons()).toHaveLength(PLAY.CHOICE_COUNT)
   })
 
@@ -815,7 +1181,7 @@ describe("renderQuestion", () => {
   // pressing 3 picks the third. The label says which digit goes with which
   // answer, and the number is the button's own position, not the value.
   it("labels each button with the number key that presses it", () => {
-    ui.renderQuestion(questionState(), false, false, () => {})
+    ui.renderQuestion(questionState(), {}, () => {})
     expect(choiceButtons().map((button) => button.getAttribute("aria-label"))).toEqual([
       "Answer 1: 73",
       "Answer 2: 72",
@@ -825,8 +1191,8 @@ describe("renderQuestion", () => {
   })
 
   it("renumbers the labels when the next question arrives", () => {
-    ui.renderQuestion(questionState(), false, false, () => {})
-    ui.renderQuestion(questionState({ choices: [56, 54, 63, 48] }), false, false, () => {})
+    ui.renderQuestion(questionState(), {}, () => {})
+    ui.renderQuestion(questionState({ choices: [56, 54, 63, 48] }), {}, () => {})
     expect(choiceButtons().map((button) => button.getAttribute("aria-label"))).toEqual([
       "Answer 1: 56",
       "Answer 2: 54",
@@ -835,29 +1201,37 @@ describe("renderQuestion", () => {
     ])
   })
 
+  // The label is composed by the caller and passed in -- see game.js's
+  // `_questionTag`, which is where the boss wording lives, because it needs the
+  // rescue value and how many tries are left. This only checks it is displayed.
   it.each([
-    [false, false, "", true],
-    [true, false, "Glowing challenge", false],
-    [false, true, "Boss challenge", false],
-    [true, true, "Boss challenge", false],
-  ])("glowing=%p boss=%p tags the question %p", (glowing, isBoss, tag, hidden) => {
-    ui.renderQuestion(questionState(), glowing, isBoss, () => {})
+    [{}, "", true, false],
+    [{ tag: "Glowing challenge", lit: true }, "Glowing challenge", false, true],
+    [
+      { tag: "Last try — worth 3 more roses", lit: true },
+      "Last try — worth 3 more roses",
+      false,
+      true,
+    ],
+    [{ tag: "A label with no glow" }, "A label with no glow", false, false],
+  ])("shows the label it is given (%p)", (label, text, hidden, lit) => {
+    ui.renderQuestion(questionState(), label, () => {})
     const element = document.getElementById("question-tag")
-    expect(element.textContent).toBe(tag)
+    expect(element.textContent).toBe(text)
     expect(element.classList.contains("hidden")).toBe(hidden)
-    expect(document.body.classList.contains("is-glowing-question")).toBe(glowing || isBoss)
+    expect(document.body.classList.contains("is-glowing-question")).toBe(lit)
   })
 
   it("clears the glowing class when an ordinary question follows a glowing one", () => {
-    ui.renderQuestion(questionState(), true, false, () => {})
+    ui.renderQuestion(questionState(), { tag: "Glowing challenge", lit: true }, () => {})
     expect(document.body.classList.contains("is-glowing-question")).toBe(true)
-    ui.renderQuestion(questionState(), false, false, () => {})
+    ui.renderQuestion(questionState(), {}, () => {})
     expect(document.body.classList.contains("is-glowing-question")).toBe(false)
   })
 
   it("calls back with the chosen value and the button that was pressed", () => {
     const onAnswer = jest.fn()
-    ui.renderQuestion(questionState(), false, false, onAnswer)
+    ui.renderQuestion(questionState(), {}, onAnswer)
     const buttons = choiceButtons()
     buttons[2].click()
     expect(onAnswer).toHaveBeenCalledTimes(1)
@@ -865,7 +1239,7 @@ describe("renderQuestion", () => {
   })
 
   it("rebuilds rather than appends", () => {
-    ui.renderQuestion(questionState(), false, false, () => {})
+    ui.renderQuestion(questionState(), {}, () => {})
     ui.renderQuestion(
       questionState({ prompt: "8 × 7", choices: [56, 54, 63, 48] }),
       false,
@@ -889,7 +1263,7 @@ describe("flashAnswer", () => {
   const wrong = { correct: false }
 
   beforeEach(() => {
-    ui.renderQuestion(questionState(), false, false, () => {})
+    ui.renderQuestion(questionState(), {}, () => {})
   })
 
   // `aria-disabled` rather than `disabled`. Disabling the element that currently
@@ -981,7 +1355,7 @@ describe("flashAnswer", () => {
 
   it("the next question clears the marks and unlocks the buttons", () => {
     ui.flashAnswer(wrong, choiceButtons()[3], 73, "Not quite.")
-    ui.renderQuestion(questionState(), false, false, () => {})
+    ui.renderQuestion(questionState(), {}, () => {})
     expect(document.querySelectorAll("#choices .is-correct")).toHaveLength(0)
     expect(document.querySelectorAll("#choices .is-wrong")).toHaveLength(0)
     expect(document.querySelectorAll("#choices .is-locked")).toHaveLength(0)
@@ -1328,7 +1702,11 @@ describe("content is written as text, never as markup", () => {
       evilSeason,
     )
     ui.renderTrail(evilSeason, 3, "phoenix")
-    ui.renderQuestion(questionState({ prompt: XSS }), true, false, () => {})
+    ui.renderQuestion(
+      questionState({ prompt: XSS }),
+      { tag: "Glowing challenge", lit: true },
+      () => {},
+    )
     ui.flashAnswer({ correct: false }, choiceButtons()[0], 73, XSS)
     ui.renderResult(
       resultState({ lost: 1 }),
@@ -1344,10 +1722,7 @@ describe("content is written as text, never as markup", () => {
   it.each([
     ["season-name", () => ui.renderHud(hudState(), evilSeason)],
     ["demand-line", () => ui.renderHud(hudState(), evilSeason)],
-    [
-      "question-prompt",
-      () => ui.renderQuestion(questionState({ prompt: XSS }), false, false, () => {}),
-    ],
+    ["question-prompt", () => ui.renderQuestion(questionState({ prompt: XSS }), {}, () => {})],
     ["result-title", () => ui.renderResult(resultState(), SPRING, [], XSS, "x")],
     ["result-text", () => ui.renderResult(resultState(), SPRING, [], "x", XSS)],
   ])("#%s holds the payload as text", (id, render) => {
@@ -1386,7 +1761,7 @@ describe("content is written as text, never as markup", () => {
   })
 
   it("a hostile choice value becomes button text, not a node", () => {
-    ui.renderQuestion(questionState({ choices: [XSS, 1, 2, 3] }), false, false, () => {})
+    ui.renderQuestion(questionState({ choices: [XSS, 1, 2, 3] }), {}, () => {})
     const button = choiceButtons()[0]
     expect(button.textContent).toBe(XSS)
     expect(button.children).toHaveLength(0)
@@ -1404,7 +1779,7 @@ describe("a page whose markup has drifted", () => {
       bare.renderTrail(SPRING, 2, "sloth")
       bare.renderHud(hudState(), SPRING)
       bare.renderItemTrack(hudState({ items: 2, wilting: 1 }), SPRING)
-      bare.renderQuestion(questionState(), true, false, () => {})
+      bare.renderQuestion(questionState(), { tag: "Glowing challenge", lit: true }, () => {})
       bare.flashAnswer({ correct: false }, null, 73, "x")
       bare.startTimer(null, () => {})
       bare.stopTimer()

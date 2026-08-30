@@ -30,6 +30,7 @@ import {
   spaceAt,
 } from "../js/Journey.js"
 import { PLAY } from "../js/constants.js"
+import { isHardKind, isObstacleKind } from "../js/obstacles.js"
 import { maxItems, SEASON_LIST } from "../js/seasons.js"
 
 /** The real seasons, as [name, season] pairs for it.each. */
@@ -63,15 +64,25 @@ describe("buildTrail", () => {
     expect(new Set(season.glowingAt).size).toBe(season.glowingAt.length)
   })
 
-  it.each(SEASONS)("%s carries only an index and a glowing flag", (_name, season) => {
-    // A space deliberately does not say what it is worth. It used to carry an
-    // `items` field set from PLAY.ITEMS_PER_GLOWING_SPACE, which disagreed with
-    // what the player actually collected -- the Banana Slug gets 2 from a
-    // glowing space, not 3 -- so the number was both dead and wrong.
-    // GameState.answer is the single authority on payout.
+  it.each(SEASONS)("%s carries an index, an obstacle kind and a glowing flag", (_name, season) => {
+    // A space deliberately does not say what it is worth: payout depends on the
+    // character (the Banana Slug collects 2 from a glowing space, not 3), so a
+    // number here would disagree with what the player receives.
+    // GameState.answer is the single authority.
     for (const space of buildTrail(season)) {
-      expect(Object.keys(space).sort()).toEqual(["glowing", "index"])
+      expect(Object.keys(space).sort()).toEqual(["glowing", "index", "kind"])
+      expect(isObstacleKind(space.kind)).toBe(true)
     }
+  })
+
+  it.each(SEASONS)("%s derives glowing from the obstacle standing there", (_name, season) => {
+    // The mountain IS the hard space. There is no separate list of glowing
+    // indices to fall out of step with the scenery -- moving a mountain in a
+    // route moves the hard question with it.
+    for (const space of buildTrail(season)) {
+      expect(space.glowing).toBe(isHardKind(space.kind))
+    }
+    expect(buildTrail(season).filter((s) => s.glowing)).toHaveLength(season.glowingAt.length)
   })
 
   it.each(SEASONS)("%s builds an equal but fresh trail each time", (_name, season) => {

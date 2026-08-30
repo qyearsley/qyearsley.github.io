@@ -65,6 +65,11 @@ const PALETTES = {
     "--season-accent": "#e8657f",
     "--season-accent-text": "#e02c50",
     "--season-accent-text-dark": "#e86680",
+    "--season-water": "#6fb0cf",
+    "--season-rock": "#71857c",
+    "--season-leaf": "#3f8455",
+    "--season-earth": "#5b9c6e",
+    "--season-trunk": "#5a4632",
     "--season-glow": "#fff2a8",
     "--season-ink": "#2b3d31",
   },
@@ -75,6 +80,11 @@ const PALETTES = {
     "--season-accent": "#4aa3d4",
     "--season-accent-text": "#297dab",
     "--season-accent-text-dark": "#4aa3d4",
+    "--season-water": "#3f9ccf",
+    "--season-rock": "#8d8168",
+    "--season-leaf": "#5f8f3d",
+    "--season-earth": "#d9a94f",
+    "--season-trunk": "#6b5533",
     "--season-glow": "#fff3c4",
     "--season-ink": "#26404d",
   },
@@ -85,6 +95,11 @@ const PALETTES = {
     "--season-accent": "#c94f2c",
     "--season-accent-text": "#c94f2c",
     "--season-accent-text-dark": "#da7558",
+    "--season-water": "#5f8fae",
+    "--season-rock": "#7a6553",
+    "--season-leaf": "#a8551c",
+    "--season-earth": "#96552a",
+    "--season-trunk": "#5b3a22",
     "--season-glow": "#ffd98a",
     "--season-ink": "#43281a",
   },
@@ -95,7 +110,14 @@ const PALETTES = {
     "--season-accent": "#4f6f96",
     "--season-accent-text": "#4f6f96",
     "--season-accent-text-dark": "#7794b7",
-    "--season-glow": "#ffffff",
+    "--season-water": "#5b86a8",
+    "--season-rock": "#5f6d7d",
+    "--season-leaf": "#4f6f68",
+    "--season-earth": "#7890a8",
+    "--season-trunk": "#48535e",
+    // Warm rather than white. A white glow on winter's near-white sky was
+    // invisible, in the one season Ella called the hardest.
+    "--season-glow": "#ffd27a",
     "--season-ink": "#22303f",
   },
 }
@@ -165,8 +187,16 @@ const CHARACTERS = {
   ],
 
   sloth: () => [
-    // Branch to hang from.
-    svg("rect", { x: 2, y: 11, width: 96, height: 7, rx: 3.5, fill: "#7a5b3a" }),
+    // Branch to hang from -- card only; see `character(id, onTrail)`.
+    svg("rect", {
+      x: 2,
+      y: 11,
+      width: 96,
+      height: 7,
+      rx: 3.5,
+      fill: "#7a5b3a",
+      "data-hangs-from": "1",
+    }),
     // Body.
     svg("ellipse", { cx: 52, cy: 66, rx: 21, ry: 23, fill: "#9b8468" }),
     svg("ellipse", { cx: 52, cy: 70, rx: 13, ry: 15, fill: "#b6a189", "fill-opacity": 0.8 }),
@@ -196,8 +226,16 @@ const CHARACTERS = {
     svg("path", { d: "M43 59 C29 53 25 32 31 14 L22 15 C17 33 21 54 35 63 Z", fill: "#8a7259" }),
     svg("path", { d: "M61 59 C75 53 79 32 73 14 L82 15 C87 33 83 54 69 63 Z", fill: "#8a7259" }),
     // Claws hooked over the branch.
-    svg("path", { d: "M20 16 C18 8 26 4 31 9 L28 13 C25 10 21 12 24 17 Z", fill: "#4a3b2c" }),
-    svg("path", { d: "M84 16 C86 8 78 4 73 9 L76 13 C79 10 83 12 80 17 Z", fill: "#4a3b2c" }),
+    svg("path", {
+      d: "M20 16 C18 8 26 4 31 9 L28 13 C25 10 21 12 24 17 Z",
+      fill: "#4a3b2c",
+      "data-hangs-from": "1",
+    }),
+    svg("path", {
+      d: "M84 16 C86 8 78 4 73 9 L76 13 C79 10 83 12 80 17 Z",
+      fill: "#4a3b2c",
+      "data-hangs-from": "1",
+    }),
   ],
 
   phoenix: () => [
@@ -267,15 +305,19 @@ const CHARACTERS = {
  * Draw a character.
  *
  * @param {unknown} characterId - A character id
+ * @param {boolean} [onTrail] - Drop anything the animal hangs from on its card
  * @returns {import("./index.js").Drawing} The drawing; a neutral blob if unknown
  */
-export function character(characterId) {
+export function character(characterId, onTrail = false) {
   // Object.hasOwn, not a bare lookup: `character("constructor")` off a
   // corrupted save would otherwise reach Object.prototype and throw, and
   // this file's header promises an unknown id degrades to a neutral shape.
   const draw = Object.hasOwn(CHARACTERS, characterId) ? CHARACTERS[characterId] : null
   if (!draw) return _drawing([svg("circle", { cx: 50, cy: 55, r: 30, fill: NEUTRAL })])
-  return _drawing(draw())
+  // On the trail the animal is standing on the ground, so anything it hangs
+  // from on its card has to go: the sloth's branch otherwise travelled with it
+  // as a stick floating in mid-air.
+  return _drawing(draw().filter((shape) => !(onTrail && shape.dataset?.hangsFrom)))
 }
 
 /**
@@ -345,33 +387,6 @@ export function item(seasonId, rare = false) {
 }
 
 /**
- * The background band behind the trail: three layers of hills in the season's
- * palette. Drawn in a wide box because it sits behind the whole journey.
- *
- * @param {unknown} seasonId - A season id
- * @returns {import("./index.js").Drawing} The drawing
- */
-export function scenery(seasonId) {
-  const colors = palette(seasonId)
-  return _drawing(
-    [
-      svg("rect", { x: 0, y: 0, width: 1000, height: 220, fill: colors["--season-sky"] }),
-      svg("path", {
-        d: "M0 150 C120 110 200 160 320 138 C450 114 520 158 660 136 C790 116 880 154 1000 132 L1000 220 L0 220 Z",
-        fill: colors["--season-far"],
-        "fill-opacity": 0.7,
-      }),
-      svg("path", {
-        d: "M0 182 C140 156 240 196 380 176 C520 156 620 194 760 174 C860 160 930 186 1000 176 L1000 220 L0 220 Z",
-        fill: colors["--season-ground"],
-        "fill-opacity": 0.85,
-      }),
-    ],
-    "0 0 1000 220",
-  )
-}
-
-/**
  * The snake woman. A coiled serpent with a crowned head -- she is a
  * potion-maker who sets the quest, not a threat, so the shape leans regal and
  * composed rather than monstrous.
@@ -421,34 +436,469 @@ export function villain() {
   ])
 }
 
+/* ==================== Obstacles ==================== */
+
 /**
- * The path the trail is drawn along, as an SVG `d` string.
+ * The six obstacle drawings, keyed by kind. Each is drawn in trail coordinates
+ * around an origin of (0, 0) sitting on the ground, so `layout` can place it by
+ * translation alone. They read from the season palette rather than fixed
+ * colours, so one drawing serves all four seasons.
+ * @private
+ */
+const OBSTACLE_ART = {
+  hill: (c, edge) => [
+    // Broad and low: the gentlest thing on a trail, and a much wider silhouette
+    // than the boulder so the two never read alike.
+    svg("path", {
+      d: "M-118 2 C-84 -44 -44 -62 0 -62 C46 -62 88 -42 118 2 Z",
+      fill: c.earth,
+      ...edge,
+    }),
+    svg("path", {
+      d: "M-118 2 C-84 -44 -44 -62 0 -62 C-22 -38 -44 -16 -56 2 Z",
+      fill: c.leaf,
+      "fill-opacity": 0.45,
+    }),
+    svg("path", {
+      d: "M-40 -44 C-20 -54 12 -54 34 -44",
+      stroke: "#fff",
+      "stroke-width": 3,
+      "stroke-opacity": 0.22,
+      fill: "none",
+    }),
+  ],
+
+  mountain: (c, edge) => [
+    // Deliberately the biggest thing on any trail: it is the hard question.
+    svg("path", { d: "M-124 2 L-40 -120 L0 -78 L44 -108 L128 2 Z", fill: c.rock, ...edge }),
+    svg("path", {
+      d: "M-40 -120 L0 -78 L-14 -60 L-72 2 L-124 2 Z",
+      fill: c.ink,
+      "fill-opacity": 0.22,
+    }),
+    svg("path", { d: "M-40 -120 L-60 -84 L-18 -84 Z", fill: "#fff", "fill-opacity": 0.9 }),
+    svg("path", { d: "M44 -108 L28 -80 L60 -80 Z", fill: "#fff", "fill-opacity": 0.8 }),
+  ],
+
+  river: (c, edge) => [
+    // Sits in the basin `layout` sinks into the ground for it. Stepping stones,
+    // because the crossing animation lands on them twice.
+    svg("path", {
+      d: "M-106 -4 C-66 34 -30 50 0 50 C34 50 70 32 106 -4 Z",
+      fill: c.water,
+      ...edge,
+    }),
+    svg("path", {
+      d: "M-70 6 C-52 -2 -34 2 -18 -4",
+      stroke: "#fff",
+      "stroke-width": 3.5,
+      "stroke-opacity": 0.55,
+      fill: "none",
+      "stroke-linecap": "round",
+    }),
+    svg("path", {
+      d: "M20 12 C36 4 54 8 70 2",
+      stroke: "#fff",
+      "stroke-width": 3.5,
+      "stroke-opacity": 0.38,
+      fill: "none",
+      "stroke-linecap": "round",
+    }),
+    svg("ellipse", { cx: -42, cy: 6, rx: 19, ry: 8, fill: c.rock, ...edge }),
+    svg("ellipse", { cx: 42, cy: 6, rx: 19, ry: 8, fill: c.rock, ...edge }),
+  ],
+
+  boulder: (c, edge) => [
+    // Angular and faceted, in rock rather than earth, so it does not read as a
+    // second, smaller hill.
+    svg("ellipse", { cx: 4, cy: 0, rx: 70, ry: 11, fill: c.ink, "fill-opacity": 0.18 }),
+    svg("path", { d: "M-58 2 L-46 -50 L-6 -78 L38 -62 L58 -20 L48 2 Z", fill: c.rock, ...edge }),
+    svg("path", {
+      d: "M-58 2 L-46 -50 L-6 -78 L-2 -38 L-14 2 Z",
+      fill: c.ink,
+      "fill-opacity": 0.24,
+    }),
+    svg("path", { d: "M-6 -78 L38 -62 L34 -34 L-2 -38 Z", fill: "#fff", "fill-opacity": 0.24 }),
+  ],
+
+  thicket: (c, edge) => [
+    // Three trunked shrubs with daylight between them, so the silhouette is
+    // clearly vegetation to push through rather than one solid mound.
+    svg("path", {
+      d: "M-80 4 L-78 -34",
+      stroke: c.trunk,
+      "stroke-width": 8,
+      "stroke-linecap": "round",
+    }),
+    svg("path", {
+      d: "M-2 4 L-4 -54",
+      stroke: c.trunk,
+      "stroke-width": 10,
+      "stroke-linecap": "round",
+    }),
+    svg("path", {
+      d: "M80 4 L76 -30",
+      stroke: c.trunk,
+      "stroke-width": 8,
+      "stroke-linecap": "round",
+    }),
+    svg("circle", { cx: -80, cy: -58, r: 30, fill: c.leaf, ...edge }),
+    svg("circle", { cx: 78, cy: -54, r: 28, fill: c.leaf, ...edge }),
+    svg("circle", { cx: -4, cy: -86, r: 40, fill: c.leaf, ...edge }),
+    svg("circle", { cx: -18, cy: -98, r: 20, fill: "#fff", "fill-opacity": 0.2 }),
+    svg("circle", { cx: -90, cy: -70, r: 13, fill: "#fff", "fill-opacity": 0.16 }),
+  ],
+
+  gap: (c) => [
+    // A break in the ground rather than an object on it: nothing to climb, and
+    // the darkness IS the obstacle. It widens with depth and overshoots the
+    // canvas on purpose: the ground's break is a constant width, so a shape that
+    // tapered inward let the backdrop show through either side of it.
+    svg("path", { d: "M-64 -2 L64 -2 L72 120 L-72 120 Z", fill: c.ink, "fill-opacity": 0.88 }),
+    svg("path", { d: "M-64 -2 L-72 120 L-40 120 L-40 -2 Z", fill: c.ink, "fill-opacity": 0.55 }),
+    svg("path", { d: "M-74 -4 L-58 -4 L-54 12 L-76 10 Z", fill: c.rock }),
+    svg("path", { d: "M74 -4 L58 -4 L54 12 L76 10 Z", fill: c.rock }),
+  ],
+}
+
+/**
+ * Draw the obstacle standing at a space.
  *
- * A longer season winds more, so the trail always fills the same box whether it
- * has fourteen spaces or twenty. GameUI walks this path with `getPointAtLength`
- * to place the space markers and the character, so the curve can change shape
- * completely without any layout code changing.
+ * Returned in trail coordinates with its base at the origin, so `layout`'s
+ * obstacle positions place it by translation. Unlike `character` and `item`,
+ * this takes a season so one drawing can be recoloured for all four.
+ *
+ * @param {unknown} kind - An obstacle kind; see obstacles.js
+ * @param {unknown} seasonId - The season being played, for the palette
+ * @returns {import("./index.js").Drawing} The drawing; a plain mound if unknown
+ */
+export function obstacle(kind, seasonId) {
+  const colors = palette(seasonId)
+  // Materials, not palette slots. A boulder is rock, a thicket is leaf and
+  // trunk, a river is water -- so each obstacle separates from the ground it
+  // stands on instead of dissolving into it, which is what happened when every
+  // shape was drawn in the season's two earth tones.
+  const c = {
+    earth: colors["--season-earth"],
+    rock: colors["--season-rock"],
+    leaf: colors["--season-leaf"],
+    trunk: colors["--season-trunk"],
+    water: colors["--season-water"],
+    far: colors["--season-far"],
+    ink: colors["--season-ink"],
+  }
+  // One shared outline for every silhouette. Materials do most of the
+  // separation, but a season whose ground happens to sit close to a material
+  // would still flatten out; the edge guarantees the shape reads regardless.
+  const edge = { stroke: c.ink, "stroke-opacity": 0.3, "stroke-width": 2.5 }
+  const draw = Object.hasOwn(OBSTACLE_ART, kind) ? OBSTACLE_ART[kind] : OBSTACLE_ART.hill
+  return { element: svg("g", {}, draw(c, edge)), viewBox: "-124 -200 248 208" }
+}
+
+/* ==================== Trail geometry ==================== */
+
+/**
+ * Trail geometry, in user units. The trail is drawn far wider than the screen
+ * and scrolled; VIEWPORT_WIDTH is how much is visible at once, so about four
+ * obstacles are on screen and each is large enough to animate over.
+ * @private
+ */
+const SPACING = 240
+const MARGIN = 150
+const HEIGHT = 258
+const VIEWPORT_WIDTH = 1100
+
+/** Where the ground rests, and how far it undulates either side. @private */
+const GROUND = 190
+const ROLL = 14
+
+/** Half the drawn token's width, and how far its feet sit below its origin. @private */
+const TOKEN_HALF = 34
+const TOKEN_FOOT = 62
+
+/**
+ * How each obstacle kind deforms the ground it stands on.
+ *
+ * Hills, boulders, thickets and mountains sit *on* the ground and change nothing
+ * here. A river and a gap are holes *in* it, and drawing them as objects on a
+ * flat band was why neither read as anything -- a river looked like a puddle and
+ * a gap like a dark sticker. A river sinks the ground into a basin that can hold
+ * water; a gap removes the ground outright, which is what makes the leap legible.
+ * @private
+ */
+const GROUND_PROFILE = {
+  river: { dip: 46, halfWidth: 104 },
+  gap: { breakHalfWidth: 62, dip: 10, halfWidth: 96 },
+}
+
+/**
+ * The ground's resting height at a given x, before any obstacle deforms it.
+ * @private
+ * @param {number} x - Horizontal position in user units
+ * @returns {number} The ground's y
+ */
+function restingGroundY(x) {
+  return GROUND + Math.sin(x / 260) * ROLL
+}
+
+/**
+ * Smooth 0..1 falloff, 1 at a feature's centre and 0 at its edge, so a river
+ * basin eases into the surrounding ground instead of stepping down into it.
+ * @private
+ * @param {number} distance - Distance from the feature's centre
+ * @param {number} halfWidth - Where the feature reaches zero
+ * @returns {number} A weight in 0..1
+ */
+function falloff(distance, halfWidth) {
+  if (Math.abs(distance) >= halfWidth) return 0
+  return (Math.cos((distance / halfWidth) * Math.PI) + 1) / 2
+}
+
+/**
+ * Where each obstacle sits, and what it does to the ground under it.
+ * @private
+ * @param {string[]} route - The season's obstacle kinds
+ * @returns {Array<{kind: string, x: number, profile: Object|null}>} Placements
+ */
+function placements(route) {
+  return route.map((kind, i) => ({
+    kind,
+    x: MARGIN + i * SPACING + SPACING / 2,
+    profile: Object.hasOwn(GROUND_PROFILE, kind) ? GROUND_PROFILE[kind] : null,
+  }))
+}
+
+/**
+ * The ground's height at x with every obstacle's deformation applied.
+ * @private
+ * @param {number} x - Horizontal position
+ * @param {Array<Object>} spots - Output of `placements`
+ * @returns {number} The deformed ground y
+ */
+function deformedGroundY(x, spots) {
+  let y = restingGroundY(x)
+  for (const spot of spots) {
+    if (spot.profile) y += spot.profile.dip * falloff(x - spot.x, spot.profile.halfWidth)
+  }
+  return y
+}
+
+/**
+ * The ground as one or more filled paths.
+ *
+ * More than one because a gap genuinely removes the ground: each gap ends a
+ * segment and starts the next, so the void between them is the sky showing
+ * through rather than a dark shape drawn on top of solid earth.
+ * @private
+ * @param {number} width - Total trail width
+ * @param {Array<Object>} spots - Output of `placements`
+ * @returns {string[]} One SVG path `d` per unbroken stretch of ground
+ */
+function groundSegmentsFor(width, spots) {
+  const breaks = spots
+    .filter((spot) => spot.profile?.breakHalfWidth)
+    .map((spot) => [spot.x - spot.profile.breakHalfWidth, spot.x + spot.profile.breakHalfWidth])
+  const inBreak = (x) => breaks.some(([from, to]) => x > from && x < to)
+
+  const segments = []
+  let points = []
+  const flush = () => {
+    if (points.length >= 2) {
+      const first = points[0]
+      const last = points[points.length - 1]
+      const line = points.map(([x, y], i) => `${i ? "L" : "M"} ${x} ${y}`).join(" ")
+      segments.push(`${line} L ${last[0]} ${HEIGHT} L ${first[0]} ${HEIGHT} Z`)
+    }
+    points = []
+  }
+  for (let x = 0; x <= width; x += 12) {
+    if (inBreak(x)) flush()
+    else points.push([x, deformedGroundY(x, spots)])
+  }
+  flush()
+  return segments
+}
+
+/**
+ * The sky and distant hills behind a whole trail.
+ *
+ * Generated at the trail's real width rather than scaled to it: an earlier
+ * fixed-size vignette stretched across a 5000-unit trail flattened its hills
+ * into flat bands. Two rolling layers at different frequencies, which gives a
+ * little depth as the camera pans.
+ *
+ * @param {unknown} seasonId - The season being played
+ * @param {number} width - Total trail width in user units
+ * @returns {import("./index.js").Drawing} The backdrop
+ */
+export function backdrop(seasonId, width) {
+  const colors = palette(seasonId)
+  const span = Math.max(1, width)
+  const band = (amplitude, wavelength, top, fill, opacity) => {
+    let d = `M 0 ${top + Math.sin(0) * amplitude}`
+    for (let x = 40; x <= span; x += 40) {
+      d += ` L ${x} ${top + Math.sin(x / wavelength) * amplitude}`
+    }
+    return svg("path", {
+      d: `${d} L ${span} ${HEIGHT} L 0 ${HEIGHT} Z`,
+      fill,
+      "fill-opacity": opacity,
+    })
+  }
+  return {
+    element: svg("g", {}, [
+      svg("rect", { x: 0, y: 0, width: span, height: HEIGHT, fill: colors["--season-sky"] }),
+      band(26, 520, 150, colors["--season-far"], 0.55),
+      band(18, 300, 196, colors["--season-far"], 0.85),
+    ]),
+    viewBox: `0 0 ${span} ${HEIGHT}`,
+  }
+}
+
+/**
+ * Geometry for a season's trail.
+ *
+ * `stops[i]` is where the character stands while facing obstacle `i`, and
+ * `stops[route.length]` is the boss. Obstacle `i` sits between stops `i` and
+ * `i + 1`, so crossing it is a move from one stop to the next.
  *
  * @param {import("../seasons.js").Season|null} season - The season being played
- * @returns {{d: string, viewBox: string, width: number, height: number}} The path
+ * @returns {{width: number, height: number, viewportWidth: number, viewBox: string,
+ *   groundSegments: string[], stops: Array<{x: number, y: number}>,
+ *   obstacles: Array<{kind: string, x: number, y: number}>, tokenScale: number,
+ *   bossOffset: number, bossTransform: string,
+ *   glow: {cy: number, r: number}}} The trail's geometry, plus how this pack
+ *   wants the shared pieces placed within it
  */
-export function trailPath(season) {
-  const width = 1000
-  const height = 220
-  const margin = 56
-  const amplitude = 46
-  const mid = height / 2 + 12
-  const spaces = Number.isFinite(season?.spaces) ? season.spaces : 12
-  // One full wave per four spaces, clamped so the curve never gets too busy.
-  const waves = Math.max(3, Math.min(6, Math.round(spaces / 3.5)))
-  const span = (width - margin * 2) / waves
-
-  let d = `M ${margin} ${mid}`
-  for (let i = 0; i < waves; i += 1) {
-    const x0 = margin + span * i
-    const x1 = x0 + span
-    const lift = i % 2 === 0 ? -amplitude : amplitude
-    d += ` C ${x0 + span / 3} ${mid + lift}, ${x1 - span / 3} ${mid + lift}, ${x1} ${mid}`
+export function layout(season) {
+  const route = Array.isArray(season?.route) && season.route.length ? season.route : ["hill"]
+  const width = MARGIN * 2 + route.length * SPACING
+  const spots = placements(route)
+  // Stops sit on the resting ground, never the deformed ground: the character
+  // stands at the near edge of each obstacle, not down in a basin or a void.
+  const stops = Array.from({ length: route.length + 1 }, (_, i) => {
+    const x = MARGIN + i * SPACING
+    return { x, y: restingGroundY(x) }
+  })
+  return {
+    width,
+    height: HEIGHT,
+    viewportWidth: VIEWPORT_WIDTH,
+    viewBox: `0 0 ${VIEWPORT_WIDTH} ${HEIGHT}`,
+    groundSegments: groundSegmentsFor(width, spots),
+    stops,
+    obstacles: spots.map((spot) => ({ kind: spot.kind, x: spot.x, y: restingGroundY(spot.x) })),
+    // How the shared pieces are scaled and placed in *this* pack's coordinate
+    // system. GameUI used to hard-code these four numbers, which quietly made it
+    // a second place that knew how the art was drawn -- so a replacement pack
+    // could not actually be dropped in without editing the UI too.
+    tokenScale: 0.68,
+    bossOffset: 60,
+    bossTransform: "translate(-52 -132) scale(1.05)",
+    glow: { cy: -88, r: 86 },
   }
-  return { d, viewBox: `0 0 ${width} ${height}`, width, height }
+}
+
+/**
+ * How the character gets across one obstacle, as Web Animations keyframes.
+ *
+ * The pack owns the motion as well as the drawing, so a future sprite pack can
+ * return frame-swapping keyframes where this one returns transforms, and GameUI
+ * does not have to know which it got. Every kind moves between the same two
+ * points; what differs is the shape of the path and the timing, which is where
+ * the sense of weight comes from.
+ *
+ * @param {string} kind - The obstacle kind being crossed
+ * @param {{x: number, y: number}} from - The stop being left
+ * @param {{x: number, y: number}} to - The stop being reached
+ * @returns {{keyframes: Array<Object>, options: Object}} Input for `Element.animate`
+ */
+export function traversal(kind, from, to) {
+  const at = (point, lift = 0, extra = "") =>
+    `translate(${point.x - TOKEN_HALF}px, ${point.y - TOKEN_FOOT - lift}px)${extra}`
+  const mid = { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 }
+  const quarter = { x: from.x + (to.x - from.x) * 0.25, y: from.y + (to.y - from.y) * 0.25 }
+  const threeQuarter = { x: from.x + (to.x - from.x) * 0.75, y: from.y + (to.y - from.y) * 0.75 }
+
+  switch (kind) {
+    case "gap":
+      // A long low leap: fast, committed, no hang time.
+      return {
+        keyframes: [
+          { transform: at(from, 0, " scaleY(0.86)") },
+          { transform: at(mid, 96), offset: 0.5 },
+          { transform: at(to, 0, " scaleY(0.9)") },
+        ],
+        options: { duration: 620, easing: "ease-out" },
+      }
+    case "river":
+      // Two hops across, as if using stones -- low, quick, a bob each time.
+      return {
+        keyframes: [
+          { transform: at(from) },
+          { transform: at(quarter, 44), offset: 0.25 },
+          { transform: at(mid, 4), offset: 0.5 },
+          { transform: at(threeQuarter, 44), offset: 0.75 },
+          { transform: at(to) },
+        ],
+        options: { duration: 780, easing: "ease-in-out" },
+      }
+    case "boulder":
+      // Up and over something solid: steep, and a moment on top.
+      return {
+        keyframes: [
+          { transform: at(from) },
+          { transform: at(quarter, 84), offset: 0.35 },
+          { transform: at(mid, 100), offset: 0.55 },
+          { transform: at(to) },
+        ],
+        options: { duration: 760, easing: "ease-in-out" },
+      }
+    case "thicket":
+      // No lift at all -- pushing through, squashed narrow, and slower for it.
+      return {
+        keyframes: [
+          { transform: at(from) },
+          { transform: at(quarter, 0, " scaleX(0.78)"), offset: 0.3 },
+          { transform: at(threeQuarter, 0, " scaleX(0.82)"), offset: 0.7 },
+          { transform: at(to) },
+        ],
+        options: { duration: 880, easing: "ease-in-out" },
+      }
+    case "mountain":
+      // The hard one. Slow, high, and it pauses at the summit.
+      return {
+        keyframes: [
+          { transform: at(from, 0, " scaleY(0.92)") },
+          { transform: at(quarter, 104), offset: 0.3 },
+          { transform: at(mid, 128), offset: 0.5 },
+          { transform: at(mid, 128), offset: 0.62 },
+          { transform: at(threeQuarter, 104), offset: 0.82 },
+          { transform: at(to) },
+        ],
+        options: { duration: 1150, easing: "ease-in-out" },
+      }
+    case "hill":
+    default:
+      // A rolling scramble up and down the far side.
+      return {
+        keyframes: [
+          { transform: at(from) },
+          { transform: at(mid, 74), offset: 0.5 },
+          { transform: at(to) },
+        ],
+        options: { duration: 700, easing: "ease-in-out" },
+      }
+  }
+}
+
+/**
+ * Where the character stands, as a transform, with no animation. Used to place
+ * the token on first draw and after a jump that should not be animated.
+ *
+ * @param {{x: number, y: number}} stop - The stop to stand on
+ * @returns {string} A CSS transform
+ */
+export function standing(stop) {
+  return `translate(${stop.x - TOKEN_HALF}px, ${stop.y - TOKEN_FOOT}px)`
 }

@@ -9,9 +9,11 @@
  * in constants.ART.PACK. The graphics are undecided, so the decision is
  * isolated rather than deferred.
  *
- * A pack must export `id`, `name`, `palette`, `character`, `item`, `scenery`,
- * `villain`, and `trailPath`. See placeholder.js for the reference
- * implementation and the exact signatures, and ../README.md for the recipe.
+ * A pack must export eleven names: `id`, `name`, `palette`, the drawings
+ * `character`, `item`, `obstacle`, `villain` and `backdrop`, and the
+ * trail's geometry and motion, `layout`, `traversal` and `standing`. See
+ * placeholder.js for the reference implementation and the exact signatures, and
+ * ../README.md for what each one returns and where the recipe lives.
  *
  * - Palettes live here, not in seasons.js, because "what colour is autumn" is a
  *   question about the art and a new pack should be free to answer it

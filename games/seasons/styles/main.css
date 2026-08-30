@@ -413,66 +413,40 @@ body {
   height: auto;
 }
 
-.trail-track {
-  stroke: var(--season-ink);
-  stroke-opacity: 0.25;
-  stroke-width: 9;
-  stroke-linecap: round;
-  stroke-dasharray: 2 14;
+/* The camera. Panning this is what scrolls the landscape; a viewBox cannot be
+   animated, a transform can. JS owns the transform, so nothing is set here. */
+.trail-camera {
+  will-change: transform;
 }
 
-.trail-walked {
-  stroke: var(--season-accent);
-  stroke-width: 7;
-  stroke-linecap: round;
-
-  /* GameUI sets pathLength="1" on the element, so these are fractions of
-     the curve rather than user units -- the maths holds for any path. */
-  stroke-dasharray: 1;
-  stroke-dashoffset: calc(1 - var(--walked, 0));
-  transition: stroke-dashoffset 0.45s ease;
+.trail-ground {
+  fill: var(--season-ground);
 }
 
-.marker-dot {
-  fill: var(--season-sky);
-  stroke: var(--season-ink);
-  stroke-opacity: 0.45;
-  stroke-width: 2;
-}
-
-.trail-marker.is-done .marker-dot {
-  fill: var(--season-accent);
-}
-
-.marker-glow {
+/* Behind a mountain rather than around a dot, so the light haloes the thing
+   being climbed. */
+.obstacle-glow {
   transform-box: fill-box;
   transform-origin: center;
   fill: var(--season-glow);
-  fill-opacity: 0.5;
-  animation: seasons-pulse 2.4s ease-in-out infinite;
-}
-
-.marker-glow-inner {
-  transform-box: fill-box;
-  transform-origin: center;
-  fill: var(--season-glow);
-  fill-opacity: 0.85;
+  fill-opacity: 0.28;
+  animation: seasons-pulse 2.6s ease-in-out infinite;
 }
 
 .trail-token {
-  transition: transform 0.45s ease;
+  will-change: transform;
 }
 
 @keyframes seasons-pulse {
   0%,
   100% {
     transform: scale(1);
-    opacity: 0.45;
+    opacity: 0.4;
   }
 
   50% {
-    transform: scale(1.18);
-    opacity: 0.85;
+    transform: scale(1.14);
+    opacity: 0.75;
   }
 }
 
@@ -572,13 +546,13 @@ body.is-glowing-question .question-prompt {
     border-color 0.15s ease;
 }
 
-.choice:hover:not(:disabled),
+.choice:hover:not(.is-locked),
 .choice:focus-visible {
   border-color: var(--sn-primary);
   outline: none;
 }
 
-.choice:active:not(:disabled) {
+.choice:active:not(.is-locked) {
   transform: scale(0.95);
 }
 
@@ -715,6 +689,44 @@ body.is-glowing-question .question-prompt {
 
 .big-btn:active {
   transform: scale(0.96);
+}
+
+/* ==================== Short screens ==================== */
+
+/* An iPad in landscape is 768px tall, and the demand bar, the trail and the
+   question block together overflowed it -- which put the answer buttons below
+   the fold on the one screen the game is actually played on. This tightens the
+   vertical rhythm rather than shrinking any single piece. */
+@media (height <= 820px) {
+  .game-main {
+    padding: 10px 16px;
+  }
+
+  .trail {
+    margin: 10px 0;
+  }
+
+  .demand-bar,
+  .question-block {
+    padding: 10px 16px;
+  }
+
+  .question-prompt {
+    font-size: clamp(1.8rem, 6vw, 2.5rem);
+  }
+
+  .timer-wrap {
+    margin: 10px auto 2px;
+  }
+
+  .choices {
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .feedback {
+    margin-top: 8px;
+  }
 }
 
 /* ==================== Narrow screens ==================== */
