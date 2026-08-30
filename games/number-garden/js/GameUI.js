@@ -1,4 +1,4 @@
-import { MATH } from "./constants.js"
+import { MATH, DEFAULTS } from "./constants.js"
 import { BaseGameUI } from "../../shared/BaseGameUI.js"
 import { CastleUI } from "./CastleUI.js"
 
@@ -33,6 +33,7 @@ export class GameUI extends BaseGameUI {
       answerOptions: document.getElementById("answer-options"),
       feedbackArea: document.getElementById("feedback-area"),
       gardenCanvas: document.getElementById("garden-canvas"),
+      progressBar: document.getElementById("progress-bar"),
       starCounts: document.querySelectorAll("#star-count, #activity-star-count"),
       levelDisplay: document.getElementById("level-display"),
       gardenPreview: document.querySelector(".garden-preview"),
@@ -41,7 +42,6 @@ export class GameUI extends BaseGameUI {
       difficultySelect: document.getElementById("difficulty-select"),
       inputModeSelect: document.getElementById("input-mode-select"),
       visualHintsSelect: document.getElementById("visual-hints-select"),
-      questionsPerLevelSelect: document.getElementById("questions-per-level-select"),
       soundEffectsSelect: document.getElementById("sound-effects-select"),
       castleBackButton: document.getElementById("castle-back-button"),
       castleScreenTitle: document.getElementById("castle-screen-title"),
@@ -73,11 +73,27 @@ export class GameUI extends BaseGameUI {
 
   /**
    * Update progress bar
+   *
+   * OVERRIDES `BaseGameUI.updateProgressBar`, which writes only the bar width
+   * and the text, leaving `aria-valuenow` frozen at its markup value -- a
+   * screen reader would report 0/5 for the whole level. This also writes
+   * `aria-valuemax`, so the announced total matches the text even when a caller
+   * passes a level length other than the default.
+   *
+   * `total` defaults rather than being required: passing `undefined` renders
+   * "3/undefined" as the text and "NaN%" as the bar width, which is invalid
+   * CSS, so the bar silently stops moving. Times Trail's override defaults for
+   * the same reason.
+   *
    * @param {number} current - Current progress
-   * @param {number} total - Total required
+   * @param {number} [total] - Total required (defaults to a full level)
    */
-  updateProgressBar(current, total) {
+  updateProgressBar(current, total = DEFAULTS.QUESTIONS_PER_LEVEL) {
     super.updateProgressBar(current, total, MATH.PERCENT_MULTIPLIER)
+    const bar = this.elements.progressBar
+    if (!bar) return
+    bar.setAttribute("aria-valuenow", String(current))
+    bar.setAttribute("aria-valuemax", String(total))
   }
 
   /**
@@ -361,9 +377,13 @@ export class GameUI extends BaseGameUI {
       document.body.style.backgroundImage = "none"
     }
 
-    // Set CSS custom properties for theme colors
+    // Set CSS custom properties for theme colors. `--theme-ink` is the
+    // text-safe variant of the primary colour (see ProgressionManager); it
+    // falls back to the primary so a theme that ever omits it renders a valid
+    // colour instead of the literal string "undefined".
     document.documentElement.style.setProperty("--theme-primary", theme.primaryColor)
     document.documentElement.style.setProperty("--theme-accent", theme.accentColor)
+    document.documentElement.style.setProperty("--theme-ink", theme.inkColor || theme.primaryColor)
 
     // Add decorations based on progress
     const numDecorations = Math.floor((progressPercent / 100) * theme.decorations.length * 2)

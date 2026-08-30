@@ -163,7 +163,7 @@
   width: 100%;
   padding: 10px;
   font-size: 1rem;
-  border: 2px solid #ddd;
+  border: 2px solid var(--ng-border);
   border-radius: 8px;
   background: white;
   cursor: pointer;
@@ -219,7 +219,7 @@
 
 .error-details {
   font-size: 0.9em;
-  color: #666;
+  color: var(--ng-ink-muted);
 }
 
 /* ==================== Responsive ==================== */

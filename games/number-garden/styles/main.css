@@ -6,8 +6,84 @@
 }
 
 :root {
+  /* ---- Per-area theme hooks ----
+     Set at runtime by GameUI.updateVisualProgression from
+     ProgressionManager.areaThemes, so each garden area recolours itself.
+     `primary` and `accent` are DECORATIVE (gradients, fills, borders); `ink` is
+     the text-safe variant of `primary`. They differ because two areas
+     (time-temple gold, measurement-market orange) have identity colours that
+     fall below 3:1 against the light background -- readable as a fill, not as
+     text. Values here are the flower-meadow defaults, used before any area
+     loads and as a fallback if the JS never runs. */
   --theme-primary: #764ba2;
   --theme-accent: #667eea;
+  --theme-ink: #764ba2;
+
+  /* ---- Neutrals ----
+     Tinted toward the violet brand rather than pure grey. Contrast vs white:
+     ink 14.3, ink-muted 6.9, ink-faint 3.7. */
+  --ng-ink: #2e2836;
+  --ng-ink-muted: #5f5768;
+  --ng-ink-faint: #8b8296;
+  --ng-border: #ded9e4;
+  --ng-surface: #fff;
+  --ng-surface-alt: #f4f1f7;
+
+  /* ---- Semantic feedback ----
+     A wrong answer is amber, not red: this is a game for young children and
+     the softer signal is deliberate. Hence `retry` rather than `error`.
+     Text on these fills must be --ng-ink, not white -- white lands between
+     1.67 and 2.54 against them, which is effectively unreadable. */
+  --ng-correct: #16a34a;
+  --ng-correct-fill: #4ade80;
+  --ng-retry: #f59e0b;
+  --ng-retry-fill: #fbbf24;
+  --ng-hint: #3b82f6;
+  --ng-hint-fill: #60a5fa;
+  --ng-star: #ffa500;
+  --ng-star-bright: #ffd700;
+  --ng-strike: #ef4444;
+
+  /* ---- Decorative gradient pairs ---- */
+  --ng-card-from: #a8edea;
+  --ng-card-to: #fed6e3;
+  --ng-warm-from: #ffecd2;
+  --ng-warm-to: #fcb69f;
+
+  /* ---- Type scale ---- */
+  --ng-text-xs: 0.75rem;
+  --ng-text-sm: 0.875rem;
+  --ng-text-base: 1rem;
+  --ng-text-md: 1.125rem;
+  --ng-text-lg: 1.375rem;
+  --ng-text-xl: 1.5rem;
+  --ng-text-2xl: 1.75rem;
+  --ng-text-3xl: 2.375rem;
+  --ng-text-4xl: 3rem;
+
+  /* ---- Emoji / icon scale (decorative glyphs, not body text) ---- */
+  --ng-icon-sm: 2rem;
+  --ng-icon-md: 3rem;
+  --ng-icon-lg: 4rem;
+  --ng-icon-xl: 5rem;
+  --ng-icon-2xl: 7.5rem;
+
+  /* ---- Spacing scale ---- */
+  --ng-space-xs: 0.25rem;
+  --ng-space-sm: 0.5rem;
+  --ng-space-md: 0.75rem;
+  --ng-space-lg: 1rem;
+  --ng-space-xl: 1.25rem;
+  --ng-space-2xl: 1.875rem;
+  --ng-space-3xl: 2.5rem;
+
+  /* ---- Elevation and shape ---- */
+  --ng-radius-sm: 0.5rem;
+  --ng-radius: 1.25rem;
+  --ng-radius-pill: 999px;
+  --ng-shadow-sm: 0 2px 10px rgb(0, 0, 0, 0.1);
+  --ng-shadow: 0 5px 20px rgb(0, 0, 0, 0.1);
+  --ng-shadow-lg: 0 10px 30px rgb(0, 0, 0, 0.2);
 
   transition:
     background-color 0.6s ease,
@@ -22,13 +98,13 @@ body {
     "Segoe UI",
     Roboto,
     sans-serif;
-  background-color: #667eea;
+  background-color: var(--theme-accent);
   min-height: 100vh;
   min-height: 100dvh; /* Dynamic viewport height for mobile browsers */
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 10px;
+  padding: var(--ng-space-md);
   overflow: hidden;
   transition:
     background-color 0.6s ease,
@@ -51,7 +127,7 @@ body {
   max-height: 100vh;
   max-height: 100dvh; /* Dynamic viewport height for mobile browsers */
   background: rgb(255, 255, 255, 0.95);
-  border-radius: 20px;
+  border-radius: var(--ng-radius);
   box-shadow: 0 20px 60px rgb(0, 0, 0, 0.3);
   overflow: hidden;
   position: relative;
@@ -60,7 +136,7 @@ body {
 /* Screen Management */
 .screen {
   display: none !important;
-  padding: 20px;
+  padding: var(--ng-space-xl);
   position: absolute;
   inset: 0;
   overflow-y: auto;
@@ -76,40 +152,40 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
-  padding-bottom: 10px;
-  border-bottom: 3px solid #e0e0e0;
+  margin-bottom: var(--ng-space-lg);
+  padding-bottom: var(--ng-space-md);
+  border-bottom: 3px solid var(--ng-border);
   flex-shrink: 0;
 }
 
 .header h2 {
-  font-size: 24px;
-  color: var(--theme-primary);
+  font-size: var(--ng-text-xl);
+  color: var(--theme-ink);
   text-shadow: 2px 2px 4px rgb(0, 0, 0, 0.1);
   transition: color 0.6s ease;
 }
 
 .stats {
   display: flex;
-  gap: 15px;
+  gap: var(--ng-space-lg);
 }
 
 .stat {
-  font-size: 18px;
+  font-size: var(--ng-text-md);
   font-weight: bold;
-  color: #333;
+  color: var(--ng-ink);
   background: white;
-  padding: 6px 12px;
-  border-radius: 20px;
-  box-shadow: 0 2px 10px rgb(0, 0, 0, 0.1);
+  padding: var(--ng-space-sm) var(--ng-space-md);
+  border-radius: var(--ng-radius);
+  box-shadow: var(--ng-shadow-sm);
 }
 
 /* Progress Bar */
 .progress-container {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 15px;
+  gap: var(--ng-space-md);
+  margin-bottom: var(--ng-space-lg);
   flex-shrink: 0;
 }
 
@@ -117,7 +193,7 @@ body {
   flex: 1;
   height: 30px;
   background: white;
-  border-radius: 15px;
+  border-radius: var(--ng-radius-sm);
   overflow: hidden;
   box-shadow: inset 0 2px 5px rgb(0, 0, 0, 0.1);
 }
@@ -132,9 +208,9 @@ body {
 }
 
 .progress-text {
-  font-size: 18px;
+  font-size: var(--ng-text-md);
   font-weight: bold;
-  color: var(--theme-primary);
+  color: var(--theme-ink);
   min-width: 50px;
   transition: color 0.6s ease;
   text-align: center;
@@ -147,49 +223,53 @@ body {
   justify-content: center;
   align-items: center;
   text-align: center;
-  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+  background: linear-gradient(135deg, var(--ng-warm-from) 0%, var(--ng-warm-to) 100%);
 }
 
 .game-title {
-  font-size: 48px;
-  color: var(--theme-primary);
-  margin-bottom: 20px;
+  font-size: var(--ng-text-4xl);
+  color: var(--theme-ink);
+  margin-bottom: var(--ng-space-xl);
   text-shadow: 3px 3px 6px rgb(0, 0, 0, 0.2);
   transition: color 0.6s ease;
 }
 
 .subtitle {
-  font-size: 24px;
-  color: var(--theme-accent);
-  margin-bottom: 40px;
+  font-size: var(--ng-text-xl);
+  color: var(--theme-ink);
+  margin-bottom: var(--ng-space-3xl);
   transition: color 0.6s ease;
 }
 
 .title-buttons {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: var(--ng-space-lg);
   align-items: center;
 }
 
 /* Buttons */
 .big-button {
-  font-size: 24px;
+  font-size: var(--ng-text-xl);
   font-weight: bold;
   color: white;
-  background: linear-gradient(135deg, var(--theme-accent) 0%, var(--theme-primary) 100%);
+  background:
+    linear-gradient(135deg, rgb(255, 255, 255, 0.18) 0%, rgb(255, 255, 255, 0) 100%),
+    var(--theme-ink);
   border: none;
-  padding: 20px 50px;
-  border-radius: 50px;
+  padding: var(--ng-space-xl) 50px;
+  border-radius: var(--ng-radius-pill);
   cursor: pointer;
   box-shadow: 0 10px 30px rgb(0, 0, 0, 0.3);
   transition: all 0.3s ease;
   font-family: inherit;
 }
 
-.big-button:hover {
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 15px 40px rgb(0, 0, 0, 0.4);
+@media (hover: hover) and (pointer: fine) {
+  .big-button:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 15px 40px rgb(0, 0, 0, 0.4);
+  }
 }
 
 .big-button:active {
@@ -197,22 +277,24 @@ body {
 }
 
 .secondary-button {
-  font-size: 16px;
-  color: var(--theme-accent);
+  font-size: var(--ng-text-base);
+  color: var(--theme-ink);
   background: white;
   border: 2px solid var(--theme-accent);
-  padding: 12px 30px;
-  border-radius: 25px;
+  padding: var(--ng-space-md) var(--ng-space-2xl);
+  border-radius: var(--ng-radius-pill);
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: inherit;
   font-weight: bold;
 }
 
-.secondary-button:hover {
-  background: var(--theme-accent);
-  color: white;
-  transform: translateY(-2px);
+@media (hover: hover) and (pointer: fine) {
+  .secondary-button:hover {
+    background: var(--theme-ink);
+    color: white;
+    transform: translateY(-2px);
+  }
 }
 
 .secondary-button:active {
@@ -220,66 +302,86 @@ body {
 }
 
 .nav-button {
-  font-size: 18px;
-  color: var(--theme-accent);
+  font-size: var(--ng-text-md);
+  color: var(--theme-ink);
   background: white;
   border: 2px solid var(--theme-accent);
-  padding: 10px 20px;
-  border-radius: 25px;
+  padding: var(--ng-space-md) var(--ng-space-xl);
+  border-radius: var(--ng-radius-pill);
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: inherit;
   font-weight: bold;
 }
 
-.nav-button:hover {
-  background: var(--theme-accent);
-  color: white;
-  transform: translateX(-3px);
+@media (hover: hover) and (pointer: fine) {
+  .nav-button:hover {
+    background: var(--theme-ink);
+    color: white;
+    transform: translateX(-3px);
+  }
 }
 
 /* Garden Hub */
 .project-intro {
   text-align: center;
-  font-size: 22px;
-  color: #666;
-  margin: 20px 0;
+  font-size: var(--ng-text-lg);
+  color: var(--ng-ink-muted);
+  margin: var(--ng-space-xl) 0;
   font-weight: 600;
 }
 
 .project-choices {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 30px;
-  padding: 20px;
+  gap: var(--ng-space-2xl);
+  padding: var(--ng-space-xl);
   max-width: 600px;
   margin: 0 auto;
 }
 
+/* Cards (project picker and garden hub) share one treatment: a white surface
+   with the mint-to-pink gradient reduced to a top accent bar. Previously the
+   gradient covered the whole card, so the heading sat on the pink end and its
+   contrast depended on where the gradient happened to land. */
 .project-option {
-  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-  border-radius: 20px;
-  padding: 40px 30px;
+  position: relative;
+  overflow: hidden;
+  background: var(--ng-surface);
+  border: 1px solid var(--ng-border);
+  border-radius: var(--ng-radius);
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 5px 20px rgb(0, 0, 0, 0.1);
+  box-shadow: var(--ng-shadow);
+  padding: var(--ng-space-2xl) var(--ng-space-xl);
 }
 
-.project-option:hover {
-  transform: translateY(-8px) scale(1.05);
-  box-shadow: 0 15px 40px rgb(0, 0, 0, 0.25);
+.project-option::before,
+.garden-area::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: var(--ng-space-sm);
+  background: linear-gradient(90deg, var(--ng-card-from) 0%, var(--ng-card-to) 100%);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .project-option:hover {
+    transform: translateY(-8px) scale(1.05);
+    box-shadow: 0 15px 40px rgb(0, 0, 0, 0.25);
+  }
 }
 
 .project-icon {
-  font-size: 80px;
-  margin-bottom: 15px;
+  font-size: var(--ng-icon-xl);
+  margin-bottom: var(--ng-space-lg);
   animation: bounce 2s ease-in-out infinite;
 }
 
 .project-option h3 {
-  font-size: 24px;
-  color: var(--theme-primary);
+  font-size: var(--ng-text-xl);
+  color: var(--theme-ink);
   margin: 0;
   transition: color 0.6s ease;
   font-weight: bold;
@@ -292,47 +394,65 @@ body {
 .garden-areas {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 30px;
-  margin-top: 30px;
+  gap: var(--ng-space-2xl);
+  margin-top: var(--ng-space-2xl);
 }
 
 .garden-area {
-  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-  border-radius: 20px;
-  padding: 30px;
+  position: relative;
+  overflow: hidden;
+  background: var(--ng-surface);
+  border: 1px solid var(--ng-border);
+  border-radius: var(--ng-radius);
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 5px 20px rgb(0, 0, 0, 0.1);
+  box-shadow: var(--ng-shadow);
+  padding: var(--ng-space-2xl) var(--ng-space-xl);
 }
 
-.garden-area.unlocked:hover {
-  transform: translateY(-5px) scale(1.02);
-  box-shadow: 0 10px 30px rgb(0, 0, 0, 0.2);
+@media (hover: hover) and (pointer: fine) {
+  .garden-area.unlocked:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: var(--ng-shadow-lg);
+  }
 }
 
 .garden-area.locked {
-  background: #e0e0e0;
+  background: var(--ng-surface-alt);
   cursor: not-allowed;
-  opacity: 0.6;
+  box-shadow: none;
+}
+
+.garden-area.locked::before {
+  background: var(--ng-border);
+}
+
+/* Dim the glyph rather than the whole card, so the area name stays legible. */
+.garden-area.locked .area-icon {
+  opacity: 0.45;
+}
+
+.garden-area.locked h3 {
+  color: var(--ng-ink-muted);
 }
 
 .area-icon {
-  font-size: 64px;
-  margin-bottom: 15px;
+  font-size: var(--ng-icon-lg);
+  margin-bottom: var(--ng-space-lg);
   animation: bounce 2s ease-in-out infinite;
 }
 
 .garden-area h3 {
-  font-size: 24px;
-  color: var(--theme-primary);
-  margin-bottom: 10px;
+  font-size: var(--ng-text-xl);
+  color: var(--theme-ink);
+  margin-bottom: var(--ng-space-md);
   transition: color 0.6s ease;
 }
 
 .garden-area p {
-  font-size: 16px;
-  color: #666;
+  font-size: var(--ng-text-base);
+  color: var(--ng-ink-muted);
 }
 
 /* Activity Screen */
@@ -344,7 +464,7 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: var(--ng-space-lg);
 }
 
 .creature-guide {
@@ -352,26 +472,26 @@ body {
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 10px;
+  gap: var(--ng-space-md);
+  padding: var(--ng-space-md);
   flex-shrink: 0;
 }
 
 .creature-image {
-  font-size: 48px;
+  font-size: var(--ng-icon-md);
   animation: wiggle 2s ease-in-out infinite;
   flex-shrink: 0;
 }
 
 .creature-message {
-  font-size: 16px;
+  font-size: var(--ng-text-base);
   font-weight: 600;
-  color: var(--theme-primary);
+  color: var(--theme-ink);
   text-align: left;
   margin: 0;
-  padding: 8px 16px;
+  padding: var(--ng-space-sm) var(--ng-space-lg);
   background: white;
-  border-radius: 15px;
+  border-radius: var(--ng-radius-sm);
   box-shadow: 0 2px 8px rgb(0, 0, 0, 0.1);
   max-width: 280px;
 }
@@ -383,17 +503,17 @@ body {
 /* Question Area */
 .question-area {
   background: white;
-  padding: 25px;
-  border-radius: 20px;
+  padding: var(--ng-space-2xl);
+  border-radius: var(--ng-radius);
   box-shadow: 0 5px 15px rgb(0, 0, 0, 0.1);
   text-align: center;
   flex-shrink: 0;
 }
 
 .question {
-  font-size: 28px;
-  color: #333;
-  margin-bottom: 20px;
+  font-size: var(--ng-text-2xl);
+  color: var(--ng-ink);
+  margin-bottom: var(--ng-space-xl);
   font-weight: bold;
   line-height: 1.4;
 }
@@ -402,7 +522,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 8px;
+  gap: var(--ng-space-sm);
   min-height: 80px;
   flex-wrap: wrap;
   width: 100%;
@@ -410,7 +530,7 @@ body {
 }
 
 .visual-item {
-  font-size: 48px;
+  font-size: var(--ng-text-4xl);
   animation: pop-in 0.3s ease-out;
 }
 
@@ -426,34 +546,34 @@ body {
   top: 50%;
   width: 60px;
   height: 3px;
-  background: #ef4444;
+  background: var(--ng-strike);
   transform: translate(-50%, -50%) rotate(-45deg);
 }
 
 .visual-item.separator {
-  font-size: 32px;
+  font-size: var(--ng-icon-sm);
   opacity: 0.3;
   animation: none;
-  color: #999;
+  color: var(--ng-ink-faint);
 }
 
 /* Answer Options */
 .answer-options {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 15px;
+  gap: var(--ng-space-lg);
   flex-shrink: 0;
 }
 
 .answer-button {
   position: relative;
-  font-size: 38px;
+  font-size: var(--ng-text-3xl);
   font-weight: bold;
-  color: var(--theme-primary);
+  color: var(--theme-ink);
   background: white;
   border: 4px solid var(--theme-primary);
-  padding: 25px;
-  border-radius: 20px;
+  padding: var(--ng-space-2xl);
+  border-radius: var(--ng-radius);
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: inherit;
@@ -467,7 +587,7 @@ body {
 /* Only apply hover effects on devices that support hover (not touch screens) */
 @media (hover: hover) and (pointer: fine) {
   .answer-button:hover:not(:active) {
-    background: var(--theme-primary);
+    background: var(--theme-ink);
     color: white;
     transform: scale(1.05);
     box-shadow: 0 8px 25px rgb(0, 0, 0, 0.3);
@@ -480,9 +600,9 @@ body {
 }
 
 .answer-button.correct {
-  background: #4ade80;
-  border-color: #16a34a;
-  color: white;
+  background: var(--ng-correct-fill);
+  border-color: var(--ng-correct);
+  color: var(--ng-ink);
   animation: pulse-correct 0.5s ease;
 }
 
@@ -493,9 +613,9 @@ body {
 
 /* Feedback Area */
 .feedback-area {
-  margin-top: 15px;
+  margin-top: var(--ng-space-lg);
   padding: 0;
-  border-radius: 20px;
+  border-radius: var(--ng-radius);
   text-align: center;
   transition: all 0.3s ease;
   min-height: 68px;
@@ -511,52 +631,67 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 20px;
-  border-radius: 20px;
+  gap: var(--ng-space-md);
+  padding: var(--ng-space-xl);
+  border-radius: var(--ng-radius);
 }
 
 .feedback-icon {
-  font-size: 48px;
+  font-size: var(--ng-text-4xl);
   animation: bounce 0.5s ease;
 }
 
 .feedback h3 {
   margin: 0;
-  font-size: 24px;
+  font-size: var(--ng-text-xl);
   font-weight: bold;
   color: inherit;
 }
 
 .feedback p {
-  margin: 5px 0 0;
-  font-size: 18px;
+  margin: var(--ng-space-xs) 0 0;
+  font-size: var(--ng-text-md);
   font-weight: normal;
 }
 
 .feedback p strong {
   font-weight: bold;
-  font-size: 22px;
+  font-size: var(--ng-text-lg);
 }
 
+/* Dark ink, not white: these are light-to-mid tints, so white measured
+   1.67-2.54 against them -- and this is the text a child reads after every
+   answer. The gradient is a white sheen over the light fill rather than a ramp
+   from the light fill down to the dark semantic colour, because `.feedback p`
+   is 18px at normal weight (so it needs 4.5:1) and ink over the dark blue end
+   only reached 3.88. Over the fills it is 5.6 to 8.5. The dark semantic
+   tokens are the border colours instead. */
 .feedback.correct {
-  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
-  color: white;
+  background:
+    linear-gradient(135deg, rgb(255, 255, 255, 0.25) 0%, rgb(255, 255, 255, 0) 100%),
+    var(--ng-correct-fill);
+  border: 2px solid var(--ng-correct);
+  color: var(--ng-ink);
 }
 
 .feedback.incorrect {
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-  color: white;
+  background:
+    linear-gradient(135deg, rgb(255, 255, 255, 0.25) 0%, rgb(255, 255, 255, 0) 100%),
+    var(--ng-retry-fill);
+  border: 2px solid var(--ng-retry);
+  color: var(--ng-ink);
 }
 
 .feedback.encourage {
-  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-  color: white;
+  background:
+    linear-gradient(135deg, rgb(255, 255, 255, 0.25) 0%, rgb(255, 255, 255, 0) 100%),
+    var(--ng-hint-fill);
+  border: 2px solid var(--ng-hint);
+  color: var(--ng-ink);
 }
 
 .feedback-explanation {
   font-style: italic;
-  opacity: 0.9;
 }
 
 /* Garden Preview */
@@ -568,7 +703,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  gap: 8px;
+  gap: var(--ng-space-sm);
   min-height: 80px;
   flex-wrap: wrap;
   width: 100%;
@@ -576,7 +711,7 @@ body {
 }
 
 .garden-item {
-  font-size: 32px;
+  font-size: var(--ng-icon-sm);
   animation: grow-in 0.5s ease-out;
 }
 
@@ -593,7 +728,7 @@ body {
 
 .particle {
   position: absolute;
-  font-size: 24px;
+  font-size: var(--ng-text-xl);
   animation: float-up 2s ease-out forwards;
   pointer-events: none;
 }
@@ -605,10 +740,10 @@ body {
 
 /* Icon Buttons */
 .icon-button {
-  font-size: 24px;
+  font-size: var(--ng-text-xl);
   background: white;
   border: 2px solid var(--theme-primary);
-  padding: 8px 12px;
+  padding: var(--ng-space-sm) var(--ng-space-md);
   border-radius: 50%;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -620,10 +755,12 @@ body {
   position: relative;
 }
 
-.icon-button:hover {
-  background: var(--theme-primary);
-  transform: scale(1.1) rotate(15deg);
-  box-shadow: 0 5px 15px rgb(0, 0, 0, 0.2);
+@media (hover: hover) and (pointer: fine) {
+  .icon-button:hover {
+    background: var(--theme-primary);
+    transform: scale(1.1) rotate(15deg);
+    box-shadow: 0 5px 15px rgb(0, 0, 0, 0.2);
+  }
 }
 
 .icon-button:active {
@@ -635,9 +772,9 @@ body {
   position: absolute;
   top: -5px;
   right: -5px;
-  background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
-  color: white;
-  font-size: 12px;
+  background: linear-gradient(135deg, var(--ng-star-bright) 0%, var(--ng-star) 100%);
+  color: var(--ng-ink);
+  font-size: var(--ng-text-xs);
   font-weight: bold;
   width: 20px;
   height: 20px;
@@ -665,19 +802,21 @@ body {
 .text-button {
   background: none;
   border: none;
-  color: var(--theme-primary);
-  font-size: 14px;
+  color: var(--theme-ink);
+  font-size: var(--ng-text-sm);
   font-weight: 600;
   cursor: pointer;
-  padding: 4px 8px;
-  margin-top: 4px;
+  padding: var(--ng-space-xs) var(--ng-space-sm);
+  margin-top: var(--ng-space-xs);
   transition: all 0.2s ease;
   font-family: inherit;
 }
 
-.text-button:hover {
-  color: var(--theme-accent);
-  text-decoration: underline;
+@media (hover: hover) and (pointer: fine) {
+  .text-button:hover {
+    color: var(--theme-ink);
+    text-decoration: underline;
+  }
 }
 
 .text-button:active {
@@ -688,7 +827,8 @@ body {
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
-.garden-area:focus-visible {
+.garden-area:focus-visible,
+.project-option:focus-visible {
   outline: 3px solid var(--theme-accent);
   outline-offset: 3px;
 }
@@ -710,7 +850,7 @@ select:focus-visible,
   position: absolute;
   top: 4px;
   right: 4px;
-  font-size: 12px;
+  font-size: var(--ng-text-xs);
   opacity: 0.5;
   font-weight: normal;
 }
@@ -724,7 +864,7 @@ select:focus-visible,
   justify-content: center;
   align-items: center;
   z-index: 10000;
-  padding: 20px;
+  padding: var(--ng-space-xl);
 }
 
 .modal.hidden {
@@ -733,47 +873,47 @@ select:focus-visible,
 
 .modal-content {
   background: white;
-  padding: 30px;
-  border-radius: 20px;
+  padding: var(--ng-space-2xl);
+  border-radius: var(--ng-radius);
   max-width: 500px;
   width: 100%;
   box-shadow: 0 20px 60px rgb(0, 0, 0, 0.4);
 }
 
 .modal-content h2 {
-  font-size: 32px;
-  color: var(--theme-primary);
-  margin-bottom: 20px;
+  font-size: var(--ng-text-2xl);
+  color: var(--theme-ink);
+  margin-bottom: var(--ng-space-xl);
   text-align: center;
 }
 
 .setting-group {
-  margin-bottom: 20px;
+  margin-bottom: var(--ng-space-xl);
 }
 
 .setting-group label {
   display: block;
-  font-size: 18px;
+  font-size: var(--ng-text-md);
   font-weight: bold;
-  color: #333;
-  margin-bottom: 8px;
+  color: var(--ng-ink);
+  margin-bottom: var(--ng-space-sm);
 }
 
 .setting-select {
   width: 100%;
-  font-size: 16px;
-  padding: 12px;
+  font-size: var(--ng-text-base);
+  padding: var(--ng-space-md);
   border: 2px solid var(--theme-primary);
-  border-radius: 10px;
+  border-radius: var(--ng-radius-sm);
   font-family: inherit;
   background: white;
   cursor: pointer;
 }
 
 .setting-description {
-  font-size: 14px;
-  color: #666;
-  margin-top: 5px;
+  font-size: var(--ng-text-sm);
+  color: var(--ng-ink-muted);
+  margin-top: var(--ng-space-xs);
   font-style: italic;
 }
 
@@ -783,38 +923,38 @@ select:focus-visible,
 }
 
 .project-visual {
-  font-size: 120px;
+  font-size: var(--ng-icon-2xl);
   line-height: 1.2;
-  margin: 20px 0;
+  margin: var(--ng-space-xl) 0;
   min-height: 150px;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  gap: 10px;
+  gap: var(--ng-space-md);
 }
 
 .project-progress-text {
-  font-size: 20px;
-  color: #666;
-  margin: 20px 0;
+  font-size: var(--ng-text-md);
+  color: var(--ng-ink-muted);
+  margin: var(--ng-space-xl) 0;
   font-weight: 600;
 }
 
 /* Castle Screen */
 .castle-container {
   text-align: center;
-  padding: 20px;
+  padding: var(--ng-space-xl);
 }
 
 .castle-description {
-  font-size: 18px;
-  color: #666;
-  margin-bottom: 15px;
+  font-size: var(--ng-text-md);
+  color: var(--ng-ink-muted);
+  margin-bottom: var(--ng-space-lg);
 }
 
 .castle-svg-container {
-  margin: 30px auto;
+  margin: var(--ng-space-2xl) auto;
   max-width: 600px;
   min-height: 400px;
   display: flex;
@@ -825,25 +965,25 @@ select:focus-visible,
 .castle-pieces {
   display: flex;
   justify-content: center;
-  gap: 10px;
+  gap: var(--ng-space-md);
   flex-wrap: wrap;
-  margin-top: 20px;
+  margin-top: var(--ng-space-xl);
 }
 
 .castle-piece {
   width: 60px;
   height: 60px;
   border: 3px solid var(--theme-primary);
-  border-radius: 10px;
+  border-radius: var(--ng-radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 30px;
+  font-size: var(--ng-icon-sm);
   background: white;
 }
 
 .castle-piece.completed {
-  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  background: linear-gradient(135deg, var(--ng-card-from) 0%, var(--ng-card-to) 100%);
   animation: pop-in 0.5s ease-out;
 }
 
@@ -853,13 +993,13 @@ select:focus-visible,
 
 /* Keyboard Input */
 .answer-input {
-  font-size: 32px;
+  font-size: var(--ng-text-3xl);
   font-weight: bold;
-  color: var(--theme-primary);
+  color: var(--theme-ink);
   background: white;
   border: 4px solid var(--theme-primary);
-  padding: 20px;
-  border-radius: 20px;
+  padding: var(--ng-space-xl);
+  border-radius: var(--ng-radius);
   text-align: center;
   width: 100%;
   max-width: 300px;
@@ -877,26 +1017,30 @@ select:focus-visible,
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 15px;
+  gap: var(--ng-space-lg);
 }
 
 .submit-answer-button {
-  font-size: 20px;
+  font-size: var(--ng-text-md);
   font-weight: bold;
   color: white;
-  background: linear-gradient(135deg, var(--theme-accent) 0%, var(--theme-primary) 100%);
+  background:
+    linear-gradient(135deg, rgb(255, 255, 255, 0.18) 0%, rgb(255, 255, 255, 0) 100%),
+    var(--theme-ink);
   border: none;
-  padding: 15px 40px;
-  border-radius: 25px;
+  padding: var(--ng-space-lg) var(--ng-space-3xl);
+  border-radius: var(--ng-radius-pill);
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: inherit;
   box-shadow: 0 5px 20px rgb(0, 0, 0, 0.2);
 }
 
-.submit-answer-button:hover {
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 8px 30px rgb(0, 0, 0, 0.3);
+@media (hover: hover) and (pointer: fine) {
+  .submit-answer-button:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 30px rgb(0, 0, 0, 0.3);
+  }
 }
 
 .submit-answer-button:active {
@@ -912,94 +1056,158 @@ select:focus-visible,
 /* Responsive Design */
 @media (width <= 768px) {
   body {
-    padding: 5px;
+    padding: var(--ng-space-xs);
   }
 
   #game-container {
-    border-radius: 15px;
+    border-radius: var(--ng-radius-sm);
     height: 100vh;
     max-height: 100vh;
   }
 
   .screen {
-    padding: 10px;
+    padding: var(--ng-space-md);
   }
 
   .game-title {
-    font-size: 28px;
-    margin-bottom: 10px;
+    font-size: var(--ng-text-2xl);
+    margin-bottom: var(--ng-space-md);
   }
 
   .subtitle {
-    font-size: 14px;
-    margin-bottom: 20px;
+    font-size: var(--ng-text-sm);
+    margin-bottom: var(--ng-space-xl);
   }
 
   .big-button {
-    font-size: 18px;
-    padding: 12px 24px;
+    font-size: var(--ng-text-md);
+    padding: var(--ng-space-md) 24px;
   }
 
   .header {
-    margin-bottom: 10px;
-    padding-bottom: 5px;
+    margin-bottom: var(--ng-space-md);
+    padding-bottom: var(--ng-space-xs);
   }
 
   .header h2 {
-    font-size: 18px;
+    font-size: var(--ng-text-md);
   }
 
   .stat {
-    font-size: 12px;
-    padding: 4px 8px;
+    font-size: var(--ng-text-xs);
+    padding: var(--ng-space-xs) var(--ng-space-sm);
   }
 
   .creature-guide {
-    padding: 5px;
-    gap: 8px;
+    padding: var(--ng-space-xs);
+    gap: var(--ng-space-sm);
   }
 
   .creature-image {
-    font-size: 32px;
+    font-size: var(--ng-icon-sm);
   }
 
   .creature-message {
-    font-size: 12px;
-    padding: 6px 10px;
+    font-size: var(--ng-text-xs);
+    padding: var(--ng-space-sm) var(--ng-space-md);
   }
 
   .creature-speech p {
-    font-size: 14px;
+    font-size: var(--ng-text-sm);
   }
 
   .question-area {
-    padding: 15px;
+    padding: var(--ng-space-lg);
   }
 
   .question {
-    font-size: 20px;
-    margin-bottom: 10px;
+    font-size: var(--ng-text-md);
+    margin-bottom: var(--ng-space-md);
   }
 
   .visual-item {
-    font-size: 32px;
+    font-size: var(--ng-icon-sm);
   }
 
   .answer-options {
-    gap: 10px;
+    gap: var(--ng-space-md);
   }
 
   .answer-button {
-    font-size: 28px;
-    padding: 15px;
+    font-size: var(--ng-text-2xl);
+    padding: var(--ng-space-lg);
   }
 
   .garden-item {
-    font-size: 28px;
+    font-size: var(--ng-text-2xl);
   }
 
   .activity-container {
-    gap: 10px;
+    gap: var(--ng-space-md);
+  }
+
+  /* Project picker and hub cards. Neither had any responsive rules: the picker
+     is a fixed 2-up grid, so at ~360px each card had roughly 70px of content
+     width holding an 80px glyph. */
+  .project-intro {
+    font-size: var(--ng-text-md);
+    margin: var(--ng-space-lg) 0;
+  }
+
+  .project-choices {
+    gap: var(--ng-space-lg);
+    padding: var(--ng-space-md);
+  }
+
+  .project-option,
+  .garden-area {
+    padding: var(--ng-space-xl) var(--ng-space-md);
+  }
+
+  .project-icon,
+  .area-icon {
+    font-size: var(--ng-icon-md);
+    margin-bottom: var(--ng-space-sm);
+  }
+
+  .project-option h3,
+  .garden-area h3 {
+    font-size: var(--ng-text-md);
+  }
+
+  .garden-areas {
+    gap: var(--ng-space-lg);
+    margin-top: var(--ng-space-lg);
+  }
+
+  /* Level complete (folded in from a second 768px block that used to live at
+     the end of the file). */
+  .celebration {
+    padding: 2rem 1rem;
+  }
+
+  .celebration h2 {
+    font-size: 2rem;
+  }
+
+  .completion-message {
+    font-size: 1rem;
+  }
+
+  .reward-item {
+    font-size: 1rem;
+  }
+
+  .reward-icon {
+    font-size: 1.5rem;
+  }
+
+  .project-piece-icon {
+    font-size: 3rem;
+  }
+
+  .completion-buttons {
+    width: 100%;
   }
 }
 
@@ -1009,10 +1217,12 @@ select:focus-visible,
   top: 20px;
   left: 50%;
   transform: translateX(-50%) translateY(-150px);
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background:
+    linear-gradient(135deg, rgb(255, 255, 255, 0.18) 0%, rgb(255, 255, 255, 0) 100%),
+    var(--theme-ink);
   color: white;
-  padding: 20px 30px;
-  border-radius: 20px;
+  padding: var(--ng-space-xl) var(--ng-space-2xl);
+  border-radius: var(--ng-radius);
   box-shadow: 0 10px 40px rgb(0, 0, 0, 0.4);
   z-index: 10001;
   transition:
@@ -1049,11 +1259,11 @@ select:focus-visible,
 .castle-notification-content {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: var(--ng-space-lg);
 }
 
 .castle-notification-icon {
-  font-size: 48px;
+  font-size: var(--ng-icon-md);
   animation: notification-spin 1s ease;
 }
 
@@ -1074,16 +1284,16 @@ select:focus-visible,
 .castle-notification-text {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: var(--ng-space-xs);
 }
 
 .castle-notification-text strong {
-  font-size: 20px;
+  font-size: var(--ng-text-md);
   font-weight: bold;
 }
 
 .castle-notification-text span {
-  font-size: 16px;
+  font-size: var(--ng-text-base);
   opacity: 0.9;
 }
 
@@ -1091,13 +1301,13 @@ select:focus-visible,
 #level-complete-screen {
   padding: 2rem 1rem;
   text-align: center;
-  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+  background: linear-gradient(135deg, var(--ng-warm-from) 0%, var(--ng-warm-to) 100%);
 }
 
 .celebration {
   background: white;
   border: 3px solid var(--theme-primary);
-  border-radius: 20px;
+  border-radius: var(--ng-radius);
   padding: 3rem 2rem;
   box-shadow: 0 8px 24px rgb(0, 0, 0, 0.2);
   max-width: 600px;
@@ -1122,7 +1332,7 @@ select:focus-visible,
 }
 
 .celebration h2 {
-  color: var(--theme-primary);
+  color: var(--theme-ink);
   font-size: 2.5rem;
   margin-bottom: 1.5rem;
   text-shadow: 2px 2px 4px rgb(0, 0, 0, 0.1);
@@ -1130,7 +1340,7 @@ select:focus-visible,
 
 .completion-message {
   font-size: 1.2rem;
-  color: #666;
+  color: var(--ng-ink-muted);
   margin: 1.5rem 0;
   font-weight: 600;
 }
@@ -1141,8 +1351,8 @@ select:focus-visible,
   gap: 1rem;
   margin: 2rem 0;
   padding: 1.5rem;
-  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-  border-radius: 15px;
+  background: linear-gradient(135deg, var(--ng-card-from) 0%, var(--ng-card-to) 100%);
+  border-radius: var(--ng-radius-sm);
 }
 
 .reward-item {
@@ -1152,7 +1362,7 @@ select:focus-visible,
   gap: 1rem;
   font-size: 1.2rem;
   font-weight: 600;
-  color: var(--theme-primary);
+  color: var(--theme-ink);
 }
 
 .reward-icon {
@@ -1166,8 +1376,10 @@ select:focus-visible,
 .project-progress-container {
   margin: 2rem 0;
   padding: 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 15px;
+  background:
+    linear-gradient(135deg, rgb(255, 255, 255, 0.18) 0%, rgb(255, 255, 255, 0) 100%),
+    var(--theme-ink);
+  border-radius: var(--ng-radius-sm);
   color: white;
   animation: pop-in 0.5s ease-out;
 }
@@ -1210,35 +1422,4 @@ select:focus-visible,
   gap: 1rem;
   max-width: 400px;
   margin: 2rem auto 0;
-}
-
-/* Responsive adjustments for level complete screen */
-@media (width <= 768px) {
-  .celebration {
-    padding: 2rem 1rem;
-  }
-
-  .celebration h2 {
-    font-size: 2rem;
-  }
-
-  .completion-message {
-    font-size: 1rem;
-  }
-
-  .reward-item {
-    font-size: 1rem;
-  }
-
-  .reward-icon {
-    font-size: 1.5rem;
-  }
-
-  .project-piece-icon {
-    font-size: 3rem;
-  }
-
-  .completion-buttons {
-    width: 100%;
-  }
 }

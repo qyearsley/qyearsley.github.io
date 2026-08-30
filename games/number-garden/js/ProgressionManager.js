@@ -3,12 +3,27 @@
  */
 export class ProgressionManager {
   constructor() {
-    /** @type {Object} */
+    /**
+     * Per-area theme data.
+     *
+     * `primaryColor` and `accentColor` are the decorative identity of an area
+     * (backgrounds, borders, glows). `inkColor` is the text-safe variant of
+     * `primaryColor`: headings are drawn with it, and the two gold/orange
+     * primaries (`time-temple` at 2.42:1 and `measurement-market` at 2.85:1
+     * against white) are far too light to read as text. Rather than darkening
+     * the identity colours, `inkColor` carries a darkened value that clears
+     * WCAG AA 4.5:1 while `primaryColor` stays bright for decoration. The four
+     * primaries that already pass repeat their value here on purpose -- do not
+     * collapse `inkColor` back into `primaryColor`.
+     *
+     * @type {Object}
+     */
     this.areaThemes = {
       "flower-meadow": {
         progressionType: "color",
         primaryColor: "#764ba2",
         accentColor: "#667eea",
+        inkColor: "#764ba2",
         stages: [
           {
             percent: 0,
@@ -52,6 +67,7 @@ export class ProgressionManager {
         progressionType: "glow",
         primaryColor: "#6a5acd",
         accentColor: "#9370db",
+        inkColor: "#6a5acd",
         stages: [
           {
             percent: 0,
@@ -95,6 +111,7 @@ export class ProgressionManager {
         progressionType: "depth",
         primaryColor: "#4a6b3a",
         accentColor: "#7a9b5f",
+        inkColor: "#4a6b3a",
         stages: [
           {
             percent: 0,
@@ -138,6 +155,8 @@ export class ProgressionManager {
         progressionType: "light",
         primaryColor: "#c9a227",
         accentColor: "#f4d03f",
+        // Darkened gold: 4.61:1 on white, where #c9a227 is only 2.42:1.
+        inkColor: "#8d721b",
         stages: [
           {
             percent: 0,
@@ -181,6 +200,8 @@ export class ProgressionManager {
         progressionType: "organized",
         primaryColor: "#e67e22",
         accentColor: "#f39c12",
+        // Darkened orange: 4.60:1 on white, where #e67e22 is only 2.85:1.
+        inkColor: "#b35f14",
         stages: [
           {
             percent: 0,
@@ -224,6 +245,7 @@ export class ProgressionManager {
         progressionType: "reveal",
         primaryColor: "#9b59b6",
         accentColor: "#c27ba0",
+        inkColor: "#9b59b6",
         stages: [
           {
             percent: 0,

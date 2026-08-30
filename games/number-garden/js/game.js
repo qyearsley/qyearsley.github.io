@@ -8,7 +8,7 @@ import { RewardSystem } from "./rewards.js"
 import { ActivityGenerator } from "./activities.js"
 import { SoundManager } from "./SoundManager.js"
 import { ProjectVisuals } from "./ProjectVisuals.js"
-import { TIMING, AREAS, AREA_NAMES } from "./constants.js"
+import { TIMING, AREAS, AREA_NAMES, DEFAULTS } from "./constants.js"
 
 /**
  * Main game controller for Number Garden
@@ -258,10 +258,7 @@ class NumberGarden {
   enterArea(areaId) {
     this.state.enterArea(areaId)
     this.showScreen("activity-screen")
-    this.ui.updateProgressBar(
-      this.state.stats.currentLevelProgress,
-      this.state.settings.questionsPerLevel,
-    )
+    this.ui.updateProgressBar(this.state.stats.currentLevelProgress, DEFAULTS.QUESTIONS_PER_LEVEL)
     this.generateActivity()
     this.ui.renderGarden(this.state.garden)
   }
@@ -349,10 +346,7 @@ class NumberGarden {
    */
   updateAllDisplays() {
     this.ui.updateStats(this.state.stats)
-    this.ui.updateProgressBar(
-      this.state.stats.currentLevelProgress,
-      this.state.settings.questionsPerLevel,
-    )
+    this.ui.updateProgressBar(this.state.stats.currentLevelProgress, DEFAULTS.QUESTIONS_PER_LEVEL)
     this.ui.updateVisualProgression(
       this.state.currentArea,
       this.progression.getAreaThemes(),
@@ -368,7 +362,9 @@ class NumberGarden {
   showLevelComplete() {
     const wasAreaJustCompleted =
       this.state.currentArea && !this.state.completedAreas.has(this.state.currentArea)
-    const questionsCompleted = this.state.settings.questionsPerLevel
+    // One correct answer earns one star and one flower, and a level is
+    // QUESTIONS_PER_LEVEL correct answers -- so the level total is the reward count.
+    const questionsCompleted = DEFAULTS.QUESTIONS_PER_LEVEL
 
     this.state.completeLevel()
 

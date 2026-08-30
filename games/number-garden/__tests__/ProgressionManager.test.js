@@ -68,6 +68,63 @@ describe("ProgressionManager", () => {
     })
   })
 
+  describe("theme colors", () => {
+    // WCAG relative luminance, then the contrast ratio against white
+    // (luminance 1.0). Kept local to the test so a colour tweak that makes
+    // heading text unreadable fails here instead of shipping.
+    const relativeLuminance = (hex) => {
+      const channels = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+      const [r, g, b] = channels.map((c) =>
+        c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4),
+      )
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b
+    }
+    const contrastOnWhite = (hex) => 1.05 / (relativeLuminance(hex) + 0.05)
+
+    test("relative luminance helper matches known reference values", () => {
+      // Sanity check on the helper itself: pure black is 21:1 on white, and
+      // white is 1:1.
+      expect(contrastOnWhite("#000000")).toBeCloseTo(21, 1)
+      expect(contrastOnWhite("#ffffff")).toBeCloseTo(1, 2)
+    })
+
+    test("every area theme defines primary, accent, and ink colors", () => {
+      const themes = Object.values(progression.getAreaThemes())
+      expect(themes).toHaveLength(6)
+
+      themes.forEach((theme) => {
+        expect(theme.primaryColor).toMatch(/^#[0-9a-f]{6}$/i)
+        expect(theme.accentColor).toMatch(/^#[0-9a-f]{6}$/i)
+        expect(theme.inkColor).toMatch(/^#[0-9a-f]{6}$/i)
+      })
+    })
+
+    // inkColor is used for heading text on the light page background, so it has
+    // to clear WCAG AA for normal text. primaryColor is decorative and is
+    // deliberately not held to this bar.
+    test("every inkColor clears 4.5:1 against white", () => {
+      // Collect failures so the message names the offending area and its ratio.
+      const tooLight = Object.entries(progression.getAreaThemes())
+        .map(([areaId, theme]) => [areaId, contrastOnWhite(theme.inkColor)])
+        .filter(([, ratio]) => ratio < 4.5)
+        .map(([areaId, ratio]) => `${areaId}: ${ratio.toFixed(2)}:1`)
+
+      expect(tooLight).toEqual([])
+    })
+
+    test("the two light primaries have darker ink variants", () => {
+      const gold = progression.getTheme("time-temple")
+      const orange = progression.getTheme("measurement-market")
+
+      expect(gold.inkColor).not.toBe(gold.primaryColor)
+      expect(orange.inkColor).not.toBe(orange.primaryColor)
+      expect(contrastOnWhite(gold.primaryColor)).toBeLessThan(4.5)
+      expect(contrastOnWhite(orange.primaryColor)).toBeLessThan(4.5)
+      expect(contrastOnWhite(gold.inkColor)).toBeCloseTo(4.61, 2)
+      expect(contrastOnWhite(orange.inkColor)).toBeCloseTo(4.6, 2)
+    })
+  })
+
   describe("theme stages", () => {
     test("stages are ordered by percent", () => {
       const theme = progression.getTheme("flower-meadow")

@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeEach, jest } from "@jest/globals"
 import { GameUI } from "../js/GameUI.js"
+import { DEFAULTS } from "../js/constants.js"
 
 describe("GameUI", () => {
   let gameUI
@@ -32,7 +33,6 @@ describe("GameUI", () => {
       <select id="difficulty-select"></select>
       <select id="input-mode-select"></select>
       <select id="visual-hints-select"></select>
-      <select id="questions-per-level-select"></select>
       <select id="sound-effects-select"></select>
       <button id="castle-back-button"></button>
       <div id="castle-screen-title"></div>
@@ -556,6 +556,43 @@ describe("GameUI", () => {
       expect(progressBar.style.width).toBe("50%")
       expect(progressText.textContent).toBe("5/10")
     })
+
+    // Regression: game.js read `settings.questionsPerLevel`, a setting that was
+    // never defined, so every caller passed undefined. That rendered
+    // "3/undefined" as the text and "NaN%" as the width -- an invalid CSS value,
+    // so the bar never moved for the whole level.
+    test("falls back to a full level when total is omitted", () => {
+      gameUI.updateProgressBar(3)
+
+      const progressBar = document.getElementById("progress-bar")
+      const progressText = document.getElementById("progress-text")
+
+      expect(progressText.textContent).toBe(`3/${DEFAULTS.QUESTIONS_PER_LEVEL}`)
+      expect(progressText.textContent).not.toContain("undefined")
+      expect(progressBar.style.width).not.toContain("NaN")
+      expect(progressBar.style.width).toBe("60%")
+    })
+
+    // The base class writes only the width and the text, so without the
+    // override a screen reader reads the markup's aria-valuenow ("0") for the
+    // whole level no matter how far the bar has moved.
+    test("keeps aria attributes in sync with the visible progress", () => {
+      gameUI.updateProgressBar(2, 5)
+
+      const progressBar = document.getElementById("progress-bar")
+      expect(progressBar.getAttribute("aria-valuenow")).toBe("2")
+      expect(progressBar.getAttribute("aria-valuemax")).toBe("5")
+    })
+
+    test("aria-valuenow tracks current across successive calls", () => {
+      const progressBar = document.getElementById("progress-bar")
+
+      for (let current = 0; current <= DEFAULTS.QUESTIONS_PER_LEVEL; current++) {
+        gameUI.updateProgressBar(current)
+        expect(progressBar.getAttribute("aria-valuenow")).toBe(String(current))
+        expect(progressBar.getAttribute("aria-valuemax")).toBe(String(DEFAULTS.QUESTIONS_PER_LEVEL))
+      }
+    })
   })
 
   describe("updateVisualProgression", () => {
@@ -563,6 +600,7 @@ describe("GameUI", () => {
       forest: {
         primaryColor: "#228B22",
         accentColor: "#8FBC8F",
+        inkColor: "#14611E",
         decorations: ["🌳", "🌲", "🍄"],
         stages: [
           { percent: 0, background: "#f0f0f0" },
@@ -584,6 +622,17 @@ describe("GameUI", () => {
       const root = document.documentElement
       expect(root.style.getPropertyValue("--theme-primary")).toBe("#228B22")
       expect(root.style.getPropertyValue("--theme-accent")).toBe("#8FBC8F")
+      expect(root.style.getPropertyValue("--theme-ink")).toBe("#14611E")
+    })
+
+    // A theme without an inkColor must still produce a usable colour: setting
+    // the literal "undefined" would break every rule reading --theme-ink.
+    test("falls back to the primary color when a theme has no inkColor", () => {
+      const themes = { forest: { ...mockThemes.forest, inkColor: undefined } }
+
+      gameUI.updateVisualProgression("forest", themes, 0)
+
+      expect(document.documentElement.style.getPropertyValue("--theme-ink")).toBe("#228B22")
     })
 
     test("handles missing theme gracefully", () => {
