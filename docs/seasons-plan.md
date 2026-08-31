@@ -136,6 +136,3 @@ Honest limitations rather than things to fix soon.
 - **Two ceilings are conventions, not tests.** Two-digit multiplication stays
   within a product of 100, and addition and subtraction within a few hundred.
   Nothing enforces either; a retune could quietly cross both.
-- **`npm test -- --testPathPatterns seasons` also collects a stale copy** under
-  `.claude/worktrees/`. `npx jest --roots="<rootDir>/games/seasons"` is the
-  precise form.

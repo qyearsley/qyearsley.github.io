@@ -74,7 +74,8 @@
     ],
     "testPathIgnorePatterns": [
       "/node_modules/",
-      "/dist/"
+      "/dist/",
+      "/.claude/"
     ],
     "silent": true,
     "collectCoverageFrom": [
