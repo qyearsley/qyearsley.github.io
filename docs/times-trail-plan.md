@@ -402,10 +402,18 @@ decomposition is exact -- 36 facts, no gaps:
 - **Unaffected:** the 8x8 fact map and the 36-card collection stay as the global
   completion view. Trails become routes through the set; the collection is the
   total.
-- **Noticed while working this out:** `PATTERN_FREE_IDS` claims to be what is
-  left after doubles, fives, the x9 trick and squares are removed, but it lists
-  6x6 and 7x7, which are squares, and omits 3x4 and 3x6. The genuine leftover set
-  is the ten in the table above. Either the name or the list is wrong.
+- **Noticed while working this out, and since fixed (2026-08-31):**
+  `PATTERN_FREE_IDS` claimed to be what is left after doubles, fives, the x9
+  trick and squares are removed, but it listed 6x6 and 7x7, which are squares,
+  and omitted 3x4 and 3x6. The list now matches the table above, and
+  `constants.test.js` re-derives the set from that definition instead of
+  restating it, so the two cannot drift apart again. No behaviour changed:
+  `isTough` is still read by nothing outside the tests, and Phase 2 boss stops
+  are its only intended consumer. One Journey test did have to change — it
+  asserted every tough fact sits in a region of table 6 or higher, which stops
+  being true once 3x4 is in the set, since a region owns the facts whose larger
+  operand is its table. That outlier is now asserted by name, as evidence for
+  this section.
 
 ### Centre the play area in landscape -- **done**
 

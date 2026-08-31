@@ -263,17 +263,22 @@ export const REGIONS = Object.freeze([
  * square shortcuts are taken away, so they have to be recalled rather than
  * derived. Ten of them, not twelve -- the name says what the list is, not how
  * long it happens to be. Boss stops (Phase 2) draw only from this pool.
+ *
+ * That definition derives the list exactly -- drop every canonical fact
+ * containing a 2, 5 or 9, then drop the squares, and these ten remain.
+ * `constants.test.js` re-derives it rather than restating it, so the list and
+ * this comment cannot drift apart again.
  */
 export const PATTERN_FREE_IDS = Object.freeze([
+  "3x4",
+  "3x6",
   "3x7",
   "3x8",
   "4x6",
   "4x7",
   "4x8",
-  "6x6",
   "6x7",
   "6x8",
-  "7x7",
   "7x8",
 ])
 

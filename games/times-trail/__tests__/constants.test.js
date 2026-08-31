@@ -494,6 +494,24 @@ describe("PATTERN_FREE_IDS", () => {
       }
     })
   })
+
+  describe("matches its own definition", () => {
+    // The doc comment defines the list as a derivation, not as a list. Deriving
+    // it here rather than restating the ten ids is what stops the two drifting:
+    // the previous list said it excluded squares and then included 6x6 and 7x7.
+    test("is exactly the canonical facts left after doubles, fives, nines and squares", () => {
+      const SHORTCUT_OPERANDS = new Set([2, 5, 9])
+      const derived = []
+      for (let a = OPERAND_MIN; a <= OPERAND_MAX; a++) {
+        for (let b = a; b <= OPERAND_MAX; b++) {
+          if (a === b) continue // squares
+          if (SHORTCUT_OPERANDS.has(a) || SHORTCUT_OPERANDS.has(b)) continue
+          derived.push(`${a}x${b}`)
+        }
+      }
+      expect([...PATTERN_FREE_IDS].sort()).toEqual(derived.sort())
+    })
+  })
 })
 
 describe("STARS", () => {

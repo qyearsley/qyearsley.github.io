@@ -219,11 +219,23 @@ describe("Journey", () => {
       expect(journey.regionForFactId("nope")).toBeNull()
     })
 
-    test("every tough-dozen fact lives in a region of table 6 or higher", () => {
+    test("every pattern-free fact resolves to a region", () => {
       const journey = fullJourney()
       for (const id of PATTERN_FREE_IDS) {
-        expect(journey.regionForFactId(id).table).toBeGreaterThanOrEqual(6)
+        expect(journey.regionForFactId(id)).not.toBeNull()
       }
+    })
+
+    // A region owns the facts whose LARGER operand is its table, so the
+    // pattern-free set lands late -- except 3x4, whose larger operand is 4.
+    // Asserted by name rather than loosening the bound to 4, because the
+    // outlier is the interesting part: the hardest facts are not all far
+    // along the trail, which is one of the things the themed-trails proposal
+    // in docs/times-trail-plan.md is meant to address.
+    test("all of them sit in a region of table 6 or higher, except 3x4", () => {
+      const journey = fullJourney()
+      const early = PATTERN_FREE_IDS.filter((id) => journey.regionForFactId(id).table < 6)
+      expect(early).toEqual(["3x4"])
     })
 
     test("createTrail is space 0 with no lap fields", () => {
