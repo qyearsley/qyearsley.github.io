@@ -361,6 +361,9 @@ There is no strings file; copy sits beside the code that shows it.
 | The count sentence, wilt note, perk note, trail label                    | `renderHud` and `_describeTrail` in `js/GameUI.js`                        |
 | The question label — "Glowing challenge", and the boss's worth and tries | `_questionTag` in `js/game.js`                                            |
 | Summary-row labels on the result screen                                  | `renderResult` in `js/GameUI.js`                                          |
+| The jar caption on the result screen — "11 roses into her jar"           | `_renderHaul` in `js/GameUI.js`                                           |
+| The "Your journey" panel and its lifetime-totals sentence                | `renderJourneySoFar` in `js/GameUI.js`                                    |
+| The top-bar season title — "Autumn — 3 of 4"                             | `_seasonTitle` in `js/GameUI.js`                                          |
 | Headings, the intro paragraph, top-bar titles                            | `index.html`                                                              |
 
 Two suites pin copy, and both are meant to be updated with it: `game.test.js`

@@ -50,6 +50,12 @@
   --sn-tap: 64px;
   --sn-radius: 14px;
 
+  /* One item slot in the demand bar. A variable rather than a literal because
+     the short-viewport rule below shrinks it: winter asks for seventeen, and
+     seventeen slots at the full size cost the play area a row it cannot always
+     spare. */
+  --sn-pip: 26px;
+
   /* Overwritten by GameUI.applyPalette; these are the pre-season defaults. */
   --season-sky: #dff3e4;
   --season-far: #a8d5ba;
@@ -309,6 +315,66 @@ body {
   color: var(--sn-ink-muted);
 }
 
+/* ==================== The journey so far ====================
+   Under the character cards, so choosing an animal stays the first thing on the
+   screen. Everything here is read off the save: which seasons are open, and the
+   counters that carry across runs. */
+.journey-so-far {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--sn-border);
+}
+
+.journey-heading {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--sn-ink-muted);
+}
+
+.journey-seasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 0;
+  list-style: none;
+}
+
+/* Locked is the resting state and open is the marked one, so an unfinished
+   journey reads as a row with progress in it rather than one with gaps. */
+.journey-season {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 14px;
+  font-size: 0.95rem;
+  color: var(--sn-ink-muted);
+  background: var(--sn-surface-alt);
+  border: 1px solid var(--sn-border);
+  border-radius: 999px;
+}
+
+.journey-season.is-open {
+  font-weight: 700;
+  color: var(--sn-primary-ink);
+  background: var(--sn-primary);
+  border-color: var(--sn-primary);
+}
+
+/* The number is the part that says "of four" without spelling it out, so it
+   stays legible on both the open and the locked chip. */
+.journey-ordinal {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.75;
+}
+
+.journey-totals {
+  margin-top: 14px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--sn-ink-muted);
+}
+
 /* ==================== The demand bar ==================== */
 .demand-bar {
   display: flex;
@@ -357,14 +423,14 @@ body {
 .item-track {
   display: flex;
   flex-wrap: wrap;
-  gap: 3px;
+  gap: 5px;
   margin-top: 6px;
 }
 
 .item-pip {
   display: block;
-  width: 19px;
-  height: 19px;
+  width: var(--sn-pip);
+  height: var(--sn-pip);
   border: 2px dashed var(--sn-border);
   border-radius: 50%;
 }
@@ -642,6 +708,77 @@ body.is-glowing-question .question-prompt {
   text-align: center;
 }
 
+/* The haul, drawn as a jar with the season's collectibles counted into it. The
+   jar is CSS and the items come from the art pack, so replacing the art changes
+   what is inside without touching the container. */
+.result-haul {
+  margin: 0 auto 20px;
+}
+
+.haul-jar {
+  display: flex;
+  align-items: flex-end;
+  width: 190px;
+  min-height: 132px;
+  margin: 0 auto;
+  padding: 12px 12px 14px;
+  background: color-mix(in srgb, var(--season-sky) 55%, var(--sn-surface));
+  border: 3px solid var(--sn-border);
+
+  /* Narrow shoulders, wide base: the silhouette is what makes it read as a jar
+     rather than a box, since nothing here draws a lid. */
+  border-radius: 14px 14px 30px 30px / 10px 10px 34px 34px;
+}
+
+.haul-contents {
+  display: flex;
+  flex-wrap: wrap-reverse;
+  gap: 4px;
+  place-content: flex-start center;
+  width: 100%;
+}
+
+.haul-item {
+  display: block;
+  width: 22px;
+  height: 22px;
+
+  /* Dropped in one after another, so the pile reads as being counted rather
+     than as having always been there. `backwards` holds each item hidden until
+     its turn. */
+  animation: haul-drop 260ms ease-out backwards;
+  animation-delay: calc(var(--haul-index, 0) * 55ms);
+}
+
+@keyframes haul-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.7);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The global reduced-motion rule collapses the duration but not the delay, so
+   without this the items would still appear one at a time, just instantly --
+   which is the staggered effect it was meant to switch off. */
+@media (prefers-reduced-motion: reduce) {
+  .haul-item {
+    animation-delay: 0ms !important;
+  }
+}
+
+.haul-caption {
+  margin-top: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--sn-ink-muted);
+  text-align: center;
+}
+
 .result-summary {
   max-width: 420px;
   margin: 0 auto 24px;
@@ -709,6 +846,12 @@ body.is-glowing-question .question-prompt {
   .demand-bar,
   .question-block {
     padding: 10px 16px;
+  }
+
+  /* Seventeen slots at 26px wrap to a third row here and push the keypad off a
+     short iPad. Smaller still beats the old 19px, which read as a dotted line. */
+  :root {
+    --sn-pip: 22px;
   }
 
   .question-prompt {

@@ -191,6 +191,18 @@ function expectLayout(plan) {
   }
 }
 
+/**
+ * A colour's rough lightness, 0..1, for comparing two palettes against each
+ * other. Not a WCAG luminance -- it skips the gamma step, which is fine for
+ * "which of these four is the lightest" and would be wrong for a contrast claim.
+ * @param {string} hex - A six-digit hex colour
+ * @returns {number} Its lightness
+ */
+function lightness(hex) {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b
+}
+
 describe("svg", () => {
   it("creates elements in the SVG namespace, not the HTML one", () => {
     const circle = svg("circle")
@@ -598,6 +610,54 @@ describe("the placeholder pack fulfils the art-pack contract", () => {
         expectDrawing(drawing)
         expect(parseViewBox(drawing.viewBox)[2]).toBe(plan.width)
       },
+    )
+  })
+})
+
+// Placeholder-specific, and deliberately outside the contract block above: a
+// replacement pack is free to draw winter however it likes. What is pinned here
+// is this pack's answer to "winter is the least distinctive season despite being
+// the climax" -- snow underfoot, snow on everything standing in it, and a sky
+// with some value in it -- so a later palette tidy-up cannot quietly undo it.
+describe("the placeholder pack's winter", () => {
+  const others = SEASON_ORDER.filter((seasonId) => seasonId !== "winter")
+
+  it("lays the lightest ground of the four under the darkest sky", () => {
+    const ground = (seasonId) => lightness(placeholder.palette(seasonId)["--season-ground"])
+    const sky = (seasonId) => lightness(placeholder.palette(seasonId)["--season-sky"])
+    for (const seasonId of others) {
+      expect(ground("winter")).toBeGreaterThan(ground(seasonId))
+      expect(sky("winter")).toBeLessThan(sky(seasonId))
+    }
+    // And far enough apart that the trail is not one flat wash. Winter used to
+    // be pale sky over pale ground, which is the whole thing this replaced.
+    expect(ground("winter") - sky("winter")).toBeGreaterThan(0.2)
+  })
+
+  it("puts snow on every obstacle, over the silhouette the seasons share", () => {
+    for (const kind of OBSTACLE_KINDS) {
+      const winter = placeholder.obstacle(kind, "winter").element
+      // Shape count, not markup: recolouring alone already makes the two differ,
+      // so only the extra layer can tell a snowy obstacle from a bare one.
+      for (const seasonId of others) {
+        const bare = placeholder.obstacle(kind, seasonId).element
+        expect(winter.childElementCount).toBeGreaterThan(bare.childElementCount)
+      }
+    }
+  })
+
+  it("snows on an unknown kind too, which is drawn as a hill", () => {
+    expect(placeholder.obstacle("nope", "winter").element.outerHTML).toBe(
+      placeholder.obstacle("hill", "winter").element.outerHTML,
+    )
+  })
+
+  it("falls snow through its backdrop and no other season's", () => {
+    const shapes = (seasonId) => placeholder.backdrop(seasonId, 3000).element.childElementCount
+    for (const seasonId of others) expect(shapes("winter")).toBeGreaterThan(shapes(seasonId))
+    // Deterministic, or the trail would flicker every time the scene is rebuilt.
+    expect(markup(placeholder.backdrop("winter", 3000))).toBe(
+      markup(placeholder.backdrop("winter", 3000)),
     )
   })
 })

@@ -103,24 +103,54 @@ const PALETTES = {
     "--season-glow": "#ffd98a",
     "--season-ink": "#43281a",
   },
+  // The climax, and the one season that is not built like the other three.
+  // Winter used to be the palest palette here -- a near-white sky over
+  // near-white hills over near-white ground -- which read as washed out rather
+  // than as the last season. It is built on *value* now instead of hue: the only
+  // saturated sky in the game, ridges darker than the sky, and snow-white ground
+  // under everything. That gives the trail three separated bands even to an eye
+  // that cannot tell the blues apart, which is the same bet the rest of the
+  // game's contrast work makes. Every material is a dark tone for the same
+  // reason: each has to silhouette against the sky above it and against the snow
+  // below it, and a pale material would have managed neither.
   winter: {
-    "--season-sky": "#e7eff7",
-    "--season-far": "#b8cbdd",
-    "--season-ground": "#8fa6bd",
-    "--season-accent": "#4f6f96",
-    "--season-accent-text": "#4f6f96",
-    "--season-accent-text-dark": "#7794b7",
-    "--season-water": "#5b86a8",
-    "--season-rock": "#5f6d7d",
-    "--season-leaf": "#4f6f68",
-    "--season-earth": "#7890a8",
-    "--season-trunk": "#48535e",
-    // Warm rather than white. A white glow on winter's near-white sky was
-    // invisible, in the one season Ella called the hardest.
+    "--season-sky": "#6f9dcc",
+    "--season-far": "#55779f",
+    "--season-ground": "#dfeaf7",
+    "--season-accent": "#3b6ea8",
+    "--season-accent-text": "#2f5f95",
+    "--season-accent-text-dark": "#8fb0d6",
+    "--season-water": "#3f7ba6",
+    "--season-rock": "#4f5f70",
+    "--season-leaf": "#2f5850",
+    "--season-earth": "#6d87a3",
+    "--season-trunk": "#3a444f",
+    // Warm rather than white, still. A white glow on winter's old near-white sky
+    // was invisible, in the one season Ella called the hardest; on the snow and
+    // the falling flakes a white one would be lost all over again. Warm is the
+    // only thing that survives either sky.
     "--season-glow": "#ffd27a",
-    "--season-ink": "#22303f",
+    "--season-ink": "#16283a",
   },
 }
+
+/**
+ * Seasons whose ground and obstacles are under snow.
+ *
+ * A set here rather than a palette entry, because "is there snow here" is a fact
+ * about the season and not a colour -- every season has to define the same
+ * palette keys, and there is no sensible value for spring's snow.
+ * @private
+ */
+const SNOWY = new Set(["winter"])
+
+/**
+ * What snow is painted in. Brighter than the snow already lying on the ground,
+ * which the palette above tints blue, so a drift on an obstacle and a flake in
+ * the air both read as a fresher fall than the trail underfoot.
+ * @private
+ */
+const SNOW = "#fff"
 
 /**
  * Used when an id is unknown, so missing art is visible but harmless.
@@ -363,9 +393,10 @@ const ITEMS = {
     }),
   ],
   winter: (rare) => [
-    // Winter's palette is the palest of the four, and an icicle drawn in ice
-    // colours vanishes into it. The saturated cap and the shaded facet are what
-    // give it an edge without relying on a stroke.
+    // An icicle drawn in ice colours vanishes into the white card it sits on --
+    // the item pips are on the game's chrome, not on the season's sky, so the
+    // deepened winter palette does not help here. The saturated cap and the
+    // shaded facet are what give it an edge without relying on a stroke.
     svg("rect", { x: 30, y: 4, width: 40, height: 8, rx: 3, fill: rare ? "#7fc9e8" : "#4f9ec4" }),
     svg("path", { d: "M34 10 L66 10 L55 60 L50 94 L45 60 Z", fill: rare ? "#d8f4ff" : "#8fd4ee" }),
     svg("path", { d: "M34 10 L50 10 L48 58 L45 60 Z", fill: "#4f9ec4", "fill-opacity": 0.45 }),
@@ -562,6 +593,93 @@ const OBSTACLE_ART = {
 }
 
 /**
+ * The snow lying on each obstacle, keyed by the same kinds as OBSTACLE_ART and
+ * drawn over the top of it in the seasons `SNOWY` names.
+ *
+ * A separate map rather than a branch inside each drawing above, so a kind is
+ * still one silhouette that recolours for all four seasons and winter is an
+ * extra layer rather than a second version of every shape.
+ *
+ * Every path here is written against the silhouette it settles on and stays
+ * inside it -- mostly by reusing that silhouette's own vertices, the same trick
+ * the hill's shaded face uses. Snow that overshot the outline would read as a
+ * white smear floating beside the obstacle rather than as lying on it.
+ * @private
+ */
+const SNOW_ART = {
+  hill: (snow) => [
+    // The dome's whole outline, closed with a wavy line back to its own base
+    // corners: a drift over the crown that thins to nothing where the hill meets
+    // the ground. The line has to stay low near the corners, because that is
+    // where the dome climbs fastest and snow drawn any higher would leave it.
+    svg("path", {
+      d: "M-118 2 C-84 -44 -44 -62 0 -62 C46 -62 88 -42 118 2 Q98 -24 62 -26 Q26 -12 0 -26 Q-30 -40 -62 -26 Q-96 -12 -118 2 Z",
+      fill: snow,
+    }),
+  ],
+
+  mountain: (snow) => [
+    // A snowfield on each peak, hung from the summit and down both ridges, with
+    // a jagged lower edge where the snowline runs out. Both start and end on the
+    // ridge points themselves, so the field can only ever be inside the rock.
+    svg("path", {
+      d: "M-40 -120 L-78 -65 L-70 -70 L-62 -62 L-52 -76 L-42 -68 L-32 -82 L-24 -76 L-16 -95 Z",
+      fill: snow,
+    }),
+    svg("path", {
+      d: "M44 -108 L20 -91 L28 -84 L38 -92 L48 -78 L58 -84 L68 -70 L78 -64 Z",
+      fill: snow,
+    }),
+  ],
+
+  river: (snow) => [
+    // Ice growing out from both banks along the water's own edge, and a cap on
+    // each stepping stone -- the crossing animation lands on those twice, so
+    // they are the part of a frozen river worth drawing.
+    svg("path", {
+      d: "M-106 -4 C-86 15 -67 28 -49 37 C-64 22 -78 8 -92 -4 Z",
+      fill: snow,
+      "fill-opacity": 0.85,
+    }),
+    svg("path", {
+      d: "M106 -4 C88 14 70 27 52 37 C66 23 80 9 92 -4 Z",
+      fill: snow,
+      "fill-opacity": 0.85,
+    }),
+    svg("ellipse", { cx: -42, cy: 3, rx: 15, ry: 4, fill: snow }),
+    svg("ellipse", { cx: 42, cy: 3, rx: 15, ry: 4, fill: snow }),
+  ],
+
+  boulder: (snow) => [
+    // The three top vertices of the boulder, closed with a ragged line across
+    // its face: a cap thick enough to read at trail scale.
+    svg("path", { d: "M-46 -50 L-6 -78 L38 -62 L30 -50 L2 -62 L-16 -52 L-34 -40 Z", fill: snow }),
+  ],
+
+  thicket: (snow) => [
+    // One cap per crown, each arc drawn at that crown's own radius so it follows
+    // the shrub instead of sitting on it as a separate lump.
+    svg("path", {
+      d: "M-105 -74 A30 30 0 0 1 -56 -76 Q-68 -64 -80 -70 Q-92 -76 -105 -74 Z",
+      fill: snow,
+    }),
+    svg("path", {
+      d: "M-38 -105 A40 40 0 0 1 28 -110 Q12 -94 -6 -102 Q-22 -110 -38 -105 Z",
+      fill: snow,
+    }),
+    svg("path", { d: "M55 -70 A28 28 0 0 1 100 -71 Q88 -60 76 -66 Q64 -72 55 -70 Z", fill: snow }),
+  ],
+
+  gap: (snow) => [
+    // Snow on the two rock lips, which is the only part of a hole in the ground
+    // that any can settle on. It also brightens the rim, so the void reads even
+    // harder against it.
+    svg("path", { d: "M-74 -4 L-58 -4 L-57 3 L-66 7 L-75 4 Z", fill: snow }),
+    svg("path", { d: "M74 -4 L58 -4 L57 3 L66 7 L75 4 Z", fill: snow }),
+  ],
+}
+
+/**
  * Draw the obstacle standing at a space.
  *
  * Returned in trail coordinates with its base at the origin, so `layout`'s
@@ -591,8 +709,13 @@ export function obstacle(kind, seasonId) {
   // separation, but a season whose ground happens to sit close to a material
   // would still flatten out; the edge guarantees the shape reads regardless.
   const edge = { stroke: c.ink, "stroke-opacity": 0.3, "stroke-width": 2.5 }
-  const draw = Object.hasOwn(OBSTACLE_ART, kind) ? OBSTACLE_ART[kind] : OBSTACLE_ART.hill
-  return { element: svg("g", {}, draw(c, edge)), viewBox: "-124 -200 248 208" }
+  const drawn = Object.hasOwn(OBSTACLE_ART, kind) ? kind : "hill"
+  const shapes = OBSTACLE_ART[drawn](c, edge)
+  // Snow last, because it lies on top of everything it has fallen on. The
+  // resolved kind, not the argument: an unknown kind draws a hill, and it should
+  // be a hill with snow on it rather than a bare one.
+  if (SNOWY.has(seasonId) && Object.hasOwn(SNOW_ART, drawn)) shapes.push(...SNOW_ART[drawn](SNOW))
+  return { element: svg("g", {}, shapes), viewBox: "-124 -200 248 208" }
 }
 
 /* ==================== Trail geometry ==================== */
@@ -725,7 +848,8 @@ function groundSegmentsFor(width, spots) {
  * Generated at the trail's real width rather than scaled to it: an earlier
  * fixed-size vignette stretched across a 5000-unit trail flattened its hills
  * into flat bands. Two rolling layers at different frequencies, which gives a
- * little depth as the camera pans.
+ * little depth as the camera pans, and falling snow in the seasons that have
+ * any.
  *
  * @param {unknown} seasonId - The season being played
  * @param {number} width - Total trail width in user units
@@ -745,11 +869,33 @@ export function backdrop(seasonId, width) {
       "fill-opacity": opacity,
     })
   }
+  // Falling snow, scattered by arithmetic rather than by chance: nothing in this
+  // game calls Math.random (see ../README.md), and a backdrop that came out
+  // differently each time it was built would make the trail flicker on every
+  // rebuild. The moduli are coprime with the step, so the flakes do not line up
+  // into a lattice, and they stay above the ground so none of them settles on
+  // the trail the character walks.
+  const flakes = []
+  if (SNOWY.has(seasonId)) {
+    for (let i = 0, x = 24; x < span; i += 1, x += 52) {
+      const size = i % 3
+      flakes.push(
+        svg("circle", {
+          cx: x + ((i * 29) % 41),
+          cy: 12 + ((i * 67) % 157),
+          r: 1.6 + size * 0.7,
+          fill: SNOW,
+          "fill-opacity": 0.5 + size * 0.15,
+        }),
+      )
+    }
+  }
   return {
     element: svg("g", {}, [
       svg("rect", { x: 0, y: 0, width: span, height: HEIGHT, fill: colors["--season-sky"] }),
       band(26, 520, 150, colors["--season-far"], 0.55),
       band(18, 300, 196, colors["--season-far"], 0.85),
+      ...flakes,
     ]),
     viewBox: `0 0 ${span} ${HEIGHT}`,
   }

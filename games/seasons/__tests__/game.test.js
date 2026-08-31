@@ -465,7 +465,7 @@ describe("choosing a character", () => {
     chooseCharacter("sloth")
     expect(isActive("screen-play")).toBe(true)
     expect(isActive("screen-character")).toBe(false)
-    expect(byId("season-name").textContent).toBe("Spring")
+    expect(byId("season-name").textContent).toBe("Spring — 1 of 4")
     expect(byId("demand-line").textContent).toBe(SPRING.demandText)
     expect(hudCount()).toMatchObject({ items: 0, demand: SPRING.demand, noun: many(SPRING) })
     expect(byId("question-prompt").textContent).not.toBe("")
@@ -713,6 +713,40 @@ describe("crossing the obstacle in the way", () => {
     expect(isCrossing()).toBe(false)
     expect(choices().every((button) => button.getAttribute("aria-disabled") === null)).toBe(true)
     expect(trailSpace()).toEqual({ space: start + 2, of: SPRING.spaces })
+  })
+
+  // The flash used to be unskippable, so a tap only half worked: it cut the
+  // crossing and then sat through the 900ms verdict anyway.
+  it("cuts the flash short when the page is tapped after a right answer", async () => {
+    const start = ordinarySpace(SPRING)
+    await bootInto({ position: start, items: 0 })
+
+    tapRight()
+    expect(isCrossing()).toBe(false)
+
+    // Nowhere near FLASH_MS: without the tap nothing would have moved yet.
+    jest.advanceTimersByTime(100)
+    document.dispatchEvent(new Event("pointerdown"))
+
+    expect(isCrossing()).toBe(true)
+  })
+
+  // The other half of the rule. A wrong answer's flash is carrying the line
+  // that says what the answer actually was, so hurrying past it would skip the
+  // only part of the loop that teaches.
+  it("holds the full flash after a wrong answer, however fast she taps", async () => {
+    const start = ordinarySpace(SPRING)
+    await bootInto({ position: start, items: 0 })
+
+    tapWrong()
+    jest.advanceTimersByTime(100)
+    document.dispatchEvent(new Event("pointerdown"))
+
+    // Still locked: the verdict is still on screen.
+    expect(choices().some((button) => button.getAttribute("aria-disabled") === "true")).toBe(true)
+
+    jest.advanceTimersByTime(FLASH_MS)
+    expect(choices().every((button) => button.getAttribute("aria-disabled") === null)).toBe(true)
   })
 })
 
@@ -1097,7 +1131,7 @@ describe("playing a season to the end", () => {
     resultButtons()[0].click()
 
     expect(isActive("screen-play")).toBe(true)
-    expect(byId("season-name").textContent).toBe("Summer")
+    expect(byId("season-name").textContent).toBe("Summer — 2 of 4")
     expect(byId("demand-line").textContent).toBe(SUMMER.demandText)
     expect(hudCount()).toMatchObject({ items: 0, demand: SUMMER.demand, noun: many(SUMMER) })
     expect(document.querySelectorAll("#item-track .item-pip")).toHaveLength(SUMMER.demand)
@@ -1379,7 +1413,7 @@ describe("the boss question", () => {
       resultButtons()[0].click()
 
       expect(isActive("screen-play")).toBe(true)
-      expect(byId("season-name").textContent).toBe("Spring")
+      expect(byId("season-name").textContent).toBe("Spring — 1 of 4")
       expect(hudCount()).toMatchObject({ items: 0 })
       expect(saved().run.position).toBe(0)
       expect(saved().run.items).toBe(0)
@@ -1449,7 +1483,9 @@ describe("the boss question", () => {
 
       resultButtons()[0].click()
       expect(isActive("screen-play")).toBe(true)
-      expect(byId("season-name").textContent).toBe(getSeason(SEASON_ORDER[0]).name)
+      expect(byId("season-name").textContent).toBe(
+        `${getSeason(SEASON_ORDER[0]).name} — 1 of ${SEASON_ORDER.length}`,
+      )
       expect(saved().run.runOver).toBe(false)
       expect(saved().run.items).toBe(0)
     })
@@ -1563,7 +1599,7 @@ describe("persistence", () => {
     expect(isActive("screen-play")).toBe(true)
     expect(isActive("screen-character")).toBe(false)
     expect(hudCount()).toMatchObject({ items: 2 })
-    expect(byId("season-name").textContent).toBe("Spring")
+    expect(byId("season-name").textContent).toBe("Spring — 1 of 4")
     expect(trailSpace()).toEqual({ space: 3, of: SPRING.spaces })
     expect(choices()).toHaveLength(PLAY.CHOICE_COUNT)
   })

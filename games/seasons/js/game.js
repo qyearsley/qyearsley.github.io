@@ -49,10 +49,13 @@ import {
 } from "./GameState.js"
 import { isGlowingAt, kindAt } from "./Journey.js"
 import { getCharacter } from "./characters.js"
-import { getSeason } from "./seasons.js"
+import { SEASON_LIST, getSeason } from "./seasons.js"
 import { StorageManager, defaultSave, toSavedRun } from "./storage.js"
 
 const ui = new GameUI()
+// The "1 of 4" framing in the top bar. Assigned rather than imported by GameUI
+// so the view stays ignorant of which levels exist; see renderJourneySoFar.
+ui.seasonOrder = SEASON_LIST
 const storage = new StorageManager()
 
 /** @type {Object} The live game state. */
@@ -74,6 +77,18 @@ let answering = false
 let flashTimer = null
 
 /**
+ * The pending flash's continuation, so a tap can run it early instead of
+ * waiting out `flashDuration`.
+ *
+ * Only set after a CORRECT answer. Skipping ahead is for the player who already
+ * knows she got it right; on a wrong answer the flash is carrying the feedback
+ * line that says what the answer actually was, and cutting that short would
+ * skip the one moment in the question loop that teaches anything.
+ * @type {null | function(): void}
+ */
+let flashSkip = null
+
+/**
  * Bumped whenever the run is torn down mid-cycle. The crossing animation
  * finishes asynchronously, so its callback has to be able to tell that the
  * season it belonged to is gone -- otherwise a restart during a crossing draws
@@ -88,6 +103,7 @@ function _cancelFlash() {
     clearTimeout(flashTimer)
     flashTimer = null
   }
+  flashSkip = null
   cycle += 1
   ui.skipTraversal()
   answering = false
@@ -144,6 +160,7 @@ function render() {
   if (state.phase === PHASE.CHARACTER_SELECT) {
     ui.stopTimer()
     ui.renderCharacterCards(_onChooseCharacter)
+    ui.renderJourneySoFar(save, SEASON_LIST)
     ui.showScreen("screen-character")
     ui.focusHeading("screen-character")
     return
@@ -311,8 +328,9 @@ function _onAnswer(value, button) {
   )
   ui.renderHud(state, getSeason(state.seasonId))
 
-  flashTimer = setTimeout(() => {
+  const advance = () => {
     flashTimer = null
+    flashSkip = null
     if (state.phase === PHASE.SEASON_WON) _unlockAfter(season.id)
     if (state.phase === PHASE.SEASON_WON || state.phase === PHASE.SEASON_LOST) {
       answering = false
@@ -340,7 +358,16 @@ function _onAnswer(value, button) {
       answering = false
       _askQuestion()
     })
-  }, ui.flashDuration)
+  }
+
+  flashTimer = setTimeout(advance, ui.flashDuration)
+  // Armed only for a correct answer; see the `flashSkip` declaration.
+  flashSkip = result.outcome.correct
+    ? () => {
+        clearTimeout(flashTimer)
+        advance()
+      }
+    : null
 }
 
 /**
@@ -495,7 +522,24 @@ function start() {
     state = rehydrate(loaded.run)
   }
   // Anyone who taps faster than the animation should not have to wait for it.
-  document.addEventListener("pointerdown", () => ui.skipTraversal())
+  // A pending flash goes first, then the crossing: two taps clear both, and the
+  // tap that submitted the answer cannot cut its own flash short, because
+  // pointerdown fires before the click that arms it.
+  document.addEventListener("pointerdown", () => {
+    // Two guards before running the continuation early. `flashTimer` says a
+    // flash is actually pending. `isConnected` says this module instance still
+    // owns the screen: the listener is on `document`, so a page that imports
+    // this module twice leaves the first instance's listener attached with its
+    // own `flashSkip` still armed, and running that would advance a run whose
+    // markup is gone. Only the tests import twice today, but a stale listener
+    // driving a dead run is the kind of thing that is much harder to diagnose
+    // later than to rule out here.
+    if (flashTimer !== null && flashSkip && ui.elements.choices?.isConnected) {
+      flashSkip()
+      return
+    }
+    ui.skipTraversal()
+  })
   document.addEventListener("keydown", _onKeyDown)
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {

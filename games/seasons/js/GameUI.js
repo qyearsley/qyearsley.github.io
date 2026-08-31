@@ -77,6 +77,14 @@ export class GameUI extends BaseGameUI {
     this._timerId = null
     /** @type {number} Milliseconds left on the current question. */
     this._timeLeftMs = 0
+    /**
+     * Seasons in play order, for the "1 of 4" framing in the top bar. Assigned
+     * once by game.js rather than imported, for the reason given on
+     * `renderJourneySoFar`. Empty means the framing is simply left off, so the
+     * title degrades to the bare season name instead of lying about the count.
+     * @type {Array<{id: string, name: string}>}
+     */
+    this.seasonOrder = []
     this.cacheElements()
   }
 
@@ -87,6 +95,7 @@ export class GameUI extends BaseGameUI {
   cacheElements() {
     const ids = [
       "character-grid",
+      "journey-so-far",
       "season-name",
       "demand-line",
       "villain-portrait",
@@ -104,6 +113,7 @@ export class GameUI extends BaseGameUI {
       "feedback",
       "result-title",
       "result-text",
+      "result-haul",
       "result-summary",
       "result-actions",
     ]
@@ -200,6 +210,75 @@ export class GameUI extends BaseGameUI {
       card.addEventListener("click", () => onChoose(entry.id))
       grid.append(card)
     }
+  }
+
+  /**
+   * Draw the "journey so far" panel under the character cards: which of the
+   * four seasons are open, and the counters that carry across runs.
+   *
+   * Both halves already existed in the save and neither reached the screen, so
+   * nothing told a player there were four seasons at all, or that the question
+   * counts were cumulative rather than per-run.
+   *
+   * The season list is passed in rather than imported. `GameUI` sits above
+   * `seasons.js` in the dependency order and does not otherwise know about the
+   * levels; keeping it that way means the panel stays a view of whatever it is
+   * handed.
+   *
+   * @param {Object|null} save - The save state, or null before one is loaded
+   * @param {Array<{id: string, name: string}>} seasons - Seasons, in play order
+   */
+  renderJourneySoFar(save, seasons) {
+    const host = this.elements["journey-so-far"]
+    if (!host) return
+    host.replaceChildren()
+    if (!save || !seasons?.length) return
+
+    const heading = document.createElement("h2")
+    heading.className = "journey-heading"
+    heading.textContent = `Your journey: ${seasons.length} seasons`
+    host.append(heading)
+
+    const list = document.createElement("ol")
+    list.className = "journey-seasons"
+    for (const [index, season] of seasons.entries()) {
+      const open = save.unlocked.includes(season.id)
+      const item = document.createElement("li")
+      item.className = `journey-season${open ? " is-open" : ""}`
+
+      const ordinal = document.createElement("span")
+      ordinal.className = "journey-ordinal"
+      ordinal.textContent = String(index + 1)
+      item.append(ordinal)
+
+      const name = document.createElement("span")
+      name.className = "journey-season-name"
+      name.textContent = season.name
+      item.append(name)
+
+      // The open ones are only distinguished by colour and weight otherwise,
+      // which says nothing to a screen reader and little to a colour-blind eye.
+      const state = document.createElement("span")
+      state.className = "visually-hidden"
+      state.textContent = open ? " (open)" : " (not reached yet)"
+      item.append(state)
+
+      list.append(item)
+    }
+    host.append(list)
+
+    // A first run has nothing to report, and four zeros would read as failure.
+    const totals = save.totals
+    if (!totals || totals.questionsAnswered < 1) return
+
+    const line = document.createElement("p")
+    line.className = "journey-totals"
+    const cleared = totals.seasonsCleared
+    line.textContent =
+      `Altogether you have answered ${totals.questionsAnswered} questions ` +
+      `and got ${totals.questionsCorrect} right.` +
+      (cleared > 0 ? ` You have finished ${cleared} ${cleared === 1 ? "season" : "seasons"}.` : "")
+    host.append(line)
   }
 
   renderTrail(season, position, characterId) {
@@ -451,9 +530,27 @@ export class GameUI extends BaseGameUI {
    * @param {Object} state - The current GameState
    * @param {import("./seasons.js").Season|null} season - The season being played
    */
+  /**
+   * The top-bar title for a season: its name, plus where it sits in the run.
+   *
+   * Nothing on the play screen said there were four seasons, so a player in
+   * Autumn had no way to know she was three quarters of the way through a
+   * journey rather than on an endless trail.
+   *
+   * @private
+   * @param {import("./seasons.js").Season} season - The season being played
+   * @returns {string} "Autumn - 3 of 4", or just "Autumn" if the order is unset
+   */
+  _seasonTitle(season) {
+    const total = this.seasonOrder.length
+    const index = this.seasonOrder.findIndex((entry) => entry.id === season.id)
+    if (total < 1 || index === -1) return season.name
+    return `${season.name} — ${index + 1} of ${total}`
+  }
+
   renderHud(state, season) {
     if (!season) return
-    this.setText("season-name", season.name)
+    this.setText("season-name", this._seasonTitle(season))
     this.setText("demand-line", season.demandText)
     this._mount(this.elements["villain-portrait"], this.pack.villain(), "villain-svg")
     this.renderItemTrack(state, season)
@@ -697,6 +794,7 @@ export class GameUI extends BaseGameUI {
   renderResult(state, season, actions, title, text, rows = null) {
     this.setText("result-title", title)
     this.setText("result-text", text)
+    this._renderHaul(state, season, rows)
 
     const summary = this.elements["result-summary"]
     if (summary && (season || rows)) {
@@ -733,6 +831,63 @@ export class GameUI extends BaseGameUI {
       }
       holder.querySelector("button")?.focus()
     }
+  }
+
+  /**
+   * Draw the season's haul going into the snake woman's jar.
+   *
+   * After fifteen questions of gathering roses the payoff used to be five rows
+   * of numbers. The collectibles are already drawn by the art pack for the HUD,
+   * so showing the pile she actually delivered costs nothing new to draw.
+   *
+   * Only for the per-season screen. When the caller passes its own `rows` it is
+   * the end-of-run screen, and every per-season counter on `state` belongs to
+   * the last season played -- a jar of seventeen icicles labelled as the whole
+   * journey would be a lie. There is no lifetime item count to draw instead.
+   *
+   * The jar is CSS; the items are the art pack's. That split is deliberate, so
+   * a replacement art pack changes what is in the jar without owning the jar.
+   *
+   * @private
+   * @param {Object} state - The finished GameState
+   * @param {import("./seasons.js").Season|null} season - The season just played
+   * @param {Array|null} rows - Caller-supplied summary rows, if any
+   */
+  _renderHaul(state, season, rows) {
+    const host = this.elements["result-haul"]
+    if (!host) return
+    host.replaceChildren()
+    if (rows || !season) return
+
+    const delivered = Math.max(0, state?.items ?? 0)
+    if (delivered < 1) return
+
+    const jar = document.createElement("div")
+    jar.className = "haul-jar"
+
+    const contents = document.createElement("div")
+    contents.className = "haul-contents"
+    // Same ceiling as the HUD track, and for the same reason: `items` comes off
+    // a save file that storage only clamps to non-negative.
+    const drawn = Math.min(MAX_ITEM_PIPS, delivered)
+    for (let i = 0; i < drawn; i += 1) {
+      const slot = document.createElement("span")
+      slot.className = "haul-item"
+      // Read by the stylesheet as the stagger, so they drop in one after
+      // another instead of all at once. No JS animation: the reduced-motion
+      // rule then covers this for free.
+      slot.style.setProperty("--haul-index", String(i))
+      this._mount(slot, this.pack.item(season.id, false), "item-svg")
+      contents.append(slot)
+    }
+    jar.append(contents)
+    host.append(jar)
+
+    const caption = document.createElement("p")
+    caption.className = "haul-caption"
+    const noun = delivered === 1 ? season.itemName : season.itemPlural
+    caption.textContent = `${delivered} ${noun.toLowerCase()} into her jar`
+    host.append(caption)
   }
 
   /**

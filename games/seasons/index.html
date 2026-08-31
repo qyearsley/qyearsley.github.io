@@ -39,6 +39,11 @@
             be.
           </p>
           <div id="character-grid" class="character-grid"></div>
+
+          <!-- Both halves of this come straight off the save and neither was
+               shown anywhere before: which seasons are open, and the counters
+               that carry across every run. -->
+          <div id="journey-so-far" class="journey-so-far"></div>
         </section>
 
         <!-- Screen 2: the trail -->
@@ -78,6 +83,9 @@
         <section id="screen-result" class="screen">
           <h2 id="result-title" class="screen-heading"></h2>
           <p id="result-text" class="result-text"></p>
+          <!-- aria-hidden: the summary below states the same count in a row the
+               screen reader already reads. This is the picture of it. -->
+          <div id="result-haul" class="result-haul" aria-hidden="true"></div>
           <div id="result-summary" class="result-summary"></div>
           <div id="result-actions" class="result-actions"></div>
         </section>

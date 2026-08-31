@@ -81,6 +81,7 @@ const MADE_UP = madeUpSeason()
  */
 const CACHED_IDS = [
   "character-grid",
+  "journey-so-far",
   "season-name",
   "demand-line",
   "villain-portrait",
@@ -98,6 +99,7 @@ const CACHED_IDS = [
   "feedback",
   "result-title",
   "result-text",
+  "result-haul",
   "result-summary",
   "result-actions",
 ]
@@ -335,6 +337,98 @@ describe("renderCharacterCards", () => {
     expect(document.querySelectorAll("#character-grid .character-card")).toHaveLength(
       CHARACTERS.length,
     )
+  })
+})
+
+describe("renderJourneySoFar", () => {
+  const saveWith = (overrides = {}) => ({
+    unlocked: [SEASON_LIST[0].id],
+    totals: { runsCompleted: 0, seasonsCleared: 0, questionsAnswered: 0, questionsCorrect: 0 },
+    ...overrides,
+  })
+  const panel = () => document.getElementById("journey-so-far")
+  const entries = () => Array.from(panel().querySelectorAll(".journey-season"))
+
+  it("lists every season in play order, so the four are visible at all", () => {
+    ui.renderJourneySoFar(saveWith(), SEASON_LIST)
+    expect(entries()).toHaveLength(SEASON_LIST.length)
+    entries().forEach((item, index) => {
+      expect(item.querySelector(".journey-ordinal").textContent).toBe(String(index + 1))
+      expect(item.querySelector(".journey-season-name").textContent).toBe(SEASON_LIST[index].name)
+    })
+  })
+
+  it("marks only the unlocked seasons as open", () => {
+    const open = [SEASON_LIST[0].id, SEASON_LIST[1].id]
+    ui.renderJourneySoFar(saveWith({ unlocked: open }), SEASON_LIST)
+    const flags = entries().map((item) => item.classList.contains("is-open"))
+    expect(flags).toEqual(SEASON_LIST.map((season) => open.includes(season.id)))
+  })
+
+  it("says open or not in words, since the styling alone says it only in colour", () => {
+    ui.renderJourneySoFar(saveWith(), SEASON_LIST)
+    const said = entries().map((item) => item.querySelector(".visually-hidden").textContent)
+    expect(said[0]).toContain("open")
+    expect(said[1]).toContain("not reached")
+  })
+
+  // Four zeros on a first run would read as a report card rather than a start.
+  it("leaves the totals off entirely until a question has been answered", () => {
+    ui.renderJourneySoFar(saveWith(), SEASON_LIST)
+    expect(panel().querySelector(".journey-totals")).toBeNull()
+  })
+
+  it("states the lifetime counts once there are any", () => {
+    const totals = {
+      runsCompleted: 2,
+      seasonsCleared: 3,
+      questionsAnswered: 128,
+      questionsCorrect: 112,
+    }
+    ui.renderJourneySoFar(saveWith({ totals }), SEASON_LIST)
+    const text = panel().querySelector(".journey-totals").textContent
+    expect(text).toContain("128")
+    expect(text).toContain("112")
+    expect(text).toContain("3 seasons")
+  })
+
+  it("says season, not seasons, for exactly one", () => {
+    const totals = {
+      runsCompleted: 1,
+      seasonsCleared: 1,
+      questionsAnswered: 20,
+      questionsCorrect: 18,
+    }
+    ui.renderJourneySoFar(saveWith({ totals }), SEASON_LIST)
+    expect(panel().querySelector(".journey-totals").textContent).toContain("1 season.")
+  })
+
+  it("draws nothing at all without a save, rather than a panel of blanks", () => {
+    ui.renderJourneySoFar(null, SEASON_LIST)
+    expect(panel().children).toHaveLength(0)
+  })
+})
+
+describe("the season title in the top bar", () => {
+  const title = () => document.getElementById("season-name").textContent
+
+  it("frames the season as one of four once the order is known", () => {
+    ui.seasonOrder = SEASON_LIST
+    ui.renderHud(hudState(), SEASON_LIST[2])
+    expect(title()).toBe(`${SEASON_LIST[2].name} — 3 of ${SEASON_LIST.length}`)
+  })
+
+  // Degrading to the bare name is the point: a count it cannot compute would be
+  // worse than no count.
+  it("falls back to the bare name when the order was never set", () => {
+    ui.renderHud(hudState(), SEASON_LIST[2])
+    expect(title()).toBe(SEASON_LIST[2].name)
+  })
+
+  it("falls back to the bare name for a season outside the order", () => {
+    ui.seasonOrder = SEASON_LIST
+    ui.renderHud(hudState(), { ...SEASON_LIST[0], id: "monsoon", name: "Monsoon" })
+    expect(title()).toBe("Monsoon")
   })
 })
 
@@ -1499,6 +1593,56 @@ describe("renderResult", () => {
     { label: "Pick a new character", onClick: jest.fn() },
   ]
 
+  describe("the haul in the jar", () => {
+    const jar = () => document.getElementById("result-haul")
+    const items = () => Array.from(jar().querySelectorAll(".haul-item"))
+
+    it("draws one collectible per item delivered", () => {
+      ui.renderResult(resultState({ items: 11 }), SPRING, [], "t", "x")
+      expect(items()).toHaveLength(11)
+      for (const item of items()) {
+        expect(item.querySelector("svg")).not.toBeNull()
+      }
+    })
+
+    it("staggers them, so they read as being counted in one at a time", () => {
+      ui.renderResult(resultState({ items: 4 }), SPRING, [], "t", "x")
+      const order = items().map((item) => item.style.getPropertyValue("--haul-index"))
+      expect(order).toEqual(["0", "1", "2", "3"])
+    })
+
+    it("names the collectible, plural for many and singular for one", () => {
+      ui.renderResult(resultState({ items: 3 }), SPRING, [], "t", "x")
+      expect(jar().querySelector(".haul-caption").textContent).toBe("3 roses into her jar")
+      ui.renderResult(resultState({ items: 1 }), SPRING, [], "t", "x")
+      expect(jar().querySelector(".haul-caption").textContent).toBe("1 rose into her jar")
+    })
+
+    // The end-of-run screen passes its own rows, and every per-season counter on
+    // the state belongs to the last season played. A jar there would be a lie.
+    it("draws nothing when the caller supplied its own rows", () => {
+      ui.renderResult(resultState({ items: 11 }), SPRING, [], "t", "x", [["Best streak", "4"]])
+      expect(jar().children).toHaveLength(0)
+    })
+
+    it("draws nothing for an empty-handed season, rather than an empty jar", () => {
+      ui.renderResult(resultState({ items: 0 }), SPRING, [], "t", "x")
+      expect(jar().children).toHaveLength(0)
+    })
+
+    it("clears the previous season's haul instead of stacking on it", () => {
+      ui.renderResult(resultState({ items: 9 }), SPRING, [], "t", "x")
+      ui.renderResult(resultState({ items: 2 }), SUMMER, [], "t", "x")
+      expect(items()).toHaveLength(2)
+    })
+
+    // `items` comes off a save file that storage only clamps to non-negative.
+    it("caps a corrupted count instead of building a node per item", () => {
+      ui.renderResult(resultState({ items: 5_000_000 }), SPRING, [], "t", "x")
+      expect(items().length).toBeLessThanOrEqual(60)
+    })
+  })
+
   it("writes the title and the verdict", () => {
     ui.renderResult(resultState(), SPRING, [], "Spring complete", "She takes them.")
     expect(document.getElementById("result-title").textContent).toBe("Spring complete")
@@ -1649,11 +1793,20 @@ describe("applyPalette and focusHeading", () => {
   })
 
   it("replaces the previous season's palette rather than merging it", () => {
+    const spring = ui.pack.palette(SPRING.id)
+    const winter = ui.pack.palette(WINTER.id)
     ui.applyPalette(SPRING)
     ui.applyPalette(WINTER)
     expect(document.documentElement.dataset.season).toBe("winter")
-    expect(document.documentElement.style.getPropertyValue("--season-sky")).toBe("#e7eff7")
-    expect(document.documentElement.style.getPropertyValue("--season-accent")).toBe("#4f6f96")
+
+    // Read from the pack rather than pinning hexes. This test is about which
+    // season's values ended up on the page, not about what the colours are, and
+    // the pinned version broke the first time the winter art was retouched.
+    for (const [property, value] of Object.entries(winter)) {
+      expect(document.documentElement.style.getPropertyValue(property)).toBe(value)
+    }
+    // Without this the loop above would still pass if both packs were identical.
+    expect(winter).not.toEqual(spring)
   })
 
   it("leaves the page alone for a null season", () => {

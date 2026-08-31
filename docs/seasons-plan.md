@@ -101,23 +101,40 @@ rather than an incidental one.
 ## Deferred polish
 
 Judged not to stand between Ella and a good first play, in rough value order.
+Most of this list was cleared on 2026-08-31; what is left is below the done ones.
 
-- **The result screen is a table.** After fifteen questions of gathering roses,
-  the payoff is five rows of numbers. The art pack already draws the
-  collectibles; showing them being counted into her jar is the obvious win, and
-  the one most likely to make finishing a season feel like something.
-- **Nothing frames that there are four seasons.** No picker, no "Spring, 1 of 4".
-  `save.unlocked` is recorded and never surfaced, which is most of a season
-  picker already done.
-- **Item pips are small.** 19px, and sixteen-plus empty rings in the later
-  seasons read as a dotted line rather than as what she still owes.
-- **Lifetime totals are recorded and never shown.** `save.totals` counts runs,
-  seasons and questions; the character screen is the natural home.
-- **~2s between questions** (a 900ms flash plus up to 1150ms of crossing). A tap
-  skips the crossing but not the flash, so the instinct to hurry only half works.
-- **Winter is the least distinctive season** despite being the climax: no snow on
-  the ground or the trees, and the palest palette.
-- ~~**`obstacles.verb`** is defined and unread.~~ **Done 2026-08-31.** The trail's
+- **A season picker.** Still open, and the half of "nothing frames four seasons"
+  that was not done: the character screen now shows which seasons are open, but
+  there is no way to _choose_ one. Whether she can replay a finished season, or
+  jump to one she has unlocked, is a rule question rather than a display one —
+  it is Ella's call, and it changes what a run means.
+- ~~**The result screen is a table.**~~ **Done.** The season screen now draws the
+  haul going into the snake woman's jar: one collectible per item delivered,
+  dropped in on a stagger, captioned "11 roses into her jar". The jar is CSS and
+  the items come from the art pack, so a new pack changes what is inside without
+  owning the container. Deliberately not shown on the end-of-run screen — every
+  per-season counter on the state belongs to the last season played, and there is
+  no lifetime item count to draw instead.
+- ~~**Nothing frames that there are four seasons.**~~ **Partly done**, see the
+  picker above. The top bar now reads "Autumn — 3 of 4", and the character screen
+  carries a "Your journey" panel listing all four with the unlocked ones marked.
+- ~~**Item pips are small.**~~ **Done.** 19px to 26px, via a `--sn-pip` variable
+  so the short-viewport rule can drop it back to 22px — seventeen slots at the
+  full size wrapped to a third row and pushed the keypad off a short iPad.
+- ~~**Lifetime totals are recorded and never shown.**~~ **Done.** They read as a
+  sentence at the foot of the character screen, and are left off entirely until a
+  question has been answered, since four zeros on a first run read as a report
+  card rather than a start.
+- ~~**~2s between questions.**~~ **Done, for correct answers only.** A tap now
+  cuts the flash short as well as the crossing. It deliberately does not skip the
+  flash after a _wrong_ answer: that flash is carrying the line saying what the
+  answer actually was, which is the one part of the loop that teaches.
+- ~~**Winter is the least distinctive season.**~~ **Done.** Rebuilt on value
+  rather than hue — a saturated sky, ridges darker than it, and snow as the
+  lightest ground of the four — plus snow on all six obstacle kinds and falling
+  flakes in the backdrop. The warm glow stayed warm: white was invisible on the
+  old near-white sky and would be lost in the snow now.
+- ~~**`obstacles.verb`** is defined and unread.~~ **Done.** The trail's
   accessible label now reads "a thicket to push through" rather than "a thicket
   to cross". The field moved from third person to the infinitive, since the label
   describes what is still ahead; third person is derivable from that and not the
