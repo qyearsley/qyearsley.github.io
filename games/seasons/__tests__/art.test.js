@@ -365,6 +365,26 @@ describe("the placeholder pack fulfils the art-pack contract", () => {
     expect(new Set(drawn).size).toBe(CHARACTER_IDS.length)
   })
 
+  // `onTrail` selects a pose. A pack is free to use the same drawing for both --
+  // most of this one's characters do -- but a pack that quietly ignored the flag
+  // for every character would put the sloth on the trail still hanging from a
+  // branch, so at least one has to answer it.
+  it("gives at least one character a different pose on the trail", () => {
+    const posed = CHARACTER_IDS.filter(
+      (characterId) =>
+        markup(pack.character(characterId, true)) !== markup(pack.character(characterId, false)),
+    )
+    expect(posed.length).toBeGreaterThan(0)
+  })
+
+  it.each(CHARACTER_IDS)("draws %s on the trail without its card's scenery", (characterId) => {
+    // Whatever the pose, it is still that character and still a real drawing --
+    // an empty trail pose would leave the token invisible mid-season.
+    const drawing = pack.character(characterId, true)
+    expectDrawing(drawing)
+    expect(markup(drawing)).not.toBe(markup(pack.character("nope", true)))
+  })
+
   it.each(SEASON_ORDER)("draws the ordinary item for %s", (seasonId) => {
     const drawing = pack.item(seasonId, false)
     expectDrawing(drawing)
@@ -498,6 +518,12 @@ describe("the placeholder pack fulfils the art-pack contract", () => {
       // which is precisely what the animation exists to stop.
       expect(keyframes[0].transform).toContain(pack.standing(FROM))
       expect(keyframes[keyframes.length - 1].transform).toContain(pack.standing(TO))
+
+      // And ends on nothing *but* that. Crossings play with `fill: "forwards"`,
+      // so a scale left on the last keyframe outlives the animation: the
+      // character wears it for the whole of the next question. The gap used to
+      // finish on `scaleY(0.9)` and leave the animal standing 10% short.
+      expect(keyframes[keyframes.length - 1].transform).toBe(pack.standing(TO))
 
       // Any offsets given run forwards through the crossing. An out-of-order
       // one throws in a real browser, where nothing here would. Offsets are

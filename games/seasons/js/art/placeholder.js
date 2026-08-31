@@ -182,131 +182,192 @@ function _drawing(shapes, viewBox = UNIT_VIEWBOX) {
 /**
  * Character drawings, keyed by character id. Each returns a list of shapes in
  * the 100x100 unit box, drawn facing right.
+ *
+ * An entry is either one function -- the animal looks the same wherever it is
+ * drawn -- or `{card, trail}`, a pose for the select screen and a pose for the
+ * trail. The sloth is the only one that needs both so far: on its card it hangs
+ * from a branch, and on the trail it is walking somewhere.
  * @private
  */
 const CHARACTERS = {
+  // Drawn low in the box on purpose. The token is placed so that y=91 sits on
+  // the trail, and the slug used to stop at y=78 -- so the one animal in the
+  // roster that is nothing but underside travelled nine units above the ground.
   "banana-slug": () => [
     // Body: a long low blob with the head raised at the right.
     svg("path", {
-      d: "M10 74 C10 62 20 57 36 56 C54 55 70 53 78 45 C85 38 95 43 93 54 C90 67 79 74 60 76 L18 78 C13 78 10 77 10 74 Z",
+      d: "M10 87 C10 75 20 70 36 69 C54 68 70 66 78 58 C85 51 95 56 93 67 C90 80 79 87 60 89 L18 91 C13 91 10 90 10 87 Z",
       fill: "#e8d05a",
     }),
     // Mantle, the saddle-shaped shield over the back.
-    svg("ellipse", { cx: 40, cy: 62, rx: 20, ry: 9, fill: "#d4b943" }),
+    svg("ellipse", { cx: 40, cy: 75, rx: 20, ry: 9, fill: "#d4b943" }),
     // Spots.
-    svg("circle", { cx: 28, cy: 70, r: 2.6, fill: "#a8912c", "fill-opacity": 0.7 }),
-    svg("circle", { cx: 52, cy: 68, r: 2.2, fill: "#a8912c", "fill-opacity": 0.7 }),
-    svg("circle", { cx: 66, cy: 64, r: 1.8, fill: "#a8912c", "fill-opacity": 0.7 }),
+    svg("circle", { cx: 28, cy: 83, r: 2.6, fill: "#a8912c", "fill-opacity": 0.7 }),
+    svg("circle", { cx: 52, cy: 81, r: 2.2, fill: "#a8912c", "fill-opacity": 0.7 }),
+    svg("circle", { cx: 66, cy: 77, r: 1.8, fill: "#a8912c", "fill-opacity": 0.7 }),
     // Eyestalks.
     svg("path", {
-      d: "M84 46 L80 28",
+      d: "M84 59 L80 41",
       stroke: "#e8d05a",
       "stroke-width": 5,
       "stroke-linecap": "round",
     }),
     svg("path", {
-      d: "M90 47 L96 32",
+      d: "M90 60 L96 45",
       stroke: "#e8d05a",
       "stroke-width": 5,
       "stroke-linecap": "round",
     }),
-    svg("circle", { cx: 79, cy: 26, r: 4, fill: "#3a3222" }),
-    svg("circle", { cx: 97, cy: 30, r: 4, fill: "#3a3222" }),
-    svg("circle", { cx: 80, cy: 25, r: 1.4, fill: "#fff" }),
-    svg("circle", { cx: 98, cy: 29, r: 1.4, fill: "#fff" }),
+    svg("circle", { cx: 79, cy: 39, r: 4, fill: "#3a3222" }),
+    svg("circle", { cx: 97, cy: 43, r: 4, fill: "#3a3222" }),
+    svg("circle", { cx: 80, cy: 38, r: 1.4, fill: "#fff" }),
+    svg("circle", { cx: 98, cy: 42, r: 1.4, fill: "#fff" }),
   ],
 
-  sloth: () => [
-    // Branch to hang from -- card only; see `character(id, onTrail)`.
-    svg("rect", {
-      x: 2,
-      y: 11,
-      width: 96,
-      height: 7,
-      rx: 3.5,
-      fill: "#7a5b3a",
-      "data-hangs-from": "1",
-    }),
-    // Body.
-    svg("ellipse", { cx: 52, cy: 66, rx: 21, ry: 23, fill: "#9b8468" }),
-    svg("ellipse", { cx: 52, cy: 70, rx: 13, ry: 15, fill: "#b6a189", "fill-opacity": 0.8 }),
-    // Head.
-    svg("circle", { cx: 52, cy: 44, r: 16, fill: "#c3b099" }),
-    // Eye patches, the sloth's whole face really.
-    svg("ellipse", { cx: 45, cy: 42, rx: 6, ry: 7, fill: "#6d5a45", "fill-opacity": 0.85 }),
-    svg("ellipse", { cx: 59, cy: 42, rx: 6, ry: 7, fill: "#6d5a45", "fill-opacity": 0.85 }),
-    svg("circle", { cx: 45, cy: 42, r: 2.6, fill: "#2e2519" }),
-    svg("circle", { cx: 59, cy: 42, r: 2.6, fill: "#2e2519" }),
-    svg("circle", { cx: 52, cy: 50, r: 2.4, fill: "#6d5a45" }),
-    // The permanent faint smile.
-    svg("path", {
-      d: "M46 55 Q52 59 58 55",
-      stroke: "#6d5a45",
-      "stroke-width": 2,
-      fill: "none",
-      "stroke-linecap": "round",
-    }),
-    // Arms last, so they hang in FRONT of the body and head. Behind them the
-    // sloth reads as a generic round animal with no reason to be up a tree.
+  sloth: {
+    // Hanging from a branch, which is what a sloth is famous for and what the
+    // select screen has room to show.
+    card: () => [
+      svg("rect", { x: 2, y: 11, width: 96, height: 7, rx: 3.5, fill: "#7a5b3a" }),
+      // Body.
+      svg("ellipse", { cx: 52, cy: 66, rx: 21, ry: 23, fill: "#9b8468" }),
+      svg("ellipse", { cx: 52, cy: 70, rx: 13, ry: 15, fill: "#b6a189", "fill-opacity": 0.8 }),
+      // Head.
+      svg("circle", { cx: 52, cy: 44, r: 16, fill: "#c3b099" }),
+      // Eye patches, the sloth's whole face really.
+      svg("ellipse", { cx: 45, cy: 42, rx: 6, ry: 7, fill: "#6d5a45", "fill-opacity": 0.85 }),
+      svg("ellipse", { cx: 59, cy: 42, rx: 6, ry: 7, fill: "#6d5a45", "fill-opacity": 0.85 }),
+      svg("circle", { cx: 45, cy: 42, r: 2.6, fill: "#2e2519" }),
+      svg("circle", { cx: 59, cy: 42, r: 2.6, fill: "#2e2519" }),
+      svg("circle", { cx: 52, cy: 50, r: 2.4, fill: "#6d5a45" }),
+      // The permanent faint smile.
+      svg("path", {
+        d: "M46 55 Q52 59 58 55",
+        stroke: "#6d5a45",
+        "stroke-width": 2,
+        fill: "none",
+        "stroke-linecap": "round",
+      }),
+      // Arms last, so they hang in FRONT of the body and head. Behind them the
+      // sloth reads as a generic round animal with no reason to be up a tree.
+      //
+      // Filled bands rather than thick strokes, for the same reason as the snake
+      // woman's coils: a stroke-only path disappears in renderers that treat
+      // `stroke-width` loosely, and the arms are too much of the silhouette to
+      // risk that.
+      svg("path", {
+        d: "M43 59 C29 53 25 32 31 14 L22 15 C17 33 21 54 35 63 Z",
+        fill: "#8a7259",
+      }),
+      svg("path", {
+        d: "M61 59 C75 53 79 32 73 14 L82 15 C87 33 83 54 69 63 Z",
+        fill: "#8a7259",
+      }),
+      // Claws hooked over the branch.
+      svg("path", { d: "M20 16 C18 8 26 4 31 9 L28 13 C25 10 21 12 24 17 Z", fill: "#4a3b2c" }),
+      svg("path", { d: "M84 16 C86 8 78 4 73 9 L76 13 C79 10 83 12 80 17 Z", fill: "#4a3b2c" }),
+    ],
+
+    // Crawling, for the trail. This used to be the hanging pose with the branch
+    // subtracted, which left the sloth travelling along the ground with both
+    // arms straight up in the air holding nothing. A sloth off its branch is
+    // low, long and slow, so the whole animal is redrawn rather than adjusted:
+    // body horizontal, head pushed out in front, four limbs down to the ground.
     //
-    // Filled bands rather than thick strokes, for the same reason as the snake
-    // woman's coils: a stroke-only path disappears in renderers that treat
-    // `stroke-width` loosely, and the arms are too much of the silhouette to
-    // risk that.
-    svg("path", { d: "M43 59 C29 53 25 32 31 14 L22 15 C17 33 21 54 35 63 Z", fill: "#8a7259" }),
-    svg("path", { d: "M61 59 C75 53 79 32 73 14 L82 15 C87 33 83 54 69 63 Z", fill: "#8a7259" }),
-    // Claws hooked over the branch.
-    svg("path", {
-      d: "M20 16 C18 8 26 4 31 9 L28 13 C25 10 21 12 24 17 Z",
-      fill: "#4a3b2c",
-      "data-hangs-from": "1",
-    }),
-    svg("path", {
-      d: "M84 16 C86 8 78 4 73 9 L76 13 C79 10 83 12 80 17 Z",
-      fill: "#4a3b2c",
-      "data-hangs-from": "1",
-    }),
-  ],
+    // Everything but the smile is a filled shape, for the reason the hanging
+    // arms give above.
+    trail: () => [
+      // The far pair of limbs, behind the body and a shade darker for it.
+      svg("path", { d: "M64 58 C59 72 59 84 63 90 L72 90 C68 82 68 70 71 58 Z", fill: "#7a6350" }),
+      svg("path", { d: "M22 60 C17 74 17 84 21 90 L30 90 C26 82 26 70 29 60 Z", fill: "#7a6350" }),
+      svg("ellipse", { cx: 67, cy: 89, rx: 5.5, ry: 2.8, fill: "#4a3b2c" }),
+      svg("ellipse", { cx: 25, cy: 89, rx: 5.5, ry: 2.8, fill: "#4a3b2c" }),
+      // Body, long and low, with the belly nearly on the ground.
+      svg("ellipse", { cx: 42, cy: 62, rx: 29, ry: 20, fill: "#9b8468" }),
+      svg("ellipse", { cx: 42, cy: 69, rx: 20, ry: 12, fill: "#b6a189", "fill-opacity": 0.8 }),
+      // Head, out in front and low, which is the whole difference from the card.
+      svg("circle", { cx: 74, cy: 52, r: 17, fill: "#c3b099" }),
+      svg("ellipse", { cx: 69, cy: 50, rx: 6, ry: 7, fill: "#6d5a45", "fill-opacity": 0.85 }),
+      svg("ellipse", { cx: 82, cy: 50, rx: 6, ry: 7, fill: "#6d5a45", "fill-opacity": 0.85 }),
+      svg("circle", { cx: 69, cy: 50, r: 2.6, fill: "#2e2519" }),
+      svg("circle", { cx: 82, cy: 50, r: 2.6, fill: "#2e2519" }),
+      svg("circle", { cx: 76, cy: 59, r: 2.4, fill: "#6d5a45" }),
+      svg("path", {
+        d: "M70 64 Q76 68 82 64",
+        stroke: "#6d5a45",
+        "stroke-width": 2,
+        fill: "none",
+        "stroke-linecap": "round",
+      }),
+      // The near pair, in front of the body, mid-stride: the foreleg reaching
+      // and the hind leg still under the hip.
+      svg("path", { d: "M56 64 C51 76 51 86 55 91 L66 91 C62 84 62 74 65 64 Z", fill: "#8a7259" }),
+      svg("path", { d: "M28 66 C23 78 23 87 27 91 L38 91 C34 85 34 76 37 66 Z", fill: "#8a7259" }),
+      svg("ellipse", { cx: 60, cy: 90, rx: 7, ry: 3.4, fill: "#4a3b2c" }),
+      svg("ellipse", { cx: 32, cy: 90, rx: 7, ry: 3.4, fill: "#4a3b2c" }),
+      // The claws, hooked forward. Off the branch they are the one cue left
+      // that this is a sloth and not any other brown animal.
+      svg("path", { d: "M66 90 C70 87 73 90 70 92 L66 92 Z", fill: "#4a3b2c" }),
+      svg("path", { d: "M38 90 C42 87 45 90 42 92 L38 92 Z", fill: "#4a3b2c" }),
+    ],
+  },
 
+  // Sitting a couple of units clear of where the ground will be, which is the
+  // one character that is meant to. Its tail plumes used to reach y=96, five
+  // units past the y=91 the token places on the trail, so the longest feathers
+  // were buried in the earth rather than trailing behind a bird in flight.
   phoenix: () => [
     // Tail plumes, layered back to front.
-    svg("path", { d: "M40 62 C22 72 12 86 16 96 C26 90 34 80 44 74 Z", fill: "#d94f2b" }),
-    svg("path", { d: "M42 60 C28 64 16 74 14 84 C26 80 36 72 46 68 Z", fill: "#f08a2c" }),
+    svg("path", { d: "M40 55 C22 65 12 79 16 89 C26 83 34 73 44 67 Z", fill: "#d94f2b" }),
+    svg("path", { d: "M42 53 C28 57 16 67 14 77 C26 73 36 65 46 61 Z", fill: "#f08a2c" }),
     // Wing, swept up.
-    svg("path", { d: "M50 52 C40 34 46 16 66 8 C64 26 62 40 58 54 Z", fill: "#f5b53f" }),
+    svg("path", { d: "M50 45 C40 27 46 9 66 1 C64 19 62 33 58 47 Z", fill: "#f5b53f" }),
     svg("path", {
-      d: "M52 54 C48 40 54 26 68 18 C66 32 62 44 58 56 Z",
+      d: "M52 47 C48 33 54 19 68 11 C66 25 62 37 58 49 Z",
       fill: "#ffd76a",
       "fill-opacity": 0.85,
     }),
     // Body.
     svg("path", {
-      d: "M46 70 C42 56 50 44 62 44 C74 44 82 54 80 66 C78 78 66 84 56 80 Z",
+      d: "M46 63 C42 49 50 37 62 37 C74 37 82 47 80 59 C78 71 66 77 56 73 Z",
       fill: "#e8642a",
     }),
     // Head and crest.
-    svg("circle", { cx: 74, cy: 40, r: 11, fill: "#f5843a" }),
-    svg("path", { d: "M72 30 C70 20 76 14 84 12 C80 20 80 26 79 31 Z", fill: "#ffd76a" }),
+    svg("circle", { cx: 74, cy: 33, r: 11, fill: "#f5843a" }),
+    svg("path", { d: "M72 23 C70 13 76 7 84 5 C80 13 80 19 79 24 Z", fill: "#ffd76a" }),
     // Beak and eye.
-    svg("path", { d: "M84 40 L95 44 L84 47 Z", fill: "#f5b53f" }),
-    svg("circle", { cx: 77, cy: 37, r: 3, fill: "#3a1f0e" }),
-    svg("circle", { cx: 78, cy: 36, r: 1.1, fill: "#fff" }),
+    svg("path", { d: "M84 33 L95 37 L84 40 Z", fill: "#f5b53f" }),
+    svg("circle", { cx: 77, cy: 30, r: 3, fill: "#3a1f0e" }),
+    svg("circle", { cx: 78, cy: 29, r: 1.1, fill: "#fff" }),
   ],
 
   porcupine: () => {
     // Quills, generated so the fan is even rather than hand-placed.
+    //
+    // Rooted on the body's own ellipse rather than on a circle around it. A
+    // single `inner` radius cannot do that job: the body is much wider than it
+    // is tall, so a radius short enough to bury the quills over the flanks
+    // cleared the spine entirely and the quills above the back started in
+    // mid-air. Deriving both ends from BODY means this keeps holding if the body
+    // is ever resized, which a hand-tuned pair of radii would not.
+    const BODY = { cx: 50, cy: 68, rx: 27, ry: 21 }
+    // How far down into the body each quill is buried, as a fraction of the
+    // body's radius, and how far past the silhouette it stands out. The body is
+    // drawn over the roots, so ROOT only has to be inside the outline.
+    const ROOT = 0.88
+    const LENGTH = 18
     const quills = []
     for (let i = 0; i < 13; i += 1) {
-      const angle = Math.PI * (0.08 + (i / 12) * 0.84)
-      const cx = 52
-      const cy = 66
-      const inner = 22
-      const outer = 40
+      // Stops short of the head: the fan used to reach 0.92π, which put the last
+      // quill's root on top of the eye.
+      const angle = Math.PI * (0.08 + (i / 12) * 0.8)
+      const dx = -Math.cos(angle)
+      const dy = -Math.sin(angle)
       quills.push(
         svg("path", {
-          d: `M${cx - Math.cos(angle) * inner} ${cy - Math.sin(angle) * inner} L${
-            cx - Math.cos(angle) * outer
-          } ${cy - Math.sin(angle) * outer}`,
+          d:
+            `M${BODY.cx + dx * BODY.rx * ROOT} ${BODY.cy + dy * BODY.ry * ROOT} ` +
+            `L${BODY.cx + dx * (BODY.rx + LENGTH)} ${BODY.cy + dy * (BODY.ry + LENGTH)}`,
           stroke: i % 2 === 0 ? "#4a3b2c" : "#6d5642",
           "stroke-width": 3.4,
           "stroke-linecap": "round",
@@ -316,7 +377,7 @@ const CHARACTERS = {
     return [
       ...quills,
       // Body.
-      svg("ellipse", { cx: 50, cy: 68, rx: 27, ry: 21, fill: "#6d5642" }),
+      svg("ellipse", { cx: BODY.cx, cy: BODY.cy, rx: BODY.rx, ry: BODY.ry, fill: "#6d5642" }),
       svg("ellipse", { cx: 50, cy: 72, rx: 20, ry: 14, fill: "#8a7159", "fill-opacity": 0.7 }),
       // Snout.
       svg("path", { d: "M74 66 C84 64 92 68 92 73 C92 78 82 80 74 77 Z", fill: "#a3907c" }),
@@ -334,20 +395,24 @@ const CHARACTERS = {
 /**
  * Draw a character.
  *
+ * `onTrail` picks a pose, not a subset of shapes. It used to strip out anything
+ * the animal hung from, which was enough to get the sloth's branch off the trail
+ * but left it walking with its arms above its head -- and a subtractive flag is
+ * meaningless to a pack backed by images, where a pose is a different frame. A
+ * character with only one pose ignores the flag.
+ *
  * @param {unknown} characterId - A character id
- * @param {boolean} [onTrail] - Drop anything the animal hangs from on its card
+ * @param {boolean} [onTrail] - True for the walking pose, false for the card
  * @returns {import("./index.js").Drawing} The drawing; a neutral blob if unknown
  */
 export function character(characterId, onTrail = false) {
   // Object.hasOwn, not a bare lookup: `character("constructor")` off a
   // corrupted save would otherwise reach Object.prototype and throw, and
   // this file's header promises an unknown id degrades to a neutral shape.
-  const draw = Object.hasOwn(CHARACTERS, characterId) ? CHARACTERS[characterId] : null
-  if (!draw) return _drawing([svg("circle", { cx: 50, cy: 55, r: 30, fill: NEUTRAL })])
-  // On the trail the animal is standing on the ground, so anything it hangs
-  // from on its card has to go: the sloth's branch otherwise travelled with it
-  // as a stick floating in mid-air.
-  return _drawing(draw().filter((shape) => !(onTrail && shape.dataset?.hangsFrom)))
+  const entry = Object.hasOwn(CHARACTERS, characterId) ? CHARACTERS[characterId] : null
+  if (!entry) return _drawing([svg("circle", { cx: 50, cy: 55, r: 30, fill: NEUTRAL })])
+  const draw = typeof entry === "function" ? entry : onTrail ? entry.trail : entry.card
+  return _drawing(draw())
 }
 
 /**
@@ -418,52 +483,112 @@ export function item(seasonId, rare = false) {
 }
 
 /**
- * The snake woman. A coiled serpent with a crowned head -- she is a
- * potion-maker who sets the quest, not a threat, so the shape leans regal and
- * composed rather than monstrous.
+ * The snake woman. A witch from the waist up and a serpent below it: coils on
+ * the ground, a violet robe, a pointed hat, a human face, and the potion she is
+ * making held out in one hand.
+ *
+ * She used to have a snake's head and a crown, which read as a monster wearing
+ * jewellery rather than as the potion-maker who sets the quest. The coils stayed
+ * -- they are what make her a snake woman rather than a generic witch -- and
+ * everything above them is a person now.
+ *
+ * Two constraints shape the drawing more than taste does:
+ *
+ * - **It has to work at 62px.** The demand bar portrait is that small, so at
+ *   that size the face is about 18px across. What survives is the arrangement,
+ *   the brows and the hat; slit pupils and a forked tongue did not. Her head is
+ *   deliberately larger than a realistic proportion would allow.
+ * - **Her skin is pale enough to disappear** against the white surface the
+ *   portrait sits on, which is why a slightly darker ellipse sits behind the
+ *   face as a rim and the hair frames it on both sides. The hat does the same
+ *   job from above.
  *
  * Built almost entirely from filled shapes rather than thick strokes: a stroked
  * path looks identical in a browser but vanishes in any renderer that treats
- * `stroke-width` loosely, and the coil reads better as a solid body anyway.
+ * `stroke-width` loosely, and the coils read better as a solid body anyway.
  *
  * @returns {import("./index.js").Drawing} The drawing
  */
 export function villain() {
   return _drawing([
+    // Tail tip curling out from under the lower coil.
+    svg("path", { d: "M16 92 C9 90 6 84 10 80 C12 86 17 87 20 87 Z", fill: "#4b7a5a" }),
     // Coils, back to front. Each is an ellipse with a darker inner ellipse, so
     // it reads as a ring of body rather than a flat blob.
-    svg("ellipse", { cx: 50, cy: 82, rx: 37, ry: 15, fill: "#4b7a5a" }),
-    svg("ellipse", { cx: 50, cy: 83, rx: 21, ry: 6, fill: "#3d6549" }),
-    svg("ellipse", { cx: 53, cy: 68, rx: 27, ry: 12, fill: "#5a8c66" }),
-    svg("ellipse", { cx: 53, cy: 69, rx: 14, ry: 5, fill: "#4b7a5a" }),
-    // Tail tip curling out of the lower coil.
-    svg("path", { d: "M13 84 C6 82 4 76 8 72 C10 78 14 79 17 79 Z", fill: "#4b7a5a" }),
-    // The body rising out of the coils, tapering toward the hood.
-    svg("path", { d: "M44 66 C42 54 45 43 52 35 L66 40 C60 47 57 55 58 66 Z", fill: "#6a9c76" }),
-    // Hood.
+    svg("ellipse", { cx: 50, cy: 86, rx: 36, ry: 13, fill: "#4b7a5a" }),
+    svg("ellipse", { cx: 50, cy: 87.5, rx: 19, ry: 5.5, fill: "#3d6549" }),
+    svg("ellipse", { cx: 52, cy: 74, rx: 28, ry: 12, fill: "#5a8c66" }),
+    svg("ellipse", { cx: 52, cy: 75, rx: 14.5, ry: 5, fill: "#4b7a5a" }),
+    // The robe, flaring from the shoulders down onto the top coil. Kept narrow
+    // enough that the coil still shows either side of the hem -- draped over the
+    // whole width, the two rings stopped reading as a coiled body.
     svg("path", {
-      d: "M38 33 C38 13 78 13 78 33 C78 46 58 51 58 51 C58 51 38 46 38 33 Z",
-      fill: "#6a9c76",
+      d: "M45 54 C42 60 39 66 37 74 C44 78 62 78 69 74 C67 66 64 60 61 54 Z",
+      fill: "#6b4a86",
     }),
     svg("path", {
-      d: "M46 31 C46 20 70 20 70 31 C70 39 58 43 58 43 C58 43 46 39 46 31 Z",
-      fill: "#7fb08b",
+      d: "M45 54 C42 60 39 66 37 74 C41 76 45 77 50 77.4 C48 69 47 61 48 54 Z",
+      fill: "#573a6f",
     }),
-    // Head.
-    svg("ellipse", { cx: 58, cy: 28, rx: 13, ry: 14, fill: "#8fc39b" }),
-    // Her crown.
-    svg("path", { d: "M45 17 L49 6 L54 15 L58 2 L62 15 L67 6 L71 17 Z", fill: "#e8c34a" }),
-    svg("circle", { cx: 58, cy: 4, r: 2.2, fill: "#f5e08a" }),
-    // Eyes, slit pupils.
-    svg("ellipse", { cx: 52, cy: 28, rx: 3.4, ry: 4.4, fill: "#f5f0c8" }),
-    svg("ellipse", { cx: 64, cy: 28, rx: 3.4, ry: 4.4, fill: "#f5f0c8" }),
-    svg("ellipse", { cx: 52, cy: 28, rx: 1.1, ry: 3.4, fill: "#2b3d31" }),
-    svg("ellipse", { cx: 64, cy: 28, rx: 1.1, ry: 3.4, fill: "#2b3d31" }),
-    // Forked tongue.
+    // The one piece of gold left from her crown.
+    svg("circle", { cx: 54, cy: 56, r: 2.8, fill: "#e8c34a" }),
+    // Her left arm, resting a hand on the coil. Darker than the robe so it
+    // separates from it without an outline.
+    svg("path", { d: "M45 57 C40 59 36 64 34 70 L40 73 C42 68 45 64 49 62 Z", fill: "#573a6f" }),
+    svg("circle", { cx: 36.5, cy: 72.5, r: 4.4, fill: "#ece0f2" }),
+    // Head. The rim is the outline: a darker ellipse a shade larger than the
+    // face, which survives a renderer that ignores stroke widths.
+    svg("ellipse", { cx: 53, cy: 39, rx: 15.4, ry: 16.4, fill: "#c4aed4" }),
+    svg("ellipse", { cx: 53, cy: 39, rx: 14, ry: 15, fill: "#ece0f2" }),
+    // Hair, falling either side from under the brim and framing the pale face.
+    svg("path", { d: "M41 30 C36 40 35 54 38 64 L45 62 C42 52 41 40 44 31 Z", fill: "#2f2340" }),
+    svg("path", { d: "M65 30 C70 40 71 54 68 64 L61 62 C64 52 65 40 62 31 Z", fill: "#2f2340" }),
+    // Brows, which are what make this read as a face rather than two dots. They
+    // do more at portrait size than the eyes themselves, which is exactly why
+    // they are filled and not stroked -- see the note above about renderers that
+    // treat `stroke-width` loosely. A brow that failed to draw would cost her
+    // the expression.
+    //
+    // Near level, tilting down very slightly towards the outer edge. Sloped the
+    // other way -- inner ends low -- she scowled, and she is the one character
+    // in the game who is not a threat.
+    svg("path", { d: "M44.6 34.3 L51.6 33.1 L51.6 35 L44.6 36.2 Z", fill: "#2f2340" }),
+    svg("path", { d: "M61.4 34.3 L54.4 33.1 L54.4 35 L61.4 36.2 Z", fill: "#2f2340" }),
+    // Eyes. Green irises, the last thing she has in common with a snake.
+    svg("ellipse", { cx: 47.8, cy: 40, rx: 3.7, ry: 3.3, fill: "#fff" }),
+    svg("ellipse", { cx: 58.2, cy: 40, rx: 3.7, ry: 3.3, fill: "#fff" }),
+    svg("circle", { cx: 48.2, cy: 40, r: 2.2, fill: "#3d6549" }),
+    svg("circle", { cx: 58.6, cy: 40, r: 2.2, fill: "#3d6549" }),
+    svg("circle", { cx: 48.2, cy: 40, r: 1.1, fill: "#1e1728" }),
+    svg("circle", { cx: 58.6, cy: 40, r: 1.1, fill: "#1e1728" }),
+    // A soft shadow for the nose tip. Drawn as a wedge it read as a hole, which
+    // with two large eyes above it made the face look like a skull.
+    svg("ellipse", { cx: 53.6, cy: 45, rx: 2.2, ry: 1.6, fill: "#d9c4e3" }),
+    svg("circle", { cx: 45, cy: 45, r: 2.6, fill: "#d9a0b8", "fill-opacity": 0.45 }),
+    svg("circle", { cx: 61, cy: 45, r: 2.6, fill: "#d9a0b8", "fill-opacity": 0.45 }),
+    // She is pleased to see you and she still wants eleven roses. A filled
+    // crescent rather than a stroked arc, for the same reason as the brows.
+    svg("path", { d: "M48.8 48.2 Q53 52.4 57.2 48.2 Q53 50.6 48.8 48.2 Z", fill: "#a8506e" }),
+    // The hat, drawn over the head so the brim sits on the forehead. Leaning a
+    // little, because a perfectly upright cone looks like a traffic marker.
+    svg("path", { d: "M60 1 C55 9 49 19 42 28 L67 28 C65 19 63 9 60 1 Z", fill: "#3f2a52" }),
+    svg("path", { d: "M49.8 18 L64 18 L65.2 23 L46.4 23 Z", fill: "#e8c34a" }),
     svg("path", {
-      d: "M56.6 40 L59.4 40 L59.4 47 L62 51 L60 52 L58 49 L56 52 L54 51 L56.6 47 Z",
-      fill: "#c94f6a",
+      d: "M55.5 17.1 L56.38 19.29 L58.73 19.45 L56.93 20.96 L57.5 23.25 L55.5 22 L53.5 23.25 L54.07 20.96 L52.27 19.45 L54.62 19.29 Z",
+      fill: "#f5e08a",
     }),
+    svg("ellipse", { cx: 54, cy: 28, rx: 20.5, ry: 4.4, fill: "#3f2a52" }),
+    // Her right arm and the potion, in front of everything: the flask is the
+    // clearest thing in the drawing that says what she does.
+    svg("path", { d: "M62 57 C68 58 74 62 78 68 L73 72 C70 67 66 64 59 62 Z", fill: "#573a6f" }),
+    svg("circle", { cx: 79, cy: 71, r: 4.6, fill: "#ece0f2" }),
+    svg("rect", { x: 78.5, y: 51, width: 7, height: 3.6, rx: 1.4, fill: "#8a6a4a" }),
+    svg("rect", { x: 79.5, y: 54, width: 5, height: 6, fill: "#8fd4ee" }),
+    svg("circle", { cx: 82, cy: 64, r: 6.5, fill: "#8fd4ee" }),
+    // The arc's ends sit on the circle, so the potion fills the flask exactly to
+    // the line rather than spilling out of the glass.
+    svg("path", { d: "M75.82 64 A6.5 6.5 0 0 0 88.18 64 Z", fill: "#7fb08b" }),
+    svg("circle", { cx: 79.6, cy: 63, r: 1.8, fill: "#fff", "fill-opacity": 0.6 }),
   ])
 }
 
@@ -735,7 +860,19 @@ const VIEWPORT_WIDTH = 1100
 const GROUND = 190
 const ROLL = 14
 
-/** Half the drawn token's width, and how far its feet sit below its origin. @private */
+/**
+ * Half the drawn token's width, and how far its feet sit below its origin.
+ *
+ * Together with `layout`'s `tokenScale` these fix the **ground line** every
+ * character is drawn against: a token placed at a stop puts drawing y
+ * `TOKEN_FOOT / tokenScale`, which is 91, exactly on the trail. So a character
+ * whose lowest shape stops short of y=91 floats, and one that reaches past it is
+ * buried. Three of the four got this wrong at some point, and the mistake is
+ * invisible in the 100x100 box a character is drawn in -- it only shows once the
+ * animal is standing on a hillside. If `tokenScale` changes, every character
+ * moves off the ground together.
+ * @private
+ */
 const TOKEN_HALF = 34
 const TOKEN_FOOT = 62
 
@@ -954,6 +1091,19 @@ export function layout(season) {
  * points; what differs is the shape of the path and the timing, which is where
  * the sense of weight comes from.
  *
+ * Every crossing lands the same way: a squash just before the end, then a clean
+ * final frame. The squash is how far the animal fell, so a mountain hits harder
+ * than a river hop, and it is the cheapest thing on the trail that makes the
+ * ground feel solid. The final frame carries no deformation at all, which is
+ * load-bearing rather than tidy -- crossings play with `fill: "forwards"`, so
+ * whatever the last frame says is what the character keeps looking like for the
+ * whole of the next question. The gap used to end on `scaleY(0.9)` and left the
+ * animal standing there 10% short.
+ *
+ * The squash scales about the bottom of the token, not its middle. That is a
+ * CSS decision, in `.trail-token`; without it a `scaleY` here lifts the
+ * character off the ground instead of pressing it into the ground.
+ *
  * @param {string} kind - The obstacle kind being crossed
  * @param {{x: number, y: number}} from - The stop being left
  * @param {{x: number, y: number}} to - The stop being reached
@@ -965,6 +1115,16 @@ export function traversal(kind, from, to) {
   const mid = { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 }
   const quarter = { x: from.x + (to.x - from.x) * 0.25, y: from.y + (to.y - from.y) * 0.25 }
   const threeQuarter = { x: from.x + (to.x - from.x) * 0.75, y: from.y + (to.y - from.y) * 0.75 }
+  /**
+   * The landing: squash at `offset`, then stand up clean.
+   * @param {number} squash - How far the animal compresses, 1 being not at all
+   * @param {number} offset - When it touches down, as a fraction of the crossing
+   * @returns {Array<Object>} The last two keyframes
+   */
+  const land = (squash, offset) => [
+    { transform: at(to, 0, ` scaleY(${squash})`), offset },
+    { transform: at(to) },
+  ]
 
   switch (kind) {
     case "gap":
@@ -973,19 +1133,21 @@ export function traversal(kind, from, to) {
         keyframes: [
           { transform: at(from, 0, " scaleY(0.86)") },
           { transform: at(mid, 96), offset: 0.5 },
-          { transform: at(to, 0, " scaleY(0.9)") },
+          ...land(0.82, 0.88),
         ],
         options: { duration: 620, easing: "ease-out" },
       }
     case "river":
-      // Two hops across, as if using stones -- low, quick, a bob each time.
+      // Two hops across, as if using stones -- low, quick, a bob each time. The
+      // lightest landing of the six: the last hop is onto the bank, not down
+      // onto it.
       return {
         keyframes: [
           { transform: at(from) },
           { transform: at(quarter, 44), offset: 0.25 },
           { transform: at(mid, 4), offset: 0.5 },
           { transform: at(threeQuarter, 44), offset: 0.75 },
-          { transform: at(to) },
+          ...land(0.93, 0.9),
         ],
         options: { duration: 780, easing: "ease-in-out" },
       }
@@ -996,23 +1158,27 @@ export function traversal(kind, from, to) {
           { transform: at(from) },
           { transform: at(quarter, 84), offset: 0.35 },
           { transform: at(mid, 100), offset: 0.55 },
-          { transform: at(to) },
+          ...land(0.84, 0.86),
         ],
         options: { duration: 760, easing: "ease-in-out" },
       }
     case "thicket":
       // No lift at all -- pushing through, squashed narrow, and slower for it.
+      // Nothing to land from either, so it comes out of the last branches still
+      // a little compressed sideways rather than dropping onto its feet.
       return {
         keyframes: [
           { transform: at(from) },
           { transform: at(quarter, 0, " scaleX(0.78)"), offset: 0.3 },
           { transform: at(threeQuarter, 0, " scaleX(0.82)"), offset: 0.7 },
+          { transform: at(to, 0, " scaleX(0.93)"), offset: 0.88 },
           { transform: at(to) },
         ],
         options: { duration: 880, easing: "ease-in-out" },
       }
     case "mountain":
-      // The hard one. Slow, high, and it pauses at the summit.
+      // The hard one. Slow, high, it pauses at the summit, and it comes down
+      // from further than anything else on the trail.
       return {
         keyframes: [
           { transform: at(from, 0, " scaleY(0.92)") },
@@ -1020,7 +1186,7 @@ export function traversal(kind, from, to) {
           { transform: at(mid, 128), offset: 0.5 },
           { transform: at(mid, 128), offset: 0.62 },
           { transform: at(threeQuarter, 104), offset: 0.82 },
-          { transform: at(to) },
+          ...land(0.8, 0.92),
         ],
         options: { duration: 1150, easing: "ease-in-out" },
       }
@@ -1031,7 +1197,7 @@ export function traversal(kind, from, to) {
         keyframes: [
           { transform: at(from) },
           { transform: at(mid, 74), offset: 0.5 },
-          { transform: at(to) },
+          ...land(0.89, 0.87),
         ],
         options: { duration: 700, easing: "ease-in-out" },
       }

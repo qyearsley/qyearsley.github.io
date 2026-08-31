@@ -28,8 +28,8 @@ Roughly in order of how much each would change the game.
    placeholder to keep the slot playable. Replacing it is one entry in
    `js/characters.js` as long as it reuses an existing effect field.
 
-2. **What is the snake woman called?** She has a personality, a crown and a
-   potion, and no name.
+2. **What is the snake woman called?** She has a personality, a witch's hat, a
+   potion in her hand, and no name.
 
 3. **What should a wrong answer cost?** `RULES.WRONG_ANSWER`, currently `WILT`.
    - `GENTLE` -- nothing happens, the question just changes
@@ -108,6 +108,62 @@ Most of this list was cleared on 2026-08-31; what is left is below the done ones
   there is no way to _choose_ one. Whether she can replay a finished season, or
   jump to one she has unlocked, is a rule question rather than a display one —
   it is Ella's call, and it changes what a run means.
+- **Nothing on the trail moves except the character.** Between questions the
+  scene is completely still: the animal is a static shape, the river does not
+  run, the thicket does not stir, and winter's snow is drawn as a field of
+  circles that never fall. Reviewed 2026-08-31 and deliberately left, because
+  each piece needs a decision about _where_ the motion lives rather than just
+  some keyframes:
+  - **An idle bob or breathe on the character and on the snake woman.** Not
+    simply a CSS rule: JS owns `.trail-token`'s transform and the group inside it
+    already carries the pack's `scale`, so this needs a third nested `<g>`. And
+    ownership is the real question — motion belongs to the art pack, which owns
+    `traversal()` for exactly this reason, so the shape is probably an
+    **optional** twelfth export, `idle(characterId)`, that GameUI uses if the
+    pack offers one. Optional keeps the required contract at eleven names, and a
+    sprite pack returns frame swaps where this one returns a transform.
+  - **Falling snow, and autumn leaves to match.** Winter has weather and autumn
+    has none. The per-flake stagger can come from index arithmetic exactly as the
+    positions already do, so [the no-randomness rule](../games/seasons/js/README.md#purity)
+    holds. A pack cannot ship CSS, so the likely shape is that the pack tags its
+    own shapes (`class="snow-flake"`) and the stylesheet animates whatever
+    carries the tag. That is a mild widening of the seam — a class-name
+    convention between pack and stylesheet — but it means the universal
+    `prefers-reduced-motion` rule covers all of it for free. SMIL inside the
+    drawing would be self-contained and needs no convention, but it ignores
+    reduced motion entirely, which is the wrong trade for this game.
+  - **Water shimmer on the river, and a slight thicket sway.** Same mechanism as
+    the flakes, so same decision.
+- **Item pips do not pop in when earned.** `renderItemTrack` rebuilds every pip
+  on every render, so a CSS animation replays across the whole row each time.
+  Doing it properly means telling the UI which pip is new, which is a state
+  change rather than a display one.
+- ~~**Two characters did not stand on the ground.**~~ **Done**, 2026-08-31. The
+  token is placed so that drawing y=91 lands on the trail. The banana slug
+  stopped at y=78, so the one animal in the roster that is nothing but underside
+  floated nine units above it; the phoenix's tail plumes reached y=96 and were
+  buried five units into the earth. Both were shifted in their own boxes rather
+  than rescaled, since `tokenScale` is shared by all four. The phoenix now clears
+  the ground by two units, which is the one character that should.
+- ~~**The snake woman had a snake's head.**~~ **Done**, 2026-08-31. She is a
+  witch from the waist up now: human face, pointed hat, violet robe, and the
+  potion she is making held out in one hand. The coils stayed, because they are
+  what make her a snake woman rather than a generic witch. Her head is
+  deliberately oversized — the demand-bar portrait is 62px, which puts the face
+  at about 18px, and at that size the brows do more work than the eyes.
+- ~~**The sloth walked with its arms in the air.**~~ **Done**, 2026-08-31, and it
+  changed the contract: `character(id, onTrail)` picks a pose now rather than
+  filtering out shapes tagged `data-hangs-from`. A subtractive flag was never
+  going to survive a pack backed by images, where a pose is a different frame.
+- ~~**The porcupine's quills started in mid-air.**~~ **Done**, 2026-08-31. The
+  fan was generated from a circle and the body is a much flatter ellipse, so a
+  radius short enough to bury the quills over the flanks cleared the spine. Both
+  ends of each quill come off the body's own ellipse now.
+- ~~**Crossings ended flat.**~~ **Done**, 2026-08-31. Every traversal lands on a
+  squash sized to how far the animal fell, then a clean final frame. The clean
+  frame was a bug as much as a polish item: crossings play with
+  `fill: "forwards"`, and the gap used to finish on `scaleY(0.9)`, so the
+  character stood 10% short for the whole of the next question.
 - ~~**The result screen is a table.**~~ **Done.** The season screen now draws the
   haul going into the snake woman's jar: one collectible per item delivered,
   dropped in on a stagger, captioned "11 roses into her jar". The jar is CSS and

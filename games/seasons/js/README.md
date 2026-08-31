@@ -135,9 +135,12 @@ implementation of every one.
   `villain()`, `backdrop(seasonId, width)` → a `Drawing`, `{element, viewBox}`.
   An obstacle is drawn with its origin on the ground so `layout` can place it by
   translation alone, and takes a season so one drawing recolours for all four;
-  `backdrop` is generated at the trail's real width. `onTrail` drops any shape
-  carrying `data-hangs-from` — the sloth's branch otherwise travelled onto the
-  trail as a stick floating in mid-air.
+  `backdrop` is generated at the trail's real width. `onTrail` picks a **pose**,
+  not a subset of shapes — the sloth hangs from a branch on its card and walks on
+  the trail. It used to strip out anything tagged `data-hangs-from`, which got
+  the branch off the trail but left the sloth walking with its arms above its
+  head, and a subtractive flag means nothing to a pack backed by images, where a
+  pose is a different frame. A character with one pose ignores the flag.
 - `layout(season)` → the trail's geometry: `width`, `height`, `viewportWidth`,
   `viewBox`, `groundSegments`, `stops`, `obstacles`. `stops[i]` is where the
   character stands facing obstacle `i`, `stops[route.length]` is the boss, and
@@ -149,6 +152,13 @@ implementation of every one.
   four, which made it a second place that knew how the art was drawn and meant a
   replacement pack could not be dropped in without editing the UI.
 - `traversal(kind, from, to)` → `{keyframes, options}` for `Element.animate`.
+  Every crossing ends on a squash and then a clean final frame. The clean frame
+  matters: crossings play with `fill: "forwards"`, so any deformation left on the
+  last keyframe is what the character wears for the whole of the next question.
+  The squash pivots on the bottom of the token, which `.trail-token` sets in CSS
+  with `transform-box: fill-box` — an SVG group scales about the centre of the
+  whole trail viewBox otherwise, which lifts the character rather than
+  compressing it.
 - `standing(stop)` → a CSS transform, for placing the token with no animation.
 
 The pack owning `traversal` as well as the drawings is the point of the seam: a

@@ -499,7 +499,16 @@ body {
   animation: seasons-pulse 2.6s ease-in-out infinite;
 }
 
+/* The character. JS owns the transform -- `standing()` places it and the
+   traversal keyframes move it -- but not the origin those keyframes scale
+   about, and the default is wrong here. Without `fill-box` a scale on an SVG
+   group pivots on the centre of the whole trail viewBox, which is roughly two
+   obstacles away: the anticipation crouch and the landing squash both shrank the
+   animal AND slid it up into the air. Pinned to the bottom of its own box, a
+   `scaleY` squashes onto the ground, which is what the keyframes mean by it. */
 .trail-token {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
   will-change: transform;
 }
 
