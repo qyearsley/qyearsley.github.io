@@ -1,83 +1,40 @@
-# Build System Options
+# Decision: Plain HTML Pages, No Site Generator
 
-Comparison of approaches for reducing HTML boilerplate across pages.
+**Decided 2026-08-31. Closed.** `CLAUDE.md` already states the preference
+("prefer self-contained HTML files over complex build abstractions"); this file
+records why, and what would reopen it.
 
-## Current: Self-Contained HTML Files
+## What we decided
 
-Each page is a complete HTML file with its own `<head>`, `<header>`, etc.
-The build script only handles translation, resume, sitemap, and validation.
+Every page stays a complete, standalone HTML file. `build.js` does only what a
+static host can't: copy the tree to `dist/`, render `resume/resume.md` into
+`resume/template.html`, generate the `/zh/` pages from co-located `*.zh.json`
+files, inject `window.__translatedPaths`, write `sitemap.xml`, and check
+internal links. No layouts, no partials, no page templating -- the resume's
+single `{{CONTENT}}` placeholder is the only template in the repo.
 
-**Pros:**
+## Why
 
-- Each file is readable and editable on its own
-- Standard HTML -- all linters, formatters, and editors work
-- No template abstraction to learn or maintain
-- `npm run dev` serves files directly without building
+There are ~29 pages and they change slowly, so duplicated `<head>` and
+`<header>` markup is cheap to maintain. In exchange, every file is valid HTML
+that tools understand on its own, and `npm run dev` serves the source unbuilt.
 
-**Cons:**
+What the alternatives cost:
 
-- Shared elements (head boilerplate, header, nav script tag) duplicated in every file
-- Changing shared structure requires editing every HTML file
+| Option                                                  | Ruled out because                                                                                                                                                                                                                                                      |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Custom `.page` templates (YAML frontmatter + HTML body) | Would roughly halve each page, but pages stop being HTML: no linting, no formatting, no editor support, unreadable without a build, and ~200 more lines in `build.js`. The earlier version of this doc records it as tried and reverted; no trace of it landed in git. |
+| Static site generator (11ty, Hugo, Jekyll)              | Mature and well documented, but heavy for a site this size, and Hugo or Jekyll drag in a non-JS toolchain.                                                                                                                                                             |
+| Client-side includes / web components                   | No build step, but shared markup then needs JavaScript to exist -- bad for `<title>` and meta tags, bad for crawlers, and it flashes on load.                                                                                                                          |
 
-**When this breaks down:** If you have 50+ pages with shared headers/footers
-that change frequently.
+## What would change our mind
 
-## Custom Templates (.page files)
+- Page count past roughly 50, or shared header/nav markup changing often enough
+  that editing every file starts to hurt.
+- Wanting real content pages -- a blog, or anything better written in Markdown
+  than in HTML.
+- `build.js` growing page-templating logic anyway, one special case at a time.
+  That is the signal that a real generator would do the job better.
 
-What was tried and reverted: YAML frontmatter + HTML body in `.page` files,
-rendered through a shared template by build.js.
-
-**Pros:**
-
-- Eliminates boilerplate (each page is ~50% shorter)
-- Auto-generated breadcrumbs from directory structure
-- Single template file for shared layout
-
-**Cons:**
-
-- Custom format -- linters, formatters, editor syntax highlighting don't work
-- Pages are unreadable without the build step
-- ~200 extra lines in build.js to maintain
-- Learning curve for anyone new to the repo
-
-## Static Site Generators (11ty, Hugo, Jekyll)
-
-Mature tools designed for exactly this problem.
-
-**Pros:**
-
-- Large ecosystem, good documentation
-- Markdown support, layouts, partials, data files
-- Many output formats and features out of the box
-
-**Cons:**
-
-- Heavy dependency for ~27 mostly-static pages
-- Learning curve for the tool's conventions
-- Build step required for all development
-- Jekyll (Ruby) or Hugo (Go) add a non-JS dependency
-
-**Best fit for:** Sites with 50+ content pages, blog posts, or teams
-that already use one of these tools.
-
-## Web Components / HTML Includes
-
-Use `<script>` or custom elements to inject shared headers/footers client-side.
-
-**Pros:**
-
-- Standard web technology, no build step
-- Progressive enhancement possible
-
-**Cons:**
-
-- Requires JavaScript -- content invisible to noscript users and some crawlers
-- Flash of unstyled/empty content before components load
-- Not great for SEO-critical elements like `<title>` and meta tags
-
-## Recommendation
-
-Keep self-contained HTML until boilerplate maintenance becomes a real problem.
-With ~27 pages that change infrequently, the duplication cost is low. If the
-site grows significantly, 11ty is the natural next step -- it's JavaScript-based,
-handles i18n well, and has a gentle learning curve.
+If we do move, try 11ty first: it's JavaScript, handles i18n, and can take pages
+over gradually rather than all at once.

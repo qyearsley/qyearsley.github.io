@@ -79,6 +79,9 @@ build, but `npm run build` regenerates it from `resume.md`. Edit the markdown.
 6. **Sitemap** -- generate `dist/sitemap.xml` from all HTML files
 7. **Validate** -- check all internal `href="/..."` links point to existing files
 
+Why this rather than a site generator, and what would change our mind:
+[`build-system-options.md`](build-system-options.md).
+
 ## Commands
 
 ```bash
