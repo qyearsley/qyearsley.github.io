@@ -435,10 +435,11 @@ export class GameUI extends BaseGameUI {
     if (!t) return
     const season = t.season
     const space = buildTrail(season)[position]
+    const obstacle = space ? getObstacle(space.kind) : null
     t.canvas.setAttribute(
       "aria-label",
-      space
-        ? `${season.name} trail, space ${position + 1} of ${season.spaces}: a ${getObstacle(space.kind).name.toLowerCase()} to cross`
+      obstacle
+        ? `${season.name} trail, space ${position + 1} of ${season.spaces}: a ${obstacle.name.toLowerCase()} to ${obstacle.verb}`
         : `${season.name} trail complete — you have reached the snake woman`,
     )
   }

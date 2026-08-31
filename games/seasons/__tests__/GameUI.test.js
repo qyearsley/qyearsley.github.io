@@ -533,6 +533,23 @@ describe("renderTrail", () => {
     )
   })
 
+  // "a river to cross" is the one label the old hardcoded "to cross" also
+  // produced, so it cannot tell the two apart. These can: each obstacle has to
+  // contribute its own verb.
+  it.each([
+    ["hill", "a hill to climb"],
+    ["thicket", "a thicket to push through"],
+    ["boulder", "a boulder to clamber over"],
+    ["gap", "a gap to leap across"],
+    ["mountain", "a mountain to climb"],
+  ])("says what the player does to a %s, not just 'cross'", (kind, expected) => {
+    const season = routedSeason([kind, "river", "river"])
+    ui.renderTrail(season, 0, "sloth")
+    expect(trailCanvas().getAttribute("aria-label")).toBe(
+      `Testing trail, space 1 of 3: ${expected}`,
+    )
+  })
+
   it.each(SEASON_LIST.map((season) => [season.id, season]))(
     "names %s's own obstacle at whichever space the player is on",
     (_id, season) => {

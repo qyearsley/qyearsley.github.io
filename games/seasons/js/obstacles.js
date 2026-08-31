@@ -15,10 +15,12 @@
  * reads a picture of a mountain. Tuning how many hard spaces a season has means
  * placing that many mountains in its route.
  *
- * `verb` is not read anywhere yet. It is here so a crossing can be described in
- * words when something wants to -- the trail's accessible label currently uses
- * `name` ("a river to cross"), and the feedback line after an answer talks about
- * items rather than movement.
+ * `verb` is what the trail's accessible label reads after "to": "a hill to
+ * climb", "a thicket to push through". It is held as an infinitive rather than
+ * third person for that reason -- the label describes what is still ahead of
+ * the player, so "a gap to leap across" is the right mood and "the porcupine
+ * leaps" is not. A pack that wants third person can build it from this; the
+ * reverse is not reliably derivable ("crosses" -> "crosse").
  *
  * Error Handling: `getObstacle` falls back to the first kind for anything
  * unknown, so a typo in a season's route draws the wrong hill rather than
@@ -32,7 +34,8 @@
  * @typedef {Object} Obstacle
  * @property {string} kind - Stable id; the art-pack key and the route value
  * @property {string} name - Display name, for labels and copy
- * @property {string} verb - What the character does to it, third person
+ * @property {string} verb - What the player must do to it, as an infinitive:
+ *   reads after "to" in the trail label, as in "a hill to climb"
  * @property {boolean} hard - Whether this is a harder question worth more items
  */
 
@@ -46,12 +49,12 @@
  * @type {Object<string, Obstacle>}
  */
 const OBSTACLES = {
-  hill: { kind: "hill", name: "Hill", verb: "climbs", hard: false },
-  river: { kind: "river", name: "River", verb: "crosses", hard: false },
-  thicket: { kind: "thicket", name: "Thicket", verb: "pushes through", hard: false },
-  boulder: { kind: "boulder", name: "Boulder", verb: "clambers over", hard: false },
-  gap: { kind: "gap", name: "Gap", verb: "leaps", hard: false },
-  mountain: { kind: "mountain", name: "Mountain", verb: "climbs", hard: true },
+  hill: { kind: "hill", name: "Hill", verb: "climb", hard: false },
+  river: { kind: "river", name: "River", verb: "cross", hard: false },
+  thicket: { kind: "thicket", name: "Thicket", verb: "push through", hard: false },
+  boulder: { kind: "boulder", name: "Boulder", verb: "clamber over", hard: false },
+  gap: { kind: "gap", name: "Gap", verb: "leap across", hard: false },
+  mountain: { kind: "mountain", name: "Mountain", verb: "climb", hard: true },
 }
 
 /** Every valid kind id, in declaration order. @type {string[]} */

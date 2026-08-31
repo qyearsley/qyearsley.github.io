@@ -117,9 +117,11 @@ Judged not to stand between Ella and a good first play, in rough value order.
   skips the crossing but not the flash, so the instinct to hurry only half works.
 - **Winter is the least distinctive season** despite being the climax: no snow on
   the ground or the trees, and the palest palette.
-- **`obstacles.verb`** ("climbs", "crosses") is defined and unread. It exists so a
-  crossing can be described in words -- the trail's label currently uses the
-  obstacle's name instead.
+- ~~**`obstacles.verb`** is defined and unread.~~ **Done 2026-08-31.** The trail's
+  accessible label now reads "a thicket to push through" rather than "a thicket
+  to cross". The field moved from third person to the infinitive, since the label
+  describes what is still ahead; third person is derivable from that and not the
+  other way round.
 
 ## Known gaps
 
