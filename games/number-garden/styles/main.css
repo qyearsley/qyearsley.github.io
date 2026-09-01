@@ -180,9 +180,13 @@ body {
   gap: var(--ng-space-lg);
 }
 
+/* Tabular figures: the star count changes on nearly every answer, and with
+   proportional digits the pill resized under it -- a 1 is narrower than a 4, so
+   9 to 10 shifted the row. */
 .stat {
   font-size: var(--ng-text-md);
   font-weight: bold;
+  font-variant-numeric: tabular-nums;
   color: var(--ng-ink);
   background: white;
   padding: var(--ng-space-sm) var(--ng-space-md);
@@ -220,6 +224,7 @@ body {
 .progress-text {
   font-size: var(--ng-text-md);
   font-weight: bold;
+  font-variant-numeric: tabular-nums;
   color: var(--theme-ink);
   min-width: 50px;
   transition: color 0.6s ease;

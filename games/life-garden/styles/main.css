@@ -169,6 +169,17 @@ select:focus-visible {
   outline-offset: 2px;
 }
 
+/* Press feedback. Seasons, Times Trail and Number Garden all do this; the two
+   older games had no pressed state at all, so a tap that missed and a tap that
+   landed looked the same until the grid changed. */
+.icon-btn:active,
+.ctrl-btn:active,
+.speed-btn:active,
+.species-btn:active,
+.preset-btn:active {
+  transform: scale(0.96);
+}
+
 .gen-display {
   font-size: 0.85rem;
   color: var(--lg-ink-faint);

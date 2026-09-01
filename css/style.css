@@ -38,12 +38,27 @@
   --color-success-text: #14532d;
   --color-info-bg: #eff6ff;
   --color-info-border: #bfdbfe;
-  --color-tag-bg: var(--color-primary);
-  --color-tag-text: #fff;
   --color-header-text: #fff;
   --color-header-breadcrumb: #cbd5e0;
   --color-header-separator: #718096;
   --color-header-border: transparent;
+
+  /* Text drawn on a --color-primary fill. Its own token because --color-primary
+     is light in dark mode, where white text on it drops to about 2:1. */
+  --color-on-primary: #fff;
+
+  /* A table's top-left corner cell: a header for the row labels rather than for
+     a data column, so it is greyed rather than accented. */
+  --color-table-corner-bg: #6c757d;
+  --color-table-corner-text: #fff;
+
+  /* Small numbered badges (proof steps). Tinted fill in light, solid fill in
+     dark -- a pale tint under light text is unreadable, and these carry a
+     single digit that has to be legible at 14px. */
+  --color-badge-info-bg: #dbeafe;
+  --color-badge-info-text: #2c5aa0;
+  --color-badge-success-bg: #dcfce7;
+  --color-badge-success-text: #14532d;
   --shadow-container: 0 2px 8px rgb(0, 0, 0, 0.1);
   --shadow-hover: 0 4px 12px rgb(0, 0, 0, 0.08);
 }
@@ -78,7 +93,13 @@
     --color-success-text: #bbf7d0;
     --color-info-bg: #1e3a5f;
     --color-info-border: #2c5aa0;
-    --color-tag-text: #1a202c;
+    --color-on-primary: #1a202c;
+    --color-table-corner-bg: #4a5568;
+    --color-table-corner-text: #e2e8f0;
+    --color-badge-info-bg: #2c5aa0;
+    --color-badge-info-text: #fff;
+    --color-badge-success-bg: #15803d;
+    --color-badge-success-text: #fff;
     --color-header-breadcrumb: #cbd5e0;
     --color-header-separator: #718096;
     --color-header-border: #4a5568;
@@ -116,7 +137,13 @@
   --color-success-text: #bbf7d0;
   --color-info-bg: #1e3a5f;
   --color-info-border: #2c5aa0;
-  --color-tag-text: #1a202c;
+  --color-on-primary: #1a202c;
+  --color-table-corner-bg: #4a5568;
+  --color-table-corner-text: #e2e8f0;
+  --color-badge-info-bg: #2c5aa0;
+  --color-badge-info-text: #fff;
+  --color-badge-success-bg: #15803d;
+  --color-badge-success-text: #fff;
   --color-header-breadcrumb: #cbd5e0;
   --color-header-separator: #718096;
   --color-header-border: #4a5568;
@@ -185,6 +212,24 @@ body {
   background-color: var(--color-bg-body);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%23e0e0e0' fill-opacity='0.3' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E");
   padding: 2rem 1rem;
+}
+
+::selection {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+/* Headings are short and are the thing most hurt by a one-word last line;
+   `balance` is capped at a few lines by the spec, so it is safe to apply
+   broadly here. Paragraphs get `pretty`, which only avoids the orphan. */
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
 }
 
 /* Container */
@@ -263,12 +308,24 @@ body {
 .header h1 {
   font-size: 2rem;
   font-weight: 600;
-  margin-bottom: 1rem;
 }
 
 .header.compact h1 {
   font-size: 1.75rem;
-  margin-bottom: 0.5rem;
+}
+
+/* The gap between title and tagline belongs to the tagline. As a bottom margin
+   on the h1 it also applied on the pages that have no tagline -- the homepage,
+   404 -- padding the bottom of the header twice. Adjacent sibling rather than
+   `:has()` or `:last-child`, because theme.js appends its own controls div to
+   the header after load, and because the resume's second paragraph (the contact
+   line) should stay tucked under the first. */
+.header h1 + p {
+  margin-top: 1rem;
+}
+
+.header.compact h1 + p {
+  margin-top: 0.5rem;
 }
 
 .header p {
@@ -278,20 +335,25 @@ body {
   margin: 0 auto;
 }
 
-/* Profile Image */
+/* Profile Image
+   Sits above the <h1> on the homepage, which is its only use. The margin is on
+   the bottom for that reason: as a top margin (written when the image followed
+   the heading) it opened a gap above the photo and left the name jammed against
+   its underside. The ring is --color-bg-container rather than white so it reads
+   as the page showing through in either theme, not a bright halo in dark. */
 .profile-image {
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  border: 3px solid white;
-  margin: 1.5rem auto 0;
+  border: 3px solid var(--color-bg-container);
+  margin: 0 auto 1rem;
   display: block;
 }
 
 .header.compact .profile-image {
   width: 80px;
   height: 80px;
-  margin: 1rem auto 0;
+  margin: 0 auto 0.75rem;
 }
 
 /* Main Content */
@@ -331,6 +393,7 @@ body {
 
 .internal-links a:hover {
   text-decoration: underline;
+  text-underline-offset: 0.15em;
 }
 
 .internal-links a:focus {
@@ -345,6 +408,21 @@ body {
 .internal-links a span {
   font-weight: 400;
   color: var(--color-text-muted);
+}
+
+/* Marks a link that leaves the site. The homepage lists GitHub, the blog and
+   LinkedIn in the same list as internal pages, and nothing distinguished them.
+   The `/ ""` is alternative text for the accessibility tree: empty, because a
+   screen reader already announces the destination from the href and does not
+   need to hear "north east arrow" on every one. Browsers without support for
+   that syntax announce the glyph, which is the old behaviour. */
+.internal-links a[href^="http"]::after,
+.external-links a[href^="http"]::after {
+  content: " \2197" / "";
+  display: inline-block;
+  font-size: 0.85em;
+  color: var(--color-text-muted);
+  text-decoration: none;
 }
 
 /* External Links */
@@ -366,62 +444,6 @@ body {
   text-decoration: underline;
 }
 
-/* Game List */
-.game-list {
-  list-style: none;
-}
-
-.game-item {
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  transition: all 0.2s ease;
-}
-
-.game-item:hover {
-  border-color: var(--color-primary);
-  box-shadow: var(--shadow-hover);
-}
-
-.game-item h3 {
-  font-size: 1.4rem;
-  font-weight: 600;
-  color: var(--color-text-heading);
-  margin-bottom: 0.75rem;
-}
-
-.game-item h3 a {
-  color: var(--color-text-heading);
-  text-decoration: none;
-}
-
-.game-item h3 a:hover {
-  color: var(--color-primary);
-}
-
-.game-item p {
-  color: var(--color-text-secondary);
-  line-height: 1.6;
-  margin-bottom: 1rem;
-}
-
-.game-meta {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.tag {
-  background: var(--color-tag-bg);
-  color: var(--color-tag-text);
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.85rem;
-  font-weight: 500;
-}
-
 .back-link {
   display: inline-block;
   color: var(--color-primary);
@@ -435,7 +457,7 @@ body {
 
 .back-link:hover {
   background: var(--color-primary);
-  color: var(--color-tag-text);
+  color: var(--color-on-primary);
 }
 
 /* Breadcrumb Navigation */
@@ -496,46 +518,13 @@ body {
   color: var(--color-header-separator);
 }
 
-/* Project Links */
-.links-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.link-card {
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  padding: 1.5rem;
-  text-decoration: none;
-  color: inherit;
-  display: block;
-  transition: border-color 0.2s ease;
-}
-
-.link-card:hover {
-  border-color: var(--color-primary);
-}
-
-.link-card h3 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--color-text-heading);
-  margin-bottom: 0.5rem;
-}
-
-.link-card p {
-  color: var(--color-text-tertiary);
-  font-size: 0.9rem;
-  margin: 0;
-}
-
-/* Form Elements */
+/* Form Elements
+   No font-family here. This selector catches every input on the site, and the
+   monospace it used to set was meant for the tool pages, where the content is
+   an expression or a code point. The opt-in .form-input / .form-textarea
+   classes below still carry it. */
 input,
 textarea {
-  font-family: monospace;
   border: 1px solid var(--color-border);
   border-radius: 4px;
   padding: 0.5rem;
@@ -688,6 +677,14 @@ td {
   border-color: var(--color-primary);
 }
 
+/* A form of prose rather than of expressions -- a name, an address, a message.
+   Opts back out of the monospace the tool pages want. */
+.form-prose .form-input,
+.form-prose .form-textarea {
+  font-family: inherit;
+  font-size: 1rem;
+}
+
 .probability-sample {
   background: var(--color-bg-container);
   border: 1px solid var(--color-border-form);
@@ -704,7 +701,7 @@ td {
 
 .submit-btn {
   background: var(--color-primary);
-  color: var(--color-tag-text);
+  color: var(--color-on-primary);
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 4px;
@@ -719,6 +716,13 @@ td {
 .submit-btn:focus {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
+}
+
+/* contact-form.js disables this while a message is in flight. Without a style
+   for it the button looked exactly as clickable as before. */
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Output Displays */
@@ -861,11 +865,17 @@ textarea:focus {
   top: 6px;
 }
 
-/* Ensure interactive elements are keyboard accessible */
+/* Interactive elements get a pointer. Text fields do not: the browser's own
+   caret says "you can type here", and overriding it to a pointer said the
+   opposite on every form on the site. */
 button,
 a,
-input,
-textarea {
+select,
+summary,
+input[type="checkbox"],
+input[type="radio"],
+input[type="submit"],
+input[type="button"] {
   cursor: pointer;
 }
 
@@ -975,8 +985,20 @@ kbd {
   .main-content {
     padding: 1.5rem;
   }
+}
 
-  .links-grid {
-    grid-template-columns: 1fr;
+/* Motion
+   Everything on the site that moves is decoration: hover lifts, the theme
+   popover, the logic engine's spinner. None of it carries meaning that is lost
+   when it stops. Three of the five games already had their own version of this
+   block; the rest of the site had none. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

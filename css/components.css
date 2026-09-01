@@ -2,6 +2,16 @@
  * components.css — Specialized styles for interactive tool pages.
  * Only loaded on pages that need it (experiments, Chinese tools).
  * Extends style.css with buttons, data tables, logic engine, and status messages.
+ *
+ * No dark-mode block. Everything here draws from the `--color-*` tokens in
+ * style.css, which already resolve for both the OS preference and an explicit
+ * choice from the theme picker. There used to be one, written as a bare
+ * `@media (prefers-color-scheme: dark)`: most of it restated the light rules
+ * once the variables resolved, and the handful of literal colours it did carry
+ * were invisible to the picker -- white table-header text stayed white while
+ * --color-primary went light, and the proof-step badges kept a pale tint under
+ * light text. Those became --color-on-primary, --color-table-corner-*, and
+ * --color-badge-* rather than a second copy of the rules.
  */
 
 /* ========================================
@@ -81,6 +91,7 @@ body.logic-engine {
 /* Card sections */
 .logic-card {
   background: var(--color-bg-container);
+  border: 1px solid var(--color-border);
   border-radius: 0.5rem;
   box-shadow: 0 1px 3px rgb(0, 0, 0, 0.1);
   padding: 1.5rem;
@@ -280,7 +291,7 @@ body.logic-engine {
   font-size: 0.875rem;
   background: var(--color-bg-form);
   color: var(--color-text-heading);
-  border: none;
+  border: 1px solid var(--color-border);
   border-radius: 0.25rem;
   cursor: pointer;
   transition: background-color 0.2s;
@@ -393,13 +404,13 @@ body.logic-engine {
 }
 
 .step-badge.premise {
-  background: #dbeafe;
-  color: var(--color-primary-hover);
+  background: var(--color-badge-info-bg);
+  color: var(--color-badge-info-text);
 }
 
 .step-badge.derived {
-  background: #dcfce7;
-  color: var(--color-success-hover);
+  background: var(--color-badge-success-bg);
+  color: var(--color-badge-success-text);
 }
 
 .step-content {
@@ -594,7 +605,7 @@ body.logic-engine {
 .syllabary-table th,
 .truth-table th {
   background: var(--color-primary);
-  color: white;
+  color: var(--color-on-primary);
   padding: 0.75rem;
   text-align: center;
   font-weight: 600;
@@ -630,7 +641,8 @@ body.logic-engine {
 }
 
 .syllabary-table th:first-child {
-  background: var(--color-text-muted);
+  background: var(--color-table-corner-bg);
+  color: var(--color-table-corner-text);
   font-weight: 700;
   min-width: 3rem;
 }
@@ -731,190 +743,5 @@ body.logic-engine {
 
 .syllabary-table span:hover {
   background: var(--color-primary) !important;
-  color: var(--color-tag-text) !important;
-}
-
-/* ========================================
-   DARK MODE SUPPORT
-   Component-specific overrides only.
-   Colors using CSS variables are handled
-   automatically by the :root dark block.
-   ======================================== */
-@media (prefers-color-scheme: dark) {
-  /* Logic Engine Dark Mode */
-  body.logic-engine {
-    background: var(--color-bg-body);
-  }
-
-  .logic-card {
-    border: 1px solid var(--color-border);
-  }
-
-  .logic-card h3 {
-    color: var(--color-text-secondary);
-  }
-
-  .logic-card p {
-    color: var(--color-text-muted);
-  }
-
-  .logic-input:focus {
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 2px var(--color-primary);
-  }
-
-  .logic-input:disabled {
-    background: var(--color-bg-container);
-  }
-
-  .operator-details {
-    color: var(--color-text-muted);
-  }
-
-  .operator-details summary:hover {
-    color: var(--color-text-secondary);
-  }
-
-  .operator-details code {
-    background: var(--color-bg-body);
-    color: var(--color-text);
-  }
-
-  .example-btn {
-    background: var(--color-bg-body);
-    color: var(--color-text-secondary);
-    border: 1px solid var(--color-border);
-  }
-
-  .example-btn:hover {
-    background: var(--color-border);
-  }
-
-  /* Proof steps — use variables (auto dark mode) */
-  .proof-step.premise {
-    background: var(--color-info-bg);
-    border-color: var(--color-info-border);
-  }
-
-  .proof-step.derived {
-    background: var(--color-success-bg);
-    border-color: var(--color-success-border);
-  }
-
-  .step-badge.premise {
-    background: var(--color-info-border);
-    color: var(--color-info-bg);
-  }
-
-  .step-badge.derived {
-    background: var(--color-success-border);
-    color: var(--color-success-bg);
-  }
-
-  .step-justification.premise {
-    color: var(--color-primary-hover);
-  }
-
-  .step-justification.derived {
-    color: var(--color-success);
-  }
-
-  .step-justification .step-refs {
-    color: var(--color-text-muted);
-  }
-
-  .empty-state {
-    color: var(--color-text-muted);
-  }
-
-  .empty-state svg {
-    color: var(--color-border);
-  }
-
-  .empty-state p:first-of-type {
-    color: var(--color-text-muted);
-  }
-
-  /* Status messages — component-specific dark colors */
-  .status-message.error {
-    background: var(--color-error-bg);
-    border-color: var(--color-error-border);
-  }
-
-  .status-message.error svg {
-    color: var(--color-error);
-  }
-
-  .status-message.error .message-text {
-    color: var(--color-error-text);
-  }
-
-  .status-message.success {
-    background: var(--color-success-bg);
-    border-color: var(--color-success-border);
-  }
-
-  .status-message.success svg {
-    color: var(--color-success);
-  }
-
-  .status-message.success .message-text {
-    color: var(--color-success-text);
-  }
-
-  .info-card {
-    background: var(--color-info-bg);
-    border-color: var(--color-info-border);
-  }
-
-  .info-card h3 {
-    color: var(--color-text);
-  }
-
-  .info-card .info-content,
-  .info-card .info-content p {
-    color: var(--color-text-secondary);
-  }
-
-  /* Tables — header-specific dark colors */
-  .data-table th,
-  .syllabary-table th,
-  .truth-table th {
-    background: var(--color-primary);
-    color: var(--color-bg-body);
-    border-color: var(--color-primary-hover);
-  }
-
-  .syllabary-table th:first-child {
-    background: var(--color-border);
-    color: var(--color-text);
-  }
-
-  .data-table td,
-  .syllabary-table td,
-  .truth-table td {
-    color: var(--color-text);
-  }
-
-  /* Info Boxes */
-  .legend h3,
-  .data-files h3,
-  .info-box h3 {
-    color: var(--color-text);
-  }
-
-  .data-files {
-    background: var(--color-info-bg);
-    border-color: var(--color-primary);
-  }
-
-  .data-files h3 {
-    color: var(--color-primary-hover);
-  }
-
-  /* Lists */
-  .operator-item,
-  .example-item {
-    color: var(--color-text);
-  }
+  color: var(--color-on-primary) !important;
 }

@@ -22,7 +22,7 @@
         <nav class="breadcrumbs">
           <a href="/">Home</a>
           <span class="separator">/</span>
-          <span class="current">Contact</span>
+          <span class="current" aria-current="page">Contact</span>
         </nav>
 
         <section class="section">
@@ -34,18 +34,32 @@
           -->
           <form
             id="contact-form"
-            class="form-container"
+            class="form-container form-prose"
             method="POST"
             action="https://formspree.io/f/mvkppvnl"
           >
             <div class="form-group">
               <label for="contact-name">Name</label>
-              <input type="text" id="contact-name" class="form-input" name="name" required />
+              <input
+                type="text"
+                id="contact-name"
+                class="form-input"
+                name="name"
+                autocomplete="name"
+                required
+              />
             </div>
 
             <div class="form-group">
               <label for="contact-email">Email</label>
-              <input type="email" id="contact-email" class="form-input" name="email" required />
+              <input
+                type="email"
+                id="contact-email"
+                class="form-input"
+                name="email"
+                autocomplete="email"
+                required
+              />
               <small>So I can reply.</small>
             </div>
 

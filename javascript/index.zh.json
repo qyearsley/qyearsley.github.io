@@ -1,9 +1,10 @@
 {
-  "_title": "实验",
+  "_title": "实验 - Quinten Yearsley",
   "_description": "交互工具与实验",
 
   "Experiments": "实验",
   "Interactive tools and experiments.": "交互工具与实验。",
+  "Tools": "工具",
 
   "Experiment with classical rules of inference": "体验经典推理规则",
   "Generate text using Markov chains": "用马尔可夫链生成文本",

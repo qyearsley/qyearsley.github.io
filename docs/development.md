@@ -213,22 +213,36 @@ When adding a cross-module global, prefix it with `__`, expose it as soon as the
 module initializes, and guard every read (`if (window.__foo)`) so load order
 never matters.
 
-## Game Stylesheets
+## Stylesheets
 
-Each game owns its stylesheet and its own `--prefix-*` colour variables; there
-is no shared game CSS layer. Two conventions are enforced by
-`__tests__/game-styles.test.js`:
+`css/style.css` holds the design tokens and loads on every page.
+`css/components.css` adds tool-page components and draws only from those tokens.
+Each game then owns its own sheet and its own `--prefix-*` variables; there is no
+shared game CSS layer.
 
-- A game that styles a dark theme must write the dark values **twice** -- once
+Two conventions are enforced by `__tests__/stylesheets.test.js`:
+
+- A sheet that styles a dark theme must write the dark values **twice** -- once
   under `@media (prefers-color-scheme: dark)` and once under
-  `:root[data-theme="dark"]`. A custom property cannot be aliased across two
+  `[data-theme="dark"]`. A custom property cannot be aliased across two
   selectors, so there is no way to share them. Without the second block the site
-  theme picker has no effect on that game.
+  theme picker has no effect on that sheet.
 - Selectors inside the media query need the `:not([data-theme="light"])` guard,
   so an explicit light choice beats the OS preference.
 
-Games also load `/css/style.css`, which is written for document pages. Two of
-its rules need care: `.header` is the site's page-header class (Number Garden
-and Times Trail reuse the name for an in-screen HUD and reset it), and its focus
-ring fires on `:focus` rather than `:focus-visible`, which leaves a ring around
-whatever was last tapped.
+Drawing from the tokens in `style.css` avoids both, since they already resolve
+for either form. Prefer that to a second dark block: it is why
+`components.css` has none. Where a colour depends on the theme in a way the
+existing tokens do not cover, add a token rather than a rule -- see
+`--color-on-primary` (text on a primary fill, which is light in dark mode) and
+`--color-badge-*`.
+
+Two things in `style.css` to know about when writing a page:
+
+- `.header` is the site's page-header class. Number Garden and Times Trail reuse
+  the name for an in-screen HUD and have to reset it.
+- Its focus ring fires on `:focus` rather than `:focus-visible`, so it leaves a
+  ring around whatever was last clicked or tapped. Every game overrides this;
+  the tool pages do not.
+- `.form-input` and `.form-textarea` are monospace, which suits an expression or
+  a code point. A form of prose puts `form-prose` on the `<form>` to opt out.

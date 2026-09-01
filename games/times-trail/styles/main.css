@@ -213,9 +213,13 @@ body {
   justify-content: flex-end;
 }
 
+/* Tabular figures: these counters change on nearly every answer, and with
+   proportional digits the whole pill resized under them -- a 1 is narrower than
+   a 4, so "⭐ 9" to "⭐ 10" shifted everything to its left. */
 .stat {
   font-size: 1.25rem;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
   color: var(--tt-ink);
   background-color: var(--tt-surface-alt);
   border-radius: 999px;
@@ -266,6 +270,7 @@ body {
   font-size: 1rem;
   line-height: 1.2;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
   text-align: center;
   color: var(--tt-ink-muted);
 }
@@ -587,6 +592,7 @@ body {
 .answer-display {
   font-size: 3rem;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
   text-align: center;
   min-height: 3.5rem; /* reserve the line so "?" -> "42" never shifts the keypad */
   color: var(--tt-ink);

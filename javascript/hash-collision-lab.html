@@ -257,6 +257,9 @@
       .lab-input {
         flex: 1;
         padding: 0.6rem 0.75rem;
+        /* Monospace to match the hash digests it produces. Stated here rather
+           than inherited: style.css no longer sets it on every input. */
+        font-family: monospace;
         font-size: 1rem;
         border: 2px solid var(--color-border-dark);
         border-radius: 6px;
@@ -528,7 +531,7 @@
           <span class="separator">/</span>
           <a href="/javascript/">Experiments</a>
           <span class="separator">/</span>
-          <span class="current">Hash Collision Lab</span>
+          <span class="current" aria-current="page">Hash Collision Lab</span>
         </nav>
 
         <section class="section">
