@@ -552,7 +552,17 @@ export class GameUI extends BaseGameUI {
     if (!season) return
     this.setText("season-name", this._seasonTitle(season))
     this.setText("demand-line", season.demandText)
-    this._mount(this.elements["villain-portrait"], this.pack.villain(), "villain-svg")
+    // Drawn once, not once per answer. `villain()` takes no arguments and so
+    // returns the same picture every time, but it is by far the biggest thing
+    // the pack builds -- the coiled tail alone is hundreds of ellipses -- and
+    // renderHud runs on every answer. Rebuilding it each time cost more than
+    // the rest of the game put together. The check is against the live DOM
+    // rather than a flag on `this`, so a fresh page with a fresh GameUI draws
+    // it again.
+    const portrait = this.elements["villain-portrait"]
+    if (portrait && !portrait.firstElementChild) {
+      this._mount(portrait, this.pack.villain(), "villain-svg")
+    }
     this.renderItemTrack(state, season)
 
     // One sentence in one node, in a live region. Split across several elements
