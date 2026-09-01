@@ -24,7 +24,7 @@ npm run lint    # Lint JS, HTML, CSS, and check formatting
 npm run format  # Format with Prettier
 ```
 
-A pre-commit hook lints the staged files and runs the tests. See
-[docs/development.md](docs/development.md#before-committing).
+A pre-commit hook lints and formats the staged files; a pre-push hook runs the
+tests. See [docs/development.md](docs/development.md#git-hooks).
 
 See [docs/development.md](docs/development.md) for the build pipeline, how to add pages, and how translations work.

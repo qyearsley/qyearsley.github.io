@@ -94,19 +94,32 @@ npm run lint    # ESLint + HTMLHint + Stylelint + Prettier
 npm run format  # Prettier
 ```
 
-## Before Committing
+## Git Hooks
 
-A Husky `pre-commit` hook (`.husky/pre-commit`) runs `lint-staged` and then the
-full test suite. `lint-staged` formats each staged file with Prettier -- writing,
-not just checking, so it restages the fixed file -- and then runs the linter for
-that file type. The whole hook takes a few seconds.
+Two Husky hooks, split by what they do rather than by convenience:
 
-The linting happens here, and not only in CI, because
+- **`.husky/pre-commit`** runs `lint-staged` (about a second). It formats each
+  staged file with Prettier -- writing, not just checking, so the fixed file is
+  restaged -- and then runs the linter for that file type. Only things that
+  _change_ the commit belong here.
+- **`.husky/pre-push`** runs the full test suite (about five seconds). Pushing to
+  `main` deploys the site, so this is the boundary worth guarding; a broken local
+  commit costs nothing and can be amended. Running once per push also beats
+  running once per commit.
+
+The linting happens locally at all, rather than only in CI, because
 `.github/workflows/deploy.yml` is a single job: build, test, lint, deploy. A lint
 failure there is a failed deploy of the live site rather than a failed check on a
 pull request.
 
-To commit without the hook, `git commit --no-verify`. CI still runs everything.
+`jest --onlyChanged` is deliberately not used to speed up the pre-push run. Jest
+builds its dependency graph from `import` statements and cannot see
+`readFileSync`, so editing any `.html` file selects zero suites -- even though
+`__tests__/html.test.js` checks every page that way and the game suites load
+their `index.html` the same way. Nearly every commit here touches HTML.
+
+To skip a hook, `git commit --no-verify` or `git push --no-verify`. CI still runs
+everything.
 
 ## Testing
 

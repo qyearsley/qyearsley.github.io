@@ -1,0 +1,12 @@
+# Run the whole suite before anything reaches the remote.
+#
+# Here rather than in pre-commit because this is the boundary that matters:
+# pushing to main deploys the site, so a broken push breaks production, while a
+# broken local commit costs nothing and can be amended. Running once per push
+# also beats once per commit.
+#
+# Not `jest --onlyChanged`: Jest builds its dependency graph from imports and
+# cannot see readFileSync, so an edit to any .html file selects zero suites --
+# even though __tests__/html.test.js checks every page and the game suites load
+# their index.html that way. Nearly every commit here touches HTML.
+npm test

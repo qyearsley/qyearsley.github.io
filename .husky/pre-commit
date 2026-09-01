@@ -1,9 +1,11 @@
-# Lint and format only what is staged, then run the whole test suite.
+# Format and lint the staged files, then let the commit through.
 #
-# The linters run here rather than only in CI because .github/workflows/deploy.yml
-# is a single job -- build, test, lint, then deploy. A lint failure there is a
-# failed deploy of the live site, not a failed check on a pull request. Prettier
-# is set to --write rather than --check so a formatting nit fixes itself and gets
-# restaged instead of blocking the commit.
+# Only things that *change* the commit belong here: `prettier --write` rewrites
+# a staged file and lint-staged restages it, so it has to run before the
+# snapshot is taken. Validation that changes nothing -- the test suite -- runs
+# in .husky/pre-push instead, where it gates what actually reaches main.
+#
+# The linters run locally at all because .github/workflows/deploy.yml is a
+# single job: build, test, lint, then deploy. A lint failure there is a failed
+# deploy of the live site, not a failed check on a pull request.
 npx lint-staged
-npm test
