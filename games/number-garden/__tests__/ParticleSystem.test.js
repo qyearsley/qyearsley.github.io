@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect, jest, test } from "@jest/globals"
+
 import { ParticleSystem } from "../js/ParticleSystem.js"
 
 describe("ParticleSystem", () => {
@@ -5,6 +7,10 @@ describe("ParticleSystem", () => {
   let container
 
   beforeEach(() => {
+    // Every particle is spawned and removed on a timer, so the tests below drive
+    // the clock rather than waiting on it. Left on real timers this file slept
+    // for about 1.8 seconds, which was almost all of its runtime.
+    jest.useFakeTimers()
     particleSystem = new ParticleSystem()
     container = document.createElement("div")
     container.id = "test-container"
@@ -13,6 +19,7 @@ describe("ParticleSystem", () => {
 
   afterEach(() => {
     document.body.removeChild(container)
+    jest.useRealTimers()
   })
 
   describe("initialization", () => {
@@ -49,35 +56,30 @@ describe("ParticleSystem", () => {
   })
 
   describe("createParticles", () => {
-    test("creates correct number of particles", (done) => {
+    test("creates correct number of particles", () => {
       particleSystem.createParticles(150, 150, container)
 
-      // Wait for all particles to spawn
-      setTimeout(() => {
-        const particles = container.querySelectorAll(".particle")
-        expect(particles.length).toBe(5)
-        done()
-      }, 500)
+      // Past the last spawn (4 * 80ms) but well inside the 2000ms lifetime.
+      jest.advanceTimersByTime(500)
+
+      expect(container.querySelectorAll(".particle").length).toBe(5)
     })
 
-    test("particles are removed after lifetime", (done) => {
+    test("particles are removed after lifetime", () => {
       particleSystem.particleLifetime = 100
-      particleSystem.particleCount = 2 // Fewer particles for faster test
-      particleSystem.spawnDelay = 20 // Faster spawn for testing
+      particleSystem.particleCount = 2
+      particleSystem.spawnDelay = 20
       particleSystem.createParticles(150, 150, container)
 
-      // Check particles exist initially
-      setTimeout(() => {
-        expect(container.querySelectorAll(".particle").length).toBeGreaterThan(0)
-      }, 30)
+      // Both particles have spawned (0ms and 20ms) and neither has expired.
+      jest.advanceTimersByTime(30)
+      expect(container.querySelectorAll(".particle").length).toBe(2)
 
-      // Check particles are removed after lifetime
-      // Wait for: spawn time (2 particles * 20ms = 40ms) + lifetime (100ms) + buffer (100ms)
-      setTimeout(() => {
-        expect(container.querySelectorAll(".particle").length).toBe(0)
-        done()
-      }, 250)
-    }, 10000) // Increase test timeout
+      // The later particle spawns at 20ms and lives 100ms, so everything is
+      // gone by 120ms.
+      jest.advanceTimersByTime(120)
+      expect(container.querySelectorAll(".particle").length).toBe(0)
+    })
   })
 
   describe("reduced motion", () => {
@@ -111,24 +113,22 @@ describe("ParticleSystem", () => {
       expect(queries).toEqual(["(prefers-reduced-motion: reduce)"])
     })
 
-    test("creates no particles when reduced motion is preferred", (done) => {
+    test("creates no particles when reduced motion is preferred", () => {
       stubMatchMedia(true)
       particleSystem.createParticles(150, 150, container)
 
-      setTimeout(() => {
-        expect(container.querySelectorAll(".particle").length).toBe(0)
-        done()
-      }, 500)
+      jest.advanceTimersByTime(500)
+
+      expect(container.querySelectorAll(".particle").length).toBe(0)
     })
 
-    test("still creates particles when reduced motion is not preferred", (done) => {
+    test("still creates particles when reduced motion is not preferred", () => {
       stubMatchMedia(false)
       particleSystem.createParticles(150, 150, container)
 
-      setTimeout(() => {
-        expect(container.querySelectorAll(".particle").length).toBe(5)
-        done()
-      }, 500)
+      jest.advanceTimersByTime(500)
+
+      expect(container.querySelectorAll(".particle").length).toBe(5)
     })
   })
 })

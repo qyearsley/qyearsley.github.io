@@ -90,9 +90,23 @@ npm run build:verbose  # Build, plus warnings about possibly-untranslated text
 npm start       # Build + serve dist/ on port 8000
 npm run dev     # Serve source directly on port 8000 (no build)
 npm test        # Run all tests (Jest)
-npm run lint    # ESLint + HTMLHint + Stylelint
+npm run lint    # ESLint + HTMLHint + Stylelint + Prettier
 npm run format  # Prettier
 ```
+
+## Before Committing
+
+A Husky `pre-commit` hook (`.husky/pre-commit`) runs `lint-staged` and then the
+full test suite. `lint-staged` formats each staged file with Prettier -- writing,
+not just checking, so it restages the fixed file -- and then runs the linter for
+that file type. The whole hook takes a few seconds.
+
+The linting happens here, and not only in CI, because
+`.github/workflows/deploy.yml` is a single job: build, test, lint, deploy. A lint
+failure there is a failed deploy of the live site rather than a failed check on a
+pull request.
+
+To commit without the hook, `git commit --no-verify`. CI still runs everything.
 
 ## Testing
 
@@ -116,13 +130,15 @@ Jest's `moduleNameMapper` in `package.json` strips `.js` extensions from relativ
 
 ## Lint Configuration
 
-`npm run lint` runs three linters; their notable settings:
+`npm run lint` runs four linters; their notable settings:
 
 - **ESLint** (`eslint.config.js`): covers `javascript/`, `games/`, `shared/`, `__tests__/`, and the two root build files. `no-console` allows `warn`/`error` -- the build script and shared modules use them for surfacing real problems. `jestGlobals` is included in the browser config because `*.test.js` files live alongside source under `shared/`, `javascript/`, and `games/` rather than in a separate test directory.
 - **Stylelint** (`package.json`): several rules are disabled because the codebase mixes hand-written CSS conventions with design-token patterns that the standard config rejects.
   - `selector-class-pattern` / `selector-id-pattern` / `custom-property-pattern`: allow descriptive names like `.game-list` and `--color-bg-card` instead of forcing strict BEM.
   - `no-descending-specificity`: silenced because component CSS frequently overrides base styles in a deliberate cascade order.
   - `color-function-notation: legacy` and `alpha-value-notation: number`: pin to one notation since both are valid CSS and mixing them is noisier than picking either.
+- **HTMLHint** (`.htmlhintrc`): structural checks over every source page, skipping `node_modules/`, `coverage/`, and `dist/`.
+- **Prettier** (`package.json`): `printWidth: 100` and `semi: false`. `eslint-config-prettier` turns off the ESLint rules that would otherwise disagree with it, so formatting has exactly one owner. `npm run lint` checks formatting; `npm run format` fixes it.
 
 ## Adding a New Page
 

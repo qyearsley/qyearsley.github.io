@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach, jest } from "@jest/globals"
-import { BaseGameUI } from "../../shared/BaseGameUI.js"
+import { BaseGameUI } from "../BaseGameUI.js"
 
 describe("BaseGameUI", () => {
   let baseGameUI

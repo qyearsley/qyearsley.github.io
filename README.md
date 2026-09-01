@@ -4,7 +4,7 @@ Personal website with educational games, JavaScript experiments, and Chinese lan
 
 ## Site Structure
 
-- [`/games/`](games/) -- Educational games (Number Garden, Life Garden, Turing Tape, Times Trail)
+- [`/games/`](games/) -- Educational games (Number Garden, Life Garden, Turing Tape, Times Trail, Seasons)
 - [`/javascript/`](javascript/) -- Interactive tools exploring CS concepts (automata, hashing, logic, etc.)
 - [`/chinese/`](chinese/) -- Chinese language reference tools (pinyin, tone tables, character encoding)
 - [`/resume/`](resume/) -- Resume (rendered from markdown at build time)
@@ -20,8 +20,11 @@ npm install     # Install dependencies
 npm start       # Build + serve locally (http://localhost:8000)
 npm run dev     # Serve source directly (no build step)
 npm test        # Run tests
-npm run lint    # Lint JS, HTML, CSS
+npm run lint    # Lint JS, HTML, CSS, and check formatting
 npm run format  # Format with Prettier
 ```
+
+A pre-commit hook lints the staged files and runs the tests. See
+[docs/development.md](docs/development.md#before-committing).
 
 See [docs/development.md](docs/development.md) for the build pipeline, how to add pages, and how translations work.

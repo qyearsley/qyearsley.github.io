@@ -1,1 +1,9 @@
+# Lint and format only what is staged, then run the whole test suite.
+#
+# The linters run here rather than only in CI because .github/workflows/deploy.yml
+# is a single job -- build, test, lint, then deploy. A lint failure there is a
+# failed deploy of the live site, not a failed check on a pull request. Prettier
+# is set to --write rather than --check so a formatting nit fixes itself and gets
+# restaged instead of blocking the commit.
+npx lint-staged
 npm test
