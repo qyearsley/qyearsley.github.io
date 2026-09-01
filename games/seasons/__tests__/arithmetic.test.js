@@ -332,6 +332,28 @@ describe("arithmetic", () => {
         expect(question.answer).toBeGreaterThanOrEqual(2)
       }
     })
+
+    it("honours a quotient floor, which is what makes a hard slot hard", () => {
+      // Without this the quotient came from 2 upward whatever `tables` said, so a
+      // third of every draw was a ÷2 or ÷3 fact and narrowing the tables changed
+      // nothing: autumn's boss asked `12 ÷ 6 = 2`.
+      for (const from of [4, 6, 7, 10]) {
+        for (const question of sample({ kind: "div", tables: [6, 7, 8, 9], from, upTo: 10 })) {
+          expect(question.answer).toBeGreaterThanOrEqual(from)
+          expect(question.answer).toBeLessThanOrEqual(10)
+        }
+      }
+    })
+
+    it("lets the ceiling win when the floor is above it", () => {
+      // A contradictory form must degrade rather than hang or invert, and it is
+      // `upTo` that keeps the fact inside the tables, so `upTo` is the one to
+      // respect.
+      for (const question of sample({ kind: "div", tables: [7], from: 50, upTo: 6 })) {
+        expect(question.answer).toBe(6)
+        expect(question.prompt).toBe("42 ÷ 7")
+      }
+    })
   })
 
   describe("twoStep", () => {
@@ -353,6 +375,36 @@ describe("arithmetic", () => {
         operators.add(TWO_STEP.exec(question.prompt)[3])
       }
       expect([...operators].sort()).toEqual(["+", "-"])
+    })
+
+    it("honours a floor on the second operand", () => {
+      // Same reason as `div`'s: without it the last question of the game could be
+      // `8 × 2 + 3`, which is not a climax.
+      for (const question of sample({
+        kind: "twoStep",
+        tables: [6, 7, 8, 9],
+        from: 7,
+        upTo: 10,
+        max: 100,
+      })) {
+        const [, , other] = TWO_STEP.exec(question.prompt)
+        expect(Number(other)).toBeGreaterThanOrEqual(7)
+      }
+    })
+
+    it("never lets the second step wipe out the multiplication", () => {
+      // `6 × 3 - 17 = 1` was reachable: a one-step question wearing a two-step
+      // prompt, and its choices ran down to 0.
+      for (const form of [
+        { kind: "twoStep", tables: [6, 7, 8, 9], from: 7, upTo: 10, max: 100 },
+        { kind: "twoStep", tables: [2, 3], upTo: 10, max: 100 },
+      ]) {
+        for (const question of sample(form)) {
+          const [, table, other] = TWO_STEP.exec(question.prompt)
+          const product = Number(table) * Number(other)
+          expect(question.answer).toBeGreaterThanOrEqual(Math.floor(product / 2))
+        }
+      }
     })
   })
 
@@ -453,7 +505,7 @@ describe("arithmetic", () => {
         expect(question.answer).toBeLessThan(100)
         for (const value of question.choices) {
           if (value === question.answer) continue
-          expect(Math.abs(value - question.answer)).toBeLessThanOrEqual(2)
+          expect(Math.abs(value - question.answer)).toBeLessThanOrEqual(3)
           distractors += 1
         }
       }
@@ -664,11 +716,15 @@ describe("distractors stay believable for the size of the answer", () => {
 })
 
 describe("big answers get whole-factor distractors, whatever the operation", () => {
-  it("spreads the choices for three-digit column arithmetic", () => {
-    // Three-digit addition with neighbours one and two away cannot be narrowed
-    // by estimating: the sum has to be carried out exactly, then four
-    // three-digit numbers read and compared. Ten out is what a real carry slip
-    // looks like at that size, and it leaves something to reason about.
+  it("spreads the choices for column arithmetic", () => {
+    // Addition with neighbours one and two away cannot be narrowed by
+    // estimating: the sum has to be carried out exactly, then four numbers read
+    // and compared. Ten out is what a real carry slip looks like at that size,
+    // and it leaves something to reason about.
+    //
+    // `max: 400` is above anything the seasons ask for now -- the retune caps
+    // addition at 100 -- so this exercises the mechanism directly rather than a
+    // live form.
     let checked = 0
     for (let seed = 0; seed < 300; seed += 1) {
       const question = generate([{ kind: "add", max: 400, borrow: true }], createRng(`big-${seed}`))
@@ -678,5 +734,204 @@ describe("big answers get whole-factor distractors, whatever the operation", () 
       checked += 1
     }
     expect(checked).toBeGreaterThan(20)
+  })
+})
+
+/**
+ * Distractors built from the operands rather than from the answer alone.
+ *
+ * The candidates used to include `answer * 2`, which for any answer at or above
+ * BIG_ANSWER was both offered and always the largest choice -- so "never pick the
+ * biggest" was a reliable strategy on every large question in the game, and the
+ * question was effectively one-in-three. Nothing caught it, because every test
+ * here asked whether the choices were *spread*, and a doubled answer is very
+ * spread indeed. So the property below is the opposite one: every choice has to
+ * be a number some slip actually lands on.
+ */
+describe("distractors are numbers a child could actually reach", () => {
+  /**
+   * The operands of any prompt shape, one-step or two.
+   * @param {string} prompt - The question text
+   * @returns {number[]} The numbers in it, in the order they appear
+   */
+  function allOperands(prompt) {
+    return prompt.match(/\d+/g).map(Number)
+  }
+
+  /**
+   * Every value a believable slip can land on, worked out from the prompt rather
+   * than from the implementation. Kept in step with `_slipSizes` on purpose --
+   * this is the model the generator has to satisfy, and restating it here is what
+   * makes a regression visible.
+   *
+   * Exact, with no slack: an earlier version also allowed `answer + 3` through
+   * `answer + 8`, to cover `_choices`'s upward padding. That padding only fires
+   * when the candidates collide, which needs a very small answer -- so allowing it
+   * unconditionally widened the set enough that gutting `_candidates` to return
+   * nothing still passed. The sweep below skips small answers instead.
+   *
+   * @param {Object} question - A generated question
+   * @returns {Set<number>} The values the choices are allowed to take
+   */
+  function reachable(question) {
+    const { answer, kind, prompt } = question
+    const nums = allOperands(prompt)
+    const unit = (n) => (n >= 20 && n % 10 === 0 ? 10 : 1)
+    let steps = []
+    if (kind === "mul") {
+      const [a, b] = nums
+      steps = [b * unit(a), a * unit(b)]
+      steps = [...steps, ...steps.map((s) => s * 2), ...steps.map((s) => s * 3)]
+    } else if (kind === "twoStep") {
+      steps = [nums[0], nums[1], nums[0] * 2, nums[1] * 2]
+    } else if (kind === "add" || kind === "sub") {
+      steps = [10]
+    }
+    // Near misses apply to every kind, and are the only slips division gets.
+    steps = [...steps, 1, 2, 3]
+    const values = new Set([answer])
+    for (const step of steps) {
+      values.add(answer + step)
+      values.add(answer - step)
+    }
+    return values
+  }
+
+  /**
+   * Below this answer `_choices` can run out of candidates and pad upward, which
+   * legitimately produces values no slip would reach. Five is the smallest answer
+   * for which the four near misses are all distinct and non-negative.
+   */
+  const PADDING_FREE_FROM = 5
+
+  it.each(FORM_LISTS)("offers only reachable choices: %s", (label, forms) => {
+    const unreachable = []
+    let checked = 0
+    for (let seed = 0; seed < 400; seed += 1) {
+      const question = generate(forms, createRng(`reach-${label}-${seed}`))
+      if (question.answer < PADDING_FREE_FROM) continue
+      checked += 1
+      const allowed = reachable(question)
+      for (const choice of question.choices) {
+        if (!allowed.has(choice)) {
+          unreachable.push(
+            `${question.prompt} = ${question.answer}: ${choice} in ${question.choices}`,
+          )
+        }
+      }
+    }
+    // The `continue` above could skip everything -- a form list of tiny quotients
+    // would assert nothing at all -- so name how much actually got looked at.
+    expect(checked).toBeGreaterThan(100)
+    expect(unreachable.slice(0, 5)).toEqual([])
+  })
+
+  it("would catch the doubled answer it was written for", () => {
+    // Guards the guard. `574 - 38 = 536` used to offer 1072, and the model above
+    // has to reject it -- otherwise the sweep proves nothing.
+    const old = { kind: "sub", prompt: "574 - 38", answer: 536, choices: [526, 546, 1072, 536] }
+    const allowed = reachable(old)
+    expect(allowed.has(526)).toBe(true)
+    expect(allowed.has(546)).toBe(true)
+    expect(allowed.has(1072)).toBe(false)
+    // And it has to reject the padding values too, or deleting the whole slip
+    // mechanism would pass: with no candidates at all, `_choices` pads upward.
+    expect(allowed.has(540)).toBe(false)
+    expect(allowed.has(541)).toBe(false)
+    // The digits reversed is no longer offered, so the model must not allow it.
+    expect(allowed.has(635)).toBe(false)
+  })
+
+  it("spreads a two-step's choices by its factors, not by one or two", () => {
+    // The `twoStep` branch of `_slipSizes` had nothing holding it, so the last
+    // question of the game -- winter's boss is 100% two-step -- could have lost
+    // its operand slips and dropped to `answer ± 1, ± 2` without failing a test.
+    let checked = 0
+    for (let seed = 0; seed < 400; seed += 1) {
+      const question = generate(
+        [{ kind: "twoStep", tables: [6, 7, 8, 9], from: 7, upTo: 10, max: 100 }],
+        createRng(`two-${seed}`),
+      )
+      const spread = Math.max(...question.choices.map((c) => Math.abs(c - question.answer)))
+      expect(spread).toBeGreaterThan(2)
+      checked += 1
+    }
+    expect(checked).toBe(400)
+  })
+
+  it("keeps every choice on the grid for a product of a multiple of ten", () => {
+    // `40 × 4` can only plausibly be got wrong by a multiple of forty, so a
+    // choice of 161 is a free elimination. This failed at 13% of tens products
+    // before `_slipSizes` learned to offer two-step slips: the one-step pair
+    // collapses to a single distance when one factor is ten times the other,
+    // which left a near miss filling the last slot.
+    //
+    // Scoped to a tens operand of 20 and up, because `7 × 10` is a plain fact
+    // rather than a place-value question -- slipping the 10 itself to 9 or 11 is
+    // believable there, so its choices need not sit on the grid.
+    const offGrid = []
+    for (let seed = 0; seed < 3000; seed += 1) {
+      const question = generate(
+        [{ kind: "mul", tables: [20, 30, 40, 50, 60, 70, 80, 90], upTo: 9 }],
+        createRng(`grid-${seed}`),
+      )
+      if (question.choices.some((choice) => choice % 10 !== 0)) {
+        offGrid.push(`${question.prompt} -> ${question.choices}`)
+      }
+    }
+    expect(offGrid.slice(0, 5)).toEqual([])
+  })
+
+  it.each(FORM_LISTS)("does not put the answer at a predictable rank: %s", (label, forms) => {
+    // The worst bug this file has held, and it survived every other distractor
+    // test. Each distance is believable in both directions, so taking the first
+    // three candidates that fit always gave `answer + d1`, `answer - d1`,
+    // `answer + d2` -- one below the answer and two above, in **100% of questions
+    // in the game**. Tapping the second-smallest of the four buttons therefore won
+    // every question without doing any arithmetic.
+    //
+    // `puts the answer in more than one position across seeds` did not see it,
+    // because `rng.shuffle` changes where a choice sits on screen but not how the
+    // four values sort. This asserts on the sorted rank instead.
+    const counts = [0, 0, 0, 0]
+    const draws = 3000
+    for (let seed = 0; seed < draws; seed += 1) {
+      const question = generate(forms, createRng(`rank-${label}-${seed}`))
+      counts[question.choices.filter((choice) => choice < question.answer).length] += 1
+    }
+    // Loose on purpose: the point is that no single rank is a winning strategy,
+    // not that the split is exactly even. A perfect generator sits at 25% each;
+    // the old one sat at 100% on rank 1.
+    for (const share of counts) {
+      expect(share / draws).toBeGreaterThan(0.1)
+      expect(share / draws).toBeLessThan(0.45)
+    }
+  })
+
+  it("splits a carrying sum's tens evenly between the two operands", () => {
+    // `_add` used to cap the first operand's tens at half the available room and
+    // give the second whatever was left, so every bit of spare magnitude landed
+    // in the second slot: `{max: 200, borrow: true}` produced `5 + 195`. The sum
+    // was in range, so the bound tests passed and nothing noticed the shape.
+    // Both branches: the carrying one and the plain-sum fallback. The fallback had
+    // the same flaw for longer -- `a` uniform and `b` given the remainder put the
+    // big number first, with medians of 50 and 19 at `max: 100`.
+    for (const borrow of [true, false]) {
+      for (const max of [100, 200, 1000]) {
+        let firstLarger = 0
+        const draws = 4000
+        for (let seed = 0; seed < draws; seed += 1) {
+          const [a, b] = operands(
+            generate([{ kind: "add", max, borrow }], createRng(`bal-${borrow}-${max}-${seed}`))
+              .prompt,
+          )
+          if (a > b) firstLarger += 1
+        }
+        // Neither slot should be the big one much more often than the other. The
+        // old splits sat near 0.06 and near 0.95; a fair one sits near 0.5.
+        expect(firstLarger / draws).toBeGreaterThan(0.4)
+        expect(firstLarger / draws).toBeLessThan(0.6)
+      }
+    }
   })
 })

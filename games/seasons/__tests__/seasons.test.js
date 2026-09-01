@@ -18,8 +18,10 @@
  */
 
 import { describe, expect, it } from "@jest/globals"
+import { generate } from "../js/challenges/arithmetic.js"
 import { CHARACTERS } from "../js/characters.js"
 import { SEASON_ORDER } from "../js/constants.js"
+import { createRng } from "../js/rng.js"
 import { getSeason, maxItems, nextSeason, SEASON_LIST } from "../js/seasons.js"
 
 /**
@@ -45,6 +47,76 @@ const PAIRS = SEASON_LIST.flatMap((season) =>
  */
 function timerBound(season) {
   return season.timerSeconds === null ? Infinity : season.timerSeconds
+}
+
+/**
+ * The kinds a hard space is allowed to ask.
+ *
+ * A **content** rule, not a difficulty one, and the distinction matters: this is
+ * Ella's "division is the hardest thing in a level" surviving as "a lit mountain
+ * asks division or a two-step", so a glowing space never asks a bare fact or a
+ * two-digit sum however hard the numbers are. It can therefore disagree with
+ * `formScore` -- `{mul, tables: TENS}` scores 3, above spring's `div [2,5,10]` at
+ * 2, and is still rejected here. If that ever becomes the wrong trade, this list
+ * is the thing to widen.
+ */
+const HARD_KINDS = ["div", "twoStep"]
+
+/** The facts a third grader actually has to work at, rather than recite. */
+const HARD_FACTS = new Set([6, 7, 8, 9])
+
+/**
+ * A coarse difficulty score for one form, counting **mental steps** rather than
+ * digits.
+ *
+ * Deliberately crude: it exists to catch an inversion, not to freeze the tuning.
+ * It has to be structural rather than measured from generated answers, because
+ * answer size and difficulty point in opposite directions at the top of the
+ * ladder -- `9 × 80 = 720` is one fact and a zero, while `8 × 7 + 9 = 65` is two
+ * chained operations. Scoring by magnitude would rank winter's hardest question
+ * below its easiest.
+ *
+ * @param {Object} form - An arithmetic form
+ * @returns {number} Roughly, how many mental steps it takes
+ */
+function formScore(form) {
+  const hardShare = (tables) => tables.filter((t) => HARD_FACTS.has(t)).length / tables.length
+  switch (form.kind) {
+    case "add":
+    case "sub":
+      // One column operation, plus one more step if it regroups.
+      return form.borrow ? 2 : 1
+    case "mul": {
+      // A multiple of ten is a fact plus place value; otherwise a bare fact,
+      // weighted by how many of its tables are ones that need working out. The
+      // tens case also reads how far the range runs, so that widening 10-50 to
+      // 10-90 registers as the step up the README describes it as.
+      if (form.tables.every((table) => table % 10 === 0)) {
+        return 3 + (Math.max(...form.tables) - 10) / 100
+      }
+      return 1 + hardShare(form.tables)
+    }
+    case "div":
+      // Harder to recall than the matching multiplication fact.
+      return 2 + hardShare(form.tables)
+    case "twoStep":
+      // Two chained operations: the ceiling of what grade 3 can do mentally. Still
+      // weighted by the tables, so dropping the boss to `2 × 3 + 4` scores lower
+      // rather than scoring the same as `8 × 7 + 9`.
+      return 3 + hardShare(form.tables)
+    default:
+      return 1
+  }
+}
+
+/**
+ * The mean score of a form list, which is what a player actually meets, since
+ * `generate` picks one form per question at random.
+ * @param {Array<Object>} forms - A season's `forms`, `glowingForms` or boss forms
+ * @returns {number} Mean difficulty
+ */
+function listScore(forms) {
+  return forms.reduce((sum, form) => sum + formScore(form), 0) / forms.length
 }
 
 describe("SEASON_LIST", () => {
@@ -105,14 +177,44 @@ describe.each(SEASON_LIST.map((season) => [season.id, season]))("%s", (_id, seas
 
   it("keeps division off the ordinary spaces, per Ella's rule", () => {
     // "Addition, subtraction, multiplication, maybe with division as the
-    // hardest one in a level." Division is reserved for the glowing spaces and
-    // the boss, so meeting one always means the player reached a hard space.
+    // hardest one in a level." The constraint that actually matters is
+    // one-directional: division must never turn up on an ordinary space, so
+    // meeting one always means the player reached a hard space. The converse is
+    // not required -- a hard slot may ask something else, and winter's asks a
+    // two-step, because by then plain division within 100 has run out of room.
     // Encoded here because the rule lives in a file comment otherwise, and a
     // retune that drops a `div` into `forms` would break nothing else.
     expect(season.forms.map((form) => form.kind)).not.toContain("div")
-    expect(season.glowingForms.map((form) => form.kind)).toContain("div")
-    for (const form of season.boss.forms) {
-      expect(form.kind).toBe("div")
+  })
+
+  it("asks nothing but a hard kind at a hard space", () => {
+    // The other half of the rule above: a lit mountain and a boss must never
+    // ask a bare fact or a two-digit sum, which is what makes reaching one
+    // mean something.
+    for (const form of [...season.glowingForms, ...season.boss.forms]) {
+      expect(HARD_KINDS).toContain(form.kind)
+    }
+  })
+
+  it("keeps every individual fact inside 100", () => {
+    // The single ceiling that replaced two untested conventions: no column
+    // operation past two digits, and no fact outside the grade-3 tables. A
+    // quotient of 12 on the 9 table is `108 ÷ 9`, which is neither.
+    for (const form of [...season.forms, ...season.glowingForms, ...season.boss.forms]) {
+      if (form.kind === "add" || form.kind === "sub") {
+        expect(form.max).toBeLessThanOrEqual(100)
+      }
+      if (form.kind === "div" || form.kind === "twoStep") {
+        expect(form.upTo).toBeLessThanOrEqual(10)
+        expect(Math.max(...form.tables)).toBeLessThanOrEqual(10)
+      }
+      if (form.kind === "mul") {
+        // Either plain facts, or one digit by a multiple of ten (3.NBT.A.3).
+        // Both keep the fact being recalled inside the tables.
+        const tens = form.tables.every((table) => table % 10 === 0 && table >= 10)
+        expect(form.twoDigit).toBeFalsy()
+        expect(tens ? form.upTo : Math.max(...form.tables, form.upTo)).toBeLessThanOrEqual(10)
+      }
     }
   })
 
@@ -211,6 +313,77 @@ describe("difficulty escalation", () => {
   it("starts untimed and ends timed", () => {
     expect(SEASON_LIST[0].timerSeconds).toBeNull()
     expect(SEASON_LIST[SEASON_LIST.length - 1].timerSeconds).toBeGreaterThan(0)
+  })
+
+  // The maths itself, which nothing checked before. What these catch is a
+  // *structural* inversion: a season losing a mental step, or a hard slot dropping
+  // to something with fewer steps than the trail leading to it.
+  //
+  // What they deliberately do not catch is a magnitude inversion. The score
+  // ignores `max` and answer size on purpose, so it would not have flagged the
+  // original fault where autumn asked `311 - 195` and winter's ordinary answers
+  // sat at a median of 57 — by step count, old winter did out-score old autumn.
+  // That class of problem is prevented by the `max: 100` cap instead, held by
+  // `keeps every individual fact inside 100`.
+  it.each(steps)("%s does not get arithmetically easier", (_label, before, after) => {
+    expect(listScore(after.forms)).toBeGreaterThan(listScore(before.forms))
+  })
+
+  it.each(steps)("%s does not make the hard spaces easier", (_label, before, after) => {
+    expect(listScore(after.glowingForms)).toBeGreaterThanOrEqual(listScore(before.glowingForms))
+    expect(listScore(after.boss.forms)).toBeGreaterThanOrEqual(listScore(before.boss.forms))
+  })
+
+  it.each(SEASON_LIST.map((season) => [season.id, season]))(
+    "%s asks something harder at a glowing space than on the trail",
+    (_id, season) => {
+      // The promise the lit mountain makes, and the one thing here that is a
+      // strict inequality in both directions -- a hard slot that merely ties with
+      // the trail is not a challenge.
+      expect(listScore(season.glowingForms)).toBeGreaterThan(listScore(season.forms))
+    },
+  )
+
+  it.each(SEASON_LIST.map((season) => [season.id, season]))(
+    "%s does not make its boss easier than its glowing spaces",
+    (_id, season) => {
+      expect(listScore(season.boss.forms)).toBeGreaterThanOrEqual(listScore(season.glowingForms))
+    },
+  )
+
+  // The scores above read the form *declarations*, which is what makes them cheap
+  // -- and is also their blind spot. `{div, tables: [6,7,8,9], upTo: 10}` scores
+  // the same whether its quotients run 2-10 or 7-10, so narrowing a season's
+  // tables looked like a difficulty rise while the generator kept drawing from 2
+  // upward. Autumn's boss, the climax of the third season, asked `12 ÷ 6 = 2`.
+  // These two sample what the generator actually emits.
+  const HARD_SLOTS = SEASON_LIST.flatMap((season) => [
+    [`${season.id} glowing`, season.glowingForms],
+    [`${season.id} boss`, season.boss.forms],
+  ])
+
+  /** Smallest answer a hard slot may offer. Below this it is not a challenge. */
+  const HARD_SLOT_FLOOR = 4
+
+  it.each(HARD_SLOTS)("%s never asks a question a younger child could do", (_label, forms) => {
+    let smallest = Infinity
+    for (let seed = 0; seed < 1500; seed += 1) {
+      smallest = Math.min(smallest, generate(forms, createRng(`floor-${seed}`)).answer)
+    }
+    expect(smallest).toBeGreaterThanOrEqual(HARD_SLOT_FLOOR)
+  })
+
+  it.each(HARD_SLOTS)("%s draws from a pool worth replaying", (_label, forms) => {
+    // A season can be replayed -- `RETRY_SEASON` is the default -- so a slot with
+    // only a handful of possible questions becomes recall of the choice list
+    // rather than of the fact. Division within 100 has a hard ceiling here: once
+    // the quotient floor is raised, there are only so many facts left, and the
+    // narrowest slot in the game sits at 16.
+    const prompts = new Set()
+    for (let seed = 0; seed < 1500; seed += 1) {
+      prompts.add(generate(forms, createRng(`pool-${seed}`)).prompt)
+    }
+    expect(prompts.size).toBeGreaterThanOrEqual(15)
   })
 })
 

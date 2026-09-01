@@ -16,18 +16,21 @@
  *   target is third grade.
  * - Keep every ordinary question in mental range: the answer has to be found and
  *   four choices read before the countdown ends, so anything that wants written
- *   vertical maths is not something this format can fairly ask. Two-digit
- *   multiplication keeps its product within 100 (`tables` no higher than 5,
- *   `upTo` no higher than 20) -- grade 3 caps there, and `6 x 19` was reachable
- *   before the tables were cut. Addition and subtraction stay within a few
- *   hundred: autumn's 400 and winter's 600 are already three-digit column
- *   arithmetic, and the 1000 they replaced made every carry a written one.
- *   Nothing enforces either ceiling.
+ *   vertical maths is not something this format can fairly ask. One rule covers
+ *   it: **no single column operation goes past two digits, and every individual
+ *   fact stays inside 100.** So addition and subtraction cap at `max: 100`, and
+ *   `div` caps at `upTo: 10` (a quotient of 12 on the 9 table is `108 ÷ 9`,
+ *   which is outside the grade-3 tables). Escalation comes from the number of
+ *   mental steps instead: one fact, then a fact plus a regrouping, then a fact
+ *   scaled by ten, then two chained operations.
+ * - Answers still get large, which is fine -- `9 × 80` is on grade (3.NBT.A.3)
+ *   and purely mental. What is banned is column work, not size.
  * - Ella's rule for the operations: "addition, subtraction, multiplication,
- *   maybe with division as the hardest one in a level." Division is therefore
- *   the whole of every season's `glowingForms` and every boss -- reaching the
- *   lit mountain is what earns the hard operation -- and never appears in
- *   ordinary `forms`, which seasons.test.js enforces.
+ *   maybe with division as the hardest one in a level." The constraint that
+ *   matters is one-directional: division never appears in ordinary `forms`,
+ *   which seasons.test.js enforces. A hard slot is free to ask something else,
+ *   and winter's does -- by then plain division within 100 has run out of room,
+ *   so its climax is the two-step instead.
  *
  * Reachability: `maxItems` below is what a perfect run collects, and
  * seasons.test.js asserts every demand is reachable by every character with
@@ -41,6 +44,24 @@
 
 import { SEASON_ORDER } from "./constants.js"
 import { isHardKind } from "./obstacles.js"
+
+/**
+ * One-digit × a multiple of ten, as a `mul` form's `tables`.
+ *
+ * This is grade 3's 3.NBT.A.3 -- "multiply one-digit whole numbers by multiples
+ * of 10 in the range 10-90" -- and it needs no new form kind, because `mul`
+ * already means "one operand from `tables`, the other 2..upTo". It is the job
+ * autumn's old `4 × 17` was doing illegitimately: large answers, place-value
+ * practice, and not one column of written arithmetic.
+ *
+ * Autumn gets the lower half and winter the whole range, which is how the same
+ * skill escalates between the two seasons that use it.
+ * @type {number[]}
+ */
+const TENS = [10, 20, 30, 40, 50, 60, 70, 80, 90]
+
+/** The lower half of {@link TENS}, for autumn. @type {number[]} */
+const TENS_LOWER = [10, 20, 30, 40, 50]
 
 /**
  * One level.
@@ -101,15 +122,18 @@ const SEASONS = {
     demand: 11,
     timerSeconds: null,
     challenge: "arithmetic",
+    // One fact, or one two-digit sum that needs no regrouping. The gentlest the
+    // game gets, and untimed to match.
     forms: [
       { kind: "add", max: 100 },
       { kind: "sub", max: 100 },
-      { kind: "mul", tables: [2, 5, 10], upTo: 10 },
+      { kind: "mul", tables: [2, 3, 4, 5, 10], upTo: 10 },
     ],
-    glowingForms: [{ kind: "div", tables: [2, 5, 10], upTo: 10 }],
+    glowingForms: [{ kind: "div", tables: [2, 5, 10], from: 4, upTo: 10 }],
     boss: {
       rescue: 3,
-      forms: [{ kind: "div", tables: [2, 5, 10], upTo: 10 }],
+      // Wider than the glowing spaces, so the boss is not a rerun of them.
+      forms: [{ kind: "div", tables: [2, 3, 4, 5, 10], from: 5, upTo: 10 }],
     },
   },
 
@@ -141,15 +165,17 @@ const SEASONS = {
     demand: 13,
     timerSeconds: 20,
     challenge: "arithmetic",
+    // The step up is the regrouping, and the whole times table rather than the
+    // easy half of it.
     forms: [
       { kind: "mul", tables: [2, 3, 4, 5, 6, 7, 8, 9, 10], upTo: 10 },
-      { kind: "add", max: 200, borrow: true },
-      { kind: "sub", max: 200, borrow: true },
+      { kind: "add", max: 100, borrow: true },
+      { kind: "sub", max: 100, borrow: true },
     ],
-    glowingForms: [{ kind: "div", tables: [2, 3, 4, 5, 6, 7, 8, 9, 10], upTo: 10 }],
+    glowingForms: [{ kind: "div", tables: [2, 3, 4, 5, 6, 7, 8, 9, 10], from: 5, upTo: 10 }],
     boss: {
       rescue: 4,
-      forms: [{ kind: "div", tables: [6, 7, 8, 9], upTo: 10 }],
+      forms: [{ kind: "div", tables: [6, 7, 8, 9], from: 6, upTo: 10 }],
     },
   },
 
@@ -183,15 +209,19 @@ const SEASONS = {
     demand: 15,
     timerSeconds: 18,
     challenge: "arithmetic",
+    // Two steps up: the facts narrow to the ones that are actually hard to
+    // recall, and place value arrives as `7 × 40`. Subtraction stops escalating
+    // here on purpose -- two-digit regrouping is the mental ceiling, so once a
+    // season has it there is nowhere on-grade left to go.
     forms: [
-      { kind: "mul", tables: [2, 3, 4, 5], upTo: 15, twoDigit: true },
-      { kind: "add", max: 400, borrow: true },
-      { kind: "sub", max: 400, borrow: true },
+      { kind: "mul", tables: [3, 4, 6, 7, 8, 9], upTo: 10 },
+      { kind: "sub", max: 100, borrow: true },
+      { kind: "mul", tables: TENS_LOWER, upTo: 9 },
     ],
-    glowingForms: [{ kind: "div", tables: [3, 4, 6, 7, 8, 9], upTo: 12 }],
+    glowingForms: [{ kind: "div", tables: [3, 4, 6, 7, 8, 9], from: 6, upTo: 10 }],
     boss: {
       rescue: 5,
-      forms: [{ kind: "div", tables: [4, 6, 7, 8, 9], upTo: 12 }],
+      forms: [{ kind: "div", tables: [6, 7, 8, 9], from: 7, upTo: 10 }],
     },
   },
 
@@ -227,15 +257,27 @@ const SEASONS = {
     demand: 17,
     timerSeconds: 16,
     challenge: "arithmetic",
+    // Only the hard facts now, and the full range of tens. The ordinary spaces
+    // have reached the on-grade ceiling for a single mental step, so winter's
+    // escalation moves into the hard slots below -- and into the clock.
     forms: [
-      { kind: "twoStep", tables: [2, 3, 4, 5, 6, 7, 8, 9], upTo: 12, max: 300 },
-      { kind: "mul", tables: [2, 3, 4, 5], upTo: 20, twoDigit: true },
-      { kind: "sub", max: 600, borrow: true },
+      { kind: "mul", tables: [6, 7, 8, 9], upTo: 10 },
+      { kind: "sub", max: 100, borrow: true },
+      { kind: "mul", tables: TENS, upTo: 9 },
     ],
-    glowingForms: [{ kind: "div", tables: [6, 7, 8, 9], upTo: 12 }],
+    // The one season whose lit mountains are not simply division. Two chained
+    // operations is grade 3's own two-step standard (3.OA.D.8) and the only
+    // thing left that is harder than a single fact without leaving the grade;
+    // the division form keeps Ella's hardest-operation rule alive alongside it.
+    glowingForms: [
+      { kind: "twoStep", tables: [6, 7, 8, 9], from: 6, upTo: 10, max: 100 },
+      { kind: "div", tables: [6, 7, 8, 9], from: 7, upTo: 10 },
+    ],
     boss: {
       rescue: 6,
-      forms: [{ kind: "div", tables: [6, 7, 8, 9], upTo: 12 }],
+      // The two-step alone, so the last question of the game is the hardest
+      // shape it has rather than a coin flip between two.
+      forms: [{ kind: "twoStep", tables: [6, 7, 8, 9], from: 7, upTo: 10, max: 100 }],
     },
   },
 }

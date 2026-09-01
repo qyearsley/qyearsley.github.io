@@ -48,155 +48,130 @@ Roughly in order of how much each would change the game.
    recipe. Kinds she has mentioned that do not exist yet: forest as distinct from
    thicket, and anything weather-shaped.
 
-## Difficulty: a retune that is planned but not done
+## Difficulty: retuned 2026-08-31
 
-Reviewed 2026-08-31 by sampling 4,000 generated questions per form list per
-season. Nothing here is implemented; the numbers below describe the game as it
-ships today. The README's [Difficulty](../games/seasons/README.md#difficulty)
-table describes the same thing from the outside and will need rewriting with it.
+Implemented. Kept here because the reasoning is a design record rather than
+documentation, and because what is still open at the end of it is Ella's to
+decide. The README's [Difficulty](../games/seasons/README.md#difficulty) table
+describes the result from the outside.
 
-**Three things Ella's rules did not settle, now decided.**
+**The problem, from sampling 4,000 generated questions per form list.** Three
+findings, all now fixed:
 
-- **Division only appears in the hard slots.** It does not have to _be_ the hard
-  question. Ella's rule was "division as the hardest one in a level", which the
-  code reads as "glowing spaces and bosses ask division"; the constraint is
-  really one-directional — division must not appear in ordinary `forms`, which
-  `seasons.test.js` already enforces — and a hard slot may ask something else.
-- **A boss may be structurally different** from the glowing spaces if there is a
-  good question idea for it; otherwise the same kind of question at higher stakes
-  is fine.
-- **Three-digit subtraction is out of scope.** So is anything else that wants
-  written column work: the game is for third grade, assumes mental computation
-  with no pen and paper, and exists to solidify what is taught in school rather
-  than to stretch past it.
+1. **Every glowing space and every boss was the easiest question in the game.**
+   Division quotients ran at a median of 6 in all four seasons, so autumn's
+   ordinary space asked `311 - 195` while its lit mountain — the special
+   challenge, worth three items — asked `14 ÷ 7`.
+2. **The curve was not monotonic.** Autumn was the hardest season, not winter:
+   autumn's ordinary answers ran to a median of 111, winter's to 57. Nothing
+   caught it because `seasons.test.js` pinned the route, demand, glowing count,
+   timer and `boss.rescue` — but never the maths.
+3. **Two forms were above grade level.** `4 × 17` is 4.NBT.B.5, and three-digit
+   addition with carrying is column work. Meanwhile one grade-3 standard went
+   unused: one-digit × a multiple of ten.
 
-### What the sampling found
+**What the retune did.** Escalate by **number of mental steps**, not by digit
+count. No column operation past two digits, every individual fact inside 100, and
+the ladder climbs from one fact, to a fact plus a regrouping, to a fact scaled by
+ten, to two chained operations. `9 × 80` is fine — what is banned is column work,
+not large answers.
 
-1. **Every glowing space and every boss is the easiest question in the game.**
-   Division quotients run at a median of 6 and a maximum of 12 in all four
-   seasons. So autumn's ordinary space asks `311 - 195` and its lit mountain —
-   the special challenge, worth three items — asks `14 ÷ 7`. Reserving division
-   for the hard slots inverted the intent, because small-fact division is not
-   hard.
-2. **The boss asks nothing new.** Spring's `boss.forms` is identical to its
-   `glowingForms`; autumn's and winter's differ by one table. Only summer narrows
-   meaningfully, to the 6–9 facts.
-3. **The curve is not monotonic — autumn is the hardest season, not winter.**
-   Ordinary answers: autumn median 112, p90 323, 66% regrouping, 18s. Winter
-   median 57, p90 299, 33% regrouping, 16s. Winter swapped autumn's `add: 400`
-   for `twoStep` (small products) and caps `mul` at 5×20, so the season whose
-   demand line is "This is the hard part" is arithmetically lighter than the one
-   before it. Nothing caught this because `seasons.test.js`'s
-   `difficulty escalation` block pins the route, demand, glowing count, timer and
-   `boss.rescue` — but never the maths.
-4. **Two current forms are above grade level**, on the Common Core grade-3
-   standards (3.OA.C.7 multiply and divide within 100, 3.NBT.A.3 multiply
-   one-digit by multiples of 10, 3.OA.D.8 two-step problems). Autumn's and
-   winter's `mul` with `twoDigit: true` gives `4 × 17`, which is 4.NBT.B.5 —
-   grade **4**. Three-digit addition with carrying (`145 + 129`) is column work
-   for the same reason three-digit subtraction is.
-5. **One grade-3 standard is unused**: one-digit × a multiple of ten (`6 × 40`).
-   It is on-grade, purely mental, drills place value, and produces large answers
-   with no column arithmetic — which is exactly the job `4 × 17` was doing
-   illegitimately.
-6. **Fact fluency is a minority of the questions**, at roughly a third of
-   ordinary spaces. For a game whose purpose is consolidating grade 3, × and ÷
-   facts within 100 should be the bulk of it.
+`seasons.test.js` now holds the ladder two ways, and the split matters. A
+**structural score** over the form declarations catches a season losing a mental
+step; it deliberately ignores answer size, so it would _not_ have caught finding 2
+— by step count, old winter did out-score old autumn. That class of fault is
+prevented by the `max: 100` cap instead. Finding 1 is caught by a second set of
+tests that **sample what the generator actually emits**, because the fault lived in
+the generator rather than the declaration.
 
-### The principle to retune on
+Three things Ella's rules did not settle, now decided:
 
-Escalate by **number of mental steps**, not by digit count. No single column
-operation goes past two digits; every individual fact stays inside 100; the
-ladder climbs from one fact, to a fact plus a regrouping, to a fact scaled by
-ten, to two chained operations.
+- **Division is a one-directional rule.** It must not appear in ordinary `forms`;
+  a hard slot is free to ask something else. Winter's does.
+- **A boss may be structurally different** from the glowing spaces.
+- **Three-digit subtraction is out of scope**, along with anything wanting
+  written column work. The game is for third grade and assumes mental
+  computation.
 
-| Season       | Ordinary spaces                                                             | Measured median / p90 / max |
-| ------------ | --------------------------------------------------------------------------- | --------------------------- |
-| Spring, none | 2-digit ± within 100, no forced regrouping; ×2 ×3 ×4 ×5 ×10                 | 36 / 94 / 100               |
-| Summer, 20s  | all facts to 10×10; 2-digit ± within 100 with regrouping                    | 42 / 82 / 100               |
-| Autumn, 18s  | the harder facts (3 4 6 7 8 9); 2-digit − with regrouping; × multiple of 10 | 49 / 360 / 810              |
-| Winter, 16s  | two-step (`8 × 7 + 9`); the 6–9 facts; × multiple of 10                     | 56 / 360 / 810              |
+**Two ideas that were tried and rejected**, both worth not re-deriving:
 
-Zero three-digit operands anywhere in that table. The proposed form lists, which
-produced those figures:
+- **A new `mulTen` form kind.** Unnecessary — `mul` already means "one operand
+  from `tables`, the other 2..upTo", so `{tables: [10, 20, ...90], upTo: 9}`
+  produces exactly the same distribution. Measured identical over 20,000 seeds.
+- **A two-step ending in division, `7 × 6 ÷ 3`**, as winter's climax. It looked
+  like the answer to finding 1, and it is not grade 3. Enumerating all 141
+  possible questions for the 6–9 tables: **39% need a grade-4 division step**
+  (`6 × 7 ÷ 3` is `42 ÷ 3 = 14`, a two-digit quotient, which is 4.NBT.B.6).
+  Constrain the answer to a single digit so both steps are facts and only **18 of
+  the 86 survivors are genuinely two-step** — the rest are cancellations like
+  `7 × 7 ÷ 7`, solved in one step. Eighteen questions is a set a child memorises.
+  The existing `twoStep` (`8 × 7 + 9`) does the same job, is already implemented,
+  and is grade 3's own two-step standard.
 
-```js
-spring:  [{ kind: "add", max: 100 },
-          { kind: "sub", max: 100 },
-          { kind: "mul", tables: [2, 3, 4, 5, 10], upTo: 10 }]
-summer:  [{ kind: "mul", tables: [2,3,4,5,6,7,8,9,10], upTo: 10 },
-          { kind: "add", max: 100, borrow: true },
-          { kind: "sub", max: 100, borrow: true }]
-autumn:  [{ kind: "mul", tables: [3, 4, 6, 7, 8, 9], upTo: 10 },
-          { kind: "sub", max: 100, borrow: true },
-          { kind: "mulTen", tables: [2..9], tensUpTo: 9 }]        // new kind
-winter:  [{ kind: "twoStep", tables: [3, 4, 6, 7, 8, 9], upTo: 10, max: 100 },
-          { kind: "mul", tables: [6, 7, 8, 9], upTo: 10 },
-          { kind: "mulTen", tables: [2..9], tensUpTo: 9 }]        // new kind
-```
+**Also fixed, in `arithmetic.js`.** All found by measurement, all independent of
+the season numbers:
 
-Note that subtraction stops escalating after summer, on purpose: two-digit
-regrouping is the mental ceiling, so once a season has it there is nowhere
-on-grade left to go, and the escalation moves to multiplication and then to
-chaining. Spring's demand line and the `demandText` numbers do not move — none of
-this touches `route`, `demand`, `timerSeconds` or `boss.rescue`, so the whole
-`difficulty escalation` suite should still pass unchanged.
+- **The hard slots were still asking easy questions after the retune.** Narrowing
+  a season's `tables` looked like a difficulty rise but did nothing to the answer:
+  `_div` drew its quotient from 2 upward whatever the tables said, so a third of
+  every draw was a ÷2 or ÷3 fact and autumn's boss asked `12 ÷ 6 = 2`. `div` and
+  `twoStep` now take a `from` floor, and every hard slot sets one. This was
+  finding 1 surviving its own fix, and it is the reason the difficulty tests
+  sample generated output as well as scoring the declarations — a structural score
+  reads the form's shape, and `from` does not change the shape.
+- **The last question of the game could be `8 × 2 + 3`.** `twoStep`'s second
+  operand had no floor either, and its second step could wipe the multiplication
+  out entirely: `6 × 3 - 17 = 1`. The addend is now capped at half the product.
+- **The answer was always the second-smallest of the four buttons.** In 100% of
+  questions in the game, so tapping the second-smallest won every one without
+  doing any arithmetic. Every slip distance is believable in both directions, so
+  filling the choice list in order of temptingness always gave one value below the
+  answer and two above; `rng.shuffle` hid it, because shuffling changes where a
+  button sits on screen and not how the four values sort. `_choices` now draws how
+  many distractors sit below the answer, which spreads the rank evenly. This was
+  the worst defect found, it predates the retune, and no test came close to it —
+  the existing one checked shuffled _position_, never sorted _rank_.
+- **The distractors gave the game away in two smaller ways too.** Above
+  `BIG_ANSWER` the candidate list offered `answer × 2`, always the largest button;
+  and the answer's digits reversed was offered as a last resort, which put 61 among
+  the multiples of forty for `40 × 4`. Generators now hand back their operands and
+  the distractors come from slipping one of them by one step, so every button is
+  reachable: `4 × 80` offers 240 and 400 (the 4 misremembered) and 280 and 360
+  (the 80 misremembered). The digit reversal is gone entirely — transposing digits
+  is a slip you make while writing, and nothing is written in this game.
+- **`_add`'s tens split was asymmetric**, so all the leftover magnitude landed in
+  the second operand. Both branches draw a total and divide it now. Note this
+  fixed the lopsidedness, not the ability of a large `max` to put a three-digit
+  number in one slot — that is within what `max` promises, and no season asks for
+  `max` above 100 any more.
+- **A form with a very large finite `max` hung.** Above 2^53 the gap between
+  representable numbers exceeds the padding step, so `pad + 1 === pad` and the
+  choice-filling loop spun forever. Unreachable from any real season, but a hang
+  is not an acceptable failure mode, so the step grows until it moves.
 
-### The glowing slots and the boss
+**The cost of the `from` floors is pool size.** Division within 100 has only so
+many hard facts, so autumn's boss is down to 16 distinct questions and summer's to 20. With `RETRY_SEASON` as the default a child who fails a season repeatedly will
+see repeats. Judged acceptable — a boss is met once per attempt — and pinned at 15
+by `draws from a pool worth replaying` so it cannot quietly shrink further. Widen
+`tables` before lowering `from` if a slot starts feeling stale.
 
-Division stays within 100, so plain division cannot carry a season's peak — which
-is finding 1 restated. The idea that works is a **two-step ending in division**,
-`7 × 6 ÷ 3`: it is grade 3's two-step standard, every fact stays inside 100, and
-it is a real climax rather than a rerun of the spaces leading up to it. That is
-the structurally-different boss the decision above allows.
+### Still open, and Ella's to decide
 
-Careful with the generator: the divisor has to be drawn from the **factors of the
-product**, not from a fixed list. A first sketch of this drew from `[2,3,4,6,8]`
-and emitted `5 × 5 ÷ 2 = 13`, which is not an exact division — and `_div`'s whole
-approach is to build from the product so a remainder is impossible.
-
-### Two bugs in `arithmetic.js`, worth fixing first
-
-Both are self-contained in that file, need no season retune, and are verified.
-
-- **`_add`'s tens split is asymmetric.** `tensA` is capped at half the available
-  room and `tensB` gets whatever is left, so all the leftover magnitude lands in
-  the second operand. Summer's `{kind: "add", max: 200, borrow: true}` produces a
-  three-digit operand in **28.8%** of questions, `5 + 195` among them. The sum
-  respects `max`, so this is not a bound violation — it is a shape the form did
-  not ask for, and the README describes it as "addition within 200 with
-  regrouping".
-- **The distractor floor tracks answer magnitude, not difficulty.** Above
-  `BIG_ANSWER` (100), `_candidates` puts `answer * 2` third, and `_choices` takes
-  the first three — so `574 - 38 = 536` offers `[526, 546, 1072, 536]` and nobody
-  picks 1072. That question is effectively one-in-three. Meanwhile `313 - 268 =
-45`, one of the hardest questions the game can ask, gets tight near-miss
-  distractors because its _answer_ is small. Replacing the scaled candidates with
-  slips that are believable in column arithmetic — off by 100, off by 20, one
-  digit transposed — makes the hard questions honestly one-in-four without
-  touching a single season number. Measured share of distractors close enough
-  that estimating cannot eliminate them, today: spring 84%, summer 71%, autumn
-  58%, winter 50%.
-
-### Order of work
-
-1. The two `arithmetic.js` bugs. Independent of everything else. Expect
-   `arithmetic.test.js` to need a look — it parses every generated prompt and
-   recomputes it, and separately checks each generator against its form's `max`.
-2. The two new form kinds, `mulTen` and the two-step-ending-in-division. Each
-   needs an entry in `GENERATORS`, a line in the `arithmetic.js` header's kind
-   list, and prompt-parsing support in `arithmetic.test.js`.
-3. The season retune above, plus the README's difficulty table and the ceiling
-   note in `seasons.js`'s header, which currently cites "autumn's 400 and
-   winter's 600".
-4. A coarse per-season difficulty score asserted to rise spring→winter, and
-   "a season's glowing forms are at least as hard as its ordinary forms".
-   Deliberately coarse: it should catch an inversion like finding 3 without
-   freezing the tuning.
-
-Still open: whether spring should stay untimed once the ladder is gentler, and
-whether the two-step-ending-in-division belongs in the glowing spaces as well as
-the boss or only at the boss.
+- **Is a lit mountain still "the division one"?** Winter's now asks `8 × 7 + 9`
+  half the time, because by winter a single division fact within 100 is easier
+  than its ordinary spaces. Consistent with the decision above, but it changes
+  what reaching a mountain means, which is her rule rather than a tuning number.
+- **Should spring stay untimed** now the ladder is gentler? Keeping it untimed is
+  the zero-churn option — `seasons.test.js` names spring as the one season allowed
+  to be untimed.
+- **The autumn→winter step is the thinnest one.** Both seasons ask hard facts,
+  regrouping subtraction and a multiple of ten; winter differs by narrowing the
+  facts to 6–9 and widening the tens to 90. The rest of its escalation is carried
+  by the clock, the demand and the hard slots. That is coherent with "escalate on
+  every axis at once", but it is the place to look first if winter does not feel
+  like a step up.
+- **`mul`'s `twoDigit` option is now unused** by every season. It is a real
+  capability rather than dead code, but nothing exercises it in the game.
 
 ## Next direction: NPCs, items and trading
 
@@ -358,8 +333,8 @@ Honest limitations rather than things to fix soon.
 - **`min-height: 100dvh` is a floor, not a ceiling.** The play screen fits an iPad
   in landscape, which is the case that matters, but a short enough viewport can
   still overflow.
-- **Two ceilings are conventions, not tests.** Two-digit multiplication stays
-  within a product of 100, and addition and subtraction within a few hundred.
-  Nothing enforces either; a retune could quietly cross both. Both ceilings are
-  superseded by the retune above, which replaces them with a single rule — no
-  column operation past two digits — and proposes the test that would hold it.
+- ~~**Two ceilings are conventions, not tests.**~~ **Closed**, 2026-08-31. Two
+  untested conventions — a two-digit product within 100, and addition and
+  subtraction within a few hundred — were replaced by one rule that is now a test:
+  no column operation past two digits, and every individual fact inside 100. See
+  `seasons.test.js › keeps every individual fact inside 100`.

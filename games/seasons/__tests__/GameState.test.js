@@ -1381,7 +1381,7 @@ describe("a full playthrough", () => {
   itWithASecondTry.each(["sloth", "banana-slug", "phoenix", "porcupine"])(
     "can be completed by the %s even after missing every boss question once",
     (characterId) => {
-      // The boss slot now asks division, the hardest form in the level, and
+      // The boss slot asks whatever the season names as its hardest form, and
       // gives more than one try. A player who fumbles the first try of every
       // boss and recovers on the next must still finish the run under END_RUN
       // -- otherwise the extra try is decoration.
@@ -1393,7 +1393,11 @@ describe("a full playthrough", () => {
         expect(state.attempt).toBe(0)
 
         const boss = playToBoss(state)
-        expect(boss.question.kind).toBe("div")
+        // Derived from the season rather than hard-coded, because which kind is
+        // a season's hardest is a tuning decision -- winter's is `twoStep`, not
+        // `div`. What matters here is that the boss draws from `boss.forms` and
+        // not from the ordinary spaces.
+        expect(season.boss.forms.map((form) => form.kind)).toContain(boss.question.kind)
 
         const missed = answerWrong(boss)
         expect(missed.state.phase).toBe(PHASE.BOSS)

@@ -30,13 +30,14 @@ a boulder, a gap, or a mountain — and the question is how you get past it. A
 correct answer collects an item and plays the crossing: the character climbs,
 hops the stones, or leaps, and the camera pans along, because the trail is drawn
 much wider than the screen. Tap anywhere to cut a crossing short. The
-**mountains** are the **glowing spaces** — always a division question, lit up,
+**mountains** are the **glowing spaces** — the season's hardest question, lit up,
 worth three items instead of one, tagged "Glowing challenge" on screen.
 
 **Face the boss.** At the end of the trail the snake woman is waiting with one
-last question — division again, the hardest operation in the season — worth a
-block of items (3 in spring, rising to 6 in winter), which is how a run that fell
-a little short can still make the demand. The label says what it is worth before
+last question — the hardest thing the season asks, which is division in spring
+through autumn and a two-step by winter — worth a block of items (3 in spring,
+rising to 6 in winter), which is how a run that fell a little short can still make
+the demand. The label says what it is worth before
 you answer it. Missing it is not the end: `BOSS_TRIES` in
 [`js/constants.js`](js/constants.js) is 2, so a wrong boss answer says "One more
 go!", draws a fresh question, and lets you try again — Ella's rule, "if you miss
@@ -80,9 +81,16 @@ boss try has been used up too:
 ## Difficulty
 
 Pitched at third grade. If it is wrong, [`js/seasons.js`](js/seasons.js) is the
-only file to change — it holds every difficulty number in the game. The
-**Maths** column covers **ordinary spaces only**: every season's glowing spaces
-and boss ask division, which is reserved for them ([why](#change-the-maths)).
+only file to change — it holds every difficulty number in the game.
+
+**One rule keeps it mental.** No single column operation goes past two digits,
+and every individual fact stays inside 100. The answer has to be found _and_ four
+choices read before the countdown ends, so anything wanting written vertical
+maths is not something this format can fairly ask. Escalation therefore comes
+from the **number of mental steps**, not from digit count: one fact, then a fact
+plus a regrouping, then a fact scaled by ten, then two chained operations.
+Answers still get large — `9 × 80` is on grade and purely mental — because what
+is banned is column work, not size.
 
 **The route model.** A season's trail is one array: `route`, holding one obstacle
 kind per space, in order. Its length _is_ the trail length, and the mountains in
@@ -93,12 +101,20 @@ a season has means placing that many mountains. The kinds are listed in
 [`js/obstacles.js`](js/obstacles.js), where `hard` is a property of the _kind_
 rather than of the space; the mountain is the only kind that carries it.
 
-|        | Maths (ordinary spaces)                                    | Timer | Trail | Glowing | Demand |
-| ------ | ---------------------------------------------------------- | ----- | ----- | ------- | ------ |
-| Spring | + and − within 100, ×2 ×5 ×10                              | none  | 14    | 2       | 11     |
-| Summer | × facts to 10×10, + and − within 200 with regrouping       | 20s   | 16    | 3       | 13     |
-| Autumn | 2–5 × 10–15, + and − within 400 with regrouping            | 18s   | 18    | 4       | 15     |
-| Winter | Two-step to 300, 2–5 × 10–20, − within 600 with regrouping | 16s   | 20    | 5       | 17     |
+|        | Ordinary spaces                                | Glowing spaces           | Boss         | Timer | Trail | Glowing | Demand |
+| ------ | ---------------------------------------------- | ------------------------ | ------------ | ----- | ----- | ------- | ------ |
+| Spring | + and − within 100, ×2 ×3 ×4 ×5 ×10            | `40 ÷ 5`                 | `35 ÷ 5`     | none  | 14    | 2       | 11     |
+| Summer | × facts to 10×10, + and − within 100 borrowing | `48 ÷ 6`                 | `72 ÷ 9`     | 20s   | 16    | 3       | 13     |
+| Autumn | ×3 4 6 7 8 9, − within 100 borrowing, × 10–50  | `54 ÷ 9`                 | `56 ÷ 8`     | 18s   | 18    | 4       | 15     |
+| Winter | ×6 7 8 9, − within 100 borrowing, × 10–90      | `8 × 7 + 9`, or `63 ÷ 9` | `8 × 9 - 17` | 16s   | 20    | 5       | 17     |
+
+Every hard slot carries a `from` floor on its quotient, which is what stops it
+asking `12 ÷ 6`; see [Change the maths](#change-the-maths). Subtraction stops
+escalating after summer on purpose: two-digit regrouping is the mental ceiling, so
+once a season has it there is nowhere on-grade left to go, and the escalation moves
+to multiplication and then to chaining. Winter is the one season whose lit
+mountains are not simply division — by then a single division fact within 100 is
+easier than its ordinary spaces, so its climax is the two-step.
 
 Demands are tuned against the **Banana Slug**, who collects 2 from a glowing
 space rather than 3, because her handicap grows with the number of glowing spaces
@@ -126,19 +142,32 @@ model, it is an adventure, and large tap targets suit a shared iPad. Revisit thi
 if Seasons ever grows one.
 
 Distractors are near misses rather than random numbers, because a random
-distractor is trivially eliminated and teaches nothing. All the candidates are
-derived from the answer alone — `answer ± 1`, `± 2`, `± 10`, `× 2`, `÷ 2` rounded
-down, and the answer's digits reversed — and the first three distinct, non-negative
-ones become the other buttons. Only the _order_ varies, and by the size of the
-answer before the operation: below `SCALED_SLIP_FROM` (20) the off-by-one slips
-lead; at or above `BIG_ANSWER` (100) the whole-factor slips lead whatever the
-operation; in between they lead only for multiplication, division and two-step.
-Both thresholds exist because the alternative gave the question away — "6 ÷ 2"
-offering 13 and 1 beside the answer 3, or a three-digit answer flanked by ±1 and
-±2, which leaves nothing to estimate with;
-[`js/challenges/arithmetic.js`](js/challenges/arithmetic.js) carries the reasoning.
-The generator never sees the operands, so it cannot offer the answer to the wrong
-operation.
+distractor is trivially eliminated and teaches nothing. Each generator hands back
+the operands it used, and the distractors come from **slipping one of them by one
+step** — so `4 × 80` offers 240 and 400 (the 4 misremembered) and 280 and 360 (the
+80 misremembered), and every button is a number a child could actually arrive at.
+Addition and subtraction slip by a whole ten, which is what a dropped carry looks
+like; small answers get the plain near misses, `± 1` to `± 3`, since an
+operand-sized slip means nothing at that size. Both thresholds (`SLIP_FROM` at 20,
+`BIG_ANSWER` at 100) exist because the alternative gave the question away — "6 ÷ 2"
+offering 13 and 1 beside the answer 3.
+
+**How many distractors sit below the answer is drawn at random, and that matters
+more than any of the above.** Every distance is believable in both directions, so
+filling the list in order of temptingness produced `answer + d`, `answer − d`,
+`answer + d2` — one below and two above, in **every question in the game**. The
+answer was always the second-smallest of the four buttons, so tapping the
+second-smallest won every question without doing any arithmetic. `rng.shuffle` hid
+it, because shuffling moves a choice on screen but does not change how the four
+values sort. Two earlier flaws had the same shape: `answer × 2` was offered above
+`BIG_ANSWER` and was always the largest button, and the answer's digits reversed
+was offered as a last resort and could put 61 among the multiples of forty for
+`40 × 4`. Both are gone.
+
+[`js/challenges/arithmetic.js`](js/challenges/arithmetic.js) carries the
+reasoning, and `arithmetic.test.js › distractors are numbers a child could
+actually reach` holds all of it — including a check on the answer's rank in the
+sorted choice list, which is the assertion whose absence let the giveaway survive.
 
 ## Keyboard
 
@@ -189,6 +218,15 @@ different: `reachability` or `difficulty escalation` in `seasons.test.js`, which
 also require the demand to rise strictly spring→winter, the trail not to shorten,
 the timer not to loosen, the glowing count not to fall, and `boss.rescue` to stay
 under the demand.
+
+Changing **the maths** has its own set. `difficulty escalation` scores each form
+list structurally — mental steps, not answer size — and requires the ordinary
+spaces to get strictly harder each season, the hard slots never to get easier, and
+every season's glowing spaces to beat its own ordinary ones. That last one is the
+check that was missing while every lit mountain in the game asked an easier
+question than the trail leading to it. The score is in `seasons.test.js`'s
+`formScore`, deliberately coarse so it catches an inversion without freezing the
+tuning; if a change is right and the score disagrees, the score is what to edit.
 
 ### Add or change an obstacle
 
@@ -275,28 +313,52 @@ Forms live in [`js/seasons.js`](js/seasons.js) — `forms` for ordinary spaces,
 [`js/challenges/arithmetic.js`](js/challenges/arithmetic.js) owns what a form
 _means_. The five kinds:
 
-| Kind      | Parameters                   | Question                                                                      |
-| --------- | ---------------------------- | ----------------------------------------------------------------------------- |
-| `add`     | `max`, `borrow`              | a + b, sum at most `max`; `borrow` forces a carry                             |
-| `sub`     | `max`, `borrow`              | a − b, never negative; `borrow` forces regrouping                             |
-| `mul`     | `tables`, `upTo`, `twoDigit` | one operand from `tables`, the other 2..`upTo`, or 10..`upTo` with `twoDigit` |
-| `div`     | `tables`, `upTo`             | exact only; the quotient is 2..`upTo`                                         |
-| `twoStep` | `tables`, `upTo`, `max`      | a × b then + or − c, result 0..`max`                                          |
+| Kind      | Parameters                      | Question                                                                      |
+| --------- | ------------------------------- | ----------------------------------------------------------------------------- |
+| `add`     | `max`, `borrow`                 | a + b, sum at most `max`; `borrow` forces a carry                             |
+| `sub`     | `max`, `borrow`                 | a − b, never negative; `borrow` forces regrouping                             |
+| `mul`     | `tables`, `upTo`, `twoDigit`    | one operand from `tables`, the other 2..`upTo`, or 10..`upTo` with `twoDigit` |
+| `div`     | `tables`, `upTo`, `from`        | exact only; the quotient is `from`..`upTo`, defaulting to 2                   |
+| `twoStep` | `tables`, `upTo`, `max`, `from` | a × b then + or − c, result 0..`max`, with b from `from`..`upTo`              |
+
+**`from` is what makes a hard slot hard**, and it is the least obvious field here.
+Narrowing `tables` does nothing to the _answer_: `div` drew its quotient from 2
+upward whatever the tables said, so a third of every draw landed on the ÷2 and ÷3
+facts and autumn's boss — the climax of the third season — asked `12 ÷ 6 = 2`.
+Raising the floor raises the dividend with it, so `from: 7` on the 6–9 tables asks
+`56 ÷ 8`. `seasons.test.js › … never asks a question a younger child could do`
+samples what the generator actually emits and holds this; the structural score
+cannot, because it reads the form declaration and `from` does not change a form's
+shape.
+
+The trade-off is pool size: division within 100 has only so many hard facts, so a
+high floor with narrow tables leaves few questions — autumn's boss has 16, which
+`draws from a pool worth replaying` pins as the floor. Widen `tables` before
+lowering `from` if a slot starts feeling repetitive.
 
 Two rules to keep. **Division never goes in `forms`** — Ella's rule is that it is
-the hardest thing in a level, so it is the whole of every season's `glowingForms`
-and every boss, and
-`seasons.test.js › keeps division off the ordinary spaces, per Ella's rule`
-enforces all three halves of that. **Every ordinary question stays mental**: keep a
-two-digit product within 100 (`tables` ≤ 5, `upTo` ≤ 20 — grade 3 caps there, and
-an earlier tuning reached `6 × 19`), and addition and subtraction within a few
-hundred (autumn's 400 and winter's 600 are already three-digit column arithmetic).
-Nothing enforces the second rule; it is a convention in the `seasons.js` header,
-which carries the reasoning.
+the hardest thing in a level, so it belongs to the glowing spaces and the boss,
+and `seasons.test.js › keeps division off the ordinary spaces, per Ella's rule`
+enforces that direction. The converse is not required: a hard slot may ask
+something else, and winter's does, because a single division fact within 100 is
+easier than winter's ordinary spaces — its climax is `twoStep` instead, which is
+grade 3's own two-step standard. What a hard slot may _not_ do is drop to a bare
+fact or a two-digit sum; `asks nothing but a hard kind at a hard space` holds
+that. **Every ordinary question stays mental**: no column operation past two
+digits, and every individual fact inside 100. That means `add`/`sub` cap at
+`max: 100` and `div` at `upTo: 10` — a quotient of 12 on the 9 table is `108 ÷ 9`,
+outside the grade-3 tables. `keeps every individual fact inside 100` enforces it,
+so it is a test now rather than a convention.
+
+For questions bigger than a bare fact without breaking that rule, put the
+multiples of ten in `tables`: `{kind: "mul", tables: [10, 20, ...90], upTo: 9}`
+gives `7 × 40`, which is grade 3's 3.NBT.A.3 — large answers, place-value
+practice, no column arithmetic, and no new form kind needed.
 
 `arithmetic.test.js` sweeps every form list the real seasons use, parsing each
 prompt and recomputing it, and separately checks that no generator exceeds the
-`max` its own form declares.
+`max` its own form declares and that every distractor is a number a slip could
+actually land on.
 
 ### Replace the art
 
