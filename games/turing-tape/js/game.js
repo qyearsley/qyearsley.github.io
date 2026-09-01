@@ -137,6 +137,34 @@ function makeCell(symbol) {
   return div
 }
 
+/**
+ * Keep the head cell inside the tape's visible strip.
+ *
+ * The machine grows the tape as it runs, so on a long run -- or on any narrow
+ * screen -- the head walks off the edge of `.tape-scroll` and the player is
+ * watching an empty stretch of tape. Nudged rather than centred, so a head
+ * moving back and forth in view does not make the whole tape jitter.
+ *
+ * `offsetLeft` is measured against `.tape-scroll` (the nearest positioned
+ * ancestor) and does not move as that element scrolls, unlike a bounding rect.
+ *
+ * @param {HTMLElement} headCell - The cell currently under the head.
+ */
+function scrollHeadIntoView(headCell) {
+  const scroller = activeTapeEl.parentElement
+  if (!scroller) return
+
+  const margin = 8
+  const left = headCell.offsetLeft
+  const right = left + headCell.offsetWidth
+
+  if (left - margin < scroller.scrollLeft) {
+    scroller.scrollLeft = Math.max(0, left - margin)
+  } else if (right + margin > scroller.scrollLeft + scroller.clientWidth) {
+    scroller.scrollLeft = right + margin - scroller.clientWidth
+  }
+}
+
 function updateDisplay() {
   const { tape, head, state, stepCount, halted } = machine
 
@@ -154,6 +182,7 @@ function updateDisplay() {
     const tapeRect = activeTapeEl.getBoundingClientRect()
     const cellRect = headCell.getBoundingClientRect()
     headIndicator.style.left = `${cellRect.left - tapeRect.left + cellRect.width / 2 - 6}px`
+    scrollHeadIntoView(headCell)
   }
 
   currentStateEl.textContent = state

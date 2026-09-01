@@ -105,6 +105,8 @@
       if (s.condition === "theme" && !window.__themeToggle) continue
       if (s.condition === "breadcrumb" && !getParentLink()) continue
       if (s.condition === "lang" && !getLangToggleUrl()) continue
+      // Suppressed on game pages, so don't advertise them there.
+      if (PAGE_NAV_KEYS.indexOf(s.key) !== -1 && isGamePage()) continue
 
       const dt = document.createElement("dt")
       dt.innerHTML = "<kbd>" + s.key + "</kbd>"
@@ -203,6 +205,17 @@
   }
 
   // --- Navigation helpers ---
+
+  const PAGE_NAV_KEYS = ["h", "j", "k", "u", "l"]
+
+  // Every game page is built around one of these two containers and no other
+  // page uses either, so the presence of one is the signal that page-navigation
+  // keys should stay out of the way. Deliberately not `.screen`, which is
+  // generic enough that a future non-game page might reasonably use it.
+  function isGamePage() {
+    return document.querySelector("#game-container, .game-layout") !== null
+  }
+
   function getParentLink() {
     const links = document.querySelectorAll(".breadcrumbs a")
     return links.length >= 1 ? links[links.length - 1] : null
@@ -253,73 +266,79 @@
     // All remaining shortcuts are disabled while the help overlay is open.
     if (isHelpOpen()) return
 
-    switch (e.key) {
-      case "h": {
-        const homePath = preferredLang === "zh" ? "/zh/" : "/"
-        if (window.location.pathname !== homePath) {
-          e.preventDefault()
-          window.location.href = homePath
-        }
-        return
-      }
-
-      case "l": {
-        const langUrl = getLangToggleUrl()
-        if (langUrl) {
-          e.preventDefault()
-          const targetLang = isZhPage ? "en" : "zh"
-          try {
-            localStorage.setItem("preferred-lang", targetLang)
-          } catch (_) {
-            /* ignored */
-          }
-          window.location.href = langUrl
-        }
-        return
-      }
-
-      case "u": {
-        const parent = getParentLink()
-        if (parent) {
-          e.preventDefault()
-          window.location.href = parent.href
-        }
-        return
-      }
-
-      case "t":
-        if (window.__themeToggle) {
-          e.preventDefault()
-          window.__themeToggle()
-        }
-        return
-
-      case "j":
-        e.preventDefault()
-        if (currentIndex === -1 && links.length > 0) {
-          links[0].focus()
-        } else if (currentIndex < links.length - 1) {
-          links[currentIndex + 1].focus()
-        }
-        return
-
-      case "k":
-        e.preventDefault()
-        if (currentIndex === -1 && links.length > 0) {
-          links[0].focus()
-        } else if (currentIndex > 0) {
-          links[currentIndex - 1].focus()
-        }
-        return
-
-      default:
-        for (let i = 0; i < shortcuts.length; i++) {
-          if (shortcuts[i].handler && shortcuts[i].key === e.key) {
+    // h/j/k/u/l move between and out of documents. Inside a game that is
+    // destructive rather than helpful, so they are skipped there and fall
+    // through to whatever the game itself registered for the key. `t` is not in
+    // the list: cycling the theme mid-game is harmless.
+    const isPageNavKey = PAGE_NAV_KEYS.indexOf(e.key) !== -1
+    if (!(isPageNavKey && isGamePage())) {
+      switch (e.key) {
+        case "h": {
+          const homePath = preferredLang === "zh" ? "/zh/" : "/"
+          if (window.location.pathname !== homePath) {
             e.preventDefault()
-            shortcuts[i].handler(e)
-            return
+            window.location.href = homePath
           }
+          return
         }
+
+        case "l": {
+          const langUrl = getLangToggleUrl()
+          if (langUrl) {
+            e.preventDefault()
+            const targetLang = isZhPage ? "en" : "zh"
+            try {
+              localStorage.setItem("preferred-lang", targetLang)
+            } catch (_) {
+              /* ignored */
+            }
+            window.location.href = langUrl
+          }
+          return
+        }
+
+        case "u": {
+          const parent = getParentLink()
+          if (parent) {
+            e.preventDefault()
+            window.location.href = parent.href
+          }
+          return
+        }
+
+        case "t":
+          if (window.__themeToggle) {
+            e.preventDefault()
+            window.__themeToggle()
+          }
+          return
+
+        case "j":
+          e.preventDefault()
+          if (currentIndex === -1 && links.length > 0) {
+            links[0].focus()
+          } else if (currentIndex < links.length - 1) {
+            links[currentIndex + 1].focus()
+          }
+          return
+
+        case "k":
+          e.preventDefault()
+          if (currentIndex === -1 && links.length > 0) {
+            links[0].focus()
+          } else if (currentIndex > 0) {
+            links[currentIndex - 1].focus()
+          }
+          return
+      }
+    }
+
+    for (let i = 0; i < shortcuts.length; i++) {
+      if (shortcuts[i].handler && shortcuts[i].key === e.key) {
+        e.preventDefault()
+        shortcuts[i].handler(e)
+        return
+      }
     }
   })
 })()

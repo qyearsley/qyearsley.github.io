@@ -45,14 +45,20 @@
         <!-- Target tape (hidden for demos) -->
         <div id="target-section" class="tape-section">
           <div class="tape-label">Goal</div>
-          <div id="target-tape" class="tape tape-target"></div>
+          <div class="tape-scroll">
+            <div id="target-tape" class="tape tape-target"></div>
+          </div>
         </div>
 
-        <!-- Active tape + head -->
+        <!-- Active tape + head. The head indicator lives inside the scroll
+             container so it tracks the cell it points at when the tape is
+             wider than the screen. -->
         <div class="tape-section">
           <div class="tape-label">Tape</div>
-          <div id="active-tape" class="tape tape-active"></div>
-          <div id="head-indicator" class="head-indicator"></div>
+          <div class="tape-scroll with-head">
+            <div id="active-tape" class="tape tape-active"></div>
+            <div id="head-indicator" class="head-indicator"></div>
+          </div>
         </div>
 
         <!-- State + controls on one line -->
@@ -84,19 +90,21 @@
             <h2>Rules</h2>
             <button id="add-rule-btn" class="small-btn" title="Add rule">+ Add Rule</button>
           </div>
-          <table id="rule-table" class="rule-table">
-            <thead>
-              <tr>
-                <th>State</th>
-                <th>Read</th>
-                <th>Write</th>
-                <th>Move</th>
-                <th>Next State</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="rule-body"></tbody>
-          </table>
+          <div class="rule-table-scroll">
+            <table id="rule-table" class="rule-table">
+              <thead>
+                <tr>
+                  <th>State</th>
+                  <th>Read</th>
+                  <th>Write</th>
+                  <th>Move</th>
+                  <th>Next State</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="rule-body"></tbody>
+            </table>
+          </div>
         </div>
 
         <!-- How it works -->

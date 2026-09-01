@@ -267,17 +267,31 @@ export class Renderer {
     return `rgb(${r}, ${g}, ${b})`
   }
 
+  /**
+   * Whether the canvas should paint its dark palette.
+   *
+   * Goes through `window.__prefersDark` (shared/theme.js) rather than calling
+   * `matchMedia` directly, so an explicit choice in the site theme picker beats
+   * the OS preference here the same way it does in the stylesheet. Falls back to
+   * the media query if theme.js has not loaded, which is only the test
+   * environment.
+   *
+   * @returns {boolean} True when the dark palette applies.
+   */
+  _isDark() {
+    if (typeof window.__prefersDark === "function") return window.__prefersDark()
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+  }
+
   _bgColor() {
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "#1a202c" : "#f8fafc"
+    return this._isDark() ? "#1a202c" : "#f8fafc"
   }
 
   _gridLineColor() {
-    return window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "rgba(255,255,255,0.1)"
-      : "rgba(0,0,0,0.1)"
+    return this._isDark() ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"
   }
 
   _lockedColor() {
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "#4a5568" : "#cbd5e0"
+    return this._isDark() ? "#4a5568" : "#cbd5e0"
   }
 }

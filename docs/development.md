@@ -202,7 +202,33 @@ cross-module call, so `nav.js` and `theme.js` work in either order.
 | `__themeToggle()`                               | `theme.js`                           | `nav.js`   | Cycle light/dark/system; also gates the "t" shortcut's visibility                |
 | `__themePopoverIsOpen()`                        | `theme.js`                           | `nav.js`   | Whether the theme popover is open (so `Escape` closes it first)                  |
 | `__themePopoverClose()`                         | `theme.js`                           | tests      | Close the theme popover                                                          |
+| `__prefersDark()`                               | `theme.js`                           | games      | Whether dark applies right now, honouring an explicit choice over the OS         |
+
+`theme.js` also dispatches a `themechange` event on `window` when the picker
+changes the theme. Stylesheets re-resolve themselves; anything painted into a
+canvas does not, so a game that draws its own colours needs both `__prefersDark`
+and that event (see `games/life-garden/js/Renderer.js`).
 
 When adding a cross-module global, prefix it with `__`, expose it as soon as the
 module initializes, and guard every read (`if (window.__foo)`) so load order
 never matters.
+
+## Game Stylesheets
+
+Each game owns its stylesheet and its own `--prefix-*` colour variables; there
+is no shared game CSS layer. Two conventions are enforced by
+`__tests__/game-styles.test.js`:
+
+- A game that styles a dark theme must write the dark values **twice** -- once
+  under `@media (prefers-color-scheme: dark)` and once under
+  `:root[data-theme="dark"]`. A custom property cannot be aliased across two
+  selectors, so there is no way to share them. Without the second block the site
+  theme picker has no effect on that game.
+- Selectors inside the media query need the `:not([data-theme="light"])` guard,
+  so an explicit light choice beats the OS preference.
+
+Games also load `/css/style.css`, which is written for document pages. Two of
+its rules need care: `.header` is the site's page-header class (Number Garden
+and Times Trail reuse the name for an in-screen HUD and reset it), and its focus
+ring fires on `:focus` rather than `:focus-visible`, which leaves a ring around
+whatever was last tapped.

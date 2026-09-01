@@ -1,4 +1,70 @@
-/* Life Garden - Main Styles */
+/**
+ * Life Garden -- main styles
+ *
+ * Loaded after the site sheet (/css/style.css), which supplies the page
+ * background and typography. This is a scrolling document rather than a
+ * full-screen app, so unlike Seasons and Times Trail it keeps that inheritance
+ * instead of resetting it.
+ *
+ * Colours go through `--lg-*` so the two dark blocks below only have to
+ * redeclare a dozen variables. They were once ~100 lines of duplicated rules
+ * under a bare `prefers-color-scheme` query, which meant the site theme picker
+ * had no effect here: choosing "Dark" on a light OS gave a dark page background
+ * (from the site sheet, which does honour the picker) under light-mode text.
+ * The canvas has the same split -- see `Renderer._isDark`.
+ */
+:root {
+  --lg-surface: #fff;
+  --lg-surface-alt: #edf2f7;
+  --lg-surface-hover: #f7fafc;
+  --lg-ink: #2d3748;
+  --lg-ink-muted: #4a5568;
+  --lg-ink-faint: #718096;
+  --lg-ink-fainter: #a0aec0;
+  --lg-border: #e2e8f0;
+  --lg-border-strong: #cbd5e0;
+  --lg-primary: #38a169;
+  --lg-primary-ink: #fff;
+  --lg-primary-bg: #f0fff4;
+}
+
+/* Dark, form 1: the OS preference. Scoped so an explicit light choice made
+   through /shared/theme.js still wins. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --lg-surface: #2d3748;
+    --lg-surface-alt: #2d3748;
+    --lg-surface-hover: #4a5568;
+    --lg-ink: #e2e8f0;
+    --lg-ink-muted: #cbd5e0;
+    --lg-ink-faint: #a0aec0;
+    --lg-ink-fainter: #718096;
+    --lg-border: #4a5568;
+    --lg-border-strong: #718096;
+    --lg-primary: #68d391;
+    --lg-primary-ink: #1a202c;
+    --lg-primary-bg: #1c3a1c;
+  }
+}
+
+/* Dark, form 2: the explicit choice /shared/theme.js writes onto
+   <html data-theme="dark">. Written out in full rather than referenced, because
+   a custom property cannot be aliased across two different selectors. If a
+   variable is added to one of these blocks, add it to the other. */
+:root[data-theme="dark"] {
+  --lg-surface: #2d3748;
+  --lg-surface-alt: #2d3748;
+  --lg-surface-hover: #4a5568;
+  --lg-ink: #e2e8f0;
+  --lg-ink-muted: #cbd5e0;
+  --lg-ink-faint: #a0aec0;
+  --lg-ink-fainter: #718096;
+  --lg-border: #4a5568;
+  --lg-border-strong: #718096;
+  --lg-primary: #68d391;
+  --lg-primary-ink: #1a202c;
+  --lg-primary-bg: #1c3a1c;
+}
 
 .screen {
   display: none;
@@ -10,6 +76,13 @@
 
 .hidden {
   display: none !important;
+}
+
+/* The site sheet gives every page `padding: 2rem 1rem`, which the 100vh layout
+   below then overflows by exactly that much -- a scrollbar on every visit, with
+   nothing under the fold. `.game-layout` supplies its own gutter instead. */
+body {
+  padding: 0;
 }
 
 /* Game layout */
@@ -34,24 +107,24 @@
 
 .icon-btn {
   background: none;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--lg-border);
   border-radius: 4px;
   padding: 0.4rem 0.8rem;
   font-size: 1.1rem;
   cursor: pointer;
-  color: #4a5568;
+  color: var(--lg-ink-muted);
   text-decoration: none;
 }
 
 .icon-btn:hover {
-  background: #f7fafc;
-  border-color: #cbd5e0;
+  background: var(--lg-surface-hover);
+  border-color: var(--lg-border-strong);
 }
 
 .puzzle-title {
   font-weight: 600;
   font-size: 1.1rem;
-  color: #2d3748;
+  color: var(--lg-ink);
 }
 
 .top-controls {
@@ -62,28 +135,43 @@
 }
 
 .ctrl-btn {
-  background: #edf2f7;
-  border: 1px solid #e2e8f0;
+  background: var(--lg-surface-alt);
+  border: 1px solid var(--lg-border);
   border-radius: 4px;
   padding: 0.35rem 0.7rem;
   font-size: 0.8rem;
   cursor: pointer;
-  color: #2d3748;
+  color: var(--lg-ink);
   transition: background 0.15s;
 }
 
 .ctrl-btn:hover {
-  background: #e2e8f0;
+  background: var(--lg-surface-hover);
 }
 
-.ctrl-btn:focus {
-  outline: 2px solid #38a169;
+/* Focus.
+   The site sheet rings every `:focus`, so a ring stayed on the last button
+   clicked -- and at `button:focus` (0,1,1) it outranks a bare `:focus-visible`
+   rule. Both halves are replaced: the always-on ring is dropped, and the
+   keyboard-only one is redrawn at matching specificity in the garden's green. */
+a:focus,
+button:focus,
+input:focus,
+select:focus {
+  outline: none;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--lg-primary);
   outline-offset: 2px;
 }
 
 .gen-display {
   font-size: 0.85rem;
-  color: #718096;
+  color: var(--lg-ink-faint);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -91,19 +179,19 @@
 /* Speed toggle */
 .speed-toggle {
   display: flex;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--lg-border);
   border-radius: 4px;
   overflow: hidden;
 }
 
 .speed-btn {
-  background: white;
+  background: var(--lg-surface);
   border: none;
-  border-right: 1px solid #e2e8f0;
+  border-right: 1px solid var(--lg-border);
   padding: 0.35rem 0.6rem;
   font-size: 0.75rem;
   cursor: pointer;
-  color: #718096;
+  color: var(--lg-ink-faint);
   transition: all 0.15s;
 }
 
@@ -112,12 +200,12 @@
 }
 
 .speed-btn:hover {
-  background: #f7fafc;
+  background: var(--lg-surface-hover);
 }
 
 .speed-btn.active {
-  background: #38a169;
-  color: white;
+  background: var(--lg-primary);
+  color: var(--lg-primary-ink);
 }
 
 /* Main area */
@@ -141,7 +229,7 @@
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #718096;
+  color: var(--lg-ink-faint);
   margin-bottom: 0.5rem;
 }
 
@@ -157,20 +245,20 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0.75rem;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--lg-border);
   border-radius: 6px;
-  background: white;
+  background: var(--lg-surface);
   cursor: pointer;
   transition: border-color 0.2s;
 }
 
 .species-btn:hover {
-  border-color: #38a169;
+  border-color: var(--lg-primary);
 }
 
 .species-btn.selected {
-  border-color: #38a169;
-  background: #f0fff4;
+  border-color: var(--lg-primary);
+  background: var(--lg-primary-bg);
 }
 
 .species-emoji {
@@ -180,13 +268,13 @@
 .species-name {
   font-size: 0.9rem;
   font-weight: 500;
-  color: #2d3748;
+  color: var(--lg-ink);
 }
 
 .species-key {
   margin-left: auto;
   font-size: 0.7rem;
-  color: #a0aec0;
+  color: var(--lg-ink-fainter);
 }
 
 /* Presets */
@@ -197,37 +285,37 @@
 }
 
 .preset-btn {
-  background: #edf2f7;
-  border: 1px solid #e2e8f0;
+  background: var(--lg-surface-alt);
+  border: 1px solid var(--lg-border);
   border-radius: 4px;
   padding: 0.3rem 0.6rem;
   font-size: 0.75rem;
   cursor: pointer;
-  color: #4a5568;
+  color: var(--lg-ink-muted);
   transition: all 0.15s;
 }
 
 .preset-btn:hover {
-  background: #e2e8f0;
-  border-color: #38a169;
+  background: var(--lg-surface-hover);
+  border-color: var(--lg-primary);
 }
 
 /* Rules */
 .rules-section summary {
   font-size: 0.85rem;
-  color: #718096;
+  color: var(--lg-ink-faint);
   cursor: pointer;
   user-select: none;
 }
 
 .rules-section summary:hover {
-  color: #4a5568;
+  color: var(--lg-ink-muted);
 }
 
 .rules-list {
   margin: 0.5rem 0 0 1.2rem;
   font-size: 0.8rem;
-  color: #718096;
+  color: var(--lg-ink-faint);
   line-height: 1.6;
 }
 
@@ -241,18 +329,21 @@
   padding: 0;
   margin: 0;
   font-size: 0.8rem;
-  color: #718096;
+  color: var(--lg-ink-faint);
   line-height: 1.8;
 }
 
-kbd {
-  background: #edf2f7;
-  border: 1px solid #e2e8f0;
+/* Scoped to this game's own lists. Left unscoped, this also restyled the `kbd`
+   chips in the shared keyboard-help overlay, so `?` looked different here than
+   on the rest of the site. */
+.shortcuts-list kbd {
+  background: var(--lg-surface-alt);
+  border: 1px solid var(--lg-border);
   border-radius: 3px;
   padding: 0.1rem 0.35rem;
   font-family: system-ui, sans-serif;
   font-size: 0.75rem;
-  color: #4a5568;
+  color: var(--lg-ink-muted);
 }
 
 /* Responsive */
@@ -286,114 +377,5 @@ kbd {
     margin-left: 0;
     flex-basis: 100%;
     order: 10;
-  }
-}
-
-/* Dark mode */
-@media (prefers-color-scheme: dark) {
-  .icon-btn {
-    color: #cbd5e0;
-    border-color: #4a5568;
-  }
-
-  .icon-btn:hover {
-    background: #2d3748;
-    border-color: #718096;
-  }
-
-  .puzzle-title {
-    color: #e2e8f0;
-  }
-
-  .gen-display {
-    color: #a0aec0;
-  }
-
-  .sidebar-section h3 {
-    color: #a0aec0;
-  }
-
-  .species-btn {
-    background: #2d3748;
-    border-color: #4a5568;
-  }
-
-  .species-btn:hover {
-    border-color: #68d391;
-  }
-
-  .species-btn.selected {
-    border-color: #68d391;
-    background: #1c3a1c;
-  }
-
-  .species-name {
-    color: #e2e8f0;
-  }
-
-  .species-key {
-    color: #718096;
-  }
-
-  .ctrl-btn {
-    background: #2d3748;
-    border-color: #4a5568;
-    color: #e2e8f0;
-  }
-
-  .ctrl-btn:hover {
-    background: #4a5568;
-  }
-
-  .speed-toggle {
-    border-color: #4a5568;
-  }
-
-  .speed-btn {
-    background: #2d3748;
-    border-color: #4a5568;
-    color: #a0aec0;
-  }
-
-  .speed-btn:hover {
-    background: #4a5568;
-  }
-
-  .speed-btn.active {
-    background: #68d391;
-    color: #1a202c;
-  }
-
-  .rules-section summary {
-    color: #a0aec0;
-  }
-
-  .rules-section summary:hover {
-    color: #e2e8f0;
-  }
-
-  .rules-list {
-    color: #a0aec0;
-  }
-
-  .preset-btn {
-    background: #2d3748;
-    border-color: #4a5568;
-    color: #a0aec0;
-  }
-
-  .preset-btn:hover {
-    background: #4a5568;
-    border-color: #68d391;
-  }
-
-  .shortcuts-list {
-    color: #a0aec0;
-  }
-
-  kbd {
-    background: #2d3748;
-    border-color: #4a5568;
-    color: #cbd5e0;
   }
 }

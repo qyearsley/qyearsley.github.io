@@ -203,6 +203,27 @@ body {
   border: 0;
 }
 
+/* ==================== Focus ====================
+   The site sheet rings every `:focus`, which on a touch screen means a blue box
+   left around whichever control was last tapped, and at `button:focus` (0,1,1)
+   it also outranks a bare `:focus-visible` rule. Both halves are replaced here:
+   the always-on ring is dropped, and the keyboard-only one is redrawn at
+   matching specificity in the game's own green. */
+a:focus,
+button:focus,
+input:focus,
+select:focus {
+  outline: none;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--sn-primary);
+  outline-offset: 3px;
+}
+
 .screen-heading {
   margin-bottom: 8px;
   font-size: 1.5rem;
@@ -269,10 +290,8 @@ body {
     transform 0.15s ease;
 }
 
-.character-card:hover,
-.character-card:focus-visible {
+.character-card:hover {
   border-color: var(--sn-primary);
-  outline: none;
 }
 
 .character-card:active {
@@ -646,10 +665,12 @@ body.is-glowing-question .question-prompt {
   }
 }
 
-.choice:hover:not(.is-locked),
-.choice:focus-visible {
+/* Hover only. Focus is handled by the game-wide `:focus-visible` ring: this
+   rule used to carry `:focus-visible` too, setting the border to the colour it
+   already had and then `outline: none` on top -- which left keyboard focus
+   completely invisible on the four controls the game is played with. */
+.choice:hover:not(.is-locked) {
   border-color: var(--sn-primary);
-  outline: none;
 }
 
 .choice:active:not(.is-locked) {

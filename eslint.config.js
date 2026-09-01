@@ -25,6 +25,7 @@ const browserGlobals = {
   localStorage: "readonly",
   Storage: "readonly",
   Event: "readonly",
+  CustomEvent: "readonly",
   KeyboardEvent: "readonly",
   MouseEvent: "readonly",
   HTMLElement: "readonly",

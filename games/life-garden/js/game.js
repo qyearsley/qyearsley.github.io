@@ -26,6 +26,7 @@ class LifeGarden {
 
     this._setupRenderer()
     this._setupEvents()
+    this._setupThemeRepaint()
     this._init()
   }
 
@@ -34,6 +35,25 @@ class LifeGarden {
     if (canvas) {
       this.renderer = new Renderer(canvas, this.registry)
     }
+  }
+
+  /**
+   * Repaint when the page theme changes.
+   *
+   * The stylesheet re-resolves itself, but the canvas holds whatever was last
+   * painted into it. Without this the grid keeps its old background and grid
+   * lines until the next generation, which on a paused board is forever.
+   *
+   * Both sources are covered: `themechange` for the site theme picker
+   * (shared/theme.js), and the media query for a change to the OS preference
+   * while the page is open.
+   */
+  _setupThemeRepaint() {
+    const repaint = () => {
+      if (this.renderer && this.grid) this.renderer.render(this.grid)
+    }
+    window.addEventListener("themechange", repaint)
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", repaint)
   }
 
   _setupEvents() {

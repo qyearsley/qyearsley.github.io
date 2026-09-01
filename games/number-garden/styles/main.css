@@ -147,13 +147,23 @@ body {
   flex-direction: column;
 }
 
-/* Header Styles */
+/* Header Styles
+   `.header` is also the site sheet's page-header class, and this is a
+   `<div class="header">` inside a screen rather than a `<header>` at the top of
+   a document. Left alone it inherited a dark slate background, white text,
+   centred text and `padding: 2rem` -- which is why the light --ng-border
+   underline below never made sense against it, and why the HUD sat 32px inside
+   the screen gutter that everything under it uses. */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: static;
+  background: none;
+  color: inherit;
+  text-align: left;
+  padding: 0 0 var(--ng-space-md);
   margin-bottom: var(--ng-space-lg);
-  padding-bottom: var(--ng-space-md);
   border-bottom: 3px solid var(--ng-border);
   flex-shrink: 0;
 }
@@ -823,7 +833,18 @@ body {
   transform: translateX(-2px);
 }
 
-/* Focus Styles - Accessibility */
+/* Focus Styles - Accessibility
+   The site sheet rings every `:focus`, which on a tablet leaves a blue box
+   around whichever control was last tapped. `.answer-button` had its own
+   exemption for that below; this covers the rest of the game the same way, so
+   only keyboard focus draws a ring. */
+a:focus,
+button:focus,
+input:focus,
+select:focus {
+  outline: none;
+}
+
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
@@ -837,11 +858,6 @@ select:focus-visible,
   outline: 4px solid var(--theme-accent);
   outline-offset: 4px;
   transform: scale(1.05);
-}
-
-/* Prevent persistent highlight after touch on mobile */
-.answer-button:focus:not(:focus-visible) {
-  outline: none;
 }
 
 /* Keyboard hint */
@@ -1059,10 +1075,13 @@ select:focus-visible,
     padding: var(--ng-space-xs);
   }
 
+  /* dvh, not vh. The base rule already prefers it; repeating `100vh` here put
+     the phone -- the one place Safari's disappearing toolbars actually change
+     the viewport -- back on the measurement that ignores them. */
   #game-container {
     border-radius: var(--ng-radius-sm);
-    height: 100vh;
-    max-height: 100vh;
+    height: 100dvh;
+    max-height: 100dvh;
   }
 
   .screen {

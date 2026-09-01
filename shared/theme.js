@@ -13,6 +13,17 @@
   if (theme) document.documentElement.dataset.theme = theme
   if (accent) document.documentElement.dataset.accent = accent
 
+  // Resolve "is the page dark right now" the same way CSS does: an explicit
+  // choice beats the OS preference. Exposed because canvas and SVG can't read a
+  // media query the way a stylesheet can -- see life-garden's Renderer, which
+  // used to call matchMedia directly and so ignored the toggle entirely.
+  window.__prefersDark = function () {
+    const explicit = document.documentElement.dataset.theme
+    if (explicit === "dark") return true
+    if (explicit === "light") return false
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+  }
+
   // Part 2: UI injection after DOM is ready
   document.addEventListener("DOMContentLoaded", function () {
     // Inject styles
@@ -46,7 +57,11 @@
       // underneath it. Reserving the room here rather than in each game's
       // stylesheet keeps it in one place, and puts it on the element that
       // causes the overlap. 60px clears the 36px button plus both margins.
-      ".game-top-bar { padding-right: 60px; }",
+      //
+      // `.screen > .header` is the same problem in the two screen-stack games
+      // (Number Garden, Times Trail): their right-hand HUD ends in a settings
+      // gear that the fixed toggle would otherwise cover.
+      ".game-top-bar, .screen > .header { padding-right: 60px; }",
       "",
       ".theme-popover {",
       "  position: fixed;",
@@ -232,8 +247,16 @@
       "</div>" +
       "</fieldset>"
 
-    // Place button in header controls if available, else fall back to body
-    const header = document.querySelector(".header")
+    // Place button in header controls if available, else fall back to body.
+    //
+    // Only a page-level header counts. Number Garden and Times Trail reuse the
+    // `.header` class for a HUD row inside each of their stacked `.screen`
+    // panels, and all but one of those are `display: none` -- so the first
+    // match was a hidden element and the toggle vanished with it. Those two
+    // games get the fixed top-right button instead.
+    const header = Array.from(document.querySelectorAll(".header")).find(function (el) {
+      return !el.closest(".screen")
+    })
     let controls = header ? header.querySelector(".header-controls") : null
     if (header && !controls) {
       controls = document.createElement("div")
@@ -297,6 +320,9 @@
       }
       btn.innerHTML = getIcon()
       updateActiveStates()
+      // Stylesheets re-resolve themselves; anything painted into a canvas does
+      // not. Life Garden listens for this to repaint its grid.
+      window.dispatchEvent(new CustomEvent("themechange", { detail: { theme: t } }))
     }
 
     // Apply accent

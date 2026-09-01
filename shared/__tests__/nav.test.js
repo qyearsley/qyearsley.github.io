@@ -386,6 +386,61 @@ describe("nav.js", () => {
     })
   })
 
+  // h/j/k/u/l leave the page. On a game that discards unsaved state -- a Life
+  // Garden grid, a Turing Tape rule table -- and it fires while the player is
+  // pressing keys at the game. Detection is the presence of a game container.
+  describe("page navigation keys on a game page", () => {
+    function makeGamePage() {
+      document.body.innerHTML = `
+        <div class="breadcrumbs">
+          <a href="/">Home</a> / <a href="/games/">Games</a>
+        </div>
+        <div class="game-layout">
+          <div class="internal-links"><a href="/page1">Page 1</a></div>
+        </div>
+      `
+    }
+
+    it.each(["h", "j", "k", "u", "l"])("%s is left alone", (key) => {
+      makeGamePage()
+      const event = pressKey(key)
+      expect(event.defaultPrevented).toBe(false)
+    })
+
+    it("still cycles the theme with t", () => {
+      makeGamePage()
+      window.__themeToggle = jest.fn()
+      pressKey("t")
+      expect(window.__themeToggle).toHaveBeenCalled()
+      delete window.__themeToggle
+    })
+
+    it("still runs a shortcut the game registered for a suppressed key", () => {
+      makeGamePage()
+      const handler = jest.fn()
+      window.__registerShortcut("k", "Move up", handler)
+      pressKey("k")
+      expect(handler).toHaveBeenCalled()
+    })
+
+    it("does not advertise the suppressed keys in the help overlay", () => {
+      makeGamePage()
+      pressKey("?")
+      const keys = Array.from(document.querySelectorAll(".shortcut-list dt")).map(
+        (dt) => dt.textContent,
+      )
+      expect(keys).not.toContain("h")
+      expect(keys).not.toContain("u")
+      expect(keys).toContain("?")
+    })
+
+    it("#game-container also counts as a game page", () => {
+      document.body.innerHTML = `<main id="game-container"></main>`
+      const event = pressKey("h")
+      expect(event.defaultPrevented).toBe(false)
+    })
+  })
+
   describe("theme key", () => {
     it("calls __themeToggle when available", () => {
       window.__themeToggle = jest.fn()

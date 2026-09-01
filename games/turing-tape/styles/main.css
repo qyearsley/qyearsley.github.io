@@ -1,3 +1,109 @@
+/**
+ * Turing Tape -- game stylesheet
+ *
+ * Loaded after the site sheet (/css/style.css), which supplies the page
+ * background, typography and body padding. This is a scrolling document rather
+ * than a full-screen app, so unlike Seasons and Times Trail it keeps that
+ * inheritance instead of resetting it.
+ *
+ * Colours go through `--tape-*` so the two dark blocks below only have to
+ * redeclare variables. They were once ~160 lines of duplicated rules under a
+ * bare `prefers-color-scheme` query, which meant the site theme picker had no
+ * effect here: choosing "Dark" on a light OS gave a dark page background (from
+ * the site sheet, which does honour the picker) under light-mode text.
+ *
+ * Anything that just needs body text is left uncoloured so it inherits
+ * `--color-text` from the site sheet, which is already theme-aware.
+ */
+:root {
+  --tape-surface: #fff;
+  --tape-surface-alt: #edf2f7;
+  --tape-surface-hover: #f7fafc;
+  --tape-surface-hover-strong: #e2e8f0;
+  --tape-ink-muted: #4a5568;
+  --tape-ink-faint: #718096;
+  --tape-ink-fainter: #a0aec0;
+  --tape-border: #cbd5e0;
+  --tape-border-hover: #a0aec0;
+  --tape-border-subtle: #e2e8f0;
+  --tape-border-faint: #edf2f7;
+  --tape-accent: #3182ce;
+  --tape-accent-bg: #ebf8ff;
+  --tape-accent-ink: #2b6cb0;
+  --tape-accent-glow: rgb(49, 130, 206, 0.25);
+  --tape-ok: #48bb78;
+  --tape-ok-bg: #f0fff4;
+  --tape-ok-ink: #276749;
+  --tape-ok-border: #c6f6d5;
+  --tape-bad: #e53e3e;
+  --tape-bad-bg: #fff5f5;
+  --tape-bad-ink: #9b2c2c;
+  --tape-bad-border: #fed7d7;
+
+  /* One tape cell. A variable because the narrow-width block shrinks it. */
+  --tape-cell: 3rem;
+}
+
+/* Dark, form 1: the OS preference. Scoped so an explicit light choice made
+   through /shared/theme.js still wins. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --tape-surface: #2d3748;
+    --tape-surface-alt: #2d3748;
+    --tape-surface-hover: #4a5568;
+    --tape-surface-hover-strong: #4a5568;
+    --tape-ink-muted: #cbd5e0;
+    --tape-ink-faint: #a0aec0;
+    --tape-ink-fainter: #718096;
+    --tape-border: #4a5568;
+    --tape-border-hover: #718096;
+    --tape-border-subtle: #4a5568;
+    --tape-border-faint: #2d3748;
+    --tape-accent: #63b3ed;
+    --tape-accent-bg: #2a4365;
+    --tape-accent-ink: #bee3f8;
+    --tape-accent-glow: rgb(99, 179, 237, 0.25);
+    --tape-ok: #48bb78;
+    --tape-ok-bg: #1c4532;
+    --tape-ok-ink: #9ae6b4;
+    --tape-ok-border: #276749;
+    --tape-bad: #fc8181;
+    --tape-bad-bg: #4a2020;
+    --tape-bad-ink: #feb2b2;
+    --tape-bad-border: #9b2c2c;
+  }
+}
+
+/* Dark, form 2: the explicit choice /shared/theme.js writes onto
+   <html data-theme="dark">. Written out in full rather than referenced, because
+   a custom property cannot be aliased across two different selectors. If a
+   variable is added to one of these blocks, add it to the other. */
+:root[data-theme="dark"] {
+  --tape-surface: #2d3748;
+  --tape-surface-alt: #2d3748;
+  --tape-surface-hover: #4a5568;
+  --tape-surface-hover-strong: #4a5568;
+  --tape-ink-muted: #cbd5e0;
+  --tape-ink-faint: #a0aec0;
+  --tape-ink-fainter: #718096;
+  --tape-border: #4a5568;
+  --tape-border-hover: #718096;
+  --tape-border-subtle: #4a5568;
+  --tape-border-faint: #2d3748;
+  --tape-accent: #63b3ed;
+  --tape-accent-bg: #2a4365;
+  --tape-accent-ink: #bee3f8;
+  --tape-accent-glow: rgb(99, 179, 237, 0.25);
+  --tape-ok: #48bb78;
+  --tape-ok-bg: #1c4532;
+  --tape-ok-ink: #9ae6b4;
+  --tape-ok-border: #276749;
+  --tape-bad: #fc8181;
+  --tape-bad-bg: #4a2020;
+  --tape-bad-ink: #feb2b2;
+  --tape-bad-border: #9b2c2c;
+}
+
 /* Layout */
 .game-layout {
   max-width: 700px;
@@ -25,12 +131,12 @@
   border-radius: 6px;
   text-decoration: none;
   font-size: 1.25rem;
-  color: #4a5568;
-  background: #edf2f7;
+  color: var(--tape-ink-muted);
+  background: var(--tape-surface-alt);
 }
 
 .icon-btn:hover {
-  background: #e2e8f0;
+  background: var(--tape-surface-hover-strong);
 }
 
 .level-title {
@@ -41,7 +147,7 @@
 .step-display {
   margin-left: auto;
   font-variant-numeric: tabular-nums;
-  color: #718096;
+  color: var(--tape-ink-faint);
 }
 
 /* Level nav */
@@ -54,40 +160,40 @@
 
 .level-btn {
   padding: 0.3rem 0.75rem;
-  border: 2px solid #cbd5e0;
+  border: 2px solid var(--tape-border);
   border-radius: 6px;
   background: none;
   cursor: pointer;
   font-size: 0.9rem;
-  color: #4a5568;
+  color: var(--tape-ink-muted);
   transition:
     border-color 0.15s,
     background 0.15s;
 }
 
 .level-btn:hover {
-  border-color: #a0aec0;
-  background: #f7fafc;
+  border-color: var(--tape-border-hover);
+  background: var(--tape-surface-hover);
 }
 
 .level-btn.active {
-  border-color: #3182ce;
-  background: #ebf8ff;
-  color: #2b6cb0;
+  border-color: var(--tape-accent);
+  background: var(--tape-accent-bg);
+  color: var(--tape-accent-ink);
   font-weight: 600;
 }
 
 .level-btn.completed {
-  border-color: #48bb78;
+  border-color: var(--tape-ok);
 }
 
 .level-btn.completed::after {
   content: " \2713";
-  color: #48bb78;
+  color: var(--tape-ok);
 }
 
 .level-description {
-  color: #4a5568;
+  color: var(--tape-ink-muted);
   margin: 0 0 1.25rem;
   line-height: 1.5;
 }
@@ -95,7 +201,6 @@
 /* Tape */
 .tape-section {
   margin-bottom: 0.75rem;
-  position: relative;
 }
 
 .tape-label {
@@ -103,27 +208,45 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #a0aec0;
+  color: var(--tape-ink-fainter);
   margin-bottom: 0.25rem;
+}
+
+/* The machine grows the tape as it runs (TuringMachine.step pushes and
+   unshifts blanks), so its width is not bounded by the level data and a long
+   run overflowed the 700px layout on a desktop, never mind a phone. Scrolling
+   the tape keeps it a single readable row; game.js keeps the head in view. */
+.tape-scroll {
+  position: relative;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+/* The head arrow used to hang below .tape-section on a negative offset. Inside
+   a scroll container that would be clipped, so its room is reserved instead. */
+.tape-scroll.with-head {
+  padding-bottom: 0.65rem;
 }
 
 .tape {
   display: flex;
   gap: 2px;
+  width: max-content;
 }
 
 .tape-cell {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 3rem;
-  height: 3rem;
-  border: 2px solid #cbd5e0;
+  width: var(--tape-cell);
+  height: var(--tape-cell);
+  flex: none;
+  border: 2px solid var(--tape-border);
   border-radius: 6px;
   font-size: 1.4rem;
   font-weight: 600;
   font-family: "SF Mono", Menlo, Consolas, monospace;
-  background: #fff;
+  background: var(--tape-surface);
   transition:
     background 0.15s,
     border-color 0.15s,
@@ -133,35 +256,35 @@
 .tape-target .tape-cell {
   opacity: 0.5;
   border-style: dashed;
-  height: 2.25rem;
+  height: calc(var(--tape-cell) * 0.75);
   font-size: 1.1rem;
 }
 
 .tape-cell.head {
-  border-color: #3182ce;
-  background: #ebf8ff;
+  border-color: var(--tape-accent);
+  background: var(--tape-accent-bg);
   transform: scale(1.08);
-  box-shadow: 0 0 0 2px rgb(49, 130, 206, 0.25);
+  box-shadow: 0 0 0 2px var(--tape-accent-glow);
 }
 
 .tape-cell.match {
-  border-color: #48bb78;
-  background: #f0fff4;
+  border-color: var(--tape-ok);
+  background: var(--tape-ok-bg);
 }
 
 .tape-cell.mismatch {
-  border-color: #e53e3e;
-  background: #fff5f5;
+  border-color: var(--tape-bad);
+  background: var(--tape-bad-bg);
 }
 
 .head-indicator {
   position: absolute;
-  bottom: -0.6rem;
+  bottom: 0;
   width: 0;
   height: 0;
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
-  border-bottom: 8px solid #3182ce;
+  border-bottom: 8px solid var(--tape-accent);
   transition: left 0.2s ease;
   transform: rotate(180deg);
 }
@@ -177,7 +300,7 @@
 
 .status-line {
   font-size: 0.95rem;
-  color: #4a5568;
+  color: var(--tape-ink-muted);
   white-space: nowrap;
 }
 
@@ -189,21 +312,21 @@
 
 .ctrl-btn {
   padding: 0.5rem 1.25rem;
-  border: 2px solid #cbd5e0;
+  border: 2px solid var(--tape-border);
   border-radius: 6px;
-  background: #fff;
+  background: var(--tape-surface);
   cursor: pointer;
   font-size: 0.95rem;
   font-weight: 500;
-  color: #4a5568;
+  color: var(--tape-ink-muted);
   transition:
     border-color 0.15s,
     background 0.15s;
 }
 
 .ctrl-btn:hover {
-  border-color: #a0aec0;
-  background: #f7fafc;
+  border-color: var(--tape-border-hover);
+  background: var(--tape-surface-hover);
 }
 
 .ctrl-btn:disabled {
@@ -211,10 +334,21 @@
   cursor: not-allowed;
 }
 
+/* Scoped to this game's own buttons. Left unscoped, this also restyled the
+   `kbd` chips in the shared keyboard-help overlay, so `?` looked different here
+   than on the rest of the site. */
 .ctrl-btn kbd {
-  font-size: 0.7rem;
+  display: inline-block;
+  min-width: 2rem;
   padding: 0.1rem 0.3rem;
   margin-left: 0.25rem;
+  border: 1px solid var(--tape-border);
+  border-radius: 3px;
+  background: var(--tape-surface-alt);
+  color: var(--tape-ink-muted);
+  font-family: inherit;
+  font-size: 0.7rem;
+  text-align: center;
   opacity: 0.6;
 }
 
@@ -232,7 +366,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #718096;
+  color: var(--tape-ink-faint);
   margin: 0 0 0.35rem;
 }
 
@@ -245,19 +379,39 @@
 }
 
 .result-msg.success {
-  background: #f0fff4;
-  color: #276749;
-  border: 1px solid #c6f6d5;
+  background: var(--tape-ok-bg);
+  color: var(--tape-ok-ink);
+  border: 1px solid var(--tape-ok-border);
 }
 
 .result-msg.error {
-  background: #fff5f5;
-  color: #9b2c2c;
-  border: 1px solid #fed7d7;
+  background: var(--tape-bad-bg);
+  color: var(--tape-bad-ink);
+  border: 1px solid var(--tape-bad-border);
 }
 
 .hidden {
   display: none !important;
+}
+
+/* Focus.
+   The site sheet rings every `:focus`, so a ring stayed on the last control
+   clicked -- and at `button:focus` (0,1,1) it outranks a bare `:focus-visible`
+   rule. Both halves are replaced: the always-on ring is dropped, and the
+   keyboard-only one is redrawn at matching specificity in the machine's blue. */
+a:focus,
+button:focus,
+input:focus,
+select:focus {
+  outline: none;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--tape-accent);
+  outline-offset: 2px;
 }
 
 /* Rule table */
@@ -279,21 +433,29 @@
 
 .small-btn {
   padding: 0.25rem 0.75rem;
-  border: 1px solid #cbd5e0;
+  border: 1px solid var(--tape-border);
   border-radius: 4px;
-  background: #fff;
+  background: var(--tape-surface);
   cursor: pointer;
   font-size: 0.85rem;
-  color: #4a5568;
+  color: var(--tape-ink-muted);
 }
 
 .small-btn:hover {
-  background: #f7fafc;
-  border-color: #a0aec0;
+  background: var(--tape-surface-hover);
+  border-color: var(--tape-border-hover);
+}
+
+/* Six columns of selects do not fit a phone. Scrolling the table beats
+   squeezing every dropdown down to a few characters wide. */
+.rule-table-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
 }
 
 .rule-table {
   width: 100%;
+  min-width: 30rem;
   border-collapse: collapse;
   font-size: 0.95rem;
 }
@@ -301,55 +463,56 @@
 .rule-table th {
   text-align: left;
   padding: 0.4rem 0.5rem;
-  border-bottom: 2px solid #e2e8f0;
+  border-bottom: 2px solid var(--tape-border-subtle);
   font-size: 0.85rem;
   font-weight: 600;
-  color: #718096;
+  color: var(--tape-ink-faint);
 }
 
 .rule-table td {
   padding: 0.3rem 0.25rem;
-  border-bottom: 1px solid #edf2f7;
+  border-bottom: 1px solid var(--tape-border-faint);
 }
 
 .rule-table select {
   width: 100%;
   padding: 0.35rem 0.3rem;
-  border: 1px solid #cbd5e0;
+  border: 1px solid var(--tape-border);
   border-radius: 4px;
   font-size: 0.9rem;
   font-family: "SF Mono", Menlo, Consolas, monospace;
-  background: #fff;
+  background: var(--tape-surface);
+  color: inherit;
 }
 
-.rule-table select:focus {
-  outline: 2px solid #3182ce;
+.rule-table select:focus-visible {
+  outline: 2px solid var(--tape-accent);
   outline-offset: 1px;
 }
 
 .rule-table .active-rule {
-  background: #ebf8ff;
+  background: var(--tape-accent-bg);
 }
 
 .delete-rule-btn {
   border: none;
   background: none;
   cursor: pointer;
-  color: #a0aec0;
+  color: var(--tape-ink-fainter);
   font-size: 1.1rem;
   padding: 0.25rem;
   border-radius: 4px;
 }
 
 .delete-rule-btn:hover {
-  color: #e53e3e;
-  background: #fff5f5;
+  color: var(--tape-bad);
+  background: var(--tape-bad-bg);
 }
 
 /* Info sections */
 .info-section {
   margin-top: 1rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--tape-border-subtle);
   border-radius: 6px;
   padding: 0.75rem 1rem;
 }
@@ -357,7 +520,7 @@
 .info-section h2 {
   font-size: 1rem;
   font-weight: 600;
-  color: #4a5568;
+  color: var(--tape-ink-muted);
   margin: 0 0 0.5rem;
 }
 
@@ -371,190 +534,48 @@
   line-height: 1.4;
 }
 
-.shortcuts-list {
-  list-style: none;
-  padding-left: 0;
-}
-
-.shortcuts-list li {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-kbd {
-  display: inline-block;
-  min-width: 2rem;
-  padding: 0.15rem 0.4rem;
-  border: 1px solid #cbd5e0;
-  border-radius: 3px;
-  background: #edf2f7;
-  font-family: inherit;
-  font-size: 0.85rem;
-  text-align: center;
-}
-
-/* Dark mode */
-@media (prefers-color-scheme: dark) {
-  .icon-btn {
-    color: #cbd5e0;
-    background: #2d3748;
+/* Narrow screens.
+   The controls get a 44px floor here rather than everywhere, because this is
+   where a finger rather than a pointer is the likely input. */
+@media (width <= 600px) {
+  :root {
+    --tape-cell: 2.5rem;
   }
 
-  .icon-btn:hover {
-    background: #4a5568;
-  }
-
-  .level-title {
-    color: #e2e8f0;
-  }
-
-  .step-display {
-    color: #a0aec0;
-  }
-
-  .level-btn {
-    border-color: #4a5568;
-    color: #cbd5e0;
-  }
-
-  .level-btn:hover {
-    border-color: #718096;
-    background: #2d3748;
-  }
-
-  .level-btn.active {
-    border-color: #63b3ed;
-    background: #2a4365;
-    color: #bee3f8;
-  }
-
-  .level-description {
-    color: #a0aec0;
-  }
-
-  .tape-label {
-    color: #718096;
+  .game-layout {
+    padding: 0.75rem;
   }
 
   .tape-cell {
-    background: #2d3748;
-    border-color: #4a5568;
-    color: #e2e8f0;
+    font-size: 1.15rem;
   }
 
-  .tape-cell.head {
-    border-color: #63b3ed;
-    background: #2a4365;
-    box-shadow: 0 0 0 2px rgb(99, 179, 237, 0.25);
+  .tape-target .tape-cell {
+    font-size: 0.95rem;
   }
 
-  .tape-cell.match {
-    border-color: #48bb78;
-    background: #1c4532;
+  .controls {
+    flex-wrap: wrap;
   }
 
-  .tape-cell.mismatch {
-    border-color: #fc8181;
-    background: #4a2020;
+  .ctrl-btn,
+  .small-btn,
+  .level-btn {
+    min-height: 44px;
   }
 
-  .head-indicator {
-    border-bottom-color: #63b3ed;
-  }
-
-  .status-line {
-    color: #a0aec0;
-  }
-
-  .ctrl-btn {
-    background: #2d3748;
-    border-color: #4a5568;
-    color: #cbd5e0;
-  }
-
-  .ctrl-btn:hover {
-    background: #4a5568;
-    border-color: #718096;
-  }
-
-  .result-msg.success {
-    background: #1c4532;
-    color: #9ae6b4;
-    border-color: #276749;
-  }
-
-  .result-msg.error {
-    background: #4a2020;
-    color: #feb2b2;
-    border-color: #9b2c2c;
-  }
-
-  .rule-header h2 {
-    color: #e2e8f0;
-  }
-
-  .small-btn {
-    background: #2d3748;
-    border-color: #4a5568;
-    color: #cbd5e0;
-  }
-
-  .small-btn:hover {
-    background: #4a5568;
-  }
-
-  .rule-table th {
-    border-bottom-color: #4a5568;
-    color: #a0aec0;
-  }
-
-  .rule-table td {
-    border-bottom-color: #2d3748;
-  }
-
-  .rule-table select {
-    background: #2d3748;
-    border-color: #4a5568;
-    color: #e2e8f0;
-  }
-
-  .rule-table select:focus {
-    outline-color: #63b3ed;
-  }
-
-  .rule-table .active-rule {
-    background: #2a4365;
+  .icon-btn {
+    width: 44px;
+    height: 44px;
   }
 
   .delete-rule-btn {
-    color: #718096;
+    min-width: 44px;
+    min-height: 44px;
   }
 
-  .delete-rule-btn:hover {
-    color: #fc8181;
-    background: #4a2020;
-  }
-
-  .info-section {
-    border-color: #4a5568;
-  }
-
-  .info-section h2 {
-    color: #cbd5e0;
-  }
-
-  .info-section li {
-    color: #a0aec0;
-  }
-
-  .section-heading {
-    color: #a0aec0;
-  }
-
-  kbd {
-    background: #2d3748;
-    border-color: #4a5568;
-    color: #cbd5e0;
+  /* No keyboard to hint at. */
+  .ctrl-btn kbd {
+    display: none;
   }
 }
