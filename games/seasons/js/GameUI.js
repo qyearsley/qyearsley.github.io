@@ -667,7 +667,12 @@ export class GameUI extends BaseGameUI {
       button.className = "choice"
       button.textContent = String(value)
       button.dataset.value = String(value)
-      // Makes the 1-4 shortcut audible; the digit is otherwise undiscoverable.
+      // The 1-4 keyboard shortcut, in two forms. `aria-label` makes it audible;
+      // `data-key` is what the stylesheet prints in the corner of the button,
+      // and only on a device with a real pointer -- see `.choice::before`. On
+      // the iPad the shortcut does not exist, and a small stray digit beside a
+      // two-digit answer is a good way to make a child misread it.
+      button.dataset.key = String(index + 1)
       button.setAttribute("aria-label", `Answer ${index + 1}: ${value}`)
       button.addEventListener("click", () => onAnswer(value, button))
       choices.append(button)
@@ -790,11 +795,14 @@ export class GameUI extends BaseGameUI {
    *   just-played season's figures; a caller summarising a whole run must pass
    *   its own, because every per-season counter on `state` belongs to the last
    *   season only.
+   * @param {{finale?: boolean}} [options] - `finale` draws the finished potion
+   *   instead of the season's haul. The end-of-run screen is the only caller.
    */
-  renderResult(state, season, actions, title, text, rows = null) {
+  renderResult(state, season, actions, title, text, rows = null, { finale = false } = {}) {
     this.setText("result-title", title)
     this.setText("result-text", text)
-    this._renderHaul(state, season, rows)
+    if (finale) this._renderFinale()
+    else this._renderHaul(state, season, rows)
 
     const summary = this.elements["result-summary"]
     if (summary && (season || rows)) {
@@ -831,6 +839,55 @@ export class GameUI extends BaseGameUI {
       }
       holder.querySelector("button")?.focus()
     }
+  }
+
+  /**
+   * Draw the finished potion: the last thing the game shows.
+   *
+   * The end-of-run screen used to be a title, a paragraph and a table of four
+   * numbers -- the flattest screen in the game, at the one moment that has been
+   * earned. Every other result screen draws the haul going into the jar, and
+   * this one could not, because every per-season counter belongs to the last
+   * season played.
+   *
+   * What it draws instead is the thing the whole run was for: one rare
+   * collectible from each season, suspended in the finished flask. It needs no
+   * per-season counts, it is the only screen where all four seasons appear at
+   * once, and it comes free from art the pack already has. The flask is CSS and
+   * the collectibles are the pack's, the same split as the jar -- so a new art
+   * pack changes what is in it without owning the glass.
+   * @private
+   */
+  _renderFinale() {
+    const host = this.elements["result-haul"]
+    if (!host) return
+    host.replaceChildren()
+
+    const flask = document.createElement("div")
+    flask.className = "finale-flask"
+
+    const brew = document.createElement("div")
+    brew.className = "finale-brew"
+    this.seasonOrder.forEach((season, index) => {
+      const slot = document.createElement("span")
+      slot.className = "finale-item"
+      // The stagger, read by the stylesheet, so they rise one after another.
+      slot.style.setProperty("--finale-index", String(index))
+      // The rare variant: this is the finished potion, not a day's gathering.
+      this._mount(slot, this.pack.item(season.id, true), "item-svg")
+      brew.append(slot)
+    })
+    flask.append(brew)
+
+    const neck = document.createElement("div")
+    neck.className = "finale-neck"
+    flask.prepend(neck)
+    host.append(flask)
+
+    const caption = document.createElement("p")
+    caption.className = "haul-caption"
+    caption.textContent = "One of every season, and it is done"
+    host.append(caption)
   }
 
   /**

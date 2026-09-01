@@ -1301,6 +1301,17 @@ describe("renderQuestion", () => {
     ])
   })
 
+  it("carries the shortcut digit for the stylesheet to print", () => {
+    // `data-key` rather than text inside the button, so `textContent` stays
+    // exactly the answer -- the screen reader, the tests and the flash all read
+    // it. The digit is drawn by `.choice::before`, and only on a device with a
+    // real pointer, so the iPad never shows a stray number beside an answer.
+    ui.renderQuestion(questionState(), {}, () => {})
+    const buttons = choiceButtons()
+    expect(buttons.map((button) => button.dataset.key)).toEqual(["1", "2", "3", "4"])
+    expect(buttons.map((button) => button.textContent)).toEqual(["73", "72", "74", "83"])
+  })
+
   it("renumbers the labels when the next question arrives", () => {
     ui.renderQuestion(questionState(), {}, () => {})
     ui.renderQuestion(questionState({ choices: [56, 54, 63, 48] }), {}, () => {})

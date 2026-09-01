@@ -48,7 +48,7 @@ import {
   retry,
 } from "./GameState.js"
 import { isGlowingAt, kindAt } from "./Journey.js"
-import { getCharacter } from "./characters.js"
+import { CHARACTERS, getCharacter } from "./characters.js"
 import { SEASON_LIST, getSeason } from "./seasons.js"
 import { StorageManager, defaultSave, toSavedRun } from "./storage.js"
 
@@ -57,6 +57,126 @@ const ui = new GameUI()
 // so the view stays ignorant of which levels exist; see renderJourneySoFar.
 ui.seasonOrder = SEASON_LIST
 const storage = new StorageManager()
+
+/**
+ * What the debug query string asked for.
+ *
+ * @typedef {Object} DebugRequest
+ * @property {boolean} on            - Any debug switch is set, so saving is off
+ * @property {string|null} seasonId  - Season to start in
+ * @property {string|null} characterId - Animal to play as
+ * @property {string|null} phase     - Screen to jump to, as a `PHASE` value
+ */
+
+/**
+ * The short names `?phase=` accepts, alongside the raw `PHASE` values.
+ *
+ * Short because they are typed by hand into a URL bar. `end` is the one worth
+ * having: the last screen of the game is otherwise four seasons away, which
+ * makes it the least-looked-at screen in the game and the most likely to be
+ * disappointing when it finally arrives.
+ * @private
+ */
+const DEBUG_PHASES = {
+  trail: PHASE.TRAIL,
+  boss: PHASE.BOSS,
+  won: PHASE.SEASON_WON,
+  lost: PHASE.SEASON_LOST,
+  end: PHASE.RUN_COMPLETE,
+}
+
+/**
+ * Debug entry points, read once from the query string.
+ *
+ * For looking at a season without playing three to get there. `?season=winter`
+ * drops straight into winter, `&character=sloth` picks the animal, `?phase=end`
+ * jumps to the last screen in the game, and `?debug=1` alone just opens every
+ * season on the character screen.
+ *
+ * **Nothing is written to storage while any of these are set.** A grown-up
+ * opening `?season=winter` to check the art must not overwrite a child's
+ * half-finished run, and that is a silent, unrecoverable kind of damage -- so
+ * `_save` becomes a no-op rather than the caller having to remember. It also
+ * means a debug session leaves no trace: close the tab and the real save is
+ * exactly as it was.
+ *
+ * @private
+ * @returns {DebugRequest} What the query string asked for
+ */
+function _readDebug() {
+  let params
+  try {
+    params = new URLSearchParams(window.location.search)
+  } catch {
+    // A document with no usable location, which is only ever a test harness.
+    return { on: false, seasonId: null, characterId: null, phase: null }
+  }
+  const seasonId = getSeason(params.get("season")) ? params.get("season") : null
+  const wanted = params.get("character")
+  // `getCharacter` substitutes a default for an unknown id rather than
+  // returning null, so an id is only honoured when it really is one.
+  const characterId = CHARACTERS.some((one) => one.id === wanted) ? wanted : null
+  const asked = params.get("phase")
+  const phase = DEBUG_PHASES[asked] ?? (Object.values(PHASE).includes(asked) ? asked : null)
+  return {
+    on: params.has("debug") || seasonId !== null || characterId !== null || phase !== null,
+    seasonId,
+    characterId,
+    phase,
+  }
+}
+
+/**
+ * A saved run matching what the query string asked for.
+ *
+ * Built as a *save* and handed to `rehydrate` rather than assembled as live
+ * state, so it goes through the same coercion and the same promotion a real
+ * reload does -- including "a trail phase standing on the last space is really
+ * at the boss", which is how `?phase=boss` gets a boss question without this
+ * function knowing how questions are made.
+ *
+ * @private
+ * @returns {Object} A run, ready for `rehydrate`
+ */
+function _debugRun() {
+  const characterId = debug.characterId ?? CHARACTERS[0].id
+  if (debug.phase === PHASE.RUN_COMPLETE) {
+    // Every season needs a haul or the end-of-run summary is a blank table, and
+    // the season on screen has to be the last one, as it would be after a real
+    // finish.
+    const last = getSeason(SEASON_ORDER.at(-1))
+    return {
+      phase: PHASE.RUN_COMPLETE,
+      characterId,
+      seasonId: last.id,
+      position: last.spaces,
+      items: last.demand,
+      collected: Object.fromEntries(SEASON_ORDER.map((id) => [id, getSeason(id).demand])),
+      bestStreak: last.spaces + 1,
+    }
+  }
+  const season = getSeason(debug.seasonId) ?? getSeason(SEASON_ORDER[0])
+  const base = { characterId, seasonId: season.id }
+  switch (debug.phase) {
+    case PHASE.BOSS:
+      // Left three short, so the boss's rescue has something to rescue.
+      return { ...base, phase: PHASE.TRAIL, position: season.spaces, items: season.demand - 3 }
+    case PHASE.SEASON_WON:
+      return { ...base, phase: PHASE.SEASON_WON, position: season.spaces, items: season.demand + 1 }
+    case PHASE.SEASON_LOST:
+      return {
+        ...base,
+        phase: PHASE.SEASON_LOST,
+        position: season.spaces,
+        items: Math.max(0, season.demand - 4),
+      }
+    default:
+      return { ...base, phase: PHASE.TRAIL, position: 0, items: 0 }
+  }
+}
+
+/** @type {DebugRequest} */
+const debug = _readDebug()
 
 /** @type {Object} The live game state. */
 let state = createState(_freshSeed())
@@ -123,9 +243,12 @@ function _freshSeed() {
 
 /**
  * Persist the current state. Called after every answer and every screen change.
+ *
+ * A no-op in debug mode, so that looking at winter cannot overwrite a real run.
  * @private
  */
 function _save() {
+  if (debug.on) return
   save = { ...save, run: toSavedRun(state) }
   storage.saveRun(save)
 }
@@ -392,6 +515,7 @@ function _renderResult(season) {
       "The potion is finished",
       "She stirs in the last icicle, and the whole jar turns the colour of a morning you have not had yet. She says you passed.",
       rows,
+      { finale: true },
     )
     return
   }
@@ -516,10 +640,24 @@ function _onKeyDown(event) {
  * @private
  */
 function start() {
-  const loaded = storage.loadRun()
-  if (loaded) {
-    save = loaded
-    state = rehydrate(loaded.run)
+  if (debug.on) {
+    // Every season open on the character screen, so the "Your journey" panel is
+    // navigable rather than showing three locked rows.
+    save = { ...defaultSave(), unlocked: [...SEASON_ORDER] }
+    if (debug.seasonId || debug.phase) {
+      state = rehydrate({ ...toSavedRun(createState(_freshSeed())), ..._debugRun() })
+    } else if (debug.characterId) {
+      state = chooseCharacter(createState(_freshSeed()), debug.characterId)
+    }
+    // Marks the page so the stylesheet can show that saving is off. Without it
+    // the natural conclusion from a debug session is that saving is broken.
+    document.body?.setAttribute("data-debug", debug.phase ?? debug.seasonId ?? "on")
+  } else {
+    const loaded = storage.loadRun()
+    if (loaded) {
+      save = loaded
+      state = rehydrate(loaded.run)
+    }
   }
   // Anyone who taps faster than the animation should not have to wait for it.
   // A pending flash goes first, then the crossing: two taps clear both, and the

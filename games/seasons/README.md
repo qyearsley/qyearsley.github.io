@@ -101,12 +101,18 @@ a season has means placing that many mountains. The kinds are listed in
 [`js/obstacles.js`](js/obstacles.js), where `hard` is a property of the _kind_
 rather than of the space; the mountain is the only kind that carries it.
 
-|        | Ordinary spaces                                | Glowing spaces           | Boss         | Timer | Trail | Glowing | Demand |
-| ------ | ---------------------------------------------- | ------------------------ | ------------ | ----- | ----- | ------- | ------ |
-| Spring | + and − within 100, ×2 ×3 ×4 ×5 ×10            | `40 ÷ 5`                 | `35 ÷ 5`     | none  | 14    | 2       | 11     |
-| Summer | × facts to 10×10, + and − within 100 borrowing | `48 ÷ 6`                 | `72 ÷ 9`     | 20s   | 16    | 3       | 13     |
-| Autumn | ×3 4 6 7 8 9, − within 100 borrowing, × 10–50  | `54 ÷ 9`                 | `56 ÷ 8`     | 18s   | 18    | 4       | 15     |
-| Winter | ×6 7 8 9, − within 100 borrowing, × 10–90      | `8 × 7 + 9`, or `63 ÷ 9` | `8 × 9 - 17` | 16s   | 20    | 5       | 17     |
+|        | Ordinary spaces                                 | Glowing spaces           | Boss         | Timer | Trail | Glowing | Demand |
+| ------ | ----------------------------------------------- | ------------------------ | ------------ | ----- | ----- | ------- | ------ |
+| Spring | + and − within 100, ×2 ×3 ×4 ×5 ×10             | `40 ÷ 5`                 | `35 ÷ 5`     | none  | 14    | 2       | 11     |
+| Summer | × facts to 10×10, + and − within 100 borrowing  | `48 ÷ 6`                 | `72 ÷ 9`     | 30s   | 16    | 3       | 13     |
+| Autumn | ×2 3 4 6 7 8 9, − within 100 borrowing, × 10–50 | `54 ÷ 9`                 | `56 ÷ 8`     | 28s   | 18    | 4       | 15     |
+| Winter | ×4 6 7 8 9, − within 100 borrowing, × 10–70     | `8 × 7 + 9`, or `63 ÷ 9` | `8 × 9 - 17` | 25s   | 20    | 5       | 17     |
+
+**The clock is deliberately loose.** It was 20/18/16s, and played that way the
+countdown rather than the arithmetic was what made a question fail — a timer has
+to cover reading the question, working it out, _and_ reading four options. It
+still tightens across the year, because that is part of the escalation, but it is
+now slack enough that running out means the fact was not known.
 
 Every hard slot carries a `from` floor on its quotient, which is what stops it
 asking `12 ÷ 6`; see [Change the maths](#change-the-maths). Subtraction stops
@@ -447,9 +453,33 @@ npm run dev     # from the repo root; serves the source, no build step
 
 Then open <http://localhost:8000/games/seasons/> and reload after each edit.
 
-**Jump straight to a state.** The game restores whatever is in `localStorage`
-under `seasonsProgress`, so any screen is one paste into the browser console and
-a reload away:
+**Jump to a season from the URL.** The quickest way to look at one without
+playing three to get there:
+
+| URL                              | What it does                                                 |
+| -------------------------------- | ------------------------------------------------------------ |
+| `?season=winter`                 | Starts winter immediately, with the first animal             |
+| `?season=summer&character=sloth` | Picks the animal too                                         |
+| `?phase=end`                     | The last screen in the game, four seasons of haul already in |
+| `?season=autumn&phase=boss`      | Straight to that season's boss, three items short            |
+| `?phase=won` / `?phase=lost`     | The end-of-season screens                                    |
+| `?debug=1`                       | Character screen, with all four seasons shown open           |
+
+`?phase=` also takes the raw `PHASE` values. The run it builds is handed to
+`rehydrate`, the same path a reload takes, so a jump gets the same coercion and
+the same promotion a real save does — which is how `?phase=boss` arrives with a
+boss question already drawn.
+
+**Nothing is saved while any of those are set**, so checking the art cannot write
+over a real half-finished run — which is the whole reason the switch exists
+rather than a console paste being good enough. A small "debug — not saving" badge
+sits in the corner so the session cannot be mistaken for broken saving. An
+unknown season or character id is ignored and the game starts normally.
+
+**Jump straight to any state.** For anything the URL does not cover — mid-boss,
+a specific item count, a lost season — the game restores whatever is in
+`localStorage` under `seasonsProgress`, so any screen is one paste into the
+browser console and a reload away:
 
 ```js
 localStorage.setItem(

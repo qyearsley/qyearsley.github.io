@@ -621,6 +621,31 @@ body.is-glowing-question .question-prompt {
     border-color 0.15s ease;
 }
 
+/* The 1-4 shortcut, shown only where there is a real pointer -- a laptop, not
+   the iPad the game is mostly played on. `pointer: fine` is the closest thing
+   to "there is probably a keyboard too", and it keeps a stray digit away from
+   the answers on a touch screen. Drawn from `data-key` so the button's text
+   stays exactly the number, which is what the tests and the screen reader read. */
+@media (hover: hover) and (pointer: fine) {
+  .choice {
+    position: relative;
+  }
+
+  .choice::before {
+    content: attr(data-key);
+    position: absolute;
+    top: 6px;
+    left: 9px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--sn-ink-muted);
+  }
+
+  .choice.is-locked::before {
+    opacity: 0.4;
+  }
+}
+
 .choice:hover:not(.is-locked),
 .choice:focus-visible {
   border-color: var(--sn-primary);
@@ -722,6 +747,72 @@ body.is-glowing-question .question-prompt {
    what is inside without touching the container. */
 .result-haul {
   margin: 0 auto 20px;
+}
+
+/* ==================== The finished potion ==================== */
+
+/*
+ * The last picture in the game. A round-bottomed flask with a narrow neck,
+ * holding one rare collectible from each season. The silhouette does the work:
+ * a jar is square-shouldered, a flask is not, and the difference is what makes
+ * this read as the finished potion rather than another day's gathering.
+ */
+.finale-flask {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 168px;
+  height: 168px;
+  margin: 6px auto 0;
+  padding: 18px;
+  background: radial-gradient(
+    circle at 38% 32%,
+    color-mix(in srgb, var(--sn-primary) 34%, var(--sn-surface)),
+    color-mix(in srgb, var(--sn-primary) 16%, var(--sn-surface))
+  );
+  border: 3px solid var(--sn-border);
+  border-radius: 50%;
+}
+
+/* The neck and stopper, sitting above the bulb. */
+.finale-neck {
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  width: 34px;
+  height: 26px;
+  background: color-mix(in srgb, var(--sn-primary) 20%, var(--sn-surface));
+  border: 3px solid var(--sn-border);
+  border-bottom: none;
+  border-radius: 7px 7px 0 0;
+  transform: translateX(-50%);
+}
+
+.finale-brew {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  place-items: center;
+  width: 100%;
+}
+
+.finale-item {
+  display: block;
+  width: 40px;
+  height: 40px;
+
+  /* Rising into place one after another, so the four seasons are read in order
+     rather than arriving as a block. Slower than the jar's drop: this one is
+     the end of the game and has nothing to hurry for. */
+  animation: finale-rise 520ms ease-out backwards;
+  animation-delay: calc(var(--finale-index, 0) * 180ms);
+}
+
+@keyframes finale-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.6);
+  }
 }
 
 .haul-jar {
@@ -915,4 +1006,27 @@ body.is-glowing-question .question-prompt {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ==================== Debug mode ==================== */
+
+/*
+ * Set by game.js when the query string carries `?debug`, `?season` or
+ * `?character`. Saving is switched off in that mode, so this badge exists to
+ * stop a debug session reading as a save bug -- the natural conclusion from
+ * "I played winter and it forgot" is that storage is broken.
+ */
+body[data-debug]::after {
+  content: "debug - not saving";
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+  padding: 4px 10px;
+  border-radius: 6px 0 0;
+  background: #000000b3;
+  color: #fff;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  pointer-events: none;
 }

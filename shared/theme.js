@@ -41,6 +41,13 @@
       ".theme-toggle:focus { outline: 2px solid var(--color-primary); outline-offset: 2px; }",
       ".theme-toggle svg { width: 18px; height: 18px; }",
       "",
+      // The toggle is fixed at the top right, which is exactly where a game's
+      // top bar puts its own right-hand control -- Seasons' restart button sat
+      // underneath it. Reserving the room here rather than in each game's
+      // stylesheet keeps it in one place, and puts it on the element that
+      // causes the overlap. 60px clears the 36px button plus both margins.
+      ".game-top-bar { padding-right: 60px; }",
+      "",
       ".theme-popover {",
       "  position: fixed;",
       "  z-index: 9999;",

@@ -483,6 +483,87 @@ export function item(seasonId, rare = false) {
 }
 
 /**
+ * The snake woman's coils: one tapering body wound twice, drawn as a chain of
+ * overlapping ellipses.
+ *
+ * This was two flat ellipses, each with a darker ellipse in the middle. The dark
+ * middle was meant to suggest a rounded ring; what it reads as is a hole, so she
+ * sat inside two green hoops rather than on her own tail.
+ *
+ * A spiral fixes it because the two cues that say "one body" are continuity and
+ * taper, and neither survives being drawn as separate rings. The chain runs from
+ * her waist outward, thick to thin, and is emitted in that order so the
+ * painter's algorithm does the overlap for free: each blob is nearer the viewer
+ * than the one before, which is exactly true of a coil spiralling outward and
+ * down.
+ *
+ * Filled ellipses rather than a stroked path, for the reason given on her face:
+ * this pack avoids strokes. A tapering stroke would need a variable width
+ * anyway, which SVG cannot express.
+ * @private
+ * @returns {Array<Object>} Ellipses, back to front
+ */
+function _coils() {
+  // Enough samples that consecutive ellipses overlap even at the thin end. The
+  // step along the spiral grows with its radius while the body shrinks, so the
+  // outer turn is where a chain like this beads into visible lumps.
+  const STEPS = 300
+  const TURNS = 1.85
+  const START = Math.PI * 0.55
+  const round1 = (value) => Number(value.toFixed(1))
+
+  /**
+   * One link of the chain: where it sits and how thick it is there.
+   * @param {number} t - Progress along the body, 0 at her waist
+   * @returns {{cx: number, cy: number, body: number, lit: boolean, turn: number}} The link
+   */
+  const link = (t) => {
+    const angle = START + t * TURNS * Math.PI * 2
+    const spiral = 12 + 24 * t
+    return {
+      cx: 50 + spiral * Math.cos(angle),
+      // `0.34` is the foreshortening: a coil seen from slightly above is a wide,
+      // shallow ellipse, not a circle. The drift downward stacks the turns.
+      cy: 70 + 11 * t + spiral * 0.34 * Math.sin(angle),
+      // Thin enough that consecutive turns do not touch. Thicker and the whole
+      // spiral merges into one green mass, which is no better than the two
+      // hoops it replaced. The power curve holds the width most of the way and
+      // then loses it quickly, which is how a tail actually tapers -- linear
+      // gives a cone.
+      body: 7 - 4.4 * t ** 2.1,
+      lit: Math.sin(angle) < -0.2,
+      turn: Math.floor((angle - START) / (Math.PI * 2)),
+    }
+  }
+
+  const blob = (one, grow, fill) =>
+    svg("ellipse", {
+      cx: round1(one.cx),
+      cy: round1(one.cy),
+      rx: round1(one.body + grow),
+      ry: round1((one.body + grow) * 0.9),
+      fill,
+    })
+
+  // Grouped by whole turn, and each turn drawn rim-then-body. The rim is only
+  // visible where the next thing painted does not cover it: around the outside
+  // of the chain, and -- because a turn is completed before the next one starts
+  // -- along the seam where the body crosses in front of itself. That seam is
+  // what separates one turn from the next; without it the spiral reads as a
+  // single flat shape.
+  const links = []
+  for (let i = 0; i <= STEPS; i += 1) links.push(link(i / STEPS))
+  const turns = [...new Set(links.map((one) => one.turn))]
+  return turns.flatMap((turn) => {
+    const inTurn = links.filter((one) => one.turn === turn)
+    return [
+      ...inTurn.map((one) => blob(one, 1.4, "#31543d")),
+      ...inTurn.map((one) => blob(one, 0, one.lit ? "#5f9470" : "#4b7a5a")),
+    ]
+  })
+}
+
+/**
  * The snake woman. A witch from the waist up and a serpent below it: coils on
  * the ground, a violet robe, a pointed hat, a human face, and the potion she is
  * making held out in one hand.
@@ -511,14 +592,8 @@ export function item(seasonId, rare = false) {
  */
 export function villain() {
   return _drawing([
-    // Tail tip curling out from under the lower coil.
-    svg("path", { d: "M16 92 C9 90 6 84 10 80 C12 86 17 87 20 87 Z", fill: "#4b7a5a" }),
-    // Coils, back to front. Each is an ellipse with a darker inner ellipse, so
-    // it reads as a ring of body rather than a flat blob.
-    svg("ellipse", { cx: 50, cy: 86, rx: 36, ry: 13, fill: "#4b7a5a" }),
-    svg("ellipse", { cx: 50, cy: 87.5, rx: 19, ry: 5.5, fill: "#3d6549" }),
-    svg("ellipse", { cx: 52, cy: 74, rx: 28, ry: 12, fill: "#5a8c66" }),
-    svg("ellipse", { cx: 52, cy: 75, rx: 14.5, ry: 5, fill: "#4b7a5a" }),
+    // Her coils: one tapering body wound twice. See `_coils`.
+    ..._coils(),
     // The robe, flaring from the shoulders down onto the top coil. Kept narrow
     // enough that the coil still shows either side of the hem -- draped over the
     // whole width, the two rings stopped reading as a coiled body.
@@ -1083,6 +1158,155 @@ export function layout(season) {
 }
 
 /**
+ * How many keyframes a crossing is sampled into.
+ *
+ * The motion is described as a continuous path and then sampled, rather than
+ * written as a handful of poses. Twenty-four is where a 620ms leap stops showing
+ * corners on a 60Hz screen -- roughly one sample every 26ms -- and it is cheap:
+ * the browser interpolates between them on the compositor either way.
+ * @private
+ */
+const TRAVERSAL_SAMPLES = 24
+
+/**
+ * Height of a jump at `t`, as a fraction of its peak. A projectile: 0 at both
+ * ends, 1 at the top, and -- the part that matters -- slowest near the apex,
+ * because the curve flattens there.
+ * @private
+ * @param {number} t - Progress through the jump, 0 to 1
+ * @returns {number} Height as a fraction of the peak
+ */
+function _arc(t) {
+  return 4 * t * (1 - t)
+}
+
+/**
+ * Progress along the ground at `t`.
+ *
+ * `hang` slows the middle of the crossing without changing where it starts or
+ * ends: the derivative is `1 + hang * cos(2*pi*t)`, so the character covers
+ * ground quickly at take-off and landing and dwells at the top. It has to stay
+ * under 1 or the derivative goes negative and the character walks backwards.
+ * @private
+ * @param {number} t - Progress through the crossing, 0 to 1
+ * @param {number} hang - How much to dwell in the middle, 0 to 0.8
+ * @returns {number} Fraction of the distance covered
+ */
+function _ground(t, hang) {
+  return t + (hang * Math.sin(2 * Math.PI * t)) / (2 * Math.PI)
+}
+
+/**
+ * A brief compression centred on one moment of the crossing.
+ *
+ * A raised cosine rather than a triangle, so the squash eases in and out
+ * instead of cornering. Each dip must satisfy `at + width <= 1`, which is what
+ * lets the last sample come out clean -- see `traversal`.
+ * @private
+ * @param {number} t - Progress through the crossing, 0 to 1
+ * @param {Array<{at: number, width: number, depth: number}>} dips - Where to compress
+ * @returns {number} Total compression at `t`, 0 being none
+ */
+function _compression(t, dips) {
+  let total = 0
+  for (const { at, width, depth } of dips) {
+    const distance = Math.abs(t - at)
+    if (distance < width) total += depth * 0.5 * (1 + Math.cos((Math.PI * distance) / width))
+  }
+  return total
+}
+
+/**
+ * The shape and timing of one kind of crossing.
+ *
+ * `height` is the peak of the arc in pixels, `hops` splits it into that many
+ * arcs in a row, `hang` dwells at the top, `squash` compresses vertically and
+ * `narrow` horizontally. Every kind gets its own `duration`, because the same
+ * path at the same speed would make a mountain feel like a step over a hill.
+ * @private
+ * @param {string} kind - The obstacle kind
+ * @returns {Object} The crossing's shape
+ */
+function _crossing(kind) {
+  switch (kind) {
+    case "gap":
+      // A long low leap: committed, no hang at all, so the ground speed stays
+      // constant the way a real jump's does. Hardest landing of the flat ones.
+      return {
+        duration: 620,
+        height: 96,
+        hang: 0,
+        squash: [
+          { at: 0, width: 0.16, depth: 0.14 },
+          { at: 0.88, width: 0.12, depth: 0.18 },
+        ],
+      }
+    case "river":
+      // Two hops across, as if using stones. `hops: 2` puts a touchdown exactly
+      // at the halfway point, where the second arc starts from zero again.
+      return {
+        duration: 780,
+        height: 44,
+        hops: 2,
+        hang: 0,
+        squash: [
+          { at: 0.5, width: 0.1, depth: 0.08 },
+          { at: 0.92, width: 0.08, depth: 0.07 },
+        ],
+      }
+    case "boulder":
+      // Up and over something solid: a moment on top, and a firm landing.
+      return {
+        duration: 760,
+        height: 100,
+        hang: 0.45,
+        squash: [
+          { at: 0, width: 0.14, depth: 0.1 },
+          { at: 0.86, width: 0.14, depth: 0.16 },
+        ],
+      }
+    case "thicket":
+      // No lift at all -- pushing through. The hang is the resistance, and the
+      // character comes out still a little compressed sideways rather than
+      // dropping onto its feet.
+      return {
+        duration: 880,
+        height: 0,
+        hang: 0.55,
+        squash: [],
+        narrow: [
+          { at: 0.32, width: 0.3, depth: 0.22 },
+          { at: 0.72, width: 0.28, depth: 0.18 },
+        ],
+      }
+    case "mountain":
+      // The hard one. Slow, high, it dwells at the summit, and it comes down
+      // from further than anything else on the trail.
+      return {
+        duration: 1150,
+        height: 128,
+        hang: 0.7,
+        squash: [
+          { at: 0, width: 0.12, depth: 0.08 },
+          { at: 0.9, width: 0.1, depth: 0.2 },
+        ],
+      }
+    case "hill":
+    default:
+      // A rolling scramble up and down the far side.
+      return {
+        duration: 700,
+        height: 74,
+        hang: 0.2,
+        squash: [
+          { at: 0, width: 0.14, depth: 0.09 },
+          { at: 0.87, width: 0.13, depth: 0.11 },
+        ],
+      }
+  }
+}
+
+/**
  * How the character gets across one obstacle, as Web Animations keyframes.
  *
  * The pack owns the motion as well as the drawing, so a future sprite pack can
@@ -1091,6 +1315,15 @@ export function layout(season) {
  * points; what differs is the shape of the path and the timing, which is where
  * the sense of weight comes from.
  *
+ * **The path is sampled, not posed.** Each crossing used to be three to six
+ * keyframes -- take off, apex, land -- which the browser joins with straight
+ * lines, so a jump traced a triangle and visibly cornered at the top. Worse, the
+ * single `ease-in-out` across the whole animation made the character *fastest*
+ * at the apex, which is backwards: a real jump hangs there. Describing the arc
+ * as a function and sampling it at `TRAVERSAL_SAMPLES` points fixes both, and
+ * the options carry `easing: "linear"` because the timing now lives in the
+ * samples themselves.
+ *
  * Every crossing lands the same way: a squash just before the end, then a clean
  * final frame. The squash is how far the animal fell, so a mountain hits harder
  * than a river hop, and it is the cheapest thing on the trail that makes the
@@ -1098,7 +1331,9 @@ export function layout(season) {
  * load-bearing rather than tidy -- crossings play with `fill: "forwards"`, so
  * whatever the last frame says is what the character keeps looking like for the
  * whole of the next question. The gap used to end on `scaleY(0.9)` and left the
- * animal standing there 10% short.
+ * animal standing there 10% short. Each dip keeps `at + width <= 1` so the
+ * compression has already returned to zero by the end, and the last sample is
+ * written out clean regardless.
  *
  * The squash scales about the bottom of the token, not its middle. That is a
  * CSS decision, in `.trail-token`; without it a `scaleY` here lifts the
@@ -1110,98 +1345,44 @@ export function layout(season) {
  * @returns {{keyframes: Array<Object>, options: Object}} Input for `Element.animate`
  */
 export function traversal(kind, from, to) {
+  const shape = _crossing(kind)
+  const { height = 0, hops = 1, hang = 0, squash = [], narrow = [] } = shape
   const at = (point, lift = 0, extra = "") =>
     `translate(${point.x - TOKEN_HALF}px, ${point.y - TOKEN_FOOT - lift}px)${extra}`
-  const mid = { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 }
-  const quarter = { x: from.x + (to.x - from.x) * 0.25, y: from.y + (to.y - from.y) * 0.25 }
-  const threeQuarter = { x: from.x + (to.x - from.x) * 0.75, y: from.y + (to.y - from.y) * 0.75 }
-  /**
-   * The landing: squash at `offset`, then stand up clean.
-   * @param {number} squash - How far the animal compresses, 1 being not at all
-   * @param {number} offset - When it touches down, as a fraction of the crossing
-   * @returns {Array<Object>} The last two keyframes
-   */
-  const land = (squash, offset) => [
-    { transform: at(to, 0, ` scaleY(${squash})`), offset },
-    { transform: at(to) },
-  ]
 
-  switch (kind) {
-    case "gap":
-      // A long low leap: fast, committed, no hang time.
-      return {
-        keyframes: [
-          { transform: at(from, 0, " scaleY(0.86)") },
-          { transform: at(mid, 96), offset: 0.5 },
-          ...land(0.82, 0.88),
-        ],
-        options: { duration: 620, easing: "ease-out" },
-      }
-    case "river":
-      // Two hops across, as if using stones -- low, quick, a bob each time. The
-      // lightest landing of the six: the last hop is onto the bank, not down
-      // onto it.
-      return {
-        keyframes: [
-          { transform: at(from) },
-          { transform: at(quarter, 44), offset: 0.25 },
-          { transform: at(mid, 4), offset: 0.5 },
-          { transform: at(threeQuarter, 44), offset: 0.75 },
-          ...land(0.93, 0.9),
-        ],
-        options: { duration: 780, easing: "ease-in-out" },
-      }
-    case "boulder":
-      // Up and over something solid: steep, and a moment on top.
-      return {
-        keyframes: [
-          { transform: at(from) },
-          { transform: at(quarter, 84), offset: 0.35 },
-          { transform: at(mid, 100), offset: 0.55 },
-          ...land(0.84, 0.86),
-        ],
-        options: { duration: 760, easing: "ease-in-out" },
-      }
-    case "thicket":
-      // No lift at all -- pushing through, squashed narrow, and slower for it.
-      // Nothing to land from either, so it comes out of the last branches still
-      // a little compressed sideways rather than dropping onto its feet.
-      return {
-        keyframes: [
-          { transform: at(from) },
-          { transform: at(quarter, 0, " scaleX(0.78)"), offset: 0.3 },
-          { transform: at(threeQuarter, 0, " scaleX(0.82)"), offset: 0.7 },
-          { transform: at(to, 0, " scaleX(0.93)"), offset: 0.88 },
-          { transform: at(to) },
-        ],
-        options: { duration: 880, easing: "ease-in-out" },
-      }
-    case "mountain":
-      // The hard one. Slow, high, it pauses at the summit, and it comes down
-      // from further than anything else on the trail.
-      return {
-        keyframes: [
-          { transform: at(from, 0, " scaleY(0.92)") },
-          { transform: at(quarter, 104), offset: 0.3 },
-          { transform: at(mid, 128), offset: 0.5 },
-          { transform: at(mid, 128), offset: 0.62 },
-          { transform: at(threeQuarter, 104), offset: 0.82 },
-          ...land(0.8, 0.92),
-        ],
-        options: { duration: 1150, easing: "ease-in-out" },
-      }
-    case "hill":
-    default:
-      // A rolling scramble up and down the far side.
-      return {
-        keyframes: [
-          { transform: at(from) },
-          { transform: at(mid, 74), offset: 0.5 },
-          ...land(0.89, 0.87),
-        ],
-        options: { duration: 700, easing: "ease-in-out" },
-      }
+  /**
+   * The deformation at one moment, as a transform suffix.
+   * @param {number} t - Progress through the crossing, 0 to 1
+   * @returns {string} A scale suffix, or "" when the character is undeformed
+   */
+  const deform = (t) => {
+    const scaleX = 1 - _compression(t, narrow)
+    const scaleY = 1 - _compression(t, squash)
+    const round = (value) => Number(value.toFixed(4))
+    return (
+      (scaleX === 1 ? "" : ` scaleX(${round(scaleX)})`) +
+      (scaleY === 1 ? "" : ` scaleY(${round(scaleY)})`)
+    )
   }
+
+  const keyframes = []
+  for (let i = 0; i < TRAVERSAL_SAMPLES; i += 1) {
+    const t = i / (TRAVERSAL_SAMPLES - 1)
+    const along = _ground(t, hang)
+    const point = { x: from.x + (to.x - from.x) * along, y: from.y + (to.y - from.y) * along }
+    // With more than one hop each arc runs its own 0..1, so the character
+    // touches down between them. `_arc` is 0 at both ends, which is what makes
+    // the wrap-around land rather than jump.
+    const lift = height * _arc((t * hops) % 1)
+    keyframes.push({ transform: at(point, Number(lift.toFixed(3)), deform(t)), offset: t })
+  }
+  // The two ends are written exactly rather than sampled. The last must be
+  // `standing(to)` and nothing else, for the `fill: "forwards"` reason above;
+  // the first must be exactly where the character already stands, so rounding
+  // in `_ground` can never shift it a pixel on take-off.
+  keyframes[0] = { transform: at(from, 0, deform(0)), offset: 0 }
+  keyframes[keyframes.length - 1] = { transform: at(to), offset: 1 }
+  return { keyframes, options: { duration: shape.duration, easing: "linear" } }
 }
 
 /**

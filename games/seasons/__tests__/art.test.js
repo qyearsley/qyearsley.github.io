@@ -567,6 +567,45 @@ describe("the placeholder pack fulfils the art-pack contract", () => {
       }
     })
 
+    it("moves in small steps, so the path curves instead of cornering", () => {
+      // The point of sampling the path rather than posing it. Each crossing used
+      // to be three to six keyframes, which the browser joins with straight
+      // lines -- so a jump traced a triangle and visibly cornered at the apex,
+      // where the old hill turned through 73 degrees in one step.
+      //
+      // Phrased as "no single step covers much ground" rather than as an angle,
+      // because that holds for any path shape a pack might choose: a bounce is
+      // allowed to be a sharp corner, as long as it is a corner between two
+      // short steps rather than two long ones.
+      const span = Math.hypot(TO.x - FROM.x, TO.y - FROM.y)
+      for (const kind of OBSTACLE_KINDS) {
+        const points = pack.traversal(kind, FROM, TO).keyframes.map((f) => translatePx(f.transform))
+        let longest = 0
+        for (let i = 1; i < points.length; i += 1) {
+          longest = Math.max(
+            longest,
+            Math.hypot(points[i][0] - points[i - 1][0], points[i][1] - points[i - 1][1]),
+          )
+        }
+        expect(longest).toBeLessThan(span * 0.15)
+      }
+    })
+
+    it("varies how high it lifts, so the kinds do not all move alike", () => {
+      // `does not simply slide the character along the ground` accepts a squash
+      // in place of a lift, which is right for the thicket -- but it means every
+      // arc in the pack could be flattened to nothing and only that one kind
+      // would notice. This asks that the pack actually varies its vertical
+      // motion, without dictating which kind gets what.
+      const [, groundY] = translatePx(pack.standing(FROM))
+      const peaks = OBSTACLE_KINDS.map((kind) => {
+        const ys = pack.traversal(kind, FROM, TO).keyframes.map((f) => translatePx(f.transform)[1])
+        return Math.round(groundY - Math.min(...ys))
+      })
+      expect(Math.max(...peaks)).toBeGreaterThan(40)
+      expect(new Set(peaks).size).toBeGreaterThan(2)
+    })
+
     it.each([["nope"], [null], [undefined]])(
       "traversal(%p) still returns a usable animation",
       (kind) => {

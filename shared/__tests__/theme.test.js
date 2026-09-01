@@ -41,6 +41,17 @@ describe("theme.js", () => {
       const themeStyle = Array.from(styles).find((s) => s.textContent.includes(".theme-toggle"))
       expect(themeStyle).not.toBeUndefined()
     })
+
+    it("reserves room for itself in a game top bar", () => {
+      // The toggle is fixed at the top right, which is where the game pages put
+      // their own right-hand control -- Seasons' restart button sat directly
+      // underneath it. jsdom does no layout, so this can only check the rule is
+      // still shipped; the number is worked out in theme.js.
+      const styles = Array.from(document.querySelectorAll("style"))
+      const themeStyle = styles.find((s) => s.textContent.includes(".theme-toggle"))
+      expect(themeStyle.textContent).toContain(".game-top-bar")
+      expect(themeStyle.textContent).toMatch(/\.game-top-bar\s*\{[^}]*padding-right/)
+    })
   })
 
   describe("theme cycling", () => {

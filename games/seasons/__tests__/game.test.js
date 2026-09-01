@@ -1544,23 +1544,27 @@ describe("leaving and coming back", () => {
   })
 
   it("stops the clock while hidden and restarts it on return", async () => {
+    // Read from the season rather than written as a literal: the clock is meant
+    // to be retunable, and this test is about the pause, not the length. The
+    // Banana Slug has no timer perk, so what the season says is what shows.
+    const full = getSeason("summer").timerSeconds
     await bootInto({ characterId: "banana-slug", seasonId: "summer", position: 1 })
-    expect(byId("timer").textContent).toBe("20")
+    expect(byId("timer").textContent).toBe(String(full))
 
     jest.advanceTimersByTime(3_000)
-    expect(byId("timer").textContent).toBe("17")
+    expect(byId("timer").textContent).toBe(String(full - 3))
 
     setHidden(true)
     jest.advanceTimersByTime(9_000)
-    expect(byId("timer").textContent).toBe("17")
+    expect(byId("timer").textContent).toBe(String(full - 3))
     expect(saved().run.questionsAsked).toBe(0)
 
     // Restarted, not resumed: the alternative is handing back a question with
     // two seconds left because the iPad was locked.
     setHidden(false)
-    expect(byId("timer").textContent).toBe("20")
+    expect(byId("timer").textContent).toBe(String(full))
     jest.advanceTimersByTime(2_000)
-    expect(byId("timer").textContent).toBe("18")
+    expect(byId("timer").textContent).toBe(String(full - 2))
   })
 
   it("hiding the page mid-flash does not lose the answer that just landed", async () => {
@@ -1712,5 +1716,122 @@ describe("the boss says what is at stake", () => {
     const answer = tapWrong()
     expect(feedback()).not.toMatch(/one more go/i)
     expect(feedback()).toContain(`The answer was ${answer}.`)
+  })
+})
+
+/**
+ * The debug query string, which exists so a grown-up can look at winter without
+ * playing three seasons to reach it.
+ *
+ * The load-bearing test here is the one about storage. Everything else is a
+ * convenience; writing over a child's half-finished run while checking the art
+ * is the kind of damage that is silent and cannot be undone.
+ *
+ * Every other test in this file boots at jsdom's default location, which has no
+ * query string, so they exercise the non-debug path already.
+ */
+describe("the debug query string", () => {
+  /**
+   * Boot with a query string, from a clean save.
+   * @param {string} search - The query string, including its leading "?"
+   * @returns {Promise<void>} Resolves once the game has drawn
+   */
+  async function bootWith(search) {
+    localStorage.clear()
+    document.body.removeAttribute("data-debug")
+    window.history.replaceState({}, "", `/${search}`)
+    await boot()
+  }
+
+  afterEach(() => window.history.replaceState({}, "", "/"))
+
+  /**
+   * The kind of the question on screen, worked out from its prompt. Debug mode
+   * writes no save, so `liveQuestion` -- which reads one back -- cannot be used.
+   * @returns {string} A form kind
+   */
+  function liveQuestionKind() {
+    const prompt = byId("question-prompt").textContent
+    if (/×.*[+-]/.test(prompt)) return "twoStep"
+    if (prompt.includes("÷")) return "div"
+    if (prompt.includes("×")) return "mul"
+    return prompt.includes("+") ? "add" : "sub"
+  }
+
+  it("drops straight into the named season", async () => {
+    await bootWith("?season=winter")
+    expect(isActive("screen-play")).toBe(true)
+    expect(byId("season-name").textContent).toContain(getSeason("winter").name)
+  })
+
+  it("writes nothing to storage, so a real run survives being looked at", async () => {
+    localStorage.clear()
+    seedSave({ seasonId: "spring", position: 4 })
+    const before = localStorage.getItem(STORAGE.KEY)
+    document.body.removeAttribute("data-debug")
+    window.history.replaceState({}, "", "/?season=winter")
+    await boot()
+    // Play a question, which is what would normally trigger a save.
+    choices()[0].click()
+    jest.advanceTimersByTime(4000)
+    expect(localStorage.getItem(STORAGE.KEY)).toBe(before)
+  })
+
+  it("marks the page, so a debug session does not read as a save bug", async () => {
+    await bootWith("?season=autumn")
+    expect(document.body.getAttribute("data-debug")).toBe("autumn")
+  })
+
+  it("takes the character too", async () => {
+    await bootWith("?season=summer&character=sloth")
+    expect(byId("season-name").textContent).toContain(getSeason("summer").name)
+    expect(saved()).toBeNull()
+  })
+
+  it("jumps to the last screen in the game", async () => {
+    // The one that is otherwise four seasons away, and so the least-looked-at
+    // screen in the game.
+    await bootWith("?phase=end")
+    expect(isActive("screen-result")).toBe(true)
+    expect(byId("result-title").textContent).toBe("The potion is finished")
+    // Every season has to show a haul, or the summary is a blank table.
+    const summary = byId("result-summary").textContent
+    for (const id of SEASON_ORDER) expect(summary).toContain(getSeason(id).name)
+    // And the picture: one rare collectible per season in the finished flask.
+    // This screen used to be a title, a paragraph and four numbers.
+    expect(byId("result-haul").querySelectorAll(".finale-item")).toHaveLength(SEASON_ORDER.length)
+    expect(byId("result-haul").querySelector(".finale-flask")).not.toBeNull()
+  })
+
+  it("jumps to a boss, with a boss question already drawn", async () => {
+    await bootWith("?season=autumn&phase=boss")
+    expect(isActive("screen-play")).toBe(true)
+    expect(choices()).toHaveLength(4)
+    const kinds = getSeason("autumn").boss.forms.map((form) => form.kind)
+    expect(kinds).toContain(liveQuestionKind())
+  })
+
+  it.each([
+    ["won", "screen-result"],
+    ["lost", "screen-result"],
+  ])("jumps to the %s screen", async (phase, screen) => {
+    await bootWith(`?season=summer&phase=${phase}`)
+    expect(isActive(screen)).toBe(true)
+  })
+
+  it("opens every season when asked for nothing else", async () => {
+    await bootWith("?debug=1")
+    expect(isActive("screen-character")).toBe(true)
+    expect(document.body.getAttribute("data-debug")).toBe("on")
+  })
+
+  it.each([
+    ["an unknown season", "?season=monsoon"],
+    ["an unknown character", "?character=dragon"],
+    ["an unrelated param", "?utm_source=whatever"],
+    ["nothing at all", ""],
+  ])("stays out of the way for %s", async (_label, search) => {
+    await bootWith(search)
+    expect(document.body.hasAttribute("data-debug")).toBe(false)
   })
 })

@@ -155,6 +155,24 @@ see repeats. Judged acceptable — a boss is met once per attempt — and pinned
 by `draws from a pool worth replaying` so it cannot quietly shrink further. Widen
 `tables` before lowering `from` if a slot starts feeling stale.
 
+### Eased after the first real play, 2026-09-01
+
+The retune above was tuned on measurements; this is what changed once someone
+actually played it. Both are worth keeping separate — the numbers were right
+about the _shape_ of the ladder and wrong about its absolute level.
+
+- **The clock was the thing making questions fail**, not the arithmetic. 20/18/16s
+  has to cover reading the question, working it out and reading four options.
+  Now 30/28/25s. It still tightens across the year; it is just no longer the
+  binding constraint.
+- **Winter was too hard.** Its ordinary spaces were the 6–9 facts with no easy
+  ones at all, so there was never a breather, and its tens ran to `9 × 80`. Now
+  the 4 table is back on the trail and the tens stop at 70. Autumn gets the 2
+  table back and gentler hard slots; summer only loses a notch on its boss.
+- **The structural score did not catch any of this**, and could not: it measures
+  the shape of the ladder, not whether the whole thing sits too high. Worth
+  remembering before trusting it over a play session.
+
 ### Still open, and Ella's to decide
 
 - **Is a lit mountain still "the division one"?** Winter's now asks `8 × 7 + 9`
@@ -232,7 +250,10 @@ Most of this list was cleared on 2026-08-31; what is left is below the done ones
   that was not done: the character screen now shows which seasons are open, but
   there is no way to _choose_ one. Whether she can replay a finished season, or
   jump to one she has unlocked, is a rule question rather than a display one —
-  it is Ella's call, and it changes what a run means.
+  it is Ella's call, and it changes what a run means. The `?season=` URL added
+  for debugging is deliberately **not** this: it skips the rule question by not
+  saving, which is fine for an adult checking the art and wrong as a game
+  mechanic.
 - **Nothing on the trail moves except the character.** Between questions the
   scene is completely still: the animal is a static shape, the river does not
   run, the thicket does not stir, and winter's snow is drawn as a field of
@@ -284,6 +305,17 @@ Most of this list was cleared on 2026-08-31; what is left is below the done ones
   fan was generated from a circle and the body is a much flatter ellipse, so a
   radius short enough to bury the quills over the flanks cleared the spine. Both
   ends of each quill come off the body's own ellipse now.
+- ~~**Crossings cornered at the apex.**~~ **Done**, 2026-09-01. Each crossing was
+  three to six keyframes, and the browser joins keyframes with straight lines —
+  so a jump traced a triangle rather than an arc and turned through 73 degrees in
+  a single step at the top. The single `ease-in-out` across the whole animation
+  made it worse by running the character _fastest_ at the apex, which is
+  backwards. The path is now described as a function — a projectile arc, with an
+  optional dwell at the top and per-kind squash — and sampled into 24 keyframes,
+  with `easing: "linear"` because the timing lives in the samples. Largest turn
+  drops from 73 degrees to 9. The two sharp corners left are the river's
+  touchdown between hops and the mountain's summit, both intended and both across
+  steps of a few pixels.
 - ~~**Crossings ended flat.**~~ **Done**, 2026-08-31. Every traversal lands on a
   squash sized to how far the animal fell, then a clean final frame. The clean
   frame was a bug as much as a polish item: crossings play with
