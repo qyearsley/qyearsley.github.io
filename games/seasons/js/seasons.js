@@ -16,13 +16,19 @@
  *   target is third grade.
  * - Keep every ordinary question in mental range: the answer has to be found and
  *   four choices read before the countdown ends, so anything that wants written
- *   vertical maths is not something this format can fairly ask. One rule covers
- *   it: **no single column operation goes past two digits, and every individual
- *   fact stays inside 100.** So addition and subtraction cap at `max: 100`, and
- *   `div` caps at `upTo: 10` (a quotient of 12 on the 9 table is `108 ÷ 9`,
- *   which is outside the grade-3 tables). Escalation comes from the number of
- *   mental steps instead: one fact, then a fact plus a regrouping, then a fact
- *   scaled by ten, then two chained operations.
+ *   vertical maths is not something this format can fairly ask.
+ * - **Addition and subtraction are recall, not calculation.** Every add and sub
+ *   form in this file stays inside 18, which is the addition-facts table and its
+ *   inverses -- `8 + 7`, `15 - 9`. They used to run to `max: 100`, which meant
+ *   even spring could ask `47 + 45`, and from summer on the `borrow` flag made
+ *   two-digit regrouping a third of every ordinary space. That is column work in
+ *   your head against a clock, and it was the hardest thing in the game by a
+ *   distance. It is gone. `min` is what keeps the easy end honest: without a
+ *   floor, "inside 18" would offer `2 + 3` just as often as `9 + 8`.
+ * - Escalation therefore lives entirely in multiplication and division: one
+ *   fact, then the whole table, then a fact scaled by ten, then two chained
+ *   operations. `div` caps at `upTo: 10` (a quotient of 12 on the 9 table is
+ *   `108 ÷ 9`, which is outside the grade-3 tables).
  * - Answers still get large, which is fine -- `9 × 80` is on grade (3.NBT.A.3)
  *   and purely mental. What is banned is column work, not size.
  * - Ella's rule for the operations: "addition, subtraction, multiplication,
@@ -130,11 +136,12 @@ const SEASONS = {
     demand: 11,
     timerSeconds: null,
     challenge: "arithmetic",
-    // One fact, or one two-digit sum that needs no regrouping. The gentlest the
-    // game gets, and untimed to match.
+    // One addition fact and one subtraction fact, both inside 18, plus the easy
+    // half of the times tables. The gentlest the game gets, and untimed to
+    // match.
     forms: [
-      { kind: "add", max: 100 },
-      { kind: "sub", max: 100 },
+      { kind: "add", min: 6, max: 18 },
+      { kind: "sub", min: 6, max: 18 },
       { kind: "mul", tables: [2, 3, 4, 5, 10], upTo: 10 },
     ],
     glowingForms: [{ kind: "div", tables: [2, 5, 10], from: 4, upTo: 10 }],
@@ -173,12 +180,12 @@ const SEASONS = {
     demand: 13,
     timerSeconds: 30,
     challenge: "arithmetic",
-    // The step up is the regrouping, and the whole times table rather than the
-    // easy half of it.
+    // The step up is the whole times table rather than the easy half of it, and
+    // add/sub crossing ten rather than sitting under it.
     forms: [
       { kind: "mul", tables: [2, 3, 4, 5, 6, 7, 8, 9, 10], upTo: 10 },
-      { kind: "add", max: 100, borrow: true },
-      { kind: "sub", max: 100, borrow: true },
+      { kind: "add", min: 11, max: 18 },
+      { kind: "sub", min: 11, max: 18, borrow: true },
     ],
     glowingForms: [{ kind: "div", tables: [2, 3, 4, 5, 6, 7, 8, 9, 10], from: 4, upTo: 10 }],
     boss: {
@@ -218,12 +225,12 @@ const SEASONS = {
     timerSeconds: 28,
     challenge: "arithmetic",
     // Two steps up: the facts lose the easiest two, and place value arrives as
-    // `7 × 40`. Subtraction stops escalating here on purpose -- two-digit
-    // regrouping is the mental ceiling, so once a season has it there is nowhere
-    // on-grade left to go.
+    // `7 × 40`. Subtraction stops escalating here on purpose -- the regrouping
+    // fact is the mental ceiling for a single subtraction, so once a season has
+    // it there is nowhere on-grade left to go.
     forms: [
       { kind: "mul", tables: [2, 3, 4, 6, 7, 8, 9], upTo: 10 },
-      { kind: "sub", max: 100, borrow: true },
+      { kind: "sub", min: 11, max: 18, borrow: true },
       { kind: "mul", tables: tensTo(50), upTo: 9 },
     ],
     glowingForms: [{ kind: "div", tables: [3, 4, 6, 7, 8, 9], from: 5, upTo: 10 }],
@@ -272,7 +279,7 @@ const SEASONS = {
     // mental step, so winter's escalation lives in the hard slots below.
     forms: [
       { kind: "mul", tables: [4, 6, 7, 8, 9], upTo: 10 },
-      { kind: "sub", max: 100, borrow: true },
+      { kind: "sub", min: 11, max: 18, borrow: true },
       { kind: "mul", tables: tensTo(70), upTo: 9 },
     ],
     // The one season whose lit mountains are not simply division. Two chained

@@ -218,6 +218,40 @@ describe.each(SEASON_LIST.map((season) => [season.id, season]))("%s", (_id, seas
     }
   })
 
+  // Tighter than the ceiling above, and the guard that matters most for how the
+  // game actually plays. Addition and subtraction are meant to be *recalled*,
+  // not worked out: 18 is where the addition-facts table stops. Every add/sub
+  // form ran to `max: 100` once, which let even spring -- the untimed, gentlest
+  // season -- ask `47 + 45`, and made two-digit regrouping a third of every
+  // ordinary space from summer on. That was the hardest thing in the game, in
+  // the one operation that was supposed to be the easy breather between the
+  // times tables. Escalation belongs to `mul` and `div`; this keeps a future
+  // retune from quietly handing it back to `add` and `sub`.
+  it("asks addition and subtraction only as facts inside 18", () => {
+    for (const form of [...season.forms, ...season.glowingForms, ...season.boss.forms]) {
+      if (form.kind !== "add" && form.kind !== "sub") continue
+      expect(form.max).toBeLessThanOrEqual(18)
+    }
+  })
+
+  // The bound above is on the form; this is on what the form actually emits.
+  // A generator that ignored `max` would sail through the check above, which is
+  // how `{max: 20, borrow: true}` came to produce almost no regroupings at all
+  // while looking perfectly well configured.
+  it("generates no add or sub operand above 18, across many seeds", () => {
+    const addSub = [...season.forms, ...season.glowingForms, ...season.boss.forms].filter(
+      (form) => form.kind === "add" || form.kind === "sub",
+    )
+    if (addSub.length === 0) return
+    const oversized = []
+    for (let seed = 0; seed < 400; seed += 1) {
+      const question = generate(addSub, createRng(`${season.id}-addsub-${seed}`))
+      const largest = Math.max(...question.prompt.match(/\d+/g).map(Number))
+      if (largest > 18) oversized.push(`${question.prompt} (seed ${seed})`)
+    }
+    expect(oversized).toEqual([])
+  })
+
   it("has a boss with a positive rescue and at least one form", () => {
     expect(season.boss).toBeTruthy()
     expect(Number.isInteger(season.boss.rescue)).toBe(true)

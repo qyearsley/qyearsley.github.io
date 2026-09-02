@@ -11,8 +11,9 @@
  * different question every time. seasons.js owns which forms a season uses;
  * this file owns what each form means. The kinds, one per entry in GENERATORS:
  *
- * - `add`     {max, borrow}       a + b, sum at most max. `borrow` forces a carry.
- * - `sub`     {max, borrow}       a - b, never negative. `borrow` forces regrouping.
+ * - `add`     {min, max, borrow}  a + b, sum min..max. `borrow` forces a carry.
+ * - `sub`     {min, max, borrow}  a - b, never negative, minuend min..max.
+ *                                 `borrow` forces regrouping.
  * - `mul`     {tables, upTo, twoDigit}  one operand from `tables`; the other 2..upTo,
  *                                 or 10..upTo when `twoDigit` is set.
  * - `div`     {tables, upTo, from}  exact division only; the quotient is from..upTo,
@@ -20,10 +21,12 @@
  * - `twoStep` {tables, upTo, max, from}  a × b then + or - c, result 0..max, with
  *                                 b drawn from from..upTo.
  *
- * `from` is what stops a hard slot asking an easy question. A season narrows
- * `tables` to make a form harder, but that alone does nothing to the *answer*:
- * `div` used to draw its quotient from 2 upward whatever the tables said, so
- * autumn's boss asked `12 ÷ 6 = 2`. See `_div`.
+ * `from` and `min` are what stop a hard slot asking an easy question. A season
+ * narrows `tables` to make a form harder, but that alone does nothing to the
+ * *answer*: `div` used to draw its quotient from 2 upward whatever the tables
+ * said, so autumn's boss asked `12 ÷ 6 = 2`. See `_div`. `min` is the same idea
+ * one operation over: every season's add and sub now live inside 20, so without
+ * a floor the whole of summer's addition could be `2 + 3`. See `_add`.
  *
  * Answers are multiple choice (see PLAY.CHOICE_COUNT), so every question also
  * carries distractors. Those are near misses rather than random numbers, because
@@ -101,12 +104,52 @@ function _tables(tables) {
 }
 
 /**
+ * Read a form's `min` as a floor that cannot exceed its own ceiling.
+ *
+ * A form that asks for more than its `max` allows is a contradiction, and the
+ * ceiling has to win: it is the bound that keeps the question inside the range
+ * the season was designed around, while the floor only makes it less trivial.
+ * @private
+ * @param {unknown} value - The form's `min`
+ * @param {number} max - The form's already-resolved `max`
+ * @returns {number} A floor at least 3 and at most `max`
+ */
+function _floor(value, max) {
+  return Math.min(_size(value, 3, 3), max)
+}
+
+/**
+ * Split a total into two parts that are both single digits where the total
+ * allows it.
+ *
+ * This is what makes a bounded sum a *fact* rather than merely a small number.
+ * Drawing the first part uniformly from 1..total-1 is correct arithmetic and
+ * useless practice: at `max: 18` it offers `1 + 17` and `19 - 1` as often as
+ * anything else, and neither is a thing a child recalls. Keeping both parts
+ * under ten is exactly the addition-facts table.
+ *
+ * Above 18 no such split exists, so the wide draw is the fallback rather than
+ * the rule -- a form with a large `max` behaves as it always did.
+ *
+ * @private
+ * @param {number} total - The sum, or the minuend
+ * @param {import("../rng.js").Rng} rng - Source of randomness
+ * @returns {number} The first part, 1..total-1
+ */
+function _splitToFacts(total, rng) {
+  const low = Math.max(1, total - 9)
+  const high = Math.min(total - 1, 9)
+  return low <= high ? rng.int(low, high) : rng.int(1, Math.max(1, total - 1))
+}
+
+/**
  * Addition. With `borrow`, both ones digits are forced high enough to carry,
  * which is the whole difficulty of multi-digit addition for a third grader.
  *
  * The carrying pair is chosen first and the tens are then sized to whatever is
- * left under `max`. Sizing the tens first lets a small `max` be ignored
- * entirely, because the carrying pair still has to be added on top of them.
+ * left between `min` and `max`. Sizing the tens first lets a small `max` be
+ * ignored entirely, because the carrying pair still has to be added on top of
+ * them.
  *
  * The tens are split by drawing a total and then dividing it, rather than
  * capping the first operand at half the room and giving the second the rest.
@@ -116,34 +159,37 @@ function _tables(tables) {
  * shape the form never asked for.
  *
  * @private
- * @param {Object} form - {max, borrow}
+ * @param {Object} form - {min, max, borrow}
  * @param {import("../rng.js").Rng} rng - Source of randomness
  * @returns {{prompt: string, answer: number, parts: number[]}} The question
  */
 function _add(form, rng) {
   const max = _size(form.max, 100, 10)
+  const min = _floor(form.min, max)
   if (form.borrow) {
     const onesA = rng.int(5, 9)
     const onesB = rng.int(10 - onesA, 9)
     const carrySum = onesA + onesB
-    if (carrySum <= max) {
-      // Whatever is left after the carrying pair, split evenly in expectation
-      // between the two tens columns. Both can be 0, which still carries:
-      // 7 + 8 is a valid question.
-      const tensTotal = rng.int(0, Math.floor((max - carrySum) / 10))
+    // Whatever is left after the carrying pair, split evenly in expectation
+    // between the two tens columns. Both can be 0, which still carries:
+    // 7 + 8 is a valid question, and inside 20 it is the only kind there is.
+    const lowTens = Math.max(0, Math.ceil((min - carrySum) / 10))
+    const highTens = Math.floor((max - carrySum) / 10)
+    if (lowTens <= highTens) {
+      const tensTotal = rng.int(lowTens, highTens)
       const tensA = rng.int(0, tensTotal)
       const a = tensA * 10 + onesA
       const b = (tensTotal - tensA) * 10 + onesB
       return { prompt: `${a} + ${b}`, answer: a + b, parts: [a, b] }
     }
-    // No carrying pair fits under max at all, so fall through to a plain sum
-    // rather than silently exceeding the bound the form asked for.
+    // No carrying pair fits between min and max at all, so fall through to a
+    // plain sum rather than silently breaking the bounds the form asked for.
   }
   // Drawn as a sum and then split, for the same reason as the tens above: taking
   // `a` uniformly and giving `b` the remainder put the big number first every
   // time, with medians of 50 and 19 at `max: 100`.
-  const sum = rng.int(3, max)
-  const a = rng.int(1, sum - 1)
+  const sum = rng.int(min, max)
+  const a = _splitToFacts(sum, rng)
   return { prompt: `${a} + ${sum - a}`, answer: sum, parts: [a, sum - a] }
 }
 
@@ -151,32 +197,58 @@ function _add(form, rng) {
  * Subtraction, never negative. With `borrow`, the minuend's ones digit is
  * smaller than the subtrahend's, forcing regrouping.
  *
- * The minuend's tens are bounded by what `max` leaves after its ones digit, so
- * a form claiming `max: 100` cannot produce "104 - 27".
+ * The minuend is drawn inside `min`..`max`, so a form claiming `max: 100`
+ * cannot produce "104 - 27".
+ *
+ * **The tens are chosen before the ones, and the subtrahend is allowed to have
+ * no tens at all.** Both of those are fixes for the same bug. The old version
+ * picked the ones digits first, derived `maxTensA` from what `max` had left,
+ * and then required `maxTensA >= 2` on the grounds that "regrouping needs the
+ * subtrahend to have a smaller tens column than the minuend". That reasoning is
+ * wrong: a subtrahend with *no* tens column regroups perfectly well, and
+ * `13 - 7` is the single most common regrouping question a seven-year-old
+ * meets. Because the old code forced `tensB >= 1`, it could not produce that
+ * shape at all -- and at `max: 20` the `maxTensA >= 2` guard failed for every
+ * ones digit except 0, so the form silently fell through to plain subtraction
+ * and quietly stopped asking for the thing it was written to ask for. Choosing
+ * the tens first means the ones can then be fitted to the bounds instead of the
+ * other way round, and every draw honours `borrow`.
  *
  * @private
- * @param {Object} form - {max, borrow}
+ * @param {Object} form - {min, max, borrow}
  * @param {import("../rng.js").Rng} rng - Source of randomness
  * @returns {{prompt: string, answer: number, parts: number[]}} The question
  */
 function _sub(form, rng) {
   const max = _size(form.max, 100, 10)
+  const min = _floor(form.min, max)
   if (form.borrow) {
-    const onesA = rng.int(0, 4)
-    const onesB = rng.int(onesA + 1, 9)
-    const maxTensA = Math.floor((max - onesA) / 10)
-    // Regrouping needs the subtrahend to have a smaller tens column than the
-    // minuend, so there has to be room for two distinct tens values.
-    if (maxTensA >= 2) {
-      const tensB = rng.int(1, Math.max(1, Math.floor(maxTensA / 2)))
-      const tensA = rng.int(tensB + 1, Math.max(tensB + 1, maxTensA))
-      const a = tensA * 10 + onesA
-      const b = tensB * 10 + onesB
-      return { prompt: `${a} - ${b}`, answer: a - b, parts: [a, b] }
+    // At least one ten, or there is nothing to regroup from.
+    const lowTens = Math.max(1, Math.floor(min / 10))
+    const highTens = Math.floor(max / 10)
+    if (lowTens <= highTens) {
+      const tensA = rng.int(lowTens, highTens)
+      // The minuend's ones digit has to leave a larger one beneath it, so it
+      // stops at 8, and it has to keep the minuend inside the bounds.
+      const lowOnes = Math.max(0, min - tensA * 10)
+      const highOnes = Math.min(8, max - tensA * 10)
+      if (lowOnes <= highOnes) {
+        const onesA = rng.int(lowOnes, highOnes)
+        const onesB = rng.int(onesA + 1, 9)
+        // 0 is included: inside 20 the subtrahend is always a bare digit.
+        // Capped one ten below the minuend's, which is what keeps the answer
+        // positive -- the largest subtrahend this can build is `a - 1`.
+        const tensB = rng.int(0, tensA - 1)
+        const a = tensA * 10 + onesA
+        const b = tensB * 10 + onesB
+        return { prompt: `${a} - ${b}`, answer: a - b, parts: [a, b] }
+      }
     }
+    // Nothing that regroups fits between min and max, so fall through rather
+    // than break the bounds the form asked for.
   }
-  const a = rng.int(3, max)
-  const b = rng.int(1, Math.max(1, a - 1))
+  const a = rng.int(min, max)
+  const b = _splitToFacts(a, rng)
   return { prompt: `${a} - ${b}`, answer: a - b, parts: [a, b] }
 }
 

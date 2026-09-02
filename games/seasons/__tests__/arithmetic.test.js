@@ -243,6 +243,36 @@ describe("arithmetic", () => {
         expect(question.answer).toBeGreaterThan(0)
       }
     })
+
+    it("honours a floor on the sum, which is what keeps a fact form from asking 2 + 3", () => {
+      for (const form of [
+        { kind: "add", min: 11, max: 18 },
+        { kind: "add", min: 11, max: 18, borrow: true },
+        { kind: "add", min: 40, max: 100 },
+      ]) {
+        for (const question of sample(form)) {
+          expect(question.answer).toBeGreaterThanOrEqual(form.min)
+          expect(question.answer).toBeLessThanOrEqual(form.max)
+        }
+      }
+    })
+
+    // The point of a bounded sum is that it is a *fact*. Drawing the first
+    // addend uniformly from 1..sum-1 is correct arithmetic and useless
+    // practice: it offers `1 + 17` as readily as `9 + 8`.
+    it("keeps both addends single-digit when the sum leaves room for it", () => {
+      for (const question of sample({ kind: "add", min: 11, max: 18 })) {
+        const [a, b] = operands(question.prompt)
+        expect(a).toBeLessThanOrEqual(9)
+        expect(b).toBeLessThanOrEqual(9)
+      }
+    })
+
+    it("lets the ceiling win when the floor is above it", () => {
+      for (const question of sample({ kind: "add", min: 500, max: 20 })) {
+        expect(question.answer).toBeLessThanOrEqual(20)
+      }
+    })
   })
 
   describe("sub", () => {
@@ -266,6 +296,48 @@ describe("arithmetic", () => {
         const [a, b] = operands(question.prompt)
         expect(question.prompt).toContain(" - ")
         expect(a % 10).toBeLessThan(b % 10)
+      }
+    })
+
+    // The regression this file most needs. `{max: 20, borrow: true}` used to
+    // take its regrouping branch only when the minuend's ones digit was 0, and
+    // silently fall through to plain subtraction the rest of the time -- so a
+    // season asking for regrouping inside 20 got almost none. Worse, the branch
+    // forced the subtrahend to have a tens digit of its own, which ruled out
+    // `13 - 7` entirely: the commonest regrouping question there is.
+    it("regroups on every draw inside 20, with a bare-digit subtrahend", () => {
+      const questions = sample({ kind: "sub", min: 11, max: 18, borrow: true }, 400)
+      for (const question of questions) {
+        const [a, b] = operands(question.prompt)
+        expect(a % 10).toBeLessThan(b % 10)
+        expect(a).toBeGreaterThanOrEqual(11)
+        expect(a).toBeLessThanOrEqual(18)
+        expect(b).toBeLessThanOrEqual(9)
+        expect(question.answer).toBeGreaterThan(0)
+        expect(question.answer).toBeLessThanOrEqual(9)
+      }
+      // Not just reachable -- the shape the form actually asks for.
+      expect(questions.length).toBe(400)
+    })
+
+    it("honours a floor on the minuend", () => {
+      for (const form of [
+        { kind: "sub", min: 11, max: 18 },
+        { kind: "sub", min: 11, max: 18, borrow: true },
+        { kind: "sub", min: 60, max: 100, borrow: true },
+      ]) {
+        for (const question of sample(form)) {
+          const [a] = operands(question.prompt)
+          expect(a).toBeGreaterThanOrEqual(form.min)
+          expect(a).toBeLessThanOrEqual(form.max)
+        }
+      }
+    })
+
+    it("keeps the subtrahend single-digit when the minuend leaves room for it", () => {
+      for (const question of sample({ kind: "sub", min: 11, max: 18 })) {
+        const [, b] = operands(question.prompt)
+        expect(b).toBeLessThanOrEqual(9)
       }
     })
   })
