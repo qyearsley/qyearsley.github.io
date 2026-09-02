@@ -4,8 +4,8 @@ import { GameUI } from "../js/GameUI.js"
 
 const SPECIES_DEFS = [
   { id: SPECIES.GRASS, emoji: "🌿", name: "Grass" },
-  { id: SPECIES.FLOWER, emoji: "🌸", name: "Flower" },
   { id: SPECIES.BEE, emoji: "🐝", name: "Bee" },
+  { id: SPECIES.RABBIT, emoji: "🐇", name: "Rabbit" },
 ]
 
 describe("GameUI", () => {
@@ -45,7 +45,7 @@ describe("GameUI", () => {
     })
 
     test("marks only the selected species", () => {
-      ui.renderSpeciesPalette(SPECIES_DEFS, SPECIES.FLOWER)
+      ui.renderSpeciesPalette(SPECIES_DEFS, SPECIES.BEE)
       const selected = [...document.querySelectorAll(".species-btn.selected")]
       expect(selected.map((b) => b.dataset.speciesId)).toEqual(["2"])
     })

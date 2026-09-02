@@ -46,27 +46,70 @@
             </div>
             <details class="sidebar-section rules-section">
               <summary>How it works</summary>
+              <p class="rules-intro">
+                Every generation each cell counts its 8 neighbours, but each species counts a
+                different set of them.
+              </p>
+              <table class="rules-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Species</th>
+                    <th scope="col">Counts</th>
+                    <th scope="col">Lives</th>
+                    <th scope="col">Born</th>
+                    <th scope="col">Age</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">&#x1f33f; Grass</th>
+                    <td>grass</td>
+                    <td>2&ndash;3</td>
+                    <td>3</td>
+                    <td>never</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">&#x1f338; In bloom</th>
+                    <td>grass</td>
+                    <td>2&ndash;3</td>
+                    <td>&mdash;</td>
+                    <td>never</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">&#x1f41d; Bee</th>
+                    <td>bloom, bees</td>
+                    <td>1&ndash;3</td>
+                    <td>3</td>
+                    <td>20</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">&#x1f407; Rabbit</th>
+                    <td>grass, rabbits</td>
+                    <td>2&ndash;3</td>
+                    <td>3</td>
+                    <td>25</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">&#x1f98a; Fox</th>
+                    <td>rabbits, foxes</td>
+                    <td>1&ndash;3</td>
+                    <td>4</td>
+                    <td>45</td>
+                  </tr>
+                </tbody>
+              </table>
               <ul class="rules-list">
                 <li>
-                  Each generation, cells live or die based on their neighbors (the 8 surrounding
-                  cells).
+                  <strong>Grass blooms.</strong> Grass that survives 8 generations flowers. It is
+                  the same plant under the same rules, just older.
                 </li>
                 <li>
-                  <strong>Grass</strong> survives with 2-3 neighbors. Spreads where 3 neighbors
-                  exist. Counts grass and flowers.
+                  <strong>Bees pollinate.</strong> Grass next to a bee spreads on 2 neighbours
+                  instead of 3.
                 </li>
-                <li>
-                  <strong>Flowers</strong> survive with 2-4 neighbors, only counting flowers. Age
-                  and die after 30 gens.
-                </li>
-                <li>
-                  <strong>Bees</strong> thrive near flowers. They pollinate: flowers near bees
-                  spread more easily. Die after 20 gens.
-                </li>
-                <li>
-                  <strong>Rabbits</strong> live near grass and other rabbits. They eat grass: grass
-                  next to 2+ rabbits dies. Die after 25 gens.
-                </li>
+                <li><strong>Rabbits eat grass.</strong> Grass next to 2+ rabbits dies.</li>
+                <li><strong>Foxes eat rabbits.</strong> A rabbit next to 3 foxes dies.</li>
+                <li>Eating is resolved first, so nothing survives being eaten.</li>
               </ul>
             </details>
             <div class="sidebar-section shortcuts-section">
@@ -83,6 +126,16 @@
           </div>
           <div class="canvas-wrapper">
             <canvas id="game-canvas" width="640" height="640"></canvas>
+            <figure class="chart-figure">
+              <canvas
+                id="population-chart"
+                width="640"
+                height="120"
+                role="img"
+                aria-label="Population of each species over the last 200 generations"
+              ></canvas>
+              <figcaption id="chart-legend" class="chart-legend"></figcaption>
+            </figure>
           </div>
         </main>
       </div>

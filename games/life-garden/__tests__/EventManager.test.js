@@ -1,5 +1,7 @@
 import { describe, test, expect, beforeEach, jest } from "@jest/globals"
 import { EventManager } from "../js/EventManager.js"
+import { SpeciesRegistry } from "../js/Species.js"
+import { SPECIES } from "../js/constants.js"
 
 /**
  * jsdom reports a zero-sized rect for every element, which would make the
@@ -210,6 +212,21 @@ describe("EventManager", () => {
     test("number keys select a species", () => {
       press("3")
       expect(callbacks.onSpeciesSelect).toHaveBeenCalledWith(3)
+    })
+
+    test("the digits cover exactly the palette", () => {
+      // The palette labels its keyboard hints by position while this handler
+      // passes the digit through as a species id, so the placeable ids have to
+      // be 1..n. A digit past the end must land on nothing.
+      const ids = new SpeciesRegistry().placeable().map((s) => s.id)
+      for (const id of ids) {
+        callbacks.onSpeciesSelect.mockClear()
+        press(String(id))
+        expect(callbacks.onSpeciesSelect).toHaveBeenCalledWith(id)
+      }
+      expect(ids).toEqual([1, 2, 3, 4])
+      // FLOWERING_GRASS is a life stage, so no digit reaches it
+      expect(ids).not.toContain(SPECIES.FLOWERING_GRASS)
     })
 
     test("space is swallowed so it does not scroll the page", () => {

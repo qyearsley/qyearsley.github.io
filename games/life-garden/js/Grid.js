@@ -156,7 +156,10 @@ export class Grid {
             const survives = def.survive.includes(neighborCount)
             const withinAge = def.maxAge === null || cell.age < def.maxAge
             if (survives && withinAge) {
-              next.cells[y][x] = { species: cell.species, age: cell.age + 1 }
+              const age = cell.age + 1
+              // Life-stage transition: grass that has lasted long enough blooms
+              const species = def.bloomsInto && age >= def.bloomAge ? def.bloomsInto : cell.species
+              next.cells[y][x] = { species, age }
               continue
             }
           }

@@ -323,8 +323,42 @@ select:focus-visible {
   color: var(--lg-ink-muted);
 }
 
+.rules-intro {
+  margin: 0.5rem 0;
+  font-size: 0.8rem;
+  color: var(--lg-ink-faint);
+  line-height: 1.5;
+}
+
+.rules-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.7rem;
+  color: var(--lg-ink-faint);
+}
+
+.rules-table th,
+.rules-table td {
+  padding: 0.15rem 0.2rem;
+  text-align: left;
+  border-bottom: 1px solid var(--lg-border);
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.rules-table thead th {
+  color: var(--lg-ink-fainter);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 0.62rem;
+}
+
+.rules-table tbody th {
+  color: var(--lg-ink-muted);
+}
+
 .rules-list {
-  margin: 0.5rem 0 0 1.2rem;
+  margin: 0.6rem 0 0 1.2rem;
   font-size: 0.8rem;
   color: var(--lg-ink-faint);
   line-height: 1.6;

@@ -2,8 +2,9 @@
 .canvas-wrapper {
   flex: 1;
   display: flex;
-  align-items: flex-start;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 #game-canvas {
@@ -11,6 +12,43 @@
   height: auto;
   border-radius: 4px;
   cursor: crosshair;
+}
+
+/* Population chart, under the grid */
+.chart-figure {
+  margin: 0;
+  width: 100%;
+  max-width: 640px;
+}
+
+#population-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--lg-border);
+  border-radius: 4px;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.9rem;
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--lg-ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.chart-legend-swatch {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 2px;
 }
 
 @media (width <= 768px) {

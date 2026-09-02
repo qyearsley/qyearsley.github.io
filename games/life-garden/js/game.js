@@ -5,6 +5,7 @@ import { GameState } from "./GameState.js"
 import { GameUI } from "./GameUI.js"
 import { Renderer } from "./Renderer.js"
 import { EventManager } from "./EventManager.js"
+import { PopulationChart } from "./PopulationChart.js"
 import { LifeGardenStorage } from "./storage.js"
 import { PUZZLES } from "./PuzzleData.js"
 import { PRESETS } from "./Presets.js"
@@ -20,11 +21,13 @@ class LifeGarden {
     this.ui = new GameUI()
     this.grid = null
     this.renderer = null
+    this.chart = null
     this.selectedSpecies = SPECIES.GRASS
     this.simulationTimer = null
     this.history = [] // previous grid states for undo
 
     this._setupRenderer()
+    this._setupChart()
     this._setupEvents()
     this._setupThemeRepaint()
     this._init()
@@ -35,6 +38,12 @@ class LifeGarden {
     if (canvas) {
       this.renderer = new Renderer(canvas, this.registry)
     }
+  }
+
+  _setupChart() {
+    const canvas = document.getElementById("population-chart")
+    if (!canvas) return
+    this.chart = new PopulationChart(canvas, this.registry, document.getElementById("chart-legend"))
   }
 
   /**
@@ -51,6 +60,7 @@ class LifeGarden {
   _setupThemeRepaint() {
     const repaint = () => {
       if (this.renderer && this.grid) this.renderer.render(this.grid)
+      this.chart?.render()
     }
     window.addEventListener("themechange", repaint)
     window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", repaint)
@@ -101,6 +111,8 @@ class LifeGarden {
 
     this._updatePalette()
     this._renderPresets()
+    this.chart?.reset()
+    this.chart?.record(this.state.generation, this.grid)
     this.ui.updateGeneration(this.state.generation)
     this.ui.showScreen("game-screen")
     this.ui.setSimulatingControls(false)
@@ -132,6 +144,7 @@ class LifeGarden {
     }
 
     this.renderer.render(this.grid)
+    this.chart?.record(this.state.generation, this.grid)
   }
 
   _handleCanvasHover(px, py) {
@@ -186,6 +199,7 @@ class LifeGarden {
 
     this.grid = this.history.pop()
     this.state.generation--
+    this.chart?.truncate(this.state.generation)
     this.ui.updateGeneration(this.state.generation)
     this.renderer.render(this.grid)
   }
@@ -199,6 +213,7 @@ class LifeGarden {
 
       this.grid = this.grid.step()
       this.state.generation++
+      this.chart?.record(this.state.generation, this.grid)
       this.ui.updateGeneration(this.state.generation)
       this.renderer.render(this.grid)
     } catch (error) {
@@ -212,6 +227,8 @@ class LifeGarden {
     this.state.startPuzzle(PUZZLES[0])
     this.grid = new Grid(PUZZLES[0].gridWidth, PUZZLES[0].gridHeight, this.registry)
     this.history = []
+    this.chart?.reset()
+    this.chart?.record(this.state.generation, this.grid)
     this.ui.updateGeneration(this.state.generation)
     this.ui.setSimulatingControls(false)
     this.renderer.render(this.grid)
@@ -227,6 +244,8 @@ class LifeGarden {
     for (const cell of preset.cells) {
       this.grid.setCell(cell.x, cell.y, cell.species)
     }
+    this.chart?.reset()
+    this.chart?.record(this.state.generation, this.grid)
     this.ui.updateGeneration(this.state.generation)
     this.ui.setSimulatingControls(false)
     this.renderer.render(this.grid)

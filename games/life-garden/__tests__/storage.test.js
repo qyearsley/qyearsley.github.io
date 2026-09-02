@@ -42,8 +42,34 @@ describe("LifeGardenStorage", () => {
     // Save raw data without completedPuzzles field
     localStorage.setItem(
       "lifeGardenProgress",
-      JSON.stringify({ version: "1.0", lastPlayed: Date.now() }),
+      JSON.stringify({ version: "2.0", lastPlayed: Date.now() }),
     )
     expect(storage.loadProgress()).toBeNull()
+  })
+
+  test("discards a save written before the species list changed", () => {
+    // Species ids were renumbered when flowers became a life stage of grass,
+    // so anything written under the old version has to be thrown away.
+    localStorage.setItem(
+      "lifeGardenProgress",
+      JSON.stringify({
+        version: "1.0",
+        lastPlayed: Date.now(),
+        completedPuzzles: { sandbox: { stars: 3 } },
+        settings: { speed: "fast" },
+      }),
+    )
+    expect(storage.loadProgress()).toBeNull()
+  })
+
+  test("stores no species ids, so nothing can put a dead species back", () => {
+    storage.saveProgress({ sandbox: { stars: 1 } }, { speed: "fast", showGrid: true })
+    const raw = JSON.parse(localStorage.getItem("lifeGardenProgress"))
+    expect(Object.keys(raw).sort()).toEqual([
+      "completedPuzzles",
+      "lastPlayed",
+      "settings",
+      "version",
+    ])
   })
 })

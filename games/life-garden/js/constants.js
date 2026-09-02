@@ -1,10 +1,15 @@
-// Species IDs
+// Species IDs.
+// The placeable ones must stay sequential from 1 and in palette order: the
+// palette labels its keyboard hints by position, EventManager passes the
+// pressed digit straight through as a species id. FLOWERING_GRASS is a life
+// stage rather than a palette entry, so it sits after them.
 export const SPECIES = {
   EMPTY: 0,
   GRASS: 1,
-  FLOWER: 2,
-  BEE: 3,
-  RABBIT: 4,
+  BEE: 2,
+  RABBIT: 3,
+  FOX: 4,
+  FLOWERING_GRASS: 5,
 }
 
 // Grid defaults

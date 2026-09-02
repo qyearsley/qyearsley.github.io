@@ -11,9 +11,9 @@ export const PUZZLES = [
     gridHeight: 20,
     budget: {
       [SPECIES.GRASS]: Infinity,
-      [SPECIES.FLOWER]: Infinity,
       [SPECIES.BEE]: Infinity,
       [SPECIES.RABBIT]: Infinity,
+      [SPECIES.FOX]: Infinity,
     },
     preplacedCells: [],
     lockedCells: [],

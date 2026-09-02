@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeEach } from "@jest/globals"
 import { Renderer } from "../js/Renderer.js"
+import { SpeciesRegistry } from "../js/Species.js"
 
 /**
  * The drawing methods are exercised by playing the game; these tests cover the
@@ -105,6 +106,33 @@ describe("Renderer", () => {
 
     test("interpolates each channel independently", () => {
       expect(renderer._lerpColor("#000000", "#ff8800", 0.5)).toBe("rgb(128, 68, 0)")
+    })
+  })
+
+  describe("textures", () => {
+    // A missing case in _drawTexture draws a plain coloured square rather than
+    // raising, so a species whose texture nobody implemented looks merely dull.
+    // Check every registered texture actually reaches a draw method.
+    test.each(new SpeciesRegistry().all().map((def) => [def.name, def]))(
+      "%s draws something",
+      (_name, def) => {
+        let calls = 0
+        const ctx = new Proxy(
+          {},
+          {
+            get: () => () => {
+              calls++
+            },
+          },
+        )
+        renderer._drawTexture(ctx, 0, 0, 20, 20, def, 0)
+        expect(calls).toBeGreaterThan(0)
+      },
+    )
+
+    test("an unknown texture is skipped rather than throwing", () => {
+      const ctx = new Proxy({}, { get: () => () => {} })
+      expect(() => renderer._drawTexture(ctx, 0, 0, 20, 20, { texture: "nope" }, 0)).not.toThrow()
     })
   })
 })

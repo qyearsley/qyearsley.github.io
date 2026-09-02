@@ -145,14 +145,17 @@ export class Renderer {
       case "blades":
         this._drawBlades(ctx, cx, cy, s, alpha)
         break
-      case "petals":
-        this._drawPetals(ctx, cx, cy, s, alpha)
+      case "bloom":
+        this._drawBloom(ctx, cx, cy, s, alpha)
         break
       case "dot":
         this._drawDot(ctx, cx, cy, s, alpha)
         break
       case "ears":
         this._drawEars(ctx, cx, cy, s, alpha)
+        break
+      case "snout":
+        this._drawSnout(ctx, cx, cy, s, alpha)
         break
     }
   }
@@ -174,29 +177,43 @@ export class Renderer {
     ctx.restore()
   }
 
-  _drawPetals(ctx, cx, cy, s, alpha) {
+  /**
+   * Grass in bloom: the same blades as plain grass, in green, with a flower
+   * head on top. Drawn over the pink fill so a bloomed meadow is obvious at a
+   * glance while still reading as grass.
+   */
+  _drawBloom(ctx, cx, cy, s, alpha) {
     ctx.save()
-    ctx.globalAlpha = alpha * 0.6
-    const r = s * 0.12
-    // Center dot
-    ctx.fillStyle = "rgba(255,255,200,0.8)"
-    ctx.beginPath()
-    ctx.arc(cx, cy, r, 0, Math.PI * 2)
-    ctx.fill()
-    // Four small petal dots
-    ctx.fillStyle = "rgba(255,255,255,0.4)"
-    const pr = s * 0.08
-    const d = s * 0.22
-    for (const [dx, dy] of [
+    ctx.globalAlpha = alpha * 0.7
+    // Green blades, so the cell still reads as grass
+    ctx.strokeStyle = "rgba(74,159,73,0.75)"
+    ctx.lineWidth = Math.max(1, s * 0.08)
+    ctx.lineCap = "round"
+    const r = s * 0.25
+    for (const dx of [-0.2, 0.2]) {
+      ctx.beginPath()
+      ctx.moveTo(cx + dx * s, cy + r)
+      ctx.lineTo(cx + dx * s - s * 0.05, cy - r * 0.3)
+      ctx.stroke()
+    }
+    // Flower head: four white petals around a yellow centre
+    ctx.fillStyle = "rgba(255,255,255,0.85)"
+    const pr = s * 0.09
+    const d = s * 0.16
+    for (const [px, py] of [
       [0, -1],
       [0, 1],
       [-1, 0],
       [1, 0],
     ]) {
       ctx.beginPath()
-      ctx.arc(cx + dx * d, cy + dy * d, pr, 0, Math.PI * 2)
+      ctx.arc(cx + px * d, cy - s * 0.05 + py * d, pr, 0, Math.PI * 2)
       ctx.fill()
     }
+    ctx.fillStyle = "rgba(255,225,90,0.95)"
+    ctx.beginPath()
+    ctx.arc(cx, cy - s * 0.05, s * 0.1, 0, Math.PI * 2)
+    ctx.fill()
     ctx.restore()
   }
 
@@ -236,6 +253,34 @@ export class Renderer {
     ctx.fillStyle = "rgba(180,120,80,0.5)"
     ctx.beginPath()
     ctx.arc(cx, cy + s * 0.1, s * 0.06, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.restore()
+  }
+
+  /** Fox: a pointed snout between two upright triangular ears. */
+  _drawSnout(ctx, cx, cy, s, alpha) {
+    ctx.save()
+    ctx.globalAlpha = alpha * 0.7
+    ctx.fillStyle = "rgba(255,240,225,0.7)"
+    // Two pointed ears
+    for (const dir of [-1, 1]) {
+      ctx.beginPath()
+      ctx.moveTo(cx + dir * s * 0.22, cy - s * 0.3)
+      ctx.lineTo(cx + dir * s * 0.08, cy - s * 0.05)
+      ctx.lineTo(cx + dir * s * 0.3, cy - s * 0.05)
+      ctx.closePath()
+      ctx.fill()
+    }
+    // Snout
+    ctx.beginPath()
+    ctx.moveTo(cx - s * 0.14, cy)
+    ctx.lineTo(cx + s * 0.14, cy)
+    ctx.lineTo(cx, cy + s * 0.28)
+    ctx.closePath()
+    ctx.fill()
+    ctx.fillStyle = "rgba(40,25,15,0.75)"
+    ctx.beginPath()
+    ctx.arc(cx, cy + s * 0.22, s * 0.055, 0, Math.PI * 2)
     ctx.fill()
     ctx.restore()
   }
