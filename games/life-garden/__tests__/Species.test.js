@@ -69,14 +69,36 @@ describe("SPECIES_DEFS", () => {
   test("foxes eat rabbits", () => {
     const fox = SPECIES_DEFS[SPECIES.FOX]
     expect(fox.killTargets).toEqual([SPECIES.RABBIT])
-    expect(fox.killThreshold).toBe(3)
+    expect(fox.killThreshold).toBe(1)
     expect(fox.birthRequiresOwn).toBe(true)
+  })
+
+  test("a consumer counts exactly what it eats, and nothing else", () => {
+    // The whole point of the food chain. Counting anything else -- its own kind
+    // especially -- turns a full larder into a crowding limit and kills the
+    // consumer where the food is thickest.
+    for (const id of [SPECIES.RABBIT, SPECIES.FOX]) {
+      const def = SPECIES_DEFS[id]
+      expect(def.neighbors).toEqual(def.killTargets)
+      expect(def.neighbors).not.toContain(id)
+    }
+  })
+
+  test("a consumer's neighbours do not decide whether it survives", () => {
+    // survive: null. Rabbits and foxes die of maxAge or of being eaten.
+    expect(SPECIES_DEFS[SPECIES.RABBIT].survive).toBeNull()
+    expect(SPECIES_DEFS[SPECIES.FOX].survive).toBeNull()
+    // The plants are still plain Conway, and the bee still counts the bloom it
+    // pollinates rather than eats.
+    expect(SPECIES_DEFS[SPECIES.GRASS].survive).toEqual([2, 3])
+    expect(SPECIES_DEFS[SPECIES.BEE].survive).toEqual([1, 2, 3])
   })
 
   test("the fox is the scarcest and slowest of the animals", () => {
     const fox = SPECIES_DEFS[SPECIES.FOX]
     const rabbit = SPECIES_DEFS[SPECIES.RABBIT]
-    // Harder to be born than its prey, and longer-lived
+    // A knot of three prey before a new fox, two blades of grass before a new
+    // rabbit. Longer-lived, too.
     expect(Math.min(...fox.birth)).toBeGreaterThan(Math.min(...rabbit.birth))
     expect(fox.maxAge).toBeGreaterThan(rabbit.maxAge)
     // Top of the chain, so it wins birth conflicts

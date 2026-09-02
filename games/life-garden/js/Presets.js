@@ -52,10 +52,13 @@ const FIELD = [
   "....................",
 ]
 
-// Same field, with a fox trio in the bottom right
+// Same field, with a fox den in the top-left corner. Those three cells stay
+// empty for the whole "No Predator" run, so the two charts differ because of
+// the foxes and not because three extra cells nudged a chaotic board.
+// Presets.test.js pins that.
 const FIELD_WITH_FOXES = FIELD.map((row, y) => {
-  if (y === 15) return "..........gg.g.ffgg."
-  if (y === 16) return ".....g....gg..gf...."
+  if (y === 0) return "....ff.............."
+  if (y === 1) return ".g..fg..gg.g.....gg."
   return row
 })
 
@@ -107,33 +110,31 @@ export const PRESETS = [
   },
   {
     name: "Rabbit Run",
-    description: "Rabbits in a field of grass",
+    description: "Rabbits work along strips of grass and then starve",
+    // Strips rather than a clump: the grazing front is visible as it travels,
+    // and the rabbits have somewhere to travel to. Rabbits beside a lone clump
+    // just sat there, because a rabbit is born on 2-3 blades of grass and a
+    // clump only ever offers that on its edge.
     cells: fromMap([
       "....................",
       "....................",
-      "..gggg..............",
-      "..gggg..............",
-      "..gggg..............",
+      "..gg.gg.gg.gg.gg.gg.",
+      "..gg.gg.gg.gg.gg.gg.",
+      ".rr.................",
+      ".rr.................",
       "....................",
-      "....................",
-      ".......rr...........",
-      ".......rr...........",
-      "....................",
-      "..........gggg......",
-      "..........gggg......",
-      "..........gggg......",
-      "....................",
-      "....................",
-      "....................",
-      "....................",
-      "....................",
-      "....................",
+      "..gg.gg.gg.gg.gg.gg.",
+      "..gg.gg.gg.gg.gg.gg.",
       "....................",
     ]),
   },
   {
     name: "Ecosystem",
     description: "All four species at once",
+    // The foxes sit at the western edge of the rabbits' range rather than in the
+    // far corner, where the grazing front never reached them and they simply
+    // aged out. They still only get to about five -- this board is for looking
+    // at all four species, not for the chain. Food Chain is for the chain.
     cells: fromMap([
       "....................",
       "..gg......gg........",
@@ -142,14 +143,14 @@ export const PRESETS = [
       "....................",
       "....................",
       "..........gg........",
-      "..........gg........",
-      "....................",
+      ".f........gg........",
+      ".ff.................",
       "....................",
       "..rr................",
       "..rr................",
       "..gggg..............",
-      "..gggg..........ff..",
-      "................f...",
+      "..gggg..............",
+      "....................",
       "....................",
       "....................",
       "....................",

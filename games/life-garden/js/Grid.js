@@ -153,7 +153,10 @@ export class Grid {
           const def = this.registry.get(cell.species)
           if (def) {
             const neighborCount = this.countNeighbors(x, y, def.neighbors)
-            const survives = def.survive.includes(neighborCount)
+            // survive: null means neighbours do not decide survival. A species
+            // that counts its own food cannot use that count as a crowding
+            // limit as well -- see the note on `survive` in Species.js.
+            const survives = def.survive === null || def.survive.includes(neighborCount)
             const withinAge = def.maxAge === null || cell.age < def.maxAge
             if (survives && withinAge) {
               const age = cell.age + 1

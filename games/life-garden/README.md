@@ -23,13 +23,30 @@ counter.
 Every cell looks at its 8 surrounding neighbours, but each species counts a
 different set of them:
 
-| Species            | Counts as neighbours  | Survives on | Born on | Dies of age after |
-| ------------------ | --------------------- | ----------- | ------- | ----------------- |
-| 🌿 Grass           | grass, bloom          | 2–3         | 3       | never             |
-| 🌸 Flowering grass | grass, bloom          | 2–3         | —       | never             |
-| 🐝 Bee             | bloom, bees           | 1–3         | 3       | 20 gens           |
-| 🐇 Rabbit          | grass, bloom, rabbits | 2–3         | 3       | 25 gens           |
-| 🦊 Fox             | rabbits, foxes        | 1–3         | 4       | 45 gens           |
+| Species            | Counts as neighbours | Survives on | Born on | Dies of age after |
+| ------------------ | -------------------- | ----------- | ------- | ----------------- |
+| 🌿 Grass           | grass, bloom         | 2–3         | 3       | never             |
+| 🌸 Flowering grass | grass, bloom         | 2–3         | —       | never             |
+| 🐝 Bee             | bloom, bees          | 1–3         | 3       | 20 gens           |
+| 🐇 Rabbit          | grass, bloom         | any         | 2–3     | 25 gens           |
+| 🦊 Fox             | rabbits              | any         | 3       | 45 gens           |
+
+The plants are Conway: they count their own kind, and too many neighbours kills
+them. The two consumers are not. A rabbit counts grass and a fox counts rabbits,
+so for them the count is how much there is to eat, and it decides only where the
+next one is born. Nothing about it can kill them — that is what `survive: null`
+means in `SPECIES_DEFS` — so a rabbit dies of old age or of a fox, and a fox dies
+of old age.
+
+That is a correction rather than a flourish. The rabbit used to count grass,
+bloom **and** other rabbits against a `survive` of 2–3, which made its own food
+supply a crowding limit: a rabbit in the middle of a meadow died of four blades
+of grass. No prey boom could form, so the predator had nothing to follow.
+
+The bee is the exception. It counts the bloom, like a consumer, but it also
+counts other bees, and 4 neighbours or none at all still kill it. Bees pollinate
+rather than eat, so the flowers they sit among stay where they are, and counting
+them is what lets a colony ride a spreading meadow.
 
 Four rules reach across the table:
 
@@ -44,12 +61,12 @@ Four rules reach across the table:
   grass then grows into.
 - **Rabbits eat.** Grass at either stage with 2 or more adjacent rabbits dies
   regardless of its own rule (`killTargets` / `killThreshold`).
-- **Foxes eat.** A rabbit with 3 adjacent foxes dies the same way.
+- **Foxes eat.** A rabbit with a fox adjacent dies the same way.
 
 Killing is resolved before survival, so nothing saves what gets eaten.
 
 Bees, rabbits and foxes set `birthRequiresOwn`, so they can only appear next to
-their own kind — otherwise a meadow would spontaneously grow bees. When two
+their own kind — otherwise a meadow would spontaneously grow rabbits. When two
 species both want the same empty cell, the higher `priority` wins: fox (5) >
 rabbit (4) > bee (3) > flowering grass (2) > grass (1).
 
@@ -60,16 +77,40 @@ fade.
 ### Why the fox is tuned the way it is
 
 A top predator only means anything if it is scarcer and slower than its prey,
-and in a Life-style automaton that is harder than it sounds: a predator that
-counts its own kind as neighbours can sustain itself with no prey at all, and
-one that counts only prey dies within a few generations as the prey moves.
+and in a Life-style automaton that is harder than it sounds. Two ways of writing
+one have already failed here:
 
-Birth on exactly 4 is what keeps foxes rare — it takes a real concentration of
-rabbits before another fox appears, so foxes sit at a few percent of the board
-while rabbits can reach a third of it. `maxAge: 45` is the other brake: without
-it a fox pair would sit in an empty field forever. The consequence is that foxes
-seldom breed at all on small hand-made boards; on the **Food Chain** preset the
-three you start with simply live out their lifespan.
+- A fox that counts other foxes sustains itself with no prey at all. Give it a
+  birth rule it can satisfy and it floods the board; give it one it cannot and it
+  never breeds. Birth on exactly 4 rabbits-or-foxes was the old compromise, and
+  the result was a fox that did nothing: on the old **Food Chain** board the
+  three you started with simply lived out their lifespan.
+- A fox that counts only prey, and needs prey adjacent to survive, dies within
+  about five generations. Prey adjacency does not last: the rabbit next door gets
+  eaten, or moves, and the fox starves.
+
+What works is to separate the two: the fox counts prey, and survival does not
+depend on the count. Birth on 3 adjacent rabbits keeps it rare — it takes a knot
+of prey before another fox appears — and `maxAge: 45` is the brake that stops a
+den sitting in an empty field forever. `killThreshold: 1` is the other half:
+three foxes had to line up on one rabbit under the old rule, and rabbits move too
+thinly through a grazed field for that to happen, so the predator never actually
+ate anything.
+
+### Does it oscillate?
+
+Partly. The fox now breeds and it peaks after its prey, which it never did
+before — on **Food Chain** the rabbits go 4 → 49 with their peak around
+generation 17, the foxes go 3 → 29 with theirs around generation 35, and the
+rabbits are gone by generation 43 with the last fox following at 81. That is a
+lag of about 18 generations in the right direction.
+
+It is one boom and bust, though, not a cycle, and there is a structural reason.
+Grass cannot grow back from nothing: Conway birth needs three living neighbours,
+so a patch the rabbits have been through is gone for good. The prey's food supply
+only ever shrinks, which means there is no second wave for the fox to follow.
+`Presets.test.js` asserts the single boom, so if some later change does produce a
+cycle, this section is what needs rewriting.
 
 ### The population chart
 
@@ -93,7 +134,7 @@ clears the grid first.
 | --------------- | -------------------------------------------------------------------- |
 | **Meadow**      | Grass blocks settle down and come into bloom around generation 8     |
 | **Pollinator**  | Bees push a 20-cell meadow out to 60-odd; without them it sits still |
-| **Rabbit Run**  | Rabbits work through a field of grass and then starve                |
+| **Rabbit Run**  | Rabbits work along two strips of grass and then starve               |
 | **Ecosystem**   | All four placeable species on one board                              |
 | **Food Chain**  | Grass, rabbits, three foxes                                          |
 | **No Predator** | The same field with the foxes removed                                |
@@ -101,10 +142,27 @@ clears the grid first.
 
 **Food Chain** and **No Predator** are the same board except for three cells, so
 running both shows what removing the predator does. Watch the chart: without the
-foxes the rabbits climb from 4 to about 90 by generation 50, take the grass to
-zero by generation 60, and then dwindle away with nothing left to eat. With the
-foxes they never get past about 20, and the grass is still there — around 40
-cells — at generation 200.
+foxes the rabbits climb from 4 to about 85 by generation 20 and cut the meadow
+from 122 cells to about 23 by generation 60, then starve. With the foxes they
+never get past 50, and a fox line climbs behind them to 29.
+
+The three cells are chosen carefully. This is a chaotic automaton, and three
+extra cells anywhere busy would change the whole run by themselves — the old den
+sat in the bottom right, ate almost nothing, and still halved the rabbit peak
+just by existing. The den is now at the top left, on three cells that stay empty
+for the whole **No Predator** run, so the difference between the two charts is
+the foxes' work. `Presets.test.js` asserts that they stay empty.
+
+**Rabbit Run** is strips rather than clumps for a related reason: a rabbit is
+born on 2 or 3 blades of grass, and a clump only offers that along its edge, so
+rabbits beside one clump barely got going. Along a strip the grazing front has
+somewhere to travel, and 4 rabbits reach 75 before the grass runs out around
+generation 20.
+
+The **Ecosystem** foxes are at the western edge of the rabbits' range rather than
+in the far corner, where the grazing front never reached them at all. They still
+only get to about five: that board is for looking at all four species at once,
+not for the chain.
 
 The Glider needs no special case: its cells are recreated every cycle and never
 get older than 3, well short of the bloom age of 8.
@@ -166,9 +224,11 @@ Nothing is saved either: `game.js` never calls `state.loadProgress()` or
 
 **Change a species' rules.** Edit its entry in `SPECIES_DEFS` in
 `js/Species.js`. Every field is data — `survive`, `birth`, `neighbors`,
-`maxAge`, `priority` — and the engine picks it up with no other change. The
-sidebar's "How it works" table is hand-written in `index.html`, so update it and
-`index.zh.json` too.
+`maxAge`, `priority` — and the engine picks it up with no other change.
+`survive: null` is the one that is not a list: it means neighbours do not decide
+survival, which is what a consumer needs so that its food does not double as a
+crowding limit. The sidebar's "How it works" table is hand-written in
+`index.html`, so update it and `index.zh.json` too.
 
 **Add a species.** Add an id to `SPECIES` in `js/constants.js`, add a definition
 to `SPECIES_DEFS`, and add a `case` for its `texture` in `Renderer._drawTexture`

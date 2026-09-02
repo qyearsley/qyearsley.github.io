@@ -84,16 +84,16 @@
                   </tr>
                   <tr>
                     <th scope="row">&#x1f407; Rabbit</th>
-                    <td>grass, rabbits</td>
+                    <td>grass</td>
+                    <td>any</td>
                     <td>2&ndash;3</td>
-                    <td>3</td>
                     <td>25</td>
                   </tr>
                   <tr>
                     <th scope="row">&#x1f98a; Fox</th>
-                    <td>rabbits, foxes</td>
-                    <td>1&ndash;3</td>
-                    <td>4</td>
+                    <td>rabbits</td>
+                    <td>any</td>
+                    <td>3</td>
                     <td>45</td>
                   </tr>
                 </tbody>
@@ -108,8 +108,12 @@
                   instead of 3.
                 </li>
                 <li><strong>Rabbits eat grass.</strong> Grass next to 2+ rabbits dies.</li>
-                <li><strong>Foxes eat rabbits.</strong> A rabbit next to 3 foxes dies.</li>
+                <li><strong>Foxes eat rabbits.</strong> A rabbit next to a fox dies.</li>
                 <li>Eating is resolved first, so nothing survives being eaten.</li>
+                <li>
+                  A rabbit counts grass and a fox counts rabbits, so the count is food rather than
+                  crowding: they live to their age whatever the count, unless something eats them.
+                </li>
               </ul>
             </details>
             <div class="sidebar-section shortcuts-section">

@@ -123,6 +123,18 @@ describe("the food-chain presets", () => {
   const chain = byName("Food Chain")
   const noPredator = byName("No Predator")
 
+  /** Peak count of a species, and the generation it happened. */
+  function peak(preset, speciesId, generations) {
+    let grid = load(preset)
+    let best = { value: grid.countSpecies(speciesId), gen: 0 }
+    for (let i = 1; i <= generations; i++) {
+      grid = grid.step()
+      const value = grid.countSpecies(speciesId)
+      if (value > best.value) best = { value, gen: i }
+    }
+    return best
+  }
+
   test("differ only by the foxes", () => {
     const key = (cells) =>
       cells
@@ -134,33 +146,84 @@ describe("the food-chain presets", () => {
     expect(key(chain.cells.filter((c) => c.species !== SPECIES.FOX))).toBe(key(noPredator.cells))
   })
 
-  test("without a predator the rabbits explode and take the grass with them", () => {
+  test("the den cells stay empty without the foxes, so the comparison is honest", () => {
+    // A cellular automaton is chaotic: three extra cells anywhere busy would
+    // change the whole run on their own, and the old den did exactly that --
+    // three foxes that never ate anything still halved the rabbit peak. The den
+    // sits on cells this board leaves empty, so any difference between the two
+    // charts is the foxes' doing.
+    const den = chain.cells.filter((c) => c.species === SPECIES.FOX)
     let grid = load(noPredator)
+    for (let i = 0; i < 60; i++) {
+      for (const cell of den) {
+        expect(grid.getCell(cell.x, cell.y).species).toBe(SPECIES.EMPTY)
+      }
+      grid = grid.step()
+    }
+  })
+
+  test("without a predator the rabbits explode and eat the meadow down", () => {
+    let grid = load(noPredator)
+    const startingPlants = plants(grid)
     let rabbitPeak = 0
     for (let i = 0; i < 60; i++) {
       grid = grid.step()
       rabbitPeak = Math.max(rabbitPeak, grid.countSpecies(SPECIES.RABBIT))
     }
     const startingRabbits = noPredator.cells.filter((c) => c.species === SPECIES.RABBIT).length
+    // 4 -> 85 by generation 17
     expect(rabbitPeak).toBeGreaterThan(startingRabbits * 5)
-    expect(plants(grid)).toBe(0)
+    // 122 plants -> 23 by generation 60, and the rabbits starve with them
+    expect(plants(grid)).toBeLessThan(startingPlants / 4)
+    expect(grid.countSpecies(SPECIES.RABBIT)).toBe(0)
   })
 
-  test("with the foxes the rabbits stay down and the grass survives", () => {
-    let chainGrid = load(chain)
-    let chainRabbitPeak = 0
-    for (let i = 0; i < 60; i++) {
-      chainGrid = chainGrid.step()
-      chainRabbitPeak = Math.max(chainRabbitPeak, chainGrid.countSpecies(SPECIES.RABBIT))
-    }
-    let bareGrid = load(noPredator)
-    let bareRabbitPeak = 0
-    for (let i = 0; i < 60; i++) {
-      bareGrid = bareGrid.step()
-      bareRabbitPeak = Math.max(bareRabbitPeak, bareGrid.countSpecies(SPECIES.RABBIT))
-    }
+  test("with the foxes the rabbits are held down and the foxes follow them up", () => {
+    const bareRabbits = peak(noPredator, SPECIES.RABBIT, 60)
+    const chainRabbits = peak(chain, SPECIES.RABBIT, 60)
+    const chainFoxes = peak(chain, SPECIES.FOX, 60)
+    const startingFoxes = chain.cells.filter((c) => c.species === SPECIES.FOX).length
 
-    expect(chainRabbitPeak).toBeLessThan(bareRabbitPeak / 2)
-    expect(plants(chainGrid)).toBeGreaterThan(0)
+    // 85 without the foxes, 49 with them
+    expect(chainRabbits.value).toBeLessThan(bareRabbits.value * 0.75)
+    // 3 foxes become 29, so the predator is breeding rather than ageing out
+    expect(chainFoxes.value).toBeGreaterThan(startingFoxes * 3)
+    // ...and it peaks after its prey: rabbits at 17, foxes at 35
+    expect(chainFoxes.gen).toBeGreaterThan(chainRabbits.gen + 10)
+    // Still the scarcer animal
+    expect(chainFoxes.value).toBeLessThan(chainRabbits.value)
+  })
+
+  test("it is one boom and bust, not a cycle", () => {
+    // Grass cannot grow back from nothing, so once the rabbits have been
+    // through a patch there is no second wave. If that ever changes, the README
+    // says it does not cycle and would need rewriting.
+    let grid = load(chain)
+    for (let i = 0; i < 120; i++) grid = grid.step()
+    expect(grid.countSpecies(SPECIES.RABBIT)).toBe(0)
+    expect(grid.countSpecies(SPECIES.FOX)).toBe(0)
+    let laterRabbits = 0
+    for (let i = 0; i < 180; i++) {
+      grid = grid.step()
+      laterRabbits = Math.max(laterRabbits, grid.countSpecies(SPECIES.RABBIT))
+    }
+    expect(laterRabbits).toBe(0)
+  })
+})
+
+describe("the Rabbit Run preset", () => {
+  test("rabbits work along the strips and then starve", () => {
+    const preset = byName("Rabbit Run")
+    let grid = load(preset)
+    const startingPlants = plants(grid)
+    let rabbitPeak = 0
+    for (let i = 0; i < 60; i++) {
+      grid = grid.step()
+      rabbitPeak = Math.max(rabbitPeak, grid.countSpecies(SPECIES.RABBIT))
+    }
+    // 4 -> 75 by generation 18, then nothing left to eat by generation 20
+    expect(rabbitPeak).toBeGreaterThan(startingPlants)
+    expect(plants(grid)).toBe(0)
+    expect(grid.countSpecies(SPECIES.RABBIT)).toBe(0)
   })
 })

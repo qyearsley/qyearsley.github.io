@@ -220,17 +220,60 @@ describe("Grid", () => {
 
   describe("step - birth priority", () => {
     test("the higher-priority species takes a contested cell", () => {
-      // Three rabbits around (3,3): rabbit counts grass and rabbits, grass
-      // counts neither, so only the rabbit wants the cell.
+      // Three grass cells around (3,3) satisfy both grass's birth rule and the
+      // rabbit's, and the rabbit at (2,4) satisfies birthRequiresOwn. Rabbit
+      // priority is higher, so it gets the cell.
       const grid = makeGrid(6, 6)
       for (const [x, y] of [
         [2, 2],
         [3, 2],
         [4, 2],
       ]) {
-        grid.setCell(x, y, SPECIES.RABBIT)
+        grid.setCell(x, y, SPECIES.GRASS)
+      }
+      grid.setCell(2, 4, SPECIES.RABBIT)
+      expect(grid.step().getCell(3, 3).species).toBe(SPECIES.RABBIT)
+    })
+  })
+
+  describe("step - a consumer counts food, not company", () => {
+    test("a rabbit surrounded by grass lives", () => {
+      // The old rule counted grass against a survive of [2,3], so this rabbit
+      // died of five blades of food. Nothing else could get a prey boom going.
+      const grid = makeGrid(6, 6)
+      grid.setCell(3, 3, SPECIES.RABBIT)
+      for (const [x, y] of [
+        [2, 2],
+        [3, 2],
+        [4, 2],
+        [2, 3],
+        [4, 3],
+      ]) {
+        grid.setCell(x, y, SPECIES.GRASS)
       }
       expect(grid.step().getCell(3, 3).species).toBe(SPECIES.RABBIT)
+    })
+
+    test("a rabbit with nothing to eat lives out its life anyway", () => {
+      // survive: null -- only maxAge and a fox can end it.
+      const grid = makeGrid(6, 6)
+      grid.setCell(3, 3, SPECIES.RABBIT)
+      expect(grid.step().getCell(3, 3).species).toBe(SPECIES.RABBIT)
+    })
+
+    test("a rabbit is born on 2 or 3 grass next to another rabbit", () => {
+      const grid = makeGrid(6, 6)
+      grid.setCell(2, 2, SPECIES.GRASS)
+      grid.setCell(4, 2, SPECIES.GRASS)
+      grid.setCell(2, 4, SPECIES.RABBIT)
+      expect(grid.step().getCell(3, 3).species).toBe(SPECIES.RABBIT)
+    })
+
+    test("rabbits do not appear out of bare grass", () => {
+      const grid = makeGrid(6, 6)
+      grid.setCell(2, 2, SPECIES.GRASS)
+      grid.setCell(4, 2, SPECIES.GRASS)
+      expect(grid.step().getCell(3, 3).species).not.toBe(SPECIES.RABBIT)
     })
   })
 
@@ -286,52 +329,54 @@ describe("Grid", () => {
   })
 
   describe("step - foxes eat rabbits", () => {
-    test("a rabbit adjacent to 3 foxes dies", () => {
+    test("a rabbit adjacent to a fox dies", () => {
       const grid = makeGrid(6, 6)
       grid.setCell(2, 2, SPECIES.RABBIT)
       grid.setCell(1, 2, SPECIES.FOX)
-      grid.setCell(3, 2, SPECIES.FOX)
-      grid.setCell(2, 1, SPECIES.FOX)
       expect(grid.step().getCell(2, 2).species).toBe(SPECIES.EMPTY)
     })
 
-    test("two foxes are not enough", () => {
-      // Give the rabbit two rabbit neighbours so it would otherwise survive.
+    test("a rabbit out of reach of every fox lives", () => {
       const grid = makeGrid(6, 6)
       grid.setCell(2, 2, SPECIES.RABBIT)
-      grid.setCell(2, 3, SPECIES.RABBIT)
-      grid.setCell(3, 3, SPECIES.RABBIT)
-      grid.setCell(1, 2, SPECIES.FOX)
-      grid.setCell(2, 1, SPECIES.FOX)
+      grid.setCell(4, 4, SPECIES.FOX)
       expect(grid.step().getCell(2, 2).species).toBe(SPECIES.RABBIT)
     })
 
     test("eating beats survival, so nothing saves a cornered rabbit", () => {
       const grid = makeGrid(6, 6)
-      // A stable rabbit block, which would survive on its own rules
+      // A rabbit with food and company, which would otherwise survive
       block(grid, 2, 2, SPECIES.RABBIT)
       grid.setCell(1, 1, SPECIES.FOX)
-      grid.setCell(2, 1, SPECIES.FOX)
-      grid.setCell(1, 2, SPECIES.FOX)
       expect(grid.step().getCell(2, 2).species).toBe(SPECIES.EMPTY)
     })
 
+    test("a fox with no prey lives out its life anyway", () => {
+      // survive: null for the fox too. It dies of maxAge, not of loneliness --
+      // counting only prey for survival killed every fox within a few
+      // generations, because prey adjacency never lasts.
+      const grid = makeGrid(6, 6)
+      grid.setCell(2, 2, SPECIES.FOX)
+      expect(grid.step().getCell(2, 2).species).toBe(SPECIES.FOX)
+    })
+
     test("foxes need a fox nearby to be born", () => {
-      // Four rabbits around (2,2) satisfy the fox's birth count, but with no
+      // Three rabbits around (2,2) satisfy the fox's birth count, but with no
       // fox adjacent birthRequiresOwn blocks it.
       const grid = makeGrid(6, 6)
       for (const [x, y] of [
         [1, 1],
         [3, 1],
         [1, 3],
-        [3, 3],
       ]) {
         grid.setCell(x, y, SPECIES.RABBIT)
       }
       expect(grid.step().getCell(2, 2).species).not.toBe(SPECIES.FOX)
     })
 
-    test("a fox is born on 4 neighbours when one of them is a fox", () => {
+    test("a fox is born on 3 rabbits when a fox is adjacent", () => {
+      // The neighbouring fox is not part of the count -- a fox counts prey
+      // only -- so three rabbits are still needed.
       const grid = makeGrid(6, 6)
       for (const [x, y] of [
         [1, 1],
@@ -342,6 +387,14 @@ describe("Grid", () => {
       }
       grid.setCell(3, 3, SPECIES.FOX)
       expect(grid.step().getCell(2, 2).species).toBe(SPECIES.FOX)
+    })
+
+    test("two rabbits are not enough for a new fox", () => {
+      const grid = makeGrid(6, 6)
+      grid.setCell(1, 1, SPECIES.RABBIT)
+      grid.setCell(3, 1, SPECIES.RABBIT)
+      grid.setCell(3, 3, SPECIES.FOX)
+      expect(grid.step().getCell(2, 2).species).not.toBe(SPECIES.FOX)
     })
   })
 
