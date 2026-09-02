@@ -17,11 +17,15 @@
  *   palette all come from the active art pack, so this file works unchanged when
  *   the art is replaced.
  * - The trail is wider than the screen and scrolls by panning a camera group,
- *   because a `viewBox` cannot be animated and a transform can. Both the
- *   geometry and the crossing animations come from the art pack, so a pack could
- *   hand back a spiral, or swap sprite frames where this one arcs a transform,
- *   and nothing here changes. No SVG geometry is measured, so the class works
- *   under jsdom without a test-only branch.
+ *   because a `viewBox` cannot be animated and a transform can. The backdrop is
+ *   several more such groups, each panned by the same offset scaled by the
+ *   parallax factor its own layer reported, which is the only thing this file
+ *   knows about depth -- how many layers there are, what is in them and how
+ *   fast each moves are all the pack's. Both the geometry and the crossing
+ *   animations come from the art pack, so a pack could hand back a spiral, or
+ *   swap sprite frames where this one arcs a transform, and nothing here
+ *   changes. No SVG geometry is measured, so the class works under jsdom
+ *   without a test-only branch.
  * - The countdown lives here rather than in GameState, because a clock is not a
  *   rule. `startTimer` owns the interval and `stopTimer` is safe to call at any
  *   time, including when no timer is running.
@@ -62,12 +66,34 @@ const TICK_MS = 100
 const CAMERA_MS = 900
 
 /**
+ * How long the camera takes to follow under `prefers-reduced-motion`. Paired
+ * with the pack's reduced crossing and a beat longer than it, so the landscape
+ * still settles fractionally after the character lands rather than stopping
+ * dead with it.
+ * @private
+ */
+const CAMERA_REDUCED_MS = 300
+
+/**
  * Ceiling on drawn item slots. Comfortably above anything a real run reaches;
  * it exists only so a corrupted save cannot turn the HUD into an unbounded
  * render.
  * @private
  */
 const MAX_ITEM_PIPS = 60
+
+/**
+ * Code point of "A", so the nth answer button can be named A, B, C, D.
+ *
+ * Letters, not digits. Every answer in this game is a number, so a small "3" in
+ * the corner of a button reading "34" is one glance away from being read as part
+ * of the answer. A letter is a *name* for the choice and cannot be mistaken for
+ * one. Derived from the index rather than listed, so the run of letters follows
+ * `PLAY.CHOICE_COUNT` if it ever changes. `game.js` reverses this arithmetic to
+ * turn a keypress back into an index.
+ * @private
+ */
+const FIRST_CHOICE_KEY = "A".codePointAt(0)
 
 export class GameUI extends BaseGameUI {
   constructor() {
@@ -78,10 +104,11 @@ export class GameUI extends BaseGameUI {
     /** @type {number} Milliseconds left on the current question. */
     this._timeLeftMs = 0
     /**
-     * Seasons in play order, for the "1 of 4" framing in the top bar. Assigned
-     * once by game.js rather than imported, for the reason given on
-     * `renderJourneySoFar`. Empty means the framing is simply left off, so the
-     * title degrades to the bare season name instead of lying about the count.
+     * Seasons in play order, for the finished potion on the end-of-run screen:
+     * one collectible per season, in the order they were played. Assigned once
+     * by game.js rather than imported, for the reason given on
+     * `renderJourneySoFar`. Empty means the flask is simply drawn empty rather
+     * than this file inventing a season list of its own.
      * @type {Array<{id: string, name: string}>}
      */
     this.seasonOrder = []
@@ -300,16 +327,46 @@ export class GameUI extends BaseGameUI {
 
     const canvas = svg("svg", { viewBox: plan.viewBox, class: "trail-svg", role: "img" })
 
-    // Everything inside the camera group; panning it is what scrolls the trail.
-    // `viewBox` would be the obvious thing to move instead, but it is not
-    // animatable, and a transform is.
+    // The backdrop is not one group but several, each with its own parallax
+    // factor, and each therefore needing its own transform -- so they are
+    // siblings of the camera rather than children of it. What is drawn in them,
+    // how many there are and how fast each moves are all the pack's business;
+    // this loop only mounts what it is given, in the order it is given, back to
+    // front.
+    const backdrop = this.pack.backdrop(season.id, plan.width)
+    const layers = []
+    for (const plane of backdrop.layers ?? []) {
+      const group = svg("g", {
+        // `is-still` is the stylesheet's cue not to promote a layer that never
+        // moves onto its own compositor layer. Derived from the factor the pack
+        // reported rather than from the layer's name, so nothing here has to
+        // know that "sky" is the fixed one.
+        class: `trail-layer${plane.factor === 0 ? " is-still" : ""}`,
+        "data-layer": plane.name,
+      })
+      group.append(plane.element)
+      canvas.append(group)
+      layers.push({ group, factor: plane.factor })
+    }
+
+    // Everything that moves with the ground inside the camera group; panning it
+    // is what scrolls the trail. `viewBox` would be the obvious thing to move
+    // instead, but it is not animatable, and a transform is. The camera is the
+    // last layer and its factor is 1 by definition: it *is* the ground, and the
+    // parallax factors above are all measured against it.
     const camera = svg("g", { class: "trail-camera" })
     canvas.append(camera)
-
-    camera.append(this.pack.backdrop(season.id, plan.width).element)
+    layers.push({ group: camera, factor: 1 })
 
     for (const d of plan.groundSegments) {
       camera.append(svg("path", { d, class: "trail-ground" }))
+    }
+    // The band of material along the top of the ground, over the earth and
+    // under everything standing on it. One path per ground segment, from the
+    // same list of samples, so it follows the river basins down and stops at
+    // the lip of every gap.
+    for (const d of plan.groundEdges ?? []) {
+      camera.append(svg("path", { d, class: "trail-ground-edge" }))
     }
 
     // One obstacle per space, each sitting on the ground where layout put it.
@@ -346,7 +403,7 @@ export class GameUI extends BaseGameUI {
     host.append(canvas)
 
     this._trailKey = key
-    this._trail = { canvas, camera, token, plan, season }
+    this._trail = { canvas, camera, layers, token, plan, season }
     this._placeToken(position, { animate: false })
   }
 
@@ -388,7 +445,7 @@ export class GameUI extends BaseGameUI {
   _cancelAnimations() {
     const t = this._trail
     if (!t) return
-    for (const element of [t.token, t.camera]) {
+    for (const element of [t.token, ...t.layers.map((layer) => layer.group)]) {
       if (typeof element.getAnimations !== "function") continue
       for (const animation of element.getAnimations()) animation.cancel()
     }
@@ -399,33 +456,52 @@ export class GameUI extends BaseGameUI {
    * Scroll the trail so the character sits comfortably in view, clamped so the
    * camera never runs off either end of the landscape.
    *
+   * One offset, applied to every layer scaled by that layer's parallax factor.
+   * The ground's layer has a factor of 1 and so moves by the whole offset; a
+   * ridge on the horizon at 0.25 moves by a quarter of it and therefore appears
+   * to be four times further away. The clamp is applied to the offset *before*
+   * the factors, which is what keeps this safe: every layer is asked for a
+   * window no further along than `factor * furthest + viewportWidth`, and the
+   * pack promises a `span` at least that wide -- see `BackdropLayer`.
+   *
    * @private
    * @param {{x: number, y: number}} stop - Where the character is
    * @param {{animate: boolean}} options - Whether to pan or jump
-   * @returns {Animation|null} The pan, if one was started
+   * @returns {Array<Animation>} The pans that were started, which may be empty
    */
   _panCamera(stop, { animate }) {
     const t = this._trail
-    if (!t) return null
+    if (!t) return []
     // A third of the way in rather than centred: the player is walking left to
     // right, so what is ahead matters more than what is behind.
     const ideal = stop.x - t.plan.viewportWidth / 3
     const furthest = Math.max(0, t.plan.width - t.plan.viewportWidth)
-    const target = `translateX(${-Math.max(0, Math.min(ideal, furthest))}px)`
-    if (!animate || this._prefersReducedMotion() || typeof t.camera.animate !== "function") {
-      t.camera.style.transform = target
-      return null
-    }
-    const pan = t.camera.animate(
-      [{ transform: t.camera.style.transform || target }, { transform: target }],
-      {
-        duration: CAMERA_MS,
-        easing: "ease-in-out",
+    const offset = Math.max(0, Math.min(ideal, furthest))
+    const reduced = this._prefersReducedMotion()
+    const pans = []
+    for (const layer of t.layers) {
+      const target = `translateX(${-(offset * layer.factor)}px)`
+      const current = layer.group.style.transform
+      if (!animate || typeof layer.group.animate !== "function") {
+        layer.group.style.transform = target
+        continue
+      }
+      // A layer that is already where it is going gets no animation at all.
+      // That is every crossing for a fixed sky, and starting a no-op animation
+      // on it would promote it to its own compositor layer for nothing.
+      if (current === target) continue
+      const pan = layer.group.animate([{ transform: current || target }, { transform: target }], {
+        // Under reduced motion the pan matches the pack's plain slide rather
+        // than the leisurely drift: a long eased pan of the whole landscape is
+        // a large moving field, which is the thing the preference is about.
+        duration: reduced ? CAMERA_REDUCED_MS : CAMERA_MS,
+        easing: reduced ? "linear" : "ease-in-out",
         fill: "forwards",
-      },
-    )
-    t.camera.style.transform = target
-    return pan
+      })
+      layer.group.style.transform = target
+      pans.push(pan)
+    }
+    return pans
   }
 
   /**
@@ -435,6 +511,18 @@ export class GameUI extends BaseGameUI {
    * where this one arcs a transform, and nothing here needs to know. Returns a
    * promise so the caller can wait before asking the next question, and
    * `skipTraversal` can cut it short if the player is faster than the animation.
+   *
+   * Three paths, and they are three different conditions rather than one:
+   *
+   * - No Web Animations API at all -- jsdom, and nothing else in practice --
+   *   places the character instantly. There is nothing else it could do.
+   * - `prefers-reduced-motion` asks the pack for its reduced crossing, a plain
+   *   slide. This used to be folded in with the case above and placed the
+   *   character instantly too, which meant the trail's main piece of feedback
+   *   simply did not happen for anyone with the system setting on. A pack with
+   *   no reduced crossing to offer falls back to the instant placement, which
+   *   is no worse than what it did before.
+   * - Otherwise the full crossing, arc and squash and all.
    *
    * @param {number} from - The stop being left
    * @param {string} kind - The obstacle kind being crossed
@@ -448,7 +536,9 @@ export class GameUI extends BaseGameUI {
     const finish = stops[Math.max(0, Math.min(from + 1, stops.length - 1))]
 
     this._describeTrail(from + 1)
-    if (this._prefersReducedMotion() || typeof t.token.animate !== "function") {
+    const reduced = this._prefersReducedMotion()
+    const motion = reduced ? this.pack.reducedTraversal : this.pack.traversal
+    if (typeof t.token.animate !== "function" || typeof motion !== "function") {
       this._placeToken(from + 1, { animate: false })
       return Promise.resolve()
     }
@@ -461,7 +551,7 @@ export class GameUI extends BaseGameUI {
     // exactly the kind of thing a future sprite pack could do.
     let move
     try {
-      const { keyframes, options } = this.pack.traversal(kind, start, finish)
+      const { keyframes, options } = motion.call(this.pack, kind, start, finish)
       move = t.token.animate(keyframes, { ...options, fill: "forwards" })
     } catch (error) {
       console.error("GameUI.crossObstacle: could not animate the crossing", error)
@@ -470,8 +560,8 @@ export class GameUI extends BaseGameUI {
       return Promise.resolve()
     }
 
-    const pan = this._panCamera(finish, { animate: true })
-    this._crossing = { move, pan }
+    const pans = this._panCamera(finish, { animate: true })
+    this._crossing = { move, pans }
     t.token.style.transform = this.pack.standing(finish)
 
     return move.finished
@@ -484,10 +574,14 @@ export class GameUI extends BaseGameUI {
   /**
    * Cut a crossing short and land the character. Safe to call when nothing is
    * animating, which is what lets a tap anywhere skip it.
+   *
+   * Every pan is finished, not just the ground's: with the backdrop split into
+   * parallax layers a skip that only landed the character would leave four
+   * ridges still drifting behind a stationary animal.
    */
   skipTraversal() {
     if (!this._crossing) return
-    for (const animation of [this._crossing.move, this._crossing.pan]) {
+    for (const animation of [this._crossing.move, ...this._crossing.pans]) {
       if (animation && animation.playState === "running") animation.finish()
     }
     this._crossing = null
@@ -530,27 +624,9 @@ export class GameUI extends BaseGameUI {
    * @param {Object} state - The current GameState
    * @param {import("./seasons.js").Season|null} season - The season being played
    */
-  /**
-   * The top-bar title for a season: its name, plus where it sits in the run.
-   *
-   * Nothing on the play screen said there were four seasons, so a player in
-   * Autumn had no way to know she was three quarters of the way through a
-   * journey rather than on an endless trail.
-   *
-   * @private
-   * @param {import("./seasons.js").Season} season - The season being played
-   * @returns {string} "Autumn - 3 of 4", or just "Autumn" if the order is unset
-   */
-  _seasonTitle(season) {
-    const total = this.seasonOrder.length
-    const index = this.seasonOrder.findIndex((entry) => entry.id === season.id)
-    if (total < 1 || index === -1) return season.name
-    return `${season.name} — ${index + 1} of ${total}`
-  }
-
   renderHud(state, season) {
     if (!season) return
-    this.setText("season-name", this._seasonTitle(season))
+    this.setText("season-name", season.name)
     this.setText("demand-line", season.demandText)
     // Drawn once, not once per answer. `villain()` takes no arguments and so
     // returns the same picture every time, but it is by far the biggest thing
@@ -677,13 +753,13 @@ export class GameUI extends BaseGameUI {
       button.className = "choice"
       button.textContent = String(value)
       button.dataset.value = String(value)
-      // The 1-4 keyboard shortcut, in two forms. `aria-label` makes it audible;
+      // The A-D keyboard shortcut, in two forms. `aria-label` makes it audible;
       // `data-key` is what the stylesheet prints in the corner of the button,
       // and only on a device with a real pointer -- see `.choice::before`. On
-      // the iPad the shortcut does not exist, and a small stray digit beside a
-      // two-digit answer is a good way to make a child misread it.
-      button.dataset.key = String(index + 1)
-      button.setAttribute("aria-label", `Answer ${index + 1}: ${value}`)
+      // the iPad the shortcut does not exist, so nothing is drawn there at all.
+      const key = String.fromCodePoint(FIRST_CHOICE_KEY + index)
+      button.dataset.key = key
+      button.setAttribute("aria-label", `Answer ${key}: ${value}`)
       button.addEventListener("click", () => onAnswer(value, button))
       choices.append(button)
     })

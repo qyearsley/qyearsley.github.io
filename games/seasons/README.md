@@ -86,11 +86,21 @@ only file to change — it holds every difficulty number in the game.
 **One rule keeps it mental.** No single column operation goes past two digits,
 and every individual fact stays inside 100. The answer has to be found _and_ four
 choices read before the countdown ends, so anything wanting written vertical
-maths is not something this format can fairly ask. Escalation therefore comes
-from the **number of mental steps**, not from digit count: one fact, then a fact
-plus a regrouping, then a fact scaled by ten, then two chained operations.
-Answers still get large — `9 × 80` is on grade and purely mental — because what
-is banned is column work, not size.
+maths is not something this format can fairly ask.
+
+**Addition and subtraction are recall, not calculation.** Every add and sub form
+stays inside 18 — the addition-facts table and its inverses, `8 + 7` and
+`15 − 9`. They used to run to `max: 100`, which let even spring ask `47 + 45`,
+and from summer on the `borrow` flag made two-digit regrouping a third of every
+ordinary space. That was column work in your head against a clock, and it was
+the hardest thing in the game, in the one operation meant to be the breather
+between the times tables. A `min` floor keeps the easy end honest: without it,
+"inside 18" would offer `2 + 3` as readily as `9 + 8`.
+
+Escalation therefore lives entirely in **multiplication and division**: one
+fact, then the whole table, then a fact scaled by ten, then two chained
+operations. Answers still get large — `9 × 80` is on grade and purely mental —
+because what is banned is column work, not size.
 
 **The route model.** A season's trail is one array: `route`, holding one obstacle
 kind per space, in order. Its length _is_ the trail length, and the mountains in
@@ -101,12 +111,12 @@ a season has means placing that many mountains. The kinds are listed in
 [`js/obstacles.js`](js/obstacles.js), where `hard` is a property of the _kind_
 rather than of the space; the mountain is the only kind that carries it.
 
-|        | Ordinary spaces                                 | Glowing spaces           | Boss         | Timer | Trail | Glowing | Demand |
-| ------ | ----------------------------------------------- | ------------------------ | ------------ | ----- | ----- | ------- | ------ |
-| Spring | + and − within 100, ×2 ×3 ×4 ×5 ×10             | `40 ÷ 5`                 | `35 ÷ 5`     | none  | 14    | 2       | 11     |
-| Summer | × facts to 10×10, + and − within 100 borrowing  | `48 ÷ 6`                 | `72 ÷ 9`     | 30s   | 16    | 3       | 13     |
-| Autumn | ×2 3 4 6 7 8 9, − within 100 borrowing, × 10–50 | `54 ÷ 9`                 | `56 ÷ 8`     | 28s   | 18    | 4       | 15     |
-| Winter | ×4 6 7 8 9, − within 100 borrowing, × 10–70     | `8 × 7 + 9`, or `63 ÷ 9` | `8 × 9 - 17` | 25s   | 20    | 5       | 17     |
+|        | Ordinary spaces                        | Glowing spaces           | Boss         | Timer | Trail | Glowing | Demand |
+| ------ | -------------------------------------- | ------------------------ | ------------ | ----- | ----- | ------- | ------ |
+| Spring | + and − facts 6–18, ×2 ×3 ×4 ×5 ×10    | `40 ÷ 5`                 | `35 ÷ 5`     | none  | 14    | 2       | 11     |
+| Summer | × facts to 10×10, + and − facts 11–18  | `48 ÷ 6`                 | `72 ÷ 9`     | 30s   | 16    | 3       | 13     |
+| Autumn | ×2 3 4 6 7 8 9, − facts 11–18, × 10–50 | `54 ÷ 9`                 | `56 ÷ 8`     | 28s   | 18    | 4       | 15     |
+| Winter | ×4 6 7 8 9, − facts 11–18, × 10–70     | `8 × 7 + 9`, or `63 ÷ 9` | `8 × 9 - 17` | 25s   | 20    | 5       | 17     |
 
 **The clock is deliberately loose.** It was 20/18/16s, and played that way the
 countdown rather than the arithmetic was what made a question fail — a timer has
@@ -116,11 +126,12 @@ now slack enough that running out means the fact was not known.
 
 Every hard slot carries a `from` floor on its quotient, which is what stops it
 asking `12 ÷ 6`; see [Change the maths](#change-the-maths). Subtraction stops
-escalating after summer on purpose: two-digit regrouping is the mental ceiling, so
-once a season has it there is nowhere on-grade left to go, and the escalation moves
-to multiplication and then to chaining. Winter is the one season whose lit
-mountains are not simply division — by then a single division fact within 100 is
-easier than its ordinary spaces, so its climax is the two-step.
+escalating after summer on purpose: the regrouping fact — `15 − 8` — is the
+mental ceiling for a single subtraction, so once a season has it there is nowhere
+on-grade left to go, and the escalation moves to multiplication and then to
+chaining. Winter is the one season whose lit mountains are not simply division —
+by then a single division fact within 100 is easier than its ordinary spaces, so
+its climax is the two-step.
 
 Demands are tuned against the **Banana Slug**, who collects 2 from a glowing
 space rather than 3, because her handicap grows with the number of glowing spaces
@@ -139,6 +150,34 @@ looks like. The current pack draws flat vector shapes in code: clearly a
 porcupine, not meant to be final. Contract in
 [`js/README.md`](js/README.md#art--art), recipe at
 [Replace the art](#replace-the-art).
+
+Three things about the landscape are worth knowing before touching it, because
+each is a place where a change that looks harmless is not:
+
+- **The backdrop is four layers, not one picture.** `backdrop()` returns a stack
+  — sky, far ridge, near ridge, and the air the weather falls through — and each
+  says how fast it pans as a fraction of the ground's own scroll: 0, 0.25, 0.55,
+  0.85. `GameUI` moves each by `offset × factor`, so the horizon falls behind
+  the trail instead of sliding along with it. Every layer is generated at the
+  trail's full width, which is what guarantees no gap opens at either end; the
+  arithmetic is on `backdrop` in
+  [`js/art/placeholder.js`](js/art/placeholder.js) and `art.test.js` checks it
+  at both ends of winter's twenty-space trail.
+- **The ground has a top edge made of something.** `layout()` returns
+  `groundEdges` beside `groundSegments`: a band of grass, fallen leaves or snow
+  crust whose underside is the ground line sample for sample, so it follows a
+  river basin down and stops at the lip of a gap rather than floating over
+  either.
+- **Nothing is scattered at random.** The snow, blossom, leaves and heat haze
+  are all placed by arithmetic with coprime moduli, because the scene is rebuilt
+  whenever the season or character changes and a backdrop dealt afresh each time
+  would flicker. Nothing in this game calls `Math.random`.
+
+Motion is the pack's too, including what to do about it. `traversal()` is the
+full crossing and `reducedTraversal()` is the plain slide a player who has asked
+for less motion gets instead — 240ms, straight line, no arc and no squash. That
+used to be no crossing at all, which meant the trail's main piece of feedback
+silently stopped happening for anyone with the system setting on.
 
 ## Answer input
 
@@ -179,8 +218,11 @@ sorted choice list, which is the assertion whose absence let the giveaway surviv
 
 Touch is the primary input; the keyboard is an accessibility fallback.
 
-- **1–4** — choose the corresponding answer. Ignored when Cmd, Ctrl, or Alt is
-  held, so browser shortcuts still work.
+- **A–D** — choose the corresponding answer. Case is ignored. Ignored while the
+  focus is in a text field, and when Cmd, Ctrl, or Alt is held, so browser
+  shortcuts still work. Letters rather than digits because every answer in the
+  game is a number, and a small digit in the corner of a button reading "34"
+  reads as part of the answer.
 - **Tab** — move between controls; **Enter/Space** activates
 - **j/k** — move between page links (site-wide; press **?** for the full list)
 
@@ -321,8 +363,8 @@ _means_. The five kinds:
 
 | Kind      | Parameters                      | Question                                                                      |
 | --------- | ------------------------------- | ----------------------------------------------------------------------------- |
-| `add`     | `max`, `borrow`                 | a + b, sum at most `max`; `borrow` forces a carry                             |
-| `sub`     | `max`, `borrow`                 | a − b, never negative; `borrow` forces regrouping                             |
+| `add`     | `min`, `max`, `borrow`          | a + b, sum `min`..`max`; `borrow` forces a carry                              |
+| `sub`     | `min`, `max`, `borrow`          | a − b, never negative, minuend `min`..`max`; `borrow` forces regrouping       |
 | `mul`     | `tables`, `upTo`, `twoDigit`    | one operand from `tables`, the other 2..`upTo`, or 10..`upTo` with `twoDigit` |
 | `div`     | `tables`, `upTo`, `from`        | exact only; the quotient is `from`..`upTo`, defaulting to 2                   |
 | `twoStep` | `tables`, `upTo`, `max`, `from` | a × b then + or − c, result 0..`max`, with b from `from`..`upTo`              |
@@ -351,10 +393,12 @@ easier than winter's ordinary spaces — its climax is `twoStep` instead, which 
 grade 3's own two-step standard. What a hard slot may _not_ do is drop to a bare
 fact or a two-digit sum; `asks nothing but a hard kind at a hard space` holds
 that. **Every ordinary question stays mental**: no column operation past two
-digits, and every individual fact inside 100. That means `add`/`sub` cap at
-`max: 100` and `div` at `upTo: 10` — a quotient of 12 on the 9 table is `108 ÷ 9`,
-outside the grade-3 tables. `keeps every individual fact inside 100` enforces it,
-so it is a test now rather than a convention.
+digits, and every individual fact inside 100. That means `div` caps at
+`upTo: 10` — a quotient of 12 on the 9 table is `108 ÷ 9`, outside the grade-3
+tables — and `add`/`sub` cap much tighter still, at `max: 18`, because they are
+meant to be recalled rather than worked out. `keeps every individual fact inside
+100` and `asks addition and subtraction only as facts inside 18` enforce both,
+so they are tests now rather than conventions.
 
 For questions bigger than a bare fact without breaking that rule, put the
 multiples of ten in `tables`: `{kind: "mul", tables: [10, 20, ...90], upTo: 9}`
@@ -368,10 +412,14 @@ actually land on.
 
 ### Replace the art
 
-A pack exports eleven names: `id` and `name`; `palette`; the drawings
+A pack exports twelve names: `id` and `name`; `palette`; the drawings
 `character`, `item`, `obstacle`, `villain`, and `backdrop`; and the
-trail's geometry and motion, `layout`, `traversal`, and `standing`. Signatures
-and return shapes are in [`js/README.md`](js/README.md#art--art), and
+trail's geometry and motion, `layout`, `traversal`, `reducedTraversal`, and
+`standing`. Signatures and return shapes are in
+[`js/README.md`](js/README.md#art--art), with the two that have changed since —
+`backdrop`, which returns parallax layers rather than one drawing, and
+`reducedTraversal` — documented on
+[`js/art/index.js`](js/art/index.js); and
 [`js/art/placeholder.js`](js/art/placeholder.js) is the reference.
 
 1. A new file in [`js/art/`](js/art/).
@@ -391,7 +439,11 @@ to right, no NaN — because a pack chooses its own spacing. Its four placement
 values (`tokenScale`, `bossOffset`, `bossTransform`, `glow`) are not checked at
 all. Two numbers do carry meaning and are pinned: the trail has to come out wider
 than the viewport or nothing scrolls, and a route containing a `gap` has to break
-the ground into more than one segment. One caveat: a second pack is the moment to
+the ground into more than one segment. A third is pinned on the backdrop: every
+layer has to declare a `span` wide enough to cover the visible window at both
+ends of the longest trail, which is the one way a layer panning slower than the
+ground can go wrong — it runs out, and the end of the trail is blank canvas. One
+caveat: a second pack is the moment to
 move the `svg` helper out of the
 [registry cycle](js/README.md#dependency-direction).
 
@@ -431,7 +483,7 @@ There is no strings file; copy sits beside the code that shows it.
 | Summary-row labels on the result screen                                  | `renderResult` in `js/GameUI.js`                                          |
 | The jar caption on the result screen — "11 roses into her jar"           | `_renderHaul` in `js/GameUI.js`                                           |
 | The "Your journey" panel and its lifetime-totals sentence                | `renderJourneySoFar` in `js/GameUI.js`                                    |
-| The top-bar season title — "Autumn — 3 of 4"                             | `_seasonTitle` in `js/GameUI.js`                                          |
+| The top-bar season title — "Autumn"                                      | `name` in `js/seasons.js`                                                 |
 | Headings, the intro paragraph, top-bar titles                            | `index.html`                                                              |
 
 Two suites pin copy, and both are meant to be updated with it: `game.test.js`
@@ -560,7 +612,7 @@ not between questions on the same screen, which would interrupt a screen reader
 mid-sentence. `aria-live` covers the question and the feedback line, and
 `#item-count` is a single `role="status"` sentence ("9 of 13 diamonds — 4 to
 go") rather than separate nodes that announce as disconnected words. Answer
-buttons carry `aria-label="Answer 1: 42"`, which makes the 1–4 shortcut
+buttons carry `aria-label="Answer A: 42"`, which makes the A–D shortcut
 discoverable, and lock with `aria-disabled` rather than `disabled` — disabling
 the focused element drops focus to `<body>`. Colour is never the only signal:
 the correct and wrong buttons get ✓ and ✗ glyphs, and each season carries a

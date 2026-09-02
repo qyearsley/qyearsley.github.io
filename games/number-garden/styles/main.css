@@ -865,15 +865,19 @@ select:focus-visible,
   transform: scale(1.05);
 }
 
-/* Keyboard hint */
-.answer-button::after {
-  content: attr(data-keyboard-hint);
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  font-size: var(--ng-text-xs);
-  opacity: 0.5;
-  font-weight: normal;
+/* Keyboard hint, shown only where there is a real pointer -- a laptop, not the
+   iPad this is mostly played on. A stray glyph next to an answer is an easy
+   thing to misread as part of the sum. */
+@media (hover: hover) and (pointer: fine) {
+  .answer-button::after {
+    content: attr(data-key);
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    font-size: var(--ng-text-xs);
+    opacity: 0.5;
+    font-weight: normal;
+  }
 }
 
 /* Modal */

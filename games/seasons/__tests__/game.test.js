@@ -322,9 +322,14 @@ function chooseCharacter(id) {
   byId("character-grid").querySelector(`[data-character-id="${id}"]`).click()
 }
 
-/** Press a number key the way the keyboard fallback expects. */
+/** Press a key the way the keyboard fallback expects. */
 function pressKey(key, modifiers = {}) {
   document.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, ...modifiers }))
+}
+
+/** The letter that presses the nth choice: 0 -> "a", 1 -> "b", and so on. */
+function choiceKey(index) {
+  return String.fromCodePoint("a".codePointAt(0) + index)
 }
 
 /** Tap the right answer. Does not wait out the flash. */
@@ -465,7 +470,7 @@ describe("choosing a character", () => {
     chooseCharacter("sloth")
     expect(isActive("screen-play")).toBe(true)
     expect(isActive("screen-character")).toBe(false)
-    expect(byId("season-name").textContent).toBe("Spring — 1 of 4")
+    expect(byId("season-name").textContent).toBe("Spring")
     expect(byId("demand-line").textContent).toBe(SPRING.demandText)
     expect(hudCount()).toMatchObject({ items: 0, demand: SPRING.demand, noun: many(SPRING) })
     expect(byId("question-prompt").textContent).not.toBe("")
@@ -481,10 +486,12 @@ describe("choosing a character", () => {
     expect(document.querySelectorAll("#item-track svg")).toHaveLength(0)
   })
 
-  it("labels each answer button with the number key that presses it", () => {
+  it("labels each answer button with the letter key that presses it", () => {
     chooseCharacter("sloth")
     expect(choices().map((button) => button.getAttribute("aria-label"))).toEqual(
-      choices().map((button, index) => `Answer ${index + 1}: ${button.dataset.value}`),
+      choices().map(
+        (button, index) => `Answer ${choiceKey(index).toUpperCase()}: ${button.dataset.value}`,
+      ),
     )
   })
 
@@ -679,7 +686,7 @@ describe("crossing the obstacle in the way", () => {
     choices()[0].addEventListener("click", probe)
     choices()[0].click()
     expect(probe).toHaveBeenCalledTimes(1)
-    pressKey("1")
+    pressKey("a")
     await settleCrossing()
 
     expect(saved().run.questionsAsked).toBe(1)
@@ -750,35 +757,78 @@ describe("crossing the obstacle in the way", () => {
   })
 })
 
-describe("the number keys", () => {
+describe("the letter keys", () => {
   beforeEach(() => {
     chooseCharacter("sloth")
   })
 
-  it.each([1, 2, 3, 4])("key %i presses the matching choice", (key) => {
-    const button = choices()[key - 1]
+  it.each([
+    ["a", 0],
+    ["b", 1],
+    ["c", 2],
+    ["d", 3],
+  ])("key %s presses choice %i", (key, index) => {
+    const button = choices()[index]
     const wasCorrect = button.dataset.value === String(liveQuestion().answer)
-    pressKey(String(key))
+    pressKey(key)
     expect(choices().every((option) => option.getAttribute("aria-disabled") === "true")).toBe(true)
     expect(button.classList.contains(wasCorrect ? "is-correct" : "is-wrong")).toBe(true)
     expect(hudCount()).toMatchObject({ items: wasCorrect ? 1 : 0 })
   })
 
-  it("a key with no button behind it does nothing", () => {
-    pressKey("9")
-    pressKey("0")
-    pressKey("a")
+  // Caps lock is not a reason to stop being able to play.
+  it("the uppercase letter works the same as the lowercase one", () => {
+    const button = choices()[2]
+    const wasCorrect = button.dataset.value === String(liveQuestion().answer)
+    pressKey("C")
+    expect(button.classList.contains(wasCorrect ? "is-correct" : "is-wrong")).toBe(true)
+    expect(hudCount()).toMatchObject({ items: wasCorrect ? 1 : 0 })
+  })
+
+  // The reason the shortcut is a letter at all: every answer on screen is a
+  // number, so the digits have to stay inert rather than picking a choice each.
+  it.each(["1", "2", "3", "4", "9", "0"])("digit %s does nothing", (key) => {
+    pressKey(key)
     expect(choices().every((button) => button.getAttribute("aria-disabled") === null)).toBe(true)
     expect(hudCount()).toMatchObject({ items: 0 })
     expect(saved().run.questionsAsked).toBe(0)
   })
 
-  // Cmd-1 switches browser tab and Ctrl-1 is a system shortcut on some
-  // machines; answering the question as well is not what anyone meant.
+  it("a letter past the last choice does nothing", () => {
+    pressKey("e")
+    pressKey("z")
+    // Sorts before "a", so the arithmetic goes negative rather than long.
+    pressKey("!")
+    // Named keys are more than one character and never reach the arithmetic.
+    pressKey("ArrowLeft")
+    pressKey("F5")
+    expect(choices().every((button) => button.getAttribute("aria-disabled") === null)).toBe(true)
+    expect(hudCount()).toMatchObject({ items: 0 })
+    expect(saved().run.questionsAsked).toBe(0)
+  })
+
+  // A letter typed into a field belongs to the field. The play screen has no
+  // text input today, so this dispatches from one added for the test -- the
+  // guard is there to keep the next one that gets added from answering the
+  // question behind the player's back.
+  it("a letter typed into a text field is left alone", () => {
+    for (const tag of ["input", "textarea", "select"]) {
+      const field = document.createElement(tag)
+      document.body.append(field)
+      field.dispatchEvent(new KeyboardEvent("keydown", { key: "a", bubbles: true }))
+      field.remove()
+    }
+    expect(choices().every((button) => button.getAttribute("aria-disabled") === null)).toBe(true)
+    expect(hudCount()).toMatchObject({ items: 0 })
+    expect(saved().run.questionsAsked).toBe(0)
+  })
+
+  // Cmd-A selects everything on the page and Alt-A types a character on some
+  // layouts; answering the question as well is not what anyone meant.
   it.each([["metaKey"], ["ctrlKey"], ["altKey"]])(
     "a %s chord is left to the browser",
     (modifier) => {
-      pressKey("1", { [modifier]: true })
+      pressKey("a", { [modifier]: true })
       expect(saved().run.questionsAsked).toBe(0)
       expect(hudCount()).toMatchObject({ items: 0 })
       expect(choices().every((button) => button.getAttribute("aria-disabled") === null)).toBe(true)
@@ -788,7 +838,7 @@ describe("the number keys", () => {
   it("keys are ignored on the character screen", async () => {
     localStorage.clear()
     await boot()
-    pressKey("1")
+    pressKey("a")
     expect(isActive("screen-character")).toBe(true)
     expect(localStorage.getItem(STORAGE.KEY)).toBeNull()
   })
@@ -857,9 +907,9 @@ describe("the double-tap guard", () => {
   })
 
   it("a key press during the flash is ignored too", () => {
-    pressKey(String(correctIndex() + 1))
-    pressKey("1")
-    pressKey("2")
+    pressKey(choiceKey(correctIndex()))
+    pressKey("a")
+    pressKey("b")
     expect(saved().run.questionsAsked).toBe(1)
     expect(hudCount()).toMatchObject({ items: 1 })
   })
@@ -1131,7 +1181,7 @@ describe("playing a season to the end", () => {
     resultButtons()[0].click()
 
     expect(isActive("screen-play")).toBe(true)
-    expect(byId("season-name").textContent).toBe("Summer — 2 of 4")
+    expect(byId("season-name").textContent).toBe("Summer")
     expect(byId("demand-line").textContent).toBe(SUMMER.demandText)
     expect(hudCount()).toMatchObject({ items: 0, demand: SUMMER.demand, noun: many(SUMMER) })
     expect(document.querySelectorAll("#item-track .item-pip")).toHaveLength(SUMMER.demand)
@@ -1413,7 +1463,7 @@ describe("the boss question", () => {
       resultButtons()[0].click()
 
       expect(isActive("screen-play")).toBe(true)
-      expect(byId("season-name").textContent).toBe("Spring — 1 of 4")
+      expect(byId("season-name").textContent).toBe("Spring")
       expect(hudCount()).toMatchObject({ items: 0 })
       expect(saved().run.position).toBe(0)
       expect(saved().run.items).toBe(0)
@@ -1483,9 +1533,7 @@ describe("the boss question", () => {
 
       resultButtons()[0].click()
       expect(isActive("screen-play")).toBe(true)
-      expect(byId("season-name").textContent).toBe(
-        `${getSeason(SEASON_ORDER[0]).name} — 1 of ${SEASON_ORDER.length}`,
-      )
+      expect(byId("season-name").textContent).toBe(getSeason(SEASON_ORDER[0]).name)
       expect(saved().run.runOver).toBe(false)
       expect(saved().run.items).toBe(0)
     })
@@ -1603,7 +1651,7 @@ describe("persistence", () => {
     expect(isActive("screen-play")).toBe(true)
     expect(isActive("screen-character")).toBe(false)
     expect(hudCount()).toMatchObject({ items: 2 })
-    expect(byId("season-name").textContent).toBe("Spring — 1 of 4")
+    expect(byId("season-name").textContent).toBe("Spring")
     expect(trailSpace()).toEqual({ space: 3, of: SPRING.spaces })
     expect(choices()).toHaveLength(PLAY.CHOICE_COUNT)
   })

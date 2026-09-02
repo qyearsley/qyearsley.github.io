@@ -281,16 +281,26 @@ describe("GameUI", () => {
       gameUI.displayAnswerOptions([1, 2, 3], 1)
 
       const buttons = document.querySelectorAll(".answer-button")
-      expect(buttons[0].dataset.keyboardHint).toBe("1")
-      expect(buttons[1].dataset.keyboardHint).toBe("2")
-      expect(buttons[2].dataset.keyboardHint).toBe("3")
+      expect(buttons[0].dataset.key).toBe("A")
+      expect(buttons[1].dataset.key).toBe("B")
+      expect(buttons[2].dataset.key).toBe("C")
+    })
+
+    test("leaves options past the last shortcut letter unlabelled", () => {
+      gameUI.displayAnswerOptions([1, 2, 3, 4, 5], 1)
+
+      const buttons = document.querySelectorAll(".answer-button")
+      expect(buttons[3].dataset.key).toBe("D")
+      expect(buttons[4].dataset.key).toBeUndefined()
+      expect(buttons[4].getAttribute("aria-label")).toBe("Answer: 5")
     })
 
     test("sets accessibility attributes", () => {
       gameUI.displayAnswerOptions([5, 10], 5)
 
       const buttons = document.querySelectorAll(".answer-button")
-      expect(buttons[0].getAttribute("aria-label")).toBe("Answer 1: 5")
+      expect(buttons[0].getAttribute("aria-label")).toBe("Answer A: 5")
+      expect(buttons[1].getAttribute("aria-label")).toBe("Answer B: 10")
       expect(buttons[0].getAttribute("tabindex")).toBe("0")
     })
   })

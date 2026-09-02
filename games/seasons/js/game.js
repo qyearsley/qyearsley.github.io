@@ -53,8 +53,9 @@ import { SEASON_LIST, getSeason } from "./seasons.js"
 import { StorageManager, defaultSave, toSavedRun } from "./storage.js"
 
 const ui = new GameUI()
-// The "1 of 4" framing in the top bar. Assigned rather than imported by GameUI
-// so the view stays ignorant of which levels exist; see renderJourneySoFar.
+// The seasons the finished potion is built from, on the end-of-run screen.
+// Assigned rather than imported by GameUI so the view stays ignorant of which
+// levels exist; see renderJourneySoFar.
 ui.seasonOrder = SEASON_LIST
 const storage = new StorageManager()
 
@@ -615,18 +616,49 @@ function _startNewRun() {
 }
 
 /**
- * Answer with the number keys. Touch is the primary input -- this is the
+ * Code point of "a", the letter that presses the first answer button. The
+ * uppercase twin lives in GameUI, which is what puts A, B, C, D on the buttons;
+ * this reverses that arithmetic. Kept as a code point rather than a list of
+ * letters so the two stay in step however many choices a question offers.
+ * @private
+ */
+const FIRST_CHOICE_KEY = "a".codePointAt(0)
+
+/**
+ * Tags whose own keyboard behavior must never be hijacked. The same set the
+ * other games in this repo keep; see times-trail's EventManager.
+ * @private
+ */
+const TEXT_ENTRY_TAGS = new Set(["INPUT", "TEXTAREA", "SELECT"])
+
+/**
+ * Answer with the letter keys, A to D. Touch is the primary input -- this is the
  * keyboard fallback, and it only fires while the play screen is showing and an
  * answer is not already being processed.
+ *
+ * Letters rather than digits because every answer in this game is a number, and
+ * a shortcut that is also a number is one more number to sort out. Case is
+ * ignored: caps lock is not a reason to stop being able to play.
  * @private
  * @param {KeyboardEvent} event - The keydown
  */
 function _onKeyDown(event) {
   if (event.metaKey || event.ctrlKey || event.altKey) return
+  // A letter typed into a field is a letter meant for that field. This did not
+  // matter while the shortcut was a digit -- nothing on the play screen takes
+  // typing -- but letters are what people put in text boxes, so the first one
+  // added here would otherwise submit an answer behind the player's back while
+  // she was still typing into it.
+  const target = event.target
+  if (target && TEXT_ENTRY_TAGS.has(target.tagName)) return
   if (answering) return
   if (state.phase !== PHASE.TRAIL && state.phase !== PHASE.BOSS) return
-  const index = Number(event.key) - 1
-  if (!Number.isInteger(index) || index < 0) return
+  // Single characters only, so "F5" and "ArrowLeft" never reach the arithmetic.
+  if (event.key.length !== 1) return
+  const index = event.key.toLowerCase().codePointAt(0) - FIRST_CHOICE_KEY
+  if (index < 0) return
+  // How many buttons there are is the upper bound: a letter past the last
+  // choice finds nothing and falls through, the same as any other stray key.
   const buttons = document.getElementById("choices")?.querySelectorAll("button")
   const button = buttons?.[index]
   if (button instanceof HTMLButtonElement) {

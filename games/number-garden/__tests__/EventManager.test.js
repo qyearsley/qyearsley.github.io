@@ -421,17 +421,60 @@ describe("EventManager", () => {
       eventManager.setupAnswerButtons()
     })
 
-    test("number keys 1-4 trigger answer button clicks", () => {
+    test("letter keys a-d trigger answer button clicks", () => {
       eventManager.setupKeyboardShortcuts()
 
-      const event = new KeyboardEvent("keydown", { key: "1" })
-      document.dispatchEvent(event)
-
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "a" }))
       expect(callbacks.onAnswerSelected).toHaveBeenCalledWith(
         1,
         expect.anything(),
         expect.anything(),
       )
+
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "d" }))
+      expect(callbacks.onAnswerSelected).toHaveBeenCalledWith(
+        4,
+        expect.anything(),
+        expect.anything(),
+      )
+    })
+
+    test("uppercase letters work too", () => {
+      eventManager.setupKeyboardShortcuts()
+
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "B" }))
+
+      expect(callbacks.onAnswerSelected).toHaveBeenCalledWith(
+        2,
+        expect.anything(),
+        expect.anything(),
+      )
+    })
+
+    test("number keys no longer select answers", () => {
+      eventManager.setupKeyboardShortcuts()
+
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "1" }))
+
+      expect(callbacks.onAnswerSelected).not.toHaveBeenCalled()
+    })
+
+    test("ignores letters past the last answer button", () => {
+      eventManager.setupKeyboardShortcuts()
+
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "e" }))
+
+      expect(callbacks.onAnswerSelected).not.toHaveBeenCalled()
+    })
+
+    test("ignores modified keys so browser shortcuts still work", () => {
+      eventManager.setupKeyboardShortcuts()
+
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "a", metaKey: true }))
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "a", ctrlKey: true }))
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "a", altKey: true }))
+
+      expect(callbacks.onAnswerSelected).not.toHaveBeenCalled()
     })
 
     test("does not trigger when typing in input field", () => {
@@ -441,7 +484,7 @@ describe("EventManager", () => {
 
       eventManager.setupKeyboardShortcuts()
 
-      const event = new KeyboardEvent("keydown", { key: "1", target: input })
+      const event = new KeyboardEvent("keydown", { key: "a", target: input })
       Object.defineProperty(event, "target", { value: input, enumerable: true })
       document.dispatchEvent(event)
 
@@ -452,8 +495,7 @@ describe("EventManager", () => {
       document.getElementById("activity-screen").classList.remove("active")
       eventManager.setupKeyboardShortcuts()
 
-      const event = new KeyboardEvent("keydown", { key: "1" })
-      document.dispatchEvent(event)
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "a" }))
 
       expect(callbacks.onAnswerSelected).not.toHaveBeenCalled()
     })
@@ -464,8 +506,7 @@ describe("EventManager", () => {
 
       eventManager.setupKeyboardShortcuts()
 
-      const event = new KeyboardEvent("keydown", { key: "1" })
-      document.dispatchEvent(event)
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "a" }))
 
       expect(callbacks.onAnswerSelected).not.toHaveBeenCalled()
     })

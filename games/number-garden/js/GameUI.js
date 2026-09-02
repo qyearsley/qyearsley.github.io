@@ -1,4 +1,4 @@
-import { MATH, DEFAULTS } from "./constants.js"
+import { MATH, DEFAULTS, ANSWER_KEYS } from "./constants.js"
 import { BaseGameUI } from "../../shared/BaseGameUI.js"
 import { CastleUI } from "./CastleUI.js"
 
@@ -205,8 +205,13 @@ export class GameUI extends BaseGameUI {
       // times), and dataset values are strings anyway, so compare as strings
       // rather than relying on implicit coercion.
       button.dataset.correct = String(option) === String(correctAnswer) ? "true" : "false"
-      button.dataset.keyboardHint = `${index + 1}`
-      button.setAttribute("aria-label", `Answer ${index + 1}: ${option}`)
+      // Shortcut letter, if there is one for this position -- most activities
+      // give four options, but nothing guarantees it.
+      const key = ANSWER_KEYS[index]?.toUpperCase()
+      if (key) {
+        button.dataset.key = key
+      }
+      button.setAttribute("aria-label", key ? `Answer ${key}: ${option}` : `Answer: ${option}`)
       button.setAttribute("tabindex", "0")
       this.elements.answerOptions.appendChild(button)
     })

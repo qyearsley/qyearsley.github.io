@@ -60,6 +60,13 @@ export const DEFAULTS = {
 }
 
 /**
+ * Keyboard shortcuts for the answer buttons, in button order. Letters, not
+ * digits, so the hint doesn't read as one more number in the question.
+ * Buttons past the end of this list get no shortcut.
+ */
+export const ANSWER_KEYS = ["a", "b", "c", "d"]
+
+/**
  * Mathematical constants
  */
 export const MATH = {

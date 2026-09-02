@@ -55,6 +55,26 @@ const UNIT_VIEWBOX = "0 0 100 100"
  * `--season-accent` paints, and `--season-accent-text` / `-dark` are tuned to
  * clear 4.5:1 against the light and dark surfaces respectively. The stylesheet
  * picks between the two text values; a pack cannot know which theme is active.
+ *
+ * Three of these keys exist so that one *shape* can serve all four seasons, in
+ * the same way `--season-rock` lets one boulder be four boulders:
+ *
+ * - `--season-crust` is whatever lies along the top edge of the ground -- grass
+ *   in spring and summer, fallen leaves in autumn, a snow crust in winter. It
+ *   cannot be `--season-leaf`, which is the colour of a thicket's foliage: in
+ *   winter that is a dark evergreen teal, and a dark teal snow crust would be
+ *   worse than no crust at all.
+ * - `--season-prop` is what the season drops or drifts through its sky. It is
+ *   separate from the crust because only two seasons agree with themselves
+ *   about it: autumn's leaves fall and then lie there, and winter's snow does
+ *   the same, but spring's blossom is pink over green grass.
+ * - `--season-sun` is the disc high in the sky. Only summer draws one today,
+ *   and the other three still name a value, because every season must define
+ *   the same keys -- a palette with holes in it is how a season ends up
+ *   half-themed, and `art.test.js` holds the key sets equal for that reason.
+ *   It cannot borrow `--season-glow`: summer's glow is a pale cream tuned to
+ *   read as light spilling off a mountain, and on summer's pale blue sky a
+ *   cream disc is very nearly invisible.
  * @private
  */
 const PALETTES = {
@@ -72,6 +92,9 @@ const PALETTES = {
     "--season-trunk": "#5a4632",
     "--season-glow": "#fff2a8",
     "--season-ink": "#2b3d31",
+    "--season-crust": "#3f8455",
+    "--season-prop": "#f7c9d8",
+    "--season-sun": "#ffe9a8",
   },
   summer: {
     "--season-sky": "#d9eefb",
@@ -87,6 +110,9 @@ const PALETTES = {
     "--season-trunk": "#6b5533",
     "--season-glow": "#fff3c4",
     "--season-ink": "#26404d",
+    "--season-crust": "#6f9c46",
+    "--season-prop": "#ffcf7a",
+    "--season-sun": "#ffc233",
   },
   autumn: {
     "--season-sky": "#fbe9d4",
@@ -102,6 +128,9 @@ const PALETTES = {
     "--season-trunk": "#5b3a22",
     "--season-glow": "#ffd98a",
     "--season-ink": "#43281a",
+    "--season-crust": "#8f4a1e",
+    "--season-prop": "#c95f22",
+    "--season-sun": "#f0a84a",
   },
   // The climax, and the one season that is not built like the other three.
   // Winter used to be the palest palette here -- a near-white sky over
@@ -131,6 +160,13 @@ const PALETTES = {
     // only thing that survives either sky.
     "--season-glow": "#ffd27a",
     "--season-ink": "#16283a",
+    // White, not the blued snow the ground is painted in: the crust is the
+    // freshest fall, the same reading `SNOW` gives a drift on an obstacle.
+    "--season-crust": "#ffffff",
+    "--season-prop": "#ffffff",
+    // Never drawn -- winter's sky is snowing -- but named, so the key set
+    // matches the other three.
+    "--season-sun": "#cfe2f5",
   },
 }
 
@@ -936,6 +972,17 @@ const GROUND = 190
 const ROLL = 14
 
 /**
+ * How often the ground line is sampled, in user units.
+ *
+ * Fine enough that the river basin comes out as a curve rather than a chamfer,
+ * and it also sets the pitch of the textured band along the top edge -- a tuft
+ * of grass every other sample, so 24 units apart. Halving it would double the
+ * length of every ground path on a trail that can already be 5100 units wide.
+ * @private
+ */
+const GROUND_STEP = 12
+
+/**
  * Half the drawn token's width, and how far its feet sit below its origin.
  *
  * Together with `layout`'s `tokenScale` these fix the **ground line** every
@@ -1019,96 +1066,436 @@ function deformedGroundY(x, spots) {
 }
 
 /**
+ * The ground line, sampled left to right and split wherever a gap removes it.
+ *
+ * One list of `[x, y]` points per unbroken stretch. Everything drawn along the
+ * ground -- the filled earth below it and the textured band along its top edge
+ * -- is derived from these same points, which is the only way the two can be
+ * guaranteed to agree. Computing the band from its own walk of the ground would
+ * work right up until one of the two rounded differently or stepped over a
+ * break, and then the band would float over the river basin or bridge the void.
+ * @private
+ * @param {number} width - Total trail width
+ * @param {Array<Object>} spots - Output of `placements`
+ * @returns {Array<Array<number[]>>} One list of points per unbroken stretch
+ */
+function groundRuns(width, spots) {
+  const breaks = spots
+    .filter((spot) => spot.profile?.breakHalfWidth)
+    .map((spot) => [spot.x - spot.profile.breakHalfWidth, spot.x + spot.profile.breakHalfWidth])
+  const inBreak = (x) => breaks.some(([from, to]) => x > from && x < to)
+
+  const runs = []
+  let points = []
+  const flush = () => {
+    if (points.length >= 2) runs.push(points)
+    points = []
+  }
+  for (let x = 0; x <= width; x += GROUND_STEP) {
+    if (inBreak(x)) flush()
+    else points.push([x, deformedGroundY(x, spots)])
+  }
+  flush()
+  return runs
+}
+
+/**
  * The ground as one or more filled paths.
  *
  * More than one because a gap genuinely removes the ground: each gap ends a
  * segment and starts the next, so the void between them is the sky showing
  * through rather than a dark shape drawn on top of solid earth.
  * @private
- * @param {number} width - Total trail width
- * @param {Array<Object>} spots - Output of `placements`
+ * @param {Array<Array<number[]>>} runs - Output of `groundRuns`
  * @returns {string[]} One SVG path `d` per unbroken stretch of ground
  */
-function groundSegmentsFor(width, spots) {
-  const breaks = spots
-    .filter((spot) => spot.profile?.breakHalfWidth)
-    .map((spot) => [spot.x - spot.profile.breakHalfWidth, spot.x + spot.profile.breakHalfWidth])
-  const inBreak = (x) => breaks.some(([from, to]) => x > from && x < to)
-
-  const segments = []
-  let points = []
-  const flush = () => {
-    if (points.length >= 2) {
-      const first = points[0]
-      const last = points[points.length - 1]
-      const line = points.map(([x, y], i) => `${i ? "L" : "M"} ${x} ${y}`).join(" ")
-      segments.push(`${line} L ${last[0]} ${HEIGHT} L ${first[0]} ${HEIGHT} Z`)
-    }
-    points = []
-  }
-  for (let x = 0; x <= width; x += 12) {
-    if (inBreak(x)) flush()
-    else points.push([x, deformedGroundY(x, spots)])
-  }
-  flush()
-  return segments
+function groundSegmentsFor(runs) {
+  return runs.map((points) => {
+    const first = points[0]
+    const last = points[points.length - 1]
+    const line = points.map(([x, y], i) => `${i ? "L" : "M"} ${x} ${y}`).join(" ")
+    return `${line} L ${last[0]} ${HEIGHT} L ${first[0]} ${HEIGHT} Z`
+  })
 }
 
 /**
- * The sky and distant hills behind a whole trail.
+ * What the top edge of the ground is made of, per season.
+ *
+ * The ground used to end at a clean mathematical curve, which is the one thing
+ * no ground does: it read as a coloured region rather than as a surface, and it
+ * gave the four seasons nothing underfoot to tell them apart beyond hue. This
+ * band is a strip of material lying along that curve -- `depth` thick, with a
+ * top edge that stands `rise` proud of it in whatever `shape` the season's
+ * material makes.
+ *
+ * Three shapes cover the four seasons:
+ *
+ * - `tuft` alternates flat and raised at every other sample, which at
+ *   `GROUND_STEP` apart is a blade of grass every 24 units. The height is
+ *   varied by arithmetic rather than left uniform, because a perfectly even
+ *   sawtooth reads as a zip fastener.
+ * - `scallop` runs a quadratic through the same alternation instead of a
+ *   straight line, so the raised samples become rounded humps -- leaves lying
+ *   on the ground rather than grass standing up out of it.
+ * - `drift` is a shallow sine on a much thicker band: an unbroken crust of
+ *   snow, which is the one material here that does not have individual pieces.
+ * @private
+ */
+const GROUND_EDGE = {
+  spring: { depth: 3, rise: 8, shape: "tuft" },
+  summer: { depth: 3, rise: 9, shape: "tuft" },
+  autumn: { depth: 4, rise: 7, shape: "scallop" },
+  winter: { depth: 8, rise: 2.5, shape: "drift" },
+}
+
+/**
+ * Where the top of the band sits above the ground at one sample.
+ * @private
+ * @param {Object} style - An entry from GROUND_EDGE
+ * @param {number} x - The sample's x
+ * @param {number} y - The ground's y there
+ * @param {number} i - The sample's index along the run
+ * @returns {number} The band's upper y
+ */
+function edgeTop({ depth, rise, shape }, x, y, i) {
+  if (shape === "drift") return y - depth - Math.sin(x / 43) * rise
+  // Every other sample stands up. The moduli are coprime with the alternation
+  // so the raised ones are not all the same height, which is what stops a run
+  // of grass looking machined.
+  if (i % 2 === 0) return y - depth
+  return y - depth - rise * (0.55 + ((i * 7) % 5) / 8)
+}
+
+/**
+ * The textured band along the top of the ground, one path per unbroken stretch.
+ *
+ * Its underside is the ground line itself, sample for sample and in reverse, so
+ * the band cannot drift off the surface it is lying on. That matters in exactly
+ * the two places the ground is not flat: it has to sink into a river basin with
+ * the ground, and it has to stop at the lip of a gap rather than carry on over
+ * the void. Both come free from being built out of `groundRuns`, which has
+ * already done the deformation and the splitting.
+ * @private
+ * @param {Array<Array<number[]>>} runs - Output of `groundRuns`
+ * @param {unknown} seasonId - The season being played
+ * @returns {string[]} One SVG path `d` per unbroken stretch of ground
+ */
+function groundEdgesFor(runs, seasonId) {
+  const style = Object.hasOwn(GROUND_EDGE, seasonId) ? GROUND_EDGE[seasonId] : GROUND_EDGE.spring
+  const round = (value) => Number(value.toFixed(2))
+  return runs.map((points) => {
+    const top = points.map(([x, y], i) => [x, round(edgeTop(style, x, y, i))])
+    let d
+    if (style.shape === "scallop") {
+      // Each raised sample becomes the control point of a curve between the two
+      // flat samples either side of it, so the hump is round rather than
+      // pointed. A run of even length leaves a final control with nothing to
+      // curve towards, which is drawn as a plain line to it instead.
+      d = `M ${top[0][0]} ${top[0][1]}`
+      for (let i = 1; i < top.length; i += 2) {
+        const end = top[i + 1]
+        d += end
+          ? ` Q ${top[i][0]} ${top[i][1]} ${end[0]} ${end[1]}`
+          : ` L ${top[i][0]} ${top[i][1]}`
+      }
+    } else {
+      d = top.map(([x, y], i) => `${i ? "L" : "M"} ${x} ${y}`).join(" ")
+    }
+    for (let i = points.length - 1; i >= 0; i -= 1) {
+      d += ` L ${points[i][0]} ${round(points[i][1])}`
+    }
+    return `${d} Z`
+  })
+}
+
+/* ==================== Backdrop ==================== */
+
+/**
+ * How fast each backdrop layer pans, as a fraction of the ground's speed.
+ *
+ * The backdrop used to be one group, appended inside the same camera group as
+ * the ground, so a hill three miles away slid past at exactly the speed of the
+ * grass under the character's feet. That is not a subtle wrongness -- it is the
+ * whole reason the landscape read as a painted flat rather than as distance.
+ *
+ * The numbers are not measured off anything; they are the smallest set that
+ * separates four planes. Sky at 0 is nailed to the screen, which is what a sky
+ * is: it has no parallax because it has no distance. The two ridges take a
+ * quarter and a bit over half, far enough apart that the near one visibly
+ * overtakes the far one during a single crossing rather than only over a whole
+ * trail. `air` is the weather -- snow, blossom, leaves -- at 0.85: nearly the
+ * character's own plane, because it is falling between the player and the
+ * trail rather than out on the horizon, but not 1, or it would be pinned to the
+ * ground and stop reading as weather at all.
+ *
+ * Nothing may exceed 1. A layer faster than the ground overtakes the character,
+ * which the eye reads as the background sliding the wrong way.
+ * @private
+ */
+const PARALLAX = {
+  sky: 0,
+  far: 0.25,
+  near: 0.55,
+  air: 0.85,
+}
+
+/**
+ * The sun, in the coordinates of a layer that never moves -- so it stays in the
+ * same corner of the screen for the whole trail, which is what a sun at that
+ * distance does. Sized and placed against `VIEWPORT_WIDTH` rather than the
+ * trail's width for the same reason: a fixed layer only ever shows its first
+ * viewport.
+ * @private
+ */
+const SUN = { cx: VIEWPORT_WIDTH * 0.82, cy: 48, r: 24 }
+
+/**
+ * Which seasons put something in the fixed sky layer, and what.
+ *
+ * Only summer, which is the one season whose defining feature is overhead
+ * rather than falling. A map rather than an `if` so a later season can claim a
+ * moon without this function growing a branch.
+ * @private
+ */
+const SKY_ART = {
+  summer: (colors) => {
+    const rays = []
+    for (let i = 0; i < 8; i += 1) {
+      const angle = (i / 8) * Math.PI * 2
+      const [dx, dy] = [Math.cos(angle), Math.sin(angle)]
+      rays.push(
+        svg("path", {
+          d:
+            `M${(SUN.cx + dx * (SUN.r + 7)).toFixed(1)} ${(SUN.cy + dy * (SUN.r + 7)).toFixed(1)} ` +
+            `L${(SUN.cx + dx * (SUN.r + 19)).toFixed(1)} ${(SUN.cy + dy * (SUN.r + 19)).toFixed(1)}`,
+          stroke: colors["--season-sun"],
+          "stroke-width": 4,
+          "stroke-opacity": 0.55,
+          "stroke-linecap": "round",
+        }),
+      )
+    }
+    return [
+      // A halo before the disc, so the edge of the sun is soft without a
+      // gradient -- which this pack cannot use; see the file header.
+      svg("circle", { ...SUN, r: SUN.r + 14, fill: colors["--season-sun"], "fill-opacity": 0.22 }),
+      ...rays,
+      svg("circle", { ...SUN, fill: colors["--season-sun"] }),
+    ]
+  },
+}
+
+/**
+ * What each season scatters through the air, and where.
+ *
+ * `step` is how far apart the marks are seeded, which is the only real cost
+ * control here: a trail is up to 5100 units wide, so a step of 52 is around a
+ * hundred elements and a step of 5 would be a thousand. `top` and `height`
+ * bound the band they fall through, and every one of them is chosen so the
+ * lowest possible mark stays clear of the highest possible ground -- the ground
+ * rests at `GROUND - ROLL` at its very highest, 176, and every obstacle profile
+ * pushes it *down* from there. Anything drawn below that line would settle on
+ * the trail the character walks, which is the one place weather must not be.
+ *
+ * Summer is the odd one: not something falling but the air itself moving, drawn
+ * low and warm where heat actually shimmers.
+ * @private
+ */
+const AIR_ART = {
+  spring: {
+    step: 62,
+    top: 14,
+    height: 151,
+    // Blossom: a petal is a short wide oval, and it is the tilt that stops a
+    // field of them reading as a field of full stops.
+    draw: (mark, color) =>
+      svg("ellipse", {
+        cx: mark.x,
+        cy: mark.y,
+        rx: 3.4 + mark.size * 0.8,
+        ry: 1.9 + mark.size * 0.3,
+        fill: color,
+        "fill-opacity": 0.55 + mark.size * 0.15,
+        transform: `rotate(${mark.tilt} ${mark.x} ${mark.y})`,
+      }),
+  },
+  summer: {
+    step: 88,
+    top: 110,
+    height: 34,
+    // Heat haze: a shallow double curve, stroked and half transparent. Drawn
+    // low, because rising heat is a thing that happens just above hot ground and
+    // nowhere near the top of the picture -- but not so low that the grass
+    // standing along the top of the ground hides it. The grass is drawn on the
+    // ground's own layer, which is painted over this one, and summer's tufts
+    // reach some sixteen units above the ground line.
+    //
+    // Written in absolute coordinates rather than the shorter relative form, so
+    // that every number in every prop this pack draws is a real position on the
+    // trail. `art.test.js` reads those numbers back to check that nothing in the
+    // air can settle on the ground, and it cannot do that through a chain of
+    // deltas.
+    draw: (mark, color) =>
+      svg("path", {
+        d:
+          `M${mark.x} ${mark.y} ` +
+          `Q${mark.x + 7} ${mark.y - 3.5} ${mark.x + 14} ${mark.y} ` +
+          `Q${mark.x + 21} ${mark.y + 3.5} ${mark.x + 28} ${mark.y}`,
+        stroke: color,
+        "stroke-width": 1.6 + mark.size * 0.5,
+        "stroke-opacity": 0.3 + mark.size * 0.12,
+        "stroke-linecap": "round",
+        fill: "none",
+      }),
+  },
+  autumn: {
+    step: 70,
+    top: 16,
+    height: 149,
+    // Falling leaves. Longer and flatter than spring's petals, and turned
+    // through a wider spread of angles, because a leaf on the way down spins.
+    draw: (mark, color) =>
+      svg("ellipse", {
+        cx: mark.x,
+        cy: mark.y,
+        rx: 4.2 + mark.size * 0.9,
+        ry: 2 + mark.size * 0.2,
+        fill: color,
+        "fill-opacity": 0.62 + mark.size * 0.12,
+        transform: `rotate(${mark.tilt} ${mark.x} ${mark.y})`,
+      }),
+  },
+  winter: {
+    step: 52,
+    top: 12,
+    height: 157,
+    draw: (mark, color) =>
+      svg("circle", {
+        cx: mark.x,
+        cy: mark.y,
+        r: 1.6 + mark.size * 0.7,
+        fill: color,
+        "fill-opacity": 0.5 + mark.size * 0.15,
+      }),
+  },
+}
+
+/**
+ * Marks scattered across a span, by arithmetic rather than by chance.
+ *
+ * Nothing in this game calls `Math.random` (see ../README.md), and a backdrop
+ * that came out differently each time it was built would make the trail flicker
+ * on every rebuild -- the scene is rebuilt whenever the season or the character
+ * changes, and a flickering snowfall would be the most visible thing on screen.
+ *
+ * Every modulus here is coprime with the step it perturbs, which is the whole
+ * trick: `x` advances by a constant and is then nudged by a cycle of length 41
+ * that never lines up with it, so the marks do not settle into the lattice that
+ * a plain `i % n` offset produces.
+ * @private
+ * @param {number} span - How wide to scatter, in user units
+ * @param {number} step - How far apart to seed the marks
+ * @param {number} top - The top of the band they fall through
+ * @param {number} height - How deep that band is
+ * @returns {Array<{x: number, y: number, size: number, tilt: number}>} The marks
+ */
+function _scatter(span, step, top, height) {
+  const marks = []
+  for (let i = 0, x = 24; x < span; i += 1, x += step) {
+    marks.push({
+      x: x + ((i * 29) % 41),
+      y: top + ((i * 67) % height),
+      size: i % 3,
+      tilt: ((i * 47) % 180) - 90,
+    })
+  }
+  return marks
+}
+
+/**
+ * A rolling ridge, filled down to the bottom of the trail.
+ * @private
+ * @param {number} span - How wide to draw it
+ * @param {number} amplitude - How far the ridge rises and falls
+ * @param {number} wavelength - How long one roll is
+ * @param {number} top - The ridge's mean height
+ * @param {string} fill - What to paint it in
+ * @param {number} opacity - How solid it is
+ * @returns {SVGElement} The ridge
+ */
+function _ridge(span, amplitude, wavelength, top, fill, opacity) {
+  const at = (x) => `${x} ${(top + Math.sin(x / wavelength) * amplitude).toFixed(2)}`
+  let d = `M ${at(0)}`
+  for (let x = 40; x < span; x += 40) d += ` L ${at(x)}`
+  // The final sample is written at `span` exactly rather than left to the loop.
+  // Sampling every 40 units stops up to 39 short of the end on any span that is
+  // not a multiple of 40 -- winter's 5100 stops at 5080 -- and the closing edge
+  // then ran diagonally from the last ridge point down to the bottom corner.
+  d += ` L ${at(span)}`
+  return svg("path", {
+    d: `${d} L ${span} ${HEIGHT} L 0 ${HEIGHT} Z`,
+    fill,
+    "fill-opacity": opacity,
+  })
+}
+
+/**
+ * The layered landscape behind a whole trail.
  *
  * Generated at the trail's real width rather than scaled to it: an earlier
  * fixed-size vignette stretched across a 5000-unit trail flattened its hills
- * into flat bands. Two rolling layers at different frequencies, which gives a
- * little depth as the camera pans, and falling snow in the seasons that have
- * any.
+ * into flat bands.
+ *
+ * **Four layers, each with its own parallax factor** -- see `PARALLAX` for what
+ * the numbers mean and why this is not one group any more. GameUI pans layer
+ * `n` by `offset * factor[n]` instead of panning everything together, so the
+ * ridges separate in depth as the character walks.
+ *
+ * Every layer is generated across the whole trail width and says so in `span`,
+ * which is what closes the only hole this arrangement can have. GameUI clamps
+ * the camera to `[0, width - viewportWidth]`, so a layer at factor `f` is only
+ * ever asked to show `[offset * f, offset * f + viewportWidth]`, and the worst
+ * case is `f * (width - viewportWidth) + viewportWidth`. That is at most
+ * `width` for any `f` no greater than 1, so a full-width layer can never run
+ * out at either end -- and a layer that had been generated at, say, the
+ * viewport's width instead would open a gap on winter's 5100-unit trail within
+ * the first crossing. `art.test.js` holds the inequality at both ends of the
+ * longest trail rather than trusting the arithmetic here.
  *
  * @param {unknown} seasonId - The season being played
  * @param {number} width - Total trail width in user units
- * @returns {import("./index.js").Drawing} The backdrop
+ * @returns {{layers: Array<import("./index.js").BackdropLayer>, viewBox: string}} The
+ *   backdrop, back to front
  */
 export function backdrop(seasonId, width) {
   const colors = palette(seasonId)
   const span = Math.max(1, width)
-  const band = (amplitude, wavelength, top, fill, opacity) => {
-    let d = `M 0 ${top + Math.sin(0) * amplitude}`
-    for (let x = 40; x <= span; x += 40) {
-      d += ` L ${x} ${top + Math.sin(x / wavelength) * amplitude}`
-    }
-    return svg("path", {
-      d: `${d} L ${span} ${HEIGHT} L 0 ${HEIGHT} Z`,
-      fill,
-      "fill-opacity": opacity,
-    })
-  }
-  // Falling snow, scattered by arithmetic rather than by chance: nothing in this
-  // game calls Math.random (see ../README.md), and a backdrop that came out
-  // differently each time it was built would make the trail flicker on every
-  // rebuild. The moduli are coprime with the step, so the flakes do not line up
-  // into a lattice, and they stay above the ground so none of them settles on
-  // the trail the character walks.
-  const flakes = []
-  if (SNOWY.has(seasonId)) {
-    for (let i = 0, x = 24; x < span; i += 1, x += 52) {
-      const size = i % 3
-      flakes.push(
-        svg("circle", {
-          cx: x + ((i * 29) % 41),
-          cy: 12 + ((i * 67) % 157),
-          r: 1.6 + size * 0.7,
-          fill: SNOW,
-          "fill-opacity": 0.5 + size * 0.15,
-        }),
+  const layer = (name, shapes) => ({
+    name,
+    factor: PARALLAX[name],
+    span,
+    element: svg("g", {}, shapes),
+  })
+
+  const sky = [
+    svg("rect", { x: 0, y: 0, width: span, height: HEIGHT, fill: colors["--season-sky"] }),
+  ]
+  if (Object.hasOwn(SKY_ART, seasonId)) sky.push(...SKY_ART[seasonId](colors))
+
+  const air = Object.hasOwn(AIR_ART, seasonId) ? AIR_ART[seasonId] : null
+  const props = air
+    ? _scatter(span, air.step, air.top, air.height).map((mark) =>
+        air.draw(mark, colors["--season-prop"]),
       )
-    }
-  }
+    : []
+
   return {
-    element: svg("g", {}, [
-      svg("rect", { x: 0, y: 0, width: span, height: HEIGHT, fill: colors["--season-sky"] }),
-      band(26, 520, 150, colors["--season-far"], 0.55),
-      band(18, 300, 196, colors["--season-far"], 0.85),
-      ...flakes,
-    ]),
+    layers: [
+      layer("sky", sky),
+      layer("far", [_ridge(span, 26, 520, 150, colors["--season-far"], 0.55)]),
+      layer("near", [_ridge(span, 18, 300, 196, colors["--season-far"], 0.85)]),
+      layer("air", props),
+    ],
     viewBox: `0 0 ${span} ${HEIGHT}`,
   }
 }
@@ -1120,9 +1507,16 @@ export function backdrop(seasonId, width) {
  * `stops[route.length]` is the boss. Obstacle `i` sits between stops `i` and
  * `i + 1`, so crossing it is a move from one stop to the next.
  *
+ * `groundSegments` and `groundEdges` come back as two parallel lists of the
+ * same length: the filled earth, and the band of material lying along its top
+ * edge. Two lists rather than one shape because they are painted in different
+ * colours and the caller needs to be able to stack them; the same length
+ * because both are built from `groundRuns`, so a gap that breaks one breaks the
+ * other in exactly the same place.
+ *
  * @param {import("../seasons.js").Season|null} season - The season being played
  * @returns {{width: number, height: number, viewportWidth: number, viewBox: string,
- *   groundSegments: string[], stops: Array<{x: number, y: number}>,
+ *   groundSegments: string[], groundEdges: string[], stops: Array<{x: number, y: number}>,
  *   obstacles: Array<{kind: string, x: number, y: number}>, tokenScale: number,
  *   bossOffset: number, bossTransform: string,
  *   glow: {cy: number, r: number}}} The trail's geometry, plus how this pack
@@ -1132,6 +1526,7 @@ export function layout(season) {
   const route = Array.isArray(season?.route) && season.route.length ? season.route : ["hill"]
   const width = MARGIN * 2 + route.length * SPACING
   const spots = placements(route)
+  const runs = groundRuns(width, spots)
   // Stops sit on the resting ground, never the deformed ground: the character
   // stands at the near edge of each obstacle, not down in a basin or a void.
   const stops = Array.from({ length: route.length + 1 }, (_, i) => {
@@ -1143,7 +1538,8 @@ export function layout(season) {
     height: HEIGHT,
     viewportWidth: VIEWPORT_WIDTH,
     viewBox: `0 0 ${VIEWPORT_WIDTH} ${HEIGHT}`,
-    groundSegments: groundSegmentsFor(width, spots),
+    groundSegments: groundSegmentsFor(runs),
+    groundEdges: groundEdgesFor(runs, season?.id),
     stops,
     obstacles: spots.map((spot) => ({ kind: spot.kind, x: spot.x, y: restingGroundY(spot.x) })),
     // How the shared pieces are scaled and placed in *this* pack's coordinate
@@ -1383,6 +1779,55 @@ export function traversal(kind, from, to) {
   keyframes[0] = { transform: at(from, 0, deform(0)), offset: 0 }
   keyframes[keyframes.length - 1] = { transform: at(to), offset: 1 }
   return { keyframes, options: { duration: shape.duration, easing: "linear" } }
+}
+
+/**
+ * How long the reduced-motion crossing takes.
+ *
+ * Short enough to read as a transition rather than a journey, long enough that
+ * the eye catches it: the crossings it stands in for run 620ms to 1150ms, and
+ * anything under about 150ms is indistinguishable from a cut.
+ * @private
+ */
+const REDUCED_MS = 240
+
+/**
+ * The same crossing for a player who has asked for less motion.
+ *
+ * `prefers-reduced-motion` used to mean *no* motion here: the character was
+ * placed on the next stop instantly and the camera jumped after it. That reads
+ * as the game having no crossings at all, and the crossing is the main piece of
+ * feedback the trail gives -- someone playing with the system setting on was
+ * told nothing had happened every time something had. The preference asks for
+ * less vestibular load, not for the interface to stop telling the truth.
+ *
+ * So: a plain slide, and nothing else. Two keyframes, so the browser
+ * interpolates a straight line; `linear`, so there is no acceleration to feel;
+ * no arc, no hang, no squash and no horizontal compression, because those four
+ * are exactly the swooping and elastic motion the preference exists to
+ * suppress. The distance travelled is the same, which is the point -- the
+ * character is *seen* to move from one stop to the next.
+ *
+ * The kind is ignored on purpose. Giving a mountain a heavier reduced crossing
+ * than a hill would be reintroducing the character of the motion through the
+ * back door, and character is what has been asked for less of.
+ *
+ * Ends on exactly `standing(to)` and nothing else, for the `fill: "forwards"`
+ * reason spelled out on `traversal`.
+ *
+ * @param {string} _kind - The obstacle kind; deliberately unused
+ * @param {{x: number, y: number}} from - The stop being left
+ * @param {{x: number, y: number}} to - The stop being reached
+ * @returns {{keyframes: Array<Object>, options: Object}} Input for `Element.animate`
+ */
+export function reducedTraversal(_kind, from, to) {
+  return {
+    keyframes: [
+      { transform: standing(from), offset: 0 },
+      { transform: standing(to), offset: 1 },
+    ],
+    options: { duration: REDUCED_MS, easing: "linear" },
+  }
 }
 
 /**

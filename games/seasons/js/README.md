@@ -125,22 +125,30 @@ the fields it derives from. `GameState.rehydrate` regenerates it on load.
 
 ### Art — `art/`
 
-A pack exports eleven names, and `art/placeholder.js` is the reference
+A pack exports twelve names, and `art/placeholder.js` is the reference
 implementation of every one.
 
 - `id`, `name` — identity, for the registry and any future art-style picker.
 - `palette(seasonId)` → CSS custom properties, `--season-*` only; the game's
   chrome (`--sn-*`) is hard-coded in `styles/main.css` and out of a pack's reach.
 - `character(id, onTrail)`, `item(seasonId, rare)`, `obstacle(kind, seasonId)`,
-  `villain()`, `backdrop(seasonId, width)` → a `Drawing`, `{element, viewBox}`.
-  An obstacle is drawn with its origin on the ground so `layout` can place it by
-  translation alone, and takes a season so one drawing recolours for all four;
-  `backdrop` is generated at the trail's real width. `onTrail` picks a **pose**,
+  `villain()` → a `Drawing`, `{element, viewBox}`. An obstacle is drawn with its
+  origin on the ground so `layout` can place it by translation alone, and takes a
+  season so one drawing recolours for all four. `onTrail` picks a **pose**,
   not a subset of shapes — the sloth hangs from a branch on its card and walks on
   the trail. It used to strip out anything tagged `data-hangs-from`, which got
   the branch off the trail but left the sloth walking with its arms above its
   head, and a subtractive flag means nothing to a pack backed by images, where a
   pose is a different frame. A character with one pose ignores the flag.
+- `backdrop(seasonId, width)` → `{layers, viewBox}`, **not** a `Drawing`. Each
+  layer carries an `element`, a `span`, and a `parallax` factor saying how fast
+  it pans relative to the ground: the sky is pinned at 0, the ridges drift, and
+  the ground the character walks on is 1. That is what gives the trail depth —
+  the whole backdrop used to sit inside the camera group, so distant hills panned
+  at exactly the speed of the earth underfoot. Every layer is generated at the
+  trail's real width, which is what stops a slower plane running out of scenery
+  at the end of a long trail; a fixed-size vignette stretched across a 5000-unit
+  trail also flattened its hills into bands.
 - `layout(season)` → the trail's geometry: `width`, `height`, `viewportWidth`,
   `viewBox`, `groundSegments`, `stops`, `obstacles`. `stops[i]` is where the
   character stands facing obstacle `i`, `stops[route.length]` is the boss, and
@@ -160,6 +168,13 @@ implementation of every one.
   whole trail viewBox otherwise, which lifts the character rather than
   compressing it.
 - `standing(stop)` → a CSS transform, for placing the token with no animation.
+- `reducedTraversal(kind, from, to)` → the same shape as `traversal`, for a
+  player who has asked for less motion: a plain slide between the two stops, no
+  arc, hang or squash, and the kind deliberately ignored. It exists because the
+  reduced-motion path used to _delete_ the crossing rather than reduce it — the
+  character teleported and the camera did not pan, so the game's main piece of
+  feedback simply did not happen, and it read as broken rather than as
+  considerate. A pack that omits this one degrades to instant placement.
 
 The pack owning `traversal` as well as the drawings is the point of the seam: a
 sprite pack could swap frames where this one arcs a transform, and return

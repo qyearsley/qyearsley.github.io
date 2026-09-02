@@ -9,11 +9,33 @@
  * in constants.ART.PACK. The graphics are undecided, so the decision is
  * isolated rather than deferred.
  *
- * A pack must export eleven names: `id`, `name`, `palette`, the drawings
+ * A pack must export twelve names: `id`, `name`, `palette`, the drawings
  * `character`, `item`, `obstacle`, `villain` and `backdrop`, and the
- * trail's geometry and motion, `layout`, `traversal` and `standing`. See
- * placeholder.js for the reference implementation and the exact signatures, and
- * ../README.md for what each one returns and where the recipe lives.
+ * trail's geometry and motion, `layout`, `traversal`, `reducedTraversal` and
+ * `standing`. See placeholder.js for the reference implementation and the exact
+ * signatures, and ../README.md for what each one returns and where the recipe
+ * lives.
+ *
+ * Two of those have return shapes worth stating here rather than only in the
+ * reference pack, because both are contracts GameUI reads directly:
+ *
+ * - **`backdrop(seasonId, width)` returns layers, not a drawing.** It used to
+ *   hand back a single `Drawing` and GameUI appended it inside the one camera
+ *   group, which meant a hill on the horizon panned at exactly the speed of the
+ *   grass under the character's feet -- no depth at all. It now returns
+ *   `{layers, viewBox}`, back to front, and each layer says how fast it moves;
+ *   GameUI pans layer `n` by `offset * factor[n]` and owns no opinion about how
+ *   many layers there are or what is in them. A pack wanting the old behaviour
+ *   returns one layer at a factor of 1.
+ * - **`reducedTraversal(kind, from, to)` is the crossing for a player who has
+ *   asked for less motion**, in the same `{keyframes, options}` shape as
+ *   `traversal`. It exists because `prefers-reduced-motion` used to mean *no*
+ *   motion: GameUI placed the character on the next stop instantly, and the
+ *   crossing -- the trail's main piece of feedback -- simply stopped happening
+ *   for anyone with the system setting on. Deciding what "less motion" looks
+ *   like is a drawing decision, so it belongs to the pack; GameUI only chooses
+ *   *when* to ask for it. A pack that does not export one degrades to instant
+ *   placement, which is the old behaviour and never worse than it.
  *
  * - Palettes live here, not in seasons.js, because "what colour is autumn" is a
  *   question about the art and a new pack should be free to answer it
@@ -75,6 +97,30 @@ export function svg(tag, attrs = {}, children = []) {
  * @typedef {Object} Drawing
  * @property {SVGElement} element - A `<g>` holding the artwork
  * @property {string} viewBox     - The viewBox the artwork assumes
+ */
+
+/**
+ * One plane of a backdrop, and how fast it pans.
+ *
+ * `factor` is the fraction of the ground's own scroll this layer takes: 0 is
+ * nailed to the screen, 1 moves exactly with the trail. It must not exceed 1 --
+ * a layer faster than the ground overtakes the character, which the eye reads
+ * as the background sliding backwards.
+ *
+ * `span` is how wide the layer's artwork actually is, in trail units, and it is
+ * the layer's promise that no gap can open at either end. GameUI clamps the
+ * camera to `[0, width - viewportWidth]`, so the furthest into a layer it will
+ * ever look is `factor * (width - viewportWidth) + viewportWidth`, and `span`
+ * has to be at least that. Generating every layer at the trail's full width
+ * satisfies it for any factor at or below 1, which is what the placeholder pack
+ * does; a pack that tiled a short strip instead would have to say how far the
+ * tiling reaches.
+ *
+ * @typedef {Object} BackdropLayer
+ * @property {SVGElement} element - A `<g>` holding this plane's artwork
+ * @property {string} name        - What the plane is, e.g. "sky"; for debugging
+ * @property {number} factor      - Its share of the camera's scroll, 0 to 1
+ * @property {number} span        - How wide its artwork is, in trail units
  */
 
 /**

@@ -1,3 +1,5 @@
+import { ANSWER_KEYS } from "./constants.js"
+
 /**
  * Manages event listeners and callbacks for the game
  */
@@ -352,7 +354,7 @@ export class EventManager {
   }
 
   /**
-   * Setup keyboard shortcuts (1-4 for answer buttons)
+   * Setup keyboard shortcuts (a-d for answer buttons)
    */
   setupKeyboardShortcuts() {
     document.addEventListener("keydown", (e) => {
@@ -367,18 +369,26 @@ export class EventManager {
         return
       }
 
-      // Handle number keys 1-4
-      if (e.key >= "1" && e.key <= "4") {
-        e.preventDefault()
-        const buttonIndex = parseInt(e.key) - 1
-        const answerButtons = document.querySelectorAll(".answer-button")
+      // Leave browser and OS shortcuts alone
+      if (e.metaKey || e.ctrlKey || e.altKey) {
+        return
+      }
 
-        if (
-          answerButtons[buttonIndex] &&
-          !answerButtons[buttonIndex].classList.contains("disabled")
-        ) {
-          answerButtons[buttonIndex].click()
-        }
+      // Handle letter keys a-d. Letters read as a name for the choice, where a
+      // digit would look like one more number in a game full of them.
+      const buttonIndex = ANSWER_KEYS.indexOf(e.key.toLowerCase())
+      if (buttonIndex === -1) {
+        return
+      }
+
+      e.preventDefault()
+      const answerButtons = document.querySelectorAll(".answer-button")
+
+      if (
+        answerButtons[buttonIndex] &&
+        !answerButtons[buttonIndex].classList.contains("disabled")
+      ) {
+        answerButtons[buttonIndex].click()
       }
     })
   }

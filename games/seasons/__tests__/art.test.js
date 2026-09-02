@@ -45,7 +45,7 @@ import * as placeholder from "../js/art/placeholder.js"
 import { CHARACTERS } from "../js/characters.js"
 import { ART, SEASON_ORDER } from "../js/constants.js"
 import { isObstacleKind, OBSTACLE_KINDS } from "../js/obstacles.js"
-import { SEASON_LIST } from "../js/seasons.js"
+import { getSeason, SEASON_LIST } from "../js/seasons.js"
 
 /** Every character id the roster offers. */
 const CHARACTER_IDS = CHARACTERS.map((character) => character.id)
@@ -127,6 +127,61 @@ function markup(drawing) {
 }
 
 /**
+ * A whole backdrop's markup, layer by layer.
+ *
+ * `backdrop` is the one pack function that does not return a `Drawing`: it
+ * returns a stack of planes, each with its own parallax factor, so there is no
+ * single element to serialize.
+ * @param {{layers: Array<{element: Element}>}} backdrop - What `backdrop` returned
+ * @returns {string} Every layer's markup, in order
+ */
+function backdropMarkup(backdrop) {
+  return backdrop.layers.map((layer) => layer.element.outerHTML).join("\n")
+}
+
+/**
+ * Assert a value is a usable backdrop: an ordered stack of planes, each a real
+ * drawing, each declaring how fast it pans and how wide it is.
+ *
+ * A layer may legitimately be empty -- three of the four seasons put nothing in
+ * the fixed sky beyond its colour, and a season with no weather would have an
+ * empty air layer -- so the populated check is on the stack rather than on each
+ * plane.
+ * @param {unknown} backdrop - The value `backdrop` returned
+ * @param {number} span - The width it was asked for
+ */
+function expectBackdrop(backdrop, span) {
+  expect(backdrop).toBeTruthy()
+  const { layers, viewBox } = /** @type {{layers: Array<Object>, viewBox: string}} */ (backdrop)
+  expect(Array.isArray(layers)).toBe(true)
+  expect(layers.length).toBeGreaterThan(0)
+  expect(layers.some((layer) => layer.element.childElementCount > 0)).toBe(true)
+
+  let previous = -Infinity
+  for (const layer of layers) {
+    expect(layer.element).toBeInstanceOf(window.SVGElement)
+    expect(layer.element.namespaceURI).toBe(SVG_NS)
+    expect(typeof layer.name).toBe("string")
+    expect(layer.name.length).toBeGreaterThan(0)
+    expect(Number.isFinite(layer.factor)).toBe(true)
+    expect(layer.factor).toBeGreaterThanOrEqual(0)
+    // Nothing may outrun the ground. A layer faster than the trail overtakes
+    // the character, which the eye reads as the background sliding backwards.
+    expect(layer.factor).toBeLessThanOrEqual(1)
+    // Back to front. A nearer plane drawn behind a further one is a stack in
+    // the wrong order, which no factor can rescue.
+    expect(layer.factor).toBeGreaterThanOrEqual(previous)
+    previous = layer.factor
+    expect(Number.isFinite(layer.span)).toBe(true)
+    expect(layer.span).toBeGreaterThan(0)
+  }
+
+  const [, , boxWidth, boxHeight] = parseViewBox(viewBox)
+  expect(boxWidth).toBe(span)
+  expect(boxHeight).toBeGreaterThan(0)
+}
+
+/**
  * The two numbers in a `translate(Xpx, Ypx)`, asserting the string is one.
  * @param {unknown} transform - A CSS transform from `standing` or a keyframe
  * @returns {number[]} [x, y] in user units
@@ -137,6 +192,25 @@ function translatePx(transform) {
   expect(match).not.toBeNull()
   return [Number(match[1]), Number(match[2])]
 }
+
+/**
+ * Every y coordinate in a path `d`, in order.
+ *
+ * Works because every path this pack emits for the ground uses only absolute
+ * `M`, `L` and `Q` commands, all of which take whole `x y` pairs -- so the odd
+ * numbers in the string are the y values and nothing else is. A pack using
+ * relative commands or arcs would need its own reader; these assertions are
+ * placeholder-specific and say so.
+ * @param {string} d - An SVG path
+ * @returns {number[]} Its y coordinates
+ */
+function pathYs(d) {
+  const numbers = (d.match(/-?\d+(?:\.\d+)?/g) ?? []).map(Number)
+  return numbers.filter((_value, index) => index % 2 === 1)
+}
+
+/** The longest trail in the game, which is where a coverage bug shows up first. */
+const LONGEST = SEASON_LIST.reduce((a, b) => (b.route.length > a.route.length ? b : a))
 
 /**
  * Assert a layout is internally consistent, whatever route produced it.
@@ -162,7 +236,12 @@ function expectLayout(plan) {
 
   expect(Array.isArray(plan.groundSegments)).toBe(true)
   expect(plan.groundSegments.length).toBeGreaterThan(0)
-  for (const d of plan.groundSegments) {
+  // One band of surface material per stretch of ground, and never a band with
+  // no ground under it: the two lists are built from the same samples, so a
+  // length mismatch means the band has stepped over a break the ground did not.
+  expect(Array.isArray(plan.groundEdges)).toBe(true)
+  expect(plan.groundEdges).toHaveLength(plan.groundSegments.length)
+  for (const d of [...plan.groundSegments, ...plan.groundEdges]) {
     expect(typeof d).toBe("string")
     expect(d.trim().startsWith("M")).toBe(true)
     expect(d).not.toContain("NaN")
@@ -337,6 +416,7 @@ describe("the placeholder pack fulfils the art-pack contract", () => {
     ["layout", "function"],
     ["obstacle", "function"],
     ["traversal", "function"],
+    ["reducedTraversal", "function"],
     ["standing", "function"],
     ["backdrop", "function"],
   ])("exports %s as a %s", (name, type) => {
@@ -468,6 +548,62 @@ describe("the placeholder pack fulfils the art-pack contract", () => {
     it("hands back the same geometry every call, so two callers cannot disagree", () => {
       const season = SEASON_LIST[0]
       expect(pack.layout(season)).toEqual(pack.layout(season))
+    })
+
+    // The band of material along the top of the ground. The two places it can
+    // go wrong are the two places the ground is not flat, and both are here: a
+    // band drawn from its own idea of where the ground is floats over a river
+    // basin, and a band that does not know where the ground stops carries on
+    // across a gap. Neither throws, and neither shows up in a test that only
+    // asks whether a path was produced.
+    describe("the ground's textured edge", () => {
+      it("breaks with the ground at a gap, and nowhere else", () => {
+        const gapless = pack.layout({ id: "spring", route: ["hill", "boulder", "thicket"] })
+        const withGap = pack.layout({ id: "spring", route: ["hill", "gap", "thicket"] })
+        expect(gapless.groundEdges).toHaveLength(1)
+        expect(withGap.groundEdges).toHaveLength(withGap.groundSegments.length)
+        expect(withGap.groundEdges.length).toBeGreaterThan(1)
+      })
+
+      it("follows the ground down into a river basin instead of bridging it", () => {
+        const flat = pack.layout({ id: "spring", route: ["hill"] })
+        const river = pack.layout({ id: "spring", route: ["river"] })
+        const deepest = (plan) => Math.max(...pathYs(plan.groundEdges[0]))
+        // The same trail with a basin sunk into the middle of it. If the band
+        // ignored the deformation the two would come out within a unit or two
+        // of each other, because both trails roll by the same amount.
+        expect(deepest(river) - deepest(flat)).toBeGreaterThan(30)
+      })
+
+      it.each(SEASON_LIST.map((season) => [season.id, season]))(
+        "lies on %s's ground rather than above it",
+        (_id, season) => {
+          const plan = pack.layout(season)
+          plan.groundEdges.forEach((edge, index) => {
+            // The ground path closes down to the bottom of the trail, so its own
+            // corners have to come off before it can be read as a surface.
+            const surface = pathYs(plan.groundSegments[index]).filter((y) => y !== plan.height)
+            const band = pathYs(edge)
+            // Never below the surface -- a band hanging under the ground would
+            // be buried -- and never far above it. The exact clearance is the
+            // pack's business; what is pinned is that it is a band on a surface
+            // and not a second landscape floating over one.
+            expect(Math.max(...band)).toBeLessThanOrEqual(Math.max(...surface) + 0.01)
+            expect(Math.min(...band)).toBeGreaterThan(Math.min(...surface) - 25)
+          })
+        },
+      )
+
+      it("textures every season differently, or the ground says nothing about when it is", () => {
+        const drawn = SEASON_LIST.map((season) => pack.layout(season).groundEdges.join())
+        // Route lengths differ too, so this cannot fail for the wrong reason on
+        // its own -- but the same route in four seasons still has to differ.
+        const sameRoute = SEASON_ORDER.map((seasonId) =>
+          pack.layout({ id: seasonId, route: ["hill", "river"] }).groundEdges.join(),
+        )
+        expect(new Set(drawn).size).toBe(SEASON_LIST.length)
+        expect(new Set(sameRoute).size).toBe(SEASON_ORDER.length)
+      })
     })
   })
 
@@ -617,6 +753,59 @@ describe("the placeholder pack fulfils the art-pack contract", () => {
     )
   })
 
+  // The crossing a player who has asked for less motion gets instead. It used
+  // not to exist: GameUI placed the character on the next stop instantly, so
+  // the trail's main piece of feedback simply stopped happening for anyone with
+  // the system setting on. What is checked here is that the replacement is a
+  // real move and that it is *plain* -- the arc, the hang and the squash are
+  // precisely the swooping and elastic motion the preference asks to be rid of.
+  describe("reducedTraversal", () => {
+    it.each(OBSTACLE_KINDS)("slides the character across a %s", (kind) => {
+      const { keyframes, options } = pack.reducedTraversal(kind, FROM, TO)
+      expect(keyframes.length).toBeGreaterThanOrEqual(2)
+      expect(keyframes[0].transform).toBe(pack.standing(FROM))
+      // Exactly `standing(to)`, for the `fill: "forwards"` reason above: a
+      // reduced crossing that left a transform on its last frame would dress the
+      // character in it for the whole of the next question just as loudly.
+      expect(keyframes[keyframes.length - 1].transform).toBe(pack.standing(TO))
+      expect(Number.isFinite(options.duration)).toBe(true)
+      expect(options.duration).toBeGreaterThan(0)
+      // Shorter than the crossing it stands in for. A reduced motion that took
+      // as long as the full one would be a slow drift, which is worse.
+      expect(options.duration).toBeLessThan(pack.traversal(kind, FROM, TO).options.duration)
+    })
+
+    it("moves the character somewhere, or it is a cut with extra steps", () => {
+      for (const kind of OBSTACLE_KINDS) {
+        const { keyframes } = pack.reducedTraversal(kind, FROM, TO)
+        expect(keyframes[0].transform).not.toBe(keyframes[keyframes.length - 1].transform)
+      }
+    })
+
+    it("keeps to the straight line between the stops, with nothing deformed", () => {
+      const [startX, startY] = translatePx(pack.standing(FROM))
+      const [endX, endY] = translatePx(pack.standing(TO))
+      for (const kind of OBSTACLE_KINDS) {
+        for (const frame of pack.reducedTraversal(kind, FROM, TO).keyframes) {
+          expect(frame.transform).not.toMatch(/scale/i)
+          const [x, y] = translatePx(frame.transform)
+          const along = (x - startX) / (endX - startX)
+          expect(y).toBeCloseTo(startY + (endY - startY) * along, 6)
+        }
+      }
+    })
+
+    it.each([["nope"], [null], [undefined]])(
+      "reducedTraversal(%p) still returns a usable animation",
+      (kind) => {
+        const { keyframes, options } = pack.reducedTraversal(kind, FROM, TO)
+        expect(keyframes.length).toBeGreaterThanOrEqual(2)
+        expect(options.duration).toBeGreaterThan(0)
+        for (const frame of keyframes) expect(frame.transform).not.toContain("NaN")
+      },
+    )
+  })
+
   describe("standing", () => {
     it("turns a stop into a transform that tracks the stop's coordinates", () => {
       const at = (stop) => translatePx(pack.standing(stop))
@@ -645,37 +834,87 @@ describe("the placeholder pack fulfils the art-pack contract", () => {
   })
 
   describe("backdrop", () => {
-    it.each(SEASON_ORDER)("draws a backdrop for %s", (seasonId) => {
-      expectDrawing(pack.backdrop(seasonId, 4000))
+    it.each(SEASON_ORDER)("draws a layered backdrop for %s", (seasonId) => {
+      expectBackdrop(pack.backdrop(seasonId, 4000), 4000)
     })
 
     it("draws a different backdrop for each season", () => {
-      const drawn = SEASON_ORDER.map((seasonId) => markup(pack.backdrop(seasonId, 4000)))
+      const drawn = SEASON_ORDER.map((seasonId) => backdropMarkup(pack.backdrop(seasonId, 4000)))
       expect(new Set(drawn).size).toBe(SEASON_ORDER.length)
     })
 
+    // The whole point of the layer stack. One factor for everything is what the
+    // backdrop used to be, and it meant a hill on the horizon panned at exactly
+    // the speed of the grass underfoot -- no depth at all, however many bands
+    // were drawn.
+    it("gives its layers different speeds, or the stack is one flat painting", () => {
+      const factors = pack.backdrop("spring", 4000).layers.map((layer) => layer.factor)
+      expect(new Set(factors).size).toBeGreaterThan(1)
+      // Something at or near the horizon, and something keeping up with the
+      // ground. A stack whose factors were all 0.9 would pass the check above
+      // and still read as flat.
+      expect(Math.min(...factors)).toBeLessThan(0.4)
+      expect(Math.max(...factors)).toBeGreaterThan(0.6)
+    })
+
+    it("gives every season the same stack, so no season is half-built", () => {
+      const shapes = SEASON_ORDER.map((seasonId) =>
+        pack.backdrop(seasonId, 4000).layers.map((layer) => [layer.name, layer.factor]),
+      )
+      for (const stack of shapes) expect(stack).toEqual(shapes[0])
+    })
+
     // Generated at the trail's real width rather than scaled to it, which is
-    // width, which is the whole difference between the two. A backdrop that
-    // ignored the width would be stretched across the trail by the browser and
-    // its hills would flatten into bands.
+    // the whole difference between the two. A backdrop that ignored the width
+    // would be stretched across the trail by the browser and its hills would
+    // flatten into bands.
     it("scales to the width it is given", () => {
       const narrow = pack.backdrop("spring", 1200)
       const wide = pack.backdrop("spring", 4800)
       expect(parseViewBox(narrow.viewBox)[2]).toBe(1200)
       expect(parseViewBox(wide.viewBox)[2]).toBe(4800)
-      expect(markup(wide)).not.toBe(markup(narrow))
-      expect(markup(wide)).not.toContain("NaN")
+      for (const layer of narrow.layers) expect(layer.span).toBe(1200)
+      for (const layer of wide.layers) expect(layer.span).toBe(4800)
+      expect(backdropMarkup(wide)).not.toBe(backdropMarkup(narrow))
+      expect(backdropMarkup(wide)).not.toContain("NaN")
     })
 
     it.each(SEASON_LIST.map((season) => [season.id, season]))(
       "fills the whole %s trail",
       (_id, season) => {
         const plan = pack.layout(season)
-        const drawing = pack.backdrop(season.id, plan.width)
-        expectDrawing(drawing)
-        expect(parseViewBox(drawing.viewBox)[2]).toBe(plan.width)
+        const backdrop = pack.backdrop(season.id, plan.width)
+        expectBackdrop(backdrop, plan.width)
       },
     )
+
+    // Determinism, and the reason it matters: the scene is rebuilt whenever the
+    // season or the character changes, and a backdrop scattered by chance would
+    // deal a new snowfall each time. Nothing in this game calls Math.random.
+    it.each(SEASON_ORDER)("builds %s identically every time it is asked", (seasonId) => {
+      expect(backdropMarkup(pack.backdrop(seasonId, 3777))).toBe(
+        backdropMarkup(pack.backdrop(seasonId, 3777)),
+      )
+    })
+
+    // The failure mode a slower layer invites, checked at both ends of the
+    // longest trail in the game rather than in the abstract. GameUI clamps the
+    // camera to [0, width - viewportWidth] and pans layer n by offset * factor,
+    // so the furthest into a layer it ever looks is factor * furthest +
+    // viewportWidth. A layer narrower than that runs out mid-walk and the trail
+    // ends in a band of blank canvas -- silently, because nothing throws.
+    it("never runs out of landscape at either end of the longest trail", () => {
+      const plan = pack.layout(LONGEST)
+      const furthest = plan.width - plan.viewportWidth
+      expect(furthest).toBeGreaterThan(0)
+      for (const layer of pack.backdrop(LONGEST.id, plan.width).layers) {
+        for (const offset of [0, furthest]) {
+          const shown = offset * layer.factor
+          expect(shown).toBeGreaterThanOrEqual(0)
+          expect(layer.span).toBeGreaterThanOrEqual(shown + plan.viewportWidth)
+        }
+      }
+    })
   })
 })
 
@@ -717,13 +956,80 @@ describe("the placeholder pack's winter", () => {
     )
   })
 
-  it("falls snow through its backdrop and no other season's", () => {
-    const shapes = (seasonId) => placeholder.backdrop(seasonId, 3000).element.childElementCount
-    for (const seasonId of others) expect(shapes("winter")).toBeGreaterThan(shapes(seasonId))
-    // Deterministic, or the trail would flicker every time the scene is rebuilt.
-    expect(markup(placeholder.backdrop("winter", 3000))).toBe(
-      markup(placeholder.backdrop("winter", 3000)),
-    )
+  it("falls snow through its backdrop, and something different through everyone else's", () => {
+    const air = (seasonId) =>
+      placeholder.backdrop(seasonId, 3000).layers.find((layer) => layer.name === "air")
+    expect(air("winter").element.childElementCount).toBeGreaterThan(0)
+    for (const seasonId of others) {
+      // Every season has weather now -- blossom, haze, leaves -- so a count is
+      // no longer what tells winter apart. The markup is.
+      expect(air("winter").element.outerHTML).not.toBe(air(seasonId).element.outerHTML)
+    }
+  })
+})
+
+// Also placeholder-specific: the layer stack is this pack's answer to "the
+// landscape is a painted flat", and the two properties below are the ones that
+// are invisible until they are wrong. A ridge that stops short leaves blank
+// canvas at the end of a trail; a prop drawn a few units too low settles on the
+// ground the character is walking on, which is the one place weather must not
+// be. Both are cheap to check and neither throws when broken.
+describe("the placeholder pack's parallax backdrop", () => {
+  /** Wider than any real trail, and deliberately not a multiple of the ridge step. */
+  const SPAN = 5100
+
+  /** The layers of a season's backdrop, by name. */
+  const stack = (seasonId) =>
+    Object.fromEntries(placeholder.backdrop(seasonId, SPAN).layers.map((l) => [l.name, l]))
+
+  it.each(SEASON_ORDER)("paints %s's sky and both ridges edge to edge", (seasonId) => {
+    const layers = stack(seasonId)
+    const sky = layers.sky.element.firstElementChild
+    expect(sky.tagName).toBe("rect")
+    expect(sky.getAttribute("x")).toBe("0")
+    expect(sky.getAttribute("width")).toBe(String(SPAN))
+    for (const name of ["far", "near"]) {
+      const d = layers[name].element.firstElementChild.getAttribute("d")
+      expect(d.startsWith("M 0 ")).toBe(true)
+      // The ridge is sampled every 40 units and 5100 is not a multiple of 40,
+      // so the last sample has to be written at the span itself. Left to the
+      // loop it stopped 20 units short and the top edge ran diagonally down
+      // into the bottom corner -- invisible on a fast layer, and this pack has
+      // none, but it is one factor change away from being on screen.
+      expect(d).toContain(` L ${SPAN} `)
+    }
+  })
+
+  it.each(SEASON_ORDER)("keeps everything %s puts in the air off the ground", (seasonId) => {
+    // The highest the ground can ever be: every obstacle profile pushes it down
+    // from its resting line, never up, so the stops are the ceiling.
+    const highestGround = Math.min(...placeholder.layout(getSeason(seasonId)).stops.map((s) => s.y))
+    const props = Array.from(stack(seasonId).air.element.children)
+    expect(props.length).toBeGreaterThan(0)
+    for (const prop of props) {
+      // The lowest point the shape can reach. A rotated ellipse can present
+      // either radius downwards, so the larger of the two is the honest figure.
+      const radius = Math.max(
+        Number(prop.getAttribute("r") ?? 0),
+        Number(prop.getAttribute("rx") ?? 0),
+        Number(prop.getAttribute("ry") ?? 0),
+        Number(prop.getAttribute("stroke-width") ?? 0),
+      )
+      const centre = prop.hasAttribute("cy")
+        ? Number(prop.getAttribute("cy"))
+        : Math.max(...pathYs(prop.getAttribute("d")))
+      expect(centre + radius).toBeLessThan(highestGround)
+    }
+  })
+
+  it("scatters its props without ever calling Math.random", () => {
+    // The determinism check in the contract block covers the output; this one
+    // covers the mechanism, because a pack could be deterministic today by
+    // luck of a seeded stub and stop being so tomorrow.
+    const random = jest.spyOn(Math, "random")
+    for (const seasonId of SEASON_ORDER) placeholder.backdrop(seasonId, SPAN)
+    expect(random).not.toHaveBeenCalled()
+    random.mockRestore()
   })
 })
 

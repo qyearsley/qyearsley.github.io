@@ -33,7 +33,7 @@ Each level consists of 5 questions.
 
 - **Tab** - Navigate between elements
 - **j/k** - Move between navigation links (vim-style)
-- **1, 2, 3, 4** - Quick select answers during questions
+- **A, B, C, D** - Quick select answers during questions
 - **Enter/Space** - Activate buttons and submit keyboard answers
 - **Home button** - Return to start screen from garden hub
 

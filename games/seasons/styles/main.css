@@ -504,8 +504,30 @@ select:focus-visible {
   will-change: transform;
 }
 
+/* One backdrop plane. Each pans at its own fraction of the camera's offset,
+   which is what puts distance between the sky, the two ridges and the weather
+   falling through them. JS owns the transform here too. */
+.trail-layer {
+  will-change: transform;
+}
+
+/* A plane with a parallax factor of 0 never moves, so promoting it to its own
+   compositor layer buys nothing and costs a texture the size of the trail. */
+.trail-layer.is-still {
+  will-change: auto;
+}
+
 .trail-ground {
   fill: var(--season-ground);
+}
+
+/* The band of material lying along the top of the ground -- grass, fallen
+   leaves, or a snow crust, depending on the season. The shape comes from the
+   art pack's `groundEdges`, which follows the deformed ground line exactly; all
+   that is decided here is that it is painted in the season's own crust colour,
+   the same arrangement `.trail-ground` above already uses. */
+.trail-ground-edge {
+  fill: var(--season-crust);
 }
 
 /* Behind a mountain rather than around a dot, so the light haloes the thing
@@ -640,11 +662,17 @@ body.is-glowing-question .question-prompt {
     border-color 0.15s ease;
 }
 
-/* The 1-4 shortcut, shown only where there is a real pointer -- a laptop, not
+/* The A-D shortcut, shown only where there is a real pointer -- a laptop, not
    the iPad the game is mostly played on. `pointer: fine` is the closest thing
-   to "there is probably a keyboard too", and it keeps a stray digit away from
-   the answers on a touch screen. Drawn from `data-key` so the button's text
-   stays exactly the number, which is what the tests and the screen reader read. */
+   to "there is probably a keyboard too", and it keeps the marker off a screen
+   where the shortcut does not exist. Drawn from `data-key` so the button's text
+   stays exactly the number, which is what the tests and the screen reader read.
+
+   A letter, not a digit: the answers are numbers, so a digit in the corner read
+   as part of one. `left` is a pixel wider than it was for that reason -- "A"
+   has far less side bearing than "1", so the same value put it visibly closer
+   to the edge. `line-height: 1` pins the glyph box to its own font size rather
+   than inheriting the 1.6rem answer's leading. */
 @media (hover: hover) and (pointer: fine) {
   .choice {
     position: relative;
@@ -654,9 +682,10 @@ body.is-glowing-question .question-prompt {
     content: attr(data-key);
     position: absolute;
     top: 6px;
-    left: 9px;
+    left: 10px;
     font-size: 0.7rem;
     font-weight: 600;
+    line-height: 1;
     color: var(--sn-ink-muted);
   }
 
