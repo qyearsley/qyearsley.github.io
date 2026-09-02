@@ -2,6 +2,7 @@ import { describe, test, expect } from "@jest/globals"
 import * as constants from "../js/constants.js"
 import {
   ALL_TABLES,
+  ANSWER_KEYS,
   CARD_TIERS,
   DAILY_GOAL,
   DAY_MS,
@@ -254,6 +255,30 @@ describe("DISTRACTORS", () => {
 
     test("the priority window covers the distractors needed, so no padding path exists", () => {
       expect(DISTRACTORS.PRIORITY_WINDOW).toBeGreaterThanOrEqual(DISTRACTORS.OPTION_COUNT - 1)
+    })
+  })
+})
+
+describe("ANSWER_KEYS", () => {
+  describe("shape", () => {
+    test("is a-d, in tile order", () => {
+      expect(ANSWER_KEYS).toEqual(["a", "b", "c", "d"])
+    })
+
+    test("is lowercase single letters, never digits", () => {
+      for (const key of ANSWER_KEYS) {
+        expect(key).toMatch(/^[a-z]$/)
+      }
+    })
+
+    test("has no duplicates, so no two tiles share a key", () => {
+      expect(new Set(ANSWER_KEYS).size).toBe(ANSWER_KEYS.length)
+    })
+  })
+
+  describe("coverage of the tiles", () => {
+    test("there is a key for every tile a normal question shows", () => {
+      expect(ANSWER_KEYS.length).toBeGreaterThanOrEqual(DISTRACTORS.OPTION_COUNT)
     })
   })
 })
@@ -864,6 +889,7 @@ describe("module surface", () => {
       ["CARD_TIERS", CARD_TIERS],
       ["KEYPAD.KEYS", KEYPAD.KEYS],
       ["ALL_TABLES", ALL_TABLES],
+      ["ANSWER_KEYS", ANSWER_KEYS],
     ])("%s is frozen", (_name, table) => {
       expect(Object.isFrozen(table)).toBe(true)
     })

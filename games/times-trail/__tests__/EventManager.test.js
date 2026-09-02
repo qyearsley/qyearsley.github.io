@@ -10,6 +10,8 @@ import { readFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { EventManager } from "../js/EventManager.js"
+import { Keypad } from "../js/Keypad.js"
+import { ANSWER_KEYS } from "../js/constants.js"
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const INDEX_HTML = readFileSync(join(HERE, "..", "index.html"), "utf-8")
@@ -70,8 +72,12 @@ function makeMockUI() {
 
 /**
  * Render answer tiles the way GameUI.renderTiles does: `.answer-btn` buttons
- * with a `data-answer` value, a nested label span, and deliberately no
- * `data-correct` attribute.
+ * with a `data-answer` value, the `ANSWER_KEYS` letter in `data-key`, a nested
+ * label span, and deliberately no `data-correct` attribute.
+ *
+ * `data-key` is here for fidelity only. The shortcut resolves a tile by
+ * position, not by reading the attribute back off the markup, so a tile with a
+ * missing or wrong `data-key` is still selectable -- see the tests below.
  */
 function renderTiles(values, { disabledIndex = -1, correctAttrs = false } = {}) {
   const container = document.getElementById("answer-tiles")
@@ -81,6 +87,8 @@ function renderTiles(values, { disabledIndex = -1, correctAttrs = false } = {}) 
     button.type = "button"
     button.className = index === disabledIndex ? "answer-btn disabled" : "answer-btn"
     button.dataset.answer = String(value)
+    const key = ANSWER_KEYS[index]
+    if (key) button.dataset.key = key.toUpperCase()
     if (correctAttrs) {
       // Deliberately lying attributes: nothing in EventManager may read them.
       button.dataset.correct = index === 0 ? "false" : "true"
@@ -99,8 +107,8 @@ function activatePlayScreen() {
   document.getElementById("play-screen").classList.add("active")
 }
 
-function pressKey(key, target = document) {
-  target.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }))
+function pressKey(key, target = document, init = {}) {
+  target.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, ...init }))
 }
 
 function clickId(id) {
@@ -504,40 +512,91 @@ describe("EventManager", () => {
       activatePlayScreen()
     })
 
-    test("pressing 2 clicks the second tile", () => {
+    test("pressing b clicks the second tile", () => {
       const tiles = renderTiles([42, 36, 48, 49])
-      pressKey("2")
+      pressKey("b")
       expect(callbacks.onAnswerSelected).toHaveBeenCalledTimes(1)
       expect(callbacks.onAnswerSelected).toHaveBeenCalledWith(36, tiles[1])
     })
 
-    test("pressing 1 and 4 map to the first and last tiles", () => {
+    test("a and d map to the first and last tiles", () => {
       const tiles = renderTiles([42, 36, 48, 49])
-      pressKey("1")
-      pressKey("4")
+      pressKey("a")
+      pressKey("d")
       expect(callbacks.onAnswerSelected.mock.calls).toEqual([
         [42, tiles[0]],
         [49, tiles[3]],
       ])
     })
 
-    test("pressing 5 does nothing", () => {
+    test("every ANSWER_KEYS letter maps to its own tile, in order", () => {
+      const tiles = renderTiles([42, 36, 48, 49])
+      ANSWER_KEYS.forEach((key) => pressKey(key))
+      expect(callbacks.onAnswerSelected.mock.calls).toEqual(
+        tiles.map((tile) => [Number(tile.dataset.answer), tile]),
+      )
+    })
+
+    test("uppercase letters work too, so Shift or caps lock is not a trap", () => {
+      const tiles = renderTiles([42, 36, 48, 49])
+      pressKey("C", document, { shiftKey: true })
+      expect(callbacks.onAnswerSelected).toHaveBeenCalledWith(48, tiles[2])
+    })
+
+    test("pressing e does nothing", () => {
       renderTiles([42, 36, 48, 49])
-      pressKey("5")
+      pressKey("e")
       expect(callbacks.onAnswerSelected).not.toHaveBeenCalled()
+    })
+
+    // The whole point of the move off `1`-`4`: on a screen where every tile face
+    // is a number, a digit has to mean a digit.
+    test.each(["1", "2", "3", "4", "7", "0"])("pressing the digit %s clicks no tile", (digit) => {
+      renderTiles([42, 36, 48, 49])
+      pressKey(digit)
+      expect(callbacks.onAnswerSelected).not.toHaveBeenCalled()
+    })
+
+    test.each([
+      ["meta", { metaKey: true }],
+      ["ctrl", { ctrlKey: true }],
+      ["alt", { altKey: true }],
+    ])("a %s-modified letter is left to the browser", (_name, init) => {
+      renderTiles([42, 36, 48, 49])
+      pressKey("a", document, init)
+      expect(callbacks.onAnswerSelected).not.toHaveBeenCalled()
+    })
+
+    test("a fifth tile has no letter, so no key reaches it", () => {
+      // generateOptions clamps `count` to [2, 8], so more tiles than letters is
+      // reachable; the extra tiles are tap-only rather than mislabelled.
+      const tiles = renderTiles([42, 36, 48, 49, 54])
+      expect(tiles[4].dataset.key).toBeUndefined()
+      ANSWER_KEYS.forEach((key) => pressKey(key))
+      expect(callbacks.onAnswerSelected).toHaveBeenCalledTimes(ANSWER_KEYS.length)
+      expect(callbacks.onAnswerSelected).not.toHaveBeenCalledWith(54, tiles[4])
+    })
+
+    test("two tiles: the letters past the end select nothing", () => {
+      const tiles = renderTiles([42, 36])
+      pressKey("c")
+      pressKey("d")
+      expect(callbacks.onAnswerSelected).not.toHaveBeenCalled()
+      pressKey("a")
+      expect(callbacks.onAnswerSelected).toHaveBeenCalledWith(42, tiles[0])
     })
 
     test("does nothing when #play-screen is not active", () => {
       renderTiles([42, 36, 48, 49])
       document.getElementById("play-screen").classList.remove("active")
-      pressKey("2")
+      pressKey("b")
       expect(callbacks.onAnswerSelected).not.toHaveBeenCalled()
     })
 
     test("does nothing when #settings-modal is open over the play screen", () => {
       renderTiles([42, 36, 48, 49])
       document.getElementById("settings-modal").classList.remove("hidden")
-      pressKey("2")
+      pressKey("b")
       expect(callbacks.onAnswerSelected).not.toHaveBeenCalled()
     })
 
@@ -545,7 +604,7 @@ describe("EventManager", () => {
       renderTiles([42, 36, 48, 49])
       document.getElementById("answer-tiles").classList.add("hidden")
       document.getElementById("keypad").classList.remove("hidden")
-      pressKey("2")
+      pressKey("b")
       expect(callbacks.onAnswerSelected).not.toHaveBeenCalled()
     })
 
@@ -553,11 +612,11 @@ describe("EventManager", () => {
       const tiles = renderTiles([42, 36, 48, 49])
       const tileContainer = document.getElementById("answer-tiles")
       tileContainer.classList.add("hidden")
-      pressKey("2")
+      pressKey("b")
       expect(callbacks.onAnswerSelected).not.toHaveBeenCalled()
 
       tileContainer.classList.remove("hidden")
-      pressKey("2")
+      pressKey("b")
       expect(callbacks.onAnswerSelected).toHaveBeenCalledWith(36, tiles[1])
     })
 
@@ -565,24 +624,84 @@ describe("EventManager", () => {
       renderTiles([42, 36, 48, 49])
       const input = document.createElement("input")
       document.getElementById("play-screen").appendChild(input)
-      pressKey("2", input)
+      pressKey("b", input)
       expect(callbacks.onAnswerSelected).not.toHaveBeenCalled()
     })
 
     test("does nothing when the event target is a select", () => {
       renderTiles([42, 36, 48, 49])
-      pressKey("2", document.getElementById("session-length-select"))
+      pressKey("b", document.getElementById("session-length-select"))
       expect(callbacks.onAnswerSelected).not.toHaveBeenCalled()
     })
 
     test("does not click a .disabled tile", () => {
       renderTiles([42, 36, 48, 49], { disabledIndex: 1 })
-      pressKey("2")
+      pressKey("b")
       expect(callbacks.onAnswerSelected).not.toHaveBeenCalled()
     })
 
     test("does nothing when no tiles are rendered", () => {
-      expect(() => pressKey("2")).not.toThrow()
+      expect(() => pressKey("b")).not.toThrow()
+      expect(callbacks.onAnswerSelected).not.toHaveBeenCalled()
+    })
+  })
+
+  /**
+   * The two `document` keydown listeners in the game, exercised together.
+   *
+   * They used to share the digits: this class took `1`-`4` for the tiles and
+   * `Keypad` takes `0`-`9` for the entry buffer, kept apart only by which
+   * affordance was visible. The letters make them disjoint, which leaves one
+   * question worth pinning down -- where a digit goes on a tile question now
+   * that nothing here consumes it.
+   */
+  describe("coexistence with the keypad", () => {
+    let keypad
+
+    beforeEach(() => {
+      activatePlayScreen()
+      keypad = new Keypad(document.getElementById("keypad"))
+      keypad.render()
+      keypad.attach()
+      // What game.js does on every render of a tile question:
+      // `keypad.setEnabled(challenge.entry === INPUT_MODE.KEYPAD)`.
+      keypad.setEnabled(false)
+      renderTiles([42, 36, 48, 49])
+    })
+
+    afterEach(() => {
+      keypad.destroy()
+    })
+
+    test("a digit on a tile question is inert -- no tile, and no entry either", () => {
+      pressKey("4")
+      pressKey("2")
+      expect(callbacks.onAnswerSelected).not.toHaveBeenCalled()
+      expect(keypad.value).toBe("")
+    })
+
+    test("a letter on a tile question reaches the tile and types nothing", () => {
+      pressKey("b")
+      expect(callbacks.onAnswerSelected).toHaveBeenCalledTimes(1)
+      expect(keypad.value).toBe("")
+    })
+
+    test("a letter on a keypad question types nothing and clicks nothing", () => {
+      document.getElementById("answer-tiles").classList.add("hidden")
+      document.getElementById("keypad").classList.remove("hidden")
+      keypad.setEnabled(true)
+      pressKey("b")
+      expect(callbacks.onAnswerSelected).not.toHaveBeenCalled()
+      expect(keypad.value).toBe("")
+    })
+
+    test("a digit on a keypad question still builds the entry", () => {
+      document.getElementById("answer-tiles").classList.add("hidden")
+      document.getElementById("keypad").classList.remove("hidden")
+      keypad.setEnabled(true)
+      pressKey("4")
+      pressKey("2")
+      expect(keypad.value).toBe("42")
       expect(callbacks.onAnswerSelected).not.toHaveBeenCalled()
     })
   })
@@ -643,7 +762,7 @@ describe("EventManager", () => {
       const tiles = renderTiles([42, 36, 48, 49])
       tiles[0].click()
       activatePlayScreen()
-      pressKey("3")
+      pressKey("c")
     }
 
     test("no second argument at all: every interaction is a silent no-op", () => {

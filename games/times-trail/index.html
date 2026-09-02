@@ -328,10 +328,13 @@
     <script type="module" src="js/game.js"></script>
     <script>
       if (window.__registerShortcut) {
-        window.__registerShortcut("0-9", "Type answer")
+        window.__registerShortcut("0-9", "Type answer on the keypad")
         window.__registerShortcut("Enter", "Submit answer")
         window.__registerShortcut("Backspace", "Delete a digit")
         window.__registerShortcut("Escape", "Clear entry, or close settings")
+        // Multiple choice only, and the digits above are why it is letters:
+        // every tile face is a number. See ANSWER_KEYS in js/constants.js.
+        window.__registerShortcut("A-D", "Choose a multiple-choice tile")
       }
     </script>
   </body>

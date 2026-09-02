@@ -122,6 +122,24 @@ export const DISTRACTORS = Object.freeze({
   PRIORITY_WINDOW: 6, // shuffle only the top N near-misses
 })
 
+/**
+ * Keyboard shortcuts for the multiple-choice tiles, in tile order. Lowercase
+ * here; `GameUI` upper-cases them for the label and the corner hint.
+ *
+ * Letters, not digits. The tiles were picked with `1`-`4` and that was wrong
+ * twice over. Every tile face is already a number, so a digit shortcut is
+ * indistinguishable from an answer -- and it meant *position*, not value, so
+ * pressing `4` on the tile showing 42 picked whatever sat fourth. It was also
+ * invisible: nothing was ever drawn on the tile to say the shortcut existed.
+ * Seasons and Number Garden moved to A-D for exactly these reasons.
+ *
+ * The list is four long because `DISTRACTORS.OPTION_COUNT` is 4, but
+ * `generateOptions` clamps its `count` to [2, 8], so more tiles than letters is
+ * possible. A tile past the end of this list gets no shortcut and no corner
+ * hint rather than a fifth letter nobody documented.
+ */
+export const ANSWER_KEYS = Object.freeze(["a", "b", "c", "d"])
+
 /** Every table the game covers, ascending. */
 export const ALL_TABLES = Object.freeze([2, 3, 4, 5, 6, 7, 8, 9])
 

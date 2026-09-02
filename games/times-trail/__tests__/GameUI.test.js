@@ -36,6 +36,7 @@ import { fileURLToPath } from "node:url"
 import { GameUI } from "../js/GameUI.js"
 import {
   ALL_TABLES,
+  ANSWER_KEYS,
   KEYPAD,
   OPERAND_MAX,
   OPERAND_MIN,
@@ -639,21 +640,48 @@ describe("GameUI", () => {
   })
 
   describe("renderTiles", () => {
-    test("gives each button data-answer, data-index, and an aria-label", () => {
+    test("gives each button data-answer, data-index, data-key, and an aria-label", () => {
       ui.renderTiles([36, 42, 48, 49])
       const buttons = Array.from(document.querySelectorAll("#answer-tiles .answer-btn"))
       expect(buttons).toHaveLength(4)
       expect(buttons.map((b) => b.dataset.answer)).toEqual(["36", "42", "48", "49"])
       expect(buttons.map((b) => b.dataset.index)).toEqual(["0", "1", "2", "3"])
+      expect(buttons.map((b) => b.dataset.key)).toEqual(["A", "B", "C", "D"])
       expect(buttons.map((b) => b.getAttribute("aria-label"))).toEqual([
-        "Answer 1: 36",
-        "Answer 2: 42",
-        "Answer 3: 48",
-        "Answer 4: 49",
+        "Answer A: 36",
+        "Answer B: 42",
+        "Answer C: 48",
+        "Answer D: 49",
       ])
       for (const button of buttons) {
         expect(button.type).toBe("button")
       }
+    })
+
+    test("the shortcut letters come from ANSWER_KEYS, not from a second list", () => {
+      ui.renderTiles([36, 42, 48, 49])
+      const buttons = Array.from(document.querySelectorAll("#answer-tiles .answer-btn"))
+      expect(buttons.map((b) => b.dataset.key)).toEqual(ANSWER_KEYS.map((key) => key.toUpperCase()))
+    })
+
+    test("the letter stays out of the tile's face, which is only the number", () => {
+      ui.renderTiles([36, 42, 48, 49])
+      const buttons = Array.from(document.querySelectorAll("#answer-tiles .answer-btn"))
+      expect(buttons.map((b) => b.textContent)).toEqual(["36", "42", "48", "49"])
+    })
+
+    test("a tile past the end of ANSWER_KEYS gets no letter, in the markup or the label", () => {
+      // generateOptions clamps `count` to [2, 8], so five tiles is reachable.
+      ui.renderTiles([36, 42, 48, 49, 54])
+      const extra = document.querySelectorAll("#answer-tiles .answer-btn")[4]
+      expect(extra.dataset.key).toBeUndefined()
+      expect(extra.getAttribute("aria-label")).toBe("Answer: 54")
+    })
+
+    test("fewer tiles than letters labels the ones there are", () => {
+      ui.renderTiles([36, 42])
+      const buttons = Array.from(document.querySelectorAll("#answer-tiles .answer-btn"))
+      expect(buttons.map((b) => b.dataset.key)).toEqual(["A", "B"])
     })
 
     test("writes no data-correct anywhere -- the answer is not in the markup", () => {
@@ -1565,6 +1593,27 @@ describe("GameUI", () => {
 
     test("the frozen tiles rule the miss path depends on exists", () => {
       expect(cssRule(".answer-tiles-frozen")).toContain("pointer-events: none")
+    })
+
+    // The guard is the requirement, not the decoration: the game is played on a
+    // shared iPad, where the shortcut does not exist and a glyph beside a
+    // two-digit product is something to misread.
+    test("the A-D tile hint is drawn only where there is a real pointer", () => {
+      const hintAt = MAIN_CSS.indexOf(".answer-btn::after")
+      expect(hintAt).toBeGreaterThan(-1)
+
+      const guardAt = MAIN_CSS.lastIndexOf("@media (hover: hover) and (pointer: fine)", hintAt)
+      expect(guardAt).toBeGreaterThan(-1)
+
+      // No closing brace of the guard block between the two, so the hint really
+      // is inside it.
+      const between = MAIN_CSS.slice(guardAt, hintAt)
+      expect(between).not.toContain("\n}")
+    })
+
+    test("the hint text comes from data-key, so the tile's face stays the number", () => {
+      const hint = MAIN_CSS.slice(MAIN_CSS.indexOf(".answer-btn::after"))
+      expect(hint.slice(0, hint.indexOf("}"))).toContain("content: attr(data-key)")
     })
 
     test("the feedback types nothing produces have no rules", () => {

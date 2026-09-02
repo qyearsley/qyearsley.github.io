@@ -548,6 +548,42 @@ body {
   box-shadow: var(--tt-shadow);
 }
 
+/* The A-D shortcut, printed in the tile's corner and ONLY where there is a real
+   pointer -- a laptop, not the shared iPad this game is mostly played on.
+   `pointer: fine` is the closest thing to "there is probably a keyboard too",
+   and the guard is the whole point of this block: a stray glyph beside a
+   two-digit product is how a child misreads the answer. On the iPad the
+   shortcut does not exist, so nothing is drawn there at all.
+
+   Drawn from `data-key` (GameUI.renderTiles) rather than from the tile's text,
+   so the face stays exactly the number -- which is what the screen reader, the
+   tests, and the child all read. A tile past the fourth carries no `data-key`,
+   and `attr()` then resolves to the empty string, so nothing is drawn on it.
+
+   A letter, not a digit, for the same reason the shortcut itself moved off
+   `1`-`4`: every tile face is already a number. `currentcolor` carries the
+   marker through the correct/incorrect repaint below, where the tile turns
+   solid and its text turns white; a fixed muted ink would have gone invisible
+   there. `line-height: 1` pins the glyph to its own font size instead of
+   inheriting the 2.5rem answer's leading. */
+@media (hover: hover) and (pointer: fine) {
+  .answer-btn {
+    position: relative;
+  }
+
+  .answer-btn::after {
+    content: attr(data-key);
+    position: absolute;
+    top: 6px;
+    left: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1;
+    color: currentcolor;
+    opacity: 0.55;
+  }
+}
+
 /* The miss reveal: the tiles stay on screen while the scaffold teaches
    (GameUI.freezeTiles), inert, with the two tiles that carry the answer --
    the one she tapped and the right one -- at full strength and the two

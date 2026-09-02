@@ -32,8 +32,8 @@ root; `game.js` is the only module that knows about all of them.
                                  │
       ┌──────────┬───────────┬───┴────┬───────────┬──────────┐
       ▼          ▼           ▼        ▼           ▼          ▼
-  facts.js  MasteryModel  Scoring  distractors  Keypad  (EventManager
-      │          │                     │                 imports nothing)
+  facts.js  MasteryModel  Scoring  distractors  Keypad EventManager
+      │          │                     │
       │          │                     │
       ├──────────┼──► FactSelector.js  │
       ├──────────┼──► Journey.js       │
@@ -198,10 +198,16 @@ physical keyboard as an accessibility fallback.
 Attaches every DOM listener and translates each event into a callback supplied by
 `game.js`. Holds no state and no game logic, and never decides whether an answer
 is right -- it reports the tapped value and the tapped element. It owns two
-`document` key listeners: the `1`-`4` tile shortcuts, and `Escape` to close the
-settings dialog. Digit, Enter, and Backspace handling belongs to `Keypad` and is
-deliberately not duplicated; `Keypad` also owns `Escape` as clear-all, and the
+`document` key listeners: the `A`-`D` tile shortcuts (the letters come from
+`ANSWER_KEYS` in `constants.js`, which `GameUI` reads too), and `Escape` to close
+the settings dialog. Digit, Enter, and Backspace handling belongs to `Keypad` and
+is deliberately not duplicated; `Keypad` also owns `Escape` as clear-all, and the
 two never collide because each bails in exactly the state the other acts in.
+
+The tile shortcut used to be `1`-`4`, which collided with the answers themselves
+on a screen where every tile face is a number. Letters keep the two key spaces
+disjoint: a digit on a tile question falls through to `Keypad`, which is disabled
+on a tile question and so types nothing.
 
 ## Challenge contract
 

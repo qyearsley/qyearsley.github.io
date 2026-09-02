@@ -24,6 +24,8 @@
  * source of truth and readable by anyone who opens the inspector.
  */
 
+import { ANSWER_KEYS } from "./constants.js"
+
 /**
  * @typedef {Object} EventCallbacks
  * @property {() => void} [onStart]
@@ -45,9 +47,6 @@
  * @property {(key: string, value: string) => void} [onSettingChange]
  * @property {(table: number, checked: boolean) => void} [onTableToggle]
  */
-
-/** Digit keys that map onto answer tiles 1-4. */
-const TILE_SHORTCUT_KEY = /^[1-4]$/
 
 /** Tags whose own keyboard behavior must never be hijacked. */
 const TEXT_ENTRY_TAGS = new Set(["INPUT", "TEXTAREA", "SELECT"])
@@ -332,12 +331,14 @@ export class EventManager {
    * `#play-screen` active / `#settings-modal` hidden pair) plus one extra term:
    * `#answer-tiles` must itself be visible.
    *
-   * The extra term is what keeps the two `document` keydown listeners out of
-   * each other's way. `renderQuestion` shows exactly one affordance, so when the
-   * keypad is up the tile container is hidden and only `Keypad` acts on digits.
+   * The extra term still matters now that the two `document` keydown listeners
+   * no longer share a key space. `renderQuestion` shows exactly one affordance,
+   * and a tile left in the DOM from an earlier question is only hidden, not
+   * removed, until the next render clears it -- so without this term an `A`
+   * pressed on a keypad question could click a tile that is not on screen.
    *
    * @private
-   * @returns {boolean} True when 1-4 should select a tile
+   * @returns {boolean} True when A-D should select a tile
    */
   _isTileEntryActive() {
     const playScreen = document.getElementById("play-screen")
@@ -350,23 +351,36 @@ export class EventManager {
   }
 
   /**
-   * Wires one `document` `keydown` listener so keys 1-4 click the matching
-   * answer tile. Gated by `_isTileEntryActive()` and skipped when the event
-   * target is a text-entry element. Digit/Enter/Backspace handling for the
-   * keypad belongs to `Keypad.handleKeyDown` and is deliberately not duplicated.
+   * Wires one `document` `keydown` listener so the `ANSWER_KEYS` letters (`a` to
+   * `d`, either case) click the matching answer tile. Gated by
+   * `_isTileEntryActive()`, skipped when the event target is a text-entry
+   * element, and skipped when a modifier is held so browser and OS shortcuts
+   * (⌘D, ⌃A) still work.
+   *
+   * Letters rather than digits: see `ANSWER_KEYS`. The two keyboards are now
+   * disjoint, which is the point -- digits mean digits and letters mean tiles,
+   * so neither listener has to reason about what the other one is doing.
+   * Digit/Enter/Backspace handling for the keypad belongs to
+   * `Keypad.handleKeyDown` and is deliberately not duplicated. A digit pressed
+   * on a tile question reaches that handler and stops there: `game.js` calls
+   * `keypad.setEnabled(challenge.entry === INPUT_MODE.KEYPAD)` on every render,
+   * so on a tile question the pad is disabled and `handleKeyDown` bails before
+   * it touches the buffer. Nothing is typed into an entry that has no submit.
    *
    * @returns {void}
    */
   setupKeyboardShortcuts() {
     document.addEventListener("keydown", (event) => {
-      if (!TILE_SHORTCUT_KEY.test(event.key)) return
+      if (event.metaKey || event.ctrlKey || event.altKey) return
+      const index = ANSWER_KEYS.indexOf(String(event.key).toLowerCase())
+      if (index === -1) return
       if (!this._isTileEntryActive()) return
       const target = event.target
       if (target && TEXT_ENTRY_TAGS.has(target.tagName)) return
 
       event.preventDefault()
       const tiles = document.querySelectorAll("#answer-tiles .answer-btn")
-      const tile = tiles[parseInt(event.key, 10) - 1]
+      const tile = tiles[index]
       if (!tile || tile.classList.contains("disabled")) return
       tile.click()
     })

@@ -109,12 +109,25 @@ Touch is the primary input; the keyboard is an accessibility fallback.
   **⌫** key
 - **Escape** -- clear the whole entry (the only clear-all; there is no key for it
   on the pad), or close the settings dialog when it is open
+- **A-D** -- pick the first through fourth multiple-choice tile, either case.
+  Letters, not digits: a tile face is a number, so `1` read as an answer rather
+  than as a position, and the position is what it meant. Each tile prints its
+  letter in the corner, but only on a device with a real pointer -- see the
+  iPad note below. Tiles are the other entry mode, so this key does nothing
+  while the keypad is showing, and a digit does nothing while the tiles are.
 - **Tab** -- move between controls; **Enter/Space** activates a focused button
 - **j/k** -- move between page links (a site-wide shortcut; press **?** for the
   full list)
 
 The keypad shortcuts only fire while the play screen is showing and the settings
-dialog is closed.
+dialog is closed. Both handlers leave a key alone when ⌘, ⌃, or ⌥ is held, so
+browser and OS shortcuts still work.
+
+Nothing produces a tile question in this version -- `KEYPAD_MIN_STRENGTH` is 0,
+so the keypad is the only entry path -- so **A-D** is the shortcut for the mode a
+revert of that trial brings back. The letters come from `ANSWER_KEYS` in
+`js/constants.js`, which both the key handler and the tile renderer read, so
+there is one place to change them.
 
 ## iPad notes
 

@@ -55,6 +55,7 @@
 import { BaseGameUI } from "../../shared/BaseGameUI.js"
 import {
   ALL_TABLES,
+  ANSWER_KEYS,
   INPUT_MODE,
   KEYPAD,
   MATH,
@@ -654,7 +655,19 @@ export class GameUI extends BaseGameUI {
       button.textContent = String(option)
       button.dataset.answer = String(option)
       button.dataset.index = String(index)
-      button.setAttribute("aria-label", `Answer ${index + 1}: ${option}`)
+      // The keyboard shortcut, written twice for two audiences: `aria-label`
+      // says it out loud, and `data-key` is what the stylesheet prints in the
+      // tile's corner -- only where there is a real pointer, so nothing is drawn
+      // on the iPad, where no shortcut exists. It stays out of `textContent` so
+      // the tile's face is exactly the number.
+      //
+      // A letter, from `ANSWER_KEYS`, because every tile face is a number and a
+      // digit in the corner reads as part of one. A tile past the end of that
+      // list -- `OPTION_COUNT` is 4, but `generateOptions` accepts up to 8 --
+      // gets no key and an unlettered label rather than an invented letter.
+      const key = ANSWER_KEYS[index] ? ANSWER_KEYS[index].toUpperCase() : ""
+      if (key) button.dataset.key = key
+      button.setAttribute("aria-label", key ? `Answer ${key}: ${option}` : `Answer: ${option}`)
       container.appendChild(button)
     })
   }
