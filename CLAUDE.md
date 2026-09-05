@@ -23,3 +23,4 @@ npm run lint    # Run all linters
 - Write clear tests with good coverage for non-trivial code.
 - Follow best practices, use linters, keep things simple.
 - Prefer self-contained HTML files over complex build abstractions.
+  (`docs/build-system-options.md` records why, and what would reopen it.)

@@ -163,15 +163,15 @@ here.
 
 ## Modes
 
-| Mode                | What she does                                              | What it builds                                    |
-| ------------------- | ---------------------------------------------------------- | ------------------------------------------------- |
-| **Quick Recall**    | `7 x 6 = ?`, tiles or keypad                               | Direct recall; the default loop                   |
-| **Array Builder**   | Tap or step a rectangle of items to hit a target product   | The area model -- how to _derive_ an unknown fact |
-| **Card Match**      | Tap to pair 6 fact cards with 6 product cards              | Recall backwards (given 42, find 6x7)             |
-| **Story Problems**  | "6 baskets, 7 apples each" plus a picture                  | Recognizing when multiplication is the tool       |
-| **Card Duel**       | Both sides flip a fact card; larger product wins the trick | The tough-dozen facts, under mild pressure        |
-| **Product Grid**    | Slide two factor markers, claim the product, four in a row | Factor pairs, worked backwards from the product   |
-| **Lightning Round** | Opt-in timed streak                                        | Speed, once she is already confident              |
+| Mode                  | What she does                                                | What it builds                                  |
+| --------------------- | ------------------------------------------------------------ | ----------------------------------------------- |
+| **Quick Recall**      | `7 x 6 = ?`, tiles or keypad                                 | Direct recall; the default loop                 |
+| ~~**Array Builder**~~ | ~~Tap or step a rectangle of items to hit a target product~~ | **Cut**, see below -- not deferred, deleted     |
+| **Card Match**        | Tap to pair 6 fact cards with 6 product cards                | Recall backwards (given 42, find 6x7)           |
+| **Story Problems**    | "6 baskets, 7 apples each" plus a picture                    | Recognizing when multiplication is the tool     |
+| **Card Duel**         | Both sides flip a fact card; larger product wins the trick   | The tough-dozen facts, under mild pressure      |
+| **Product Grid**      | Slide two factor markers, claim the product, four in a row   | Factor pairs, worked backwards from the product |
+| **Lightning Round**   | Opt-in timed streak                                          | Speed, once she is already confident            |
 
 **Mixed Practice** rotates modes every few questions inside one session, all
 feeding one fact queue. Individual modes stay selectable from the hub, because
@@ -256,9 +256,11 @@ loop and reports mastery for the facts it happened to exercise.
 ## Phasing
 
 **Phase 1** -- mastery engine over the 36-fact set, Quick Recall with adaptive
-tiles-then-keypad entry, scaffolded miss handling, Array Builder, the trail with
-region gating, stars and gems, the 36-card collection, the 8x8 mastery map, and
-settings. A complete and enjoyable game on its own.
+tiles-then-keypad entry, scaffolded miss handling, the trail with region gating,
+stars and gems, the 36-card collection, the 8x8 mastery map, and settings. A
+complete and enjoyable game on its own. **Built and shipped**, minus Array
+Builder, which was cut rather than deferred -- see "Cut Array Builder" below,
+and the strikethrough in the Modes table above.
 
 **Phase 2** -- Card Match, Card Duel boss stops, Product Grid, Story Problems,
 Lightning Round.
