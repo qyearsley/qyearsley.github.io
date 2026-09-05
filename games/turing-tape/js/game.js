@@ -45,7 +45,19 @@ function buildLevelNav() {
     const btn = document.createElement("button")
     btn.className = "level-btn"
     btn.textContent = level.name
-    if (completedLevels.has(level.id)) btn.classList.add("completed")
+    // Highlighting matches on this, not on the label. Two entries can share a
+    // name -- a demo of a level, say -- and both would light up.
+    btn.dataset.navId = level.id
+    if (completedLevels.has(level.id)) {
+      btn.classList.add("completed")
+      // Colour is the only other cue, which says nothing to a screen reader.
+      btn.append(
+        Object.assign(document.createElement("span"), {
+          className: "visually-hidden",
+          textContent: " (solved)",
+        }),
+      )
+    }
     btn.addEventListener("click", () => loadLevel(level))
     levelNav.appendChild(btn)
   }
@@ -57,17 +69,17 @@ function buildDemoNav() {
     const btn = document.createElement("button")
     btn.className = "level-btn"
     btn.textContent = demo.name
+    btn.dataset.navId = demo.id
     btn.addEventListener("click", () => loadDemo(demo))
     demoNav.appendChild(btn)
   }
 }
 
-function updateNavHighlight(name) {
-  for (const btn of levelNav.children) {
-    btn.classList.toggle("active", btn.textContent === name)
-  }
-  for (const btn of demoNav.children) {
-    btn.classList.toggle("active", btn.textContent === name)
+function updateNavHighlight(id) {
+  for (const nav of [levelNav, demoNav]) {
+    for (const btn of nav.children) {
+      btn.classList.toggle("active", btn.dataset.navId === String(id))
+    }
   }
 }
 
@@ -80,7 +92,7 @@ function loadLevel(level) {
 
   levelTitle.textContent = level.name
   levelDescription.textContent = level.description
-  updateNavHighlight(level.name)
+  updateNavHighlight(level.id)
 
   // Show target tape for puzzles
   targetSection.classList.remove("hidden")
@@ -102,7 +114,7 @@ function loadDemo(demo) {
 
   levelTitle.textContent = demo.name
   levelDescription.textContent = demo.description
-  updateNavHighlight(demo.name)
+  updateNavHighlight(demo.id)
 
   // Hide target tape for demos
   targetSection.classList.add("hidden")
@@ -370,7 +382,7 @@ function checkWin() {
     completedLevels.add(currentLevel.id)
     saveProgress()
     buildLevelNav()
-    updateNavHighlight(currentLevel.name)
+    updateNavHighlight(currentLevel.id)
   } else if (machine.haltReason === "max-steps") {
     showResult("error", `Ran for ${machine.stepCount} steps without halting. Try different rules.`)
   } else if (machine.haltReason === "no-rule") {
@@ -423,6 +435,11 @@ document.addEventListener("keydown", (e) => {
   // document, which has no closest().
   const target = e.target
   if (typeof target?.closest === "function" && target.closest("button, select, input, textarea")) {
+    return
+  }
+  // Leave browser and OS shortcuts alone. Without this, Cmd-R reset the machine
+  // on its way to reloading the page and Cmd-Enter started it running.
+  if (e.metaKey || e.ctrlKey || e.altKey) {
     return
   }
 

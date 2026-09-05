@@ -424,3 +424,31 @@ select:focus-visible {
     order: 10;
   }
 }
+
+/* ==================== Touch ====================
+ *
+ * Every control above is sized for a mouse: `.ctrl-btn` comes out around 24px
+ * tall and `.speed-btn` around 23px, and there are six of them side by side in
+ * the top bar. That is fine with a cursor and close to unusable with a finger,
+ * on the one game whose main interaction is dragging across a canvas.
+ *
+ * Scoped to a coarse pointer rather than to a width, the same way Turing Tape
+ * does it, so a narrow desktop window keeps the compact bar. 44px is the floor
+ * the other games hold; the padding is what grows, so nothing reflows on a
+ * device that never matches. */
+@media (pointer: coarse) {
+  .icon-btn,
+  .ctrl-btn,
+  .speed-btn,
+  .species-btn,
+  .preset-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .ctrl-btn,
+  .speed-btn {
+    padding: 0.5rem 0.9rem;
+    font-size: 0.95rem;
+  }
+}

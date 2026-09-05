@@ -120,11 +120,14 @@ class LifeGarden {
   }
 
   _selectSpecies(id) {
-    const def = this.registry.get(id)
-    if (def) {
-      this.selectedSpecies = id
-      this._updatePalette()
-    }
+    // `get` knows every species, including the life stages the palette does not
+    // offer and the rules will not let the player place. Pressing 5 used to
+    // select flowering grass: a 🌸 appeared under the cursor, no palette button
+    // lit up, and nothing could ever be born from it. `placeable()` is the same
+    // list the palette is built from, so the two cannot disagree.
+    if (!this.registry.placeable().some((def) => def.id === id)) return
+    this.selectedSpecies = id
+    this._updatePalette()
   }
 
   _handleCanvasDrag(px, py, mode) {

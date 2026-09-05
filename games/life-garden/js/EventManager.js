@@ -119,6 +119,10 @@ export class EventManager {
       // button, and arrows move through a select. `closest` needs an Element,
       // and the target can be the document, so call it defensively.
       if (e.target?.closest?.("button, input, textarea, select")) return
+      // Leave browser and OS shortcuts alone. Without this, Cmd-R reset the
+      // grid on its way to reloading the page, and Cmd-Space toggled the
+      // simulation while the OS was opening a search field over it.
+      if (e.metaKey || e.ctrlKey || e.altKey) return
 
       switch (e.key) {
         case " ":
