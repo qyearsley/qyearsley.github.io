@@ -11,7 +11,7 @@
  *   not an import.)
  * - Nothing here uses `innerHTML`. Every node is built with `createElement` or
  *   the art pack's `createElementNS` helper, and every string is written with
- *   `textContent`. `BaseGameUI.setHTML` exists but is deliberately unused.
+ *   `textContent`. `BaseGameUI` no longer offers a way to write markup at all.
  * - No drawing decision lives here. Characters, items, obstacles, the backdrop,
  *   the snake woman, the trail's geometry, the motion of each crossing, and the
  *   palette all come from the active art pack, so this file works unchanged when
@@ -28,7 +28,9 @@
  *   without a test-only branch.
  * - The countdown lives here rather than in GameState, because a clock is not a
  *   rule. `startTimer` owns the interval and `stopTimer` is safe to call at any
- *   time, including when no timer is running.
+ *   time, including when no timer is running. Whether a clock runs at all is a
+ *   player preference, and game.js decides that at the call site: this class is
+ *   simply handed `null` seconds and hides the bar.
  *
  * Error Handling: every method returns quietly when the element it needs is
  * absent, matching `BaseGameUI`'s style. A missing node means the markup and
@@ -143,6 +145,9 @@ export class GameUI extends BaseGameUI {
       "result-haul",
       "result-summary",
       "result-actions",
+      "settings-button",
+      "setting-timer",
+      "close-settings",
     ]
     for (const id of ids) {
       this.elements[id] = document.getElementById(id)
@@ -869,6 +874,35 @@ export class GameUI extends BaseGameUI {
   }
 
   /**
+   * Put the settings controls in step with the saved preferences.
+   *
+   * One control so far. Called on load and after every change, so the checkbox
+   * reflects the save rather than the save reflecting the checkbox -- which is
+   * what makes a rejected or coerced value visible instead of silent.
+   *
+   * @param {import("./storage.js").Settings} settings - The saved preferences
+   */
+  renderSettings(settings) {
+    const box = this.elements["setting-timer"]
+    if (box instanceof HTMLInputElement) box.checked = settings?.timer !== false
+  }
+
+  /**
+   * Whether the settings dialog is on screen. `game.js` asks before letting a
+   * keypress reach the answer buttons underneath it, and before starting a
+   * clock on a question the dialog is covering.
+   *
+   * Looked up live rather than read off `this.elements`, unlike everything else
+   * in this class. `showSettings` and `hideSettings` are the base class's and
+   * they look the dialog up the same way, so a cached node could describe a
+   * page this instance no longer owns while the real dialog is open.
+   * @returns {boolean} True while the dialog is open
+   */
+  get settingsOpen() {
+    return document.getElementById("settings-modal")?.classList.contains("hidden") === false
+  }
+
+  /**
    * Draw the end-of-season screen.
    *
    * @param {Object} state - The finished state
@@ -923,7 +957,11 @@ export class GameUI extends BaseGameUI {
         button.addEventListener("click", action.onClick)
         holder.append(button)
       }
-      holder.querySelector("button")?.focus()
+      // Not while the settings dialog is open. A flash timeout can resolve a
+      // season behind it, and this button is the second of the two things that
+      // would then pull focus out of an `aria-modal` dialog; `focusHeading` is
+      // the other.
+      if (!this.settingsOpen) holder.querySelector("button")?.focus()
     }
   }
 
@@ -1067,9 +1105,17 @@ export class GameUI extends BaseGameUI {
    * Move focus to a screen's heading, so a keyboard or screen-reader user lands
    * somewhere meaningful after a screen change.
    *
+   * Never while the settings dialog is open. The answer flash keeps running
+   * behind it, so an answer that ended the season redraws the screen from under
+   * the dialog, and taking focus there would strand a keyboard user outside an
+   * `aria-modal` element. Nothing is needed on the other side:
+   * `BaseGameUI.hideSettings` puts focus back on the gear, which is present on
+   * whatever screen is now showing.
+   *
    * @param {string} screenId - The screen that was just shown
    */
   focusHeading(screenId) {
+    if (this.settingsOpen) return
     const heading = document.getElementById(screenId)?.querySelector("h1, h2")
     if (heading instanceof HTMLElement) {
       heading.setAttribute("tabindex", "-1")

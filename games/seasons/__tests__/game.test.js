@@ -852,6 +852,34 @@ describe("the letter keys", () => {
 // game.js -- which is the point. Every assertion below is on the *score*, not on
 // the button state, so deleting the guard fails these tests rather than being
 // papered over by the DOM refusing the click.
+// The site's help overlay covers the answer buttons the same way the settings
+// dialog does. It publishes `__helpOverlayIsOpen` from shared/nav.js precisely
+// so a game can ask, and for a while no game did.
+describe("the site help overlay", () => {
+  afterEach(() => {
+    delete window.__helpOverlayIsOpen
+  })
+
+  it("swallows the answer keys while it is open", async () => {
+    await bootInto({ seasonId: "spring", position: 1 })
+    window.__helpOverlayIsOpen = () => true
+
+    pressKey(choiceKey(correctIndex()))
+
+    expect(saved().run.questionsAsked).toBe(0)
+  })
+
+  it("lets them through again once it closes", async () => {
+    await bootInto({ seasonId: "spring", position: 1 })
+    window.__helpOverlayIsOpen = () => false
+
+    pressKey(choiceKey(correctIndex()))
+    await landAnswer()
+
+    expect(saved().run.questionsAsked).toBe(1)
+  })
+})
+
 describe("the double-tap guard", () => {
   beforeEach(() => {
     chooseCharacter("sloth")
@@ -1881,5 +1909,154 @@ describe("the debug query string", () => {
   ])("stays out of the way for %s", async (_label, search) => {
     await bootWith(search)
     expect(document.body.hasAttribute("data-debug")).toBe(false)
+  })
+})
+
+// The countdown is optional because a clock is the part of this game a nervous
+// player finds hardest, and three of the four seasons have one. The setting has
+// to survive a reload and a "start over", and it has to take effect on the
+// question already on screen -- a player who turns it off is looking at a
+// question that is counting down while she does it.
+describe("the countdown setting", () => {
+  const modal = () => byId("settings-modal")
+  const isOpen = () => modal().classList.contains("hidden") === false
+  const timerBox = () => byId("setting-timer")
+  const clockShowing = () => byId("timer-wrap").classList.contains("hidden") === false
+
+  /** Open settings, set the box, and close again -- what a player does. */
+  function setCountdown(on) {
+    byId("settings-button").click()
+    timerBox().checked = on
+    timerBox().dispatchEvent(new Event("change"))
+    byId("close-settings").click()
+  }
+
+  /** A timed season, part-way along, so there is a clock to look at. */
+  const bootIntoSummer = (save) =>
+    bootInto({ characterId: "banana-slug", seasonId: "summer", position: 1 }, save)
+
+  it("defaults to on, so nothing changes for a player who never opens settings", async () => {
+    await bootIntoSummer()
+    expect(timerBox().checked).toBe(true)
+    expect(clockShowing()).toBe(true)
+    expect(byId("timer").textContent).toBe(String(SUMMER.timerSeconds))
+    // A save written before this key existed has no `settings` at all --
+    // `bootIntoSummer` seeds exactly that -- and the first write fills it in.
+    await answerCorrectly()
+    expect(saved().settings).toEqual({ timer: true })
+  })
+
+  it("opening settings stops the clock, so a question cannot expire behind it", async () => {
+    await bootIntoSummer()
+    byId("settings-button").click()
+    expect(isOpen()).toBe(true)
+
+    jest.advanceTimersByTime(SUMMER.timerSeconds * 2000)
+
+    expect(feedback()).toBe("")
+    expect(saved().run.questionsAsked).toBe(0)
+  })
+
+  it("closing it hands the question back with a full clock, not the remainder", async () => {
+    await bootIntoSummer()
+    jest.advanceTimersByTime(10_000)
+    expect(byId("timer").textContent).toBe(String(SUMMER.timerSeconds - 10))
+
+    byId("settings-button").click()
+    byId("close-settings").click()
+
+    expect(isOpen()).toBe(false)
+    expect(byId("timer").textContent).toBe(String(SUMMER.timerSeconds))
+  })
+
+  it("turning it off takes the clock off the question already on screen", async () => {
+    await bootIntoSummer()
+    setCountdown(false)
+
+    expect(saved().settings).toEqual({ timer: false })
+    expect(clockShowing()).toBe(false)
+    jest.advanceTimersByTime(SUMMER.timerSeconds * 3000)
+    expect(feedback()).toBe("")
+    expect(saved().run.questionsAsked).toBe(0)
+  })
+
+  it("stays off across a reload, and leaves a timed season untimed", async () => {
+    await bootIntoSummer({ settings: { timer: false } })
+    expect(clockShowing()).toBe(false)
+    expect(timerBox().checked).toBe(false)
+
+    // The same question, answered correctly, with no clock to beat.
+    jest.advanceTimersByTime(120_000)
+    expect(saved().run.questionsAsked).toBe(0)
+    await answerCorrectly()
+    expect(saved().run.correctCount).toBe(1)
+    expect(clockShowing()).toBe(false)
+  })
+
+  it("turning it back on restarts the clock", async () => {
+    await bootIntoSummer({ settings: { timer: false } })
+    setCountdown(true)
+
+    expect(saved().settings).toEqual({ timer: true })
+    expect(clockShowing()).toBe(true)
+    expect(byId("timer").textContent).toBe(String(SUMMER.timerSeconds))
+  })
+
+  it("does not invent a clock for a season that never had one", async () => {
+    await bootInto({ seasonId: "spring", position: 1 })
+    setCountdown(true)
+    expect(clockShowing()).toBe(false)
+  })
+
+  it("Escape closes the dialog", async () => {
+    await bootIntoSummer()
+    byId("settings-button").click()
+    expect(isOpen()).toBe(true)
+    pressKey("Escape")
+    expect(isOpen()).toBe(false)
+  })
+
+  // The dialog covers the answer buttons, so a letter aimed at it must not
+  // answer the question underneath.
+  it("swallows the answer keys while it is open", async () => {
+    await bootIntoSummer()
+    byId("settings-button").click()
+    pressKey(choiceKey(correctIndex()))
+    expect(saved().run.questionsAsked).toBe(0)
+    expect(isOpen()).toBe(true)
+  })
+
+  // The flash keeps running while the dialog is open, so an answer that ended
+  // the season resolves behind it. Drawing the result screen is fine; pulling
+  // focus onto its heading, out of an aria-modal dialog, is not.
+  it("keeps focus inside the dialog when the season resolves behind it", async () => {
+    // At the boss, with the demand already met, so the next answer ends spring.
+    await bootInto({ seasonId: "spring", position: SPRING.spaces, items: SPRING.demand })
+    expect(byId("question-tag").textContent).toContain("snake woman")
+
+    // Answer, then open settings inside the 900ms flash -- before `advance()`
+    // has run, which is what puts the result screen up behind the dialog.
+    tapRight()
+    byId("settings-button").click()
+    expect(isOpen()).toBe(true)
+
+    jest.advanceTimersByTime(FLASH_MS)
+    await settleCrossing()
+
+    expect(isActive("screen-result")).toBe(true)
+    expect(modal().contains(document.activeElement)).toBe(true)
+  })
+
+  it("survives 'start over', which erases the journey and not the preference", async () => {
+    await bootIntoSummer()
+    setCountdown(false)
+    jest.spyOn(window, "confirm").mockReturnValue(true)
+
+    byId("restart").click()
+
+    expect(isActive("screen-character")).toBe(true)
+    expect(saved().run.seasonId).toBeNull()
+    expect(saved().totals.questionsAnswered).toBe(0)
+    expect(saved().settings).toEqual({ timer: false })
   })
 })

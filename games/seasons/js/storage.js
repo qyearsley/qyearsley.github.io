@@ -75,7 +75,7 @@ const SEASON_IDS = new Set(SEASON_ORDER)
  */
 
 /**
- * The whole save. Exactly these three keys, plus the `version` and `lastPlayed`
+ * The whole save. Exactly these four keys, plus the `version` and `lastPlayed`
  * the base class stamps on every write.
  *
  * @typedef {Object} SaveState
@@ -86,6 +86,18 @@ const SEASON_IDS = new Set(SEASON_ORDER)
  *                                the ledger is cheap and a picker is the
  *                                obvious next feature.
  * @property {Object} totals      - Lifetime counters
+ * @property {Settings} settings  - Player preferences; see `Settings`
+ */
+
+/**
+ * What the player has asked for. Kept beside the run rather than inside it,
+ * because a preference outlives the season it was set in: turning the clock off
+ * and then losing autumn should not turn it back on.
+ *
+ * @typedef {Object} Settings
+ * @property {boolean} timer - Whether a timed season runs its countdown.
+ *   Default true. False makes every question untimed, whatever the season's
+ *   `timerSeconds` says -- the questions are unchanged, only the clock goes.
  */
 
 /**
@@ -211,10 +223,27 @@ function _normalizeTotals(raw) {
 }
 
 /**
+ * Coerce untrusted preferences.
+ *
+ * `timer` defaults to **true** and only a literal `false` turns it off, which is
+ * the opposite of how the counters above are read. That direction matters: a
+ * save written before this key existed has no `timer` at all, and the game it
+ * was written by was timed, so absent has to mean on. A truthy `0` or `"no"`
+ * from a hand-edited save is not an answer either way, so it leaves the default.
+ * @private
+ * @param {unknown} raw - Persisted value of unknown shape
+ * @returns {Settings} A new, valid settings object
+ */
+function _normalizeSettings(raw) {
+  const source = _isPlainObject(raw) ? /** @type {Object} */ (raw) : {}
+  return { timer: source.timer !== false }
+}
+
+/**
  * A fresh save at documented defaults. A new object every call, safe for the
  * caller to mutate.
  *
- * @returns {SaveState} A new save with exactly the three documented keys
+ * @returns {SaveState} A new save with exactly the four documented keys
  */
 export function defaultSave() {
   return {
@@ -226,6 +255,7 @@ export function defaultSave() {
       questionsAnswered: 0,
       questionsCorrect: 0,
     },
+    settings: _normalizeSettings(null),
   }
 }
 
@@ -235,7 +265,7 @@ export function defaultSave() {
  *
  * Unknown keys are dropped rather than copied through, so a field cut from the
  * design disappears on load instead of accumulating. `version` and `lastPlayed`
- * are the only keys carried beyond the documented three, and only when the
+ * are the only keys carried beyond the documented four, and only when the
  * input already had them -- this function never invents them.
  *
  * @param {unknown} raw - Anything at all, typically a parsed JSON payload
@@ -250,6 +280,7 @@ export function normalizeSave(raw) {
     run: _normalizeRun(source.run),
     unlocked: _normalizeUnlocked(source.unlocked),
     totals: _normalizeTotals(source.totals),
+    settings: _normalizeSettings(source.settings),
   }
 
   if ("version" in source) save.version = source.version

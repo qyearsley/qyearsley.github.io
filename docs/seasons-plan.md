@@ -150,7 +150,8 @@ the season numbers:
   is not an acceptable failure mode, so the step grows until it moves.
 
 **The cost of the `from` floors is pool size.** Division within 100 has only so
-many hard facts, so autumn's boss is down to 16 distinct questions and summer's to 20. With `RETRY_SEASON` as the default a child who fails a season repeatedly will
+many hard facts, so autumn's boss is down to 20 distinct questions and spring's
+glowing spaces to 21. With `RETRY_SEASON` as the default a child who fails a season repeatedly will
 see repeats. Judged acceptable — a boss is met once per attempt — and pinned at 15
 by `draws from a pool worth replaying` so it cannot quietly shrink further. Widen
 `tables` before lowering `from` if a slot starts feeling stale.
@@ -181,7 +182,8 @@ about the _shape_ of the ladder and wrong about its absolute level.
   what reaching a mountain means, which is her rule rather than a tuning number.
 - **Should spring stay untimed** now the ladder is gentler? Keeping it untimed is
   the zero-churn option — `seasons.test.js` names spring as the one season allowed
-  to be untimed.
+  to be untimed. Less pressing since the countdown became a setting: a player who
+  finds spring's clock unfair can switch every clock off.
 - **The autumn→winter step is the thinnest one.** Both seasons ask hard facts,
   regrouping subtraction and a multiple of ten; winter differs by narrowing the
   facts to 6–9 and widening the tens to 90. The rest of its escalation is carried
@@ -246,6 +248,18 @@ rather than an incidental one.
 Judged not to stand between Ella and a good first play, in rough value order.
 Most of this list was cleared on 2026-08-31; what is left is below the done ones.
 
+- ~~**The countdown cannot be switched off.**~~ **Done**, 2026-09-05. A gear in
+  the top bar opens a dialog with one checkbox, and unticking it makes every
+  season untimed. It came from a real play session: the countdown was
+  intimidating, which is a different complaint from "the questions are too
+  hard" and wanted a different answer. The maths is unchanged; only the race is
+  gone. Two details cost more
+  thought than the switch did — the dialog stops the clock while it is open, so
+  a question cannot expire behind the thing you opened to stop it; and "start
+  over" keeps the preference, because erasing a journey is not the same as
+  overruling a player. The save key defaults to on for a save written before it
+  existed. Written up in the game's own README, since it is a feature rather
+  than a plan.
 - **A season picker.** Still open, and the half of "nothing frames four seasons"
   that was not done: the character screen now shows which seasons are open, but
   there is no way to _choose_ one. Whether she can replay a finished season, or
@@ -254,11 +268,10 @@ Most of this list was cleared on 2026-08-31; what is left is below the done ones
   for debugging is deliberately **not** this: it skips the rule question by not
   saving, which is fine for an adult checking the art and wrong as a game
   mechanic.
-- **Nothing on the trail moves except the character.** Between questions the
-  scene is completely still: the animal is a static shape, the river does not
-  run, the thicket does not stir, and winter's snow is drawn as a field of
-  circles that never fall. Reviewed 2026-08-31 and deliberately left, because
-  each piece needs a decision about _where_ the motion lives rather than just
+- **Little on the trail moves except the character and the weather.** The
+  weather now falls (below); what is still static is the animal, the snake
+  woman, the river and the thicket. Reviewed 2026-08-31, and each remaining
+  piece still needs a decision about _where_ the motion lives rather than just
   some keyframes:
   - **An idle bob or breathe on the character and on the snake woman.** Not
     simply a CSS rule: JS owns `.trail-token`'s transform and the group inside it
@@ -268,16 +281,18 @@ Most of this list was cleared on 2026-08-31; what is left is below the done ones
     **optional** twelfth export, `idle(characterId)`, that GameUI uses if the
     pack offers one. Optional keeps the required contract at eleven names, and a
     sprite pack returns frame swaps where this one returns a transform.
-  - **Falling snow, and autumn leaves to match.** Winter has weather and autumn
-    has none. The per-flake stagger can come from index arithmetic exactly as the
-    positions already do, so [the no-randomness rule](../games/seasons/js/README.md#purity)
-    holds. A pack cannot ship CSS, so the likely shape is that the pack tags its
-    own shapes (`class="snow-flake"`) and the stylesheet animates whatever
-    carries the tag. That is a mild widening of the seam — a class-name
-    convention between pack and stylesheet — but it means the universal
-    `prefers-reduced-motion` rule covers all of it for free. SMIL inside the
-    drawing would be self-contained and needs no convention, but it ignores
-    reduced motion entirely, which is the wrong trade for this game.
+  - ~~**Falling snow, and autumn leaves to match.**~~ **Done**, 2026-09-05, and
+    the predicted shape is what it turned out to be: `AIR_ART` tags each mark
+    with a `motion`, `backdrop` writes it out as `air-fall` or `air-drift`, and
+    `main.css` animates whatever carries the class. Both halves of the earlier
+    note were slightly wrong. Autumn was never without weather — it has had
+    leaves in the air layer all along; what neither season had was motion. And
+    the tag names the _behaviour_ rather than the thing, which is what keeps the
+    stylesheet's "no rule names a season" rule intact. Two details worth
+    keeping: each mark is wrapped in its own group, because spring's petals and
+    autumn's leaves already carry a `transform` for their tilt and a CSS
+    transform on the same element would replace it; and both ends of the fall
+    keyframe are transparent, which is what makes the loop seamless.
   - **Water shimmer on the river, and a slight thicket sway.** Same mechanism as
     the flakes, so same decision.
 - **Item pips do not pop in when earned.** `renderItemTrack` rebuilds every pip
@@ -358,10 +373,12 @@ Most of this list was cleared on 2026-08-31; what is left is below the done ones
 Honest limitations rather than things to fix soon.
 
 - **Screen readers are out of scope**, by decision. The countdown is
-  `aria-hidden` and there is no way to extend or switch off a time limit, so
-  three of the four seasons are effectively unplayable that way. The contrast
-  work, the answer glyphs and the focus handling were kept because they help
-  everyone -- colour-blindness is a real bet on a shared classroom iPad.
+  `aria-hidden`, so a screen-reader user gets no warning that time is running
+  out. It can now be switched off entirely — see the settings section of the
+  README — which makes the timed seasons playable, but the announcement is
+  still missing. The contrast work, the answer glyphs and the focus handling
+  were kept because they help everyone -- colour-blindness is a real bet on a
+  shared classroom iPad.
 - **`min-height: 100dvh` is a floor, not a ceiling.** The play screen fits an iPad
   in landscape, which is the case that matters, but a short enough viewport can
   still overflow.

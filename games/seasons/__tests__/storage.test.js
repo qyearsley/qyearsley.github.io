@@ -19,8 +19,8 @@ import { CHARACTERS, DEFAULT_CHARACTER } from "../js/characters.js"
 import { BOSS_TRIES, PHASE, SEASON_ORDER, STORAGE } from "../js/constants.js"
 import { defaultSave, normalizeSave, StorageManager, toSavedRun } from "../js/storage.js"
 
-/** The three keys a save always has, before the base class stamps its two. */
-const SAVE_KEYS = ["run", "unlocked", "totals"]
+/** The four keys a save always has, before the base class stamps its two. */
+const SAVE_KEYS = ["run", "unlocked", "totals", "settings"]
 
 /** Every key of a SavedRun, in no particular order. */
 const RUN_KEYS = [
@@ -78,6 +78,7 @@ function populatedSave() {
       questionsAnswered: 210,
       questionsCorrect: 190,
     },
+    settings: { timer: false },
   }
 }
 
@@ -114,7 +115,7 @@ beforeEach(() => {
 })
 
 describe("defaultSave", () => {
-  it("has exactly the three documented keys", () => {
+  it("has exactly the four documented keys", () => {
     expect(Object.keys(defaultSave()).sort()).toEqual([...SAVE_KEYS].sort())
   })
 
@@ -147,6 +148,7 @@ describe("defaultSave", () => {
         questionsAnswered: 0,
         questionsCorrect: 0,
       },
+      settings: { timer: true },
     })
   })
 
@@ -175,6 +177,7 @@ describe("defaultSave", () => {
     expect(first.run.collected).not.toBe(second.run.collected)
     expect(first.unlocked).not.toBe(second.unlocked)
     expect(first.totals).not.toBe(second.totals)
+    expect(first.settings).not.toBe(second.settings)
 
     first.run.items = 99
     first.run.collected.spring = 5
@@ -276,7 +279,7 @@ describe("normalizeSave", () => {
         totals: {},
         highScore: 42,
         mode: "quick",
-        settings: { sound: "off" },
+        audio: { sound: "off" },
       })
       expect(Object.keys(save).sort()).toEqual([...SAVE_KEYS].sort())
     })
@@ -286,6 +289,7 @@ describe("normalizeSave", () => {
       expect(save.run).toEqual(defaultSave().run)
       expect(save.unlocked).toEqual(["spring"])
       expect(save.totals.runsCompleted).toBe(3)
+      expect(save.settings).toEqual({ timer: true })
     })
 
     it("carries version and lastPlayed through only when present", () => {
@@ -611,6 +615,38 @@ describe("normalizeSave", () => {
         "runsCompleted",
         "seasonsCleared",
       ])
+    })
+  })
+
+  // The countdown switch reads the opposite way round from every counter above,
+  // and deliberately: absent means on, because a save written before the key
+  // existed came from a build that always ran the clock.
+  describe("settings", () => {
+    it.each([
+      ["absent", {}],
+      ["an absent settings block", { run: {} }],
+      ["a non-object", { settings: "off" }],
+      ["an array", { settings: [] }],
+      ["an unrelated key", { settings: { sound: "off" } }],
+      ["a truthy non-boolean", { settings: { timer: 1 } }],
+      ["a falsy non-boolean", { settings: { timer: 0 } }],
+      ["null", { settings: { timer: null } }],
+    ])("leaves the countdown on for %s", (_label, raw) => {
+      expect(normalizeSave(raw).settings).toEqual({ timer: true })
+    })
+
+    it("turns the countdown off only for a literal false", () => {
+      expect(normalizeSave({ settings: { timer: false } }).settings).toEqual({ timer: false })
+    })
+
+    it("drops unknown settings", () => {
+      const { settings } = normalizeSave({ settings: { timer: false, difficulty: "hard" } })
+      expect(Object.keys(settings)).toEqual(["timer"])
+    })
+
+    it("survives a round trip through the manager", () => {
+      manager.saveRun({ ...defaultSave(), settings: { timer: false } })
+      expect(manager.loadRun().settings).toEqual({ timer: false })
     })
   })
 })

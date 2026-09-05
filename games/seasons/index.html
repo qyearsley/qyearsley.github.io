@@ -26,6 +26,15 @@
       <div class="game-top-bar">
         <a href="/games/" class="icon-btn" title="Back to games">&larr;</a>
         <span class="level-title" id="season-name">Seasons</span>
+        <button
+          id="settings-button"
+          class="icon-btn"
+          type="button"
+          title="Settings"
+          aria-label="Open settings"
+        >
+          &#x2699;&#xfe0e;
+        </button>
         <button id="restart" class="icon-btn" type="button" title="Start over">&#x21ba;</button>
       </div>
 
@@ -92,11 +101,39 @@
       </main>
     </div>
 
+    <!-- Settings. One control so far, and it is the one that decides whether a
+         question is a race. Outside .game-main so it overlays every screen. -->
+    <div
+      id="settings-modal"
+      class="modal hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="settings-title"
+    >
+      <div class="modal-content">
+        <h2 id="settings-title">Settings</h2>
+
+        <div class="setting-group">
+          <label class="setting-check" for="setting-timer">
+            <input id="setting-timer" type="checkbox" checked />
+            <span>Countdown timer</span>
+          </label>
+          <p class="setting-description">
+            Turn this off and every question waits as long as you like. The questions themselves do
+            not change.
+          </p>
+        </div>
+
+        <button id="close-settings" class="big-btn is-primary" type="button">Done</button>
+      </div>
+    </div>
+
     <script src="/shared/nav.js"></script>
     <script type="module" src="js/game.js"></script>
     <script>
       if (window.__registerShortcut) {
         window.__registerShortcut("A-D", "Choose an answer")
+        window.__registerShortcut("Escape", "Close settings")
       }
     </script>
   </body>

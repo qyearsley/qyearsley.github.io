@@ -122,7 +122,8 @@ rather than of the space; the mountain is the only kind that carries it.
 countdown rather than the arithmetic was what made a question fail — a timer has
 to cover reading the question, working it out, _and_ reading four options. It
 still tightens across the year, because that is part of the escalation, but it is
-now slack enough that running out means the fact was not known.
+now slack enough that running out means the fact was not known. It can also be
+switched off entirely; see [Settings](#settings).
 
 Every hard slot carries a `from` floor on its quotient, which is what stops it
 asking `12 ÷ 6`; see [Change the maths](#change-the-maths). Subtraction stops
@@ -171,7 +172,17 @@ each is a place where a change that looks harmless is not:
 - **Nothing is scattered at random.** The snow, blossom, leaves and heat haze
   are all placed by arithmetic with coprime moduli, because the scene is rebuilt
   whenever the season or character changes and a backdrop dealt afresh each time
-  would flicker. Nothing in this game calls `Math.random`.
+  would flicker. Nothing in this game calls `Math.random`. The same arithmetic
+  gives each mark its stagger and its speed, so the weather falls identically on
+  every rebuild too.
+- **The weather moves, and the stylesheet is what moves it.** A pack cannot ship
+  CSS, so `AIR_ART` tags each mark with a `motion` — `fall` or `drift` — and
+  `backdrop` writes that out as the class `air-fall` or `air-drift`. `main.css`
+  animates whatever carries the class. What is tagged is the _behaviour_, never
+  the season, so the stylesheet still names no season and a replacement pack
+  re-themes the game without touching CSS; a motion the stylesheet does not know
+  simply stays still. Doing it this way rather than with SMIL inside the drawing
+  is what gets `prefers-reduced-motion` for free.
 
 Motion is the pack's too, including what to do about it. `traversal()` is the
 full crossing and `reducedTraversal()` is the plain slide a player who has asked
@@ -214,6 +225,27 @@ reasoning, and `arithmetic.test.js › distractors are numbers a child could
 actually reach` holds all of it — including a check on the answer's rank in the
 sorted choice list, which is the assertion whose absence let the giveaway survive.
 
+## Settings
+
+One control, behind the gear in the top bar: **Countdown timer**, on by default.
+
+Turning it off makes every question untimed. Nothing else changes — the same
+seasons ask the same questions, and the Sloth's ten extra seconds simply stop
+mattering. It exists because the clock, not the arithmetic, is the part of this
+game a nervous player finds hardest, and three of the four seasons have one.
+
+Three details are deliberate rather than incidental:
+
+- **Opening the dialog stops the clock**, and closing it restarts the question's
+  full allowance rather than handing back the remainder. The player most likely
+  to open settings is the one the countdown is bothering, and timing her out
+  behind the dialog she opened to switch it off would be the game at its worst.
+- **The preference survives "start over".** That button erases the journey, and
+  quietly switching the countdown back on is not what it says it does.
+- **A save written before the setting existed loads with the clock on**, because
+  the build that wrote it was timed. Only a literal `false` turns it off; see
+  `_normalizeSettings` in [`js/storage.js`](js/storage.js).
+
 ## Keyboard
 
 Touch is the primary input; the keyboard is an accessibility fallback.
@@ -224,6 +256,7 @@ Touch is the primary input; the keyboard is an accessibility fallback.
   game is a number, and a small digit in the corner of a button reading "34"
   reads as part of the answer.
 - **Tab** — move between controls; **Enter/Space** activates
+- **Escape** — close the settings dialog
 - **j/k** — move between page links (site-wide; press **?** for the full list)
 
 ## How to change things
@@ -380,8 +413,9 @@ cannot, because it reads the form declaration and `from` does not change a form'
 shape.
 
 The trade-off is pool size: division within 100 has only so many hard facts, so a
-high floor with narrow tables leaves few questions — autumn's boss has 16, which
-`draws from a pool worth replaying` pins as the floor. Widen `tables` before
+high floor with narrow tables leaves few questions — autumn's boss has 20 (the
+6–9 tables against quotients 6–10) and spring's glowing spaces 21, which
+`draws from a pool worth replaying` holds above 15. Widen `tables` before
 lowering `from` if a slot starts feeling repetitive.
 
 Two rules to keep. **Division never goes in `forms`** — Ella's rule is that it is
@@ -624,7 +658,8 @@ Built for a shared iPad: 64px tap targets, iOS web-app meta tags, and suppressed
 double-tap zoom, tap highlight, and text selection. Switching away from the tab
 stops the countdown and switching back restarts it rather than resuming — better
 than handing back a question with two seconds left because the iPad was locked.
-Follows the OS dark-mode preference unless the site theme toggle overrides it.
+Opening the settings dialog does the same thing, for the same reason. Follows
+the OS dark-mode preference unless the site theme toggle overrides it.
 `manifest.json` sets `"display": "standalone"`, so the home screen opens it
 without browser chrome, but there is no `apple-touch-icon`: iOS ignores SVG
 icons and this repo adds no binary assets, so the home-screen icon is a snapshot
@@ -635,7 +670,7 @@ of the page. To fix that, add a 180×180 PNG at
 
 Every node is built with `createElement` or `createElementNS` and every string
 written with `textContent`; `innerHTML` is not used anywhere in this game, and
-`BaseGameUI.setHTML` is deliberately never called. Progress is saved in
+the shared `BaseGameUI` offers no way to write markup. Progress is saved in
 `localStorage` under `seasonsProgress`, never leaves the device, and is erased
 by the restart button after a confirmation. Saved data is treated as untrusted:
 every field is coerced back into range on load and unknown keys are dropped. No
@@ -645,14 +680,13 @@ site's own stylesheet and scripts.
 ## Known gaps
 
 Real, and not yet fixed. **The countdown is not announced** — the number carries
-`aria-hidden`, so a screen-reader user gets no warning that time is running out,
-and there is no setting to extend or turn off the limit; three of the four
-seasons are timed, and the Sloth's +10 seconds is the only lever, buried in a
-choice made before the first question. **The page can still scroll mid-question
-on a small phone**, because `min-height: 100dvh` sets a floor rather than a
-ceiling; the target device is a shared iPad, where it fits. **`save.unlocked` and
-`save.totals` are written but never surfaced** — there is no season picker and no
-stats screen.
+`aria-hidden`, so a screen-reader user gets no warning that time is running out.
+The [countdown setting](#settings) is the lever that makes the timed seasons
+playable that way at all, but it is a switch rather than an announcement. **The
+page can still scroll mid-question on a small phone**, because
+`min-height: 100dvh` sets a floor rather than a ceiling; the target device is a
+shared iPad, where it fits. **`save.unlocked` and `save.totals` are written but
+never surfaced** — there is no season picker and no stats screen.
 
 **What is planned next** is NPCs, items, and trading, and the route model was
 shaped to take them: a route entry is a value in a list, so a

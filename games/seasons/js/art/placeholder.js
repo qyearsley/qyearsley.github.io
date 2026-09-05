@@ -1286,7 +1286,7 @@ const SKY_ART = {
 }
 
 /**
- * What each season scatters through the air, and where.
+ * What each season scatters through the air, where, and how it moves.
  *
  * `step` is how far apart the marks are seeded, which is the only real cost
  * control here: a trail is up to 5100 units wide, so a step of 52 is around a
@@ -1299,6 +1299,16 @@ const SKY_ART = {
  *
  * Summer is the odd one: not something falling but the air itself moving, drawn
  * low and warm where heat actually shimmers.
+ *
+ * `motion` names how a mark behaves, and it is the whole of the convention
+ * between this pack and the stylesheet: `backdrop` writes it out as the class
+ * `air-<motion>`, and main.css animates whatever carries that class. A pack
+ * cannot ship CSS, and the alternative -- SMIL inside the drawing -- ignores
+ * `prefers-reduced-motion` entirely, which is the wrong trade for this game.
+ * Note what is tagged and what is not: the *behaviour*, never the season. The
+ * stylesheet still names no season, so a replacement pack can re-theme the game
+ * without touching CSS. A motion the stylesheet does not know simply does not
+ * animate.
  * @private
  */
 const AIR_ART = {
@@ -1306,6 +1316,7 @@ const AIR_ART = {
     step: 62,
     top: 14,
     height: 151,
+    motion: "fall",
     // Blossom: a petal is a short wide oval, and it is the tilt that stops a
     // field of them reading as a field of full stops.
     draw: (mark, color) =>
@@ -1323,6 +1334,9 @@ const AIR_ART = {
     step: 88,
     top: 110,
     height: 34,
+    // Heat does not fall. It hangs and wavers, so summer is the one season that
+    // drifts sideways instead.
+    motion: "drift",
     // Heat haze: a shallow double curve, stroked and half transparent. Drawn
     // low, because rising heat is a thing that happens just above hot ground and
     // nowhere near the top of the picture -- but not so low that the grass
@@ -1352,6 +1366,7 @@ const AIR_ART = {
     step: 70,
     top: 16,
     height: 149,
+    motion: "fall",
     // Falling leaves. Longer and flatter than spring's petals, and turned
     // through a wider spread of angles, because a leaf on the way down spins.
     draw: (mark, color) =>
@@ -1369,6 +1384,7 @@ const AIR_ART = {
     step: 52,
     top: 12,
     height: 157,
+    motion: "fall",
     draw: (mark, color) =>
       svg("circle", {
         cx: mark.x,
@@ -1483,9 +1499,27 @@ export function backdrop(seasonId, width) {
   if (Object.hasOwn(SKY_ART, seasonId)) sky.push(...SKY_ART[seasonId](colors))
 
   const air = Object.hasOwn(AIR_ART, seasonId) ? AIR_ART[seasonId] : null
+  // Each mark is wrapped rather than tagged in place, because spring's petals
+  // and autumn's leaves already carry a `transform` of their own for the tilt,
+  // and a CSS transform on the same element would replace it -- every leaf in
+  // autumn would snap flat the moment the animation started. The wrapper moves,
+  // the drawing keeps its angle.
+  //
+  // The two custom properties are the stagger and the speed, both derived from
+  // the mark's index the same way its position is, so the field still comes out
+  // identical on every rebuild. `--air-size` is 0, 1 or 2, which the stylesheet
+  // turns into three fall speeds; without it a hundred flakes descend in step
+  // and read as a sliding texture rather than as weather.
   const props = air
-    ? _scatter(span, air.step, air.top, air.height).map((mark) =>
-        air.draw(mark, colors["--season-prop"]),
+    ? _scatter(span, air.step, air.top, air.height).map((mark, index) =>
+        svg(
+          "g",
+          {
+            class: `air-mark air-${air.motion}`,
+            style: `--air-index: ${index}; --air-size: ${mark.size}`,
+          },
+          [air.draw(mark, colors["--season-prop"])],
+        ),
       )
     : []
 

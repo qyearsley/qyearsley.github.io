@@ -332,7 +332,29 @@ function _askQuestion() {
   // The flash timeout can land while the tab is hidden, which would start a
   // clock on a question nobody is looking at. `visibilitychange` starts it when
   // the page comes back.
-  if (!document.hidden) ui.startTimer(questionSeconds(state), () => _onAnswer(null, null))
+  if (!document.hidden) _startClock()
+}
+
+/**
+ * Start the countdown for the question on screen, if there is to be one.
+ *
+ * Two things can silence the clock and they are different in kind: the season
+ * may be untimed (spring), or the player may have switched the countdown off in
+ * settings. The second is checked here rather than inside `questionSeconds`
+ * because it is a pacing preference, not a rule -- the same reason the clock
+ * itself lives in GameUI and not in GameState. Every caller that starts a clock
+ * goes through this function, so there is one place the preference applies.
+ *
+ * It is also the one place that knows not to start a clock behind the settings
+ * dialog. A flash timeout can land while the dialog is open and draw the next
+ * question underneath it, and that question must not be counting down.
+ * `_closeSettings` starts it instead.
+ * @private
+ */
+function _startClock() {
+  if (ui.settingsOpen) return
+  const seconds = save.settings?.timer === false ? null : questionSeconds(state)
+  ui.startTimer(seconds, () => _onAnswer(null, null))
 }
 
 /**
@@ -616,6 +638,55 @@ function _startNewRun() {
 }
 
 /**
+ * Whether a question is on screen. The two phases that take an answer, and so
+ * the two that have a clock to run.
+ * @private
+ * @returns {boolean} True on the trail or at the boss
+ */
+function _onPlayScreen() {
+  return state.phase === PHASE.TRAIL || state.phase === PHASE.BOSS
+}
+
+/**
+ * Open the settings dialog, and stop the clock while it is open.
+ *
+ * Stopping it is the whole point of doing this here rather than leaving the
+ * dialog to `BaseGameUI`: the player most likely to open settings is the one
+ * the countdown is bothering, and a question that times out behind the dialog
+ * she opened to turn the countdown off would be the game at its worst.
+ * @private
+ */
+function _openSettings() {
+  ui.renderSettings(save.settings)
+  ui.stopTimer()
+  ui.showSettings()
+}
+
+/**
+ * Close the settings dialog and hand the question back.
+ *
+ * The clock restarts from the top rather than resuming, for the same reason
+ * `visibilitychange` does: the time spent in a dialog is not thinking time.
+ * @private
+ */
+function _closeSettings() {
+  ui.hideSettings()
+  if (!answering && _onPlayScreen()) _startClock()
+}
+
+/**
+ * Apply a settings change and persist it.
+ *
+ * @private
+ * @param {boolean} timerOn - Whether the countdown should run
+ */
+function _onTimerSetting(timerOn) {
+  save = { ...save, settings: { ...save.settings, timer: timerOn } }
+  _save()
+  ui.renderSettings(save.settings)
+}
+
+/**
  * Code point of "a", the letter that presses the first answer button. The
  * uppercase twin lives in GameUI, which is what puts A, B, C, D on the buttons;
  * this reverses that arithmetic. Kept as a code point rather than a list of
@@ -644,6 +715,11 @@ const TEXT_ENTRY_TAGS = new Set(["INPUT", "TEXTAREA", "SELECT"])
  */
 function _onKeyDown(event) {
   if (event.metaKey || event.ctrlKey || event.altKey) return
+  if (event.key === "Escape" && ui.settingsOpen) {
+    event.preventDefault()
+    _closeSettings()
+    return
+  }
   // A letter typed into a field is a letter meant for that field. This did not
   // matter while the shortcut was a digit -- nothing on the play screen takes
   // typing -- but letters are what people put in text boxes, so the first one
@@ -651,8 +727,15 @@ function _onKeyDown(event) {
   // she was still typing into it.
   const target = event.target
   if (target && TEXT_ENTRY_TAGS.has(target.tagName)) return
+  // The dialog covers the answer buttons, so a keypress must not reach them.
+  // The tag check above already catches the checkbox; this catches the Done
+  // button and anything else the dialog grows. The site's own help overlay --
+  // the one `?` opens, from shared/nav.js -- covers them just as thoroughly and
+  // is just as easy to miss: it publishes `__helpOverlayIsOpen` for exactly
+  // this, and until now nothing in any game asked.
+  if (ui.settingsOpen || window.__helpOverlayIsOpen?.()) return
   if (answering) return
-  if (state.phase !== PHASE.TRAIL && state.phase !== PHASE.BOSS) return
+  if (!_onPlayScreen()) return
   // Single characters only, so "F5" and "ArrowLeft" never reach the arithmetic.
   if (event.key.length !== 1) return
   const index = event.key.toLowerCase().codePointAt(0) - FIRST_CHOICE_KEY
@@ -714,18 +797,28 @@ function start() {
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
       ui.stopTimer()
-    } else if (!answering && (state.phase === PHASE.TRAIL || state.phase === PHASE.BOSS)) {
+    } else if (!answering && _onPlayScreen()) {
       // Restart the clock rather than resuming it. The alternative is handing
       // back a question with two seconds left because the iPad was locked.
-      ui.startTimer(questionSeconds(state), () => _onAnswer(null, null))
+      _startClock()
     }
   })
   document.getElementById("restart")?.addEventListener("click", () => {
     if (window.confirm("Start over? This erases your journey.")) {
-      save = defaultSave()
+      // Everything except the preferences. Erasing the journey is what the
+      // button says it does; quietly switching the countdown back on is not,
+      // and it would undo the one setting a player turned off because the
+      // countdown was upsetting her.
+      save = { ...defaultSave(), settings: save.settings }
       _startNewRun()
     }
   })
+  ui.elements["settings-button"]?.addEventListener("click", _openSettings)
+  ui.elements["close-settings"]?.addEventListener("click", _closeSettings)
+  ui.elements["setting-timer"]?.addEventListener("change", (event) => {
+    _onTimerSetting(event.target.checked === true)
+  })
+  ui.renderSettings(save.settings)
   render()
 }
 

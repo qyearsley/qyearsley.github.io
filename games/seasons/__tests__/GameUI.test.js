@@ -106,6 +106,9 @@ const CACHED_IDS = [
   "result-haul",
   "result-summary",
   "result-actions",
+  "settings-button",
+  "setting-timer",
+  "close-settings",
 ]
 
 /** A payload that becomes two elements if anything writes it as markup. */
@@ -252,13 +255,18 @@ beforeEach(() => {
 })
 
 describe("the fixture", () => {
-  it.each([...CACHED_IDS, "screen-character", "screen-play", "screen-result", "restart"])(
-    "index.html contains #%s exactly once",
-    (id) => {
-      expect(document.getElementById(id)).not.toBeNull()
-      expect(document.querySelectorAll(`#${id}`)).toHaveLength(1)
-    },
-  )
+  it.each([
+    ...CACHED_IDS,
+    "screen-character",
+    "screen-play",
+    "screen-result",
+    "restart",
+    // Not cached: `settingsOpen` looks it up live, for the reason given there.
+    "settings-modal",
+  ])("index.html contains #%s exactly once", (id) => {
+    expect(document.getElementById(id)).not.toBeNull()
+    expect(document.querySelectorAll(`#${id}`)).toHaveLength(1)
+  })
 
   // #item-demand and #item-label are gone: the count is one sentence in one
   // node now. Asserting their absence keeps a half-finished revert from leaving
@@ -1794,6 +1802,46 @@ describe("the countdown", () => {
   })
 })
 
+// The settings dialog itself is BaseGameUI's. What this class adds is the two
+// pieces game.js needs: putting the saved value on the control, and answering
+// whether the dialog is covering the answer buttons.
+describe("the settings dialog", () => {
+  const box = () => document.getElementById("setting-timer")
+  const modal = () => document.getElementById("settings-modal")
+
+  it("starts hidden, so the game is not behind a dialog on load", () => {
+    expect(modal().classList.contains("hidden")).toBe(true)
+    expect(ui.settingsOpen).toBe(false)
+  })
+
+  it("reports itself open once shown, and closed again once hidden", () => {
+    ui.showSettings()
+    expect(ui.settingsOpen).toBe(true)
+    ui.hideSettings()
+    expect(ui.settingsOpen).toBe(false)
+  })
+
+  it.each([
+    ["true", { timer: true }, true],
+    ["false", { timer: false }, false],
+  ])("renderSettings puts a timer of %s on the checkbox", (_label, settings, expected) => {
+    ui.renderSettings(settings)
+    expect(box().checked).toBe(expected)
+  })
+
+  // Absent means on, matching how storage.js reads a save written before the
+  // key existed. Checking it here too means the control cannot disagree with
+  // the save about what "no preference" looks like.
+  it.each([[undefined], [null], [{}], [{ timer: "off" }]])(
+    "renderSettings leaves the box ticked for %p",
+    (settings) => {
+      box().checked = false
+      ui.renderSettings(settings)
+      expect(box().checked).toBe(true)
+    },
+  )
+})
+
 describe("renderResult", () => {
   const actions = () => [
     { label: "On to Summer", onClick: jest.fn(), primary: true },
@@ -2160,8 +2208,12 @@ describe("a page whose markup has drifted", () => {
       bare.flashAnswer({ correct: false }, null, 73, "x")
       bare.startTimer(null, () => {})
       bare.stopTimer()
+      bare.renderSettings({ timer: false })
       bare.renderResult(resultState(), SPRING, [{ label: "x", onClick: () => {} }], "t", "x")
       bare.focusHeading("screen-play")
     }).not.toThrow()
+    // A page with no dialog in it reads as "no dialog is covering anything",
+    // which is the answer that keeps game.js accepting keypresses.
+    expect(bare.settingsOpen).toBe(false)
   })
 })

@@ -566,6 +566,75 @@ select:focus-visible {
   }
 }
 
+/* The weather. One mark of blossom, heat haze, a leaf or a flake, wrapped by
+   the art pack in a group tagged with how it moves -- `air-fall` or
+   `air-drift`. The pack chooses the behaviour and this file supplies it, which
+   is the whole convention between the two; no rule here names a season, so a
+   replacement pack re-themes the game without touching CSS.
+
+   The two custom properties come from the pack, derived from the mark's index
+   the same way its position is. `--air-index` staggers the start, and it is a
+   *negative* delay so the field is already mid-cycle on the first frame rather
+   than every flake waiting in a row at the top. `--air-size` is 0, 1 or 2 and
+   picks one of three speeds, which is what stops a hundred flakes descending in
+   lockstep and reading as a sliding texture.
+
+   No `will-change` here on purpose. There are around a hundred of these on a
+   winter trail, and promoting each to its own compositor layer would cost far
+   more than the small transforms they run. */
+.air-mark {
+  animation-delay: calc(var(--air-index, 0) * -0.37s);
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+
+.air-fall {
+  animation-name: seasons-fall;
+  animation-duration: calc(7s + var(--air-size, 0) * 3s);
+}
+
+/* Sideways and slow, because heat hangs and wavers rather than falling. Eased
+   and alternating, so it turns around instead of snapping back. */
+.air-drift {
+  animation-name: seasons-drift;
+  animation-duration: calc(5s + var(--air-size, 0) * 1.5s);
+  animation-direction: alternate;
+  animation-timing-function: ease-in-out;
+}
+
+/* Both ends fade to nothing, which is what makes the loop seamless: a mark is
+   invisible when it jumps from the bottom of its fall back to the top. The
+   travel is in user units, so 120 is about three quarters of the band the pack
+   scatters marks through. */
+@keyframes seasons-fall {
+  0% {
+    transform: translate(0, -24px);
+    opacity: 0;
+  }
+
+  15%,
+  80% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(-14px, 96px);
+    opacity: 0;
+  }
+}
+
+@keyframes seasons-drift {
+  from {
+    transform: translate(-7px, 0);
+    opacity: 0.75;
+  }
+
+  to {
+    transform: translate(7px, -3px);
+    opacity: 1;
+  }
+}
+
 /* ==================== Question ==================== */
 .question-block {
   padding: 16px;
@@ -976,6 +1045,79 @@ body.is-glowing-question .question-prompt {
 
 .big-btn:active {
   transform: scale(0.96);
+}
+
+/* ==================== Settings ====================
+ *
+ * `.hidden` carries `!important`, which is what lets one class hide a dialog
+ * whose resting state is `display: flex`. BaseGameUI toggles that class, so the
+ * dialog needs no state of its own here.
+ */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgb(0, 0, 0, 0.55);
+}
+
+.modal-content {
+  width: min(460px, 92vw);
+  max-height: 90dvh;
+  padding: 24px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--sn-border);
+  border-radius: var(--sn-radius);
+  background: var(--sn-surface);
+}
+
+.modal-content h2 {
+  margin-bottom: 18px;
+  font-size: 1.3rem;
+  text-align: center;
+}
+
+.setting-group {
+  margin-bottom: 22px;
+}
+
+/* The whole row is the target, not just the box. A 16px checkbox is a hard tap
+   on an iPad, and the label is the part a child aims at anyway. */
+.setting-check {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  min-height: var(--sn-tap);
+  padding: 0 14px;
+  border: 2px solid var(--sn-border);
+  border-radius: var(--sn-radius);
+  background: var(--sn-surface-alt);
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.setting-check input {
+  width: 24px;
+  height: 24px;
+  accent-color: var(--sn-primary);
+  cursor: pointer;
+}
+
+.setting-description {
+  margin-top: 8px;
+  color: var(--sn-ink-muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.modal-content .big-btn {
+  width: 100%;
 }
 
 /* ==================== Short screens ==================== */

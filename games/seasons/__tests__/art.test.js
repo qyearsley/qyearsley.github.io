@@ -1004,9 +1004,18 @@ describe("the placeholder pack's parallax backdrop", () => {
     // The highest the ground can ever be: every obstacle profile pushes it down
     // from its resting line, never up, so the stops are the ceiling.
     const highestGround = Math.min(...placeholder.layout(getSeason(seasonId)).stops.map((s) => s.y))
-    const props = Array.from(stack(seasonId).air.element.children)
-    expect(props.length).toBeGreaterThan(0)
-    for (const prop of props) {
+    const wrappers = Array.from(stack(seasonId).air.element.children)
+    expect(wrappers.length).toBeGreaterThan(0)
+    for (const wrapper of wrappers) {
+      // Each mark is wrapped in a group carrying its motion class; the shape
+      // itself is inside. The resting position is what is checked here. The
+      // stylesheet's fall animation moves a mark below this line by design, and
+      // that is safe for a different reason: the air is a backdrop layer and
+      // the camera group is appended after it, so the ground paints over
+      // anything that drifts down into it.
+      expect(wrapper.tagName).toBe("g")
+      expect(wrapper.getAttribute("class")).toMatch(/^air-mark air-\w+$/)
+      const prop = wrapper.firstElementChild
       // The lowest point the shape can reach. A rotated ellipse can present
       // either radius downwards, so the larger of the two is the honest figure.
       const radius = Math.max(
@@ -1020,6 +1029,18 @@ describe("the placeholder pack's parallax backdrop", () => {
         : Math.max(...pathYs(prop.getAttribute("d")))
       expect(centre + radius).toBeLessThan(highestGround)
     }
+  })
+
+  // The stagger and the speed are derived from the mark's index exactly as its
+  // position is, so the field animates identically on every rebuild -- the same
+  // reason nothing here calls Math.random.
+  it.each(SEASON_ORDER)("gives every %s air mark a stagger and a speed", (seasonId) => {
+    const wrappers = Array.from(stack(seasonId).air.element.children)
+    wrappers.forEach((wrapper, index) => {
+      const style = wrapper.getAttribute("style")
+      expect(style).toContain(`--air-index: ${index}`)
+      expect(style).toMatch(/--air-size: [012]\b/)
+    })
   })
 
   it("scatters its props without ever calling Math.random", () => {

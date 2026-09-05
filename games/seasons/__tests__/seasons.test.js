@@ -412,7 +412,8 @@ describe("difficulty escalation", () => {
     // only a handful of possible questions becomes recall of the choice list
     // rather than of the fact. Division within 100 has a hard ceiling here: once
     // the quotient floor is raised, there are only so many facts left, and the
-    // narrowest slot in the game sits at 16.
+    // narrowest slot in the game sits at 20 (autumn's boss), with spring's
+    // glowing spaces next at 21.
     const prompts = new Set()
     for (let seed = 0; seed < 1500; seed += 1) {
       prompts.add(generate(forms, createRng(`pool-${seed}`)).prompt)
