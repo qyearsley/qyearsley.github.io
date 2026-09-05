@@ -391,7 +391,11 @@ export class EventManager {
       // Escape closes the settings modal. Without it the modal was a keyboard
       // trap: the only way out was to Tab all the way to Done. Handled before
       // the activity-screen gate, because settings opens from the hub too.
-      if (e.key === "Escape" && this._settingsOpen()) {
+      //
+      // Not while the help overlay is up. It sits on top of the dialog and
+      // `shared/nav.js` does not stop propagation, so one Escape would dismiss
+      // both layers at once.
+      if (e.key === "Escape" && this._settingsOpen() && !window.__helpOverlayIsOpen?.()) {
         e.preventDefault()
         if (this.callbacks.onSettingsClose) this.callbacks.onSettingsClose()
         return

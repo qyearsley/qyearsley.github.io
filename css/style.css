@@ -987,6 +987,24 @@ kbd {
   }
 }
 
+/* Text for screen readers only.
+   Promoted here from the game stylesheets. Seasons and Times Trail each define
+   their own identical copy; Turing Tape used the class without defining it
+   anywhere, so its "(solved)" marker on a completed level rendered as visible
+   text and widened the nav. Duplicated definitions are harmless -- a game sheet
+   loads after this one and its copy simply wins -- but a *missing* one is not,
+   and this is the sheet all five games already link. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Motion
    Everything on the site that moves is decoration: hover lifts, the theme
    popover, the logic engine's spinner. None of it carries meaning that is lost

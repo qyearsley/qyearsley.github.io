@@ -97,6 +97,14 @@ describe("every game", () => {
     expect(PAGES[game].getElementById(target)).not.toBeNull()
   })
 
+  // Turing Tape used `.visually-hidden` without any stylesheet defining it, so
+  // its screen-reader-only "(solved)" marker rendered as visible text. The class
+  // lives in css/style.css now, which every game links -- this holds it there.
+  it("the shared stylesheet defines .visually-hidden, which three games use", () => {
+    const siteCss = readFileSync(join(GAMES_DIR, "..", "css", "style.css"), "utf-8")
+    expect(siteCss).toMatch(/^\.visually-hidden\s*\{/m)
+  })
+
   it.each(GAMES)("%s registers at least one keyboard shortcut", (game) => {
     const inline = [...PAGES[game].querySelectorAll("script:not([src])")]
       .map((script) => script.textContent)

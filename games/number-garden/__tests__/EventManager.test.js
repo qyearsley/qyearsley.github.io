@@ -495,6 +495,19 @@ describe("EventManager", () => {
       select.remove()
     })
 
+    test("Escape leaves the modal alone while the help overlay is up", () => {
+      // One Escape must not dismiss two layers. nav.js owns the overlay and
+      // does not stop propagation.
+      eventManager.setupKeyboardShortcuts()
+      document.getElementById("settings-modal").classList.remove("hidden")
+      window.__helpOverlayIsOpen = () => true
+
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }))
+
+      expect(callbacks.onSettingsClose).not.toHaveBeenCalled()
+      delete window.__helpOverlayIsOpen
+    })
+
     test("Escape closes the settings modal", () => {
       eventManager.setupKeyboardShortcuts()
       document.getElementById("settings-modal").classList.remove("hidden")

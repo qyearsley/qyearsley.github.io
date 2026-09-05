@@ -715,7 +715,11 @@ const TEXT_ENTRY_TAGS = new Set(["INPUT", "TEXTAREA", "SELECT"])
  */
 function _onKeyDown(event) {
   if (event.metaKey || event.ctrlKey || event.altKey) return
-  if (event.key === "Escape" && ui.settingsOpen) {
+  // The help overlay is on top of the dialog when both are open, and
+  // `shared/nav.js` does not stop propagation, so without this term one Escape
+  // dismissed both layers -- and restarted the question's full countdown while
+  // the player was still reading the shortcut list.
+  if (event.key === "Escape" && ui.settingsOpen && !window.__helpOverlayIsOpen?.()) {
     event.preventDefault()
     _closeSettings()
     return

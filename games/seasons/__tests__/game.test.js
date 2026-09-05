@@ -2016,6 +2016,33 @@ describe("the countdown setting", () => {
     expect(isOpen()).toBe(false)
   })
 
+  // The help overlay is drawn on top of the dialog and `shared/nav.js` does not
+  // stop propagation, so one Escape used to dismiss both -- and restart the
+  // question's full countdown while the shortcut list was still being read.
+  it("leaves the dialog alone when Escape is closing the help overlay", async () => {
+    await bootIntoSummer()
+    byId("settings-button").click()
+    window.__helpOverlayIsOpen = () => true
+
+    pressKey("Escape")
+
+    expect(isOpen()).toBe(true)
+    delete window.__helpOverlayIsOpen
+  })
+
+  it("closes on the next Escape, once the overlay has gone", async () => {
+    await bootIntoSummer()
+    byId("settings-button").click()
+    window.__helpOverlayIsOpen = () => true
+    pressKey("Escape")
+
+    window.__helpOverlayIsOpen = () => false
+    pressKey("Escape")
+
+    expect(isOpen()).toBe(false)
+    delete window.__helpOverlayIsOpen
+  })
+
   // The dialog covers the answer buttons, so a letter aimed at it must not
   // answer the question underneath.
   it("swallows the answer keys while it is open", async () => {
