@@ -600,6 +600,24 @@ describe("EventManager", () => {
       expect(callbacks.onAnswerSelected).not.toHaveBeenCalled()
     })
 
+    // The site help overlay covers the tiles the same way the settings modal
+    // does. `shared/nav.js` publishes `__helpOverlayIsOpen` so a game can ask.
+    test("does nothing while the site help overlay is open", () => {
+      renderTiles([42, 36, 48, 49])
+      window.__helpOverlayIsOpen = () => true
+      pressKey("b")
+      expect(callbacks.onAnswerSelected).not.toHaveBeenCalled()
+      delete window.__helpOverlayIsOpen
+    })
+
+    test("works again once the help overlay closes", () => {
+      renderTiles([42, 36, 48, 49])
+      window.__helpOverlayIsOpen = () => false
+      pressKey("b")
+      expect(callbacks.onAnswerSelected).toHaveBeenCalledTimes(1)
+      delete window.__helpOverlayIsOpen
+    })
+
     test("does nothing when the keypad is the active affordance", () => {
       renderTiles([42, 36, 48, 49])
       document.getElementById("answer-tiles").classList.add("hidden")

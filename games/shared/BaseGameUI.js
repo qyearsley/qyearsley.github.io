@@ -5,9 +5,17 @@
  * This class centralizes common DOM manipulation patterns to reduce
  * code duplication and ensure consistent UI behavior across games.
  *
- * Security Note: Game UI classes use innerHTML for dynamic content generation.
- * All content is generated from controlled game data (not user input), making it
- * safe from XSS attacks. User input is never directly inserted into the DOM.
+ * Security note: nothing in this class writes markup. `setHTML` used to, and
+ * the note here used to say the games relied on it being safe because the
+ * content was game data rather than user input. That argument was never needed:
+ * no game called it. It is gone, so `textContent` is the only way a string
+ * reaches the page from here.
+ *
+ * The settings dialog is shown and hidden by `showSettings` / `hideSettings`,
+ * which toggle the `hidden` class. There used to be a second pair, `showModal`
+ * and `hideModal`, toggling a `show` class instead -- no game called those
+ * either, and no stylesheet defined `.modal.show`, so the first caller would
+ * have got a dialog that never appeared. Also gone.
  */
 export class BaseGameUI {
   constructor() {
@@ -29,28 +37,6 @@ export class BaseGameUI {
       targetScreen.classList.add("active")
     } else {
       console.warn(`Screen not found: ${screenId}`)
-    }
-  }
-
-  /**
-   * Show a modal by adding the 'show' class
-   * @param {HTMLElement|string} modal - Modal element or ID
-   */
-  showModal(modal) {
-    const modalElement = typeof modal === "string" ? document.getElementById(modal) : modal
-    if (modalElement) {
-      modalElement.classList.add("show")
-    }
-  }
-
-  /**
-   * Hide a modal by removing the 'show' class
-   * @param {HTMLElement|string} modal - Modal element or ID
-   */
-  hideModal(modal) {
-    const modalElement = typeof modal === "string" ? document.getElementById(modal) : modal
-    if (modalElement) {
-      modalElement.classList.remove("show")
     }
   }
 
@@ -79,42 +65,6 @@ export class BaseGameUI {
     const element = document.getElementById(elementId)
     if (element) {
       element.textContent = text
-    }
-  }
-
-  /**
-   * Set HTML content of an element
-   * @param {string} elementId - Element ID
-   * @param {string} html - HTML to set
-   */
-  setHTML(elementId, html) {
-    const element = document.getElementById(elementId)
-    if (element) {
-      element.innerHTML = html
-    }
-  }
-
-  /**
-   * Add a CSS class to an element
-   * @param {HTMLElement|string} element - Element or ID
-   * @param {string} className - Class name to add
-   */
-  addClass(element, className) {
-    const el = typeof element === "string" ? document.getElementById(element) : element
-    if (el) {
-      el.classList.add(className)
-    }
-  }
-
-  /**
-   * Remove a CSS class from an element
-   * @param {HTMLElement|string} element - Element or ID
-   * @param {string} className - Class name to remove
-   */
-  removeClass(element, className) {
-    const el = typeof element === "string" ? document.getElementById(element) : element
-    if (el) {
-      el.classList.remove(className)
     }
   }
 

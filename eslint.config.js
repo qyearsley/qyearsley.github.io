@@ -31,6 +31,9 @@ const browserGlobals = {
   HTMLElement: "readonly",
   HTMLInputElement: "readonly",
   HTMLButtonElement: "readonly",
+  // jsdom supplies this too, which is how the games' markup-contract test
+  // parses five index.html files without a third-party parser.
+  DOMParser: "readonly",
 }
 
 // Globals exposed by specific page scripts (not browser built-ins)

@@ -347,7 +347,11 @@ export class EventManager {
     const active = Boolean(playScreen && playScreen.classList.contains("active"))
     const modalOpen = Boolean(modal && !modal.classList.contains("hidden"))
     const tilesShowing = Boolean(tiles && !tiles.classList.contains("hidden"))
-    return active && !modalOpen && tilesShowing
+    // The site's own help overlay -- the one `?` opens -- covers the tiles as
+    // thoroughly as the settings modal does. `shared/nav.js` publishes
+    // `__helpOverlayIsOpen` for exactly this, and for a while no game asked.
+    const helpOpen = window.__helpOverlayIsOpen?.() === true
+    return active && !modalOpen && !helpOpen && tilesShowing
   }
 
   /**

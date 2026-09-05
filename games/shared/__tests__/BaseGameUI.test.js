@@ -55,32 +55,6 @@ describe("BaseGameUI", () => {
     })
   })
 
-  describe("showModal and hideModal", () => {
-    test("shows modal by adding show class", () => {
-      const modal = document.getElementById("settings-modal")
-      expect(modal.classList.contains("show")).toBe(false)
-
-      baseGameUI.showModal(modal)
-      expect(modal.classList.contains("show")).toBe(true)
-    })
-
-    test("hides modal by removing show class", () => {
-      const modal = document.getElementById("settings-modal")
-      modal.classList.add("show")
-
-      baseGameUI.hideModal(modal)
-      expect(modal.classList.contains("show")).toBe(false)
-    })
-
-    test("accepts element ID as string", () => {
-      baseGameUI.showModal("settings-modal")
-      expect(document.getElementById("settings-modal").classList.contains("show")).toBe(true)
-
-      baseGameUI.hideModal("settings-modal")
-      expect(document.getElementById("settings-modal").classList.contains("show")).toBe(false)
-    })
-  })
-
   describe("setVisible", () => {
     test("shows element by removing hidden class", () => {
       const element = document.getElementById("test-element")
@@ -117,42 +91,6 @@ describe("BaseGameUI", () => {
       expect(() => {
         baseGameUI.setText("non-existent", "text")
       }).not.toThrow()
-    })
-  })
-
-  describe("setHTML", () => {
-    test("sets HTML content of element", () => {
-      baseGameUI.setHTML("html-element", "<strong>Bold</strong>")
-      expect(document.getElementById("html-element").innerHTML).toBe("<strong>Bold</strong>")
-    })
-
-    test("handles non-existent element gracefully", () => {
-      expect(() => {
-        baseGameUI.setHTML("non-existent", "<div>html</div>")
-      }).not.toThrow()
-    })
-  })
-
-  describe("addClass and removeClass", () => {
-    test("adds class to element", () => {
-      const element = document.getElementById("test-element")
-      baseGameUI.addClass(element, "new-class")
-      expect(element.classList.contains("new-class")).toBe(true)
-    })
-
-    test("removes class from element", () => {
-      const element = document.getElementById("test-element")
-      element.classList.add("remove-me")
-      baseGameUI.removeClass(element, "remove-me")
-      expect(element.classList.contains("remove-me")).toBe(false)
-    })
-
-    test("accepts element ID as string", () => {
-      baseGameUI.addClass("test-element", "string-class")
-      expect(document.getElementById("test-element").classList.contains("string-class")).toBe(true)
-
-      baseGameUI.removeClass("test-element", "string-class")
-      expect(document.getElementById("test-element").classList.contains("string-class")).toBe(false)
     })
   })
 
