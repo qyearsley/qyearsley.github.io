@@ -620,7 +620,7 @@ the `--experimental-vm-modules` flag that ESM needs.
 ```
 index.html      # The whole markup: three screens, no templating
 manifest.json   # PWA manifest, display: standalone
-icon.svg        # The only icon; see the note on apple-touch-icon below
+icon.svg        # The only icon: manifest and apple-touch-icon both point here
 index.zh.json   # Chinese strings, used by the site build
 styles/main.css # The whole stylesheet, light and dark
 js/             # 14 modules; the dependency graph is in js/README.md
@@ -661,10 +661,14 @@ than handing back a question with two seconds left because the iPad was locked.
 Opening the settings dialog does the same thing, for the same reason. Follows
 the OS dark-mode preference unless the site theme toggle overrides it.
 `manifest.json` sets `"display": "standalone"`, so the home screen opens it
-without browser chrome, but there is no `apple-touch-icon`: iOS ignores SVG
-icons and this repo adds no binary assets, so the home-screen icon is a snapshot
-of the page. To fix that, add a 180×180 PNG at
-`games/seasons/apple-touch-icon.png` and one line to `<head>`.
+without browser chrome. The `apple-touch-icon` points at `icon.svg`, which iOS
+ignores — it takes only PNG — so Add to Home Screen still falls back to a
+snapshot of the page. The link is there anyway, matching Times Trail, because a
+half-configured PWA is harder to notice than a missing one; all three
+installable games are held to the same set by
+`games/shared/__tests__/markup-contract.test.js`. For a real icon, drop a
+180×180 PNG in beside `icon.svg` and change that one `href` — at the cost of
+this repo's no-binary-assets convention.
 
 ## Security and privacy
 

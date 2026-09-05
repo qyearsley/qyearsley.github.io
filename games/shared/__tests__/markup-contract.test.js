@@ -18,7 +18,7 @@
  * attribute written in a different order still matches.
  */
 
-import { readFileSync } from "node:fs"
+import { existsSync, readFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 
@@ -44,6 +44,18 @@ const PAGES = Object.fromEntries(GAMES.map((game) => [game, page(game)]))
 
 /** The games that offer a settings dialog. Derived, not listed. */
 const WITH_SETTINGS = GAMES.filter((game) => PAGES[game].getElementById("settings-modal"))
+
+/** The games that ship a web-app manifest. Derived, not listed. */
+const WITH_MANIFEST = GAMES.filter((game) => existsSync(join(GAMES_DIR, game, "manifest.json")))
+
+/**
+ * A game's parsed manifest.
+ * @param {string} game - The game directory name
+ * @returns {Object} The parsed manifest
+ */
+function manifest(game) {
+  return JSON.parse(readFileSync(join(GAMES_DIR, game, "manifest.json"), "utf-8"))
+}
 
 describe("every game", () => {
   it.each(GAMES)("%s links the site stylesheet, so the theme toggle reaches it", (game) => {
@@ -144,5 +156,65 @@ describe("a game that has a settings dialog", () => {
       .map((script) => script.textContent)
       .join("")
     expect(inline).toContain('__registerShortcut("Escape"')
+  })
+})
+
+// Same conditional shape as the dialog block. Life Garden and Turing Tape have
+// no manifest and want none -- one is a canvas you drag on and the other is a
+// desktop-ish simulator, and neither is a thing anybody adds to a home screen.
+// The rule is that a game which *is* installable is installable properly.
+describe("a game that ships a manifest", () => {
+  it("is the set we expect, so a new one has to opt in deliberately", () => {
+    expect(WITH_MANIFEST).toEqual(["number-garden", "seasons", "times-trail"])
+  })
+
+  it.each(WITH_MANIFEST)("%s links its manifest from the page", (game) => {
+    const link = PAGES[game].querySelector('link[rel="manifest"]')
+    expect(link).not.toBeNull()
+    expect(link.getAttribute("href")).toBe("manifest.json")
+  })
+
+  it.each(WITH_MANIFEST)("%s declares a name, a scope and standalone display", (game) => {
+    const data = manifest(game)
+    expect(data.name).toBeTruthy()
+    expect(data.short_name).toBeTruthy()
+    expect(data.display).toBe("standalone")
+    // Relative, so the manifest works from /games/x/ and from /zh/games/x/.
+    expect(data.start_url).toBe("./")
+    expect(data.scope).toBe("./")
+  })
+
+  it.each(WITH_MANIFEST)("%s ships every icon its manifest names", (game) => {
+    const icons = manifest(game).icons
+    expect(icons.length).toBeGreaterThan(0)
+    for (const icon of icons) {
+      expect(existsSync(join(GAMES_DIR, game, icon.src))).toBe(true)
+    }
+  })
+
+  // A manifest theme_color that disagrees with the page's is the browser
+  // chrome changing colour when the app is installed.
+  it.each(WITH_MANIFEST)("%s agrees with the page about its theme colour", (game) => {
+    const onPage = PAGES[game].querySelector('meta[name="theme-color"]').getAttribute("content")
+    expect(manifest(game).theme_color).toBe(onPage)
+  })
+
+  it.each(WITH_MANIFEST)("%s carries the iOS web-app meta tags", (game) => {
+    for (const name of [
+      "mobile-web-app-capable",
+      "apple-mobile-web-app-capable",
+      "apple-mobile-web-app-status-bar-style",
+      "apple-mobile-web-app-title",
+    ]) {
+      expect(PAGES[game].querySelector(`meta[name="${name}"]`)).not.toBeNull()
+    }
+  })
+
+  // iOS ignores SVG here, so this is a snapshot of the page until someone adds
+  // a PNG. The link still has to point at a file that exists.
+  it.each(WITH_MANIFEST)("%s points apple-touch-icon at a real file", (game) => {
+    const link = PAGES[game].querySelector('link[rel="apple-touch-icon"]')
+    expect(link).not.toBeNull()
+    expect(existsSync(join(GAMES_DIR, game, link.getAttribute("href")))).toBe(true)
   })
 })

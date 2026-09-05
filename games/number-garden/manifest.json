@@ -1,0 +1,14 @@
+{
+  "name": "Number Garden",
+  "short_name": "Number Garden",
+  "description": "Grow a garden by answering maths questions across six themed areas",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f4f8ef",
+  "theme_color": "#7cb342",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
