@@ -308,21 +308,73 @@ export class GameUI extends BaseGameUI {
   }
 
   /**
-   * Disable all answer buttons
+   * Lock the answer controls while an answer is being processed.
+   *
+   * OVERRIDES `BaseGameUI.disableAnswerButtons`, which queries `.answer-btn`;
+   * this game's buttons are `.answer-button`, so the inherited version is a
+   * silent no-op here.
+   *
+   * There are two entry modes and this has to cover both. Multiple choice locks
+   * with a class rather than the `disabled` property, because disabling the
+   * element that currently has focus drops focus to `<body>`; the guard in
+   * `EventManager` is what actually rejects a second answer, and the class is
+   * what says so. Typed entry has nothing to click, so its field and button use
+   * the real property.
    */
   disableAnswerButtons() {
     this.elements.answerOptions.querySelectorAll(".answer-button").forEach((btn) => {
       btn.classList.add("disabled")
     })
+    this._setTypedEntryEnabled(false)
   }
 
   /**
-   * Enable all answer buttons
+   * Hand the answer controls back after a wrong answer.
+   *
+   * Typed entry is the half that used to be missing, and it was the more
+   * serious half: `handleKeyboardSubmit` sets `input.disabled` and nothing else
+   * ever cleared it, so the first wrong answer in "Type Answer" mode left a
+   * dead field and a dead button with no way back except leaving the area.
    */
   enableAnswerButtons() {
     this.elements.answerOptions.querySelectorAll(".answer-button").forEach((btn) => {
       btn.classList.remove("disabled")
     })
+    this._setTypedEntryEnabled(true)
+  }
+
+  /**
+   * Enable or disable the typed-entry field and its Submit button, if they are
+   * the controls on screen. A no-op in multiple-choice mode.
+   * @private
+   * @param {boolean} enabled - Whether the controls should accept input
+   */
+  _setTypedEntryEnabled(enabled) {
+    const input = document.getElementById("answer-input-field")
+    const submit = document.getElementById("submit-answer-btn")
+    if (input) input.disabled = !enabled
+    if (submit) submit.disabled = !enabled
+    // Put the cursor back where the child is already looking, rather than
+    // making them find the field again after every mistake.
+    if (enabled && input) input.focus()
+  }
+
+  /**
+   * Undo `updateVisualProgression`'s writes to the shared chrome.
+   *
+   * Those writes are inline styles on `document.body` and on `:root`, so they
+   * outlive the screen that set them. Crystal Cave's stages run to near-black,
+   * and leaving one on painted the garden hub, the title screen and the
+   * settings modal in it for the rest of the session.
+   */
+  clearBodyTheme() {
+    document.body.style.backgroundColor = ""
+    document.body.style.backgroundImage = ""
+    document.body.style.backgroundSize = ""
+    document.body.style.backgroundRepeat = ""
+    for (const property of ["--theme-primary", "--theme-accent", "--theme-ink"]) {
+      document.documentElement.style.removeProperty(property)
+    }
   }
 
   /**
@@ -372,7 +424,10 @@ export class GameUI extends BaseGameUI {
       this.elements.gardenPreview.style.backgroundImage = "none"
     }
 
-    // Apply theme to body background
+    // Apply theme to body background. `clearBodyTheme` is the other half; the
+    // hub, the title screen and the settings modal all share this body, and
+    // Crystal Cave's near-black stages tinted every one of them until it was
+    // added.
     document.body.style.backgroundColor = currentStage.background
     document.body.style.backgroundSize = "auto"
     document.body.style.backgroundRepeat = "repeat"

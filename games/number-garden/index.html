@@ -4,6 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Number Garden</title>
+    <meta
+      name="description"
+      content="Grow a garden by answering maths questions: addition, subtraction, times tables, measurement, patterns, and telling the time"
+    />
+    <meta name="theme-color" content="#7cb342" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -286,10 +291,10 @@
         class="modal hidden"
         role="dialog"
         aria-modal="true"
-        aria-label="Settings"
+        aria-labelledby="settings-title"
       >
         <div class="modal-content">
-          <h2>Settings ⚙️</h2>
+          <h2 id="settings-title">Settings ⚙️</h2>
 
           <div class="setting-group">
             <label for="difficulty-select">Difficulty Level:</label>
@@ -388,8 +393,9 @@
     <script type="module" src="js/game.js?v=7"></script>
     <script>
       if (window.__registerShortcut) {
-        window.__registerShortcut("A-D", "Select answer")
-        window.__registerShortcut("Enter", "Submit answer")
+        window.__registerShortcut("A-D", "Select answer (multiple choice)")
+        window.__registerShortcut("Enter", "Submit answer (typed entry)")
+        window.__registerShortcut("Escape", "Close settings")
       }
     </script>
   </body>

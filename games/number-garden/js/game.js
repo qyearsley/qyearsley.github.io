@@ -241,6 +241,15 @@ class NumberGarden {
    * @param {string} screenId - Screen identifier
    */
   showScreen(screenId) {
+    // Leaving a screen has to cancel whatever that screen queued. A correct
+    // answer arms a 1.5s timeout to draw the next activity or the level-complete
+    // screen; tapping Back inside that window used to let it fire anyway, so the
+    // level-complete screen appeared on top of the hub, or a second
+    // `generateActivity` overwrote a freshly-drawn question.
+    this._clearPendingAdvance()
+    // The activity screen paints the body from the area's own theme; every
+    // other screen shares that body and should not inherit it.
+    if (screenId !== "activity-screen") this.ui.clearBodyTheme()
     this.state.setScreen(screenId)
     this.ui.showScreen(screenId)
 
@@ -317,11 +326,28 @@ class NumberGarden {
     // Update UI
     this.updateAllDisplays()
 
-    // Handle level completion or continue
+    // Handle level completion or continue. The handle is kept so that leaving
+    // the screen can cancel it -- see `_clearPendingAdvance`.
     if (levelComplete) {
-      setTimeout(() => this.showLevelComplete(), TIMING.LEVEL_COMPLETE_DELAY)
+      this._advanceTimer = setTimeout(() => this.showLevelComplete(), TIMING.LEVEL_COMPLETE_DELAY)
     } else {
-      setTimeout(() => this.generateActivity(), TIMING.NEXT_ACTIVITY_DELAY)
+      this._advanceTimer = setTimeout(() => this.generateActivity(), TIMING.NEXT_ACTIVITY_DELAY)
+    }
+  }
+
+  /**
+   * Drop any queued "draw the next thing" timeout. Safe to call at any time,
+   * including when nothing is pending.
+   * @private
+   */
+  _clearPendingAdvance() {
+    if (this._advanceTimer !== undefined) {
+      clearTimeout(this._advanceTimer)
+      this._advanceTimer = undefined
+    }
+    if (this._retryTimer !== undefined) {
+      clearTimeout(this._retryTimer)
+      this._retryTimer = undefined
     }
   }
 
@@ -336,8 +362,14 @@ class NumberGarden {
     // Play incorrect sound
     this.sounds.playIncorrect()
 
-    setTimeout(() => {
+    this._retryTimer = setTimeout(() => {
+      this._retryTimer = undefined
       this.ui.enableAnswerButtons()
+      // Releasing the controls without releasing the guard is not a retry.
+      // `resetAnswerProcessing` used to run only from `generateActivity`, which
+      // a wrong answer never reaches, so in "Type Answer" mode the flag stayed
+      // set for the rest of the visit and every later submission was dropped.
+      this.events.resetAnswerProcessing()
     }, TIMING.RETRY_DELAY)
   }
 

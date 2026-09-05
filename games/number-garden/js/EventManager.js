@@ -1,6 +1,13 @@
 import { ANSWER_KEYS } from "./constants.js"
 
 /**
+ * Tags whose own keyboard behaviour must never be hijacked. The same set the
+ * other games in this repo keep; see times-trail's EventManager. SELECT matters
+ * here in particular, because the settings modal is four of them.
+ */
+const TEXT_ENTRY_TAGS = new Set(["INPUT", "TEXTAREA", "SELECT"])
+
+/**
  * Manages event listeners and callbacks for the game
  */
 export class EventManager {
@@ -153,6 +160,14 @@ export class EventManager {
     if (this.ui.elements.answerOptions) {
       this.ui.elements.answerOptions.addEventListener("click", (e) => {
         if (e.target.classList.contains("answer-button")) {
+          // `.disabled` is a class here, not the property -- disabling the
+          // focused element would drop focus to `<body>`. CSS gives the class
+          // `pointer-events: none`, which stops a tap but not Enter or Space on
+          // a focused button, so the guard has to be in JS as well. Without it,
+          // two fast Enters on one question scored twice: two stars, two
+          // flowers, and two advance timeouts.
+          if (e.target.classList.contains("disabled") || this.isProcessingAnswer) return
+          this.isProcessingAnswer = true
           const selectedAnswer = e.target.dataset.answer
           // Try to parse as number if possible, otherwise keep as string
           const parsedAnswer = isNaN(selectedAnswer) ? selectedAnswer : parseInt(selectedAnswer, 10)
@@ -347,7 +362,17 @@ export class EventManager {
   }
 
   /**
-   * Reset answer processing flag (called when new question is loaded)
+   * Whether the settings modal is covering the screen.
+   * @private
+   * @returns {boolean} True while the modal is open
+   */
+  _settingsOpen() {
+    return document.getElementById("settings-modal")?.classList.contains("hidden") === false
+  }
+
+  /**
+   * Reset answer processing flag (called when a new question is loaded, and
+   * after a wrong answer hands the controls back)
    */
   resetAnswerProcessing() {
     this.isProcessingAnswer = false
@@ -358,19 +383,37 @@ export class EventManager {
    */
   setupKeyboardShortcuts() {
     document.addEventListener("keydown", (e) => {
+      // Leave browser and OS shortcuts alone
+      if (e.metaKey || e.ctrlKey || e.altKey) {
+        return
+      }
+
+      // Escape closes the settings modal. Without it the modal was a keyboard
+      // trap: the only way out was to Tab all the way to Done. Handled before
+      // the activity-screen gate, because settings opens from the hub too.
+      if (e.key === "Escape" && this._settingsOpen()) {
+        e.preventDefault()
+        if (this.callbacks.onSettingsClose) this.callbacks.onSettingsClose()
+        return
+      }
+
       // Only handle if we're on the activity screen
       const activityScreen = document.getElementById("activity-screen")
       if (!activityScreen || !activityScreen.classList.contains("active")) {
         return
       }
 
-      // Check if user is typing in an input field
-      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
+      // Check if user is typing in a field. SELECT belongs here with the other
+      // two: the settings modal is four of them, and "d" on the Difficulty
+      // select used to click the fourth answer button behind the modal.
+      if (TEXT_ENTRY_TAGS.has(e.target.tagName)) {
         return
       }
 
-      // Leave browser and OS shortcuts alone
-      if (e.metaKey || e.ctrlKey || e.altKey) {
+      // Anything covering the answer buttons swallows the keys that press them
+      // -- the settings modal, and the site-wide help overlay that `?` opens.
+      // `shared/nav.js` publishes `__helpOverlayIsOpen` for exactly this.
+      if (this._settingsOpen() || window.__helpOverlayIsOpen?.()) {
         return
       }
 

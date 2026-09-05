@@ -63,7 +63,7 @@ describe("GameUI", () => {
 
     test("extends BaseGameUI", () => {
       expect(gameUI.showScreen).toBeDefined()
-      expect(gameUI.showModal).toBeDefined()
+      expect(gameUI.showSettings).toBeDefined()
       expect(gameUI.setVisible).toBeDefined()
     })
   })
@@ -552,6 +552,84 @@ describe("GameUI", () => {
       buttons.forEach((btn) => {
         expect(btn.classList.contains("disabled")).toBe(false)
       })
+    })
+
+    // There are two entry modes and both have to be released. Typed entry was
+    // the half that was missing: `handleKeyboardSubmit` sets `input.disabled`
+    // and nothing ever cleared it, so the first wrong answer in "Type Answer"
+    // mode left a dead field with no way back except leaving the area.
+    describe("typed entry", () => {
+      beforeEach(() => {
+        gameUI.displayKeyboardInput(7)
+      })
+
+      const field = () => document.getElementById("answer-input-field")
+      const submit = () => document.getElementById("submit-answer-btn")
+
+      test("locks the field and the submit button", () => {
+        gameUI.disableAnswerButtons()
+
+        expect(field().disabled).toBe(true)
+        expect(submit().disabled).toBe(true)
+      })
+
+      test("hands them back again", () => {
+        gameUI.disableAnswerButtons()
+        gameUI.enableAnswerButtons()
+
+        expect(field().disabled).toBe(false)
+        expect(submit().disabled).toBe(false)
+      })
+
+      test("puts the cursor back in the field", () => {
+        gameUI.disableAnswerButtons()
+        gameUI.enableAnswerButtons()
+
+        expect(document.activeElement).toBe(field())
+      })
+    })
+
+    test("neither call throws in multiple-choice mode, where there is no field", () => {
+      document.getElementById("answer-options").innerHTML =
+        `<button class="answer-button"></button>`
+
+      expect(() => {
+        gameUI.disableAnswerButtons()
+        gameUI.enableAnswerButtons()
+      }).not.toThrow()
+    })
+  })
+
+  // `updateVisualProgression` writes inline styles onto the shared body and
+  // `:root`, so they outlive the screen that set them. Crystal Cave's stages
+  // run to near-black, and one left on tinted the hub, the title screen and the
+  // settings modal for the rest of the session.
+  describe("clearBodyTheme", () => {
+    test("removes the body background the activity screen painted", () => {
+      document.body.style.backgroundColor = "rgb(44, 44, 68)"
+      document.body.style.backgroundImage = "linear-gradient(red, blue)"
+
+      gameUI.clearBodyTheme()
+
+      expect(document.body.style.backgroundColor).toBe("")
+      expect(document.body.style.backgroundImage).toBe("")
+    })
+
+    test("removes the theme custom properties", () => {
+      const root = document.documentElement.style
+      root.setProperty("--theme-primary", "#123456")
+      root.setProperty("--theme-accent", "#654321")
+      root.setProperty("--theme-ink", "#000000")
+
+      gameUI.clearBodyTheme()
+
+      expect(root.getPropertyValue("--theme-primary")).toBe("")
+      expect(root.getPropertyValue("--theme-accent")).toBe("")
+      expect(root.getPropertyValue("--theme-ink")).toBe("")
+    })
+
+    test("is safe to call when nothing was ever set", () => {
+      expect(() => gameUI.clearBodyTheme()).not.toThrow()
     })
   })
 

@@ -1,4 +1,5 @@
 import { GameState } from "../js/GameState.js"
+import { DEFAULTS } from "../js/constants.js"
 
 // Mock storage manager
 const mockStorageManager = {
@@ -214,6 +215,90 @@ describe("GameState", () => {
       expect(newGameState.stats.flowers).toBe(0)
       expect(newGameState.stats.currentLevel).toBe(1)
       expect(newGameState.unlockedAreas.has("flower-meadow")).toBe(true)
+    })
+  })
+
+  // A save comes off a real device and may be half-written, hand-edited, or
+  // from an old build. It has to cost the progress at worst, never the game --
+  // and it used to cost the game: a bad `unlockedAreas` reached `new Set(5)`,
+  // which throws, and the throw escaped the constructor into a permanent "Game
+  // Failed to Load" that nothing ever cleared.
+  describe("loadProgress with a hostile save", () => {
+    /** Build a state on the given payload, as a reload would. */
+    const loadFrom = (payload) => {
+      mockStorageManager.loadProgress = () => payload
+      return new GameState(mockStorageManager)
+    }
+
+    test.each([
+      ["a number for unlockedAreas", { unlockedAreas: 5 }],
+      ["a string for unlockedAreas", { unlockedAreas: "flower-meadow" }],
+      ["an object for garden", { garden: {} }],
+      ["a string for stats", { stats: "lots" }],
+      ["a number for settings", { settings: 42 }],
+      ["nothing at all", {}],
+      ["a non-object", "corrupt"],
+    ])("starts rather than throwing for %s", (_label, payload) => {
+      expect(() => loadFrom(payload)).not.toThrow()
+    })
+
+    test("a garden that is not an array becomes an empty one", () => {
+      expect(loadFrom({ garden: { first: "🌹" } }).garden).toEqual([])
+    })
+
+    test("a garden keeps only the entries that are objects", () => {
+      const state = loadFrom({ garden: [{ emoji: "🌹" }, "🌷", null, 7] })
+      expect(state.garden).toHaveLength(1)
+    })
+
+    test("an unlock list keeps only real areas, and never empties", () => {
+      const state = loadFrom({ unlockedAreas: ["flower-meadow", "atlantis", 3] })
+      expect([...state.unlockedAreas]).toEqual(["flower-meadow"])
+    })
+
+    test("an unlock list of nothing real still opens the first area", () => {
+      expect(loadFrom({ unlockedAreas: ["atlantis"] }).unlockedAreas.has("flower-meadow")).toBe(
+        true,
+      )
+    })
+
+    test.each([
+      ["a string", "31"],
+      ["a negative", -4],
+      ["a fraction", 2.7],
+      ["not a number at all", null],
+    ])("a stat that is %s is coerced to a whole count", (_label, value) => {
+      const state = loadFrom({ stats: { stars: value } })
+      expect(Number.isInteger(state.stats.stars)).toBe(true)
+      expect(state.stats.stars).toBeGreaterThanOrEqual(0)
+    })
+
+    test("the level never loads below 1, which is what the progress bar divides by", () => {
+      expect(loadFrom({ stats: { currentLevel: 0 } }).stats.currentLevel).toBe(1)
+      expect(loadFrom({ stats: { currentLevel: -9 } }).stats.currentLevel).toBe(1)
+    })
+
+    test("level progress cannot exceed the questions a level has", () => {
+      const state = loadFrom({ stats: { currentLevelProgress: 500 } })
+      expect(state.stats.currentLevelProgress).toBe(DEFAULTS.QUESTIONS_PER_LEVEL)
+    })
+
+    test.each([
+      ["inputMode", "inputMode", "shouting", "multipleChoice"],
+      ["visualHints", "visualHints", "maybe", "on"],
+      ["soundEffects", "soundEffects", 1, "off"],
+      ["difficulty", "difficulty", "impossible", "adventurer"],
+    ])("an unoffered %s falls back to its default", (_label, key, value, expected) => {
+      expect(loadFrom({ settings: { [key]: value } }).settings[key]).toBe(expected)
+    })
+
+    test("the old always/never spelling of visualHints still loads", () => {
+      expect(loadFrom({ settings: { visualHints: "always" } }).settings.visualHints).toBe("on")
+      expect(loadFrom({ settings: { visualHints: "never" } }).settings.visualHints).toBe("off")
+    })
+
+    test("an unknown project type falls back to the castle", () => {
+      expect(loadFrom({ projectType: "pyramid" }).projectType).toBe("castle")
     })
   })
 

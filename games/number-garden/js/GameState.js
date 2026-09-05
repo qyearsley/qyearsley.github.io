@@ -17,6 +17,74 @@ import { DEFAULTS, AREAS } from "./constants.js"
  * @property {number} timestamp - When flower was earned
  */
 
+/** Project types `setProjectType` accepts, for coercing a persisted value. */
+const PROJECT_TYPES = ["castle", "garden", "robot", "spaceship"]
+
+/** The two answer-entry modes the settings modal offers. */
+const INPUT_MODES = ["multipleChoice", "keyboard"]
+
+/** The values of the two on/off settings. */
+const ON_OFF = ["on", "off"]
+
+/** The three difficulty levels the settings modal offers. */
+const DIFFICULTIES = ["explorer", "adventurer", "master"]
+
+/** Every area id, for coercing a persisted unlock list. */
+const AREA_IDS = new Set(Object.values(AREAS))
+
+/**
+ * Whether a value can be read as a keyed object. Arrays are rejected: a
+ * persisted array where a map was expected is corruption, not data.
+ * @param {unknown} value - Value to test
+ * @returns {boolean} True for a non-null, non-array object
+ */
+function _isPlainObject(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value)
+}
+
+/**
+ * A persisted value read as a keyed object, or an empty one.
+ * @param {unknown} value - Value from a persisted payload
+ * @returns {Object} The object, or `{}`
+ */
+function _asObject(value) {
+  return _isPlainObject(value) ? value : {}
+}
+
+/**
+ * A persisted counter read as a non-negative integer.
+ * @param {unknown} value - Value from a persisted payload
+ * @param {number} [fallback] - What a non-numeric value becomes
+ * @returns {number} A non-negative integer
+ */
+function _count(value, fallback = 0) {
+  if (!Number.isFinite(value)) return fallback
+  return Math.max(0, Math.floor(value))
+}
+
+/**
+ * A persisted string read as one of a known set.
+ * @param {unknown} value - Value from a persisted payload
+ * @param {string[]} allowed - The values that exist
+ * @param {string} fallback - What anything else becomes
+ * @returns {string} A value from `allowed`
+ */
+function _oneOf(value, allowed, fallback) {
+  return allowed.includes(value) ? value : fallback
+}
+
+/**
+ * A persisted area list read as a set of real area ids.
+ * @param {unknown} value - Value from a persisted payload
+ * @param {string[]} fallback - The set to build when nothing survives
+ * @returns {Set<string>} A new set
+ */
+function _areaSet(value, fallback) {
+  if (!Array.isArray(value)) return new Set(fallback)
+  const kept = value.filter((id) => AREA_IDS.has(id))
+  return new Set(kept.length > 0 ? kept : fallback)
+}
+
 /**
  * Manages the game state for Enchanted Garden
  */
@@ -211,7 +279,21 @@ export class GameState {
   }
 
   /**
-   * Load progress from storage
+   * Load progress from storage.
+   *
+   * A saved payload is untrusted: it comes off a real device and may be
+   * half-written, hand-edited, or from a build six months old. Every field is
+   * therefore coerced back into range rather than taken as read, and anything
+   * unrecognised is dropped.
+   *
+   * That was not always so, and the failure mode was the worst kind. `||` reads
+   * as a default but only substitutes for a falsy value, so a saved `garden` of
+   * `{}` survived and made `renderGarden`'s `forEach` throw, and a saved
+   * `unlockedAreas` of `5` reached `new Set(5)`, which throws outright. Neither
+   * throw was inside the `try` above -- that covers only the read -- so it
+   * escaped the constructor and the game rendered "Game Failed to Load"
+   * **permanently**, because nothing ever cleared the bad key. A save that
+   * cannot be read must cost the progress, never the game.
    */
   loadProgress() {
     let saved
@@ -221,31 +303,37 @@ export class GameState {
       console.warn("Failed to load progress, starting fresh:", error)
       return
     }
-    if (saved) {
-      this.stats = {
-        stars: saved.stats.stars || 0,
-        flowers: saved.stats.flowers || 0,
-        activitiesCompleted: saved.stats.activitiesCompleted || 0,
-        currentLevel: saved.stats.currentLevel || 1,
-        currentLevelProgress: saved.stats.currentLevelProgress || 0,
-      }
-      this.garden = saved.garden || []
-      this.unlockedAreas = new Set(saved.unlockedAreas || [AREAS.FLOWER_MEADOW])
-      this.completedAreas = new Set(saved.completedAreas || [])
-      this.projectType = saved.projectType || "castle"
-      if (saved.settings) {
-        this.settings = {
-          inputMode: saved.settings.inputMode || "multipleChoice",
-          visualHints:
-            saved.settings.visualHints === "always"
-              ? "on"
-              : saved.settings.visualHints === "never"
-                ? "off"
-                : saved.settings.visualHints || "on",
-          soundEffects: saved.settings.soundEffects || "off",
-          difficulty: saved.settings.difficulty || "adventurer",
-        }
-      }
+    if (!saved || typeof saved !== "object") return
+
+    const stats = _asObject(saved.stats)
+    this.stats = {
+      stars: _count(stats.stars),
+      flowers: _count(stats.flowers),
+      activitiesCompleted: _count(stats.activitiesCompleted),
+      // A level is 1-based, and a progress bar divides by the questions per
+      // level, so both need a floor of their own rather than zero.
+      currentLevel: Math.max(1, _count(stats.currentLevel, 1)),
+      currentLevelProgress: Math.min(
+        DEFAULTS.QUESTIONS_PER_LEVEL,
+        _count(stats.currentLevelProgress),
+      ),
+    }
+    this.garden = Array.isArray(saved.garden) ? saved.garden.filter(_isPlainObject) : []
+    this.unlockedAreas = _areaSet(saved.unlockedAreas, [AREAS.FLOWER_MEADOW])
+    this.completedAreas = _areaSet(saved.completedAreas, [])
+    this.projectType = PROJECT_TYPES.includes(saved.projectType) ? saved.projectType : "castle"
+
+    const settings = _asObject(saved.settings)
+    this.settings = {
+      inputMode: _oneOf(settings.inputMode, INPUT_MODES, "multipleChoice"),
+      // "always" and "never" are what an older build wrote for this key.
+      visualHints: _oneOf(
+        { always: "on", never: "off" }[settings.visualHints] ?? settings.visualHints,
+        ON_OFF,
+        "on",
+      ),
+      soundEffects: _oneOf(settings.soundEffects, ON_OFF, "off"),
+      difficulty: _oneOf(settings.difficulty, DIFFICULTIES, "adventurer"),
     }
   }
 

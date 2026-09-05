@@ -33,6 +33,7 @@ describe("EventManager", () => {
       <button id="continue-playing-button"></button>
       <button id="return-to-hub-button"></button>
       <div id="activity-screen"></div>
+      <div id="settings-modal" class="modal hidden"></div>
     `
 
     // Setup callbacks
@@ -431,12 +432,76 @@ describe("EventManager", () => {
         expect.anything(),
       )
 
+      // A new question releases the guard; without this the second press is
+      // correctly swallowed as a double answer to the first question.
+      eventManager.resetAnswerProcessing()
       document.dispatchEvent(new KeyboardEvent("keydown", { key: "d" }))
       expect(callbacks.onAnswerSelected).toHaveBeenCalledWith(
         4,
         expect.anything(),
         expect.anything(),
       )
+    })
+
+    // `.disabled` is a class here rather than the property, and CSS gives it
+    // `pointer-events: none` -- which stops a tap but not Enter or Space on a
+    // focused button. Two fast presses used to score the same question twice.
+    test("a second answer to the same question is dropped", () => {
+      eventManager.setupKeyboardShortcuts()
+
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "a" }))
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "b" }))
+
+      expect(callbacks.onAnswerSelected).toHaveBeenCalledTimes(1)
+    })
+
+    test("a second click on the same question is dropped", () => {
+      const buttons = document.querySelectorAll(".answer-button")
+      buttons[0].click()
+      buttons[1].click()
+
+      expect(callbacks.onAnswerSelected).toHaveBeenCalledTimes(1)
+    })
+
+    // The modal covers the answer buttons, and its own four selects are the
+    // thing most likely to have focus while it is open.
+    test("keys are swallowed while the settings modal is open", () => {
+      eventManager.setupKeyboardShortcuts()
+      document.getElementById("settings-modal").classList.remove("hidden")
+
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "a" }))
+
+      expect(callbacks.onAnswerSelected).not.toHaveBeenCalled()
+    })
+
+    test("keys are swallowed while the site help overlay is open", () => {
+      eventManager.setupKeyboardShortcuts()
+      window.__helpOverlayIsOpen = () => true
+
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "a" }))
+
+      expect(callbacks.onAnswerSelected).not.toHaveBeenCalled()
+      delete window.__helpOverlayIsOpen
+    })
+
+    test("a key typed into a select does not answer the question behind it", () => {
+      eventManager.setupKeyboardShortcuts()
+      const select = document.createElement("select")
+      document.body.appendChild(select)
+
+      select.dispatchEvent(new KeyboardEvent("keydown", { key: "d", bubbles: true }))
+
+      expect(callbacks.onAnswerSelected).not.toHaveBeenCalled()
+      select.remove()
+    })
+
+    test("Escape closes the settings modal", () => {
+      eventManager.setupKeyboardShortcuts()
+      document.getElementById("settings-modal").classList.remove("hidden")
+
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }))
+
+      expect(callbacks.onSettingsClose).toHaveBeenCalledTimes(1)
     })
 
     test("uppercase letters work too", () => {
