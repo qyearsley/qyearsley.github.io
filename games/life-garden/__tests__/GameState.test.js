@@ -201,3 +201,76 @@ describe("GameState", () => {
     expect(state.getRemainingBudget(SPECIES.GRASS)).toBe(5)
   })
 })
+
+// The whole of this layer was dead code until 2026-09-05: nothing in game.js
+// called loadProgress or saveProgress, so the speed you chose was forgotten on
+// every reload and a save file was never written. Now that it is live, the
+// data coming back is untrusted like any other save.
+describe("loading an untrusted save", () => {
+  const stateFrom = (payload) => {
+    const state = new GameState({
+      loadProgress: () => payload,
+      saveProgress: () => true,
+      clearProgress: () => true,
+      hasGameState: () => true,
+    })
+    state.loadProgress()
+    return state
+  }
+
+  test.each([
+    ["a number", 7],
+    ["a string", "fast!"],
+    ["null", null],
+    ["an unoffered speed", "ludicrous"],
+    ["an array", []],
+  ])("an invalid speed of %s falls back to the default", (_label, speed) => {
+    // The simulation loop calls `speed.toUpperCase()`, so a non-string here is
+    // a TypeError on the first tick rather than a wrong interval.
+    const state = stateFrom({ completedPuzzles: {}, settings: { speed } })
+    expect(state.settings.speed).toBe("normal")
+  })
+
+  test.each(["slow", "normal", "fast"])("a real speed of %s is kept", (speed) => {
+    expect(stateFrom({ completedPuzzles: {}, settings: { speed } }).settings.speed).toBe(speed)
+  })
+
+  test("showGrid must be a boolean to survive", () => {
+    expect(
+      stateFrom({ completedPuzzles: {}, settings: { showGrid: "yes" } }).settings.showGrid,
+    ).toBe(true)
+    expect(
+      stateFrom({ completedPuzzles: {}, settings: { showGrid: false } }).settings.showGrid,
+    ).toBe(false)
+  })
+
+  test("an unknown setting is dropped rather than carried into the next save", () => {
+    const state = stateFrom({ completedPuzzles: {}, settings: { speed: "fast", colour: "puce" } })
+    expect(Object.keys(state.settings).sort()).toEqual(["showGrid", "speed"])
+  })
+
+  test.each([
+    ["a string", "corrupt"],
+    ["an array", []],
+    ["a number", 42],
+  ])("completedPuzzles that is %s becomes an empty map", (_label, completedPuzzles) => {
+    expect(stateFrom({ completedPuzzles, settings: {} }).completedPuzzles).toEqual({})
+  })
+
+  test("a null payload leaves every default in place", () => {
+    const state = stateFrom(null)
+    expect(state.settings).toEqual({ speed: "normal", showGrid: true })
+    expect(state.completedPuzzles).toEqual({})
+  })
+
+  test.each([
+    ["a number", 7],
+    ["a string", "x"],
+    ["missing", undefined],
+  ])("a settings block that is %s leaves the defaults", (_label, settings) => {
+    expect(stateFrom({ completedPuzzles: {}, settings }).settings).toEqual({
+      speed: "normal",
+      showGrid: true,
+    })
+  })
+})

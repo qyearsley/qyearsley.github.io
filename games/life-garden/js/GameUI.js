@@ -41,4 +41,19 @@ export class GameUI extends BaseGameUI {
     if (this.elements.playBtn) this.elements.playBtn.classList.toggle("hidden", simulating)
     if (this.elements.pauseBtn) this.elements.pauseBtn.classList.toggle("hidden", !simulating)
   }
+
+  /**
+   * Mark the speed button that is actually in force.
+   *
+   * `index.html` hardcodes `active` on Normal, which was true only because the
+   * saved speed was never loaded. A restored "fast" would otherwise run fast
+   * with Normal lit up.
+   *
+   * @param {string} speed - "slow", "normal" or "fast"
+   */
+  setActiveSpeed(speed) {
+    for (const btn of document.querySelectorAll(".speed-btn")) {
+      btn.classList.toggle("active", btn.dataset.speed === speed)
+    }
+  }
 }

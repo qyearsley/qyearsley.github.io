@@ -90,6 +90,7 @@ class LifeGarden {
       onPreset: (index) => this._loadPreset(index),
       onSpeedChange: (speed) => {
         this.state.settings.speed = speed
+        this.state.saveProgress()
         if (this.simulationTimer) {
           this._stopSimulation()
           this._startSimulation()
@@ -99,6 +100,14 @@ class LifeGarden {
   }
 
   _init() {
+    // Settings first: the speed decides the simulation interval, and the grid
+    // flag decides how the first frame is drawn. Nothing called this before, so
+    // `storage.js` and half of `GameState` were dead code and the speed you
+    // chose was forgotten the moment you reloaded.
+    this.state.loadProgress()
+    this.ui.setActiveSpeed(this.state.settings.speed)
+    if (this.renderer) this.renderer.showGrid = this.state.settings.showGrid
+
     const puzzle = PUZZLES[0]
     this.state.startPuzzle(puzzle)
     this.grid = new Grid(puzzle.gridWidth, puzzle.gridHeight, this.registry)

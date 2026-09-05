@@ -191,7 +191,7 @@ js/
 ├── Grid.js             # The cell array and step() -- the whole simulation
 ├── Presets.js          # PRESETS: named starting arrangements, written as maps
 ├── PuzzleData.js       # PUZZLES: one sandbox entry, source of the grid size
-├── GameState.js        # Phase, generation count, settings, budget/star bookkeeping
+├── GameState.js        # Phase, generation count, saved settings, budget/star bookkeeping
 ├── GameUI.js           # Species palette and generation display (extends BaseGameUI)
 ├── Renderer.js         # Canvas drawing and pixel↔cell coordinate maths
 ├── PopulationChart.js  # The line chart under the grid
@@ -211,14 +211,36 @@ whatever fields the definitions carry. It knows nothing about grass or foxes.
 `PopulationChart` iterates the registry the same way, so a new species gets a
 series with no change to that file.
 
+### What is saved
+
+One thing: the speed you picked. `game.js` calls `state.loadProgress()` on
+start and `state.saveProgress()` when the speed changes, so `slow` or `fast`
+survives a reload and the matching button lights up.
+
+That is a small feature and it was worth doing mostly because the whole
+persistence layer was dead before it — `storage.js` and half of `GameState`
+had no callers at all, which made a documented save file that was never
+written. The saved payload is treated as untrusted like every other game's:
+an unoffered speed or a non-boolean `showGrid` falls back to the default, and
+an unknown key is dropped rather than carried into the next write.
+
+`showGrid` is saved and honoured — `_init` hands it to the renderer — but no
+control sets it, so today it only ever holds its default. Kept rather than
+removed because the renderer already had the field and having two independent
+`showGrid` flags was the actual problem.
+
+Nothing else is saved. The grid is not: reload and the garden is empty, which
+is deliberate, since a saved board would break the moment the species list
+changed. `StorageManager`'s version stamp is the second line of defence there.
+
 ### Scaffolding that is not wired up
 
 `GameState` and `PuzzleData` carry a whole puzzle mode — budgets, goals, locked
 cells, goal zones, star thresholds, `unlockAfter` — that nothing in `game.js`
 uses. The single `sandbox` puzzle sets every budget to `Infinity` and every list
-to empty. It is tested, so it works; it is just not reachable from the UI.
-Nothing is saved either: `game.js` never calls `state.loadProgress()` or
-`state.saveProgress()`, so the `lifeGardenProgress` key is never written.
+to empty. It is tested, so it works; it is just not reachable from the UI, and
+`completePuzzle` is never called, so the `completedPuzzles` half of the save is
+always an empty object.
 
 ### Recipes
 
@@ -295,5 +317,6 @@ second, through `window.__prefersDark` — see `Renderer._isDark` and
 
 ## Privacy
 
-Nothing is saved and nothing leaves the page. The only input is clicks, taps and
-keys, and no text is ever entered.
+Nothing leaves the page. The one thing saved is the simulation speed, in
+`localStorage` under `lifeGardenProgress`; the garden itself is not stored. The
+only input is clicks, taps and keys, and no text is ever entered.
