@@ -49,7 +49,6 @@ resume/
   resume.md                 Resume content (markdown)
   template.html             Resume-specific template
   resume.css                Resume styles
-  index.html                Generated from resume.md -- do not edit by hand
 
 shared/
   nav.js                    Keyboard shortcuts + language persistence
@@ -64,8 +63,12 @@ docs/                       Development documentation (not copied to dist/)
 dist/                       Build output (gitignored)
 ```
 
-`resume/index.html` is committed so `npm run dev` can serve the resume without a
-build, but `npm run build` regenerates it from `resume.md`. Edit the markdown.
+The resume page has no source `index.html`. `npm run build` renders `resume.md`
+into `template.html` and writes the result straight to `dist/resume/index.html`.
+Edit the markdown.
+
+Because the page only exists after a build, `npm run dev` does not serve
+`/resume/`. Use `npm start` to see it.
 
 ## Build Pipeline
 

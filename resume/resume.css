@@ -1,12 +1,13 @@
-/* Resume-specific styles */
-
-.summary {
-  font-style: italic;
-  color: var(--color-text-secondary);
-  text-align: center;
-  max-width: 700px;
-  margin: 0 auto;
-}
+/* Resume-specific styles
+   The resume body is generated: build.js renders resume/resume.md through
+   `marked` into resume/template.html, so the content carries no classes of its
+   own. Everything below therefore hangs off `.resume-body` -- the one hook the
+   template gives us -- and keys off the markdown's heading levels:
+     h2  section (Professional Summary, Skills, Experience)
+     h3  job title
+     h4  a project within a job
+   The global `* { margin: 0; padding: 0 }` reset in style.css strips list
+   indents and heading rhythm from that output, so both are restored here. */
 
 .resume-contact {
   font-size: 0.9rem;
@@ -25,73 +26,77 @@
   opacity: 0.5;
 }
 
-.skills-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+/* Section headings, matching `.section h2` on the rest of the site. */
+.resume-body h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text-heading);
+  margin: 2rem 0 1rem;
+  border-bottom: 2px solid var(--color-border);
+  padding-bottom: 0.5rem;
 }
 
-.skills-list li {
-  margin-bottom: 0.35rem;
+.resume-body h2:first-child {
+  margin-top: 0;
 }
 
-.skills-list strong {
-  color: var(--color-primary);
-}
-
-.job {
-  margin-bottom: 1.5rem;
-}
-
-.job h3 {
+.resume-body h3 {
   font-size: 1.15rem;
   font-weight: 600;
   color: var(--color-text-heading);
-  margin-bottom: 0.15rem;
+  margin: 1.5rem 0 0.15rem;
 }
 
-.job-meta {
+.resume-body h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-heading);
+  margin: 0.75rem 0 0.25rem;
+}
+
+.resume-body p {
   margin-bottom: 0.5rem;
   color: var(--color-text-secondary);
 }
 
-.job-meta strong {
-  color: var(--color-text-heading);
-}
-
-.job-date {
-  color: var(--color-text-muted);
+/* The professional summary: the document's first paragraph. */
+.resume-body h2:first-child + p {
   font-style: italic;
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 1rem;
 }
 
-.job-date::before {
-  content: " | ";
-  color: var(--color-text-tertiary);
-  font-style: normal;
-}
-
-.job h4 {
-  font-size: 1rem;
-  font-weight: 600;
+/* The employer line under a job title -- `**Apple** — August 2023 - Present`. */
+.resume-body h3 + p strong {
   color: var(--color-text-heading);
-  margin-top: 0.75rem;
-  margin-bottom: 0.25rem;
 }
 
-.tech {
+/* `_(Django, React, Kubernetes)_` after a project name. Italic in the markdown
+   because that is the only emphasis it has there; it reads better upright. */
+.resume-body h4 em {
+  font-style: normal;
   font-weight: 400;
-  color: var(--color-text-muted);
   font-size: 0.9em;
+  color: var(--color-text-muted);
 }
 
-.job ul {
-  margin: 0.25rem 0 0.5rem 1.5rem;
-  padding: 0;
+/* Restore the indent the global reset removes. */
+.resume-body ul {
+  padding-left: 1.5rem;
+  margin: 0.25rem 0 0.75rem;
 }
 
-.job li {
+.resume-body li {
   margin-bottom: 0.3rem;
   color: var(--color-text-secondary);
+}
+
+/* Skills is the one list whose bullets are labels rather than prose, so its
+   `**Languages:**` lead-ins take the accent, as the rest of the site does for
+   a label followed by a value. */
+.resume-body h2 + ul strong {
+  color: var(--color-primary);
 }
 
 @media print {
