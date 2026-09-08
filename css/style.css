@@ -261,36 +261,39 @@ p {
   gap: 0.5rem;
 }
 
-.lang-switch {
+/* The language switch and the theme toggle sit side by side, so they size from
+   one rule. Left to themselves their heights come from different things -- the
+   anchor's from a text line box, the button's from its 14px icon -- and land
+   about 6px apart. `align-items: stretch` on the row would hide that, but
+   theme.js builds .header-controls on every page and only the translated ones
+   get a language switch, so the button would then be one height beside a
+   sibling and another alone. The min-height sizes each control on its own. */
+.lang-switch,
+.header-controls .theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding: 0.25rem 0.5rem;
   font-size: 0.8rem;
+  line-height: 1.2;
+  border: 1px solid currentcolor;
+  border-radius: 0.25rem;
+  background: transparent;
   color: var(--color-header-text);
   text-decoration: none;
   opacity: 0.7;
-  padding: 0.25rem 0.5rem;
-  border: 1px solid currentcolor;
-  border-radius: 0.25rem;
   transition: opacity 0.2s;
 }
 
-.lang-switch:hover {
-  opacity: 1;
-}
-
+/* Undo the fixed top-right placement theme.js gives the button by default. */
 .header-controls .theme-toggle {
   position: static;
   width: auto;
   height: auto;
-  border-radius: 0.25rem;
-  border: 1px solid var(--color-header-text);
-  background: transparent;
-  color: var(--color-header-text);
-  opacity: 0.7;
-  padding: 0.25rem 0.5rem;
-  font-size: 0.8rem;
   z-index: auto;
-  transition: opacity 0.2s;
 }
 
+.lang-switch:hover,
 .header-controls .theme-toggle:hover,
 .header-controls .theme-toggle:focus {
   opacity: 1;
@@ -336,11 +339,14 @@ p {
 }
 
 /* Profile Image
-   Sits above the <h1> on the homepage, which is its only use. The margin is on
-   the bottom for that reason: as a top margin (written when the image followed
-   the heading) it opened a gap above the photo and left the name jammed against
-   its underside. The ring is --color-bg-container rather than white so it reads
-   as the page showing through in either theme, not a bright halo in dark. */
+   An inline <svg> monogram in the homepage header, which is its only use. It is
+   inline rather than a file so it can read the theme tokens -- the disc, the
+   grid and the accent all follow the theme and accent switchers, which an
+   <img> could not do. The margin is on the bottom: as a top margin (written
+   when the image followed the heading) it opened a gap above the mark and left
+   the name jammed against its underside. The ring is --color-bg-container
+   rather than white so it reads as the page showing through in either theme,
+   not a bright halo in dark. */
 .profile-image {
   width: 100px;
   height: 100px;

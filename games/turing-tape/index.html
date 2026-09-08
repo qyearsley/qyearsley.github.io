@@ -11,11 +11,17 @@
     <meta name="theme-color" content="#2d3748" />
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="styles/main.css" />
-    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <script src="/shared/theme.js"></script>
   </head>
   <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- game.js rewrites the visible #level-title with the current level, so it
+         cannot double as the page heading. Hidden because the top bar has no
+         room for a second title. -->
+    <h1 class="visually-hidden">Turing Tape</h1>
 
     <div class="game-layout">
       <div class="game-top-bar">

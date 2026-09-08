@@ -1,16 +1,13 @@
 {
   "_title": "游戏 - Quinten Yearsley",
   "_description": "教育游戏",
-
   "Games": "游戏",
   "Educational games": "教育游戏",
-
   "For Younger Players": "适合小朋友的游戏",
   "Math adventure for young learners": "小朋友的数学探险",
   "Multiplication facts practice on a trail": "在小径上练习乘法口诀",
-  "A journey through four seasons, one maths question at a time": "穿越四季的旅程，一次一道算术题",
-
+  "One math question at a time, across four seasons": "一次一道算术题，穿越四季",
   "Sandboxes and Puzzles": "沙盒与益智游戏",
-  "Cellular automata puzzle game": "细胞自动机益智游戏",
-  "Write rules for a Turing machine to transform tapes": "编写图灵机规则来转换纸带"
+  "Cellular automata as a puzzle to solve": "把细胞自动机变成谜题",
+  "Write rules to make a Turing machine run": "编写规则，让图灵机运转"
 }
