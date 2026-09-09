@@ -78,9 +78,9 @@
   display: none !important;
 }
 
-/* The site sheet gives every page `padding: 2rem 1rem`, which the 100vh layout
-   below then overflows by exactly that much -- a scrollbar on every visit, with
-   nothing under the fold. `.game-layout` supplies its own gutter instead. */
+/* The site sheet gives every page `padding: 2rem 1rem`, which the layout below
+   then overflows by exactly that much. `.game-layout` supplies its own gutter
+   instead. */
 body {
   padding: 0;
 }
@@ -92,7 +92,6 @@ body {
   padding: 1rem;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
 }
 
 /* Top bar with controls */
@@ -219,11 +218,15 @@ select:focus-visible {
   color: var(--lg-primary-ink);
 }
 
-/* Main area */
+/* Main area.
+   The game fills the first screen so nothing important starts below the fold.
+   The rules section under it is what you scroll to, and the link in the top bar
+   is what tells you it is there. */
 .game-main {
   display: flex;
   gap: 1.5rem;
   flex: 1;
+  min-height: calc(100vh - 6rem);
 }
 
 /* Sidebar */
@@ -311,61 +314,173 @@ select:focus-visible {
   border-color: var(--lg-primary);
 }
 
-/* Rules */
-.rules-section summary {
-  font-size: 0.85rem;
-  color: var(--lg-ink-faint);
-  cursor: pointer;
-  user-select: none;
+/* The species card under the palette.
+   Short and live: what the thing you are holding does, and how many are out
+   there. The rules proper are the section under the game. */
+.species-info:empty {
+  display: none;
 }
 
-.rules-section summary:hover {
+.species-info {
+  margin-top: 0.75rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--lg-border);
+  border-radius: 6px;
+  background: var(--lg-surface-alt);
+}
+
+.species-info-title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin: 0 0 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--lg-ink);
+}
+
+/* The population row. Tabular figures so the card does not twitch as the
+   number changes every generation. */
+.species-info-rows dd:last-of-type {
+  font-variant-numeric: tabular-nums;
+}
+
+.species-info-rows {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.15rem 0.5rem;
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.species-info-rows dt {
+  color: var(--lg-ink-fainter);
+}
+
+.species-info-rows dd {
+  margin: 0;
   color: var(--lg-ink-muted);
 }
 
-.rules-intro {
-  margin: 0.5rem 0;
-  font-size: 0.8rem;
+/* The link in the top bar down to the rules. The game is sized to fill the
+   viewport, so without this the section below it is easy to miss. */
+.rules-link {
+  font-size: 0.75rem;
   color: var(--lg-ink-faint);
-  line-height: 1.5;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.rules-link:hover {
+  color: var(--lg-primary);
+  text-decoration: underline;
+}
+
+/* ==================== Rules ====================
+ *
+ * Full width, under the game rather than squeezed into the 200px sidebar. The
+ * rules outgrew that column once the animals started moving, and this is text
+ * you read once and then leave alone -- the sidebar card is the part worth
+ * having in view while playing. */
+.rules {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--lg-border);
+}
+
+.rules h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+  color: var(--lg-ink);
+}
+
+.rules-lede {
+  margin: 0 0 1.25rem;
+  max-width: 60ch;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--lg-ink-muted);
+}
+
+.rules-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem 2rem;
+}
+
+.rules-column h3 {
+  margin: 0 0 0.4rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--lg-ink-faint);
+}
+
+.rules-column p {
+  margin: 0 0 0.6rem;
+  font-size: 0.85rem;
+  color: var(--lg-ink-muted);
+}
+
+.rules-column ul,
+.rules-notes {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--lg-ink-muted);
+}
+
+.rules-column li,
+.rules-notes li {
+  margin-bottom: 0.45rem;
+}
+
+.rules-column strong,
+.rules-notes strong {
+  color: var(--lg-ink);
+}
+
+.rules-notes {
+  margin-top: 1.25rem;
+  max-width: 75ch;
+}
+
+/* Seven columns with nowrap row headers come to roughly 400px at minimum, so
+   on a narrow phone the table scrolls itself rather than the whole page. */
+.rules-table-scroll {
+  overflow-x: auto;
 }
 
 .rules-table {
   width: 100%;
+  max-width: 46rem;
+  margin: 1.5rem 0 0;
   border-collapse: collapse;
-  font-size: 0.7rem;
-  color: var(--lg-ink-faint);
+  font-size: 0.8rem;
+  color: var(--lg-ink-muted);
 }
 
 .rules-table th,
 .rules-table td {
-  padding: 0.15rem 0.2rem;
+  padding: 0.35rem 0.6rem 0.35rem 0;
   text-align: left;
   border-bottom: 1px solid var(--lg-border);
   font-weight: 400;
-  white-space: nowrap;
 }
 
 .rules-table thead th {
   color: var(--lg-ink-fainter);
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  font-size: 0.62rem;
+  font-size: 0.65rem;
 }
 
 .rules-table tbody th {
-  color: var(--lg-ink-muted);
-}
-
-.rules-list {
-  margin: 0.6rem 0 0 1.2rem;
-  font-size: 0.8rem;
-  color: var(--lg-ink-faint);
-  line-height: 1.6;
-}
-
-.rules-list li {
-  margin-bottom: 0.4rem;
+  color: var(--lg-ink);
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 /* Shortcuts */

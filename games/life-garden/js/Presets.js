@@ -91,20 +91,29 @@ export const PRESETS = [
   },
   {
     name: "Pollinator",
-    description: "Bees over a small meadow -- they spread it much further",
+    description: "Scattered blades and a few bees -- watch how much faster it fills",
+    // Lone blades rather than blocks, on purpose. Three neighbours is what the
+    // birth rule needs, and nothing here has any, so every new blade on this
+    // board comes from grass creeping into the ground beside it -- which is the
+    // one thing a bee speeds up. On blocks of grass the birth rule does the
+    // work and the bees barely show. Run it against the same board with the
+    // bees rubbed out.
     cells: fromMap([
       "....................",
-      "..gg......gg........",
-      "..gg......gg........",
-      "....bb......bb......",
+      "..b...g....g...b....",
       "....................",
-      "........gg..........",
-      "........gg..........",
-      "..bb........bb......",
+      ".g.......g.......g..",
       "....................",
-      "..gg......gg........",
-      "..gg......gg........",
-      "....bb..............",
+      "......g.....g.......",
+      "..b.............b...",
+      "....g.......g.......",
+      "....................",
+      ".g.......g.......g..",
+      "....................",
+      "......g.....g.......",
+      "..b.............b...",
+      "....................",
+      ".g...g.....g...g....",
       "....................",
     ]),
   },

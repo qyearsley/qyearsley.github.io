@@ -1,4 +1,4 @@
-import { SPECIES, PHASE, SPEED } from "./constants.js"
+import { SPECIES, KIND, PHASE, SPEED } from "./constants.js"
 import { SpeciesRegistry } from "./Species.js"
 import { Grid } from "./Grid.js"
 import { GameState } from "./GameState.js"
@@ -25,6 +25,7 @@ class LifeGarden {
     this.selectedSpecies = SPECIES.GRASS
     this.simulationTimer = null
     this.history = [] // previous grid states for undo
+    this.paintedThisDrag = new Set() // cell keys, so one drag paints each cell once
 
     this._setupRenderer()
     this._setupChart()
@@ -69,11 +70,17 @@ class LifeGarden {
   _setupEvents() {
     this.events = new EventManager(this.ui, {
       onSpeciesSelect: (id) => this._selectSpecies(id),
+      // Which layer decides the gesture is the layer the selected species
+      // would land on, not "is anything here at all". Probing both layers made
+      // the first click of a gesture disagree with the rest of it: clicking
+      // grass onto a cell holding a rabbit deleted the rabbit, while dragging
+      // the same grass in from next door planted it underneath.
       onCanvasProbe: (px, py) => {
+        // Fires exactly once, at the start of a gesture, which makes it the
+        // place to forget the cells the last gesture covered.
+        this.paintedThisDrag.clear()
         const pos = this.renderer.canvasToGrid(px, py)
-        if (!pos) return false
-        const cell = this.grid.getCell(pos.x, pos.y)
-        return cell && cell.species !== SPECIES.EMPTY
+        return pos ? this._layerTaken(pos.x, pos.y, this.selectedSpecies) : false
       },
       onCanvasDrag: (px, py, mode) => this._handleCanvasDrag(px, py, mode),
       onCanvasHover: (px, py) => this._handleCanvasHover(px, py),
@@ -126,6 +133,7 @@ class LifeGarden {
     this.ui.showScreen("game-screen")
     this.ui.setSimulatingControls(false)
     this.renderer.render(this.grid)
+    this._updateSpeciesInfo()
   }
 
   _selectSpecies(id) {
@@ -137,6 +145,7 @@ class LifeGarden {
     if (!this.registry.placeable().some((def) => def.id === id)) return
     this.selectedSpecies = id
     this._updatePalette()
+    this._updateSpeciesInfo()
   }
 
   _handleCanvasDrag(px, py, mode) {
@@ -144,19 +153,36 @@ class LifeGarden {
     if (!pos) return
     if (this.renderer.isLocked(pos.x, pos.y)) return
 
-    const cell = this.grid.getCell(pos.x, pos.y)
+    // One touch per cell per gesture, remembering every cell rather than just
+    // the last one. `mousedown` and every `mousemove` after it both paint, so a
+    // click that drifts a single pixel used to call `clearCell` twice on one
+    // cell -- taking the rabbit and then the grass it was standing in, instead
+    // of just the rabbit. Dragging back over a cell you have already crossed
+    // does the same thing, which is why this is a set.
+    const cell = `${pos.x},${pos.y}`
+    if (this.paintedThisDrag.has(cell)) return
+    this.paintedThisDrag.add(cell)
+
+    // Two layers, so "is this cell taken" depends on what you are holding: a
+    // rabbit can be dropped into grass, and grass can be planted under a
+    // rabbit. Erasing takes the top layer first, so clicking a rabbit in the
+    // grass takes the rabbit.
     if (mode === "erase") {
-      if (cell.species !== SPECIES.EMPTY) {
-        this.grid.setCell(pos.x, pos.y, SPECIES.EMPTY)
-      }
-    } else {
-      if (cell.species === SPECIES.EMPTY) {
-        this.grid.setCell(pos.x, pos.y, this.selectedSpecies)
-      }
+      this.grid.clearCell(pos.x, pos.y)
+    } else if (!this._layerTaken(pos.x, pos.y, this.selectedSpecies)) {
+      this.grid.setCell(pos.x, pos.y, this.selectedSpecies)
     }
 
     this.renderer.render(this.grid)
     this.chart?.record(this.state.generation, this.grid)
+    this._updateSpeciesInfo()
+  }
+
+  /** Whether the layer this species would land on is already occupied. */
+  _layerTaken(x, y, speciesId) {
+    const def = this.registry.get(speciesId)
+    if (def?.kind === KIND.ANIMAL) return this.grid.getAnimal(x, y) !== null
+    return this.grid.getPlant(x, y).species !== SPECIES.EMPTY
   }
 
   _handleCanvasHover(px, py) {
@@ -214,6 +240,7 @@ class LifeGarden {
     this.chart?.truncate(this.state.generation)
     this.ui.updateGeneration(this.state.generation)
     this.renderer.render(this.grid)
+    this._updateSpeciesInfo()
   }
 
   _simulationTick() {
@@ -228,6 +255,7 @@ class LifeGarden {
       this.chart?.record(this.state.generation, this.grid)
       this.ui.updateGeneration(this.state.generation)
       this.renderer.render(this.grid)
+      this._updateSpeciesInfo()
     } catch (error) {
       console.error("Simulation error:", error)
       this._pauseSimulation()
@@ -244,6 +272,7 @@ class LifeGarden {
     this.ui.updateGeneration(this.state.generation)
     this.ui.setSimulatingControls(false)
     this.renderer.render(this.grid)
+    this._updateSpeciesInfo()
   }
 
   _loadPreset(index) {
@@ -261,6 +290,7 @@ class LifeGarden {
     this.ui.updateGeneration(this.state.generation)
     this.ui.setSimulatingControls(false)
     this.renderer.render(this.grid)
+    this._updateSpeciesInfo()
   }
 
   _renderPresets() {
@@ -279,6 +309,19 @@ class LifeGarden {
 
   _updatePalette() {
     this.ui.renderSpeciesPalette(this.registry.placeable(), this.selectedSpecies)
+  }
+
+  /**
+   * Refresh the sidebar card for the selected species.
+   *
+   * The rules used to live in the sidebar as a wall of text that nobody read
+   * while playing. This is the part worth having to hand: what the thing you
+   * are holding eats, how far it sees, and how many of it are on the board
+   * right now.
+   */
+  _updateSpeciesInfo() {
+    const def = this.registry.get(this.selectedSpecies)
+    if (def) this.ui.renderSpeciesInfo(def, this.grid.countSpecies(def.id), this.registry)
   }
 }
 

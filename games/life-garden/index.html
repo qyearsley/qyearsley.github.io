@@ -34,89 +34,19 @@
             </div>
           </div>
           <span id="generation-display" class="gen-display">Gen 0</span>
+          <a href="#how-it-works" class="rules-link">How it works &darr;</a>
         </div>
         <main id="main-content" class="game-main">
           <div class="game-sidebar">
             <div class="sidebar-section">
               <h3>Species</h3>
               <div id="species-palette" class="species-palette"></div>
+              <div id="species-info" class="species-info"></div>
             </div>
             <div class="sidebar-section">
               <h3>Presets</h3>
               <div id="preset-buttons" class="preset-buttons"></div>
             </div>
-            <details class="sidebar-section rules-section">
-              <summary>How it works</summary>
-              <p class="rules-intro">
-                Every generation each cell counts its 8 neighbours, but each species counts a
-                different set of them.
-              </p>
-              <table class="rules-table">
-                <thead>
-                  <tr>
-                    <th scope="col">Species</th>
-                    <th scope="col">Counts</th>
-                    <th scope="col">Lives</th>
-                    <th scope="col">Born</th>
-                    <th scope="col">Age</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <th scope="row">&#x1f33f; Grass</th>
-                    <td>grass</td>
-                    <td>2&ndash;3</td>
-                    <td>3</td>
-                    <td>never</td>
-                  </tr>
-                  <tr>
-                    <th scope="row">&#x1f338; In bloom</th>
-                    <td>grass</td>
-                    <td>2&ndash;3</td>
-                    <td>&mdash;</td>
-                    <td>never</td>
-                  </tr>
-                  <tr>
-                    <th scope="row">&#x1f41d; Bee</th>
-                    <td>bloom, bees</td>
-                    <td>1&ndash;3</td>
-                    <td>3</td>
-                    <td>20</td>
-                  </tr>
-                  <tr>
-                    <th scope="row">&#x1f407; Rabbit</th>
-                    <td>grass</td>
-                    <td>any</td>
-                    <td>2&ndash;3</td>
-                    <td>25</td>
-                  </tr>
-                  <tr>
-                    <th scope="row">&#x1f98a; Fox</th>
-                    <td>rabbits</td>
-                    <td>any</td>
-                    <td>3</td>
-                    <td>45</td>
-                  </tr>
-                </tbody>
-              </table>
-              <ul class="rules-list">
-                <li>
-                  <strong>Grass blooms.</strong> Grass that survives 8 generations flowers. It is
-                  the same plant under the same rules, just older.
-                </li>
-                <li>
-                  <strong>Bees pollinate.</strong> Grass next to a bee spreads on 2 neighbours
-                  instead of 3.
-                </li>
-                <li><strong>Rabbits eat grass.</strong> Grass next to 2+ rabbits dies.</li>
-                <li><strong>Foxes eat rabbits.</strong> A rabbit next to a fox dies.</li>
-                <li>Eating is resolved first, so nothing survives being eaten.</li>
-                <li>
-                  A rabbit counts grass and a fox counts rabbits, so the count is food rather than
-                  crowding: they live to their age whatever the count, unless something eats them.
-                </li>
-              </ul>
-            </details>
             <div class="sidebar-section shortcuts-section">
               <h3>Shortcuts</h3>
               <ul class="shortcuts-list">
@@ -143,6 +73,128 @@
             </figure>
           </div>
         </main>
+
+        <section id="how-it-works" class="rules">
+          <h2>How it works</h2>
+          <p class="rules-lede">
+            The garden has two layers. Plants grow on the ground and never move. Animals stand on
+            top of them and do nothing but move, eat and breed.
+          </p>
+
+          <div class="rules-columns">
+            <div class="rules-column">
+              <h3>Plants are a cellular automaton</h3>
+              <p>Every generation each plant counts the plants in the 8 cells around it.</p>
+              <ul>
+                <li>
+                  <strong>Grass spreads.</strong> Bare ground with exactly 3 plants beside it grows
+                  grass.
+                </li>
+                <li>
+                  <strong>Grass is crowded out.</strong> A plant with 4 or more neighbours dies. It
+                  never dies of loneliness, which is the one place this parts company with Conway's
+                  Game of Life.
+                </li>
+                <li>
+                  <strong>Grass creeps.</strong> Bare ground beside grass may sprout on its own.
+                  Grass in bloom is four times as likely to seed it, and a bee working the patch
+                  multiplies whatever the chance was by six.
+                </li>
+                <li>
+                  <strong>Flowers are temporary.</strong> Grass that has stood 8 generations comes
+                  into bloom, and 6 generations later the bloom is over and it is plain grass again.
+                </li>
+              </ul>
+            </div>
+
+            <div class="rules-column">
+              <h3>Animals carry one number</h3>
+              <p>Its energy. Every generation, each animal in turn:</p>
+              <ul>
+                <li><strong>Spends 1 energy.</strong> At 0 it dies.</li>
+                <li>
+                  <strong>Runs, if it can see something that eats it.</strong> A frightened animal
+                  does nothing else that generation.
+                </li>
+                <li>
+                  <strong>Steps one cell towards the nearest food it can see</strong>, and eats what
+                  it lands on. If it sees nothing it wanders.
+                </li>
+                <li>
+                  <strong>Digests.</strong> After a meal it will not eat again for a few
+                  generations, which is what stops a herd stripping the board bare.
+                </li>
+                <li>
+                  <strong>Splits in two</strong> once it is full, sharing its energy with the young.
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="rules-table-scroll">
+            <table class="rules-table">
+              <thead>
+                <tr>
+                  <th scope="col">Animal</th>
+                  <th scope="col">Eats</th>
+                  <th scope="col">Sees</th>
+                  <th scope="col">Runs from</th>
+                  <th scope="col">Meal</th>
+                  <th scope="col">Digests</th>
+                  <th scope="col">Splits at</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">&#x1f41d; Bee</th>
+                  <td>nectar</td>
+                  <td>5</td>
+                  <td>&mdash;</td>
+                  <td>12</td>
+                  <td>4</td>
+                  <td>26</td>
+                </tr>
+                <tr>
+                  <th scope="row">&#x1f407; Rabbit</th>
+                  <td>grass</td>
+                  <td>4</td>
+                  <td>foxes, at 3</td>
+                  <td>16</td>
+                  <td>9</td>
+                  <td>88</td>
+                </tr>
+                <tr>
+                  <th scope="row">&#x1f98a; Fox</th>
+                  <td>rabbits</td>
+                  <td>4</td>
+                  <td>&mdash;</td>
+                  <td>40</td>
+                  <td>14</td>
+                  <td>80</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <ul class="rules-notes">
+            <li>
+              <strong>Eating sets a plant back one stage.</strong> A grazed bloom drops to plain
+              grass; plain grass is grazed down to bare ground. A meadow in flower feeds animals
+              without being destroyed by them.
+            </li>
+            <li>
+              <strong>A rabbit sees a fox later than the fox sees the rabbit.</strong> Both move one
+              cell a generation, so prey that spotted a hunter as soon as it was spotted could never
+              be caught.
+            </li>
+            <li>
+              <strong>The garden is not the whole world.</strong> Seeds blow in over the fence, and
+              now and then an animal wanders in at the edge &mdash; but only a kind that has lived
+              here before, and only if there is already food for it. A board this small cannot hold
+              a food chain up on its own.
+            </li>
+          </ul>
+        </section>
       </div>
     </div>
 

@@ -1,4 +1,4 @@
-import { SPECIES } from "./constants.js"
+import { SPECIES, KIND } from "./constants.js"
 
 export class Renderer {
   /**
@@ -75,7 +75,9 @@ export class Renderer {
       )
     }
 
-    // Cells
+    // Cells: the ground first, then whatever is standing on it. Drawing the
+    // animal inset over the plant is what makes "a rabbit in the grass" read as
+    // one thing on top of another rather than one replacing the other.
     for (let y = 0; y < grid.height; y++) {
       for (let x = 0; x < grid.width; x++) {
         const px = this.offsetX + x * cs
@@ -87,16 +89,22 @@ export class Renderer {
           continue
         }
 
-        const cell = grid.getCell(x, y)
-        if (cell && cell.species !== SPECIES.EMPTY) {
-          const def = this.registry.get(cell.species)
-          if (def) {
-            const ageRatio = def.maxAge ? Math.min(cell.age / def.maxAge, 1) : 0
-            const baseColor = this._lerpColor(def.color, def.colorAlt, ageRatio)
-            ctx.fillStyle = baseColor
-            this._fillRoundedRect(ctx, px + 1, py + 1, cs - 2, cs - 2, 4)
-            this._drawTexture(ctx, px + 1, py + 1, cs - 2, cs - 2, def, ageRatio)
-          }
+        const plant = grid.getPlant(x, y)
+        if (plant && plant.species !== SPECIES.EMPTY) {
+          this._drawOccupant(ctx, px + 1, py + 1, cs - 2, this.registry.get(plant.species), plant)
+        }
+
+        const animal = grid.getAnimal(x, y)
+        if (animal) {
+          const inset = this._animalInset(cs)
+          this._drawOccupant(
+            ctx,
+            px + inset,
+            py + inset,
+            cs - inset * 2,
+            this.registry.get(animal.species),
+            animal,
+          )
         }
       }
     }
@@ -121,18 +129,67 @@ export class Renderer {
       }
     }
 
-    // Hover preview
+    // Hover preview, on the layer the species would actually land on. A
+    // full-cell swatch under the cursor said an animal was about to replace the
+    // grass, which is exactly what the two layers stopped happening.
     if (this.hoverCell && this.selectedSpecies) {
       const def = this.registry.get(this.selectedSpecies)
       if (def && !this.isLocked(this.hoverCell.x, this.hoverCell.y)) {
-        const px = this.offsetX + this.hoverCell.x * cs
-        const py = this.offsetY + this.hoverCell.y * cs
+        const inset = def.kind === KIND.ANIMAL ? this._animalInset(cs) : 1
+        const px = this.offsetX + this.hoverCell.x * cs + inset
+        const py = this.offsetY + this.hoverCell.y * cs + inset
         ctx.globalAlpha = 0.4
         ctx.fillStyle = def.color
-        this._fillRoundedRect(ctx, px + 1, py + 1, cs - 2, cs - 2, 4)
+        this._fillRoundedRect(ctx, px, py, cs - inset * 2, cs - inset * 2, 4)
         ctx.globalAlpha = 1
       }
     }
+  }
+
+  /**
+   * How far inside its cell an animal is drawn.
+   *
+   * Leaves a ring of the plant underneath visible, which is what makes "the
+   * rabbit is standing in the grass" read correctly.
+   */
+  _animalInset(cellSize) {
+    return Math.max(2, Math.round(cellSize * 0.16))
+  }
+
+  /**
+   * One plant or animal: a rounded square in its colour, with its texture over
+   * the top.
+   *
+   * @param {number} size - Width and height; cells are square
+   * @param {object} def - Species definition
+   * @param {object} cell - The plant or animal record, for the fade
+   */
+  _drawOccupant(ctx, x, y, size, def, cell) {
+    if (!def) return
+    const fade = this._fadeRatio(def, cell)
+    ctx.fillStyle = this._lerpColor(def.color, def.colorAlt, fade)
+    this._fillRoundedRect(ctx, x, y, size, size, 4)
+    this._drawTexture(ctx, x, y, size, size, def, fade)
+  }
+
+  /**
+   * How far this cell has faded from `color` towards `colorAlt`, in [0, 1].
+   *
+   * The two layers fade for different reasons, and both are worth seeing. A
+   * plant fades as it ages towards its next life stage, so a meadow about to
+   * come into bloom looks it. An animal fades as its energy runs down, so a
+   * starving fox is visibly in trouble a few generations before it dies.
+   *
+   * @param {object} def - Species definition
+   * @param {object} cell - Plant record (age) or animal record (energy)
+   */
+  _fadeRatio(def, cell) {
+    if (def.kind === KIND.ANIMAL) {
+      if (!def.breedAt) return 0
+      return 1 - Math.min(Math.max(cell.energy / def.breedAt, 0), 1)
+    }
+    if (def.fadeAge) return Math.min(cell.age / def.fadeAge, 1)
+    return 0
   }
 
   _drawTexture(ctx, x, y, w, h, def, ageRatio) {
@@ -285,7 +342,13 @@ export class Renderer {
     ctx.restore()
   }
 
-  _fillRoundedRect(ctx, x, y, w, h, r) {
+  /**
+   * A rounded rectangle. The radius is clamped to half the shorter side --
+   * above that the quadratic corners cross over and the shape draws inside out,
+   * which is reachable at small cell sizes on a large grid.
+   */
+  _fillRoundedRect(ctx, x, y, w, h, radius) {
+    const r = Math.max(0, Math.min(radius, Math.min(w, h) / 2))
     ctx.beginPath()
     ctx.moveTo(x + r, y)
     ctx.lineTo(x + w - r, y)
