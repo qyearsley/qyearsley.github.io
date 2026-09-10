@@ -26,6 +26,7 @@ import {
   injectTranslatedPaths,
   loadTranslations,
   rewriteRelativePaths,
+  reportStaleCommonKeys,
   translateContent,
   translateHtml,
   validateLinks,
@@ -748,6 +749,42 @@ describe("translateContent", () => {
     const html = "<code>JavaScript</code>"
     const result = translateContent(html, { JavaScript: "JavaScript" }, "p.html", noCommon)
     expect(result).toBe(html)
+  })
+
+  test("records the common keys that matched, for the whole-build staleness check", () => {
+    const commonKeys = new Set(["Home", "Contact"])
+    const matched = new Set()
+
+    translateContent(
+      "<a>Home</a>",
+      { Home: "首页", Contact: "联系" },
+      "p.html",
+      commonKeys,
+      matched,
+    )
+
+    expect([...matched]).toEqual(["Home"])
+  })
+})
+
+describe("reportStaleCommonKeys", () => {
+  test("warns about a common key that matched no page at all", () => {
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => {})
+
+    const stale = reportStaleCommonKeys(new Set(["Home", "Me on the Web"]), new Set(["Home"]))
+
+    expect(stale).toEqual(["Me on the Web"])
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('"Me on the Web"'))
+    warn.mockRestore()
+  })
+
+  test("says nothing when every common key matched somewhere", () => {
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => {})
+
+    expect(reportStaleCommonKeys(new Set(["Home"]), new Set(["Home"]))).toEqual([])
+
+    expect(warn).not.toHaveBeenCalled()
+    warn.mockRestore()
   })
 })
 

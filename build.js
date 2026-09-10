@@ -225,7 +225,11 @@ function checkUntranslated(html, pagePath) {
 
 // Replaces English text content between HTML tags with Chinese translations.
 // Entries are sorted longest-first to prevent partial matches.
-function translateContent(html, translations, pagePath, commonKeys) {
+//
+// `matchedCommon`, when given, collects the common keys that matched on this
+// page. A common key that matches nothing anywhere is stale, but that cannot be
+// judged one page at a time -- see reportStaleCommonKeys.
+function translateContent(html, translations, pagePath, commonKeys, matchedCommon) {
   let result = html
 
   if (translations._title) {
@@ -251,16 +255,35 @@ function translateContent(html, translations, pagePath, commonKeys) {
     const before = result
     result = result.replace(regex, `$1${chinese}$3`)
 
+    if (result !== before) {
+      if (matchedCommon && commonKeys.has(english)) matchedCommon.add(english)
+      continue
+    }
+
     // Page-specific keys that don't match suggest stale translations
     // (renamed or deleted source text). Common keys often won't match on a
     // given page, so we skip the warning for those.
-    if (result === before && !commonKeys.has(english)) {
+    if (!commonKeys.has(english)) {
       const preview = english.length > 60 ? english.substring(0, 60) + "..." : english
       console.warn(`  Warning: no match for "${preview}" in ${pagePath}`)
     }
   }
 
   return result
+}
+
+// A key in zh-common.json that matched no page at all. Per-page translation
+// cannot warn about these -- a common key legitimately misses most pages -- so
+// the check runs once, over the whole build. Five keys had gone stale this way
+// after the homepage was reworded, leaving half of zh/index.html in English
+// with the build reporting nothing.
+function reportStaleCommonKeys(commonKeys, matchedCommon) {
+  const stale = [...commonKeys].filter((key) => !matchedCommon.has(key)).sort()
+  for (const key of stale) {
+    const preview = key.length > 60 ? key.substring(0, 60) + "..." : key
+    console.warn(`  Warning: zh-common.json key matched no page: "${preview}"`)
+  }
+  return stale
 }
 
 // Adds hreflang <link> tags and a language switcher link to an HTML page.
@@ -307,11 +330,11 @@ function rewriteRelativePaths(html, pagePath) {
 }
 
 // Generates a full Chinese translation of an HTML page.
-function translateHtml(html, translations, pagePath, commonKeys) {
+function translateHtml(html, translations, pagePath, commonKeys, matchedCommon) {
   let result = html
 
   result = result.replace('<html lang="en"', '<html lang="zh"')
-  result = translateContent(result, translations, pagePath, commonKeys)
+  result = translateContent(result, translations, pagePath, commonKeys, matchedCommon)
 
   result = result.replace(/href="(\/[^"]*?)"/g, (match, href) => {
     return TRANSLATED_URLS.has(href) ? `href="/zh${href}"` : match
@@ -472,6 +495,7 @@ function build() {
 
   const common = data.common
   const commonKeys = new Set(Object.keys(common).filter((k) => !k.startsWith("_")))
+  const matchedCommon = new Set()
 
   console.log("Generating translations...")
   for (const page of TRANSLATABLE_PAGES) {
@@ -487,7 +511,7 @@ function build() {
 
     const html = readFileSync(srcPath, "utf-8")
 
-    const zhHtml = translateHtml(html, translations, page, commonKeys)
+    const zhHtml = translateHtml(html, translations, page, commonKeys, matchedCommon)
     const zhPath = join(DIST, "zh", page)
     mkdirSync(dirname(zhPath), { recursive: true })
     writeFileSync(zhPath, zhHtml)
@@ -497,6 +521,8 @@ function build() {
     const enHtml = injectLangMeta(html, page, "en")
     writeFileSync(srcPath, enHtml)
   }
+
+  reportStaleCommonKeys(commonKeys, matchedCommon)
 
   console.log("Injecting translated paths...")
   injectTranslatedPaths()
@@ -515,6 +541,7 @@ export {
   buildTextPattern,
   findDuplicateKeys,
   translateContent,
+  reportStaleCommonKeys,
   translateHtml,
   rewriteRelativePaths,
   injectLangMeta,
