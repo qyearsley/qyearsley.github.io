@@ -7,9 +7,9 @@
   "Reference Tables": "参考表",
   "Interactive Tools": "交互工具",
   "Notes": "笔记",
-  "Syllabary": "音节表",
+  "Transliteration Syllabary": "音译音节表",
   "Characters commonly used to spell out sounds": "常用于音译的字",
-  "Tone Table": "声调表",
+  "Tone Tables": "声调表",
   "Visual guide to characters with different tones": "不同声调字符指南",
   "Pinyin Abbreviations": "拼音缩写",
   "The spelling rules nobody teaches": "很少有人教的拼写规则",
@@ -19,6 +19,6 @@
   "Convert traditional to simplified": "繁转简",
   "Encoding Explorer": "编码浏览器",
   "Characters in UTF-8, UTF-16, and GB2312": "UTF-8、UTF-16、GB2312 中的字符",
-  "Translating Buddhist Terms": "佛教词语的翻译",
+  "Buddhist Terms": "佛教词语",
   "Transliteration versus translation": "音译与意译"
 }

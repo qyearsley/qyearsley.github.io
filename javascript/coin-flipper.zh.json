@@ -1,10 +1,10 @@
 {
-  "_title": "抛硬币实验",
+  "_title": "抛硬币实验 - Quinten Yearsley",
   "_description": "观察抛硬币频率如何收敛到期望值",
 
   "Coin Flips Experiment": "抛硬币实验",
   "Explore probability convergence interactively": "交互式探索概率收敛",
-  "Coin Flips": "抛硬币",
+  "Coin Flipper": "抛硬币",
   "Experiment": "实验",
   "About This Experiment": "关于此实验",
   "Distribution:": "分布：",

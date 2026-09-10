@@ -3,11 +3,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chinese Character Converter</title>
+    <title>Chinese Character Converter - Quinten Yearsley</title>
     <meta
       name="description"
       content="Convert traditional Chinese characters to simplified Chinese using the tradsimp.js library."
     />
+    <meta name="theme-color" content="#2d3748" />
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="/css/components.css" />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
@@ -215,9 +216,9 @@
       }
 
       .copy-output-btn.copied {
-        background: #16a34a;
-        border-color: #16a34a;
-        color: #fff;
+        background: var(--color-success);
+        border-color: var(--color-success);
+        color: var(--color-on-success);
       }
 
       .examples {
@@ -262,11 +263,11 @@
       </header>
 
       <main id="main-content" class="main-content">
-        <nav class="breadcrumbs">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
           <a href="/">Home</a>
-          <span class="separator">/</span>
+          <span class="separator" aria-hidden="true">/</span>
           <a href="/chinese/">Chinese</a>
-          <span class="separator">/</span>
+          <span class="separator" aria-hidden="true">/</span>
           <span class="current" aria-current="page">Character Converter</span>
         </nav>
         <section class="section">

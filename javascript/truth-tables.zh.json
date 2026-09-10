@@ -1,10 +1,10 @@
 {
-  "_title": "真值表生成器",
+  "_title": "真值表生成器 - Quinten Yearsley",
   "_description": "为布尔表达式生成真值表（AND、OR、NOT、XOR等）",
 
   "Truth Table Generator": "真值表生成器",
   "Generate truth tables for boolean expressions (AND, OR, NOT, XOR, and more)": "为布尔表达式生成真值表（AND、OR、NOT、XOR等）",
-  "Truth Table": "真值表",
+  "Truth Tables": "真值表",
   "Generate Truth Table": "生成真值表",
   "Boolean Expression:": "布尔表达式：",
   "How It Works": "工作原理",
