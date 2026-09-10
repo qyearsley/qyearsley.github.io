@@ -170,11 +170,34 @@
       "</svg>"
 
     // Current state
+    //
+    // Guarded the same way Part 1 is. Chrome throws on `localStorage` itself
+    // when the site's cookies are blocked, and the first unguarded read here
+    // was `btn.innerHTML = getIcon()` -- early enough that the throw took the
+    // whole handler with it, so the toggle never got appended and
+    // window.__themeToggle was never set. The `t` shortcut went with it.
+    function readStored(key) {
+      try {
+        return localStorage.getItem(key)
+      } catch (_) {
+        return null
+      }
+    }
+
+    function writeStored(key, value) {
+      try {
+        if (value === null) localStorage.removeItem(key)
+        else localStorage.setItem(key, value)
+      } catch (_) {
+        /* preference is not persisted; the page still applies it */
+      }
+    }
+
     function getTheme() {
-      return localStorage.getItem("theme") || "system"
+      return readStored("theme") || "system"
     }
     function getAccent() {
-      return localStorage.getItem("accent") || ""
+      return readStored("accent") || ""
     }
 
     function getIcon() {
@@ -313,10 +336,10 @@
     function applyTheme(t) {
       if (t === "system") {
         delete document.documentElement.dataset.theme
-        localStorage.removeItem("theme")
+        writeStored("theme", null)
       } else {
         document.documentElement.dataset.theme = t
-        localStorage.setItem("theme", t)
+        writeStored("theme", t)
       }
       btn.innerHTML = getIcon()
       updateActiveStates()
@@ -329,10 +352,10 @@
     function applyAccent(a) {
       if (a === "") {
         delete document.documentElement.dataset.accent
-        localStorage.removeItem("accent")
+        writeStored("accent", null)
       } else {
         document.documentElement.dataset.accent = a
-        localStorage.setItem("accent", a)
+        writeStored("accent", a)
       }
       updateActiveStates()
     }

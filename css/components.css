@@ -153,7 +153,7 @@ body.logic-engine {
 .btn-primary {
   padding: 0.5rem 1.5rem;
   background: var(--color-primary);
-  color: white;
+  color: var(--color-on-primary);
   border: none;
   border-radius: 0.25rem;
   font-weight: 500;
@@ -181,7 +181,7 @@ body.logic-engine {
 .btn-secondary {
   padding: 0.5rem 1.5rem;
   background: var(--color-success);
-  color: white;
+  color: var(--color-on-success);
   border: none;
   border-radius: 0.25rem;
   font-weight: 500;
@@ -328,7 +328,7 @@ body.logic-engine {
 .preset-btn.active {
   background: var(--color-primary, #3182ce);
   border-color: var(--color-primary, #3182ce);
-  color: #fff;
+  color: var(--color-on-primary, #fff);
 }
 
 /* How-it-works section (used in hashlab, float) */
@@ -471,8 +471,13 @@ body.logic-engine {
   margin-top: 0.25rem;
 }
 
-/* Status messages */
-.status-message {
+/* Status messages
+   Scoped to the two modifier classes. Bare `.status-message` is already a plain
+   muted line in style.css -- the contact form's, which stays in the DOM while
+   empty so a screen reader can announce updates to it. Claiming the bare class
+   here would paint that empty element as a bordered box. */
+.status-message.error,
+.status-message.success {
   padding: 1rem;
   border-radius: 0.25rem;
   border: 1px solid;
@@ -682,16 +687,18 @@ body.logic-engine {
   color: var(--color-primary-hover);
 }
 
-/* Operator/Example Lists */
-.operator-list,
-.example-grid {
+/* Operator Lists
+   Not `.example-item`: that class belongs to the `.examples` card grid in
+   style.css, and listing it here silently restyled it on every page that loads
+   both sheets. Truth Tables came out monospace and bold while Password
+   Generator, with identical markup and no components.css, came out as cards. */
+.operator-list {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
 
-.operator-item,
-.example-item {
+.operator-item {
   font-family: monospace;
   background: var(--color-bg-container);
   padding: 0.5rem 1rem;

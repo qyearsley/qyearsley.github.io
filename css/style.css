@@ -43,9 +43,11 @@
   --color-header-separator: #718096;
   --color-header-border: transparent;
 
-  /* Text drawn on a --color-primary fill. Its own token because --color-primary
-     is light in dark mode, where white text on it drops to about 2:1. */
+  /* Text drawn on a --color-primary or --color-success fill. Their own tokens
+     because both fills are light in dark mode, where white text on them drops
+     to about 2:1 and 1.7:1 respectively. */
   --color-on-primary: #fff;
+  --color-on-success: #fff;
 
   /* A table's top-left corner cell: a header for the row labels rather than for
      a data column, so it is greyed rather than accented. */
@@ -94,6 +96,7 @@
     --color-info-bg: #1e3a5f;
     --color-info-border: #2c5aa0;
     --color-on-primary: #1a202c;
+    --color-on-success: #1a202c;
     --color-table-corner-bg: #4a5568;
     --color-table-corner-text: #e2e8f0;
     --color-badge-info-bg: #2c5aa0;
@@ -138,6 +141,7 @@
   --color-info-bg: #1e3a5f;
   --color-info-border: #2c5aa0;
   --color-on-primary: #1a202c;
+  --color-on-success: #1a202c;
   --color-table-corner-bg: #4a5568;
   --color-table-corner-text: #e2e8f0;
   --color-badge-info-bg: #2c5aa0;
