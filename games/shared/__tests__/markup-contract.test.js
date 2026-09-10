@@ -111,6 +111,28 @@ describe("every game", () => {
       .join("")
     expect(inline).toContain("__registerShortcut")
   })
+
+  // Every game shows one screen at a time, so an h1 inside a screen is an h1
+  // that disappears when the player moves on -- see the rule below.
+  it.each(GAMES)("%s has exactly one h1", (game) => {
+    expect(PAGES[game].querySelectorAll("h1")).toHaveLength(1)
+  })
+
+  // Games that swap between screens show one at a time, so an h1 inside a
+  // screen is an h1 that disappears when the player moves on -- Seasons, Number
+  // Garden and Times Trail all put theirs on the title screen, and every screen
+  // after the first was a document with no h1 and orphaned h2s under it. The
+  // fix in all three was the one Turing Tape already used: a `.visually-hidden`
+  // h1 outside the stack. Life Garden is exempt by the same logic rather than
+  // by name: its single `.screen` is never hidden, so a heading inside it is
+  // always present.
+  it.each(GAMES)("%s keeps its h1 where every screen can see it", (game) => {
+    const h1 = PAGES[game].querySelector("h1")
+    expect(h1.textContent.trim().length).toBeGreaterThan(0)
+    if (PAGES[game].querySelectorAll(".screen").length > 1) {
+      expect(h1.closest(".screen")).toBeNull()
+    }
+  })
 })
 
 // Three of the five have one. The point of the block is that a fourth cannot

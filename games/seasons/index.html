@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>Seasons</title>
+    <title>Seasons - Quinten Yearsley</title>
     <meta
       name="description"
       content="Walk a trail through four seasons, answering maths questions to gather what the snake woman needs for her potion"
@@ -26,9 +26,18 @@
   <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
 
+    <!-- The page heading, outside the screen stack. The screens are shown one at
+         a time, so a heading living inside one leaves the document with no h1
+         the moment the player moves on. Hidden because the top bar already
+         carries the season name and has no room for a second title. Turing Tape
+         does the same thing for the same reason. -->
+    <h1 class="visually-hidden">Seasons</h1>
+
     <div class="game-layout">
       <div class="game-top-bar">
-        <a href="/games/" class="icon-btn" title="Back to games">&larr;</a>
+        <a href="/games/" class="icon-btn" title="Back to games" aria-label="Back to games"
+          >&larr;</a
+        >
         <span class="level-title" id="season-name">Seasons</span>
         <button
           id="settings-button"
@@ -39,13 +48,21 @@
         >
           &#x2699;&#xfe0e;
         </button>
-        <button id="restart" class="icon-btn" type="button" title="Start over">&#x21ba;</button>
+        <button
+          id="restart"
+          class="icon-btn"
+          type="button"
+          title="Start over"
+          aria-label="Start over"
+        >
+          &#x21ba;
+        </button>
       </div>
 
       <main id="main-content" class="game-main">
         <!-- Screen 1: choose an animal -->
         <section id="screen-character" class="screen active">
-          <h1 class="screen-heading">Choose who makes the journey</h1>
+          <h2 class="screen-heading">Choose who makes the journey</h2>
           <p class="screen-intro">
             A snake woman is making a potion. She needs one thing from every season, and she has set
             you a quest to fetch it all. Each animal travels differently — pick the one you want to

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Number Garden</title>
+    <title>Number Garden - Quinten Yearsley</title>
     <meta
       name="description"
       content="Grow a garden by answering maths questions: addition, subtraction, times tables, measurement, patterns, and telling the time"
@@ -55,17 +55,24 @@
   </head>
   <body>
     <a href="#game-container" class="skip-link">Skip to main content</a>
+
+    <!-- The page heading, outside the screen stack. The screens are shown one at
+         a time, so a heading living inside one leaves the document with no h1
+         the moment the player moves on. Hidden because the title screen already
+         shows the name and the later screens have no room for it. -->
+    <h1 class="visually-hidden">Number Garden</h1>
+
     <main id="game-container">
       <!-- Title Screen -->
       <div id="title-screen" class="screen active">
-        <nav class="breadcrumbs">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
           <a href="/">Home</a>
-          <span class="separator">/</span>
+          <span class="separator" aria-hidden="true">/</span>
           <a href="/games/">Games</a>
-          <span class="separator">/</span>
+          <span class="separator" aria-hidden="true">/</span>
           <span class="current" aria-current="page">Number Garden</span>
         </nav>
-        <h1 class="game-title">🌸 Number Garden 🌸</h1>
+        <h2 class="game-title">Number Garden</h2>
         <p>Help the magic garden grow!</p>
         <div class="title-buttons">
           <button id="start-button" class="big-button" aria-label="Start new game">Start</button>
