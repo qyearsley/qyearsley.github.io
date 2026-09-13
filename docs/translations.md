@@ -89,7 +89,8 @@ differs from English, so the fragments reassemble in the wrong order.
 2. Whitespace is normalized (spaces match newlines/indentation)
 3. `&` matches both `&` and `&amp;`
 4. A tag in a key may have whitespace before its closing `>`
-5. Only text between `>` and `<` is matched (not attributes)
+5. Matching starts and ends at a tag boundary. An attribute value is never
+   translated, though a key may contain one as part of its inline markup.
 
 ## Adding Translations
 

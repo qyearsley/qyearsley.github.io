@@ -462,8 +462,9 @@ function validateLinks(distDir = DIST) {
     const fromPath = file.slice(distDir.length).replace(/\\/g, "/")
     // Both href and src: a mistyped <script src> or <img src> ships as
     // silently as a mistyped <a href>. Relative links are resolved against
-    // the page they appear on.
-    const linkRegex = /(?:href|src)="([^"]*)"/g
+    // the page they appear on. The lookbehind keeps `data-src="..."` and
+    // `xlink:href="..."` out of it: a false positive now fails the build.
+    const linkRegex = /(?<![-\w:])(?:href|src)="([^"]*)"/g
     let match
     while ((match = linkRegex.exec(html)) !== null) {
       const href = resolveLink(match[1], fromPath)

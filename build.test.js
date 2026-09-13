@@ -1030,6 +1030,12 @@ describe("validateLinks", () => {
     expect(validateLinks(tmp)).toBe(0)
   })
 
+  test("ignores a data- or namespaced attribute that ends in href or src", () => {
+    writeFile(tmp, "index.html", '<div data-src="/lazy.png" xlink:href="/icon.svg"></div>')
+
+    expect(validateLinks(tmp)).toBe(0)
+  })
+
   test("ignores a query string and a fragment on an internal link", () => {
     writeFile(tmp, "index.html", '<a href="/about.html?x=1#top">About</a>')
     writeFile(tmp, "about.html", "<p/>")

@@ -77,7 +77,7 @@ describe("HTML script tags", () => {
  */
 function description(relPath) {
   const meta = parse(relPath).querySelector('meta[name="description"]')
-  return meta ? meta.getAttribute("content").trim() : null
+  return meta ? (meta.getAttribute("content") || "").trim() : null
 }
 
 describe("meta descriptions", () => {
