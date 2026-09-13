@@ -18,9 +18,12 @@
   "= 256 possible rules.": "= 256种可能的规则。",
   "The diagram above shows each rule's 8 cases. The top row is the input pattern (left neighbor, cell, right neighbor), and the bottom cell is the output.": "上方图示展示了每条规则的8种情况。上排是输入模式（左邻居、本细胞、右邻居），下方是输出。",
   "Some notable rules:": "一些著名规则：",
+  "<b>Rule 30</b> — chaotic, used in Mathematica's random number generator": "<b>规则30</b>——混沌，Mathematica的随机数生成器使用它",
+  "<b>Rule 90</b> — produces a Sierpinski triangle": "<b>规则90</b>——生成谢尔宾斯基三角形",
+  "<b>Rule 110</b> — proven Turing-complete": "<b>规则110</b>——已证明图灵完备",
+  "<b>Rule 184</b> — models traffic flow": "<b>规则184</b>——模拟交通流",
   "Connection to Conway's Life": "与康威生命游戏的联系",
-  "These 1D automata are the simplest members of the same family as": "这些一维自动机是与以下最简单的同族成员：",
-  "Conway's Game of Life": "康威生命游戏",
+  "These 1D automata are the simplest members of the same family as <a href=\"/games/life-garden/\">Conway's Game of Life</a>. Life is a 2D cellular automaton where each cell has 8 neighbors instead of 2, and the rule considers the count of live neighbors rather than the exact pattern. But the core idea is identical: simple local rules produce complex global behavior. Rule 110's Turing-completeness shows that even the 1D case is capable of arbitrary computation.": "这些一维自动机与<a href=\"/games/life-garden/\">康威生命游戏</a>属于同一族，是其中最简单的成员。生命游戏是二维细胞自动机，每个细胞有8个邻居而非2个，规则看的是存活邻居的数量而非确切模式。但核心思想相同：简单的局部规则产生复杂的整体行为。规则110的图灵完备性表明，即使一维情形也能进行任意计算。",
   "Wolfram's Four Classes": "沃尔夫勒姆的四类分类",
   "Stephen Wolfram classified all 256 elementary rules into four classes based on their long-term behavior. This classification shows that even the simplest possible rules — one dimension, two states, nearest neighbors — can produce the full spectrum from trivial uniformity to universal computation.": "斯蒂芬·沃尔夫勒姆根据长期行为将256条初等规则分为四类。这表明即使最简单的规则——一维、两种状态、最近邻——也能产生从平凡一致到通用计算的完整谱系。",
   "Class I — Uniform": "第一类——均匀",
@@ -31,6 +34,7 @@
   "Evolution produces pseudo-random, aperiodic patterns.": "演化产生伪随机、非周期模式。",
   "Class IV — Complex": "第四类——复杂",
   "Localized structures emerge and interact in complicated ways. Capable of universal computation.": "局部结构出现并以复杂方式互动。能够进行通用计算。",
+  "The progression from Class I to Class IV mirrors a phase transition: too little activity produces uniformity, too much produces chaos, and the boundary between order and chaos — Class IV — is where complex, computation-capable behavior appears. Rule 110, a Class IV rule, has been proven Turing-complete, meaning it can simulate any computation given sufficient time and space.": "从第一类到第四类的演进如同相变：活动太少产生一致，太多产生混沌，而有序与混沌的边界——第四类——正是复杂的、可计算的行为出现之处。第四类的规则110已被证明图灵完备，即只要时间和空间足够，它可以模拟任何计算。",
   "See also": "另见",
   "— 2D cellular automata (Conway's Game of Life)": "——二维细胞自动机（康威生命游戏）"
 }

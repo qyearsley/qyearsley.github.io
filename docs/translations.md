@@ -53,12 +53,43 @@ Each file maps English text to Chinese:
 - All other keys match text content between HTML tags (`>text<`).
 - Common strings in `zh-common.json` are merged into every page.
 
+## Text Split by Inline Markup
+
+A key matches one run of text between two tags. A sentence broken by a
+`<strong>`, a `<code>` or an `<a>` is more than one run, so a plain-text key
+cannot match it.
+
+Write the markup into the key, and into the Chinese value:
+
+```json
+{
+  "The machine reads the symbol under the <strong>head</strong> (highlighted cell).": "机器读取<strong>读写头</strong>下方的符号（高亮格）。"
+}
+```
+
+Rules for these keys:
+
+- The key must cover the whole contents of its element, from the opening tag to
+  the closing tag. A key that starts in the middle of a sentence does not match.
+- Copy the tags exactly, attributes included. If you change an `href` or a
+  `style` in the page, change it in the key too. The build warns when a key
+  stops matching.
+- Write the tags as plain HTML (`</a>`). The matcher allows whitespace before
+  the closing `>` of a tag, so Prettier wrapping a long tag onto its own line
+  does not break the key.
+- Keep the `href` as it appears in the source page. Link rewriting for `/zh/`
+  runs after translation.
+
+Do not split a sentence into several small keys instead. Chinese word order
+differs from English, so the fragments reassemble in the wrong order.
+
 ## How Matching Works
 
 1. Entries are sorted longest-first to prevent partial matches
 2. Whitespace is normalized (spaces match newlines/indentation)
 3. `&` matches both `&` and `&amp;`
-4. Only text between `>` and `<` is matched (not attributes)
+4. A tag in a key may have whitespace before its closing `>`
+5. Only text between `>` and `<` is matched (not attributes)
 
 ## Adding Translations
 
