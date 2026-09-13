@@ -79,8 +79,8 @@ Because the page only exists after a build, `npm run dev` does not serve
 3. **Render resume** -- convert `resume/resume.md` to HTML via `marked`, inject into `resume/template.html`
 4. **Translate** -- for each translatable page, generate a Chinese version at `/zh/` using text-matching against co-located `*.zh.json` files. Both the `/zh/` and the English copy also get `hreflang` links and a language-switch link in the header.
 5. **Inject paths** -- write `window.__translatedPaths` into every HTML file so `nav.js` can persist language preference client-side
-6. **Sitemap** -- generate `dist/sitemap.xml` from all HTML files
-7. **Validate** -- check all internal `href="/..."` links point to existing files
+6. **Sitemap** -- generate `dist/sitemap.xml` from all HTML files, excluding `/404.html` and the `/zh/` pages (those appear as `hreflang` alternates)
+7. **Validate** -- check every internal `href` and `src`, absolute or relative, against the files in `dist/`. A broken link fails the build, which is what keeps it off the live site: the deploy workflow uploads `dist/` only after build, test and lint all pass.
 
 Why this rather than a site generator, and what would change our mind:
 [`build-system-options.md`](build-system-options.md).
@@ -159,8 +159,9 @@ Jest's `moduleNameMapper` in `package.json` strips `.js` extensions from relativ
 ## Adding a New Page
 
 1. Create `section/page-name.html` as a self-contained HTML file
-2. Create `section/page-name.zh.json` with translations -- this opts the page into the Chinese translation pipeline
-3. Run `npm run build` -- warnings show unmatched translation keys
+2. Give it a `<meta name="description">`. `__tests__/html.test.js` requires one on every page.
+3. Create `section/page-name.zh.json` with translations -- this opts the page into the Chinese translation pipeline
+4. Run `npm run build` -- warnings show unmatched translation keys
 
 `build.js` discovers translatable pages by walking the source tree for
 `*.zh.json` files; there is no manual list to update.

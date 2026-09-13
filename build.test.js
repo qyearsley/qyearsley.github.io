@@ -93,6 +93,26 @@ describe("buildTextPattern", () => {
     expect("hello          world").toMatch(new RegExp(pattern))
     expect("hello\n\n  \t  world").toMatch(new RegExp(pattern))
   })
+
+  test("matches inline markup inside a key", () => {
+    const pattern = buildTextPattern("the <strong>head</strong> cell")
+    expect("the <strong>head</strong> cell").toMatch(new RegExp(pattern))
+    expect("the <em>head</em> cell").not.toMatch(new RegExp(pattern))
+  })
+
+  test("tolerates Prettier wrapping the closing bracket of a tag", () => {
+    const pattern = buildTextPattern('see <a href="/x.txt">the data</a>.')
+    expect('see <a href="/x.txt">the data</a>.').toMatch(new RegExp(pattern))
+    expect('see <a href="/x.txt"\n              >the data</a\n            >.').toMatch(
+      new RegExp(pattern),
+    )
+  })
+
+  test("does not treat a less-than sign in prose as a tag", () => {
+    const pattern = buildTextPattern("values where a < b hold")
+    expect("values where a < b hold").toMatch(new RegExp(pattern))
+    expect("values where a <b hold").not.toMatch(new RegExp(pattern))
+  })
 })
 
 describe("findDuplicateKeys", () => {
@@ -559,14 +579,14 @@ describe("copyTree", () => {
     expect(existsSync(join(dest, "index.html"))).toBe(true)
   })
 
-  test("skips resume.md but keeps its template (resume is rendered from the source tree)", () => {
+  test("skips resume.md and template.html (the resume is rendered from the source tree)", () => {
     writeFile(src, "resume/resume.md", "# Resume")
     writeFile(src, "resume/template.html", "{{CONTENT}}")
 
     copyTree(src, dest)
 
     expect(existsSync(join(dest, "resume/resume.md"))).toBe(false)
-    expect(existsSync(join(dest, "resume/template.html"))).toBe(true)
+    expect(existsSync(join(dest, "resume/template.html"))).toBe(false)
   })
 
   test("keeps extensionless files such as LICENSE", () => {
@@ -709,6 +729,32 @@ describe("translateContent", () => {
     const html = '<meta name="description" content="A site" />'
     const result = translateContent(html, { _description: "网站" }, "test.html", noCommon)
     expect(result).toContain('content="网站"')
+  })
+
+  test("translates a sentence broken by inline markup, keeping the markup", () => {
+    const html = "<li>\n  The head is the <strong>cursor</strong> of the machine.\n</li>"
+    const result = translateContent(
+      html,
+      {
+        "The head is the <strong>cursor</strong> of the machine.":
+          "读写头是机器的<strong>光标</strong>。",
+      },
+      "test.html",
+      noCommon,
+    )
+    expect(result).toContain("读写头是机器的<strong>光标</strong>。")
+    expect(result).not.toContain("cursor")
+  })
+
+  test("translates a sentence broken by a link, leaving the href for rewriting", () => {
+    const html = '<p>See <a href="/games/">the games</a> for more.</p>'
+    const result = translateContent(
+      html,
+      { 'See <a href="/games/">the games</a> for more.': '详见<a href="/games/">游戏</a>。' },
+      "test.html",
+      noCommon,
+    )
+    expect(result).toBe('<p>详见<a href="/games/">游戏</a>。</p>')
   })
 
   test("does not warn on missing common keys", () => {
@@ -854,6 +900,16 @@ describe("generateSitemap", () => {
     expect(xml).not.toMatch(/hreflang/)
   })
 
+  test("excludes /404.html, which should not be indexed", () => {
+    writeFile(tmp, "index.html", "<p/>")
+    writeFile(tmp, "404.html", "<p/>")
+
+    generateSitemap(tmp)
+
+    const xml = readFileSync(join(tmp, "sitemap.xml"), "utf-8")
+    expect(xml).not.toContain("404.html")
+  })
+
   test("urls are sorted alphabetically", () => {
     writeFile(tmp, "z.html", "<p/>")
     writeFile(tmp, "a.html", "<p/>")
@@ -931,6 +987,52 @@ describe("validateLinks", () => {
       "index.html",
       '<a href="#top">Top</a><a href="https://example.com">Ext</a><a href="mailto:a@b.c">Mail</a>',
     )
+
+    expect(validateLinks(tmp)).toBe(0)
+  })
+
+  test("ignores protocol-relative and data URLs", () => {
+    writeFile(
+      tmp,
+      "index.html",
+      '<a href="//example.com/x">Ext</a><img src="data:image/gif;base64,R0lGOD" alt="" />',
+    )
+
+    expect(validateLinks(tmp)).toBe(0)
+  })
+
+  test("flags a broken src, not just a broken href", () => {
+    writeFile(tmp, "index.html", '<script src="/shared/typo.js"></script>')
+
+    expect(validateLinks(tmp)).toBe(1)
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("/shared/typo.js"))
+  })
+
+  test("resolves relative links against the page they appear on", () => {
+    writeFile(tmp, "games/index.html", '<a href="life-garden/">Play</a>')
+    writeFile(tmp, "games/life-garden/index.html", '<script src="js/game.js"></script>')
+    writeFile(tmp, "games/life-garden/js/game.js", "export {}")
+
+    expect(validateLinks(tmp)).toBe(0)
+  })
+
+  test("flags a broken relative link", () => {
+    writeFile(tmp, "games/index.html", '<a href="life-gardan/">Play</a>')
+    writeFile(tmp, "games/life-garden/index.html", "<p/>")
+
+    expect(validateLinks(tmp)).toBe(1)
+  })
+
+  test("resolves parent-directory links", () => {
+    writeFile(tmp, "games/life-garden/index.html", '<link href="../../css/style.css" rel="s" />')
+    writeFile(tmp, "css/style.css", "body{}")
+
+    expect(validateLinks(tmp)).toBe(0)
+  })
+
+  test("ignores a query string and a fragment on an internal link", () => {
+    writeFile(tmp, "index.html", '<a href="/about.html?x=1#top">About</a>')
+    writeFile(tmp, "about.html", "<p/>")
 
     expect(validateLinks(tmp)).toBe(0)
   })

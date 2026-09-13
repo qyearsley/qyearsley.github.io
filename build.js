@@ -21,7 +21,7 @@ import {
   writeFileSync,
 } from "node:fs"
 import { dirname, join } from "node:path"
-import { fileURLToPath } from "node:url"
+import { URL, fileURLToPath } from "node:url"
 import { marked } from "marked"
 
 const ROOT = dirname(fileURLToPath(import.meta.url))
@@ -34,6 +34,10 @@ const SKIP_DIRS = new Set(["node_modules", "dist", "docs", "coverage", "__tests_
 
 // Named dev-only files. Files matching an extension rule in `copyTree`
 // (`*.test.js`, `*.md`, `*.zh.json`) don't need an entry here.
+//
+// `template.html` is the resume shell that generateResume() fills in. Copied
+// verbatim it would publish a second resume page whose <main> is the literal
+// string {{CONTENT}}, under the real resume's <title>.
 const SKIP_FILES = new Set([
   "package.json",
   "package-lock.json",
@@ -41,7 +45,11 @@ const SKIP_FILES = new Set([
   ".htmlhintrc",
   "build.js",
   "zh-common.json",
+  "template.html",
 ])
+
+// Pages that exist on the site but should not be offered to search engines.
+const SITEMAP_EXCLUDE = new Set(["/404.html"])
 
 // Output paths (in dist/) that have Chinese translations.
 // Discovered from `*.zh.json` files co-located with HTML pages.
@@ -167,12 +175,18 @@ function escapeRegex(str) {
 
 // Builds a regex pattern that matches English text in HTML.
 // Handles: whitespace normalization (spaces -> \s+), HTML entity ambiguity
-// (& matches both & and &amp;).
+// (& matches both & and &amp;), and Prettier's tag wrapping.
+//
+// A key may contain inline markup, which is how a sentence broken by a
+// <strong> or an <a> gets translated as one string. Prettier wraps long tags
+// onto their own line (`</a\n  >`), so the `>` that closes a tag is allowed to
+// have whitespace in front of it and the key can be written as plain `</a>`.
 function buildTextPattern(english) {
   const normalized = english.trim().replace(/\s+/g, " ")
   let escaped = escapeRegex(normalized)
   escaped = escaped.replace(/&/g, "&(?:amp;)?")
   escaped = escaped.replace(/ /g, "\\s+")
+  escaped = escaped.replace(/(<\/?[a-zA-Z][^>]*?)>/g, "$1\\s*>")
   return escaped
 }
 
@@ -380,6 +394,7 @@ function generateSitemap(distDir = DIST) {
       urlPath = urlPath.replace(/index\.html$/, "")
     }
     if (zhPaths.has(urlPath)) continue
+    if (SITEMAP_EXCLUDE.has(urlPath)) continue
     urls.push(urlPath)
   }
 
@@ -410,6 +425,21 @@ function generateSitemap(distDir = DIST) {
   console.log(`  Generated sitemap.xml (${urls.length} URLs)`)
 }
 
+// Resolves a link found in a page to a site-absolute path, or null if the link
+// points somewhere this check cannot follow (another site, a fragment, a data
+// URI). The URL base is a throwaway origin; only the pathname is used, which is
+// what handles `../`, `./`, query strings and trailing fragments.
+function resolveLink(href, fromPath) {
+  if (href === "" || href.startsWith("#")) return null
+  if (href.startsWith("//")) return null
+  if (/^[a-z][a-z0-9+.-]*:/i.test(href)) return null
+  try {
+    return decodeURIComponent(new URL(href, "https://site" + fromPath).pathname)
+  } catch {
+    return null
+  }
+}
+
 function validateLinks(distDir = DIST) {
   const htmlFiles = findHtmlFiles(distDir)
   const existingPaths = new Set()
@@ -429,14 +459,18 @@ function validateLinks(distDir = DIST) {
   let brokenCount = 0
   for (const file of htmlFiles) {
     const html = readFileSync(file, "utf-8")
-    // Match absolute internal links (starting with /), ignoring fragments
-    const linkRegex = /href="(\/[^"#]*?)"/g
+    const fromPath = file.slice(distDir.length).replace(/\\/g, "/")
+    // Both href and src: a mistyped <script src> or <img src> ships as
+    // silently as a mistyped <a href>. Relative links are resolved against
+    // the page they appear on.
+    const linkRegex = /(?:href|src)="([^"]*)"/g
     let match
     while ((match = linkRegex.exec(html)) !== null) {
-      const href = match[1]
+      const href = resolveLink(match[1], fromPath)
+      if (href === null) continue
       if (!existingPaths.has(href)) {
         const relFile = file.slice(distDir.length + 1)
-        console.warn(`  Broken link in ${relFile}: ${href}`)
+        console.warn(`  Broken link in ${relFile}: ${match[1]}`)
         brokenCount++
       }
     }
@@ -531,7 +565,14 @@ function build() {
   generateSitemap()
 
   console.log("Validating links...")
-  validateLinks()
+  const broken = validateLinks()
+  if (broken > 0) {
+    // The deploy workflow uploads dist/ only if build, test and lint all pass,
+    // so failing here is what keeps a typo'd link off the live site.
+    console.error(`Build failed: ${broken} broken link(s).`)
+    process.exitCode = 1
+    return
+  }
 
   console.log("Done.")
 }
