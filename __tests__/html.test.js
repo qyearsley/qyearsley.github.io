@@ -64,3 +64,24 @@ describe("HTML script tags", () => {
     expect(placeholders).toEqual([])
   })
 })
+
+/**
+ * Meta descriptions.
+ *
+ * Every page has one, and this keeps it that way. A page can lose its
+ * description by accident -- the tag is three lines of boilerplate near the top
+ * of the head, easy to drop when a page is copied from another one.
+ *
+ * Adding a page? Write the description, then add the same English string as a
+ * `_description` key in the page's `*.zh.json` so the Chinese side keeps up.
+ */
+function description(relPath) {
+  const meta = parse(relPath).querySelector('meta[name="description"]')
+  return meta ? meta.getAttribute("content").trim() : null
+}
+
+describe("meta descriptions", () => {
+  test.each(htmlFiles)("%s: has a meta description", (relPath) => {
+    expect(description(relPath)).toBeTruthy()
+  })
+})
