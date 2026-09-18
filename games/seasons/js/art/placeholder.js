@@ -452,6 +452,54 @@ export function character(characterId, onTrail = false) {
 }
 
 /**
+ * How a drawing moves when it is standing still.
+ *
+ * The twelfth export was the required set; this is the thirteenth and it is
+ * **optional**. A pack that omits it gets a trail where nothing but the
+ * character's walk and the weather moves, which is where this game started.
+ * Keeping it optional keeps the required contract at twelve names, and leaves
+ * room for a sprite pack, where an idle is a frame loop rather than a
+ * transform.
+ *
+ * The return value is a motion name, exactly like `AIR_ART`'s `motion` tag:
+ * GameUI wraps the drawing in a group classed `idle-<motion>` and main.css
+ * animates whatever carries the class. The pack chooses the behaviour and the
+ * stylesheet supplies it, so no rule in the stylesheet has to name an animal. A
+ * motion the stylesheet does not know simply does not animate.
+ *
+ * The wrapping group is a *third* nested `<g>`, and it has to be: GameUI owns
+ * `.trail-token`'s transform for walking, the group inside it already carries
+ * the pack's `scale`, and a CSS transform replaces an element's transform
+ * attribute rather than composing with it.
+ *
+ * @param {unknown} subjectId - A character id, or `"villain"` for the snake
+ *   woman. No character uses that id, which is what makes it safe as a reserved
+ *   one.
+ * @returns {string|null} A motion name, or null for a drawing that stays still
+ */
+export function idle(subjectId) {
+  switch (subjectId) {
+    // The two that read as breathing: a slug is one muscle, and a sloth is
+    // asleep. Both get the slow scale rather than any travel.
+    case "banana-slug":
+    case "sloth":
+      return "breathe"
+    // The only one that is not standing on the ground so much as hovering over
+    // it, and the one whose tail plumes make vertical travel legible.
+    case "phoenix":
+      return "bob"
+    case "porcupine":
+      return "breathe"
+    // She is a column of coils with a hat on top, so she sways rather than
+    // rises -- a bob would read as the whole tower hopping.
+    case "villain":
+      return "sway"
+    default:
+      return null
+  }
+}
+
+/**
  * Item drawings, keyed by season id -- the rose, diamond, leaf, and icicle Ella
  * named. `rare` swaps in the brighter treatment for a glowing space's reward.
  * @private
@@ -706,6 +754,28 @@ export function villain() {
 /* ==================== Obstacles ==================== */
 
 /**
+ * Wrap shapes in a group that moves, using the same convention as the weather:
+ * the pack names a behaviour, main.css supplies it, and no rule in the
+ * stylesheet names a season or an obstacle.
+ *
+ * The group carries no `transform` attribute of its own, and that is the whole
+ * reason it exists rather than the class going on the shape. A CSS transform
+ * replaces an element's transform attribute instead of composing with it, so a
+ * shape that already has one -- which most of these do, via `cx`/`d` offsets or
+ * an explicit tilt -- would jump to the origin the moment it animated.
+ *
+ * @private
+ * @param {string} motion - Behaviour name; main.css defines `obs-<motion>`
+ * @param {number} index - Staggers the start, so identical shapes fall out of
+ *   phase rather than moving as one
+ * @param {SVGElement[]} shapes - What moves
+ * @returns {SVGElement} The wrapping group
+ */
+function _moving(motion, index, shapes) {
+  return svg("g", { class: `obs-mark obs-${motion}`, style: `--obs-index: ${index}` }, shapes)
+}
+
+/**
  * The six obstacle drawings, keyed by kind. Each is drawn in trail coordinates
  * around an origin of (0, 0) sitting on the ground, so `layout` can place it by
  * translation alone. They read from the season palette rather than fixed
@@ -755,22 +825,29 @@ const OBSTACLE_ART = {
       fill: c.water,
       ...edge,
     }),
-    svg("path", {
-      d: "M-70 6 C-52 -2 -34 2 -18 -4",
-      stroke: "#fff",
-      "stroke-width": 3.5,
-      "stroke-opacity": 0.55,
-      fill: "none",
-      "stroke-linecap": "round",
-    }),
-    svg("path", {
-      d: "M20 12 C36 4 54 8 70 2",
-      stroke: "#fff",
-      "stroke-width": 3.5,
-      "stroke-opacity": 0.38,
-      fill: "none",
-      "stroke-linecap": "round",
-    }),
+    // The two highlights are the only part of the river that moves. Shimmer is
+    // written on them rather than on the water body because the body carries
+    // the outline: an animated edge reads as the bank moving, not the surface.
+    _moving("shimmer", 0, [
+      svg("path", {
+        d: "M-70 6 C-52 -2 -34 2 -18 -4",
+        stroke: "#fff",
+        "stroke-width": 3.5,
+        "stroke-opacity": 0.55,
+        fill: "none",
+        "stroke-linecap": "round",
+      }),
+    ]),
+    _moving("shimmer", 1, [
+      svg("path", {
+        d: "M20 12 C36 4 54 8 70 2",
+        stroke: "#fff",
+        "stroke-width": 3.5,
+        "stroke-opacity": 0.38,
+        fill: "none",
+        "stroke-linecap": "round",
+      }),
+    ]),
     svg("ellipse", { cx: -42, cy: 6, rx: 19, ry: 8, fill: c.rock, ...edge }),
     svg("ellipse", { cx: 42, cy: 6, rx: 19, ry: 8, fill: c.rock, ...edge }),
   ],
@@ -809,11 +886,21 @@ const OBSTACLE_ART = {
       "stroke-width": 8,
       "stroke-linecap": "round",
     }),
-    svg("circle", { cx: -80, cy: -58, r: 30, fill: c.leaf, ...edge }),
-    svg("circle", { cx: 78, cy: -54, r: 28, fill: c.leaf, ...edge }),
-    svg("circle", { cx: -4, cy: -86, r: 40, fill: c.leaf, ...edge }),
-    svg("circle", { cx: -18, cy: -98, r: 20, fill: "#fff", "fill-opacity": 0.2 }),
-    svg("circle", { cx: -90, cy: -70, r: 13, fill: "#fff", "fill-opacity": 0.16 }),
+    // The canopies sway; the trunks above do not. Each is its own group with its
+    // own index, so the three drift out of phase -- in lockstep they would read
+    // as the whole bush sliding sideways rather than as leaves moving. The sway
+    // is a translate, not a rotation, because a rotation needs a transform
+    // origin at the trunk and `transform-box` is one more thing for a
+    // replacement pack to get right for no visible gain at this scale.
+    _moving("sway", 0, [
+      svg("circle", { cx: -80, cy: -58, r: 30, fill: c.leaf, ...edge }),
+      svg("circle", { cx: -90, cy: -70, r: 13, fill: "#fff", "fill-opacity": 0.16 }),
+    ]),
+    _moving("sway", 2, [svg("circle", { cx: 78, cy: -54, r: 28, fill: c.leaf, ...edge })]),
+    _moving("sway", 1, [
+      svg("circle", { cx: -4, cy: -86, r: 40, fill: c.leaf, ...edge }),
+      svg("circle", { cx: -18, cy: -98, r: 20, fill: "#fff", "fill-opacity": 0.2 }),
+    ]),
   ],
 
   gap: (c) => [

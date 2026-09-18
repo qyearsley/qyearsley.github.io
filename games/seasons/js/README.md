@@ -125,8 +125,8 @@ the fields it derives from. `GameState.rehydrate` regenerates it on load.
 
 ### Art — `art/`
 
-A pack exports twelve names, and `art/placeholder.js` is the reference
-implementation of every one.
+A pack exports twelve required names plus one optional one, and
+`art/placeholder.js` is the reference implementation of every one.
 
 - `id`, `name` — identity, for the registry and any future art-style picker.
 - `palette(seasonId)` → CSS custom properties, `--season-*` only; the game's
@@ -175,6 +175,23 @@ implementation of every one.
   character teleported and the camera did not pan, so the game's main piece of
   feedback simply did not happen, and it read as broken rather than as
   considerate. A pack that omits this one degrades to instant placement.
+- `idle(subjectId)` → a motion name, or null. **The one optional export.** It
+  says how a drawing moves while it is standing still: the placeholder pack
+  returns `"breathe"`, `"bob"` or `"sway"`, and `styles/main.css` animates
+  whatever carries the matching `idle-<motion>` class. Naming a behaviour rather
+  than returning a transform is the same convention `AIR_ART` uses for the
+  weather, and it is what keeps the stylesheet from having to know what an
+  animal looks like. `subjectId` is a character id, or the reserved `"villain"`
+  for the snake woman. GameUI wraps the drawing in a third nested `<g>` for
+  this, and has to: it owns `.trail-token`'s transform for walking, the group
+  inside carries the pack's `scale`, and a CSS transform replaces an element's
+  transform attribute rather than composing with it. A pack that omits `idle`
+  gets a trail where nothing but the walk and the weather moves.
+
+Obstacles can move too, and that needs no export at all: `obstacle()` wraps
+whatever should move in `obs-mark obs-<motion>` itself, exactly as `backdrop()`
+already writes `air-mark air-<motion>`. The river's highlights shimmer and the
+thicket's canopies sway that way.
 
 The pack owning `traversal` as well as the drawings is the point of the seam: a
 sprite pack could swap frames where this one arcs a transform, and return

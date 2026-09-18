@@ -189,6 +189,15 @@ function shiftOf(group) {
 /** The character's group on the trail. */
 const trailToken = () => document.querySelector("#trail .trail-token")
 
+/**
+ * The drawing inside a token or boss group, past the idle wrapper if there is
+ * one. A test that cares about the wrapper looks for `.idle-mark` itself.
+ * @param {Element} group - `.trail-token` or `.trail-boss`
+ * @returns {Element} The group holding the pack's shapes
+ */
+const trailArt = (group) =>
+  group.querySelector(":scope > .idle-mark > *") ?? group.firstElementChild
+
 /** One group per space, in the order they were drawn. */
 const trailObstacles = () => Array.from(document.querySelectorAll("#trail .trail-obstacle"))
 
@@ -609,6 +618,10 @@ describe("renderTrail", () => {
     }
   })
 
+  // The drawing sits two groups deep now, not one: `.trail-token` owns the walk
+  // and `.idle-mark` owns the idle, so the pack's `scale` needs a third element
+  // to live on. A CSS transform replaces a transform attribute rather than
+  // composing with it, which is what forces the nesting.
   it("includes a boss group and a character token", () => {
     ui.renderTrail(SPRING, 3, "phoenix")
     const boss = document.querySelector("#trail .trail-boss")
@@ -617,15 +630,51 @@ describe("renderTrail", () => {
     expect(token).not.toBeNull()
     expect(boss.childElementCount).toBeGreaterThan(0)
     expect(token.childElementCount).toBeGreaterThan(0)
-    expect(boss.firstElementChild.getAttribute("transform")).toContain("scale")
-    expect(token.firstElementChild.getAttribute("transform")).toContain("scale")
+    expect(trailArt(boss).getAttribute("transform")).toContain("scale")
+    expect(trailArt(token).getAttribute("transform")).toContain("scale")
   })
 
   it("draws the chosen character in the token", () => {
     ui.renderTrail(SPRING, 0, "phoenix")
-    const art = trailToken().firstElementChild
+    const art = trailArt(trailToken())
     expect(art.innerHTML).toBe(ui.pack.character("phoenix").element.innerHTML)
     expect(art.innerHTML).not.toBe(ui.pack.character("sloth").element.innerHTML)
+  })
+
+  describe("idle motion", () => {
+    it("wraps the character and the snake woman in the motion the pack names", () => {
+      ui.renderTrail(SPRING, 0, "phoenix")
+      const wrap = trailToken().firstElementChild
+      expect(wrap.getAttribute("class")).toBe("idle-mark idle-bob")
+      expect(
+        document.querySelector("#trail .trail-boss").firstElementChild.getAttribute("class"),
+      ).toBe("idle-mark idle-sway")
+    })
+
+    // The wrapper carries no transform of its own. If it ever gained one, the
+    // CSS animation would replace it and the drawing would jump.
+    it("leaves the wrapper free for the stylesheet to transform", () => {
+      ui.renderTrail(SPRING, 0, "sloth")
+      expect(trailToken().firstElementChild.hasAttribute("transform")).toBe(false)
+    })
+
+    // `idle` is the one optional export in the art contract. A pack without it
+    // has to render exactly as the game did before it existed.
+    it("adds no wrapper when the pack does not export idle", () => {
+      const { idle: _unused, ...packWithoutIdle } = ui.pack
+      ui.pack = packWithoutIdle
+      ui.renderTrail(SPRING, 0, "phoenix")
+
+      const art = trailToken().firstElementChild
+      expect(document.querySelector("#trail .idle-mark")).toBeNull()
+      expect(art.getAttribute("transform")).toContain("scale")
+    })
+
+    it("adds no wrapper for a subject the pack does not animate", () => {
+      ui.pack = { ...ui.pack, idle: () => null }
+      ui.renderTrail(SPRING, 0, "phoenix")
+      expect(document.querySelector("#trail .idle-mark")).toBeNull()
+    })
   })
 
   it("waits at the end of the trail with the boss, past the last stop", () => {
@@ -1469,6 +1518,66 @@ describe("renderItemTrack", () => {
     expect(pips()).toHaveLength(SPRING.demand)
     expect(countOf("is-earned")).toBe(0)
     expect(countOf("is-wilting")).toBe(0)
+  })
+
+  // The row is rebuilt from scratch on every answer, so an animation on
+  // `.is-earned` would replay across the whole row each time. `is-new` marks
+  // only what arrived since the last render, which is a fact about the previous
+  // draw rather than about the game -- GameUI remembers it, GameState does not
+  // carry it.
+  describe("which pip is new", () => {
+    /** The indexes of the pips marked as having just arrived. */
+    const newIndexes = () =>
+      pips().flatMap((pip, i) => (pip.classList.contains("is-new") ? [i] : []))
+
+    it("marks nothing on the first draw of a season", () => {
+      ui.renderItemTrack(hudState({ items: 7 }), SPRING)
+      expect(newIndexes()).toEqual([])
+    })
+
+    it("marks the one that arrived", () => {
+      ui.renderItemTrack(hudState({ items: 3 }), SPRING)
+      ui.renderItemTrack(hudState({ items: 4 }), SPRING)
+      expect(newIndexes()).toEqual([3])
+    })
+
+    // A glowing space is worth three at once, and all three should land.
+    it("marks every one that arrived at the same time", () => {
+      ui.renderItemTrack(hudState({ items: 3 }), SPRING)
+      ui.renderItemTrack(hudState({ items: 6 }), SPRING)
+      expect(newIndexes()).toEqual([3, 4, 5])
+    })
+
+    it("marks nothing when the count is unchanged", () => {
+      ui.renderItemTrack(hudState({ items: 4 }), SPRING)
+      ui.renderItemTrack(hudState({ items: 4, wilting: 1 }), SPRING)
+      expect(newIndexes()).toEqual([])
+    })
+
+    it("marks nothing when the count goes down", () => {
+      ui.renderItemTrack(hudState({ items: 5 }), SPRING)
+      ui.renderItemTrack(hudState({ items: 2 }), SPRING)
+      expect(newIndexes()).toEqual([])
+    })
+
+    // A wilting item coming back is an arrival too -- it is the moment the wilt
+    // rule is paying off, and the pip it fills was empty a moment ago.
+    it("marks a revived item", () => {
+      ui.renderItemTrack(hudState({ items: 5 }), SPRING)
+      ui.renderItemTrack(hudState({ items: 4, wilting: 1 }), SPRING)
+      ui.renderItemTrack(hudState({ items: 5 }), SPRING)
+      expect(newIndexes()).toEqual([4])
+    })
+
+    // Crossing into a new season resets the count to zero. Without the season
+    // check, the first item of summer would be compared against spring's total
+    // and the whole of summer would draw unmarked.
+    it("starts again in the next season", () => {
+      ui.renderItemTrack(hudState({ items: 11 }), SPRING)
+      ui.renderItemTrack(hudState({ items: 0 }), SUMMER)
+      ui.renderItemTrack(hudState({ items: 1 }), SUMMER)
+      expect(newIndexes()).toEqual([0])
+    })
   })
 })
 

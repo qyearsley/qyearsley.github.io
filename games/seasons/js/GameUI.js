@@ -394,7 +394,7 @@ export class GameUI extends BaseGameUI {
     const boss = svg("g", { class: "trail-boss" })
     const bossArt = this.pack.villain().element
     bossArt.setAttribute("transform", plan.bossTransform)
-    boss.append(bossArt)
+    boss.append(this._idling("villain", bossArt))
     const bossStop = plan.stops[plan.stops.length - 1]
     boss.setAttribute("transform", `translate(${bossStop.x + plan.bossOffset} ${bossStop.y})`)
     camera.append(boss)
@@ -402,7 +402,7 @@ export class GameUI extends BaseGameUI {
     const token = svg("g", { class: "trail-token" })
     const tokenArt = this.pack.character(characterId, true).element
     tokenArt.setAttribute("transform", `scale(${plan.tokenScale})`)
-    token.append(tokenArt)
+    token.append(this._idling(characterId, tokenArt))
     camera.append(token)
 
     host.append(canvas)
@@ -410,6 +410,30 @@ export class GameUI extends BaseGameUI {
     this._trailKey = key
     this._trail = { canvas, camera, layers, token, plan, season }
     this._placeToken(position, { animate: false })
+  }
+
+  /**
+   * Put a drawing inside a group that idles, if the pack says it should.
+   *
+   * `idle` is the one optional export in the art contract, so a pack that does
+   * not have it -- or does not want this subject to move -- gets the drawing
+   * back untouched and the trail behaves exactly as it did before.
+   *
+   * The extra group is load-bearing. This one owns the walk (`.trail-token`'s
+   * transform) and the drawing inside already carries the pack's `scale`, so
+   * the idle needs an element of its own: a CSS transform replaces an element's
+   * transform attribute rather than composing with it, and animating either of
+   * the other two would throw away the position or the size.
+   *
+   * @private
+   * @param {string} subjectId - A character id, or "villain"
+   * @param {SVGElement} art - The drawing to wrap
+   * @returns {SVGElement} The wrapper, or `art` itself when nothing idles
+   */
+  _idling(subjectId, art) {
+    const motion = this.pack.idle?.(subjectId)
+    if (typeof motion !== "string" || motion === "") return art
+    return svg("g", { class: `idle-mark idle-${motion}` }, [art])
   }
 
   /**
@@ -717,11 +741,28 @@ export class GameUI extends BaseGameUI {
     // each with its own SVG, on this render and every one after it.
     const slots = Math.min(MAX_ITEM_PIPS, Math.max(season.demand, earned + wilting))
 
+    // Which pips are new since the last render, so only those pop in. The row
+    // is rebuilt from scratch every time, so without this an animation on
+    // `.is-earned` would replay across the whole row on every answer -- which
+    // is why this was deferred once as needing a state change.
+    //
+    // It does not need one. What is new is a fact about the previous *render*,
+    // not about the game, so this file can remember it: the count it last drew,
+    // and which season it drew it for. Nothing pops on the first draw of a
+    // season, which is what stops a reloaded save firing seven at once, and
+    // nothing pops when the count goes down.
+    const drawn = this._pipsDrawn
+    const newFrom = drawn && drawn.seasonId === season.id ? drawn.earned : earned
+    this._pipsDrawn = { seasonId: season.id, earned }
+
     for (let i = 0; i < slots; i += 1) {
       const pip = document.createElement("span")
       const isEarned = i < earned
       const isWilting = !isEarned && i < earned + wilting
-      pip.className = `item-pip${isEarned ? " is-earned" : ""}${isWilting ? " is-wilting" : ""}`
+      const isNew = isEarned && i >= newFrom
+      pip.className = `item-pip${isEarned ? " is-earned" : ""}${isWilting ? " is-wilting" : ""}${
+        isNew ? " is-new" : ""
+      }`
       if (isEarned || isWilting) {
         this._mount(pip, this.pack.item(season.id, false), "item-svg")
       }

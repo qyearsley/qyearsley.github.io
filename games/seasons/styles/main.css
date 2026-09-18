@@ -465,6 +465,27 @@ select:focus-visible {
   transform: translateY(3px) rotate(12deg);
 }
 
+/* Only the pip just earned carries `is-new`; GameUI works out which that is.
+   The overshoot is deliberate -- an item is dropped into the row rather than
+   faded into it, which is the same gesture as the haul dropping into her jar on
+   the result screen. Short, because it happens after every correct answer and
+   the next question is already on its way. */
+.item-pip.is-new {
+  animation: seasons-pip-in 380ms cubic-bezier(0.34, 1.3, 0.64, 1) both;
+}
+
+@keyframes seasons-pip-in {
+  from {
+    transform: scale(0.3) translateY(-8px);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
 .item-svg {
   width: 100%;
   height: 100%;
@@ -631,6 +652,102 @@ select:focus-visible {
 
   to {
     transform: translate(7px, -3px);
+    opacity: 1;
+  }
+}
+
+/* Idle motion, and motion on the obstacles that are made of something that
+   moves. Same convention as the weather above: the art pack names a behaviour
+   and this file supplies it, so no rule here knows what an animal or a river
+   looks like.
+
+   All four are alternating translates or a scale about the foot, and all four
+   are small. The trail's own vocabulary is the walk and the crossing; anything
+   here that competed with those would make the screen busy rather than alive.
+   The blanket `prefers-reduced-motion` rule at the foot of this file switches
+   every one of them off. */
+.idle-mark,
+.obs-mark {
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  animation-timing-function: ease-in-out;
+}
+
+/* Scaled about the bottom centre, not the middle: the default SVG origin would
+   have the animal grow downwards through the ground it is standing on. */
+.idle-breathe {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation-name: seasons-breathe;
+  animation-duration: 3.4s;
+}
+
+.idle-bob {
+  animation-name: seasons-bob;
+  animation-duration: 2.6s;
+}
+
+.idle-sway {
+  animation-name: seasons-sway;
+  animation-duration: 4.2s;
+}
+
+/* The three canopies of a thicket share a behaviour and differ only in phase,
+   which is what stops them reading as one shape sliding sideways. */
+.obs-sway {
+  animation-name: seasons-sway;
+  animation-duration: 4.6s;
+  animation-delay: calc(var(--obs-index, 0) * -1.1s);
+}
+
+.obs-shimmer {
+  animation-name: seasons-shimmer;
+  animation-duration: 3.1s;
+  animation-delay: calc(var(--obs-index, 0) * -1.4s);
+}
+
+@keyframes seasons-breathe {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(1.035);
+  }
+}
+
+@keyframes seasons-bob {
+  from {
+    transform: translate(0, 0);
+  }
+
+  to {
+    transform: translate(0, -5px);
+  }
+}
+
+@keyframes seasons-sway {
+  from {
+    transform: translate(-2.5px, 0);
+  }
+
+  to {
+    transform: translate(2.5px, -1px);
+  }
+}
+
+/* Opacity does most of the work here. The highlights are already the lightest
+   thing on the water, so a sliding stroke reads as a ripple travelling while a
+   fading one reads as light catching the surface -- and this is the shape a
+   player stands next to for a whole question. */
+@keyframes seasons-shimmer {
+  from {
+    transform: translate(-3px, 0);
+    opacity: 0.55;
+  }
+
+  to {
+    transform: translate(3px, 1px);
     opacity: 1;
   }
 }

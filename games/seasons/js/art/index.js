@@ -12,12 +12,12 @@
  * A pack must export twelve names: `id`, `name`, `palette`, the drawings
  * `character`, `item`, `obstacle`, `villain` and `backdrop`, and the
  * trail's geometry and motion, `layout`, `traversal`, `reducedTraversal` and
- * `standing`. See placeholder.js for the reference implementation and the exact
- * signatures, and ../README.md for what each one returns and where the recipe
- * lives.
+ * `standing`. A thirteenth, `idle`, is optional. See placeholder.js for the
+ * reference implementation and the exact signatures, and ../README.md for what
+ * each one returns and where the recipe lives.
  *
- * Two of those have return shapes worth stating here rather than only in the
- * reference pack, because both are contracts GameUI reads directly:
+ * Three of those have return shapes worth stating here rather than only in the
+ * reference pack, because all three are contracts GameUI reads directly:
  *
  * - **`backdrop(seasonId, width)` returns layers, not a drawing.** It used to
  *   hand back a single `Drawing` and GameUI appended it inside the one camera
@@ -36,6 +36,15 @@
  *   like is a drawing decision, so it belongs to the pack; GameUI only chooses
  *   *when* to ask for it. A pack that does not export one degrades to instant
  *   placement, which is the old behaviour and never worse than it.
+ * - **`idle(subjectId)` returns a motion name, not a transform**, and is the
+ *   one optional export. GameUI wraps the drawing in a group classed
+ *   `idle-<motion>` and main.css animates whatever carries it — the same
+ *   convention `backdrop` uses for the weather, and the reason no rule in the
+ *   stylesheet has to know what an animal looks like. The wrapping group is a
+ *   third nested `<g>` because GameUI owns `.trail-token`'s transform and the
+ *   group inside already carries the pack's `scale`; a CSS transform replaces
+ *   an element's transform attribute rather than composing with it. `subjectId`
+ *   is a character id, or the reserved `"villain"`.
  *
  * - Palettes live here, not in seasons.js, because "what colour is autumn" is a
  *   question about the art and a new pack should be free to answer it

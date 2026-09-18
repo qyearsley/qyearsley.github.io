@@ -456,10 +456,12 @@ actually land on.
 
 ### Replace the art
 
-A pack exports twelve names: `id` and `name`; `palette`; the drawings
+A pack exports twelve required names: `id` and `name`; `palette`; the drawings
 `character`, `item`, `obstacle`, `villain`, and `backdrop`; and the
 trail's geometry and motion, `layout`, `traversal`, `reducedTraversal`, and
-`standing`. Signatures and return shapes are in
+`standing`. A thirteenth, `idle`, is optional — it says how a drawing moves
+while standing still, and a pack without it gets a trail where nothing but the
+walk and the weather moves. Signatures and return shapes are in
 [`js/README.md`](js/README.md#art--art), with the two that have changed since —
 `backdrop`, which returns parallax layers rather than one drawing, and
 `reducedTraversal` — documented on

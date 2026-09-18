@@ -48,6 +48,57 @@ Roughly in order of how much each would change the game.
    recipe. Kinds she has mentioned that do not exist yet: forest as distinct from
    thicket, and anything weather-shaped.
 
+## How long a season is, and whether it can end early
+
+Asked 2026-09-18: should a season be shorter, or should it be possible to go to
+the snake woman as soon as the demand is met? Measured before answering, against
+`main`, by walking each route and adding one item per ordinary space and three
+per glowing one:
+
+| Season | Spaces | Demand | Max items | Demand met at | Spaces after |
+| ------ | ------ | ------ | --------- | ------------- | ------------ |
+| Spring | 14     | 11     | 18        | space 9       | 5            |
+| Summer | 16     | 13     | 22        | space 9       | 7            |
+| Autumn | 18     | 15     | 26        | space 11      | 7            |
+| Winter | 20     | 17     | 30        | space 12      | 8            |
+
+So a full run is 72 questions plus four boss questions, and on a perfect run the
+jar is full about 60% of the way along every trail. The remaining spaces are not
+decoration — they are the margin that lets a wrong answer cost an item without
+losing the season — but a player who is not making mistakes spends a third of
+every season collecting things she demonstrably does not need.
+
+**The recommendation is the early finish, not the shorter trail**, and the
+difference matters. Cutting spaces takes the margin away from everybody,
+including the player who needs it, and it means retuning `demand` for all four
+seasons. An early finish takes length away only from the player who has earned
+it: answer accurately and the season is 9 questions, make mistakes and you get
+the whole trail to recover on. Accuracy becomes the lever on length, which is
+the right thing for a practice game to reward.
+
+Shape, if it goes ahead:
+
+- Offer it, never force it. When `countingItems(state) >= season.demand` on the
+  trail, the demand bar gets a "She has enough — go to her?" button. Walking on
+  stays available, because more items are still a buffer against the boss.
+- Judge it on **counting** items, not `items`. Wilting items are written off at
+  `_resolveSeason`, so offering the finish to a player holding two wilting items
+  would offer her a season she then loses.
+- It needs one new phase transition in `GameState.js` and a button in the trail
+  HUD. `bossPosition(season)` already exists and `_resolveSeason` already judges
+  the demand independently of where the token stopped, so the state machine is
+  mostly ready for this.
+
+What it costs: the boss stops being a real test. A player who skips forward with
+the demand already met cannot fail — a missed boss question costs nothing beyond
+the rescue it did not award. That is close to true today for anyone who reaches
+the boss with a full jar, so this makes an existing softness visible rather than
+introducing one. If the boss should be able to bite, that is a separate rule
+question and it is Ella's.
+
+**Still Ella's call**, like the season picker below: it changes what finishing a
+season means.
+
 ## Difficulty: retuned 2026-08-31
 
 Implemented. Kept here because the reasoning is a design record rather than
@@ -269,19 +320,19 @@ Most of this list was cleared on 2026-08-31; what is left is below the done ones
   for debugging is deliberately **not** this: it skips the rule question by not
   saving, which is fine for an adult checking the art and wrong as a game
   mechanic.
-- **Little on the trail moves except the character and the weather.** The
-  weather now falls (below); what is still static is the animal, the snake
-  woman, the river and the thicket. Reviewed 2026-08-31, and each remaining
-  piece still needs a decision about _where_ the motion lives rather than just
-  some keyframes:
-  - **An idle bob or breathe on the character and on the snake woman.** Not
-    simply a CSS rule: JS owns `.trail-token`'s transform and the group inside it
-    already carries the pack's `scale`, so this needs a third nested `<g>`. And
-    ownership is the real question — motion belongs to the art pack, which owns
-    `traversal()` for exactly this reason, so the shape is probably an
-    **optional** twelfth export, `idle(characterId)`, that GameUI uses if the
-    pack offers one. Optional keeps the required contract at eleven names, and a
-    sprite pack returns frame swaps where this one returns a transform.
+- ~~**Little on the trail moves except the character and the weather.**~~
+  **Done**, 2026-09-18. The animal, the snake woman, the river and the thicket
+  all move now, and the predicted shapes were right:
+  - ~~**An idle bob or breathe on the character and on the snake woman.**~~
+    **Done.** It is an **optional** thirteenth export, `idle(subjectId)`, and it
+    did need the third nested `<g>` — JS owns `.trail-token`'s transform, the
+    group inside carries the pack's `scale`, and a CSS transform replaces a
+    transform attribute rather than composing with it. The return value is a
+    motion name rather than a transform, matching `AIR_ART`: the pack says
+    `"breathe"`, `"bob"` or `"sway"` and main.css supplies it, so no rule in the
+    stylesheet names an animal. A pack that omits `idle` renders exactly as
+    before, which is what keeps the required contract at twelve names. The snake
+    woman comes through the same call under the reserved id `"villain"`.
   - ~~**Falling snow, and autumn leaves to match.**~~ **Done**, 2026-09-05, and
     the predicted shape is what it turned out to be: `AIR_ART` tags each mark
     with a `motion`, `backdrop` writes it out as `air-fall` or `air-drift`, and
@@ -294,12 +345,23 @@ Most of this list was cleared on 2026-08-31; what is left is below the done ones
     autumn's leaves already carry a `transform` for their tilt and a CSS
     transform on the same element would replace it; and both ends of the fall
     keyframe are transparent, which is what makes the loop seamless.
-  - **Water shimmer on the river, and a slight thicket sway.** Same mechanism as
-    the flakes, so same decision.
-- **Item pips do not pop in when earned.** `renderItemTrack` rebuilds every pip
-  on every render, so a CSS animation replays across the whole row each time.
-  Doing it properly means telling the UI which pip is new, which is a state
-  change rather than a display one.
+  - ~~**Water shimmer on the river, and a slight thicket sway.**~~ **Done**, and
+    it was the same mechanism as the flakes — so much so that it needed no
+    GameUI change at all. `backdrop` already writes its own `air-mark
+air-<motion>` class, so `obstacle` does the same with `obs-mark
+obs-<motion>` through a small `_moving` helper. Two details worth keeping:
+    only the river's two white highlights shimmer, not the water body, because
+    the body carries the outline and an animated edge reads as the bank moving;
+    and the thicket's three canopies each get their own phase, because in
+    lockstep they read as one bush sliding sideways.
+- ~~**Item pips do not pop in when earned.**~~ **Done**, 2026-09-18, and the
+  earlier note was wrong about the cost. It said this needed a state change to
+  tell the UI which pip is new. It does not: what is new is a fact about the
+  previous _render_, not about the game, so `renderItemTrack` remembers the
+  count it last drew and which season it drew it for. Only pips past that count
+  carry `is-new`. Nothing pops on the first draw of a season, so a reloaded save
+  does not fire seven at once; nothing pops when the count falls; and a revived
+  wilting item does pop, which is the moment the wilt rule pays off.
 - ~~**Two characters did not stand on the ground.**~~ **Done**, 2026-08-31. The
   token is placed so that drawing y=91 lands on the trail. The banana slug
   stopped at y=78, so the one animal in the roster that is nothing but underside
