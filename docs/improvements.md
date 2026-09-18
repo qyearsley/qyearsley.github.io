@@ -1,6 +1,6 @@
 # Improvements
 
-> **Status: audited 2026-09-18 against `main` @ `e955e81`.** Migrated from the
+> **Status: audited 2026-09-18 against `main` @ `b9881fc`.** Migrated from the
 > unversioned `~/hobby/IMPROVEMENTS.md`, which covered seven repos at once and
 > had drifted; every claim below was re-checked on this date.
 
@@ -196,12 +196,29 @@ figures as a test bound at `:88-92` and type-checks the field at `:24` and `:67`
 ## Not looked at
 
 **Nothing in this repo has been rendered in a browser.** Tests and linters pass,
-but the visual work — the Seasons settings dialog, the roughly one hundred
-CSS-animated SVG groups of falling weather on the winter trail, and now the
-Number Garden theme refactor — has never been looked at on a real screen. The
-weather and the refactor both want one look on an actual iPad. There is no
-headless browser in the dev dependencies, so nothing in the toolchain can check
-this; it needs a person.
+but nothing in the toolchain can check what a page looks like -- there is no
+headless browser in the dev dependencies -- so this needs a person, on the
+actual iPad. In rough order of how much is unverified:
+
+- **Times Trail's trail picker.** A whole new screen, and the largest single
+  piece of unlooked-at work: five rows of 16 to 20 spaces each, three space
+  states, and a `grid-auto-flow: column` row that has to hold a 20-space trail
+  and a 2-space one without the spaces stretching into bars.
+- **Number Garden's dark theme.** Every colour in the game moved onto a token
+  and the per-area colours are now `color-mix` derivations, so every one of the
+  six areas wants a glance in both themes. The feedback fills stay light in dark
+  mode on purpose; that is the pairing most likely to look wrong.
+- **Seasons' motion** -- roughly a hundred CSS-animated SVG groups of falling
+  weather on the winter trail, plus the new idle, shimmer and sway.
+- **The language switcher in each game's top bar**, which is the one change that
+  puts a new control into five already-crowded layouts.
+
+**Two `js/README.md` files were committed without a line-by-line read.**
+`games/life-garden/js/README.md` and `games/turing-tape/js/README.md`, 546 lines
+between them, landed in the working tree during the 2026-09-18 session from
+outside it. Their file references were checked and are accurate, and the Turing
+Tape one has been edited since; the Life Garden one has had no second pass.
+Worth a read before anything relies on it.
 
 One pre-existing commit, `0f300d7` (2025-02-20), carries the work email address.
 Rewriting it means rewriting every commit after it and force-pushing a public
