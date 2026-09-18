@@ -85,3 +85,24 @@ describe("meta descriptions", () => {
     expect(description(relPath)).toBeTruthy()
   })
 })
+
+// build.js injects the EN/中文 switcher into one of two places: the end of a
+// `<header>`, or an empty `<div class="lang-slot">` for a page that has none.
+// Both replacements fail SILENTLY when they find nothing -- which is how all
+// five games shipped with no switcher at all until 2026-09-18. This is the gate
+// that stops a new page doing the same.
+describe("language switcher mount point", () => {
+  test.each(htmlFiles)("%s: has exactly one mount point", (relPath) => {
+    const doc = parse(relPath)
+    const headers = doc.querySelectorAll("header")
+    const slots = doc.querySelectorAll(".lang-slot")
+    expect(headers.length + slots.length).toBe(1)
+  })
+
+  test.each(htmlFiles)("%s: leaves the slot empty for the build to fill", (relPath) => {
+    for (const slot of parse(relPath).querySelectorAll(".lang-slot")) {
+      expect(slot.textContent.trim()).toBe("")
+      expect(slot.children).toHaveLength(0)
+    }
+  })
+})

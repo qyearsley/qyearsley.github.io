@@ -301,6 +301,19 @@ function reportStaleCommonKeys(commonKeys, matchedCommon) {
 }
 
 // Adds hreflang <link> tags and a language switcher link to an HTML page.
+//
+// Two mount points, because the site has two kinds of page. A document page has
+// a `<header>` and the switcher goes at the end of it. A game is a full-screen
+// app with no `<header>` at all, so it marks a spot with an empty
+// `<div class="lang-slot">` -- in its own top bar, or after the breadcrumbs on
+// its title screen. Before the slot existed, no game page got a switcher: the
+// `</header>` replacement simply found nothing and failed silently.
+//
+// The slot is emptied and refilled rather than appended to, so the source's
+// placeholder content (there is none, but a future editor might add some)
+// cannot end up beside the link. `__tests__/html.test.js` asserts every page
+// has exactly one mount point, which is what stops a new page shipping without
+// one.
 function injectLangMeta(html, pagePath, targetLang) {
   let result = html
 
@@ -318,10 +331,14 @@ function injectLangMeta(html, pagePath, targetLang) {
   const switchHref = isZh ? enUrl : zhUrl
   const switchLang = isZh ? "en" : "zh"
   const switchLabel = isZh ? "English" : "中文"
-  const switchHtml = `\n        <div class="header-controls">\n          <a href="${switchHref}" class="lang-switch" lang="${switchLang}">${switchLabel}</a>\n        </div>`
-  result = result.replace("</header>", `${switchHtml}\n      </header>`)
+  const link = `<a href="${switchHref}" class="lang-switch" lang="${switchLang}">${switchLabel}</a>`
 
-  return result
+  if (result.includes("</header>")) {
+    const switchHtml = `\n        <div class="header-controls">\n          ${link}\n        </div>`
+    return result.replace("</header>", `${switchHtml}\n      </header>`)
+  }
+
+  return result.replace(/<div class="lang-slot">\s*<\/div>/, `<div class="lang-slot">${link}</div>`)
 }
 
 // Rewrites relative asset paths (href, src, ES module imports) to absolute

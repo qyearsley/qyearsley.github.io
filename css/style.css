@@ -303,6 +303,22 @@ p {
   opacity: 1;
 }
 
+/* Where build.js puts the language switcher on a page that has no `<header>`:
+   the five games, which are full-screen apps with their own top bars. Empty in
+   the source, and `:empty` collapses it so `npm run dev` -- which serves the
+   source unbuilt -- shows no gap where the link will be.
+
+   `currentcolor` rather than `--color-header-text`: a game's top bar is its own
+   colour, not the site header's, so the link borrows whatever it is sitting in
+   instead of assuming the site palette. */
+.lang-slot:empty {
+  display: none;
+}
+
+.lang-slot .lang-switch {
+  color: currentcolor;
+}
+
 .header-controls .theme-toggle svg {
   width: 14px;
   height: 14px;

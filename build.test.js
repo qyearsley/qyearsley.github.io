@@ -413,6 +413,46 @@ describe("injectLangMeta", () => {
     const switcher = result.indexOf("lang-switch")
     expect(switcher).toBeLessThan(headerEnd)
   })
+
+  // The second mount point. A game is a full-screen app with no `<header>`, so
+  // it marks a spot instead. Before the slot existed the `</header>` replacement
+  // found nothing and failed silently -- no game page had a switcher at all.
+  describe("the lang-slot mount point", () => {
+    const slotHtml = '<head></head><body><div class="lang-slot"></div></body>'
+
+    test("fills the slot on a page with no header", () => {
+      const result = injectLangMeta(slotHtml, "games/seasons/index.html", "en")
+      expect(result).toContain(
+        '<div class="lang-slot"><a href="/zh/games/seasons/index.html" class="lang-switch" lang="zh">中文</a></div>',
+      )
+    })
+
+    test("fills the slot on the zh side too", () => {
+      const result = injectLangMeta(slotHtml, "games/seasons/index.html", "zh")
+      expect(result).toContain('href="/games/seasons/index.html"')
+      expect(result).toContain("English")
+    })
+
+    test("adds no header-controls wrapper, since there is no header", () => {
+      expect(injectLangMeta(slotHtml, "index.html", "en")).not.toContain("header-controls")
+    })
+
+    // A page with both is a page mid-migration. The header wins, so a document
+    // page that happens to carry a slot does not get two switchers.
+    test("a header beats a slot", () => {
+      const both = '<head></head><body><header></header><div class="lang-slot"></div></body>'
+      const result = injectLangMeta(both, "index.html", "en")
+      expect(result.match(/lang-switch/g)).toHaveLength(1)
+      expect(result).toContain('<div class="lang-slot"></div>')
+    })
+
+    test("leaves a page with neither mount point alone", () => {
+      const bare = "<head></head><body><p>nothing</p></body>"
+      const result = injectLangMeta(bare, "index.html", "en")
+      expect(result).toContain("hreflang")
+      expect(result).not.toContain("lang-switch")
+    })
+  })
 })
 
 // ── File-system tests ─────────────────────────────────────────────
