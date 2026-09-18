@@ -75,15 +75,14 @@ black-box through the real `index.html` rather than constructing anything.
 
 Every value more than one module needs: operand bounds, strength boundaries and
 intervals, decay and selection tuning, the default tables and session lengths,
-the eight regions,
-star and gem tables, flame stages, card tiers, timings, the storage key, and the
+the five themed trails, star and gem tables, flame stages, card tiers, timings, the storage key, and the
 keypad layout. Imports nothing and exports only frozen literals, so importing it
 can never be order-dependent.
 
 ### facts.js
 
 Builds the 36-fact set once at module load and owns the canonical id form
-(`"<min>x<max>"`). Provides lookup, table-family and region filtering, and
+(`"<min>x<max>"`). Provides lookup, table-family and per-trail filtering, and
 `randomOrientation`, which decides whether a fact is shown as `3 × 8` or `8 × 3`.
 Functions taking operands throw `RangeError` on bad input, because that is a
 programming mistake; functions taking an id or a table list never throw, because
@@ -116,12 +115,19 @@ random position.
 
 ### Journey.js
 
-The trail: 40 spaces, 8 regions, and the gates between them. Region ownership is
-structural (a region owns the facts whose larger operand is its table), but
-gating is scoped to the active fact pool, so a region with no facts in play is
-skipped instead of blocking the way. Gates open on mastery, never on answer
-count. The token never moves backwards, even though the unlock cap can shrink as
-strength decays.
+One themed trail, bound to one active fact pool. Both are construction
+arguments: the trail is what the token walks and the pool is what gating means,
+so changing either means a new `Journey` rather than a setter.
+
+A trail is `SPACES_PER_FACT` spaces long per fact of it that is in the pool, and
+the cap is `FREE_SPACES + SPACES_PER_STRONG_FACT × strongFacts` -- one formula
+in place of the eight per-region gates this replaced. The arithmetic guarantees
+a fully strong trail reaches its last space at any size, which is the
+frozen-token class of bug gone structurally. The cap reads decayed strength and
+can shrink, but the token never moves backwards.
+
+`allTrailProgress()` is the module-level helper the hub picker uses to ask about
+all five at once.
 
 ### Scoring.js
 
@@ -312,7 +318,7 @@ recorded here.
    `MasteryStore` aliases the map it is constructed with rather than copying it,
    so `store.apply()` is immediately visible to whatever gets saved. Nothing ever
    reassigns `this.progress.facts`; "start fresh" rebuilds the progress object and
-   the store together, as a pair. Break the alias and spaced repetition, region
+   the store together, as a pair. Break the alias and spaced repetition, trail
    unlocking, and persistence all read an empty map while the screen still looks
    correct.
 2. **Every non-mutating call's return value must be assigned.**
@@ -332,7 +338,8 @@ module except `modes/shared.js`, which is asserted through the two mode suites:
 - `MasteryModel.test.js` -- strength, decay, due dates, `MasteryStore`
 - `FactSelector.test.js` -- bucket draw, retry queue, rng-call contract
 - `distractors.test.js` -- near-miss candidates and option generation
-- `Journey.test.js` -- regions, gates, pool scoping, the advance cap
+- `Journey.test.js` -- trail length, the cap formula, pool scoping, and a sweep
+  asserting every (trail, table selection) pair can be finished
 - `Scoring.test.js` -- stars, gems, daily goal, streak calendar
 - `Settings.test.js` -- table toggles, fact pool, session length, entry mode
 - `storage.test.js` -- save shape, normalization, load failures

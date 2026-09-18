@@ -29,16 +29,32 @@ that is going.
 - **Speed is measured, never shown.** The clock runs from the question appearing
   to the first tap or keypress, not to submit. A correct-but-slow answer is
   capped below mastered, because counting up is not recall.
-- **The trail.** 40 spaces across 8 regions. The token moves one space per
-  correct answer. A region opens when 60% of its facts reach "strengthening" --
-  so the trail cannot be walked by grinding 2×2 -- and when the token is held at
-  a gate, selection weights the facts it is waiting on up by
-  `SELECTION.GATE_WEIGHT_BONUS` so it opens on its own. Regions with no facts in
-  the enabled tables are skipped rather than blocking the way.
+- **Five themed trails.** Doubles, Fives, Squares, Nines, and the Tough Ten --
+  each themed on a _pattern_ rather than a times table. You pick one from the
+  hub. The sets overlap on purpose: 2×5 is a double and a five, so getting it
+  right advances both, because the mastery record is per fact and shared.
+  Together they cover all 36 facts.
 
-  A region owns the facts whose _larger_ operand is its table, so Triple Bridge
-  is `2×3` and `3×3`, not the 3 times table. The names promise themed practice
-  the engine does not deliver -- see the design plan's "Themed trails" section.
+  A trail is two spaces long per fact of it you are practising, so it is 16
+  spaces for a full pool and shorter for a narrow one. The token moves one space
+  per correct answer, and how far it may stand is one formula:
+
+  ```
+  cap = TRAIL.FREE_SPACES + TRAIL.SPACES_PER_STRONG_FACT × (facts of this trail that are strong)
+  ```
+
+  Strengthening opens ground and answering walks it, so the trail cannot be
+  walked by grinding 2×2. Selection weights the trail's unfinished facts up by
+  `SELECTION.GATE_WEIGHT_BONUS` -- weighted, not restricted, so a fact from
+  another trail that is slipping still gets asked. With every fact of a trail
+  strong the cap always reaches the last space, so a trail can always be
+  finished; `constants.test.js` asserts that at every trail size.
+
+  This replaced one 40-space board through eight table-named regions on
+  2026-09-18. A region there owned the facts whose _larger_ operand was its
+  table, so Triple Bridge was `2×3` and `3×3` rather than the 3 times table, and
+  fact selection ignored the token's position entirely. The names promised
+  themed practice and the engine gave whole-pool practice. See the design plan.
 
 - **Stars and gems.** Stars pay most for the facts the player knows least, with a
   bonus for typing the answer and a streak multiplier up to 3×. Gems come from
@@ -162,7 +178,7 @@ js/
 ├── MasteryModel.js      # Per-fact strength, decay, due dates, MasteryStore
 ├── FactSelector.js      # Which fact is asked next
 ├── distractors.js       # Near-miss options for the tiles
-├── Journey.js           # Trail spaces, regions, mastery gates
+├── Journey.js           # One themed trail: its facts, its length, its cap
 ├── Scoring.js           # Stars, gems, daily goal, streak calendar
 ├── Settings.js          # Table toggles, session length, and the active fact pool
 ├── storage.js           # Save shape plus localStorage via games/shared/

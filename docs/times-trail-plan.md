@@ -1,8 +1,13 @@
 # Times Trail -- Design Plan
 
-Status: **Phase 1 built.** The game lives at `games/times-trail/`. This document
-is the design rationale behind it; the code is the source of truth for behavior.
-Phase 2 (below) is not built.
+Status: **Phase 1 built, and reshaped around themed trails on 2026-09-18.** The
+game lives at `games/times-trail/`. This document is the design rationale behind
+it; the code is the source of truth for behavior. Phase 2 (below) is not built.
+
+The section that matters most for a reader coming to this fresh is
+[Themed trails](#themed-trails-instead-of-one-trail-with-themed-regions----done-2026-09-18):
+the eight table-named regions described further up are gone, and everything
+below that says "region" describes the design as it was.
 
 Name is a placeholder. Alternatives considered: Factor Forest, Times Tower,
 Product Park. Avoiding a third "Garden" after Number Garden and Life Garden.
@@ -364,7 +369,7 @@ in progress from the moment question 1 renders. Looking at your own card
 collection should not require abandoning a round. Like Continue and Start Fresh
 it is hidden until a save exists.
 
-### Themed trails instead of one trail with themed regions -- **open, and the most promising**
+### Themed trails instead of one trail with themed regions -- **done, 2026-09-18**
 
 The region names promise something the game does not deliver. `REGIONS` gives a
 region every canonical fact whose **larger** operand equals its table, so
@@ -401,6 +406,39 @@ decomposition is exact -- 36 facts, no gaps:
   the fix is to weight toward the current trail rather than restrict to it. A kid
   whose class is on "the 7 times table" still cannot pick that, though Custom
   difficulty covers it and table trails could be added later.
+
+**What was built, 2026-09-18.** All of the above, plus two things this section
+had not worked out:
+
+- **The gate model collapsed to one formula.** Eight per-region gates became
+  `cap = FREE_SPACES + SPACES_PER_STRONG_FACT * strongFacts`, with the trail
+  `SPACES_PER_FACT` spaces long per fact. Strengthening opens ground and
+  answering walks it. The arithmetic is what matters: a fully strong trail has
+  `cap = FREE + 2n` against a last space of `2n - 1`, so it can always be
+  finished, at any size, under any table selection. The frozen-token class of
+  bug is gone structurally rather than special-cased, and
+  `constants.test.js › a fully strong trail always reaches its last space`
+  asserts it at every size while `Journey.test.js` sweeps every
+  (trail, table selection) pair.
+- **A trail's length is scoped to the pool.** Two spaces per _active_ fact, not
+  per fact, so narrowing the tables shortens the trail instead of leaving ground
+  the pool can never open. A trail with no active fact at all is greyed out in
+  the picker rather than offered empty. This is the same problem the old
+  "skipped region" rule existed to solve, answered once rather than per region.
+
+Selection is weighted toward the chosen trail, not restricted to it, exactly as
+the paragraph above argued. The gate message stayed gone.
+
+There was no mode chooser left to replace -- Array Builder was cut -- so the
+picker is the trail screen itself, which was previously a read-only map. Each
+row is a button.
+
+The migration cost is one thing, taken knowingly: a save from before this
+carries a space index on the old 40-space board, and there is no honest
+translation of that onto a pattern trail, so it is dropped. The mastery records
+the trails are actually made of survive, so most of the ground re-opens in the
+first session back.
+
 - **Unaffected:** the 8x8 fact map and the 36-card collection stay as the global
   completion view. Trails become routes through the set; the collection is the
   total.
@@ -512,23 +550,29 @@ The tallies now say "stars this session" / "gems this session", the milestones
 sit under a "💎 New gems earned" heading, and the cards under "🃏 Cards that
 grew". Both groups hide when empty.
 
-### Reconsider the trail visualisation and the correct-answer reward -- **open**
+### Reconsider the trail visualisation -- **done, 2026-09-18**
 
-Asked for in the same feedback round, deliberately not attempted yet: it depends
-on whether the trail keeps its current structure. Rebuilding the visualisation
-around eight table regions and then replacing those regions with themed trails
-would be two redesigns.
+Held back until the structure was settled, which was the right call: rebuilding
+the visualisation around eight table regions and then replacing those regions
+with themed trails would have been two redesigns.
 
-Decide "Themed trails instead of one trail with themed regions" (above) first.
-That section is still the most promising open item, and the "why is it Triple
-Bridge? it's not just 3x tables" reaction is exactly the incoherence it
-describes: a region owns the facts whose _larger_ operand is its table, so Triple
-Bridge is `2x3` and `3x3`.
+Both screens now show three states per space rather than two -- walked, open
+(ahead of the token but inside the cap), and not open yet -- and they look the
+same as each other, so the strip and the picker read alike.
 
-Once the structure is settled, the reward ideas already listed under "More reward
-for a correct answer" apply either way -- the token hop on the play-screen strip
-is the biggest one, since advancing is currently silent and the trail is the whole
-progress metaphor.
+- **The play-screen strip shows the whole trail.** It used to show the five
+  spaces of the region the token stood in, so it reset every five answers and
+  never said how much was left. A themed trail is 16 to 20 spaces and fits.
+- **The trail screen is the picker.** Five rows, one per trail, each with its
+  spaces, its token, and a sentence: "3 of 8 strong", "Finished — all 8 strong",
+  or "Not in your tables right now". The spaces are `aria-hidden` and the row
+  carries the label, because twenty individually announced spaces bury the one
+  sentence that matters.
+
+Still open from the same feedback round: the **token hop** on the strip. The
+strip redraws rather than animating, so advancing is still silent. The reward
+ideas under "More reward for a correct answer" apply unchanged now that the
+structure is settled.
 
 ### Bias selection toward the gate instead of explaining it -- **done**
 
@@ -552,9 +596,10 @@ sentence. Implementation notes worth keeping:
   already biased; it is recomputed after every scored answer, since the gating
   region moves as facts strengthen.
 
-This is a real fix rather than a patch, but it does NOT resolve the underlying
-incoherence -- the regions still own facts by larger operand, so Triple Bridge is
-still `2x3` and `3x3`. See "Themed trails" above.
+This was a real fix rather than a patch, but it did not resolve the underlying
+incoherence -- the regions still owned facts by larger operand. "Themed trails"
+above did, on 2026-09-18. `setPriorityFacts` survived the redesign unchanged; it
+is now fed the chosen trail's unfinished facts rather than a gating region's.
 
 ### Two play-screen fixes from the same session
 
