@@ -1,5 +1,5 @@
 {
-  "_title": "Times Trail - Quinten Yearsley",
+  "_title": "乘法小径 - Quinten Yearsley",
   "_description": "沿着小径练习 2×2 到 9×9 的乘法口诀",
 
   "Times Trail": "乘法小径",
@@ -27,6 +27,7 @@
   "gems this session": "颗宝石（本轮）",
   "Correct:": "答对：",
   "Best streak:": "最长连对：",
+  "Streak 0": "连对 0",
   "💎 New gems earned": "💎 新获得的宝石",
   "🃏 Cards that grew": "🃏 升级的卡片",
 

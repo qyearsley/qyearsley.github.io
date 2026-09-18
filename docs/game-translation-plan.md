@@ -1,7 +1,9 @@
 # Game Translation Plan
 
-Status: **not started.** This is the plan, not a record of work done. Nothing in
-`games/` has changed for it.
+Status: **phase 0 done, phase 1 part-done, phase 2 undecided.** Updated
+2026-09-18. The live state of each phase is marked in its own section below; the
+running backlog entry is items 1 and 2 of
+[`improvements.md`](improvements.md).
 
 Leaving the games in English was a deliberate choice, not an oversight. The
 translation pipeline matches text in static HTML, and a game keeps most of its
@@ -57,20 +59,25 @@ Garden) to 127 (Times Trail) per game, but that count is inflated by comments,
 CSS selectors and internal error messages. The real number needs an inventory
 pass per game, which is step one of phase 3.
 
-## Phase 0: Chinese titles
+## Phase 0: Chinese titles -- **done, 2026-09-18**
 
-Every game page carries an English `_title`, so a Chinese visitor gets an
-English browser tab and an English search result. Five one-line edits in the
-`*.zh.json` files. Three of the names are already written elsewhere in the same
-file -- 乘法小径, 四季, 数字花园. Life Garden and Turing Tape need a name coined.
+Every game page carried an English `_title`, so a Chinese visitor got an English
+browser tab and an English search result. Five one-line edits. Three of the
+names were already written elsewhere in the same file -- 乘法小径, 四季,
+数字花园 -- and two were coined: **图灵纸带** for Turing Tape and **生命花园**
+for Life Garden.
 
-Verify: `npm run build`, then read `<title>` out of each
-`dist/zh/games/*/index.html`.
+Verified by reading `<title>` out of each `dist/zh/games/*/index.html` after a
+build.
 
-## Phase 1: static HTML
+## Phase 1: static HTML -- **part done**
 
 This is the part the existing pipeline already does well. Add keys to each
-game's `*.zh.json` for the text in `index.html`.
+game's `*.zh.json` for the text in `index.html`. Seasons was already finished
+and Times Trail was one key (`Streak 0`, added 2026-09-18); the other three are
+still open, and the live counts are in
+[`improvements.md`](improvements.md) item 1 rather than here, so there is one
+place to keep honest.
 
 |     | Game          | What is left in the HTML                                     |
 | --- | ------------- | ------------------------------------------------------------ |
@@ -86,10 +93,9 @@ convention in [translations.md](translations.md): the sentence
 cell).` is one key, tags and all. Do not key the fragments separately. Chinese
 word order differs from English, and the fragments reassemble wrongly.
 
-## Phase 2: decide the runtime mechanism
+## Phase 2: decide the runtime mechanism -- **still the decision point**
 
-Three options. This is the decision point, and nothing in phase 3 starts until
-it is made.
+Three options. Nothing in phase 3 starts until it is made.
 
 **Option A -- a shared `t()` helper.** Add `shared/i18n.js` exporting a lookup
 that reads `document.documentElement.lang`. Each game gets a catalog at

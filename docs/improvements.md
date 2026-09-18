@@ -10,7 +10,8 @@ docs are the `*-plan.md` files in this directory.
 
 ## At a glance
 
-1. `js/README.md` is missing for two of the five games — S · open
+1. Three games have English chrome on their `/zh/` page — M · open
+2. Game gameplay is English on every `/zh/` page — L · decision owed
 
 ## Working on these
 
@@ -18,16 +19,56 @@ docs are the `*-plan.md` files in this directory.
 - Git hooks run the tests; see [`development.md`](development.md#git-hooks).
 - Public repo. Never commit a work hostname, address, tool name or ticket ID.
 
-## 1. `js/README.md` is missing for two of the five games
+## 1. Three games have English chrome on their `/zh/` page
 
-**S · open**
+**M · open**
 
-`times-trail`, `number-garden` and `seasons` each have a `js/README.md`
-explaining their module layout. `life-garden` and `turing-tape` do not. All five
-have a top-level `README.md`.
+Phase 1 of [`game-translation-plan.md`](game-translation-plan.md) — keys for the
+text that lives in each game's `index.html`. Phase 0 (Chinese `<title>`) is done
+for all five.
 
-_Checked 2026-09-18: `find games -name README.md` — six game-level files, three
-`js/` files._
+English text nodes left in the built `/zh/` page, counted by walking the body,
+skipping `<script>` and `<style>`, and counting a node as English when it has no
+CJK character and at least two ASCII letters:
+
+| Game          | Nodes | What is left                                                 |
+| ------------- | ----- | ------------------------------------------------------------ |
+| Seasons       | 0     | Done                                                         |
+| Times Trail   | 1     | Only the switcher's own "English" label, which is correct    |
+| Life Garden   | 21    | The control bar and the keyboard legend                      |
+| Turing Tape   | 42    | The whole UI, plus a "How it works" list split by `<strong>` |
+| Number Garden | 47    | Menus, settings labels, area names, level-complete copy      |
+
+Turing Tape's list needs the inline-markup convention in
+[`translations.md`](translations.md): the whole `<li>` is one key, tags included.
+Do not key the fragments separately — Chinese word order differs and they
+reassemble wrongly.
+
+_Checked 2026-09-18 against the built `dist/`, after the phase-0 titles landed._
+
+## 2. Game gameplay is English on every `/zh/` page
+
+**L · decision owed**
+
+The blocker is structural, not effort: `build.js` translates by matching text
+between tags in the HTML source, and a string a game writes into the DOM at
+runtime never appears there. Every game keeps its questions, feedback, level
+names and dialogs in JavaScript, so no key can reach them. Seasons scores zero
+English nodes above and is still entirely English once you press Play.
+
+Phase 2 of the plan is the decision, and it is not made. Option A is a shared
+`shared/i18n.js` exporting `t()` with a per-game catalog; the plan recommends
+proving it on Turing Tape first, which is the smallest game and the most factual
+copy. Option B is to leave the gameplay in English and write that down as
+deliberate. Option C is to drop the `/zh/` page for a game whose audience is one
+English-speaking child.
+
+Worth deciding alongside the plan's own open question: a page that declares
+`lang="zh"` and then speaks English is worse for a screen reader than an English
+page, which argues against a long-lived option B.
+
+_Checked 2026-09-18: `grep -c "t(" games/*/js/*.js` is not a useful measure --
+the real number needs the inventory pass the plan calls step one of phase 3._
 
 ## Settled
 
@@ -48,6 +89,25 @@ _Checked 2026-09-18: `find games -name README.md` — six game-level files, thre
 
 ### Landed 2026-09-18
 
+- **Every game page has a language switcher.** `build.js` injected the EN/中文
+  link by replacing `</header>`, and no game page has a `<header>` -- so the
+  replacement found nothing, failed silently, and all five games shipped without
+  one. Games now mark a `<div class="lang-slot">` in their own top bar, and
+  `html.test.js` asserts every page in the source tree has exactly one mount
+  point.
+- **Chinese titles for all five games.** 图灵纸带, 生命花园, 数字花园, 乘法小径,
+  四季. A Chinese visitor used to get an English browser tab and an English
+  search result.
+- **`js/README.md` for `life-garden` and `turing-tape`**, which were the two of
+  five without one.
+- **Times Trail is five themed trails.** Doubles, Fives, Squares, Nines and the
+  Tough Ten replace one 40-space board through eight table-named regions, and
+  eight per-region gates collapse to one formula. See
+  [`times-trail-plan.md`](times-trail-plan.md).
+- **Seasons: the countdown is off by default**, and the trail moves -- idle
+  motion on the animal and the snake woman through an optional thirteenth
+  art-pack export, river shimmer, thicket sway, and item pips that pop in. See
+  [`seasons-plan.md`](seasons-plan.md).
 - **Number Garden no longer loads Google Fonts.** Quicksand came from
   `fonts.googleapis.com` — the only third-party request any page on the site
   made, and a render-blocking one on the game most likely to be opened on an
