@@ -1,6 +1,6 @@
 # Improvements
 
-> **Status: audited 2026-09-18 against `main` @ `3e8c21d`.** Migrated from the
+> **Status: audited 2026-09-18 against `main` @ `e955e81`.** Migrated from the
 > unversioned `~/hobby/IMPROVEMENTS.md`, which covered seven repos at once and
 > had drifted; every claim below was re-checked on this date.
 
@@ -10,9 +10,7 @@ docs are the `*-plan.md` files in this directory.
 
 ## At a glance
 
-1. Turing Tape cannot un-complete a level — S · settled, deliberately left
-2. No installable game has a real `apple-touch-icon` — S · settled, `icon.svg` stays
-3. `js/README.md` is missing for two of the five games — S · open
+1. `js/README.md` is missing for two of the five games — S · open
 
 ## Working on these
 
@@ -20,39 +18,7 @@ docs are the `*-plan.md` files in this directory.
 - Git hooks run the tests; see [`development.md`](development.md#git-hooks).
 - Public repo. Never commit a work hostname, address, tool name or ticket ID.
 
-## 1. Turing Tape cannot un-complete a level
-
-**S · settled, deliberately left**
-
-`games/turing-tape/js/game.js:420` writes `completedLevels` to `localStorage`
-under `STORAGE_KEY = "turingTape"` with no version key, and nothing in the UI
-clears it — `doReset()` at `:368` resets the machine's tape, not the progress
-set. Once a level is green it is green forever. Every other game on the site has
-a way back to a clean state.
-
-It cannot brick anything: the load at `:410` is inside a `try`. Reviewed
-2026-09-18 and left as it is for now; the asymmetry with the other games is
-known and accepted rather than missed.
-
-_Checked 2026-09-18: `grep -n "completedLevels\|STORAGE_KEY" games/turing-tape/js/game.js`
-and the `reset-btn` handler at `:429`, which calls `doReset`._
-
-## 2. No installable game has a real `apple-touch-icon`
-
-**S · settled, `icon.svg` stays**
-
-`number-garden`, `seasons` and `times-trail` each point `apple-touch-icon` at
-their `icon.svg`. iOS ignores SVG there, so Add to Home Screen falls back to a
-page snapshot.
-
-Decided 2026-09-18: keep the SVG. A worse home-screen icon is a smaller cost
-than three binary files in a repo that has none, and the comment in each
-`index.html` already records the trade.
-
-_Checked 2026-09-18: `grep -rn "apple-touch-icon" games/*/index.html` — three
-hits, all `href="icon.svg"`, each preceded by the comment._
-
-## 3. `js/README.md` is missing for two of the five games
+## 1. `js/README.md` is missing for two of the five games
 
 **S · open**
 
@@ -64,6 +30,21 @@ _Checked 2026-09-18: `find games -name README.md` — six game-level files, thre
 `js/` files._
 
 ## Settled
+
+### Decided 2026-09-18, no change
+
+- **Turing Tape cannot un-complete a level, and stays that way.**
+  `games/turing-tape/js/game.js:420` writes `completedLevels` to `localStorage`
+  under `STORAGE_KEY = "turingTape"` with no version key, and nothing in the UI
+  clears it — `doReset()` at `:368` resets the tape, not the progress set. Once a
+  level is green it is green forever, which is an asymmetry with every other game
+  on the site. It cannot brick anything; the load at `:410` is inside a `try`.
+  Known and accepted rather than missed.
+- **`apple-touch-icon` keeps pointing at `icon.svg`.** iOS ignores SVG there, so
+  Add to Home Screen falls back to a page snapshot for `number-garden`, `seasons`
+  and `times-trail`. A worse home-screen icon is a smaller cost than three binary
+  files in a repo that has none, and the comment in each `index.html` already
+  records the trade.
 
 ### Landed 2026-09-18
 
@@ -129,12 +110,6 @@ SHA. Left alone deliberately.
 
 ---
 
-**Conventions**
-
-- Size: `S` under an hour · `M` half a day · `L` more, or needs a design
-  decision.
-- State: `open` · `decision owed` · `blocked on <thing>`.
-- `## At a glance` is the only place an item is restated. Renumber it in the same
-  edit that renumbers a section.
-- Every claim carries a `_Checked:_` line. If you change a claim, change its
-  evidence. Say when something was not verified.
+`S` under an hour · `M` half a day · `L` more, or needs a decision. State is
+`open`, `decision owed`, or `blocked on <thing>`. Every claim carries its
+evidence and a date; say so when something was not verified.
