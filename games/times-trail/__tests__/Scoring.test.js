@@ -96,7 +96,7 @@ const METRIC_NAMES = [
   "factsCorrect",
   "starsTotal",
   "masteredCount",
-  "unlockedRegionCount",
+  "completedTrailCount",
   "streakDays",
 ]
 
@@ -987,17 +987,18 @@ describe("Scoring", () => {
       expect(result.gems).toBe(4)
     })
 
-    test("a full mastery map awards both mastered milestones plus regions-4", () => {
+    test("a full mastery map awards both mastered milestones plus both trail ones", () => {
       const result = scoringOnDay().checkMilestones(
-        { masteredCount: 36, unlockedRegionCount: 8 },
+        { masteredCount: 36, completedTrailCount: 5 },
         [],
       )
       expect(result.newlyAwarded.map((m) => m.id)).toEqual([
         "mastered-5",
         "mastered-15",
-        "regions-4",
+        "trails-1",
+        "trails-3",
       ])
-      expect(result.gems).toBe(8)
+      expect(result.gems).toBe(12)
     })
 
     test("a first session can earn a gem", () => {
@@ -1036,7 +1037,7 @@ describe("Scoring", () => {
 
     test("is idempotent when the previous ids are fed back in", () => {
       const scoring = scoringOnDay()
-      const metrics = { factsCorrect: 120, masteredCount: 20, unlockedRegionCount: 8 }
+      const metrics = { factsCorrect: 120, masteredCount: 20, completedTrailCount: 5 }
       const first = scoring.checkMilestones(metrics, [])
       expect(first.newlyAwarded.length).toBeGreaterThan(0)
       const second = scoring.checkMilestones(
@@ -1057,7 +1058,7 @@ describe("Scoring", () => {
         {
           factsCorrect: 1000,
           masteredCount: 36,
-          unlockedRegionCount: 8,
+          completedTrailCount: 5,
           streakDays: 30,
           starsTotal: 5000,
           sessionsCompleted: 50,

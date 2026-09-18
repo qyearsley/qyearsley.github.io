@@ -3,7 +3,7 @@
  *
  * Owns the 36-fact multiplication set (2x2 through 9x9), the canonical form of a
  * fact id, and every way of selecting a subset of facts: by table family, by
- * trail region, or one at a time. Pure and stateless -- no DOM, no storage, no
+ * trail, or one at a time. Pure and stateless -- no DOM, no storage, no
  * clock, and the only randomness is the injected `rng` of `randomOrientation`.
  *
  * Architecture: facts are built once at module load into a frozen array whose
@@ -17,11 +17,12 @@
  * Functions taking operands (`canonicalize`, `factId`, `getFactFor`) throw
  * `RangeError` -- a bad operand is a programming mistake and should be loud.
  * Functions taking an id or a table list (`parseFactId`, `getFact`,
- * `factsForTables`, `factsForRegionTable`) never throw, because their input can
- * come from persisted settings or a save file: they return `null` or `[]`.
+ * `factsForTables`, `factIdsForTrail`, `getTrail`) never throw, because their
+ * input can come from persisted settings or a save file: they return `null` or
+ * `[]`.
  */
 
-import { OPERAND_MIN, OPERAND_MAX, PATTERN_FREE_IDS } from "./constants.js"
+import { OPERAND_MIN, OPERAND_MAX, PATTERN_FREE_IDS, TRAILS } from "./constants.js"
 
 /**
  * @typedef {Object} Fact
@@ -229,15 +230,42 @@ export function factIdsForTables(tables) {
 }
 
 /**
- * The facts a trail region owns: those whose LARGER operand equals `table`. Each
- * of the 36 facts therefore belongs to exactly one region, and region sizes run
- * 1, 2, 3, 4, 5, 6, 7, 8 for tables 2 through 9. Never throws.
- * @param {number} table - The region's table, an integer in range
- * @returns {Fact[]} A new array in `FACTS` order; `[]` for an out-of-range table
+ * The facts of each trail, keyed by trail id, in `FACTS` order.
+ *
+ * Derived from each trail's `match` predicate rather than written out, so the
+ * five lists cannot drift from the definitions in constants.js. The sets
+ * overlap on purpose -- 2x5 is a double and a five -- and together they cover
+ * all 36 facts; `constants.test.js` checks both of those properties.
+ *
+ * Built once at module load. `match` is called here rather than in constants.js
+ * because it reads `isSquare` and `isTough`, which are fields of a Fact.
+ * @private
+ * @type {Map<string, readonly string[]>}
  */
-export function factsForRegionTable(table) {
-  if (!_isOperand(table)) return []
-  return FACTS.filter((fact) => fact.b === table)
+const _IDS_BY_TRAIL = new Map(
+  TRAILS.map((trail) => [
+    trail.id,
+    Object.freeze(FACTS.filter((fact) => trail.match(fact)).map((fact) => fact.id)),
+  ]),
+)
+
+/**
+ * Ids of the facts a trail owns, in `FACTS` order. Never throws.
+ * @param {unknown} trailId - A trail id, e.g. "squares"
+ * @returns {string[]} A new array of canonical ids; `[]` for an unknown trail
+ */
+export function factIdsForTrail(trailId) {
+  const ids = _IDS_BY_TRAIL.get(trailId)
+  return ids === undefined ? [] : [...ids]
+}
+
+/**
+ * Look up a trail by id.
+ * @param {unknown} trailId - A trail id
+ * @returns {Object|null} The frozen trail entry, or null when unknown
+ */
+export function getTrail(trailId) {
+  return TRAILS.find((trail) => trail.id === trailId) ?? null
 }
 
 /**

@@ -214,9 +214,29 @@ export const SESSION = Object.freeze({
 })
 
 /**
- * The trail the token walks. TOTAL_SPACES is SPACES_PER_REGION * REGIONS.length;
- * constants.test.js asserts the two agree rather than deriving one from the
- * other, so a mismatch fails loudly instead of silently reshaping the board.
+ * The trail the token walks.
+ *
+ * A trail is as long as twice the number of its own facts that the player is
+ * actually practising, so its length is a statement about the work rather than
+ * a fixed board: the Squares trail is 16 spaces for someone practising all
+ * eight squares and 6 spaces for someone practising three of them. Two spaces
+ * per fact rather than one, so a correct answer moves the token about twice as
+ * often as a fact gets stronger and walking never feels stalled.
+ *
+ * How far the token may stand is one formula:
+ *
+ *     cap = FREE_SPACES + SPACES_PER_STRONG_FACT * (trail facts that are strong)
+ *
+ * Strengthening opens ground and answering walks it. FREE_SPACES is what a
+ * brand-new player may walk having practised nothing, so the token moves in the
+ * first minute of the first session.
+ *
+ * This replaced eight per-region gates on 2026-09-18, and the arithmetic is the
+ * point: with all of a trail's active facts strong the cap is
+ * `FREE_SPACES + 2 * n`, which is always past the last space (`2 * n - 1`). A
+ * trail can therefore always be finished. The old gates were scoped to regions
+ * of one to eight facts and could leave the token frozen -- see
+ * `docs/times-trail-plan.md`.
  *
  * UNLOCK_MIN_STRENGTH is deliberately NOT STRENGTH.MASTERED_MIN. "Mastered"
  * means fluent recall, which is the right bar for a foiled card, the mastery
@@ -224,14 +244,14 @@ export const SESSION = Object.freeze({
  * MOVEMENT. A child who is reliably correct on a fact, even while she still
  * counts up to it, should see her token move; pinning the trail to fluency means
  * the game's central reward stays frozen through the weeks when she needs it
- * most. So region gates count facts at STRENGTH.STRENGTHENING or better, and
+ * most. So the cap counts facts at STRENGTH.STRENGTHENING or better, and
  * fluency is what the collection rewards.
  */
 export const TRAIL = Object.freeze({
-  SPACES_PER_REGION: 5,
-  TOTAL_SPACES: 40, // SPACES_PER_REGION * REGIONS.length
-  UNLOCK_FRACTION: 0.6, // ceil(fraction * regionFactCount) must reach UNLOCK_MIN_STRENGTH
-  UNLOCK_MIN_STRENGTH: STRENGTH.STRENGTHENING, // strength a fact needs to count toward a gate
+  SPACES_PER_FACT: 2,
+  FREE_SPACES: 3, // walkable before any fact is strong
+  SPACES_PER_STRONG_FACT: 2, // ground each strengthened fact opens
+  UNLOCK_MIN_STRENGTH: STRENGTH.STRENGTHENING, // strength a fact needs to count toward the cap
   SPACES_PER_CORRECT: 1,
 })
 
@@ -239,42 +259,77 @@ export const TRAIL = Object.freeze({
 export const TOKEN_EMOJI = "🥾"
 
 /**
- * The eight regions of the trail, in walking order.
+ * The five trails, in the order the hub lists them.
  *
- * A region owns every canonical fact whose LARGER operand equals its table,
- * so each of the 36 facts belongs to exactly one region. Every region is the
- * same 5 spaces wide, but the number of FACTS they own runs 1, 2, 3, 4, 5, 6,
- * 7, 8 -- the trail therefore ends in the hard neighbourhood.
- * Each region object is frozen as well as the array.
+ * Each is themed on a PATTERN rather than on a times table, and that is the
+ * whole of the 2026-09-18 redesign. The trail used to be one 40-space route
+ * through eight regions named after tables, where a region owned every fact
+ * whose LARGER operand was its table -- so Doubling Meadow owned exactly one
+ * fact, 2x2, Dragon Peak owned eight, and standing in Doubling Meadow you were
+ * asked 6x7 anyway, because selection ignored the token's position. The names
+ * promised themed practice and the engine gave whole-pool practice. Renaming
+ * would only have papered over it.
+ *
+ * `match` is the definition; `FACT_IDS_BY_TRAIL` in facts.js derives the fact
+ * list from it, and `constants.test.js` checks the five sets cover all 36 facts
+ * with no gaps. The sets deliberately OVERLAP -- 2x5 is a double and a five,
+ * 9x9 is a nine and a square -- because the mastery record is per canonical
+ * fact and shared, so getting 5x5 right advances Fives and Squares at once.
+ * `new` in the table below is how many facts each trail adds that no earlier
+ * trail already covers:
+ *
+ * | Trail   | Facts | New |
+ * | ------- | ----- | --- |
+ * | Doubles | 8     | 8   |
+ * | Fives   | 8     | 7   |
+ * | Squares | 8     | 6   |
+ * | Nines   | 8     | 5   |
+ * | Tough   | 10    | 10  |
+ *
+ * Tough is the ten facts left once the four patterns are taken away, and it is
+ * `PATTERN_FREE_IDS` below under another name -- the two are checked against
+ * each other rather than written out twice.
  */
-export const REGIONS = Object.freeze([
+export const TRAILS = Object.freeze([
   Object.freeze({
-    id: "doubling-meadow",
-    name: "Doubling Meadow",
-    table: 2,
-    emoji: "🌾",
-    spaces: 5,
-  }),
-  Object.freeze({ id: "triple-bridge", name: "Triple Bridge", table: 3, emoji: "🌉", spaces: 5 }),
-  Object.freeze({
-    id: "fourfold-orchard",
-    name: "Fourfold Orchard",
-    table: 4,
-    emoji: "🍎",
-    spaces: 5,
+    id: "doubles",
+    name: "Doubles",
+    emoji: "\u{1f43e}",
+    blurb: "Everything times two. Double it and you are done.",
+    match: (fact) => fact.a === 2 || fact.b === 2,
   }),
   Object.freeze({
-    id: "high-five-hills",
-    name: "High-Five Hills",
-    table: 5,
-    emoji: "🖐️",
-    spaces: 5,
+    id: "fives",
+    name: "Fives",
+    emoji: "\u{1f590}️",
+    blurb: "Everything times five. They all end in 5 or 0.",
+    match: (fact) => fact.a === 5 || fact.b === 5,
   }),
-  Object.freeze({ id: "beehive-hollow", name: "Beehive Hollow", table: 6, emoji: "🐝", spaces: 5 }),
-  Object.freeze({ id: "rainbow-ridge", name: "Rainbow Ridge", table: 7, emoji: "🌈", spaces: 5 }),
-  Object.freeze({ id: "spider-woods", name: "Spider Woods", table: 8, emoji: "🕸️", spaces: 5 }),
-  Object.freeze({ id: "dragon-peak", name: "Dragon Peak", table: 9, emoji: "🐉", spaces: 5 }),
+  Object.freeze({
+    id: "squares",
+    name: "Squares",
+    emoji: "\u{1f532}",
+    blurb: "A number times itself.",
+    match: (fact) => fact.isSquare,
+  }),
+  Object.freeze({
+    id: "nines",
+    name: "Nines",
+    emoji: "\u{1f308}",
+    blurb: "Everything times nine. The digits always add up to 9.",
+    match: (fact) => fact.a === 9 || fact.b === 9,
+  }),
+  Object.freeze({
+    id: "tough",
+    name: "The Tough Ten",
+    emoji: "\u{1f409}",
+    blurb: "The ones with no trick. You just have to know them.",
+    match: (fact) => fact.isTough,
+  }),
 ])
+
+/** The trail a new save starts on: the cheapest pattern to learn. */
+export const DEFAULT_TRAIL_ID = TRAILS[0].id
 
 /**
  * The pattern-free facts: what is left after the doubling (x2), x5, x9-trick and
@@ -368,11 +423,18 @@ export const GEM_MILESTONES = Object.freeze([
     label: "15 facts mastered",
   }),
   Object.freeze({
-    id: "regions-4",
-    metric: "unlockedRegionCount",
-    threshold: 4,
+    id: "trails-1",
+    metric: "completedTrailCount",
+    threshold: 1,
     gems: 3,
-    label: "Halfway along the trail",
+    label: "A whole trail finished",
+  }),
+  Object.freeze({
+    id: "trails-3",
+    metric: "completedTrailCount",
+    threshold: 3,
+    gems: 4,
+    label: "Three trails finished",
   }),
   Object.freeze({
     id: "streak-3",

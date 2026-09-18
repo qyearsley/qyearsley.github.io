@@ -661,7 +661,8 @@ describe("renderTrail", () => {
     // `idle` is the one optional export in the art contract. A pack without it
     // has to render exactly as the game did before it existed.
     it("adds no wrapper when the pack does not export idle", () => {
-      const { idle: _unused, ...packWithoutIdle } = ui.pack
+      const packWithoutIdle = { ...ui.pack }
+      delete packWithoutIdle.idle
       ui.pack = packWithoutIdle
       ui.renderTrail(SPRING, 0, "phoenix")
 

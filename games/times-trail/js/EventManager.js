@@ -80,6 +80,7 @@ export class EventManager {
     this.setupAnswerTiles()
     this.setupScaffoldContinue()
     this.setupNavButtons()
+    this.setupTrailPicker()
     this.setupSummaryButtons()
     this.setupSettingsButtons()
     this.setupSettingsControls()
@@ -239,6 +240,27 @@ export class EventManager {
     this._wireBackButton("trailBackButton", "trail-back-button", "trail-screen")
     this._wireBackButton("mapBackButton", "map-back-button", "map-screen")
     this._wireBackButton("collectionBackButton", "collection-back-button", "collection-screen")
+  }
+
+  /**
+   * Wires the trail picker.
+   *
+   * Delegated to `#trail-spaces` rather than bound per row, because the rows are
+   * rebuilt on every `renderTrail` -- once per visit to the screen, and again
+   * after every choice. Per-row listeners would have to be rebound each time,
+   * and the one that got missed would be a trail that silently could not be
+   * picked.
+   *
+   * @returns {void}
+   */
+  setupTrailPicker() {
+    const container = this._element("trailSpaces", "trail-spaces")
+    if (!container) return
+    container.addEventListener("click", (event) => {
+      const row = event.target.closest("[data-trail-id]")
+      if (!row || row.disabled) return
+      this._invoke("onChooseTrail", row.dataset.trailId)
+    })
   }
 
   /**

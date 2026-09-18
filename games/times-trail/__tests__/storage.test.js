@@ -1,13 +1,13 @@
 import { describe, test, expect, beforeEach, afterEach, jest } from "@jest/globals"
 import { StorageManager as BaseStorageManager } from "../../shared/StorageManager.js"
-import { GEM_MILESTONES, STORAGE, TRAIL } from "../js/constants.js"
+import { DEFAULT_TRAIL_ID, GEM_MILESTONES, STORAGE } from "../js/constants.js"
 // storage.js must never import Scoring; the test must, because the duplicated
 // Daily literal is the whole risk. This is the only cross-check of the two.
 import { Scoring } from "../js/Scoring.js"
 import { defaultProgress, normalizeProgress, StorageManager } from "../js/storage.js"
 
 /** The six keys a save state always has, in no particular order. */
-const SAVE_STATE_KEYS = ["facts", "totals", "trail", "daily", "settings", "awardedMilestoneIds"]
+const SAVE_STATE_KEYS = ["facts", "totals", "trails", "daily", "settings", "awardedMilestoneIds"]
 
 /**
  * A save state with every field set to something non-default, so a round trip
@@ -41,7 +41,7 @@ function populatedState() {
       factsCorrect: 180,
       sessionsCompleted: 11,
     },
-    trail: { space: 17 },
+    trails: { currentId: "squares", spaces: { doubles: 9, squares: 4 } },
     daily: {
       todayDate: "2026-08-26",
       factsToday: 12,
@@ -100,7 +100,7 @@ describe("save state shape", () => {
           factsCorrect: 0,
           sessionsCompleted: 0,
         },
-        trail: { space: 0 },
+        trails: { currentId: DEFAULT_TRAIL_ID, spaces: {} },
         daily: {
           todayDate: null,
           factsToday: 0,
@@ -119,10 +119,9 @@ describe("save state shape", () => {
       expect("secondsPracticed" in defaultProgress().totals).toBe(false)
     })
 
-    test("trail has no lapsCompleted key", () => {
-      const { trail } = defaultProgress()
-      expect(trail).toEqual({ space: 0 })
-      expect("lapsCompleted" in trail).toBe(false)
+    test("trails starts on the default trail with nothing walked", () => {
+      const { trails } = defaultProgress()
+      expect(trails).toEqual({ currentId: DEFAULT_TRAIL_ID, spaces: {} })
     })
 
     test("daily deep-equals Scoring.createDaily", () => {
@@ -183,12 +182,13 @@ describe("save state shape", () => {
       ["totals as an array", { facts: {}, totals: [] }],
       ["a null record", { facts: { "6x7": null }, totals: {} }],
       ["a numeric record", { facts: { "6x7": 42 }, totals: {} }],
-      ["trail as a string", { trail: "far" }],
+      ["trails as a string", { trails: "far" }],
+      ["trails.spaces as an array", { trails: { spaces: [1, 2] } }],
       ["daily as an array", { daily: [] }],
       ["settings as a number", { settings: 7 }],
       ["awardedMilestoneIds as an object", { awardedMilestoneIds: {} }],
       ["deeply nested junk", { facts: { "6x7": { strength: {} } }, totals: { starsTotal: [] } }],
-      ["every key wrong", { facts: 1, totals: 2, trail: 3, daily: 4, settings: 5 }],
+      ["every key wrong", { facts: 1, totals: 2, trails: 3, daily: 4, settings: 5 }],
       ["symbols and undefined values", { facts: undefined, totals: undefined }],
       ["a huge payload", { totals: { starsTotal: Number.MAX_SAFE_INTEGER } }],
     ])("never throws for %s", (_label, input) => {
@@ -200,7 +200,7 @@ describe("save state shape", () => {
       const raw = {
         facts: { "8x7": { strength: 3 }, "6x7": { strength: 99 } },
         totals: { starsTotal: -5, factsAnswered: 3, factsCorrect: 10, secondsPracticed: 900 },
-        trail: { space: 500, lapsCompleted: 4 },
+        trails: { currentId: "nowhere", spaces: { squares: 500, nowhere: 2 } },
         daily: { streakDays: 9, bestStreakDays: 1, secondsToday: 500 },
         settings: { inputMode: "keypad" },
         awardedMilestoneIds: ["facts-25", "made-up"],
@@ -268,17 +268,45 @@ describe("save state shape", () => {
       expect(state.totals.starsTotal).toBe(4)
     })
 
-    test("clamps trail.space into range", () => {
-      expect(normalizeProgress({ trail: { space: 500 } }).trail.space).toBe(TRAIL.TOTAL_SPACES - 1)
-      expect(normalizeProgress({ trail: { space: -5 } }).trail.space).toBe(0)
-      expect(normalizeProgress({ trail: { space: "x" } }).trail.space).toBe(0)
-      expect(normalizeProgress({ trail: { space: 3.7 } }).trail.space).toBe(3)
+    // Only the lower bound and the integer shape. The upper bound depends on
+    // how long the trail is, which depends on the active pool -- so it belongs
+    // to `Journey.clampToTrail`, and game.js runs it on every rebuild.
+    test("coerces each trail position to a non-negative integer", () => {
+      const { spaces } = normalizeProgress({
+        trails: { spaces: { doubles: -5, fives: "x", squares: 3.7, nines: 11 } },
+      }).trails
+      expect(spaces).toEqual({ doubles: 0, fives: 0, squares: 3, nines: 11 })
     })
 
-    test("drops lapsCompleted from trail", () => {
-      const { trail } = normalizeProgress({ trail: { space: 7, lapsCompleted: 4 } })
-      expect(trail).toEqual({ space: 7 })
-      expect("lapsCompleted" in trail).toBe(false)
+    test("drops a position for a trail that no longer exists", () => {
+      const { spaces } = normalizeProgress({
+        trails: { spaces: { squares: 4, "dragon-peak": 9 } },
+      }).trails
+      expect(spaces).toEqual({ squares: 4 })
+    })
+
+    test("falls back to the default trail for an unknown currentId", () => {
+      expect(normalizeProgress({ trails: { currentId: "dragon-peak" } }).trails.currentId).toBe(
+        DEFAULT_TRAIL_ID,
+      )
+      expect(normalizeProgress({ trails: { currentId: 7 } }).trails.currentId).toBe(
+        DEFAULT_TRAIL_ID,
+      )
+    })
+
+    test("keeps a known currentId", () => {
+      expect(normalizeProgress({ trails: { currentId: "tough" } }).trails.currentId).toBe("tough")
+    })
+
+    // A save from before 2026-09-18 holds `trail: {space}` for the old 40-space
+    // board through eight table regions. There is no honest translation into a
+    // position on a pattern trail, so it is dropped -- and the mastery records,
+    // which are what the trails are made of, survive.
+    test("drops the pre-redesign single trail position", () => {
+      const state = normalizeProgress({ trail: { space: 31 }, facts: { "6x7": { strength: 4 } } })
+      expect("trail" in state).toBe(false)
+      expect(state.trails).toEqual({ currentId: DEFAULT_TRAIL_ID, spaces: {} })
+      expect(state.facts["6x7"].strength).toBe(4)
     })
 
     test("coerces daily fields", () => {
@@ -364,7 +392,7 @@ describe("save state shape", () => {
     test("adds missing top-level keys at their defaults", () => {
       const state = normalizeProgress({ totals: { starsTotal: 3 } })
       expect(state.facts).toEqual({})
-      expect(state.trail).toEqual({ space: 0 })
+      expect(state.trails).toEqual({ currentId: DEFAULT_TRAIL_ID, spaces: {} })
       expect(state.daily).toEqual(Scoring.createDaily())
       expect(state.settings).toEqual({})
       expect(state.awardedMilestoneIds).toEqual([])
@@ -494,7 +522,8 @@ describe("StorageManager", () => {
       state.totals.starsTotal = 60
       state.totals.factsAnswered = 4
       state.totals.factsCorrect = 3
-      state.trail.space = 6
+      state.trails.currentId = "nines"
+      state.trails.spaces.nines = 6
       state.daily.factsToday = 4
       state.daily.streakDays = 2
       state.daily.bestStreakDays = 2
@@ -569,7 +598,7 @@ describe("StorageManager", () => {
       writeRaw({
         facts: { "6x7": { strength: 3, streak: 4, avgMs: 2500 } },
         totals: { starsTotal: 100, secondsPracticed: 900 },
-        trail: { space: 12, lapsCompleted: 2 },
+        trails: { currentId: "fives", spaces: { fives: 12, "dragon-peak": 2 } },
         daily: { streakDays: 3, secondsToday: 480 },
         settings: { difficulty: "master", reducedMotion: "on" },
         awardedMilestoneIds: ["facts-10", "first-steps"],
@@ -585,14 +614,14 @@ describe("StorageManager", () => {
         [...SAVE_STATE_KEYS, "lastPlayed", "version"].sort(),
       )
       expect("secondsPracticed" in loaded.totals).toBe(false)
-      expect("lapsCompleted" in loaded.trail).toBe(false)
+      expect("dragon-peak" in loaded.trails.spaces).toBe(false)
       expect("secondsToday" in loaded.daily).toBe(false)
       expect("streak" in loaded.facts["6x7"]).toBe(false)
       expect("avgMs" in loaded.facts["6x7"]).toBe(false)
       expect(loaded.awardedMilestoneIds).toEqual(["facts-10"])
       // Settings is structural here; the legacy key dies in Settings.
       expect(loaded.settings).toEqual({ difficulty: "master", reducedMotion: "on" })
-      expect(loaded.trail.space).toBe(12)
+      expect(loaded.trails.spaces.fives).toBe(12)
       expect(loaded.lastPlayed).toBe(1700000000000)
     })
   })

@@ -1,5 +1,6 @@
 import { describe, test, expect } from "@jest/globals"
 import * as constants from "../js/constants.js"
+import { FACT_IDS, factIdsForTrail } from "../js/facts.js"
 import {
   ALL_TABLES,
   ANSWER_KEYS,
@@ -20,7 +21,8 @@ import {
   MODE_LABELS,
   OPERAND_MAX,
   OPERAND_MIN,
-  REGIONS,
+  TRAILS,
+  DEFAULT_TRAIL_ID,
   RESPONSE_TIME,
   SELECTION,
   SESSION,
@@ -47,7 +49,7 @@ const MILESTONE_METRIC_NAMES = [
   "factsCorrect",
   "starsTotal",
   "masteredCount",
-  "unlockedRegionCount",
+  "completedTrailCount",
   "streakDays",
 ]
 
@@ -396,26 +398,25 @@ describe("SESSION", () => {
 
 describe("TRAIL", () => {
   describe("space arithmetic", () => {
-    test("TOTAL_SPACES is SPACES_PER_REGION times the region count", () => {
-      expect(TRAIL.TOTAL_SPACES).toBe(TRAIL.SPACES_PER_REGION * REGIONS.length)
-    })
-
-    test("TOTAL_SPACES equals the sum of the regions' own spans", () => {
-      const sum = REGIONS.reduce((total, region) => total + region.spaces, 0)
-      expect(sum).toBe(TRAIL.TOTAL_SPACES)
-    })
-
-    test("every region spans SPACES_PER_REGION spaces", () => {
-      for (const region of REGIONS) {
-        expect(region.spaces).toBe(TRAIL.SPACES_PER_REGION)
+    // The whole point of the 2026-09-18 redesign. With every active fact of a
+    // trail strong, the cap is FREE_SPACES + SPACES_PER_STRONG_FACT * n and the
+    // last space is SPACES_PER_FACT * n - 1. The first must reach the second for
+    // EVERY trail size, or a trail exists that cannot be finished -- which is
+    // exactly the frozen-token bug the per-region gates had.
+    test("a fully strong trail always reaches its last space, at any size", () => {
+      for (let facts = 1; facts <= TOTAL_FACTS; facts += 1) {
+        const cap = TRAIL.FREE_SPACES + TRAIL.SPACES_PER_STRONG_FACT * facts
+        const lastSpace = TRAIL.SPACES_PER_FACT * facts - 1
+        expect(cap).toBeGreaterThanOrEqual(lastSpace)
       }
     })
-  })
 
-  describe("UNLOCK_FRACTION", () => {
-    test("is a fraction above 0 and at most 1", () => {
-      expect(TRAIL.UNLOCK_FRACTION).toBeGreaterThan(0)
-      expect(TRAIL.UNLOCK_FRACTION).toBeLessThanOrEqual(1)
+    test("the token can move before anything is strong", () => {
+      expect(TRAIL.FREE_SPACES).toBeGreaterThan(0)
+    })
+
+    test("a trail is at least two spaces per fact, so walking outpaces gating", () => {
+      expect(TRAIL.SPACES_PER_FACT).toBeGreaterThanOrEqual(2)
     })
   })
 
@@ -440,10 +441,12 @@ describe("TRAIL", () => {
       expect(TRAIL.SPACES_PER_CORRECT).toBeGreaterThanOrEqual(1)
     })
 
-    test("a full session can walk the whole trail at most once", () => {
-      expect(Math.max(...SESSION.LENGTH_OPTIONS) * TRAIL.SPACES_PER_CORRECT).toBeLessThanOrEqual(
-        TRAIL.TOTAL_SPACES,
-      )
+    // A themed trail is meant to be finishable in a session or two rather than
+    // ground out over weeks, which is what a 40-space board asked for.
+    test("the longest session can walk the longest trail", () => {
+      const longestTrail = Math.max(...TRAILS.map((trail) => factIdsForTrail(trail.id).length))
+      const walkable = Math.max(...SESSION.LENGTH_OPTIONS) * TRAIL.SPACES_PER_CORRECT
+      expect(walkable).toBeGreaterThanOrEqual(TRAIL.SPACES_PER_FACT * longestTrail)
     })
   })
 })
@@ -457,43 +460,72 @@ describe("TOKEN_EMOJI", () => {
   })
 })
 
-describe("REGIONS", () => {
+describe("TRAILS", () => {
   describe("shape", () => {
-    test("there are eight regions", () => {
-      expect(REGIONS).toHaveLength(8)
+    test("there are five trails", () => {
+      expect(TRAILS).toHaveLength(5)
     })
 
     test("ids are unique and kebab-case", () => {
-      const ids = REGIONS.map((region) => region.id)
+      const ids = TRAILS.map((trail) => trail.id)
       expect(new Set(ids).size).toBe(ids.length)
       for (const id of ids) {
         expect(id).toMatch(/^[a-z]+(-[a-z]+)*$/)
       }
     })
 
-    test("every region has a name and an emoji", () => {
-      for (const region of REGIONS) {
-        expect(typeof region.name).toBe("string")
-        expect(region.name.length).toBeGreaterThan(0)
-        expect(typeof region.emoji).toBe("string")
-        expect(region.emoji.length).toBeGreaterThan(0)
+    test("every trail has a name, an emoji, a blurb and a predicate", () => {
+      for (const trail of TRAILS) {
+        expect(typeof trail.name).toBe("string")
+        expect(trail.name.length).toBeGreaterThan(0)
+        expect(typeof trail.emoji).toBe("string")
+        expect(trail.emoji.length).toBeGreaterThan(0)
+        expect(typeof trail.blurb).toBe("string")
+        expect(trail.blurb.length).toBeGreaterThan(0)
+        expect(typeof trail.match).toBe("function")
       }
+    })
+
+    test("DEFAULT_TRAIL_ID names a trail that exists", () => {
+      expect(TRAILS.some((trail) => trail.id === DEFAULT_TRAIL_ID)).toBe(true)
     })
   })
 
-  describe("table coverage", () => {
-    test("the region tables are exactly ALL_TABLES, in walking order", () => {
-      expect(REGIONS.map((region) => region.table)).toEqual([...ALL_TABLES])
+  describe("fact coverage", () => {
+    // The decomposition the plan claimed, checked rather than restated: five
+    // overlapping pattern sets that together leave no fact unpractisable.
+    test("together the trails cover all 36 facts", () => {
+      const covered = new Set(TRAILS.flatMap((trail) => factIdsForTrail(trail.id)))
+      expect(covered.size).toBe(TOTAL_FACTS)
     })
 
-    test("no table is owned by two regions", () => {
-      const tables = REGIONS.map((region) => region.table)
-      expect(new Set(tables).size).toBe(tables.length)
+    test("the sizes are the ones the plan worked out", () => {
+      const sizes = Object.fromEntries(
+        TRAILS.map((trail) => [trail.id, factIdsForTrail(trail.id).length]),
+      )
+      expect(sizes).toEqual({ doubles: 8, fives: 8, squares: 8, nines: 8, tough: 10 })
     })
 
-    test("the regions partition all 36 facts by larger operand", () => {
-      const owned = REGIONS.reduce((total, region) => total + (region.table - OPERAND_MIN + 1), 0)
-      expect(owned).toBe(TOTAL_FACTS)
+    // Overlap is what makes one mastery record serve five trails.
+    test("the four pattern trails overlap, and Tough overlaps none of them", () => {
+      const patterns = ["doubles", "fives", "squares", "nines"]
+      const inPatterns = new Set(patterns.flatMap((id) => factIdsForTrail(id)))
+      expect(inPatterns.size).toBeLessThan(
+        patterns.reduce((sum, id) => sum + factIdsForTrail(id).length, 0),
+      )
+      for (const id of factIdsForTrail("tough")) {
+        expect(inPatterns.has(id)).toBe(false)
+      }
+    })
+
+    // Tough is PATTERN_FREE_IDS reached from the other direction. Checking the
+    // two against each other is what stops the definition and the list drifting.
+    test("Tough is exactly what the four patterns leave behind", () => {
+      const patterns = ["doubles", "fives", "squares", "nines"]
+      const inPatterns = new Set(patterns.flatMap((id) => factIdsForTrail(id)))
+      const leftOver = FACT_IDS.filter((id) => !inPatterns.has(id))
+      expect(new Set(factIdsForTrail("tough"))).toEqual(new Set(leftOver))
+      expect(new Set(factIdsForTrail("tough"))).toEqual(new Set(PATTERN_FREE_IDS))
     })
   })
 })
@@ -592,8 +624,8 @@ describe("STARS", () => {
 
 describe("GEM_MILESTONES", () => {
   describe("shape", () => {
-    test("has exactly eight entries", () => {
-      expect(GEM_MILESTONES).toHaveLength(8)
+    test("has exactly nine entries", () => {
+      expect(GEM_MILESTONES).toHaveLength(9)
     })
 
     test("ids are unique and kebab-case", () => {
@@ -658,10 +690,11 @@ describe("GEM_MILESTONES", () => {
       expect(Math.min(...thresholds)).toBeLessThanOrEqual(Math.min(...SESSION.LENGTH_OPTIONS))
     })
 
-    test("the region milestone is reachable on the trail as laid out", () => {
-      const regionMilestones = GEM_MILESTONES.filter((m) => m.metric === "unlockedRegionCount")
-      for (const milestone of regionMilestones) {
-        expect(milestone.threshold).toBeLessThanOrEqual(REGIONS.length)
+    test("the trail milestone is reachable, given how many trails there are", () => {
+      const trailMilestones = GEM_MILESTONES.filter((m) => m.metric === "completedTrailCount")
+      expect(trailMilestones.length).toBeGreaterThan(0)
+      for (const milestone of trailMilestones) {
+        expect(milestone.threshold).toBeLessThanOrEqual(TRAILS.length)
       }
     })
   })
@@ -877,11 +910,11 @@ describe("module surface", () => {
 
   describe("Object.freeze", () => {
     test.each([
-      ["REGIONS", REGIONS],
+      ["TRAILS", TRAILS],
       ["GEM_MILESTONES", GEM_MILESTONES],
       ["STRENGTH_INTERVALS_MS", STRENGTH_INTERVALS_MS],
       ["PATTERN_FREE_IDS", PATTERN_FREE_IDS],
-      ["REGIONS[0]", REGIONS[0]],
+      ["TRAILS[0]", TRAILS[0]],
       ["STRENGTH", STRENGTH],
       ["RESPONSE_TIME", RESPONSE_TIME],
       ["STARS.STREAK_MULTIPLIERS", STARS.STREAK_MULTIPLIERS],
@@ -903,25 +936,17 @@ describe("module surface", () => {
     })
 
     test("pushing onto a frozen array does not change its length", () => {
-      const before = REGIONS.length
-      expect(() => REGIONS.push({ id: "nowhere" })).toThrow(TypeError)
-      expect(REGIONS).toHaveLength(before)
+      const before = TRAILS.length
+      expect(() => TRAILS.push({ id: "nowhere" })).toThrow(TypeError)
+      expect(TRAILS).toHaveLength(before)
     })
 
     test("mutating a nested frozen entry does not change it", () => {
-      const before = REGIONS[0].name
+      const before = TRAILS[0].name
       expect(() => {
-        REGIONS[0].name = "Somewhere Else"
+        TRAILS[0].name = "Somewhere Else"
       }).toThrow(TypeError)
-      expect(REGIONS[0].name).toBe(before)
-    })
-
-    test("mutating a nested frozen entry does not change it", () => {
-      const before = REGIONS[0].spaces
-      expect(() => {
-        REGIONS[0].spaces = 999
-      }).toThrow(TypeError)
-      expect(REGIONS[0].spaces).toBe(before)
+      expect(TRAILS[0].name).toBe(before)
     })
   })
 })

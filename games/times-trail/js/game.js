@@ -9,8 +9,8 @@
  *
  *   1. `startSession(modeId)` resets `this.session`, calls `selector.reset()`
  *      (so a miss from the previous session cannot fire on question 1), rebuilds
- *      `this.journey` with the current fact pool, points selection at the facts
- *      the next gate needs, and shows the play screen.
+ *      `this.journey` for the chosen trail and the current fact pool, points
+ *      selection at the facts that trail still needs, and shows the play screen.
  *   2. `_askNextQuestion()` picks a fact (`FactSelector`), captures its strength
  *      and card tier BEFORE the answer, builds a `Challenge` through
  *      `modes/index.js`, renders it, and arms the response clock last -- after
@@ -46,11 +46,11 @@
  *     `this.store.records === this.progress.facts` for the life of the page.
  *     Nothing ever reassigns `this.progress.facts`; a "start fresh" rebuilds the
  *     progress object and the store together, as a pair. Break the alias and
- *     spaced repetition, region unlocking, and persistence all read an empty map
+ *     spaced repetition, trail progress, and persistence all read an empty map
  *     while the screen still looks right.
  *   - **Every non-mutating call's return value is assigned.** `Journey.advance`,
  *     `Scoring.applyAnswer`, `Scoring.rollDaily`, `Scoring.checkMilestones`,
- *     and `Journey.normalizeTrail` all return new values and
+ *     and `Journey.clampToTrail` all return new values and
  *     touch nothing. A dropped return reads exactly like working code and
  *     silently kills the feature. `store.apply()` is the one call that needs no
  *     assignment, because the store writes through the aliased map.
@@ -91,10 +91,10 @@ import {
   TOKEN_EMOJI,
   TRAIL,
 } from "./constants.js"
-import { FACTS, getFact, getFactFor } from "./facts.js"
+import { FACTS, getFact, getFactFor, getTrail } from "./facts.js"
 import { MasteryStore } from "./MasteryModel.js"
 import { FactSelector } from "./FactSelector.js"
-import { Journey } from "./Journey.js"
+import { allTrailProgress, Journey, normalizeTrailId } from "./Journey.js"
 import { Scoring } from "./Scoring.js"
 import { Settings } from "./Settings.js"
 import { StorageManager, defaultProgress } from "./storage.js"
@@ -169,7 +169,7 @@ const SAVE_FAILED_TEXT =
  * @property {"tiles"|"keypad"} entry - `challenge.entry`, never recomputed
  * @property {Object|null} challenge      - The live `Challenge`, or null between questions
  * @property {boolean} goalJustMetThisSession - Today's goal was met during this session
- * @property {string|null} newRegionName  - Region newly entered this session
+ * @property {string|null} trailFinishedName - Trail finished this session, or null
  */
 
 class TimesTrail {
@@ -254,12 +254,15 @@ class TimesTrail {
     /** @type {Settings} Validated settings; the authority `buildSaveState` persists. */
     this.settings = new Settings(this.progress.settings)
 
-    // Both assigned back: these functions return new objects and mutate nothing.
-    this.progress.trail = Journey.normalizeTrail(this.progress.trail)
+    // Assigned back: this returns a new object and mutates nothing.
     this.progress.daily = this.scoring.rollDaily(this.progress.daily)
 
-    /** @type {Journey} Rebuilt whenever the fact pool changes; gating is pool-scoped. */
+    /**
+     * @type {Journey} The trail being walked, bound to the current fact pool.
+     * Rebuilt whenever either changes -- both are construction arguments.
+     */
     this.journey = this._buildJourney()
+    this._clampCurrentTrail()
 
     /** @type {SessionState} */
     this.session = this._createSession(MODE_IDS.QUICK_RECALL)
@@ -325,6 +328,13 @@ class TimesTrail {
       onAnswerSelected: (answer, buttonEl) => this._handleTileAnswer(answer, buttonEl),
       onScaffoldContinue: () => this._resolveScaffold(),
       onShowTrail: () => this.showTrail(),
+      // Redrawn, not just recorded: the picker is the screen she is looking at,
+      // and the row she tapped has to become the current one under her finger.
+      onChooseTrail: (trailId) => {
+        this.chooseTrail(trailId)
+        this.showTrail()
+        this._refreshHud()
+      },
       onShowMap: () => this.showMap(),
       onShowCollection: () => this.showCollection(),
       onPlayAgain: () => this.startSession(this.session.modeId),
@@ -365,7 +375,10 @@ class TimesTrail {
         factsCorrect: this.progress.totals.factsCorrect,
         sessionsCompleted: this.progress.totals.sessionsCompleted,
       },
-      trail: this.progress.trail,
+      trails: {
+        currentId: this.progress.trails.currentId,
+        spaces: { ...this.progress.trails.spaces },
+      },
       daily: this.progress.daily,
       settings: this.settings.toJSON(),
       awardedMilestoneIds: [...this.progress.awardedMilestoneIds],
@@ -451,6 +464,7 @@ class TimesTrail {
     this.progress.settings = this.settings.toJSON()
     this.progress.daily = this.scoring.rollDaily(this.progress.daily)
     this.journey = this._buildJourney()
+    this._clampCurrentTrail()
     this.selector.reset()
     this.session = this._createSession(MODE_IDS.QUICK_RECALL)
 
@@ -526,36 +540,46 @@ class TimesTrail {
   }
 
   /**
-   * Draw the whole trail and show it.
+   * Draw the trail picker and show it.
+   *
+   * Every trail, not just the one being walked: the screen is both the map of
+   * where the token is and the place a trail is chosen, which is what makes
+   * picking "Squares" a real choice rather than a label on a route the player
+   * never selected.
    * @returns {void}
    */
   showTrail() {
-    const regionProgress = this.journey.allRegionProgress(this.progress.facts)
-    const regions = this.journey.getRegions().map((region, index) => {
-      const status = regionProgress[index]
+    const statuses = allTrailProgress({
+      activePool: this.settings.factPool,
+      records: this.progress.facts,
+      now: this._now,
+    })
+    const trails = statuses.map((status) => {
+      const trail = getTrail(status.trailId)
       return {
-        id: region.id,
-        name: region.name,
-        emoji: region.emoji,
-        startSpace: this.journey.regionStartSpace(region.id),
-        spaces: region.spaces,
-        unlocked: status.unlocked,
-        // `strong`, not `mastered`: the gate counts facts at
+        id: status.trailId,
+        name: trail.name,
+        emoji: trail.emoji,
+        blurb: trail.blurb,
+        current: status.trailId === this.journey.trailId,
+        space: Math.min(
+          this.progress.trails.spaces[status.trailId] ?? 0,
+          Math.max(0, status.totalSpaces - 1),
+        ),
+        totalSpaces: status.totalSpaces,
+        cap: status.cap,
+        // `strong`, not `mastered`: the cap counts facts at
         // TRAIL.UNLOCK_MIN_STRENGTH (3) and `mastered` is the 4+ count, so
-        // pairing `mastered` with `required` reported progress against a bar this
-        // region does not use. The view-model key is GameUI's and stays as it is.
-        mastered: status.strong,
-        required: status.required,
-        skipped: status.skipped,
+        // showing `mastered` against the trail's length would report progress
+        // against a bar the trail does not use.
+        strong: status.strong,
+        total: status.total,
+        complete: status.complete,
+        unavailable: status.unavailable,
       }
     })
 
-    this.ui.renderTrail({
-      space: this.progress.trail.space,
-      totalSpaces: this.journey.totalSpaces,
-      regions,
-      tokenEmoji: TOKEN_EMOJI,
-    })
+    this.ui.renderTrail({ trails, tokenEmoji: TOKEN_EMOJI })
     this.ui.showScreen("trail-screen")
   }
 
@@ -648,11 +672,12 @@ class TimesTrail {
     if (!this.settings.update(key, value)) return
     this.ui.renderSettings(this.settings.toJSON(), this.settings.factCount)
     this.journey = this._buildJourney()
+    this._clampCurrentTrail()
     if (key === "sessionLength") {
       const length = this.settings.sessionLength
       this.ui.updateProgressBar(Math.min(this.session.factsAnswered, length), length)
     }
-    this._reseedGatePriority()
+    this._refreshGatePriority()
     this._save()
   }
 
@@ -676,7 +701,8 @@ class TimesTrail {
     this.ui.renderSettings(this.settings.toJSON(), this.settings.factCount)
     if (!applied) return
     this.journey = this._buildJourney()
-    this._reseedGatePriority()
+    this._clampCurrentTrail()
+    this._refreshGatePriority()
     this._save()
   }
 
@@ -688,10 +714,8 @@ class TimesTrail {
    * delay is measured from the wrong origin.
    *
    * The gate priority is seeded here rather than left to the first scored answer,
-   * so question 1 of a session is already weighted toward the facts the trail is
-   * waiting on. `_updateGatePriority` takes an `AdvanceResult`, so it is fed a
-   * zero-space advance -- which reports the current `gatingRegionId` without
-   * moving the token.
+   * so question 1 of a session is already weighted toward the facts the chosen
+   * trail is waiting on.
    * @param {string} modeId - A `MODE_IDS` value; anything unknown falls back to Quick Recall
    * @returns {void}
    */
@@ -702,7 +726,8 @@ class TimesTrail {
     this.session = this._createSession(mode === null ? MODE_IDS.QUICK_RECALL : mode.id)
     this.selector.reset()
     this.journey = this._buildJourney()
-    this._reseedGatePriority()
+    this._clampCurrentTrail()
+    this._refreshGatePriority()
     this._isProcessingAnswer = false
 
     this.ui.updatePlayHud({ sessionStars: 0, sessionStreak: 0 })
@@ -918,17 +943,14 @@ class TimesTrail {
     // Assigned back: advance returns a NEW trail. Dropping it leaves the token
     // frozen while every answer still looks scored.
     const result = this.journey.advance(
-      this.progress.trail,
+      this._currentTrailPosition(),
       TRAIL.SPACES_PER_CORRECT,
       this.progress.facts,
     )
-    this.progress.trail = result.trail
+    this._setCurrentTrailPosition(result.trail)
 
-    if (result.enteredRegionId !== null) {
-      const region = this.journey.getRegion(result.enteredRegionId)
-      if (region !== null) this.session.newRegionName = region.name
-    }
-    this._updateGatePriority(result)
+    if (result.finished) this.session.trailFinishedName = this.journey.trail?.name ?? null
+    this._refreshGatePriority()
 
     this._notePossibleNewCard(factId)
   }
@@ -956,48 +978,35 @@ class TimesTrail {
   }
 
   /**
-   * Point selection at the facts the next gate is waiting on.
+   * Point selection at the facts the chosen trail is still waiting on.
    *
-   * This replaces the gate MESSAGE, which was the wrong tool. The sentence tried
-   * to explain a stopped trail in words -- and the honest version of those words
-   * named two facts the game then did not ask, because selection ignored the
-   * token's position. Naming facts the player never sees is worse than saying
-   * nothing: it reads as an instruction she cannot follow. Biasing the draw makes
-   * the explanation unnecessary, because the gate opens on its own.
+   * This is how the theme becomes real. Selection is WEIGHTED toward the trail's
+   * facts, not restricted to them: restricting would make "Squares" mean nothing
+   * but squares for a whole session, which is the opposite of what spaced
+   * repetition wants, and would let a fact the player is losing go unasked
+   * because it belongs to another trail.
    *
-   * Recomputed whenever the gating region can have moved: after a scored answer,
-   * and after any change to the fact pool, since a region with no active facts is
-   * skipped and a narrower pool moves the gate. A zero-space advance is the way to
-   * ask for the current `gatingRegionId` without moving the token.
+   * It also replaces the gate MESSAGE, which was the wrong tool. The sentence
+   * tried to explain a stopped trail in words -- and the honest version of those
+   * words named facts the game then did not ask, because selection ignored the
+   * token's position entirely. Naming facts the player never sees reads as an
+   * instruction she cannot follow. Biasing the draw makes the explanation
+   * unnecessary, because the trail opens on its own.
+   *
+   * Only the facts still short of the bar: one already strong enough opens no
+   * more ground. When every one of them is strong the trail is complete, the
+   * priority set empties, and selection goes back to pure spaced repetition.
+   *
+   * Recomputed after a scored answer, after any change to the fact pool, and on
+   * a trail change. `setPriorityFacts` replaces the set, so there is nothing to
+   * invalidate.
    * @returns {void}
    * @private
    */
-  _reseedGatePriority() {
-    this._updateGatePriority(this.journey.advance(this.progress.trail, 0, this.progress.facts))
-  }
-
-  /**
-   * Point selection at the facts the gate `result` reports, if any.
-   *
-   * `gatingRegionId` is the first INCOMPLETE region -- the one whose facts
-   * actually open the way -- not the locked region beyond it, whose facts do
-   * nothing for the gate. `setPriorityFacts` replaces the set, so there is
-   * nothing to invalidate.
-   * @param {Object} result - The `AdvanceResult` `Journey.advance` just returned
-   * @returns {void}
-   * @private
-   */
-  _updateGatePriority(result) {
-    const regionId = result.gatingRegionId
-    if (regionId === null) {
-      this.selector.setPriorityFacts([])
-      return
-    }
-    // Only the facts still short of the bar: one already strong enough needs no
-    // more practice to open this gate.
-    const pending = this.journey
-      .activeFactIdsForRegion(regionId)
-      .filter((factId) => this.store.strengthOf(factId) < TRAIL.UNLOCK_MIN_STRENGTH)
+  _refreshGatePriority() {
+    const pending = this.journey.activeFactIds.filter(
+      (factId) => this.store.strengthOf(factId) < TRAIL.UNLOCK_MIN_STRENGTH,
+    )
     this.selector.setPriorityFacts(pending)
   }
 
@@ -1054,12 +1063,17 @@ class TimesTrail {
       factsCorrect: this.progress.totals.factsCorrect,
       starsTotal: this.progress.totals.starsTotal,
       masteredCount: this.store.masteredCount(),
-      // `earnedRegionIds`, NOT `unlockedRegionIds`: a region with no fact in the
-      // active pool is skipped, which counts as complete and therefore as
-      // unlocked. With the default custom tables [6, 7] that made five regions
-      // "unlocked" before a single question had been answered, so the `regions-4`
-      // gem ("Halfway along the trail") was handed out on the very first answer.
-      unlockedRegionCount: this.journey.earnedRegionIds(this.progress.facts).length,
+      // Trails FINISHED, not trails available. The metric this replaced counted
+      // unlocked regions, and a region holding no fact of the active pool
+      // counted as unlocked -- so the default custom tables [6, 7] handed out
+      // the halfway gem before a single question had been answered. A trail is
+      // complete only when every one of its active facts is strong, which
+      // cannot be true of a trail the player has not practised.
+      completedTrailCount: allTrailProgress({
+        activePool: this.settings.factPool,
+        records: this.progress.facts,
+        now: this._now,
+      }).filter((status) => status.complete).length,
       streakDays: this.progress.daily.streakDays,
     }
 
@@ -1242,36 +1256,40 @@ class TimesTrail {
       gemsTotal: this.progress.totals.gemsTotal,
       streakDays: this.progress.daily.streakDays,
       flame: this.scoring.flameStage(this.progress.daily),
-      regionName: this._currentRegionName(),
+      trailName: this._currentTrailName(),
     })
   }
 
   /**
-   * The name of the region the token is standing in.
-   * @returns {string} The region name, or "" when the space is out of range
+   * The name of the trail being walked.
+   * @returns {string} The trail name, or "" if the id is somehow unknown
    * @private
    */
-  _currentRegionName() {
-    const region = this.journey.regionForSpace(this.progress.trail.space)
-    return region === null ? "" : region.name
+  _currentTrailName() {
+    return this.journey.trail?.name ?? ""
   }
 
   /**
    * The play screen's one-row trail indicator.
+   *
+   * It shows the WHOLE trail now, not the five spaces of the region the token
+   * happens to be in. A themed trail is 16 to 20 spaces, which fits the strip,
+   * and showing all of it means the strip answers "how far through Squares am
+   * I" rather than "how far through an arbitrary fifth of a 40-space board".
    * @returns {Object} A `PlayTrailStripView`
    * @private
    */
   _buildStripView() {
-    const space = this.progress.trail.space
-    const region = this.journey.regionForSpace(space)
-    const startSpace = region === null ? 0 : this.journey.regionStartSpace(region.id)
-    const lastUnlocked = this.journey.lastUnlockedSpace(this.progress.facts)
+    const trail = this.journey.trail
+    const space = this._currentTrailPosition().space
+    const cap = this.journey.lastUnlockedSpace(this.progress.facts)
     return {
-      regionName: region === null ? "" : region.name,
-      regionEmoji: region === null ? "" : region.emoji,
-      spacesInRegion: region === null ? TRAIL.SPACES_PER_REGION : region.spaces,
-      indexInRegion: space - startSpace,
-      gated: space >= lastUnlocked,
+      trailName: trail?.name ?? "",
+      trailEmoji: trail?.emoji ?? "",
+      totalSpaces: this.journey.totalSpaces,
+      space,
+      cap,
+      gated: space >= cap,
     }
   }
 
@@ -1306,7 +1324,7 @@ class TimesTrail {
       factsAnswered: this.session.factsAnswered,
       bestStreak: this.session.bestStreak,
       newCards: this.session.newCardIds.map((factId) => this._buildCardView(factId)),
-      newRegionName: this.session.newRegionName,
+      trailFinishedName: this.session.trailFinishedName,
       milestoneLabels: [...this.session.milestoneLabels],
       goalJustMet: this.session.goalJustMetThisSession,
     }
@@ -1315,14 +1333,65 @@ class TimesTrail {
   // -------------------------------------------------------------- Plumbing
 
   /**
-   * A `Journey` bound to the fact pool currently in play. Gating counts only the
-   * facts in both a region and the active pool, so the pool is a construction
-   * argument rather than a setter -- change the pool, build a new journey.
-   * @returns {Journey} A journey for the current settings
+   * A `Journey` for the trail being walked, bound to the fact pool currently in
+   * play. Both are construction arguments rather than setters: the trail is what
+   * the token walks and the pool is what gating means, so changing either is a
+   * new journey.
+   * @returns {Journey} A journey for the current trail and settings
    * @private
    */
   _buildJourney() {
-    return new Journey({ activePool: this.settings.factPool, now: this._now })
+    return new Journey({
+      trailId: this.progress.trails.currentId,
+      activePool: this.settings.factPool,
+      now: this._now,
+    })
+  }
+
+  /**
+   * The token's position on the trail now being walked.
+   * @returns {{space: number}} A position object; `{space: 0}` when unvisited
+   * @private
+   */
+  _currentTrailPosition() {
+    return { space: this.progress.trails.spaces[this.journey.trailId] ?? 0 }
+  }
+
+  /**
+   * Write the token's position back for the trail now being walked.
+   * @param {{space: number}} trail - The position `advance` returned
+   * @private
+   */
+  _setCurrentTrailPosition(trail) {
+    this.progress.trails.spaces[this.journey.trailId] = trail.space
+  }
+
+  /**
+   * Bring the current trail's saved position inside the trail it belongs to.
+   *
+   * Needed on every journey rebuild, not just on load: a trail is as long as
+   * the active pool makes it, so narrowing the tables can leave the token past
+   * the end of a trail it was legitimately at the end of. Only a `Journey`
+   * knows the length, which is why storage does not do this.
+   * @private
+   */
+  _clampCurrentTrail() {
+    this._setCurrentTrailPosition(this.journey.clampToTrail(this._currentTrailPosition()))
+  }
+
+  /**
+   * Switch to another trail. Unknown ids fall back to the default rather than
+   * throwing, since this can come from a save file or a stale DOM handler.
+   * @param {string} trailId - The trail to walk
+   * @returns {void}
+   */
+  chooseTrail(trailId) {
+    this.progress.trails.currentId = normalizeTrailId(trailId)
+    this.journey = this._buildJourney()
+    this._clampCurrentTrail()
+    this.selector.reset()
+    this._refreshGatePriority()
+    this.saveProgress()
   }
 
   /**
@@ -1349,7 +1418,7 @@ class TimesTrail {
       entry: INPUT_MODE.TILES,
       challenge: null,
       goalJustMetThisSession: false,
-      newRegionName: null,
+      trailFinishedName: null,
     }
   }
 

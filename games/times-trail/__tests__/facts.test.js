@@ -10,7 +10,8 @@ import {
   getFactFor,
   factsForTables,
   factIdsForTables,
-  factsForRegionTable,
+  factIdsForTrail,
+  getTrail,
   randomOrientation,
 } from "../js/facts.js"
 import {
@@ -19,6 +20,7 @@ import {
   OPERAND_MIN,
   TOTAL_FACTS,
   PATTERN_FREE_IDS,
+  TRAILS,
 } from "../js/constants.js"
 
 /** Counts calls so rng-consumption contracts can be asserted. */
@@ -399,35 +401,74 @@ describe("facts", () => {
     })
   })
 
-  describe("factsForRegionTable", () => {
-    test("region sizes are 1..8 for tables 2..9", () => {
-      const sizes = ALL_TABLES.map((table) => factsForRegionTable(table).length)
-      expect(sizes).toEqual([1, 2, 3, 4, 5, 6, 7, 8])
+  describe("factIdsForTrail", () => {
+    test("each trail holds the facts its predicate matches", () => {
+      for (const trail of TRAILS) {
+        const expected = FACTS.filter((fact) => trail.match(fact)).map((fact) => fact.id)
+        expect(factIdsForTrail(trail.id)).toEqual(expected)
+      }
     })
 
-    test("selects facts by the larger operand", () => {
-      expect(factsForRegionTable(3).map((f) => f.id)).toEqual(["2x3", "3x3"])
-      expect(factsForRegionTable(9).every((f) => f.b === 9)).toBe(true)
+    // Spelled out rather than re-derived, so a change to a predicate has to be a
+    // deliberate change to this list too.
+    test("the five trails hold the facts the plan says they do", () => {
+      expect(factIdsForTrail("doubles")).toEqual([
+        "2x2",
+        "2x3",
+        "2x4",
+        "2x5",
+        "2x6",
+        "2x7",
+        "2x8",
+        "2x9",
+      ])
+      expect(factIdsForTrail("squares")).toEqual([
+        "2x2",
+        "3x3",
+        "4x4",
+        "5x5",
+        "6x6",
+        "7x7",
+        "8x8",
+        "9x9",
+      ])
+      expect(factIdsForTrail("tough")).toEqual([...PATTERN_FREE_IDS].sort())
     })
 
-    test("the regions partition all 36 facts", () => {
-      const ids = ALL_TABLES.flatMap((table) => factsForRegionTable(table).map((f) => f.id))
-      expect(ids.length).toBe(36)
-      expect(new Set(ids).size).toBe(36)
-      expect(new Set(ids)).toEqual(new Set(FACT_IDS))
+    // Overlap is the feature: the mastery record is per canonical fact and
+    // shared, so 2x5 being in both means getting it right advances both.
+    test("the trails overlap, and together cover all 36 facts", () => {
+      const doubles = new Set(factIdsForTrail("doubles"))
+      expect(doubles.has("2x5")).toBe(true)
+      expect(factIdsForTrail("fives")).toContain("2x5")
+
+      const union = new Set(TRAILS.flatMap((trail) => factIdsForTrail(trail.id)))
+      expect(union).toEqual(new Set(FACT_IDS))
     })
 
-    test("returns [] for an out-of-range table", () => {
-      expect(factsForRegionTable(1)).toEqual([])
-      expect(factsForRegionTable(10)).toEqual([])
-      expect(factsForRegionTable(0)).toEqual([])
-      expect(factsForRegionTable(4.5)).toEqual([])
-      expect(factsForRegionTable("7")).toEqual([])
-      expect(factsForRegionTable(null)).toEqual([])
+    test("returns [] for an unknown trail", () => {
+      expect(factIdsForTrail("meadow")).toEqual([])
+      expect(factIdsForTrail("")).toEqual([])
+      expect(factIdsForTrail(null)).toEqual([])
+      expect(factIdsForTrail(3)).toEqual([])
     })
 
     test("returns a new array each call", () => {
-      expect(factsForRegionTable(9)).not.toBe(factsForRegionTable(9))
+      expect(factIdsForTrail("nines")).not.toBe(factIdsForTrail("nines"))
+    })
+  })
+
+  describe("getTrail", () => {
+    test("finds every shipped trail by id", () => {
+      for (const trail of TRAILS) {
+        expect(getTrail(trail.id)).toBe(trail)
+      }
+    })
+
+    test("returns null for anything else", () => {
+      expect(getTrail("dragon-peak")).toBeNull()
+      expect(getTrail(undefined)).toBeNull()
+      expect(getTrail(0)).toBeNull()
     })
   })
 

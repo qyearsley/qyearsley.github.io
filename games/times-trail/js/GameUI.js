@@ -66,7 +66,6 @@ import {
   TIMING,
   TOKEN_EMOJI,
   TOTAL_FACTS,
-  TRAIL,
 } from "./constants.js"
 import { FACT_IDS, getFactFor } from "./facts.js"
 
@@ -146,9 +145,9 @@ const MASTERY_STRENGTH_LABELS = Object.freeze([
  */
 const TRAIL_LEGEND_STATES = Object.freeze([
   Object.freeze({ className: "trail-space-current", label: "You are here", token: true }),
-  Object.freeze({ className: "", label: "Open", token: false }),
-  Object.freeze({ className: "trail-space-locked", label: "Locked", token: false }),
-  Object.freeze({ className: "trail-space-skipped", label: "Skipped", token: false }),
+  Object.freeze({ className: "", label: "Walked", token: false }),
+  Object.freeze({ className: "trail-space-open", label: "Open", token: false }),
+  Object.freeze({ className: "trail-space-locked", label: "Not open yet", token: false }),
 ])
 
 /**
@@ -176,7 +175,7 @@ const FACT_ORDER = new Map(FACT_IDS.map((id, index) => [id, index]))
  * @property {number} gemsTotal - LIFETIME gems. Written to `#gem-count`.
  * @property {number} streakDays - Daily-goal streak in DAYS, not answers.
  * @property {{index: number, id: string, emoji: string, dimmed: boolean}} flame - Flame stage.
- * @property {string} regionName - Name of the region the token stands in.
+ * @property {string} trailName - Name of the trail being walked.
  */
 
 /**
@@ -187,35 +186,40 @@ const FACT_ORDER = new Map(FACT_IDS.map((id, index) => [id, index]))
  */
 
 /**
- * The one-row trail indicator on the play screen.
+ * The one-row trail indicator on the play screen. It shows the WHOLE trail: a
+ * themed trail is 16 to 20 spaces, which fits the strip, so the row answers
+ * "how far through Squares am I" rather than "how far through a fifth of an
+ * arbitrary board".
  * @typedef {Object} PlayTrailStripView
- * @property {string} regionName - Current region's name.
- * @property {string} regionEmoji - Current region's emoji.
- * @property {number} spacesInRegion - Always `TRAIL.SPACES_PER_REGION`.
- * @property {number} indexInRegion - 0-4, the token's position within this region.
- * @property {boolean} gated - Whether the next space is behind a locked region.
- */
-
-/**
- * One region as the trail screen draws it.
- * @typedef {Object} TrailRegionView
- * @property {string} id - Region id.
- * @property {string} name - Region name.
- * @property {string} emoji - Region emoji.
- * @property {number} startSpace - Index of the region's first space.
- * @property {number} spaces - How many spaces the region holds.
- * @property {boolean} unlocked - Whether the region has been reached.
- * @property {number} mastered - Facts mastered in this region.
- * @property {number} required - Facts needed to leave this region.
- * @property {boolean} skipped - Whether the region was walked past unmastered.
- */
-
-/**
- * The whole trail.
- * @typedef {Object} TrailView
+ * @property {string} trailName - Current trail's name.
+ * @property {string} trailEmoji - Current trail's emoji.
+ * @property {number} totalSpaces - How long the trail is.
  * @property {number} space - The token's space index.
- * @property {number} totalSpaces - Total spaces on the trail.
- * @property {TrailRegionView[]} regions - Regions in walking order.
+ * @property {number} cap - Furthest space the token may occupy.
+ * @property {boolean} gated - Whether the token is held at the cap.
+ */
+
+/**
+ * One trail as the picker draws it.
+ * @typedef {Object} TrailCardView
+ * @property {string} id - Trail id.
+ * @property {string} name - Trail name.
+ * @property {string} emoji - Trail emoji.
+ * @property {string} blurb - One line saying what the pattern is.
+ * @property {boolean} current - Whether this is the trail being walked.
+ * @property {number} space - The token's space index on this trail.
+ * @property {number} totalSpaces - How long this trail is for the active pool.
+ * @property {number} cap - Furthest space the token may occupy.
+ * @property {number} strong - Active facts at the cap's strength bar.
+ * @property {number} total - Active facts in the trail.
+ * @property {boolean} complete - Every active fact is strong.
+ * @property {boolean} unavailable - No fact of this trail is in the active pool.
+ */
+
+/**
+ * Every trail, as the picker draws them.
+ * @typedef {Object} TrailView
+ * @property {TrailCardView[]} trails - Trails in hub order.
  * @property {string} tokenEmoji - Always `TOKEN_EMOJI`; no cosmetics in Phase 1.
  */
 
@@ -368,7 +372,7 @@ export class GameUI extends BaseGameUI {
       starCount: document.getElementById("star-count"),
       gemCount: document.getElementById("gem-count"),
       flameDisplay: document.getElementById("flame-display"),
-      hubRegionName: document.getElementById("hub-region-name"),
+      hubTrailName: document.getElementById("hub-trail-name"),
       modeQuickRecall: document.getElementById("mode-quick-recall"),
       trailButton: document.getElementById("trail-button"),
       mapButton: document.getElementById("map-button"),
@@ -456,7 +460,7 @@ export class GameUI extends BaseGameUI {
    */
   updateHud(hud) {
     if (!hud) return
-    const { starCount, gemCount, flameDisplay, hubRegionName } = this.elements
+    const { starCount, gemCount, flameDisplay, hubTrailName } = this.elements
 
     if (starCount) starCount.textContent = String(hud.starsTotal)
     if (gemCount) gemCount.textContent = String(hud.gemsTotal)
@@ -474,7 +478,7 @@ export class GameUI extends BaseGameUI {
       flameDisplay.style.opacity = flame && flame.dimmed ? DIMMED_FLAME_OPACITY : "1"
     }
 
-    if (hubRegionName) hubRegionName.textContent = hud.regionName ? String(hud.regionName) : ""
+    if (hubTrailName) hubTrailName.textContent = hud.trailName ? String(hud.trailName) : ""
   }
 
   /**
@@ -909,11 +913,14 @@ export class GameUI extends BaseGameUI {
    * visible where she is actually looking, which is the play screen, not the
    * trail screen she visits between sessions.
    *
-   * When `strip.gated` is true the marker is APPENDED after the region's five
-   * spaces rather than drawn inside them. The gate belongs to the next region,
-   * and a blocked token always stands on the region's last space, so the old
-   * `i === indexInRegion + 1` test asked for index 5 in a five-iteration loop
-   * and drew nothing in every blocked state.
+   * The strip draws the whole trail. It used to draw the five spaces of the
+   * region the token stood in, which meant the row reset every five answers and
+   * never showed how much was left; a themed trail is 16 to 20 spaces and fits.
+   *
+   * Three states per space, and they have to look different: walked, open (past
+   * the token but inside the cap) and not open yet. A gate is "not yet"; a lock
+   * is "not here", and on a themed trail there is no "not here" -- every space
+   * opens once enough of the trail's facts are strong.
    * @param {PlayTrailStripView} strip - Strip view model
    * @returns {void}
    */
@@ -923,18 +930,19 @@ export class GameUI extends BaseGameUI {
     container.innerHTML = ""
     if (!strip) return
 
-    const total = positiveIntOr(strip.spacesInRegion, TRAIL.SPACES_PER_REGION)
-    const current = Number.isInteger(strip.indexInRegion) ? strip.indexInRegion : -1
+    const total = Math.max(0, Number.isInteger(strip.totalSpaces) ? strip.totalSpaces : 0)
+    const current = Number.isInteger(strip.space) ? strip.space : -1
+    const cap = Number.isInteger(strip.cap) ? strip.cap : total - 1
 
-    const regionEmoji = document.createElement("span")
-    regionEmoji.className = "strip-region"
-    regionEmoji.textContent = strip.regionEmoji ? String(strip.regionEmoji) : ""
-    container.appendChild(regionEmoji)
+    const trailEmoji = document.createElement("span")
+    trailEmoji.className = "strip-region"
+    trailEmoji.textContent = strip.trailEmoji ? String(strip.trailEmoji) : ""
+    container.appendChild(trailEmoji)
 
-    const regionName = document.createElement("span")
-    regionName.className = "strip-region-name"
-    regionName.textContent = strip.regionName ? String(strip.regionName) : ""
-    container.appendChild(regionName)
+    const trailName = document.createElement("span")
+    trailName.className = "strip-region-name"
+    trailName.textContent = strip.trailName ? String(strip.trailName) : ""
+    container.appendChild(trailName)
 
     for (let i = 0; i < total; i += 1) {
       const space = document.createElement("span")
@@ -946,12 +954,17 @@ export class GameUI extends BaseGameUI {
         token.className = "strip-token"
         token.textContent = TOKEN_EMOJI
         space.appendChild(token)
+      } else if (i > cap) {
+        space.classList.add("strip-space-locked")
+      } else if (i > current) {
+        space.classList.add("strip-space-open")
       }
       container.appendChild(space)
     }
 
-    if (!strip.gated) return
-    // A gate is "not yet"; a lock is "not here". They must look different.
+    if (!strip.gated || current >= total - 1) return
+    // A gate is "not yet". It marks the boundary rather than replacing a space,
+    // so the row keeps showing how long the trail actually is.
     const gate = document.createElement("span")
     gate.className = "strip-space strip-space-gate"
     gate.dataset.index = String(total)
@@ -962,7 +975,14 @@ export class GameUI extends BaseGameUI {
   // ------------------------------------------------------- Trail screen
 
   /**
-   * Draw the whole trail as eight labelled region rows of five spaces.
+   * Draw the five themed trails as a picker: one row each, with its spaces, its
+   * token, and how much of it is strong.
+   *
+   * The screen is the map AND the chooser. Each row is a button, because
+   * choosing "Squares" is the meaningful decision this screen exists to offer;
+   * a row the active tables leave empty is disabled rather than hidden, so
+   * narrowing the tables visibly removes a trail instead of silently shrinking
+   * the list.
    * @param {TrailView} view - Trail view model
    * @returns {void}
    */
@@ -970,56 +990,101 @@ export class GameUI extends BaseGameUI {
     const container = this.elements.trailSpaces
     if (container) {
       container.innerHTML = ""
-      const regions = view && Array.isArray(view.regions) ? view.regions : []
+      const trails = view && Array.isArray(view.trails) ? view.trails : []
       const tokenEmoji = (view && view.tokenEmoji) || TOKEN_EMOJI
-      const currentSpace = view && Number.isInteger(view.space) ? view.space : -1
 
-      for (const region of regions) {
-        if (!region) continue
-        const row = document.createElement("div")
-        row.className = "trail-region-row"
-
-        const label = document.createElement("span")
-        label.className = "trail-region-label"
-        label.textContent = `${region.emoji || ""} ${region.name || ""}`.trim()
-        row.appendChild(label)
-
-        const start = Number.isInteger(region.startSpace) ? region.startSpace : 0
-        const spaces = positiveIntOr(region.spaces, TRAIL.SPACES_PER_REGION)
-        for (let i = 0; i < spaces; i += 1) {
-          const index = start + i
-          const space = document.createElement("div")
-          space.className = "trail-space"
-          space.dataset.space = String(index)
-
-          const states = []
-          if (index === currentSpace) {
-            space.classList.add("trail-space-current")
-            states.push("you are here")
-            const token = document.createElement("span")
-            token.className = "trail-token"
-            token.textContent = tokenEmoji
-            space.appendChild(token)
-          }
-          if (!region.unlocked) {
-            space.classList.add("trail-space-locked")
-            states.push("locked")
-          }
-          if (region.skipped) {
-            space.classList.add("trail-space-skipped")
-            states.push("skipped")
-          }
-          if (states.length === 0) states.push("open")
-
-          space.setAttribute("aria-label", `Space ${index + 1}, ${states.join(", ")}`)
-          row.appendChild(space)
-        }
-
-        container.appendChild(row)
+      for (const trail of trails) {
+        if (!trail) continue
+        container.appendChild(this._buildTrailRow(trail, tokenEmoji))
       }
     }
 
     this._renderTrailLegend()
+  }
+
+  /**
+   * One trail's row in the picker.
+   * @private
+   * @param {TrailCardView} trail - One trail's view model
+   * @param {string} tokenEmoji - The token glyph
+   * @returns {HTMLButtonElement} The row
+   */
+  _buildTrailRow(trail, tokenEmoji) {
+    const row = document.createElement("button")
+    row.type = "button"
+    row.className = "trail-region-row"
+    row.dataset.trailId = String(trail.id ?? "")
+    if (trail.current) row.classList.add("is-current")
+    if (trail.complete) row.classList.add("is-complete")
+    if (trail.unavailable) {
+      row.classList.add("is-unavailable")
+      row.disabled = true
+    }
+    // The pressed state, not just a colour: a screen reader has to be able to
+    // tell which of five buttons is the one currently being walked.
+    row.setAttribute("aria-pressed", trail.current ? "true" : "false")
+
+    const label = document.createElement("span")
+    label.className = "trail-region-label"
+    label.textContent = `${trail.emoji || ""} ${trail.name || ""}`.trim()
+    row.appendChild(label)
+
+    const total = Math.max(0, Number.isInteger(trail.totalSpaces) ? trail.totalSpaces : 0)
+    const current = Number.isInteger(trail.space) ? trail.space : -1
+    const cap = Number.isInteger(trail.cap) ? trail.cap : total - 1
+    const spaces = document.createElement("span")
+    spaces.className = "trail-row-spaces"
+    spaces.setAttribute("aria-hidden", "true")
+    for (let i = 0; i < total; i += 1) {
+      const space = document.createElement("span")
+      space.className = "trail-space"
+      space.dataset.space = String(i)
+      if (i === current) {
+        space.classList.add("trail-space-current")
+        const token = document.createElement("span")
+        token.className = "trail-token"
+        token.textContent = tokenEmoji
+        space.appendChild(token)
+      } else if (i > cap) {
+        space.classList.add("trail-space-locked")
+      } else if (i > current) {
+        space.classList.add("trail-space-open")
+      }
+      spaces.appendChild(space)
+    }
+    row.appendChild(spaces)
+
+    // The one sentence a reader actually needs, and the row's accessible name:
+    // the spaces above are decorative, because forty individually announced
+    // spaces bury it.
+    const note = document.createElement("span")
+    note.className = "trail-row-note"
+    note.textContent = this._trailRowNote(trail)
+    row.appendChild(note)
+    row.setAttribute(
+      "aria-label",
+      `${trail.name || trail.id}. ${note.textContent} ${trail.blurb || ""}`.trim(),
+    )
+
+    const blurb = document.createElement("span")
+    blurb.className = "trail-row-blurb"
+    blurb.setAttribute("aria-hidden", "true")
+    blurb.textContent = trail.blurb ? String(trail.blurb) : ""
+    row.appendChild(blurb)
+
+    return row
+  }
+
+  /**
+   * The sentence under a trail row.
+   * @private
+   * @param {TrailCardView} trail - One trail's view model
+   * @returns {string} A short status line
+   */
+  _trailRowNote(trail) {
+    if (trail.unavailable) return "Not in your tables right now."
+    if (trail.complete) return `Finished — all ${trail.total} strong.`
+    return `${trail.strong} of ${trail.total} strong.`
   }
 
   /**

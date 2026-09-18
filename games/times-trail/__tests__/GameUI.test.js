@@ -40,7 +40,7 @@ import {
   KEYPAD,
   OPERAND_MAX,
   OPERAND_MIN,
-  REGIONS,
+  TRAILS,
   SESSION,
   TIMING,
   TOKEN_EMOJI,
@@ -84,7 +84,7 @@ const CONTRACT_IDS = [
   "star-count",
   "gem-count",
   "flame-display",
-  "hub-region-name",
+  "hub-trail-name",
   "settings-button",
   "mode-quick-recall",
   "trail-button",
@@ -230,29 +230,30 @@ function cardViews() {
 }
 
 /**
- * A trail view with the token in region 2 and the last two regions locked.
+ * A picker view spanning the four row states the screen has to draw: finished
+ * (Doubles), current and part-walked (Squares), untouched (Fives, Nines), and
+ * unavailable because the active tables hold none of its facts (Tough).
  * @param {Object} [overrides] - Fields to replace
  * @returns {Object} TrailView-shaped object
  */
 function trailView(overrides = {}) {
-  const regions = REGIONS.map((region, index) => ({
-    id: region.id,
-    name: region.name,
-    emoji: region.emoji,
-    startSpace: index * TRAIL.SPACES_PER_REGION,
-    spaces: region.spaces,
-    unlocked: index < 6,
-    mastered: 1,
-    required: 2,
-    skipped: index === 1,
-  }))
-  return {
-    space: 7,
-    totalSpaces: TRAIL.TOTAL_SPACES,
-    regions,
-    tokenEmoji: TOKEN_EMOJI,
-    ...overrides,
+  const byId = {
+    doubles: { space: 15, totalSpaces: 16, cap: 15, strong: 8, total: 8, complete: true },
+    fives: { space: 0, totalSpaces: 16, cap: 3, strong: 0, total: 8, complete: false },
+    squares: { space: 4, totalSpaces: 16, cap: 9, strong: 3, total: 8, complete: false },
+    nines: { space: 0, totalSpaces: 16, cap: 3, strong: 0, total: 8, complete: false },
+    tough: { space: 0, totalSpaces: 0, cap: 0, strong: 0, total: 0, complete: false },
   }
+  const trails = TRAILS.map((trail) => ({
+    id: trail.id,
+    name: trail.name,
+    emoji: trail.emoji,
+    blurb: trail.blurb,
+    current: trail.id === "squares",
+    unavailable: trail.id === "tough",
+    ...byId[trail.id],
+  }))
+  return { trails, tokenEmoji: TOKEN_EMOJI, ...overrides }
 }
 
 /**
@@ -347,15 +348,15 @@ describe("GameUI", () => {
       gemsTotal: 7,
       streakDays: 3,
       flame: { index: 2, id: "flame", emoji: "🔥", dimmed: false },
-      regionName: "Beehive Hollow",
+      trailName: "Squares",
     }
 
-    test("writes lifetime stars, gems, the flame, and the region name", () => {
+    test("writes lifetime stars, gems, the flame, and the trail name", () => {
       ui.updateHud(hud)
       expect(document.getElementById("star-count").textContent).toBe("1234")
       expect(document.getElementById("gem-count").textContent).toBe("7")
       expect(document.getElementById("flame-display").textContent).toBe("🔥")
-      expect(document.getElementById("hub-region-name").textContent).toBe("Beehive Hollow")
+      expect(document.getElementById("hub-trail-name").textContent).toBe("Squares")
     })
 
     test("puts the day count in the flame's label, since it has no element", () => {
@@ -1006,103 +1007,168 @@ describe("GameUI", () => {
 
   describe("renderPlayTrailStrip", () => {
     const strip = {
-      regionName: "Triple Bridge",
-      regionEmoji: "🌉",
-      spacesInRegion: TRAIL.SPACES_PER_REGION,
-      indexInRegion: 2,
+      trailName: "Squares",
+      trailEmoji: "🔲",
+      totalSpaces: 16,
+      space: 4,
+      cap: 9,
       gated: false,
     }
 
-    test("renders five spaces, the token in the current one, and the region", () => {
+    test("draws the whole trail, the token in the current space, and the name", () => {
       ui.renderPlayTrailStrip(strip)
       const spaces = Array.from(document.querySelectorAll("#play-trail-strip .strip-space"))
-      expect(spaces).toHaveLength(5)
+      expect(spaces).toHaveLength(16)
       const current = document.querySelectorAll("#play-trail-strip .strip-space-current")
       expect(current).toHaveLength(1)
-      expect(current[0]).toBe(spaces[2])
+      expect(current[0]).toBe(spaces[4])
       expect(current[0].querySelector(".strip-token").textContent).toBe(TOKEN_EMOJI)
-      expect(document.querySelector("#play-trail-strip .strip-region").textContent).toBe("🌉")
+      expect(document.querySelector("#play-trail-strip .strip-region").textContent).toBe("🔲")
       expect(document.querySelector("#play-trail-strip .strip-region-name").textContent).toBe(
-        "Triple Bridge",
+        "Squares",
       )
     })
 
-    test("gated appends a sixth marker after the region's five spaces", () => {
-      // The real blocked state: the token sits on the last space of the region,
-      // so the gate belongs to the space after the five this region owns. The
-      // old in-loop `i === indexInRegion + 1` test asked for index 5 of a
-      // five-iteration loop and drew nothing at all.
-      ui.renderPlayTrailStrip({ ...strip, indexInRegion: TRAIL.SPACES_PER_REGION - 1, gated: true })
+    // Three states, and they have to be distinguishable: walked, open, not open
+    // yet. The old strip had only "current" and everything else.
+    test("separates walked, open and not-open-yet spaces", () => {
+      ui.renderPlayTrailStrip(strip)
+      const spaces = Array.from(document.querySelectorAll("#play-trail-strip .strip-space"))
+      const classOf = (i) => spaces[i].className
+      expect(classOf(0)).toBe("strip-space")
+      expect(classOf(3)).toBe("strip-space")
+      expect(classOf(5)).toContain("strip-space-open")
+      expect(classOf(9)).toContain("strip-space-open")
+      expect(classOf(10)).toContain("strip-space-locked")
+      expect(classOf(15)).toContain("strip-space-locked")
+    })
+
+    test("gated appends a marker after the last space", () => {
+      ui.renderPlayTrailStrip({ ...strip, space: 9, gated: true })
       const container = document.getElementById("play-trail-strip")
       const spaces = Array.from(container.querySelectorAll(".strip-space"))
-      expect(spaces).toHaveLength(TRAIL.SPACES_PER_REGION + 1)
+      expect(spaces).toHaveLength(17)
       const gates = container.querySelectorAll(".strip-space-gate")
       expect(gates).toHaveLength(1)
-      expect(gates[0]).toBe(spaces[TRAIL.SPACES_PER_REGION])
       expect(gates[0]).toBe(container.lastElementChild)
       expect(gates[0].getAttribute("aria-hidden")).toBe("true")
       expect(container.querySelectorAll(".strip-space-current")).toHaveLength(1)
     })
 
-    test("gated draws the marker wherever the token stands in the region", () => {
-      for (let index = 0; index < TRAIL.SPACES_PER_REGION; index += 1) {
-        ui.renderPlayTrailStrip({ ...strip, indexInRegion: index, gated: true })
-        const gates = document.querySelectorAll("#play-trail-strip .strip-space-gate")
-        expect(gates).toHaveLength(1)
-        expect(document.querySelectorAll("#play-trail-strip .strip-space")).toHaveLength(
-          TRAIL.SPACES_PER_REGION + 1,
-        )
-      }
+    // Standing on the last space is the end of the trail, not a gate: there is
+    // nothing beyond it to be held back from.
+    test("no gate marker at the end of the trail, even when gated", () => {
+      ui.renderPlayTrailStrip({ ...strip, space: 15, cap: 15, gated: true })
+      expect(document.querySelectorAll("#play-trail-strip .strip-space-gate")).toHaveLength(0)
     })
 
     test("no gate when not gated", () => {
       ui.renderPlayTrailStrip(strip)
       expect(document.querySelectorAll("#play-trail-strip .strip-space-gate")).toHaveLength(0)
-      expect(document.querySelectorAll("#play-trail-strip .strip-space")).toHaveLength(
-        TRAIL.SPACES_PER_REGION,
-      )
+      expect(document.querySelectorAll("#play-trail-strip .strip-space")).toHaveLength(16)
+    })
+
+    test("draws nothing but the labels for an unavailable trail", () => {
+      ui.renderPlayTrailStrip({ ...strip, totalSpaces: 0, space: 0, cap: 0 })
+      expect(document.querySelectorAll("#play-trail-strip .strip-space")).toHaveLength(0)
     })
 
     test("calling twice does not accumulate", () => {
-      ui.renderPlayTrailStrip({ ...strip, gated: true })
-      ui.renderPlayTrailStrip({ ...strip, gated: true })
-      expect(document.querySelectorAll("#play-trail-strip .strip-space")).toHaveLength(
-        TRAIL.SPACES_PER_REGION + 1,
-      )
+      ui.renderPlayTrailStrip({ ...strip, space: 9, gated: true })
+      ui.renderPlayTrailStrip({ ...strip, space: 9, gated: true })
+      expect(document.querySelectorAll("#play-trail-strip .strip-space")).toHaveLength(17)
       expect(document.querySelectorAll("#play-trail-strip .strip-space-gate")).toHaveLength(1)
       expect(document.querySelectorAll("#play-trail-strip .strip-region")).toHaveLength(1)
     })
   })
 
   describe("renderTrail", () => {
-    test("renders eight labelled rows of five spaces", () => {
+    test("draws one row per trail, each with its own spaces", () => {
       const view = trailView()
       ui.renderTrail(view)
       const rows = Array.from(document.querySelectorAll("#trail-spaces .trail-region-row"))
-      expect(rows).toHaveLength(REGIONS.length)
-      expect(document.querySelectorAll("#trail-spaces .trail-space")).toHaveLength(view.totalSpaces)
-      for (const row of rows) {
-        expect(row.querySelectorAll(".trail-space")).toHaveLength(TRAIL.SPACES_PER_REGION)
+      expect(rows).toHaveLength(TRAILS.length)
+      for (const [index, row] of rows.entries()) {
+        expect(row.querySelectorAll(".trail-space")).toHaveLength(view.trails[index].totalSpaces)
         expect(row.querySelector(".trail-region-label").textContent).not.toBe("")
       }
-      expect(rows[0].querySelector(".trail-region-label").textContent).toContain("Doubling Meadow")
+      expect(rows[0].querySelector(".trail-region-label").textContent).toContain("Doubles")
     })
 
-    test("marks exactly one current space and puts the token in it", () => {
+    // Choosing the trail is what this screen is for, so the rows are buttons
+    // carrying the id the click handler reads.
+    test("every row is a button carrying its trail id", () => {
       ui.renderTrail(trailView())
-      const current = document.querySelectorAll("#trail-spaces .trail-space-current")
+      const rows = Array.from(document.querySelectorAll("#trail-spaces .trail-region-row"))
+      expect(rows.map((row) => row.tagName)).toEqual(rows.map(() => "BUTTON"))
+      expect(rows.map((row) => row.dataset.trailId)).toEqual(TRAILS.map((trail) => trail.id))
+    })
+
+    test("marks the current trail, and says so to a screen reader", () => {
+      ui.renderTrail(trailView())
+      const current = Array.from(document.querySelectorAll("#trail-spaces .is-current"))
       expect(current).toHaveLength(1)
-      expect(current[0].dataset.space).toBe("7")
+      expect(current[0].dataset.trailId).toBe("squares")
+      expect(current[0].getAttribute("aria-pressed")).toBe("true")
+      const others = document.querySelectorAll('#trail-spaces [aria-pressed="false"]')
+      expect(others).toHaveLength(TRAILS.length - 1)
+    })
+
+    test("puts one token in each trail that has been walked", () => {
+      ui.renderTrail(trailView())
+      const rows = Array.from(document.querySelectorAll("#trail-spaces .trail-region-row"))
+      const squares = rows.find((row) => row.dataset.trailId === "squares")
+      const current = squares.querySelectorAll(".trail-space-current")
+      expect(current).toHaveLength(1)
+      expect(current[0].dataset.space).toBe("4")
       expect(current[0].querySelector(".trail-token").textContent).toBe(TOKEN_EMOJI)
     })
 
-    test("locked and skipped regions mark their spaces", () => {
+    test("separates walked, open and not-open-yet spaces", () => {
       ui.renderTrail(trailView())
-      expect(document.querySelectorAll("#trail-spaces .trail-space-locked")).toHaveLength(
-        2 * TRAIL.SPACES_PER_REGION,
+      const squares = document.querySelector('[data-trail-id="squares"]')
+      const spaces = Array.from(squares.querySelectorAll(".trail-space"))
+      expect(spaces[0].className).toBe("trail-space")
+      expect(spaces[5].className).toContain("trail-space-open")
+      expect(spaces[12].className).toContain("trail-space-locked")
+    })
+
+    // A trail the tables leave empty is disabled rather than hidden, so
+    // narrowing the tables visibly removes it instead of shortening a list.
+    test("an unavailable trail is a disabled row that says why", () => {
+      ui.renderTrail(trailView())
+      const tough = document.querySelector('[data-trail-id="tough"]')
+      expect(tough.disabled).toBe(true)
+      expect(tough.classList.contains("is-unavailable")).toBe(true)
+      expect(tough.querySelector(".trail-row-note").textContent).toBe(
+        "Not in your tables right now.",
       )
-      expect(document.querySelectorAll("#trail-spaces .trail-space-skipped")).toHaveLength(
-        TRAIL.SPACES_PER_REGION,
+      expect(tough.querySelectorAll(".trail-space")).toHaveLength(0)
+    })
+
+    test("a finished trail says so", () => {
+      ui.renderTrail(trailView())
+      const doubles = document.querySelector('[data-trail-id="doubles"]')
+      expect(doubles.classList.contains("is-complete")).toBe(true)
+      expect(doubles.querySelector(".trail-row-note").textContent).toBe("Finished — all 8 strong.")
+    })
+
+    test("an unfinished trail counts what is strong", () => {
+      const squares = document.querySelector
+      ui.renderTrail(trailView())
+      expect(squares.call(document, '[data-trail-id="squares"] .trail-row-note').textContent).toBe(
+        "3 of 8 strong.",
+      )
+    })
+
+    // Sixteen individually announced spaces would bury the one sentence that
+    // matters, so the spaces are decorative and the row carries the label.
+    test("the row's accessible name is the sentence, not the spaces", () => {
+      ui.renderTrail(trailView())
+      const squares = document.querySelector('[data-trail-id="squares"]')
+      expect(squares.querySelector(".trail-row-spaces").getAttribute("aria-hidden")).toBe("true")
+      expect(squares.getAttribute("aria-label")).toBe(
+        "Squares. 3 of 8 strong. A number times itself.",
       )
     })
 
@@ -1112,30 +1178,27 @@ describe("GameUI", () => {
       expect(items).toHaveLength(4)
       expect(items.map((item) => item.lastElementChild.textContent)).toEqual([
         "You are here",
+        "Walked",
         "Open",
-        "Locked",
-        "Skipped",
+        "Not open yet",
       ])
       expect(items[0].querySelector(".trail-token").textContent).toBe(TOKEN_EMOJI)
-    })
-
-    test("the current space keeps its own class inside a skipped region", () => {
-      // Space 7 is in region index 1, the skipped one. Both classes must land on
-      // the same element; main.css scopes .trail-space.trail-space-current so
-      // the skipped rule cannot repaint over "you are here".
-      ui.renderTrail(trailView({ space: 7 }))
-      const current = document.querySelector("#trail-spaces .trail-space-current")
-      expect(current.classList.contains("trail-space-skipped")).toBe(true)
-      expect(current.getAttribute("aria-label")).toBe("Space 8, you are here, skipped")
     })
 
     test("rebuilds rather than appends", () => {
       ui.renderTrail(trailView())
       ui.renderTrail(trailView())
       expect(document.querySelectorAll("#trail-spaces .trail-region-row")).toHaveLength(
-        REGIONS.length,
+        TRAILS.length,
       )
       expect(document.querySelectorAll("#trail-legend .legend-item")).toHaveLength(4)
+    })
+
+    test("survives a junk view rather than throwing", () => {
+      for (const view of [undefined, null, {}, { trails: "none" }]) {
+        expect(() => ui.renderTrail(view)).not.toThrow()
+      }
+      expect(document.querySelectorAll("#trail-spaces .trail-region-row")).toHaveLength(0)
     })
   })
 
@@ -1628,7 +1691,7 @@ describe("GameUI", () => {
       const bare = new GameUI()
       const warn = jest.spyOn(console, "warn").mockImplementation(() => {})
       expect(() => {
-        bare.updateHud({ starsTotal: 1, gemsTotal: 1, streakDays: 1, flame: null, regionName: "x" })
+        bare.updateHud({ starsTotal: 1, gemsTotal: 1, streakDays: 1, flame: null, trailName: "x" })
         bare.updatePlayHud({ sessionStars: 1, sessionStreak: 1 })
         bare.updateProgressBar(1, 20)
         bare.flyStars(10)

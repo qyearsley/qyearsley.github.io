@@ -63,7 +63,7 @@ import {
  * @property {number} factsCorrect        - Correct answers all-time
  * @property {number} starsTotal          - Stars earned all-time
  * @property {number} masteredCount       - Facts currently mastered
- * @property {number} unlockedRegionCount - Trail regions currently unlocked
+ * @property {number} completedTrailCount - Themed trails finished outright
  * @property {number} streakDays          - Current daily-goal streak
  */
 

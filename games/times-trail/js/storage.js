@@ -42,7 +42,7 @@
  */
 
 import { StorageManager as BaseStorageManager } from "../../shared/StorageManager.js"
-import { GEM_MILESTONES, STORAGE, TRAIL } from "./constants.js"
+import { DEFAULT_TRAIL_ID, GEM_MILESTONES, STORAGE, TRAILS } from "./constants.js"
 import { normalizeRecord } from "./MasteryModel.js"
 
 /**
@@ -86,12 +86,21 @@ const MILESTONE_IDS = new Set(GEM_MILESTONES.map((milestone) => milestone.id))
  */
 
 /**
- * The token's position on the trail. One field: there is deliberately no
- * `lapsCompleted`, because space 39 is the end of the trail. Journey.js is the
- * semantic authority for this shape; the pass here is structural.
+ * Where the token stands on every trail, and which trail is being walked.
  *
- * @typedef {Object} Trail
- * @property {number} space - 0-based space index, 0 .. TRAIL.TOTAL_SPACES - 1, default 0
+ * One position per trail, kept separately, because the five trails are five
+ * routes through the same 36 facts rather than stages of one journey -- walking
+ * away from Squares half-finished and coming back to it later is the normal
+ * case, not a reset. Unknown trail ids are dropped on load, so retiring a trail
+ * does not leave its position behind for ever.
+ *
+ * Journey.js is the semantic authority for a position; the pass here is
+ * structural, and it deliberately does NOT clamp to a trail's length -- only a
+ * `Journey` knows that, because a trail is as long as the active pool makes it.
+ *
+ * @typedef {Object} Trails
+ * @property {string} currentId                - Trail being walked; DEFAULT_TRAIL_ID by default
+ * @property {Object<string, number>} spaces   - trailId -> 0-based space index, default {}
  */
 
 /**
@@ -115,7 +124,7 @@ const MILESTONE_IDS = new Set(GEM_MILESTONES.map((milestone) => milestone.id))
  * @typedef {Object} SaveState
  * @property {Object<string, MasteryRecord>} facts - Canonical fact id -> record, default {}
  * @property {Totals} totals                       - Lifetime counters, default all zeros
- * @property {Trail} trail                         - Token position, default {space: 0}
+ * @property {Trails} trails                       - Token position per trail, and which is current
  * @property {Daily} daily                         - Daily goal and streak, default per Daily above
  * @property {Object} settings                     - Raw settings, default {}; Settings fills its own defaults
  * @property {string[]} awardedMilestoneIds        - Milestone ids already paid out, default []
@@ -209,18 +218,32 @@ function _normalizeTotals(raw) {
 }
 
 /**
- * Coerce an untrusted trail position. Structural only: `Journey.normalizeTrail`
- * is the semantic authority and game.js runs it too. A legacy `lapsCompleted`
- * key is dropped.
+ * Coerce untrusted trail positions. Structural only: `Journey.clampToTrail` is
+ * the semantic authority for how long a trail is, and game.js runs it.
+ *
+ * A save written before 2026-09-18 carries a single `trail: {space}` for the
+ * old 40-space route through eight table regions. There is no honest way to
+ * translate that into a position on a pattern trail -- the two boards have
+ * nothing in common -- so it is dropped and every trail starts at zero. The
+ * mastery records, which are what the trails are actually made of, survive
+ * untouched, so the first session back re-opens most of the ground immediately.
  * @private
  * @param {unknown} raw - Persisted value of unknown shape
- * @returns {Trail} A new, valid Trail
+ * @returns {Trails} A new, valid Trails
  */
-function _normalizeTrail(raw) {
+function _normalizeTrails(raw) {
   const source = _isPlainObject(raw) ? /** @type {Object} */ (raw) : {}
-  if (!Number.isFinite(source.space)) return { space: 0 }
-  const space = Math.floor(source.space)
-  return { space: Math.min(TRAIL.TOTAL_SPACES - 1, Math.max(0, space)) }
+  const known = new Set(TRAILS.map((trail) => trail.id))
+  /** @type {Object<string, number>} */
+  const spaces = {}
+  const rawSpaces = _isPlainObject(source.spaces) ? /** @type {Object} */ (source.spaces) : {}
+  for (const trailId of Object.keys(rawSpaces)) {
+    if (known.has(trailId)) spaces[trailId] = _nonNegativeInt(rawSpaces[trailId])
+  }
+  return {
+    currentId: known.has(source.currentId) ? source.currentId : DEFAULT_TRAIL_ID,
+    spaces,
+  }
 }
 
 /**
@@ -285,7 +308,7 @@ export function defaultProgress() {
       factsCorrect: 0,
       sessionsCompleted: 0,
     },
-    trail: { space: 0 },
+    trails: { currentId: DEFAULT_TRAIL_ID, spaces: {} },
     daily: {
       todayDate: null,
       factsToday: 0,
@@ -324,7 +347,7 @@ export function normalizeProgress(raw) {
   const state = {
     facts: _normalizeFacts(source.facts),
     totals: _normalizeTotals(source.totals),
-    trail: _normalizeTrail(source.trail),
+    trails: _normalizeTrails(source.trails),
     daily: _normalizeDaily(source.daily),
     // Structural only: Settings drops unknown keys itself, so a legacy
     // `inputMode` survives here and dies there.
