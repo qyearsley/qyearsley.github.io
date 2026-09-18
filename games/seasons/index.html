@@ -135,13 +135,16 @@
         <h2 id="settings-title">Settings</h2>
 
         <div class="setting-group">
+          <!-- Unchecked in the markup to match the saved default. The game
+               writes the real state on boot; this only decides what a player
+               sees in the instant before the script runs. -->
           <label class="setting-check" for="setting-timer">
-            <input id="setting-timer" type="checkbox" checked />
+            <input id="setting-timer" type="checkbox" />
             <span>Countdown timer</span>
           </label>
           <p class="setting-description">
-            Turn this off and every question waits as long as you like. The questions themselves do
-            not change.
+            Turn this on and summer, autumn and winter give each question a time limit. The
+            questions themselves do not change.
           </p>
         </div>
 

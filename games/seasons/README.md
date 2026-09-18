@@ -118,12 +118,13 @@ rather than of the space; the mountain is the only kind that carries it.
 | Autumn | ×2 3 4 6 7 8 9, − facts 11–18, × 10–50 | `54 ÷ 9`                 | `56 ÷ 8`     | 28s   | 18    | 4       | 15     |
 | Winter | ×4 6 7 8 9, − facts 11–18, × 10–70     | `8 × 7 + 9`, or `63 ÷ 9` | `8 × 9 - 17` | 25s   | 20    | 5       | 17     |
 
-**The clock is deliberately loose.** It was 20/18/16s, and played that way the
-countdown rather than the arithmetic was what made a question fail — a timer has
-to cover reading the question, working it out, _and_ reading four options. It
-still tightens across the year, because that is part of the escalation, but it is
-now slack enough that running out means the fact was not known. It can also be
-switched off entirely; see [Settings](#settings).
+**The clock is deliberately loose**, when it runs at all — it is off unless a
+player turns it on; see [Settings](#settings). It was 20/18/16s, and played that
+way the countdown rather than the arithmetic was what made a question fail — a
+timer has to cover reading the question, working it out, _and_ reading four
+options. It still tightens across the year, because that is part of the
+escalation, but it is now slack enough that running out means the fact was not
+known.
 
 Every hard slot carries a `from` floor on its quotient, which is what stops it
 asking `12 ÷ 6`; see [Change the maths](#change-the-maths). Subtraction stops
@@ -227,12 +228,19 @@ sorted choice list, which is the assertion whose absence let the giveaway surviv
 
 ## Settings
 
-One control, behind the gear in the top bar: **Countdown timer**, on by default.
+One control, behind the gear in the top bar: **Countdown timer**, off by
+default.
 
-Turning it off makes every question untimed. Nothing else changes — the same
-seasons ask the same questions, and the Sloth's ten extra seconds simply stop
-mattering. It exists because the clock, not the arithmetic, is the part of this
-game a nervous player finds hardest, and three of the four seasons have one.
+Turning it on makes summer, autumn and winter run their clocks. Nothing else
+changes — the same seasons ask the same questions, and with it off the Sloth's
+ten extra seconds simply stop mattering. It is a setting rather than a fixed
+rule because the clock, not the arithmetic, is the part of this game a nervous
+player finds hardest, and three of the four seasons have one.
+
+It defaulted the other way until 2026-09-18. The first real play said the
+countdown was intimidating, which is a different complaint from "the questions
+are too hard" and wants a different answer, so the race is now something a
+player opts into rather than something she has to find the switch for.
 
 Three details are deliberate rather than incidental:
 
@@ -241,10 +249,12 @@ Three details are deliberate rather than incidental:
   to open settings is the one the countdown is bothering, and timing her out
   behind the dialog she opened to switch it off would be the game at its worst.
 - **The preference survives "start over".** That button erases the journey, and
-  quietly switching the countdown back on is not what it says it does.
-- **A save written before the setting existed loads with the clock on**, because
-  the build that wrote it was timed. Only a literal `false` turns it off; see
-  `_normalizeSettings` in [`js/storage.js`](js/storage.js).
+  quietly changing the countdown is not what it says it does.
+- **A save written before the setting existed loads untimed**, even though the
+  build that wrote it was timed. That is the one cost of flipping the default,
+  and it is accepted: only a literal `true` turns the clock on, so a save that
+  had ticked the box keeps it. See `_normalizeSettings` in
+  [`js/storage.js`](js/storage.js).
 
 ## Keyboard
 
@@ -685,8 +695,9 @@ site's own stylesheet and scripts.
 
 Real, and not yet fixed. **The countdown is not announced** — the number carries
 `aria-hidden`, so a screen-reader user gets no warning that time is running out.
-The [countdown setting](#settings) is the lever that makes the timed seasons
-playable that way at all, but it is a switch rather than an announcement. **The
+Since 2026-09-18 the clock is off unless a player turns it on, so a
+screen-reader user meets this only after opting in, but the announcement is
+still missing. **The
 page can still scroll mid-question on a small phone**, because
 `min-height: 100dvh` sets a floor rather than a ceiling; the target device is a
 shared iPad, where it fits. **`save.unlocked` and `save.totals` are written but

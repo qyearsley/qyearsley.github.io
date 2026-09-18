@@ -248,18 +248,19 @@ rather than an incidental one.
 Judged not to stand between Ella and a good first play, in rough value order.
 Most of this list was cleared on 2026-08-31; what is left is below the done ones.
 
-- ~~**The countdown cannot be switched off.**~~ **Done**, 2026-09-05. A gear in
-  the top bar opens a dialog with one checkbox, and unticking it makes every
-  season untimed. It came from a real play session: the countdown was
+- ~~**The countdown cannot be switched off.**~~ **Done**, 2026-09-05, and
+  **turned off by default** on 2026-09-18. A gear in the top bar opens a dialog
+  with one checkbox. It came from a real play session: the countdown was
   intimidating, which is a different complaint from "the questions are too
   hard" and wanted a different answer. The maths is unchanged; only the race is
   gone. Two details cost more
   thought than the switch did — the dialog stops the clock while it is open, so
   a question cannot expire behind the thing you opened to stop it; and "start
   over" keeps the preference, because erasing a journey is not the same as
-  overruling a player. The save key defaults to on for a save written before it
-  existed. Written up in the game's own README, since it is a feature rather
-  than a plan.
+  overruling a player. Flipping the default cost one thing, knowingly: a save
+  written before the key existed now loads untimed, where it used to load
+  timed. A save that had ticked the box carries a literal `true` and keeps it.
+  Written up in the game's own README, since it is a feature rather than a plan.
 - **A season picker.** Still open, and the half of "nothing frames four seasons"
   that was not done: the character screen now shows which seasons are open, but
   there is no way to _choose_ one. Whether she can replay a finished season, or

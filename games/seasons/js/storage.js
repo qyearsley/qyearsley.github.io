@@ -96,7 +96,7 @@ const SEASON_IDS = new Set(SEASON_ORDER)
  *
  * @typedef {Object} Settings
  * @property {boolean} timer - Whether a timed season runs its countdown.
- *   Default true. False makes every question untimed, whatever the season's
+ *   Default false. False makes every question untimed, whatever the season's
  *   `timerSeconds` says -- the questions are unchanged, only the clock goes.
  */
 
@@ -225,18 +225,25 @@ function _normalizeTotals(raw) {
 /**
  * Coerce untrusted preferences.
  *
- * `timer` defaults to **true** and only a literal `false` turns it off, which is
- * the opposite of how the counters above are read. That direction matters: a
- * save written before this key existed has no `timer` at all, and the game it
- * was written by was timed, so absent has to mean on. A truthy `0` or `"no"`
- * from a hand-edited save is not an answer either way, so it leaves the default.
+ * `timer` defaults to **false** and only a literal `true` turns it on. It used
+ * to default the other way, because the game was timed before the switch
+ * existed and a save from then has no `timer` key at all. The default flipped
+ * on 2026-09-18: a countdown read as intimidating on the first real play, and
+ * an opt-in race is the better starting point for a game a child picks up
+ * alone. The cost of the flip is exactly that case -- a save written before the
+ * key existed now loads untimed, which is a change to the game it was written
+ * by, and the deliberate choice. A save that ticked the box keeps it, because
+ * it carries a literal `true`.
+ *
+ * A truthy `1` or `"yes"` from a hand-edited save is not an answer either way,
+ * so it leaves the default.
  * @private
  * @param {unknown} raw - Persisted value of unknown shape
  * @returns {Settings} A new, valid settings object
  */
 function _normalizeSettings(raw) {
   const source = _isPlainObject(raw) ? /** @type {Object} */ (raw) : {}
-  return { timer: source.timer !== false }
+  return { timer: source.timer === true }
 }
 
 /**

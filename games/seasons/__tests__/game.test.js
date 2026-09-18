@@ -432,6 +432,16 @@ async function bootInto(run = {}, save = {}) {
   await boot()
 }
 
+/**
+ * The save fragment a test passes when it is about the countdown.
+ *
+ * The clock is off by default as of 2026-09-18, so a seeded save has none
+ * unless it says so. A test that wants to watch the clock has to ask, which is
+ * the right way round: the tests that do not ask now run the game the way a
+ * player who never opens settings gets it.
+ */
+const TIMED = { settings: { timer: true } }
+
 /** The single save/restore for the whole file. See helpers.js. */
 restoreRulesBetweenTests()
 
@@ -1068,7 +1078,7 @@ describe("the verdict under the question", () => {
   // Running out of time is its own branch, and it still has to teach the
   // answer. Summer is the first season with a clock.
   it("a timeout says so, and states the answer", async () => {
-    await bootInto({ characterId: "banana-slug", seasonId: "summer", position: 1 })
+    await bootInto({ characterId: "banana-slug", seasonId: "summer", position: 1 }, TIMED)
     const answer = liveQuestion().answer
     expect(byId("timer").textContent).toBe(String(SUMMER.timerSeconds))
 
@@ -1218,9 +1228,11 @@ describe("playing a season to the end", () => {
     expect(saved().run.items).toBe(0)
     // Spring's tally survives into the run summary; the per-season counters do not.
     expect(saved().run.collected).toEqual({ spring: PERFECT_SPRING })
-    // Summer is the first timed season, and the sloth's ten seconds apply.
-    expect(byId("timer-wrap").classList.contains("hidden")).toBe(false)
-    expect(byId("timer").textContent).toBe(String(SUMMER.timerSeconds + 10))
+    // Summer is the first timed season, and this run reached it on a fresh save,
+    // which since 2026-09-18 means the countdown is off. So the clock stays
+    // hidden: crossing into a timed season does not switch it back on. The
+    // sloth's ten extra seconds are covered in "the countdown setting" below.
+    expect(byId("timer-wrap").classList.contains("hidden")).toBe(true)
   })
 
   it("does not unlock summer twice when spring is cleared again", () => {
@@ -1624,7 +1636,7 @@ describe("leaving and coming back", () => {
     // to be retunable, and this test is about the pause, not the length. The
     // Banana Slug has no timer perk, so what the season says is what shows.
     const full = getSeason("summer").timerSeconds
-    await bootInto({ characterId: "banana-slug", seasonId: "summer", position: 1 })
+    await bootInto({ characterId: "banana-slug", seasonId: "summer", position: 1 }, TIMED)
     expect(byId("timer").textContent).toBe(String(full))
 
     jest.advanceTimersByTime(3_000)
@@ -1932,18 +1944,29 @@ describe("the countdown setting", () => {
   }
 
   /** A timed season, part-way along, so there is a clock to look at. */
-  const bootIntoSummer = (save) =>
+  const bootIntoSummer = (save = TIMED) =>
     bootInto({ characterId: "banana-slug", seasonId: "summer", position: 1 }, save)
 
-  it("defaults to on, so nothing changes for a player who never opens settings", async () => {
+  it("defaults to off, so a player who never opens settings is never raced", async () => {
+    await bootIntoSummer({})
+    expect(timerBox().checked).toBe(false)
+    expect(clockShowing()).toBe(false)
+    // The clock is not merely hidden -- the question does not expire.
+    jest.advanceTimersByTime(SUMMER.timerSeconds * 3000)
+    expect(feedback()).toBe("")
+    // A save written before this key existed has no `settings` at all --
+    // `bootIntoSummer({})` seeds exactly that -- and the first write fills it in.
+    await answerCorrectly()
+    expect(saved().settings).toEqual({ timer: false })
+  })
+
+  // The other half of the default: a save from before the flip that had ticked
+  // the box carries a literal `true`, so it keeps its clock.
+  it("is on for a save that had asked for it", async () => {
     await bootIntoSummer()
     expect(timerBox().checked).toBe(true)
     expect(clockShowing()).toBe(true)
     expect(byId("timer").textContent).toBe(String(SUMMER.timerSeconds))
-    // A save written before this key existed has no `settings` at all --
-    // `bootIntoSummer` seeds exactly that -- and the first write fills it in.
-    await answerCorrectly()
-    expect(saved().settings).toEqual({ timer: true })
   })
 
   it("opening settings stops the clock, so a question cannot expire behind it", async () => {
@@ -2006,6 +2029,15 @@ describe("the countdown setting", () => {
     await bootInto({ seasonId: "spring", position: 1 })
     setCountdown(true)
     expect(clockShowing()).toBe(false)
+  })
+
+  // The perk applies to the clock the setting turns on, not to some other clock.
+  // Moved here from "playing a season to the end", which reaches summer on a
+  // fresh save and so no longer has a countdown to measure.
+  it("adds the sloth's ten seconds to the season's own allowance", async () => {
+    await bootInto({ characterId: "sloth", seasonId: "summer", position: 1 }, TIMED)
+    expect(clockShowing()).toBe(true)
+    expect(byId("timer").textContent).toBe(String(SUMMER.timerSeconds + 10))
   })
 
   it("Escape closes the dialog", async () => {

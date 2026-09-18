@@ -148,7 +148,7 @@ describe("defaultSave", () => {
         questionsAnswered: 0,
         questionsCorrect: 0,
       },
-      settings: { timer: true },
+      settings: { timer: false },
     })
   })
 
@@ -289,7 +289,7 @@ describe("normalizeSave", () => {
       expect(save.run).toEqual(defaultSave().run)
       expect(save.unlocked).toEqual(["spring"])
       expect(save.totals.runsCompleted).toBe(3)
-      expect(save.settings).toEqual({ timer: true })
+      expect(save.settings).toEqual({ timer: false })
     })
 
     it("carries version and lastPlayed through only when present", () => {
@@ -619,34 +619,42 @@ describe("normalizeSave", () => {
   })
 
   // The countdown switch reads the opposite way round from every counter above,
-  // and deliberately: absent means on, because a save written before the key
-  // existed came from a build that always ran the clock.
+  // and deliberately: absent means OFF, so a player who never opens settings is
+  // never raced. The direction flipped on 2026-09-18, which means a save written
+  // before the key existed -- by a build that always ran the clock -- now loads
+  // untimed. That is the intended cost of the flip; see `_normalizeSettings`.
   describe("settings", () => {
     it.each([
       ["absent", {}],
       ["an absent settings block", { run: {} }],
-      ["a non-object", { settings: "off" }],
+      ["a non-object", { settings: "on" }],
       ["an array", { settings: [] }],
       ["an unrelated key", { settings: { sound: "off" } }],
       ["a truthy non-boolean", { settings: { timer: 1 } }],
       ["a falsy non-boolean", { settings: { timer: 0 } }],
       ["null", { settings: { timer: null } }],
-    ])("leaves the countdown on for %s", (_label, raw) => {
-      expect(normalizeSave(raw).settings).toEqual({ timer: true })
+    ])("leaves the countdown off for %s", (_label, raw) => {
+      expect(normalizeSave(raw).settings).toEqual({ timer: false })
     })
 
-    it("turns the countdown off only for a literal false", () => {
-      expect(normalizeSave({ settings: { timer: false } }).settings).toEqual({ timer: false })
+    it("turns the countdown on only for a literal true", () => {
+      expect(normalizeSave({ settings: { timer: true } }).settings).toEqual({ timer: true })
+    })
+
+    // A save from before the flip that had explicitly ticked the box carries a
+    // literal `true`, so the preference survives the change in default.
+    it("keeps the countdown for a save that had asked for it", () => {
+      expect(normalizeSave({ settings: { timer: true }, run: {} }).settings.timer).toBe(true)
     })
 
     it("drops unknown settings", () => {
-      const { settings } = normalizeSave({ settings: { timer: false, difficulty: "hard" } })
+      const { settings } = normalizeSave({ settings: { timer: true, difficulty: "hard" } })
       expect(Object.keys(settings)).toEqual(["timer"])
     })
 
     it("survives a round trip through the manager", () => {
-      manager.saveRun({ ...defaultSave(), settings: { timer: false } })
-      expect(manager.loadRun().settings).toEqual({ timer: false })
+      manager.saveRun({ ...defaultSave(), settings: { timer: true } })
+      expect(manager.loadRun().settings).toEqual({ timer: true })
     })
   })
 })
