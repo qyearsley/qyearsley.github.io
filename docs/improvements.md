@@ -12,6 +12,7 @@ docs are the `*-plan.md` files in this directory.
 
 1. Three games have English chrome on their `/zh/` page — M · open
 2. Game gameplay is English on every `/zh/` page — L · decision owed
+3. Turing Tape's per-level `maxSteps` is never read — S · open
 
 ## Working on these
 
@@ -70,6 +71,36 @@ page, which argues against a long-lived option B.
 _Checked 2026-09-18: `grep -c "t(" games/*/js/*.js` is not a useful measure --
 the real number needs the inventory pass the plan calls step one of phase 3._
 
+## 3. Turing Tape's per-level `maxSteps` is never read
+
+**S · open, and already a documented gap**
+
+Not a new finding: `games/turing-tape/README.md` lists it under **Known gaps**
+and mentions it twice more. This entry exists because the gap has a decision
+attached that has never been made, and a known gap with no decision is how it
+stays known forever.
+
+Every level and demo in `js/levels.js` declares a `maxSteps`, but nothing that
+runs one reads it -- `TuringMachine` caps at its own module constant,
+`MAX_STEPS = 500` (`TuringMachine.js:1`). "Write One" declares `maxSteps: 10` and
+runs 500 steps before reporting `max-steps`, with the message quoting 500.
+
+Two ways to close it, and either is fine:
+
+- **Pass `level.maxSteps` in as the cap.** The declared figures are the useful
+  ones -- they hint at the intended solution length, and the tightest is 10
+  against a cap fifty times larger. This is a behaviour change, not a fix:
+  puzzles fail faster, which is the point, but a player midway through a long
+  wrong attempt sees the error sooner than today.
+- **Delete the field** and stop implying it does something. Cheaper, and honest.
+  The demo bound in the tests would need a literal instead.
+
+_Checked 2026-09-18: `grep -rn maxSteps games/turing-tape/` -- eight declarations
+in `levels.js`; the only reader is `__tests__/levels.test.js`, which uses the demo
+figures as a test bound at `:88-92` and type-checks the field at `:24` and `:67`.
+`TuringMachine.js` never mentions it. The README records the gap at `:92`,
+`:109-110` and `:174-176`._
+
 ## Settled
 
 ### Decided 2026-09-18, no change
@@ -89,6 +120,15 @@ the real number needs the inventory pass the plan calls step one of phase 3._
 
 ### Landed 2026-09-18
 
+- **`js/README.md` for Life Garden and Turing Tape.** The other three games had
+  one; these two did not. Life Garden's covers the two-layer board, the seeded
+  generator that makes the preset ecology tests possible, and three invariants
+  that read like working code when broken -- the species numbering the digit keys
+  depend on, the "is this cell taken" layer rule, and the per-gesture painted-cell
+  set. Turing Tape's covers the shared `contentRange` alignment behind
+  `matchesTape` and `matchMask`, and why that game has no
+  `GameState`/`GameUI`/`EventManager` split, and it is what prompted item 3 --
+  which was already a documented gap, just one nobody had decided about.
 - **Every game page has a language switcher.** `build.js` injected the EN/中文
   link by replacing `</header>`, and no game page has a `<header>` -- so the
   replacement found nothing, failed silently, and all five games shipped without

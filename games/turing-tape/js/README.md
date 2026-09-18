@@ -97,7 +97,9 @@ than `HALT`, which means its halt reason is `no-rule`. Demos never call
 demo declares it, but `TuringMachine` caps at its own `MAX_STEPS = 500`, so a
 puzzle declaring `maxSteps: 10` still runs 500 steps before reporting
 `max-steps`. The only consumer is `__tests__/levels.test.js`, which uses the demo
-figures as a test bound. Recorded in `docs/improvements.md`.
+figures as a test bound. This is long-standing and deliberate-ish rather than a
+surprise — the game README lists it under **Known gaps**, and what to do about it
+is in `docs/improvements.md`.
 
 ### game.js
 

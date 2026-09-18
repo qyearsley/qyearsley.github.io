@@ -136,6 +136,8 @@ and `.result-msg.success` / `.error`.
 
 ## For developers
 
+See [js/README.md](js/README.md) for detailed module architecture documentation.
+
 ```
 index.html            # The whole page: nav, tapes, controls, rule table, "How it works"
 index.zh.json         # Chinese title and meta description only; the body is not translated
