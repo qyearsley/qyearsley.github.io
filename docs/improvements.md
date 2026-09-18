@@ -1,14 +1,8 @@
 # Improvements
 
-> **Status: audited 2026-09-18 against `main` @ `3e8c21d` plus the uncommitted
-> Number Garden theme work in the tree at the time** (five files: `index.html`,
-> `js/GameUI.js`, `styles/common.css`, `styles/main.css`, and `styles/garden.css`
-> deleted). Migrated from the unversioned `~/hobby/IMPROVEMENTS.md`, which
-> covered seven repos at once and had drifted; every claim below was re-checked
-> on this date.
->
-> Two items that were open on arrival are already fixed by that uncommitted work
-> — see `## In progress, uncommitted`. Re-audit once it lands.
+> **Status: audited 2026-09-18 against `main` @ `3e8c21d`.** Migrated from the
+> unversioned `~/hobby/IMPROVEMENTS.md`, which covered seven repos at once and
+> had drifted; every claim below was re-checked on this date.
 
 This file is the maintenance backlog: defects, debt, test gaps and doc drift.
 Blog post ideas live in [`blog-ideas.md`](blog-ideas.md). Per-feature design
@@ -16,8 +10,8 @@ docs are the `*-plan.md` files in this directory.
 
 ## At a glance
 
-1. Turing Tape cannot un-complete a level — S · open
-2. No installable game has a real `apple-touch-icon` — S · decision owed
+1. Turing Tape cannot un-complete a level — S · settled, deliberately left
+2. No installable game has a real `apple-touch-icon` — S · settled, `icon.svg` stays
 3. `js/README.md` is missing for two of the five games — S · open
 
 ## Working on these
@@ -28,7 +22,7 @@ docs are the `*-plan.md` files in this directory.
 
 ## 1. Turing Tape cannot un-complete a level
 
-**S · open**
+**S · settled, deliberately left**
 
 `games/turing-tape/js/game.js:420` writes `completedLevels` to `localStorage`
 under `STORAGE_KEY = "turingTape"` with no version key, and nothing in the UI
@@ -36,24 +30,24 @@ clears it — `doReset()` at `:368` resets the machine's tape, not the progress
 set. Once a level is green it is green forever. Every other game on the site has
 a way back to a clean state.
 
-It cannot brick anything: the load at `:410` is inside a `try`. Add a clear
-control, and a version key while the format is being touched anyway.
+It cannot brick anything: the load at `:410` is inside a `try`. Reviewed
+2026-09-18 and left as it is for now; the asymmetry with the other games is
+known and accepted rather than missed.
 
-_Checked 2026-09-18: `grep -n "completedLevels\|STORAGE_KEY"
-games/turing-tape/js/game.js`, and the `reset-btn` handler at `:429`, which
-calls `doReset`._
+_Checked 2026-09-18: `grep -n "completedLevels\|STORAGE_KEY" games/turing-tape/js/game.js`
+and the `reset-btn` handler at `:429`, which calls `doReset`._
 
 ## 2. No installable game has a real `apple-touch-icon`
 
-**S · decision owed**
+**S · settled, `icon.svg` stays**
 
 `number-garden`, `seasons` and `times-trail` each point `apple-touch-icon` at
 their `icon.svg`. iOS ignores SVG there, so Add to Home Screen falls back to a
-page snapshot. Each `index.html` already carries a comment saying exactly this.
+page snapshot.
 
-The fix is one 180×180 PNG per game and one `href` change. The cost is the
-repo's no-binary-assets convention, which is why this is a decision rather than
-a chore.
+Decided 2026-09-18: keep the SVG. A worse home-screen icon is a smaller cost
+than three binary files in a repo that has none, and the comment in each
+`index.html` already records the trade.
 
 _Checked 2026-09-18: `grep -rn "apple-touch-icon" games/*/index.html` — three
 hits, all `href="icon.svg"`, each preceded by the comment._
@@ -66,34 +60,36 @@ hits, all `href="icon.svg"`, each preceded by the comment._
 explaining their module layout. `life-garden` and `turing-tape` do not. All five
 have a top-level `README.md`.
 
-_Checked 2026-09-18: `ls games/*/js/README.md` returns three paths._
-
-## In progress, uncommitted
-
-Both were open items when this file was written, and both are already fixed in
-the working tree by the Number Garden theme refactor. They are recorded here so
-they are not re-raised, and so the next audit knows to confirm rather than
-rediscover.
-
-- **Number Garden loaded Google Fonts from a third party.** It was the only file
-  on the site referencing `fonts.googleapis.com`, costing a render-blocking
-  third-party round trip on the game most likely to be opened on an iPad over
-  cellular. The two `preconnect` links and the `Quicksand` stylesheet link are
-  gone from `index.html`. _Checked 2026-09-18: `grep -rn "fonts.googleapis"
-games/` returns nothing._
-- **Number Garden's dark mode covered the modal only** — three selectors in
-  `common.css`, while `#game-container` was a hardcoded `rgb(255, 255, 255,
-0.95)`, so a dark settings panel floated over a white game. The refactor moves
-  theming onto CSS custom properties (`--ng-surface`, `--ng-surface-alt`,
-  `--ng-error-bg`, `--theme-accent`) and the dark block now sets those variables
-  and `body` at `main.css:1514-1568`, rather than patching three selectors.
-  `#game-container` no longer sets a background colour. _Checked 2026-09-18:
-  `grep -n "prefers-color-scheme\|data-theme" games/number-garden/styles/*.css`
-  now hits `main.css` only._
+_Checked 2026-09-18: `find games -name README.md` — six game-level files, three
+`js/` files._
 
 ## Settled
 
-Landed 2026-09-05 unless noted. Suite went to 3,845 tests across 69 suites.
+### Landed 2026-09-18
+
+- **Number Garden no longer loads Google Fonts.** Quicksand came from
+  `fonts.googleapis.com` — the only third-party request any page on the site
+  made, and a render-blocking one on the game most likely to be opened on an
+  iPad. Replaced with `ui-rounded`, the rounded system face, which is SF Pro
+  Rounded on the target device and costs nothing.
+- **Number Garden's dark mode covers the whole game.** It used to be three
+  selectors, so a dark settings panel floated over a white game. Two things made
+  it more than a second palette: the per-area colours are inline styles written
+  by `GameUI`, so they are re-derived with `color-mix` rather than replaced; and
+  the stage background moved from an inline `background-color` onto a
+  `--ng-stage-bg` custom property, because an inline colour beats every rule in
+  the stylesheet and every stage colour is a light one.
+- **`stylesheets.test.js` now compares the two dark forms.** Every sheet on the
+  site writes its dark tokens out twice — once under the OS media query, once
+  under an explicit `[data-theme="dark"]` — with a comment asking whoever edits
+  one to edit the other. A comment is not a gate; the test is. Verified by
+  deleting a token from one block and watching it fail.
+- **`games/number-garden/styles/garden.css` deleted.** Every rule in it was
+  dead: `.grass`, `.sky` and `.sparkle` name SVG gradient ids in
+  `ProjectVisuals.js` rather than elements, and nothing renders `.flower-*`,
+  `.butterfly`, `.garden-grid` or `.garden-slot` — flowers are emoji.
+
+### Landed 2026-09-05
 
 - Seasons: optional countdown behind a gear, animated weather driven by
   `AIR_ART` motion tags, and a focus trap in the new dialog.
@@ -122,9 +118,9 @@ Landed 2026-09-05 unless noted. Suite went to 3,845 tests across 69 suites.
 but the visual work — the Seasons settings dialog, the roughly one hundred
 CSS-animated SVG groups of falling weather on the winter trail, and now the
 Number Garden theme refactor — has never been looked at on a real screen. The
-weather and the refactor both want one look on an actual iPad.
-
-The uncommitted work was read, not run. `npm test` was not executed against it.
+weather and the refactor both want one look on an actual iPad. There is no
+headless browser in the dev dependencies, so nothing in the toolchain can check
+this; it needs a person.
 
 One pre-existing commit, `0f300d7` (2025-02-20), carries the work email address.
 Rewriting it means rewriting every commit after it and force-pushing a public

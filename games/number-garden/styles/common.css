@@ -91,7 +91,7 @@
 }
 
 .nav-button:hover {
-  background: rgb(0, 0, 0, 0.05);
+  background: var(--ng-hover-wash);
 }
 
 .text-button {
@@ -152,7 +152,7 @@
 }
 
 .modal-content {
-  background: white;
+  background: var(--ng-surface);
   padding: 32px;
   border-radius: 16px;
   max-width: 500px;
@@ -185,14 +185,15 @@
   font-size: 1rem;
   border: 2px solid var(--ng-border);
   border-radius: 8px;
-  background: white;
+  background: var(--ng-surface-alt);
+  color: inherit;
   cursor: pointer;
   transition: border-color 0.2s ease;
 }
 
 .setting-select:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--theme-accent);
 }
 
 .setting-description {
@@ -223,8 +224,9 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: #fee;
-  border: 2px solid #c33;
+  background: var(--ng-error-bg, #fee);
+  border: 2px solid var(--ng-error, #c33);
+  color: var(--ng-ink, #2e2836);
   padding: 2rem;
   border-radius: 8px;
   max-width: 500px;
@@ -233,7 +235,7 @@
 }
 
 .error-container h2 {
-  color: #c33;
+  color: var(--ng-error, #c33);
   margin-top: 0;
 }
 
@@ -253,47 +255,4 @@
     padding: 10px 24px;
     font-size: 1rem;
   }
-}
-
-/* ==================== Dark Mode Support ====================
-   Number Garden is otherwise a light-only game -- the body carries the area's
-   theme colour and #game-container is near-white -- so this covers the modal
-   alone. Scoped like every other dark block on the site: the OS preference,
-   unless /shared/theme.js has written an explicit choice onto <html>. Before
-   that scoping the modal flipped on the OS preference and ignored the theme
-   picker, so "Light" on a dark machine still gave a dark settings panel.
-
-   Whether a dark modal belongs in a light game at all is a design question,
-   not a correctness one, and is left as it was. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .modal-content {
-    background: #2d3748;
-    color: #e2e8f0;
-  }
-
-  :root:not([data-theme="light"]) .setting-select {
-    background: #1a202c;
-    border-color: #4a5568;
-    color: #e2e8f0;
-  }
-
-  :root:not([data-theme="light"]) .nav-button:hover {
-    background: rgb(255, 255, 255, 0.1);
-  }
-}
-
-/* The explicit choice. See the note above about writing both forms out. */
-:root[data-theme="dark"] .modal-content {
-  background: #2d3748;
-  color: #e2e8f0;
-}
-
-:root[data-theme="dark"] .setting-select {
-  background: #1a202c;
-  border-color: #4a5568;
-  color: #e2e8f0;
-}
-
-:root[data-theme="dark"] .nav-button:hover {
-  background: rgb(255, 255, 255, 0.1);
 }

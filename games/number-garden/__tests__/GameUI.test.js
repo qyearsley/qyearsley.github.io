@@ -606,11 +606,13 @@ describe("GameUI", () => {
   // settings modal for the rest of the session.
   describe("clearBodyTheme", () => {
     test("removes the body background the activity screen painted", () => {
+      document.body.style.setProperty("--ng-stage-bg", "#2c2c44")
       document.body.style.backgroundColor = "rgb(44, 44, 68)"
       document.body.style.backgroundImage = "linear-gradient(red, blue)"
 
       gameUI.clearBodyTheme()
 
+      expect(document.body.style.getPropertyValue("--ng-stage-bg")).toBe("")
       expect(document.body.style.backgroundColor).toBe("")
       expect(document.body.style.backgroundImage).toBe("")
     })
@@ -697,11 +699,18 @@ describe("GameUI", () => {
       },
     }
 
-    test("updates visual theme based on progress", () => {
+    // The stage colour goes through `--ng-stage-bg`, not `background-color`.
+    // An inline `background-color` would beat every dark rule in the
+    // stylesheet, and every stage colour in ProgressionManager is a light one,
+    // so the dark theme could never get its hands on the area background.
+    test("publishes the stage colour as a custom property", () => {
       gameUI.updateVisualProgression("forest", mockThemes, 60)
 
       const preview = document.querySelector(".garden-preview")
-      expect(preview.style.backgroundColor).toBe("rgb(144, 238, 144)")
+      expect(preview.style.getPropertyValue("--ng-stage-bg")).toBe("#90EE90")
+      expect(document.body.style.getPropertyValue("--ng-stage-bg")).toBe("#90EE90")
+      expect(preview.style.backgroundColor).toBe("")
+      expect(document.body.style.backgroundColor).toBe("")
     })
 
     test("sets CSS custom properties for theme colors", () => {

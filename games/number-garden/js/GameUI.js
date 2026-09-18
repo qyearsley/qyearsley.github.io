@@ -368,6 +368,7 @@ export class GameUI extends BaseGameUI {
    * settings modal in it for the rest of the session.
    */
   clearBodyTheme() {
+    document.body.style.removeProperty("--ng-stage-bg")
     document.body.style.backgroundColor = ""
     document.body.style.backgroundImage = ""
     document.body.style.backgroundSize = ""
@@ -414,8 +415,13 @@ export class GameUI extends BaseGameUI {
       }
     }
 
-    // Apply the background color and image to garden preview
-    this.elements.gardenPreview.style.backgroundColor = currentStage.background
+    // Apply the background color and image to garden preview. The stage colour
+    // goes through `--ng-stage-bg` rather than straight onto `background-color`
+    // so that the stylesheet decides how to render it: in dark mode it is mixed
+    // into a near-black instead of used raw. Every stage colour in
+    // ProgressionManager is a light one -- Flower Meadow ends on #84fab0 -- and
+    // a raw inline value would beat any dark rule, since an inline style wins.
+    this.elements.gardenPreview.style.setProperty("--ng-stage-bg", currentStage.background)
     this.elements.gardenPreview.style.backgroundSize = "auto"
     this.elements.gardenPreview.style.backgroundRepeat = "repeat"
     if (currentStage.backgroundImage) {
@@ -428,7 +434,7 @@ export class GameUI extends BaseGameUI {
     // hub, the title screen and the settings modal all share this body, and
     // Crystal Cave's near-black stages tinted every one of them until it was
     // added.
-    document.body.style.backgroundColor = currentStage.background
+    document.body.style.setProperty("--ng-stage-bg", currentStage.background)
     document.body.style.backgroundSize = "auto"
     document.body.style.backgroundRepeat = "repeat"
     if (currentStage.backgroundImage) {

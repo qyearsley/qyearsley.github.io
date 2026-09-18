@@ -82,6 +82,40 @@ function darkMediaBlocks(css) {
 const cssFiles = SEARCH_DIRS.flatMap((dir) => findCssFiles(join(ROOT, dir), dir + "/"))
 const darkFiles = cssFiles.filter((f) => readRules(f).includes(DARK_QUERY))
 
+/**
+ * The custom-property names declared anywhere inside a chunk of CSS.
+ *
+ * @param {string} css - Stylesheet source, comments already stripped.
+ * @returns {Set<string>} Every `--name` that appears on the left of a colon.
+ */
+function declaredTokens(css) {
+  return new Set([...css.matchAll(/(--[\w-]+)\s*:/g)].map((m) => m[1]))
+}
+
+/**
+ * The source of every rule whose selector contains `[data-theme="dark"]`,
+ * excluding the ones inside a `@media (prefers-color-scheme: dark)` block.
+ *
+ * @param {string} css - Stylesheet source, comments already stripped.
+ * @returns {string} The bodies of those rules, concatenated.
+ */
+function explicitDarkRules(css) {
+  let outside = css
+  for (const block of darkMediaBlocks(css)) outside = outside.replace(block, "")
+
+  let joined = ""
+  let from = 0
+  for (;;) {
+    const found = outside.indexOf('[data-theme="dark"]', from)
+    if (found === -1) return joined
+    const open = outside.indexOf("{", found)
+    if (open === -1) return joined
+    const close = outside.indexOf("}", open)
+    joined += outside.slice(open + 1, close)
+    from = close
+  }
+}
+
 describe("stylesheets", () => {
   test("the search finds sheets, and some of them style a dark theme", () => {
     expect(cssFiles.length).toBeGreaterThan(0)
@@ -98,5 +132,19 @@ describe("stylesheets", () => {
       // preference still wins after the visitor has asked for light.
       expect(block).toContain(':not([data-theme="light"])')
     }
+  })
+
+  // The two forms have to be written out separately -- a custom property cannot
+  // be aliased across two selectors -- so every sheet here carries the same list
+  // of tokens twice, under a comment asking whoever edits one to edit the other.
+  // A comment is not a gate. This is: add a token to the media query and forget
+  // the explicit rule, and the theme picker silently drops that one colour.
+  test.each(darkFiles)("%s declares the same tokens in both dark forms", (relPath) => {
+    const css = readRules(relPath)
+    const inQuery = declaredTokens(darkMediaBlocks(css).join("\n"))
+    const inExplicit = declaredTokens(explicitDarkRules(css))
+    if (inQuery.size === 0 && inExplicit.size === 0) return
+
+    expect([...inExplicit].sort()).toEqual([...inQuery].sort())
   })
 })
