@@ -45,7 +45,6 @@ import {
   TIMING,
   TOKEN_EMOJI,
   TOTAL_FACTS,
-  TRAIL,
 } from "../js/constants.js"
 import { FACTS } from "../js/facts.js"
 

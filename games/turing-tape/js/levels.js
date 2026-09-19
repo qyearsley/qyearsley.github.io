@@ -72,7 +72,7 @@ export const demos = [
     name: "Busy Beaver (3-state)",
     description:
       "The 3-state busy beaver writes the maximum number of 1s (six) " +
-      "before halting, using only 3 states. It runs for 14 steps. " +
+      "before halting, using only 3 states. It runs for 13 steps. " +
       "This is a famous result in computability theory -- " +
       "finding busy beavers for larger state counts is an open problem.",
     tape: ["_", "_", "_", "_", "_", "_", "_", "_", "_"],
