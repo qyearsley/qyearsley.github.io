@@ -1,6 +1,6 @@
 # Game Translation Plan
 
-Status: **phases 0 and 1 done, phase 2 decided 2026-09-19.** Phases 3 and 4 are
+Status: **phases 0, 1 and 4 done; phase 2 decided 2026-09-19.** Phase 3 is
 closed unless a game gets its Chinese page back. Updated 2026-09-19.
 
 Leaving the games in English was a deliberate choice, not an oversight. The
@@ -155,19 +155,25 @@ Sizes for the three dropped games, if one ever comes back: Number Garden 3,671
 lines, Seasons 3,952, Times Trail 7,542. All line counts measured 2026-09-19
 with `cat games/<name>/js/*.js | wc -l`.
 
-## Phase 4: a coverage check that does not lie -- **open**
+## Phase 4: a coverage check that does not lie -- **done, 2026-09-19**
 
-Add a test that counts English text nodes in each built `/zh/` page and fails
-when a page goes backwards. The current signal, `build:verbose`, warns on 1
-string for a page that was 20% English, so it cannot be the ratchet.
+`__tests__/zh-coverage.test.js`. It counts English text nodes in each translated
+page, fails when a page goes backwards, and fails again when a page beats its
+baseline so the improvement gets locked in. It also makes an unmatched key a
+hard failure, which `build.js` only warns about.
 
-The check needs the built `dist/`, which `npm test` does not currently
-guarantee. Either build in the test, or run it as a separate script in the
-deploy workflow after `npm run build`.
+The open question here was that the check needs a built `dist/`, which
+`npm test` does not guarantee. It does not: it translates in memory with
+`translateContent`, so the suite runs standalone.
 
-This now guards two pages instead of five, which makes it cheaper and less
-valuable at the same time. It is still the only thing that would catch a
-`/zh/` page regressing.
+It guards two game pages instead of five, which makes it cheaper and less
+valuable at the same time. It guards every other page on the site as well, and
+that is where it immediately paid: it found four `chinese/` pages with
+untranslated prose, and one paragraph that scored zero because it quoted Chinese
+characters.
+
+Counting rules and their reasons are in
+[`translations.md`](translations.md#the-coverage-ratchet).
 
 ## Open questions
 

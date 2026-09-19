@@ -44,9 +44,8 @@ generates no `/zh/` page, injects no `hreflang` tags, lists no sitemap
 alternate, and leaves the language switcher out. `.lang-slot:empty` in
 `css/style.css` collapses the empty switcher slot, so the page shows no gap.
 
-Most tool and writing pages have a Chinese version. Only two of the five games
-do, and the reason is the pipeline itself. (`chinese/buddhist-vocabulary.html`
-also has none, for no recorded reason -- it predates this decision.)
+Every tool and writing page has a Chinese version. Only two of the five games
+do, and the reason is the pipeline itself.
 
 **The build translates static HTML. A game writes most of its text at runtime.**
 The matcher replaces text between tags in the HTML source. A string that
@@ -146,4 +145,60 @@ differs from English, so the fragments reassemble in the wrong order.
 1. Create a `<name>.zh.json` file next to the HTML page -- this alone opts the
    page into the pipeline
 2. Run `npm run build` -- warnings about unmatched keys appear by default
-3. Run `npm run build:verbose` to also see possibly-untranslated English text
+3. Run `npm test` -- the coverage ratchet tells you what is still English
+
+A new page starts with a baseline of zero, so the suite fails until the page is
+fully translated. That is deliberate.
+
+## The coverage ratchet
+
+`__tests__/zh-coverage.test.js` is the gate. It counts English text nodes in
+each translated page and fails when a page goes backwards. It also fails when a
+page beats its baseline, and prints the number to paste in, so an improvement
+gets locked in instead of leaving slack.
+
+It translates in memory with `translateContent`, so it needs no built `dist/`
+and `npm test` runs it on its own.
+
+It makes an unmatched key a hard failure. `build.js` only warns, and a key that
+matches nothing leaves a page silently English where it looks translated. This
+is the usual way a page rots: someone rewords a sentence and the key stops
+matching.
+
+**If you edit English prose on a translated page, re-run the suite.** Your edit
+almost certainly broke that page's keys.
+
+What counts as English:
+
+|     | Rule                                           | Why                               |
+| --- | ---------------------------------------------- | --------------------------------- |
+| 1   | No CJK character, and two or more words        | The ordinary case                 |
+| 2   | Five or more English words, even if it has CJK | English prose that quotes Chinese |
+
+Rule 2 exists because rule 1 alone missed a whole untranslated paragraph on
+`homophones.html`. The paragraph quotes 后, 後, 復, 複 and 复, so it contained
+CJK and was skipped, and the page scored zero.
+
+A single-word node is never counted. On the `chinese/` pages almost every one is
+pinyin (`ban3`, `yao`), a filename or a bit pattern, and counting them buried
+the signal -- `tone-table.html` scored 378 of them against one real miss. The
+cost is that a one-word English label does not show up here. Find those by
+reading the page.
+
+Three baselines are not zero, and all three are data rather than gaps: the UTF-8
+bit patterns on `encoding-explorer.html`, the pinyin spelling equations on
+`pinyin-abbreviations.html`, and the truth-table input syntax
+`(a and b) or (not a and not b)`, which is what that parser accepts.
+
+The ~211 English dictionary glosses in the `homophones.html` data rows
+(`] blackboard`) are excluded and counted separately. Whether a Chinese page
+should gloss 黑板 as "blackboard" for a reader who already knows is an open
+question, not a translation gap.
+
+## Attribute values are never translated
+
+The matcher only replaces text between tags, so `aria-label`, `title`, `alt` and
+`placeholder` stay English on every `/zh/` page -- about 264 of them site-wide.
+A screen reader announces those in English on a page that declares `lang="zh"`.
+
+Known and accepted. Closing it needs a mechanism in `build.js`, not more keys.
