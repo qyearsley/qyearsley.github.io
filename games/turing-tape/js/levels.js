@@ -10,7 +10,6 @@ export const levels = [
     headStart: 0,
     states: ["A", "HALT"],
     symbols: ["0", "1", "_"],
-    maxSteps: 10,
   },
   {
     id: "flip-it",
@@ -23,7 +22,6 @@ export const levels = [
     headStart: 0,
     states: ["A", "HALT"],
     symbols: ["0", "1", "_"],
-    maxSteps: 50,
   },
   {
     id: "move-right",
@@ -36,7 +34,6 @@ export const levels = [
     headStart: 0,
     states: ["A", "B", "HALT"],
     symbols: ["0", "1", "_"],
-    maxSteps: 20,
   },
   {
     id: "fill",
@@ -49,7 +46,6 @@ export const levels = [
     headStart: 0,
     states: ["A", "HALT"],
     symbols: ["0", "1", "_"],
-    maxSteps: 50,
   },
   {
     id: "binary-increment",
@@ -62,7 +58,6 @@ export const levels = [
     headStart: 0,
     states: ["A", "B", "HALT"],
     symbols: ["0", "1", "_"],
-    maxSteps: 100,
   },
 ]
 
@@ -84,7 +79,6 @@ export const demos = [
     headStart: 4,
     states: ["A", "B", "C", "HALT"],
     symbols: ["0", "1", "_"],
-    maxSteps: 200,
     rules: [
       ["A", "_", "1", "R", "B"],
       ["A", "1", "1", "L", "C"],
@@ -105,7 +99,6 @@ export const demos = [
     headStart: 0,
     states: ["A", "B", "C", "HALT"],
     symbols: ["0", "1", "_"],
-    maxSteps: 100,
     rules: [
       ["A", "1", "1", "R", "A"],
       ["A", "0", "1", "R", "B"],
@@ -125,7 +118,6 @@ export const demos = [
     headStart: 0,
     states: ["A", "B", "C", "D", "E", "F", "Y", "N"],
     symbols: ["0", "1", "_"],
-    maxSteps: 200,
     // A: read first char. If 1, erase and go right looking for matching 1 at end (state B).
     // If 0, erase and go right looking for matching 0 at end (state C).
     // If blank, all matched -- accept (Y).

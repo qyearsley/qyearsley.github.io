@@ -2,6 +2,12 @@ import { describe, test, expect } from "@jest/globals"
 import { levels, demos } from "../js/levels.js"
 import { TuringMachine } from "../js/TuringMachine.js"
 
+// Step bound for the demo halting test. Every demo halts in under 20 steps, so
+// 100 is generous. Keep it well below TuringMachine's MAX_STEPS (500): at that
+// cap the machine sets halted = true itself, so a bound of 500 or more would
+// let a demo that never halts pass the test.
+const DEMO_STEP_BOUND = 100
+
 function rulesFromArray(ruleArray) {
   const map = new Map()
   for (const [state, read, write, move, nextState] of ruleArray) {
@@ -21,7 +27,6 @@ describe("levels", () => {
       expect(typeof level.headStart).toBe("number")
       expect(Array.isArray(level.states)).toBe(true)
       expect(Array.isArray(level.symbols)).toBe(true)
-      expect(typeof level.maxSteps).toBe("number")
     }
   })
 
@@ -64,7 +69,6 @@ describe("demos", () => {
       expect(typeof demo.headStart).toBe("number")
       expect(Array.isArray(demo.states)).toBe(true)
       expect(Array.isArray(demo.symbols)).toBe(true)
-      expect(typeof demo.maxSteps).toBe("number")
       expect(Array.isArray(demo.rules)).toBe(true)
       expect(demo.rules.length).toBeGreaterThan(0)
     }
@@ -85,15 +89,18 @@ describe("demos", () => {
     }
   })
 
-  test("each demo halts within its declared maxSteps", () => {
+  test("each demo halts", () => {
     for (const demo of demos) {
       const tm = new TuringMachine([...demo.tape], rulesFromArray(demo.rules), "A", demo.headStart)
       let steps = 0
-      while (!tm.halted && steps <= demo.maxSteps) {
+      while (!tm.halted && steps < DEMO_STEP_BOUND) {
         tm.step()
         steps++
       }
       expect(tm.halted).toBe(true)
+      // The demo must reach HALT or run out of rules on its own. Halting by
+      // hitting the 500-step cap would mean it never terminates.
+      expect(tm.haltReason).not.toBe("max-steps")
     }
   })
 })

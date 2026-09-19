@@ -80,17 +80,13 @@ or textarea, so Space and Enter still activate whatever is focused.
 Append to `levels` in [`js/levels.js`](js/levels.js). Every field is required by
 [`__tests__/levels.test.js`](__tests__/levels.test.js): `id` (unique), `name`,
 `description`, `tape`, `target`, `headStart` (a valid index into `tape`),
-`states` (must include `HALT`), `symbols` (must include `_`), and `maxSteps`.
-Every symbol in `tape` and `target` must appear in `symbols`. Nothing else needs
-editing -- the nav, the dropdowns, and the goal tape are all built from the
-entry.
+`states` (must include `HALT`), and `symbols` (must include `_`). Every symbol
+in `tape` and `target` must appear in `symbols`. Nothing else needs editing --
+the nav, the dropdowns, and the goal tape are all built from the entry.
 
-Two things the tests do not enforce:
-
-- The start state is hardcoded to `"A"` in `loadLevel()`, so `states` must
-  include `"A"` or the level halts on its first step.
-- `maxSteps` is checked for type but nothing reads it at runtime for puzzles;
-  see [Known gaps](#known-gaps).
+One thing the tests do not enforce: the start state is hardcoded to `"A"` in
+`loadLevel()`, so `states` must include `"A"` or the level halts on its first
+step.
 
 The convention is to add a matching case under `describe("level solutions")` in
 `__tests__/TuringMachine.test.js`, proving the puzzle is solvable with the
@@ -106,8 +102,8 @@ Append to `demos` in the same file. Same fields minus `target`, plus `rules` as
 an array of `[state, read, write, move, nextState]` tuples --
 `parseRules()` in [`js/game.js`](js/game.js) turns those into the `Map`. The
 tests require every rule to name a declared state and symbol, a move of
-`L`/`R`/`S`, and the demo to halt within its own `maxSteps` (this is the one
-place `maxSteps` is used).
+`L`/`R`/`S`, and the demo to halt on its own -- within 100 steps, and not by
+hitting the `MAX_STEPS` cap.
 
 Demos also start in state `A`, hardcoded in `loadDemo()`. They do not need a
 `HALT` state: the palindrome demo ends by having no rule for `Y` or `N`, which
@@ -171,9 +167,6 @@ The game reads nothing from the URL -- there are no debug or unlock parameters.
 
 ## Known gaps
 
-- Each level declares `maxSteps`, but the machine only enforces the global
-  500-step `MAX_STEPS`. The per-level number is validated by the tests and
-  otherwise inert for puzzles.
 - Because blanks are trimmed before comparing, **Move Right** can be "solved"
   without moving anything: one rule that writes `1` and halts leaves
   `["1", "_"]`, which trims to the same content as the goal `["_", "1"]`.
@@ -211,5 +204,3 @@ colour is currently the only signal for them.
   progress.
 - No personal information, no cookies, no tracking, no external requests beyond
   the site's own stylesheet and scripts.
-  </content>
-  </invoke>

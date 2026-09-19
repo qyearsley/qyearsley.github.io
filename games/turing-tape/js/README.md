@@ -93,14 +93,6 @@ that exercises this: it declares eight states, and halts in `Y` or `N` rather
 than `HALT`, which means its halt reason is `no-rule`. Demos never call
 `checkWin`, so that is reported as a plain "Halted after N steps" either way.
 
-**`maxSteps` on a level is not read by anything that runs it.** Every level and
-demo declares it, but `TuringMachine` caps at its own `MAX_STEPS = 500`, so a
-puzzle declaring `maxSteps: 10` still runs 500 steps before reporting
-`max-steps`. The only consumer is `__tests__/levels.test.js`, which uses the demo
-figures as a test bound. This is long-standing and deliberate-ish rather than a
-surprise — the game README lists it under **Known gaps**, and what to do about it
-is in `docs/improvements.md`.
-
 ### game.js
 
 The page. Module-level state is five variables — `machine`, `currentLevel`,
@@ -198,8 +190,8 @@ modules that can be tested without a page:
 
 - `TuringMachine.test.js` — stepping, the three halt reasons, tape growth at both
   ends, and the alignment shared by `matchesTape` and `matchMask`
-- `levels.test.js` — the shape of every level and demo, and that each demo
-  actually halts within its declared `maxSteps`
+- `levels.test.js` — the shape of every level and demo, and that each demo halts
+  on its own within `DEMO_STEP_BOUND` steps, without hitting the `max-steps` cap
 
 **`game.js` has no test file.** It exports nothing and runs on import, so it can
 only be driven black-box through the real `index.html` — which is what
