@@ -7,7 +7,12 @@
   "Pinyin Abbreviations": "拼音缩写",
   "Hanyu Pinyin uses abbreviations that simplify it for experienced readers but can confuse newcomers. Keep in mind: pinyin spellings don't always match pronunciation.": "汉语拼音使用缩写，方便熟练者但容易让初学者困惑。注意：拼写不一定与发音一致。",
   "In three cases, an abbreviation is made by removing a letter:": "有三种情况通过去掉一个字母来缩写：",
-  "Where no ambiguity would arise, vowels with diacritics are written without a diacritic for convenience. The sound [ɛ] (like English r": "在不会产生歧义时，带声调符号的元音可省略符号。音[ɛ]（类似英语r",
-  "d) was originally represented by ê, but everywhere that it occurs, it is replaced.": "d）原本用ê表示，但出现的地方都被替换了。",
-  "It's also important to remember that -i represents a different sound depending on whether the initial is one of {sh, ch, zh, r}, {z, c, s}, or {b, p, m, d, t, n, l, j, q, x}. There are other differences in the sound that one letter represents between different finals, but these are less misleading.": "还需注意，-i代表的音因声母不同而不同：{sh, ch, zh, r}、{z, c, s}或{b, p, m, d, t, n, l, j, q, x}各有区别。不同韵母中同一字母代表的音也有差异，但这些较少引起混淆。"
+  "Where no ambiguity arises, a vowel with a diacritic is written without the diacritic, for convenience. The sound [ɛ] (as in English r<b>e</b>d) was originally written ê, but it is replaced everywhere it occurs.": "在不产生歧义时，带变音符号的元音省去符号书写，以求简便。音[ɛ]（如英语r<b>e</b>d中的元音）原本写作ê，但它出现的每一处都被替换掉了。",
+  "If the initial is j, q, or x, replace ü with u.": "如果声母是j、q或x，把ü改写成u。",
+  "In most cases, if there is no initial, the spelling changes to keep syllable boundaries clear when syllables are written together. If there is no initial and there is a ü, replace ü with yu.": "多数情况下，如果没有声母，拼写会作调整，使音节连写时的分界清楚。如果没有声母而又含有ü，把ü改写成yu。",
+  "If there is no initial and the vowel is i (with no diphthong), add a y:": "如果没有声母，且元音是i（不构成复元音），前面加y：",
+  "If there is no initial and there is a diphthong beginning with i, replace i with y.": "如果没有声母，且有以i开头的复元音，把i改写成y。",
+  "If there is no initial and the vowel is u (with no diphthong), add a w:": "如果没有声母，且元音是u（不构成复元音），前面加w：",
+  "If there is no initial and there is a diphthong beginning with u, replace u with w.": "如果没有声母，且有以u开头的复元音，把u改写成w。",
+  "Remember also that -i represents a different sound depending on whether the initial is one of {sh, ch, zh, r}, {z, c, s}, or {b, p, m, d, t, n, l, j, q, x}. One letter represents different sounds in other finals too, but those differences are less misleading.": "还需注意，-i代表的音取决于声母属于{sh, ch, zh, r}、{z, c, s}还是{b, p, m, d, t, n, l, j, q, x}。同一个字母在其他韵母中也代表不同的音，但那些差别不太容易造成误解。"
 }

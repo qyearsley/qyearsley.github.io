@@ -4,13 +4,13 @@
 
   "Tone Tables": "声调表",
   "Example characters for each hanyu pinyin syllable by tone": "按声调排列的汉语拼音音节示例字",
-  "This table shows example characters for each hanyu pinyin syllable by tone, allowing one to easily see which characters are grouped together, as well as which initial, final, and tone combinations are common or uncommon.": "此表按声调展示每个汉语拼音音节的示例字，方便查看字的分组，以及哪些声母、韵母和声调组合常见或罕见。",
+  "This table shows example characters for each hanyu pinyin syllable by tone. It shows which characters group together, and which combinations of initial, final, and tone are common or uncommon.": "此表按声调列出每个汉语拼音音节的示例字。它显示哪些字归为一组，以及声母、韵母和声调的哪些组合常见或罕见。",
   "The table is organized by pinyin syllable (rows) and tone (columns). Characters are color-coded by frequency: darker text indicates more common characters. Tone 0 represents the neutral tone (light tone).": "表格按拼音音节（行）和声调（列）排列。字按频率用颜色区分：深色文字表示更常用的字。声调0代表轻声。",
   "Data Sources": "数据来源",
   "To generate the table, I used the following data from Chih-Hao Tsai:": "生成此表使用了蔡志浩的以下数据：",
   "Frequency and Stroke Counts of Chinese Characters": "汉字频率与笔画数",
   "Mandarin Syllable Frequency Counts for Chinese Characters": "汉字普通话音节频率统计",
-  "I amalgamated them into a table of frequency rank and most common pronunciation for each character (<a href=\"tonetable/frequency_pinyin_table.txt\">frequency_pinyin_table.txt</a>), which was used as input to a perl script (<a href=\"tonetable/make_tone_table.py\">make_tone_table.py</a>).": "我把它们合并成一张表，列出每个汉字的频率排名和最常见读音（<a href=\"tonetable/frequency_pinyin_table.txt\">frequency_pinyin_table.txt</a>），再用它作为一个脚本（<a href=\"tonetable/make_tone_table.py\">make_tone_table.py</a>）的输入。",
+  "I combined them into a table of frequency rank and most common pronunciation for each character (<a href=\"tonetable/frequency_pinyin_table.txt\">frequency_pinyin_table.txt</a>). That table is the input to a Python script (<a href=\"tonetable/make_tone_table.py\">make_tone_table.py</a>).": "我把它们合并成一张表，列出每个汉字的频率排名和最常见读音（<a href=\"tonetable/frequency_pinyin_table.txt\">frequency_pinyin_table.txt</a>）。这张表是一个 Python 脚本（<a href=\"tonetable/make_tone_table.py\">make_tone_table.py</a>）的输入。",
   "Tone Table": "声调表",
   "See also": "另见",
   "— common characters used for transliterating foreign names": "——用于音译外国名字的常用汉字"

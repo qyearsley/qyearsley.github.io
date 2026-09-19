@@ -5,7 +5,13 @@
   "Simplified-Traditional One-to-Many Relationships": "简繁一对多关系",
   "Traditional characters that were merged during simplification": "简化过程中合并的繁体字",
   "Homophones": "同音字",
+  "When the official set of simplified characters was drawn up, several different methods were used. One method was to use a relatively simple character to write another, more complicated one. For example, the character 后 (originally 'empress') is used to write 後 ('behind, after'). In other cases, two similarly pronounced characters were simplified to the same character. For example, both 復 and 複 were simplified to 复.": "制定官方简化字表时，采用了几种不同的方法。其中一种是用一个笔画较简单的字来书写另一个较复杂的字。例如，后（本义为“皇后”）用来书写後（意为“后面、之后”）。另一些情况下，两个读音相近的字被简化为同一个字。例如，復和複都简化为复。",
+  "The purpose of this kind of simplification was originally to decrease the total number of characters that students have to learn to be literate. However, it creates a problem for students who know simplified characters and want to learn traditional ones: they must learn to make new distinctions between characters.": "这类简化最初的目的，是减少学生识字所需掌握的汉字总数。但它给已掌握简体字、又想学习繁体字的学生带来了困难：他们必须重新学会区分这些字。",
+  "Sometimes each traditional character that corresponds to a given simplified character has a distinct meaning, so it is easy to decide which one to use. At other times, two of the traditional characters may be interchangeable in certain situations. The table below shows simplified characters that correspond to several traditional characters, and the meaning of each traditional character.": "有时，对应同一个简体字的各个繁体字意义分明，很容易判断该用哪一个。另一些时候，其中两个繁体字在某些场合可以互换。下表列出对应多个繁体字的简体字，以及每个繁体字的意思。",
   "Character Relationships": "字符关系",
+  "Simplified Character": "简体字",
+  "Traditional Character": "繁体字",
+  "Examples": "示例",
   "See also": "另见",
   "— convert between traditional and simplified Chinese": "——繁简中文字符转换"
 }

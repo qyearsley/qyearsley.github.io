@@ -18,8 +18,8 @@
   "A hash table stores data in <strong>buckets</strong>. A <strong>hash function</strong> maps each key to a bucket index using modulo.": "散列表把数据存放在<strong>桶</strong>里。<strong>散列函数</strong>通过取模把每个键映射到桶索引。",
   "A <strong>collision</strong> happens when two keys land in the same bucket. Good hash functions spread keys evenly; bad ones (like using string length) cluster them.": "当两个键落入同一个桶时，就发生<strong>冲突</strong>。好的散列函数把键均匀分散，差的（比如用字符串长度）会让键聚集。",
   "Try these experiments:": "试试这些实验：",
-  "Switch to <code>length</code> hash and add words of different lengths -- see how same-length words always collide": "切换到<code>length</code>散列，加入长度不同的单词——看看长度相同的单词总会冲突",
-  "Switch to <code>charSum</code> and add anagrams (listen, silent) -- they collide because they have the same character sum": "切换到<code>charSum</code>，加入字母异位词（listen、silent）——它们的字符和相同，所以会冲突",
+  "Switch to the <code>length</code> hash and add words of different lengths &mdash; see how same-length words always collide": "切换到<code>length</code>散列，加入长度不同的单词——看看长度相同的单词总会冲突",
+  "Switch to <code>charSum</code> and add anagrams (listen, silent) &mdash; they collide because they have the same character sum": "切换到<code>charSum</code>，加入字母异位词（listen、silent）——它们的字符和相同，所以会冲突",
   "Slide the bucket count down to 2 and watch collisions pile up": "把桶数调到2，看冲突如何堆积",
   "Compare <code>djb2</code> vs <code>FNV-1a</code> distribution on the same words": "比较<code>djb2</code>与<code>FNV-1a</code>在同一组单词上的分布",
   "length (bad!)": "length（很差！）"
