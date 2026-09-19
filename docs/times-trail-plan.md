@@ -228,6 +228,7 @@ Mirrors `games/number-garden/`, reusing `games/shared/BaseGameUI` and
 games/times-trail/
   index.html
   index.zh.json          Opts the page into the translation pipeline
+                         (deleted 2026-09-19 -- Times Trail has no /zh/ page)
   manifest.json          Add-to-home-screen
   README.md
   js/

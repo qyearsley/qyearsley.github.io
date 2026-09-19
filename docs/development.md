@@ -166,6 +166,12 @@ Jest's `moduleNameMapper` in `package.json` strips `.js` extensions from relativ
 `build.js` discovers translatable pages by walking the source tree for
 `*.zh.json` files; there is no manual list to update.
 
+Step 3 is optional, and a game should think twice about it. The pipeline
+translates static HTML only, so a page that writes its text at runtime gets a
+Chinese shell around English content. Three of the five games have no `*.zh.json`
+for that reason. See
+[`translations.md`](translations.md#which-pages-have-a-chinese-version-and-why).
+
 See `docs/translations.md` for translation details.
 
 ## Contact Form

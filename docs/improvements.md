@@ -2,7 +2,8 @@
 
 > **Status: audited 2026-09-18 against `main` @ `b9881fc`.** Migrated from the
 > unversioned `~/hobby/IMPROVEMENTS.md`, which covered seven repos at once and
-> had drifted; every claim below was re-checked on this date.
+> had drifted; every claim below was re-checked on this date. Items 1-3 were
+> closed on 2026-09-19.
 
 This file is the maintenance backlog: defects, debt, test gaps and doc drift.
 Blog post ideas live in [`blog-ideas.md`](blog-ideas.md). Per-feature design
@@ -10,9 +11,8 @@ docs are the `*-plan.md` files in this directory.
 
 ## At a glance
 
-1. Three games have English chrome on their `/zh/` page — M · open
-2. Game gameplay is English on every `/zh/` page — L · decision owed
-3. Turing Tape's per-level `maxSteps` is never read — S · open
+1. No coverage check stops a `/zh/` page going backwards — M · open
+2. An unused variable warning in `times-trail/__tests__/GameUI.test.js` — S · open
 
 ## Working on these
 
@@ -20,88 +20,99 @@ docs are the `*-plan.md` files in this directory.
 - Git hooks run the tests; see [`development.md`](development.md#git-hooks).
 - Public repo. Never commit a work hostname, address, tool name or ticket ID.
 
-## 1. Three games have English chrome on their `/zh/` page
+## 1. No coverage check stops a `/zh/` page going backwards
 
 **M · open**
 
-Phase 1 of [`game-translation-plan.md`](game-translation-plan.md) — keys for the
-text that lives in each game's `index.html`. Phase 0 (Chinese `<title>`) is done
-for all five.
+Phase 4 of [`game-translation-plan.md`](game-translation-plan.md), and the only
+phase still open. `build:verbose` is not a ratchet: it warned on 1 string for a
+page that was 20% English. Nothing fails when a `/zh/` page regresses.
 
-English text nodes left in the built `/zh/` page, counted by walking the body,
-skipping `<script>` and `<style>`, and counting a node as English when it has no
-CJK character and at least two ASCII letters:
+The measure that works is counting English text nodes in the built page —
+skipping `<script>` and `<style>`, counting a node as English when it has no CJK
+character and at least two ASCII letters. That is the measure the 2026-09-19
+pass used, and it tracked reality where `build:verbose` did not.
 
-| Game          | Nodes | What is left                                                 |
-| ------------- | ----- | ------------------------------------------------------------ |
-| Seasons       | 0     | Done                                                         |
-| Times Trail   | 1     | Only the switcher's own "English" label, which is correct    |
-| Life Garden   | 21    | The control bar and the keyboard legend                      |
-| Turing Tape   | 42    | The whole UI, plus a "How it works" list split by `<strong>` |
-| Number Garden | 47    | Menus, settings labels, area names, level-complete copy      |
+Two things to settle first. The check needs a built `dist/`, which `npm test`
+does not guarantee — so either build inside the test or run it as a separate
+script after `npm run build` in the deploy workflow. And it needs an allowlist:
+Turing Tape legitimately keeps `HALT`, and a bare count would fail on it.
 
-Turing Tape's list needs the inline-markup convention in
-[`translations.md`](translations.md): the whole `<li>` is one key, tags included.
-Do not key the fragments separately — Chinese word order differs and they
-reassemble wrongly.
+Now guards two pages instead of five, which makes it cheaper and less valuable
+at the same time.
 
-_Checked 2026-09-18 against the built `dist/`, after the phase-0 titles landed._
+_Checked 2026-09-19: `/zh/games/turing-tape/` is at 1 English node,
+`/zh/games/life-garden/` at 0._
 
-## 2. Game gameplay is English on every `/zh/` page
+## 2. An unused variable warning in `times-trail/__tests__/GameUI.test.js`
 
-**L · decision owed**
+**S · open**
 
-The blocker is structural, not effort: `build.js` translates by matching text
-between tags in the HTML source, and a string a game writes into the DOM at
-runtime never appears there. Every game keeps its questions, feedback, level
-names and dialogs in JavaScript, so no key can reach them. Seasons scores zero
-English nodes above and is still entirely English once you press Play.
+`npm run lint` exits clean but reports `'TRAIL' is defined but never used` at
+`games/times-trail/__tests__/GameUI.test.js:48`. Pre-existing, and the only lint
+warning in the repo.
 
-Phase 2 of the plan is the decision, and it is not made. Option A is a shared
-`shared/i18n.js` exporting `t()` with a per-game catalog; the plan recommends
-proving it on Turing Tape first, which is the smallest game and the most factual
-copy. Option B is to leave the gameplay in English and write that down as
-deliberate. Option C is to drop the `/zh/` page for a game whose audience is one
-English-speaking child.
+Either the test meant to assert something about `TRAIL` and does not, or the
+binding is left over. Read it before deleting it — a dead binding in a test
+sometimes marks a missing assertion rather than clutter.
 
-Worth deciding alongside the plan's own open question: a page that declares
-`lang="zh"` and then speaks English is worse for a screen reader than an English
-page, which argues against a long-lived option B.
-
-_Checked 2026-09-18: `grep -c "t(" games/*/js/*.js` is not a useful measure --
-the real number needs the inventory pass the plan calls step one of phase 3._
-
-## 3. Turing Tape's per-level `maxSteps` is never read
-
-**S · open, and already a documented gap**
-
-Not a new finding: `games/turing-tape/README.md` lists it under **Known gaps**
-and mentions it twice more. This entry exists because the gap has a decision
-attached that has never been made, and a known gap with no decision is how it
-stays known forever.
-
-Every level and demo in `js/levels.js` declares a `maxSteps`, but nothing that
-runs one reads it -- `TuringMachine` caps at its own module constant,
-`MAX_STEPS = 500` (`TuringMachine.js:1`). "Write One" declares `maxSteps: 10` and
-runs 500 steps before reporting `max-steps`, with the message quoting 500.
-
-Two ways to close it, and either is fine:
-
-- **Pass `level.maxSteps` in as the cap.** The declared figures are the useful
-  ones -- they hint at the intended solution length, and the tightest is 10
-  against a cap fifty times larger. This is a behaviour change, not a fix:
-  puzzles fail faster, which is the point, but a player midway through a long
-  wrong attempt sees the error sooner than today.
-- **Delete the field** and stop implying it does something. Cheaper, and honest.
-  The demo bound in the tests would need a literal instead.
-
-_Checked 2026-09-18: `grep -rn maxSteps games/turing-tape/` -- eight declarations
-in `levels.js`; the only reader is `__tests__/levels.test.js`, which uses the demo
-figures as a test bound at `:88-92` and type-checks the field at `:24` and `:67`.
-`TuringMachine.js` never mentions it. The README records the gap at `:92`,
-`:109-110` and `:174-176`._
+_Checked 2026-09-19: one warning, zero errors, across all four linters._
 
 ## Settled
+
+### Decided 2026-09-19
+
+- **Three games lost their `/zh/` page: Number Garden, Seasons, Times Trail.**
+  Option C of [`game-translation-plan.md`](game-translation-plan.md), applied per
+  game. Their `*.zh.json` files are deleted, so the build generates no Chinese
+  page, injects no hreflang, and lists no sitemap alternate. `.lang-slot:empty`
+  collapses the switcher, so the English page shows no gap.
+
+  The reason is structural. The build translates static HTML; a game writes most
+  of its text at runtime; so a `/zh/` game page is Chinese chrome around English
+  gameplay. Seasons and Times Trail were the clearest case — both scored zero
+  English text nodes and both were entirely English in play. A page that
+  declares `lang="zh"` and then speaks English is worse for a screen reader than
+  an English page.
+
+  Turing Tape and Life Garden keep theirs, because their chrome carries most of
+  their text. Their gameplay is still English, which is the known remaining gap.
+  Why is written up in
+  [`translations.md`](translations.md#which-pages-have-a-chinese-version-and-why),
+  in `games/README.md`, and in the plan.
+
+- **`maxSteps` deleted rather than enforced.** Every level and demo declared it;
+  nothing that ran one read it, because `TuringMachine` caps at its own
+  `MAX_STEPS = 500`. Enforcing the declared figures would have been a behaviour
+  change, and the honest fix was to stop implying the field did something.
+
+  The demo halting test used `demo.maxSteps` as its loop bound. It now uses
+  `DEMO_STEP_BOUND = 100` and also asserts the halt reason is not `"max-steps"`.
+  That second assertion matters: at a bound of 500 or more the machine halts
+  itself, so the test would have passed for a demo that never halts. Verified by
+  breaking a demo and watching it fail both ways.
+
+  Note for anyone reopening this: all five puzzle levels do have reference
+  solutions, under `describe("level solutions")` in
+  `__tests__/TuringMachine.test.js`. They hardcode the tape and rules instead of
+  importing from `levels.js`, which is why a grep for `maxSteps` readers misses
+  them.
+
+### Landed 2026-09-19
+
+- **Phase 1 of the game translation plan is done.** Turing Tape 41 English text
+  nodes to 1, Life Garden 66 to 0, Number Garden 59 to 0. The one left is
+  `HALT`, a state name the player types into the rule table — data, not prose.
+  Number Garden's keys landed in `856a4bd` and were deleted the same day with
+  its page; they are recoverable from git.
+
+  **The Chinese is machine-written and unreviewed.** No native speaker has read
+  it. Treat the wording on both remaining `/zh/` game pages as a first draft.
+
+- **Two lines of stray tool-call markup removed from
+  `games/turing-tape/README.md`.** The file ended with a literal `</content>`
+  and `</invoke>`, introduced in `123d4e0` and rendering as visible garbage at
+  the bottom of the page on GitHub. A repo-wide grep found no other instance.
 
 ### Decided 2026-09-18, no change
 
@@ -210,8 +221,15 @@ actual iPad. In rough order of how much is unverified:
   mode on purpose; that is the pairing most likely to look wrong.
 - **Seasons' motion** -- roughly a hundred CSS-animated SVG groups of falling
   weather on the winter trail, plus the new idle, shimmer and sway.
-- **The language switcher in each game's top bar**, which is the one change that
-  puts a new control into five already-crowded layouts.
+- **The language switcher, now on two game top bars.** Turing Tape and Life
+  Garden. The other three lost their `/zh/` page on 2026-09-19, so their slot
+  stays empty and `.lang-slot:empty` collapses it — that collapse is itself
+  unverified in a browser, though the CSS predates the change and was written
+  for `npm run dev`.
+- **The two remaining `/zh/` game pages, read as Chinese.** The chrome is
+  machine-written and no native speaker has read it. Chinese is also wider than
+  English in some labels and narrower in others, so the game top bars want a
+  look in both languages, not just one.
 
 **Two `js/README.md` files were committed without a line-by-line read.**
 `games/life-garden/js/README.md` and `games/turing-tape/js/README.md`, 546 lines

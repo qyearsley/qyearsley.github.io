@@ -27,7 +27,7 @@ javascript/index.zh.json             JS section index
 javascript/coin-flipper.zh.json      Per-page translations
 ...
 games/index.zh.json                  Games section index
-games/number-garden/index.zh.json    Per-game translations
+games/turing-tape/index.zh.json      Per-game translations (only two games have one)
 ...
 ```
 
@@ -36,6 +36,54 @@ it uses already lives in `zh-common.json` -- the homepage's `index.zh.json` is
 `{}` for exactly that reason.
 
 Run `npm run translations` to list all translation files.
+
+## Which pages have a Chinese version, and why
+
+Deleting a page's `*.zh.json` removes its Chinese version completely. The build
+generates no `/zh/` page, injects no `hreflang` tags, lists no sitemap
+alternate, and leaves the language switcher out. `.lang-slot:empty` in
+`css/style.css` collapses the empty switcher slot, so the page shows no gap.
+
+Every tool and writing page has a Chinese version. Only two of the five games
+do, and the reason is the pipeline itself.
+
+**The build translates static HTML. A game writes most of its text at runtime.**
+The matcher replaces text between tags in the HTML source. A string that
+JavaScript puts into the DOM never appears there, so no key can reach it. This
+is a limit of the approach, not a gap in the keys.
+
+A game page therefore has two kinds of text:
+
+|     | Kind     | Lives in     | Translatable |
+| --- | -------- | ------------ | ------------ |
+| 1   | Chrome   | `index.html` | Yes          |
+| 2   | Gameplay | `js/*.js`    | No           |
+
+A game whose gameplay text is small keeps its Chinese page. A game whose
+gameplay text is large does not, because the page would claim `lang="zh"` and
+then speak English as soon as the player presses Play. That is worse for a
+screen reader than an English page, and it misleads a Chinese visitor who
+follows the switcher.
+
+|     | Game          | Chinese page | Why                                               |
+| --- | ------------- | ------------ | ------------------------------------------------- |
+| 1   | Turing Tape   | Yes          | Fixed labels, factual copy, 769 lines of JS       |
+| 2   | Life Garden   | Yes          | Chrome carries most of the text                   |
+| 3   | Number Garden | No           | 3.7k lines of JS, and one English-speaking player |
+| 4   | Seasons       | No           | Almost all text is written at runtime             |
+| 5   | Times Trail   | No           | 7.5k lines of JS, and generated feedback text     |
+
+Seasons and Times Trail are the case the counts hide. Both scored zero English
+text nodes while their gameplay stayed entirely English, so both looked finished
+and were not.
+
+The Chinese games index at `/zh/games/` still lists all five games. It links to
+the English page for the three that have no Chinese version. The index keeps its
+Chinese descriptions, so a Chinese visitor can still read what each game does.
+
+To give a game a Chinese page again, add back its `*.zh.json` and translate the
+gameplay strings too. [`game-translation-plan.md`](game-translation-plan.md)
+records what that costs.
 
 ## JSON Format
 
