@@ -116,9 +116,12 @@ once and never uses 意譯._
 
 ### Landed 2026-09-19, second pass
 
-- **The site is translated: 64 untranslated strings to 1.** The one left is the
-  truth-table input syntax `(a and b) or (not a and not b)`, which is what that
-  parser accepts.
+- **The site is translated: 64 untranslated strings to 20, and all 20 are
+  data.** Sixteen are pinyin spelling equations (`ia = ya`) on
+  `pinyin-abbreviations.html`, three are UTF-8 bit patterns on
+  `encoding-explorer.html`, and one is the truth-table input syntax
+  `(a and b) or (not a and not b)`, which is what that parser accepts. No
+  English prose is left on any page.
 
   Most of it was cross-links. Every tool page already carried a Chinese name in
   its own `_title`, but the links between pages used the English one, so a
