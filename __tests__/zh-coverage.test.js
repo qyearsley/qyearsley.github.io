@@ -38,10 +38,31 @@
 import { describe, expect, test } from "@jest/globals"
 import { readFileSync, existsSync } from "node:fs"
 import { join } from "node:path"
+import { marked } from "marked"
 
 const { translateContent, discoverTranslatablePages } = await import(
   join(process.cwd(), "build.js")
 )
+
+/**
+ * `resume/index.html` has no source file -- build.js generates it from
+ * `resume/resume.md` through `resume/template.html`. An earlier version of this
+ * suite filtered pages by `existsSync`, which silently dropped the resume: the
+ * one translated page nobody was checking, sitting at 20 English text nodes.
+ * Reproduce the generation here instead, so it is checked like any other page.
+ */
+const GENERATED = {
+  "resume/index.html": () =>
+    readFileSync("resume/template.html", "utf-8").replace(
+      "{{CONTENT}}",
+      marked.parse(readFileSync("resume/resume.md", "utf-8")),
+    ),
+}
+
+function sourceHtml(page) {
+  if (GENERATED[page]) return GENERATED[page]()
+  return readFileSync(page, "utf-8")
+}
 
 /**
  * Maximum English text nodes allowed in each translated page.
@@ -53,6 +74,9 @@ const BASELINE = {
   "chinese/encoding-explorer.html": 3,
   "chinese/pinyin-abbreviations.html": 16,
   "javascript/truth-tables.html": 1,
+  // Technology names, employer names and project titles on the resume. See
+  // docs/improvements.md -- some of these should be translated and are not.
+  "resume/index.html": 20,
 }
 
 const common = JSON.parse(readFileSync("zh-common.json", "utf-8"))
@@ -60,7 +84,7 @@ const commonKeys = new Set(Object.keys(common))
 
 function translated(page) {
   const jsonPath = page.replace(/\.html$/, ".zh.json")
-  const html = readFileSync(page, "utf-8")
+  const html = sourceHtml(page)
   const pageTranslations = JSON.parse(readFileSync(jsonPath, "utf-8"))
 
   // translateContent warns on unmatched page keys. Capture them instead of
@@ -104,11 +128,17 @@ function englishNodes(html) {
   return { english, glosses }
 }
 
-// resume/index.html is generated from markdown at build time, so there is no
-// source file to translate here.
-const pages = discoverTranslatablePages(process.cwd()).filter((p) => existsSync(p))
+// Every translatable page is checked. A page with no source file on disk must
+// be in GENERATED, or it is silently unchecked -- which is exactly the bug that
+// hid the resume.
+const pages = discoverTranslatablePages(process.cwd())
+const unreachable = pages.filter((p) => !existsSync(p) && !GENERATED[p])
 
 describe("Chinese coverage", () => {
+  test("every translatable page can be checked", () => {
+    expect(unreachable).toEqual([])
+  })
+
   test("every translatable page has a source file to check", () => {
     expect(pages.length).toBeGreaterThan(20)
   })
