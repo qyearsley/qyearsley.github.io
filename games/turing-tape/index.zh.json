@@ -1,4 +1,35 @@
 {
   "_title": "图灵纸带 - Quinten Yearsley",
-  "_description": "编写图灵机规则来转换纸带"
+  "_description": "编写图灵机规则来转换纸带",
+
+  "Turing Tape": "图灵纸带",
+  "Steps: 0": "步数：0",
+
+  "Puzzles": "谜题",
+  "Demos": "演示",
+
+  "Goal": "目标",
+  "Tape": "纸带",
+
+  "State:": "状态：",
+  "Step": "单步",
+  "Space": "空格",
+  "Play": "运行",
+  "Enter": "回车",
+  "Reset": "重置",
+
+  "Rules": "规则",
+  "+ Add Rule": "+ 添加规则",
+  "State": "状态",
+  "Read": "读取",
+  "Write": "写入",
+  "Move": "移动",
+  "Next State": "下一状态",
+
+  "How it works": "工作原理",
+  "The machine reads the symbol under the <strong>head</strong> (highlighted cell).": "机器读取<strong>读写头</strong>下方的符号（高亮的格子）。",
+  "It looks for a rule matching the current <strong>state</strong> and the symbol read.": "它查找与当前<strong>状态</strong>和读到的符号相匹配的规则。",
+  "The rule says what to <strong>write</strong>, which way to <strong>move</strong> (L/R), and what <strong>state</strong> to go to next.": "规则指明要<strong>写入</strong>什么、向哪边<strong>移动</strong>（L/R），以及接下来进入哪个<strong>状态</strong>。",
+  "The machine halts when it enters the <strong>HALT</strong> state or has no matching rule.": "机器进入<strong>HALT</strong>状态或找不到匹配的规则时停机。",
+  "You win when the tape matches the <strong>Goal</strong> after halting.": "停机后纸带与<strong>目标</strong>一致，你就赢了。"
 }
