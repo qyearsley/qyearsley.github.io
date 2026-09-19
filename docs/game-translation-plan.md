@@ -44,7 +44,7 @@ as English when it has no CJK character and at least two ASCII letters.
 
 |     | Game          | Chinese page | English nodes | Game JS        |
 | --- | ------------- | ------------ | ------------- | -------------- |
-| 1   | Turing Tape   | yes          | 1 of 41       | 3 files, 769   |
+| 1   | Turing Tape   | yes          | 1 of 41       | 3 files, 761   |
 | 2   | Life Garden   | yes          | 0 of 66       | 13 files, 2.6k |
 | 3   | Number Garden | no           | --            | 14 files, 3.7k |
 | 4   | Seasons       | no           | --            | 10 files, 3.9k |
@@ -143,7 +143,7 @@ Option A is not ruled out for those two; it is simply not started.
 Only Turing Tape and Life Garden could still use this. The other three have no
 Chinese page to improve.
 
-1. **Turing Tape** -- 769 lines over 3 files, and the UI is a fixed set of
+1. **Turing Tape** -- 761 lines over 3 files, and the UI is a fixed set of
    labels. If `t()` is awkward here, it will be worse everywhere else.
 2. **Life Garden** -- 2,583 lines, and the HTML side is done.
 
@@ -151,8 +151,9 @@ Each game starts with an inventory: list every literal that reaches the DOM,
 separate it from the comments and selectors the grep picks up, and count it.
 Stop and re-judge if the inventory is much larger than the estimate above.
 
-Sizes for the three dropped games, if one ever comes back: Number Garden 3,665
-lines, Seasons 3,904, Times Trail 7,450.
+Sizes for the three dropped games, if one ever comes back: Number Garden 3,671
+lines, Seasons 3,952, Times Trail 7,542. All line counts measured 2026-09-19
+with `cat games/<name>/js/*.js | wc -l`.
 
 ## Phase 4: a coverage check that does not lie -- **open**
 

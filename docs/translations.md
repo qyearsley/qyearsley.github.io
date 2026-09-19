@@ -44,8 +44,9 @@ generates no `/zh/` page, injects no `hreflang` tags, lists no sitemap
 alternate, and leaves the language switcher out. `.lang-slot:empty` in
 `css/style.css` collapses the empty switcher slot, so the page shows no gap.
 
-Every tool and writing page has a Chinese version. Only two of the five games
-do, and the reason is the pipeline itself.
+Most tool and writing pages have a Chinese version. Only two of the five games
+do, and the reason is the pipeline itself. (`chinese/buddhist-vocabulary.html`
+also has none, for no recorded reason -- it predates this decision.)
 
 **The build translates static HTML. A game writes most of its text at runtime.**
 The matcher replaces text between tags in the HTML source. A string that
@@ -67,7 +68,7 @@ follows the switcher.
 
 |     | Game          | Chinese page | Why                                               |
 | --- | ------------- | ------------ | ------------------------------------------------- |
-| 1   | Turing Tape   | Yes          | Fixed labels, factual copy, 769 lines of JS       |
+| 1   | Turing Tape   | Yes          | Fixed labels, factual copy, 761 lines of JS       |
 | 2   | Life Garden   | Yes          | Chrome carries most of the text                   |
 | 3   | Number Garden | No           | 3.7k lines of JS, and one English-speaking player |
 | 4   | Seasons       | No           | Almost all text is written at runtime             |
