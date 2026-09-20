@@ -1,10 +1,12 @@
 # Improvements
 
-> **Status: audited 2026-09-18 against `main` @ `b9881fc`.** Migrated from the
-> unversioned `~/hobby/IMPROVEMENTS.md`, which covered seven repos at once and
-> had drifted; every claim below was re-checked on this date. The original items
-> 1-3 were closed on 2026-09-19, and a second pass the same day closed the two
-> that replaced them.
+> **Status: audited 2026-09-18 against `main` @ `b9881fc`, re-checked
+> 2026-09-20.** Migrated from the unversioned `~/hobby/IMPROVEMENTS.md`, which
+> covered seven repos at once and had drifted. The original items 1-3 closed on
+> 2026-09-19; the two that replaced them closed the same day; a five-agent
+> Chinese review on 2026-09-20 closed nine translation errors and opened the
+> items below. Chinese conventions and rulings now live in
+> [`zh-translation.md`](zh-translation.md).
 
 This file is the maintenance backlog: defects, debt, test gaps and doc drift.
 Blog post ideas live in [`blog-ideas.md`](blog-ideas.md). Per-feature design
@@ -12,10 +14,12 @@ docs are the `*-plan.md` files in this directory.
 
 ## At a glance
 
-1. The Chinese across the whole site is machine-written and unreviewed — M · needs a person
-2. `homophones.html` glosses 211 characters in English on its `/zh/` page — S · decision owed
-3. Floating Point's `2^53 (max safe int)` button is loose — S · decision owed
-4. `buddhist-vocabulary.html` writes 義譯 where the standard term is 意譯 — S · decision owed
+1. No native speaker has read the Chinese — M · needs a person
+2. Runtime-rendered English on `/zh/` pages — M · open
+3. `homophones.html` glosses 211 characters in English on its `/zh/` page — S · decision owed
+4. Floating Point's `2^53 (max safe int)` button is loose — S · decision owed
+5. `buddhist-vocabulary.html` writes 義譯 where the standard term is 意譯 — S · decision owed
+6. `叶昆廷` in every page body, `Quinten Yearsley` in every page title — S · decision owed
 
 ## Working on these
 
@@ -23,33 +27,61 @@ docs are the `*-plan.md` files in this directory.
 - Git hooks run the tests; see [`development.md`](development.md#git-hooks).
 - Public repo. Never commit a work hostname, address, tool name or ticket ID.
 
-## 1. The Chinese across the whole site is machine-written and unreviewed
+## 1. No native speaker has read the Chinese
 
 **M · needs a person**
 
-No native speaker has read any of it. This is now the largest quality risk on
-the site, because the 2026-09-19 pass took coverage from partial to near-total:
-every page but one is at zero English text nodes, so nothing looks unfinished
-any more.
+Five model reviews ran on 2026-09-20 and found nine real errors, including one
+sentence that called GB2312 a Traditional-Chinese encoding and then said it maps
+simplified characters. Those are fixed. A model review is worth having and is not
+a native reader.
 
-Where to look first, in order — these are the renderings the writing pass itself
-flagged as weakest:
+What the reviews settled — the script, the typography and seven terms — is now
+recorded in [`zh-translation.md`](zh-translation.md), along with the rulings, so a
+second pass does not re-litigate them. Read that first.
 
-|     | String                         | Rendering  | Doubt                                                                           |
-| --- | ------------------------------ | ---------- | ------------------------------------------------------------------------------- |
-| 1   | "diacritic"                    | 变音符号   | Correct but bookish. Replaced 声调符号, which was wrong — ê and ü carry no tone |
-| 2   | "diphthong"                    | 复元音     | Chinese pedagogy usually says 复韵母                                            |
-| 3   | Cellular automaton             | 细胞自动机 | 元胞自动机 is the more standard term in Chinese CA literature                   |
-| 4   | "smallest" (the 5e-324 button) | 最小正数   | Says more than the English, deliberately                                        |
-| 5   | Number Garden's whole voice    | —          | A children's game translated flat; the copy is a cheer in English               |
+What a native reader should still judge, since a model cannot:
 
-Spacing around Latin text is also inconsistent: the files mostly run Chinese and
-Latin together (`把ü改写成u`) but use spaces around filenames. Introduced
-knowingly, worth one decision.
+|     | Where                 | The question                                                                 |
+| --- | --------------------- | ---------------------------------------------------------------------------- |
+| 1   | `life-garden`         | It is the most literary page on the site, and a child's game page            |
+| 2   | `buddhist-vocabulary` | Culturally loaded vocabulary; `比附义理`, `咒力` and the five category names |
+| 3   | `resume`              | Whether the compression reads as terse-professional or as thin               |
+| 4   | Whole site            | Whether it reads as Chinese or as translated English                         |
 
-_Checked 2026-09-19. There is no way to verify this from inside the repo._
+_Checked 2026-09-20. There is no way to verify this from inside the repo._
 
-## 2. `homophones.html` glosses 211 characters in English on its `/zh/` page
+## 2. Runtime-rendered English on `/zh/` pages
+
+**M · open**
+
+The same structural limit that cost three games their Chinese page, on pages that
+kept theirs. `build.js` matches text in static HTML, so a string JavaScript writes
+into the DOM stays English.
+
+The worst case is `javascript/floating-point.html`: its main output panel shows
+`Sign (1 bit)`, `Exponent (11 bits)` and `Mantissa (52 bits)` while the prose
+underneath explains them as 符号位 / 指数 / 尾数. Also `Click any bit to toggle
+it`, `Enter a number above`, and two parse-error strings.
+
+Elsewhere: `logic-engine/ui.js` (`Premise`, `No proof steps yet`),
+`password-generator` (`Copy`, three error strings), `markov`
+(`Transition Probabilities (sample):`), `series-tester` (a chart axis label), and
+validation strings on `truth-tables`, `coin-flipper` and `life-calculator`.
+
+Two counters are worse than untranslated, because they translate and then undo
+it: `life-garden`'s `第 0 代` flips to `Gen 1` on the first step
+(`js/GameUI.js:93`), and `turing-tape`'s `步数：0` does the same
+(`js/game.js:201`). A page that visibly reverts is worse than one that never
+claimed to be translated.
+
+One promising detail: the matcher works on `>text<` inside template literals, so
+some of this is reachable with keys rather than an i18n mechanism —
+`life-calculator`'s `Milestones` key already works that way.
+
+_Checked 2026-09-20 against the built `dist/zh/javascript/`._
+
+## 3. `homophones.html` glosses 211 characters in English on its `/zh/` page
 
 **S · decision owed**
 
@@ -70,7 +102,7 @@ The coverage ratchet excludes them, so they do not distort the count either way.
 _Checked 2026-09-19: 211 gloss nodes, against 5 real content strings on the same
 page, all 5 now translated._
 
-## 3. Floating Point's `2^53 (max safe int)` button is loose
+## 4. Floating Point's `2^53 (max safe int)` button is loose
 
 **S · decision owed**
 
@@ -85,7 +117,7 @@ Chinese inherits the same looseness.
 
 _Checked 2026-09-19 in `javascript/floating-point.html`._
 
-## 4. `buddhist-vocabulary.html` writes 義譯 where the standard term is 意譯
+## 5. `buddhist-vocabulary.html` writes 義譯 where the standard term is 意譯
 
 **S · decision owed**
 
@@ -96,11 +128,45 @@ Buddhist translation writing, so this may be deliberate.
 
 The pinyin does not settle it: 義譯 and 意譯 are both `yìyì`.
 
-This is a factual claim in someone's essay, so it was left alone rather than
-corrected. If it is a typo, the Chinese key for that sentence changes with it.
+A reviewer added the point that decides it, if you want it decided: the classical
+framing of Xuanzang's rules is 翻 against 不翻, not 音譯 against 意譯 at all. Both
+labels in that sentence are modern, so there is no reason to prefer the rare one.
+Note also that 義 simplifies to 义, not 意 — these are different words, not script
+variants.
 
-_Checked 2026-09-19: `chinese/buddhist-vocabulary.html:39`. The page uses 義譯
-once and never uses 意譯._
+This is a factual claim in someone's essay, so the English was left alone. **The
+Chinese now uses 意译 consistently**, because that is the mainland-standard term
+and the page already used it eight times for the same concept. So the two
+language versions disagree on this one word until the English is settled.
+
+_Checked 2026-09-20: `chinese/buddhist-vocabulary.html:39` uses 義譯 twice and
+never 意譯._
+
+## 6. `叶昆廷` in every page body, `Quinten Yearsley` in every page title
+
+**S · decision owed**
+
+`zh-common.json` renders your name as 叶昆廷, so every `/zh/` page header and
+footer says 叶昆廷 — while all 26 `_title` values keep `Quinten Yearsley`. A
+reader sees one name on the page and a different one in the browser tab and in
+search results.
+
+The transliteration itself is fine: 叶 is a real surname and a conventional
+phonetic fit, and 昆廷 is a standard rendering of Quentin/Quinten. Giving
+yourself a Chinese name on a Chinese-language site reads as friendly.
+
+Three ways to close it:
+
+- **Use 叶昆廷 in the titles too.** Most consistent. Loses the Latin name from
+  Chinese search results.
+- **Write titles as `简历 - 叶昆廷 (Quinten Yearsley)`.** Keeps both, at the cost
+  of a longer tab.
+- **Drop 叶昆廷.** Also consistent, and reverses a choice already made.
+
+_Checked 2026-09-20: 叶昆廷 appears 3 times, `Quinten Yearsley` 27 times. The
+`_description` values split down the middle — `resume` says
+`Quinten Yearsley的简历`, `contact` says `给叶昆廷发消息`. Those two do the same
+job on adjacent pages and were the clearest symptom._
 
 ## Settled
 

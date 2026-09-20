@@ -6,6 +6,7 @@ For detailed documentation, see:
 
 - `docs/development.md` -- build system, commands, adding pages
 - `docs/translations.md` -- i18n system and translation workflow
+- `docs/zh-translation.md` -- Chinese conventions, settled terms, and review findings
 
 ## Quick Reference
 

@@ -8,6 +8,10 @@ so there is no list to maintain. Translation is text-matching: each English
 string in the JSON file is matched against the HTML and replaced with its
 Chinese equivalent.
 
+This file covers the pipeline. For the Chinese itself -- which script, which
+terms, and what a review already found -- see
+[`zh-translation.md`](zh-translation.md).
+
 ## Translation Files
 
 Translation files live next to the HTML pages they translate, using the
