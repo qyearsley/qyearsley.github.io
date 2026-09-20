@@ -14,10 +14,10 @@ docs are the `*-plan.md` files in this directory.
 
 ## At a glance
 
-1. `tradsimp.js` converts 著名 to 着名, and five other words wrongly — S · open
-2. Nothing stops a page shadowing `zh-common.json` again — S · open
-3. No native speaker has read the Chinese — M · needs a person
-4. Runtime-rendered English on `/zh/` pages — M · open
+1. No native speaker has read the Chinese — M · needs a person
+2. 13 simplified characters still convert to the wrong traditional form — M · open
+3. Runtime-rendered English on `/zh/` pages — M · open
+4. The coverage ratchet cannot see inside `<script>` blocks — S · open
 5. `homophones.html` glosses 211 characters in English on its `/zh/` page — S · decision owed
 6. Floating Point's `2^53 (max safe int)` button is loose — S · decision owed
 7. `buddhist-vocabulary.html` writes 義譯 where the standard term is 意譯 — S · decision owed
@@ -29,71 +29,7 @@ docs are the `*-plan.md` files in this directory.
 - Git hooks run the tests; see [`development.md`](development.md#git-hooks).
 - Public repo. Never commit a work hostname, address, tool name or ticket ID.
 
-## 1. `tradsimp.js` converts 著名 to 着名, and five other words wrongly
-
-**S · open**
-
-A real defect in a shipped tool. `chinese/character-converter.html` imports
-`simplify` from `chinese/tradsimp.js`, and the map at `tradsimp.js:48` has
-`"著": "着"` unconditionally.
-
-著 is two words. As the aspect particle it does simplify to 着 — 看著 to 看着,
-穿著 to 穿着, both correct today. In the zhù sense it stays 著, and the tool gets
-every one of those wrong:
-
-|     | Input | Returns | Should be |
-| --- | ----- | ------- | --------- |
-| 1   | 著名  | 着名    | 著名      |
-| 2   | 著作  | 着作    | 著作      |
-| 3   | 顯著  | 显着    | 显著      |
-| 4   | 乾淨  | 乾净    | 干净      |
-| 5   | 這麼  | 这麽    | 这么      |
-
-Items 4 and 5 are a different fault: 乾 and 麼 are simply missing from the map, so
-they pass through unconverted. 乾 is also context-dependent — 乾淨 to 干净, but
-乾坤 keeps 乾.
-
-A character map cannot get 著 right, because the choice is per-word. Options:
-
-- **Add a word-level pre-pass** for the zhù words — 著名, 著作, 著述, 著者, 顯著,
-  著手 — before the character map runs. Fixes the common cases and keeps the
-  particle working.
-- **Drop 著 from the map.** Then 看著 passes through unconverted, which is wrong
-  in the other direction but fails safe: it leaves text alone rather than
-  producing a word that does not exist.
-- **Add 乾 and 麼** either way. 麼 to 么 is unambiguous and is a pure win.
-
-**`chinese/tradsimp.test.js` has zero occurrences of 著.** Whichever option is
-taken, the six words above belong in that test.
-
-_Found 2026-09-20 by a translation-review agent cross-checking its own
-simplification against OpenCC and against this repo's converter; the two
-disagreed. Verified by calling `simplify()` directly._
-
-## 2. Nothing stops a page shadowing `zh-common.json` again
-
-**S · open**
-
-`build.js` merges translations as `{...common, ...pageT}`, so a page key with the
-same name as a shared key **wins silently**. That trap fired three times on
-2026-09-20 — `chinese/index` kept showing two terms after both were changed in
-the shared file, and `life-calculator` showed 寿命计算器 while every other page
-showed 活了多久.
-
-All conflicts and all 25 exact duplicates are cleared, and
-[`zh-translation.md`](zh-translation.md#the-shadow-key-trap) documents the trap
-with a detection command. **A documented command is not a gate.** The repo already
-made this argument for `stylesheets.test.js`: "a comment is not a gate; the test
-is."
-
-The assertion is about ten lines in `__tests__/zh-coverage.test.js`: for every
-page file, no non-underscore key may also appear in `zh-common.json`. Verify it
-by re-adding one duplicate and watching it fail.
-
-_Checked 2026-09-20: 0 conflicts, 0 duplicates, and nothing preventing the next
-one._
-
-## 3. No native speaker has read the Chinese
+## 1. No native speaker has read the Chinese
 
 **M · needs a person**
 
@@ -117,7 +53,45 @@ What a native reader should still judge, since a model cannot:
 
 _Checked 2026-09-20. There is no way to verify this from inside the repo._
 
-## 4. Runtime-rendered English on `/zh/` pages
+## 2. 13 simplified characters still convert to the wrong traditional form
+
+**M · open**
+
+`traditionalize` in `chinese/tradsimp.js` inverts the forward character map, and
+23 simplified characters receive two traditional characters each. The inverted
+map can only pick one, so the other is always wrong.
+
+Ten were fixed on 2026-09-20 — 后, 钟, 咨, 干, plus 了 and 余 which now have no
+default at all. These thirteen are measured and left:
+
+|     | Simplified | Converts to | Should sometimes be |
+| --- | ---------- | ----------- | ------------------- |
+| 1   | 系统       | 係統        | 系統                |
+| 2   | 心脏       | 心髒        | 心臟                |
+| 3   | 复杂       | 復雜        | 複雜                |
+| 4   | 词汇       | 詞匯        | 詞彙                |
+| 5   | 头发       | 頭發        | 頭髮                |
+| 6   | 面对       | 麵對        | 面對                |
+| 7   | 尽管       | 盡管        | 儘管                |
+| 8   | 日历       | 日歷        | 日曆                |
+| 9   | 收获       | 收獲        | 收穫                |
+| 10  | 赞美       | 贊美        | 讚美                |
+| 11  | 书签       | 書簽        | 書籤                |
+| 12  | 冲水       | 衝水        | 沖水                |
+| 13  | 台风       | 臺風        | 颱風                |
+
+Each needs its own word list, the same shape as the ones already there. Doing
+four and calling it done is the failure this repo keeps warning about, so they
+were measured rather than half-fixed. 系统 and 心脏 are the two to take first.
+
+Separately, the forward map is a top-1000 list and simply lacks a long tail —
+糧, 紗, 綢, 纜, 艙, 薑, 蟬, 軀, 顱, 騾, 鹼, 黴 and many more pass through
+unconverted. Expanding that is mechanical and should come from an OpenCC table,
+not by hand.
+
+_Checked 2026-09-20 by enumerating every many-to-one merge in the map._
+
+## 3. Runtime-rendered English on `/zh/` pages
 
 **M · open**
 
@@ -125,27 +99,64 @@ The same structural limit that cost three games their Chinese page, on pages tha
 kept theirs. `build.js` matches text in static HTML, so a string JavaScript writes
 into the DOM stays English.
 
-The worst case is `javascript/floating-point.html`: its main output panel shows
-`Sign (1 bit)`, `Exponent (11 bits)` and `Mantissa (52 bits)` while the prose
-underneath explains them as 符号位 / 指数 / 尾数. Also `Click any bit to toggle
-it`, `Enter a number above`, and two parse-error strings.
+The worst case was `javascript/floating-point.html`, whose output panel showed
+`Sign (1 bit)` / `Exponent (11 bits)` / `Mantissa (52 bits)` above prose calling
+them 符号位 / 指数 / 尾数. **That one is fixed**, along with 14 more, by keying
+into the inline script — see the note below.
 
-Elsewhere: `logic-engine/ui.js` (`Premise`, `No proof steps yet`),
-`password-generator` (`Copy`, three error strings), `markov`
-(`Transition Probabilities (sample):`), `series-tester` (a chart axis label), and
-validation strings on `truth-tables`, `coin-flipper` and `life-calculator`.
+**113 strings in `javascript/` are still English**, in two buckets that need
+different answers:
 
-Two counters are worse than untranslated, because they translate and then undo
-it: `life-garden`'s `第 0 代` flips to `Gen 1` on the first step
+|     | Bucket                                 | Count | Why                                 |
+| --- | -------------------------------------- | ----- | ----------------------------------- |
+| 1   | Bare literals, or runs broken by `${}` | 56    | No `>text<` for the matcher to find |
+| 2   | External `.js` files                   | 57    | `build.js` only reads `.html`       |
+
+Bucket 2 is concentrated: `logic-engine` alone holds 53 across four files, so
+`/zh/javascript/logic-engine/` is an English app in a Chinese shell. The rest is
+`truthtable.js`.
+
+**Site-wide, and not counted above:** `shared/nav.js` renders the whole
+keyboard-shortcuts dialog and `shared/theme.js` the theme popover, in English, on
+every one of the 25 `/zh/` pages. Both are bucket 2.
+
+Two game counters are worse than untranslated, because they translate and then
+undo it: `life-garden`'s `第 0 代` flips to `Gen 1` on the first step
 (`js/GameUI.js:93`), and `turing-tape`'s `步数：0` does the same
 (`js/game.js:201`). A page that visibly reverts is worse than one that never
-claimed to be translated.
+claimed to be translated. The password generator's Copy button had exactly this
+shape and was fixed by having it restore its own label rather than a hardcoded
+string — the same trick works for both counters.
 
-One promising detail: the matcher works on `>text<` inside template literals, so
-some of this is reachable with keys rather than an i18n mechanism —
-`life-calculator`'s `Milestones` key already works that way.
+**The reachable technique, for whoever picks this up.** `build.js` matches
+`>text<` in the raw file bytes, so it reaches inside inline `<script>` blocks —
+ordinary quoted strings, not just template literals. Anything a script injects as
+markup can be keyed. Two limits: a key cannot contain a `${}`, and the coverage
+test cannot see script blocks at all, so verification is build-and-grep. That is
+item 4.
 
 _Checked 2026-09-20 against the built `dist/zh/javascript/`._
+
+## 4. The coverage ratchet cannot see inside `<script>` blocks
+
+**S · open**
+
+`__tests__/zh-coverage.test.js` strips `<script>` before counting English, so it
+cannot check the 15 runtime strings now translated through script-block keys.
+
+It still catches the loud failure: if such a key stops matching, the unmatched-key
+assertion fails. What it cannot catch is a key that matches the _wrong_ `>…<`
+somewhere else in the same file and passes silently. Today the only proof is to
+build and grep by hand.
+
+Two ways to close it. Count `>…<` runs inside script blocks as well, which is
+noisy because code is full of them. Or assert that a named set of script-block
+keys appears, translated, in the built page — narrower, and enough.
+
+This matters more than it looks, because the technique is new. Before
+2026-09-20 exactly one key reached into a script block, by accident.
+
+_Checked 2026-09-20: the strip happens in `englishNodes`._
 
 ## 5. `homophones.html` glosses 211 characters in English on its `/zh/` page
 
@@ -235,6 +246,50 @@ _Checked 2026-09-20: 叶昆廷 appears 3 times, `Quinten Yearsley` 27 times. The
 job on adjacent pages and were the clearest symptom._
 
 ## Settled
+
+### Landed 2026-09-20, third pass
+
+- **`tradsimp.js` was wrong in both directions, and the reverse was worse.**
+  Forward, a character map cannot decide 著 — as the aspect particle it is 着
+  (看著), in the zhù sense it stays 著 — so 著名 came out 着名. Same for 乾, and
+  麼 mapped to the variant 麽 rather than 么. 後, 餘, 諮 and 鍾 were missing or
+  mapped to variants, so `以後` passed through untouched.
+
+  Reverse, `traditionalize` inverts the forward map, so every merge picks one
+  winner. `瞭: 了` meant **`traditionalize("好了")` returned `好瞭`** — the most
+  common character in the language, corrupted since the map was written, and on
+  nobody's list until the sweep found it.
+
+  Both directions now scan word-first then character, in three shapes: a safe
+  default with a closed exception list (后, 钟, 咨, 干); no default where none is
+  safe (余, 了); and forward exceptions where the forward side is ambiguous
+  (項鍊, 瞭望). Tests went 8 → 46, each fix with a test that fails without it.
+
+  Correction to the entry this replaces: it said 麼 was _absent_ from the map. It
+  was present, mapped to a variant. Different bug, same symptom.
+
+- **The shadow-key trap is a gate.** One assertion per page in
+  `__tests__/zh-coverage.test.js`, 26 in total. An identical value fails too,
+  because it is the trap with the pin still in. Verified by adding both a
+  duplicate and a conflicting key and watching each fail with its own message.
+
+- **`npm test` runs in 5.2s, down from 10.9s.** A jest suite runs in one worker,
+  so on 12 cores the wall clock was set by `Presets.test.js` alone at 9.9s.
+  Splitting it and `seasons/game.test.js` is the whole win.
+
+  `Presets` splits by preset rather than by subject, because all the simulation
+  sits in the seven rows of one describe — splitting by subject leaves that whole
+  and moves nothing. Test names are unchanged, zero simulation is duplicated, and
+  a guard test asserts the ownership list covers `PRESETS`, since the split
+  created a way for a new preset to have no coverage silently.
+
+  149 tests before, 150 after, verified by diffing full test names rather than
+  trusting a total. `Grid.countAll` also landed but is worth about 5%, not the
+  20% first estimated from a single noisy 100ms sample.
+
+- **15 runtime strings translated**, including all of `floating-point`'s bit
+  panel. The password generator's Copy button needed a code change, not a key: it
+  translated to 复制 and then reset itself to English permanently on first click.
 
 ### Decided 2026-09-19, no change
 

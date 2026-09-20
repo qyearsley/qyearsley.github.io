@@ -116,21 +116,13 @@ value wins and nothing warns.** That is how `chinese/index.html` kept showing
 `字符转换` and `编码浏览器` after both were changed in the shared file, and how
 `life-calculator` showed `寿命计算器` while every other page showed `活了多久`.
 
-Check for it after any edit to `zh-common.json`:
+`__tests__/zh-coverage.test.js` now fails on this, one assertion per page. An
+exact duplicate fails too: it is correct today, but the next edit to the shared
+value will not reach that page, and every one of those three started life as a
+harmless copy. Keys starting with `_` are exempt.
 
-```bash
-node -e '
-const c=require("./zh-common.json");
-for (const f of require("child_process").execSync("git ls-files \"*.zh.json\"",{encoding:"utf8"}).trim().split("\n")) {
-  const j=require("./"+f);
-  for (const k in j) if (!k.startsWith("_") && k in c && c[k]!==j[k])
-    console.log(f, k, c[k], "vs", j[k]);
-}'
-```
-
-An exact duplicate is not a bug today but is the same trap waiting: an edit to
-the shared value will not reach the page. Keep the shared file the only
-definition.
+So there is nothing to remember. Define a shared string once, in
+`zh-common.json`, and the suite holds you to it.
 
 ## Rulings on doubtful renderings
 
@@ -157,6 +149,42 @@ Chinese label beside buttons reading `Infinity` and `NaN`.
 **`空格` for the spacebar.** Translating a key _name_ is right, even though the
 literal `R` and `1`--`4` caps stay English. Chinese keyboards often leave the bar
 unlabelled, so there is no printed English word to match against.
+
+## Reaching runtime strings
+
+`build.js` matches `>text<` in the raw file bytes, not in a parsed DOM. So it
+reaches inside an inline `<script>` block: any string a script injects as markup
+can carry an ordinary translation key, whether it is a template literal or a
+plain quoted string.
+
+15 strings on the `javascript/` pages are translated this way, including all of
+`floating-point.html`'s bit-layout panel.
+
+Three limits, in the order they will bite:
+
+1. **The coverage test cannot see script blocks.** It strips them before
+   counting. So it proves a key matched _something_, never that it matched the
+   string a reader sees. Build and grep the output to be sure.
+2. **A key cannot contain a `${}`.** An interpolation splits the run, and the
+   text either side is usually too short to key safely.
+3. **Nothing in the source marks the string as a key.** Someone editing that
+   button gets no signal, and finds out from a failing test.
+
+**Translating a string a script later overwrites is worse than leaving it
+English.** The password generator's Copy button read 复制, and two bare literals
+reset it to `Copy` on the first click -- permanently. A page that scores zero
+English and then reverts in front of the reader is the failure that cost three
+games their Chinese page, one widget at a time. The fix there was to restore the
+button's own label instead of a hardcoded string:
+
+```js
+const label = btn.textContent // 复制 on /zh/, Copy on /en/
+btn.textContent = "Copied!"
+setTimeout(() => (btn.textContent = label), 1500)
+```
+
+Prefer that shape. Before keying a runtime string, check whether anything
+overwrites the same node later.
 
 ## Open questions
 
