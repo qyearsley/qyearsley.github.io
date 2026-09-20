@@ -16,5 +16,7 @@
   "N =": "N =",
   "Number of terms to sum (1-10000)": "求和项数（1-10000）",
   "A <b>series</b> is the sum of the terms in a sequence. For some sequences, the more terms you add, the closer the sum gets to a finite number. Such series are said to <b>converge</b>.": "<b>级数</b>是数列各项之和。对某些数列，加的项越多，总和就越接近某个有限的数，这样的级数称为<b>收敛</b>级数。",
-  "This tool approximates the sum of an infinite series by computing <i>&Sigma;(n=0, N)f(n)</i> for some large <i>N</i>.": "此工具通过计算<i>&Sigma;(n=0, N)f(n)</i>（<i>N</i>取较大值）来近似无穷级数之和。"
+  "This tool approximates the sum of an infinite series by computing <i>&Sigma;(n=0, N)f(n)</i> for some large <i>N</i>.": "此工具通过计算<i>&Sigma;(n=0, N)f(n)</i>（<i>N</i>取较大值）来近似无穷级数之和。",
+
+  "Partial sums as n increases": "部分和随n增大的变化"
 }
