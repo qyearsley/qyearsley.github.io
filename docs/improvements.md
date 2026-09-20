@@ -14,12 +14,14 @@ docs are the `*-plan.md` files in this directory.
 
 ## At a glance
 
-1. No native speaker has read the Chinese — M · needs a person
-2. Runtime-rendered English on `/zh/` pages — M · open
-3. `homophones.html` glosses 211 characters in English on its `/zh/` page — S · decision owed
-4. Floating Point's `2^53 (max safe int)` button is loose — S · decision owed
-5. `buddhist-vocabulary.html` writes 義譯 where the standard term is 意譯 — S · decision owed
-6. `叶昆廷` in every page body, `Quinten Yearsley` in every page title — S · decision owed
+1. `tradsimp.js` converts 著名 to 着名, and five other words wrongly — S · open
+2. Nothing stops a page shadowing `zh-common.json` again — S · open
+3. No native speaker has read the Chinese — M · needs a person
+4. Runtime-rendered English on `/zh/` pages — M · open
+5. `homophones.html` glosses 211 characters in English on its `/zh/` page — S · decision owed
+6. Floating Point's `2^53 (max safe int)` button is loose — S · decision owed
+7. `buddhist-vocabulary.html` writes 義譯 where the standard term is 意譯 — S · decision owed
+8. `叶昆廷` in every page body, `Quinten Yearsley` in every page title — S · decision owed
 
 ## Working on these
 
@@ -27,7 +29,71 @@ docs are the `*-plan.md` files in this directory.
 - Git hooks run the tests; see [`development.md`](development.md#git-hooks).
 - Public repo. Never commit a work hostname, address, tool name or ticket ID.
 
-## 1. No native speaker has read the Chinese
+## 1. `tradsimp.js` converts 著名 to 着名, and five other words wrongly
+
+**S · open**
+
+A real defect in a shipped tool. `chinese/character-converter.html` imports
+`simplify` from `chinese/tradsimp.js`, and the map at `tradsimp.js:48` has
+`"著": "着"` unconditionally.
+
+著 is two words. As the aspect particle it does simplify to 着 — 看著 to 看着,
+穿著 to 穿着, both correct today. In the zhù sense it stays 著, and the tool gets
+every one of those wrong:
+
+|     | Input | Returns | Should be |
+| --- | ----- | ------- | --------- |
+| 1   | 著名  | 着名    | 著名      |
+| 2   | 著作  | 着作    | 著作      |
+| 3   | 顯著  | 显着    | 显著      |
+| 4   | 乾淨  | 乾净    | 干净      |
+| 5   | 這麼  | 这麽    | 这么      |
+
+Items 4 and 5 are a different fault: 乾 and 麼 are simply missing from the map, so
+they pass through unconverted. 乾 is also context-dependent — 乾淨 to 干净, but
+乾坤 keeps 乾.
+
+A character map cannot get 著 right, because the choice is per-word. Options:
+
+- **Add a word-level pre-pass** for the zhù words — 著名, 著作, 著述, 著者, 顯著,
+  著手 — before the character map runs. Fixes the common cases and keeps the
+  particle working.
+- **Drop 著 from the map.** Then 看著 passes through unconverted, which is wrong
+  in the other direction but fails safe: it leaves text alone rather than
+  producing a word that does not exist.
+- **Add 乾 and 麼** either way. 麼 to 么 is unambiguous and is a pure win.
+
+**`chinese/tradsimp.test.js` has zero occurrences of 著.** Whichever option is
+taken, the six words above belong in that test.
+
+_Found 2026-09-20 by a translation-review agent cross-checking its own
+simplification against OpenCC and against this repo's converter; the two
+disagreed. Verified by calling `simplify()` directly._
+
+## 2. Nothing stops a page shadowing `zh-common.json` again
+
+**S · open**
+
+`build.js` merges translations as `{...common, ...pageT}`, so a page key with the
+same name as a shared key **wins silently**. That trap fired three times on
+2026-09-20 — `chinese/index` kept showing two terms after both were changed in
+the shared file, and `life-calculator` showed 寿命计算器 while every other page
+showed 活了多久.
+
+All conflicts and all 25 exact duplicates are cleared, and
+[`zh-translation.md`](zh-translation.md#the-shadow-key-trap) documents the trap
+with a detection command. **A documented command is not a gate.** The repo already
+made this argument for `stylesheets.test.js`: "a comment is not a gate; the test
+is."
+
+The assertion is about ten lines in `__tests__/zh-coverage.test.js`: for every
+page file, no non-underscore key may also appear in `zh-common.json`. Verify it
+by re-adding one duplicate and watching it fail.
+
+_Checked 2026-09-20: 0 conflicts, 0 duplicates, and nothing preventing the next
+one._
+
+## 3. No native speaker has read the Chinese
 
 **M · needs a person**
 
@@ -51,7 +117,7 @@ What a native reader should still judge, since a model cannot:
 
 _Checked 2026-09-20. There is no way to verify this from inside the repo._
 
-## 2. Runtime-rendered English on `/zh/` pages
+## 4. Runtime-rendered English on `/zh/` pages
 
 **M · open**
 
@@ -81,7 +147,7 @@ some of this is reachable with keys rather than an i18n mechanism —
 
 _Checked 2026-09-20 against the built `dist/zh/javascript/`._
 
-## 3. `homophones.html` glosses 211 characters in English on its `/zh/` page
+## 5. `homophones.html` glosses 211 characters in English on its `/zh/` page
 
 **S · decision owed**
 
@@ -102,7 +168,7 @@ The coverage ratchet excludes them, so they do not distort the count either way.
 _Checked 2026-09-19: 211 gloss nodes, against 5 real content strings on the same
 page, all 5 now translated._
 
-## 4. Floating Point's `2^53 (max safe int)` button is loose
+## 6. Floating Point's `2^53 (max safe int)` button is loose
 
 **S · decision owed**
 
@@ -117,7 +183,7 @@ Chinese inherits the same looseness.
 
 _Checked 2026-09-19 in `javascript/floating-point.html`._
 
-## 5. `buddhist-vocabulary.html` writes 義譯 where the standard term is 意譯
+## 7. `buddhist-vocabulary.html` writes 義譯 where the standard term is 意譯
 
 **S · decision owed**
 
@@ -142,7 +208,7 @@ language versions disagree on this one word until the English is settled.
 _Checked 2026-09-20: `chinese/buddhist-vocabulary.html:39` uses 義譯 twice and
 never 意譯._
 
-## 6. `叶昆廷` in every page body, `Quinten Yearsley` in every page title
+## 8. `叶昆廷` in every page body, `Quinten Yearsley` in every page title
 
 **S · decision owed**
 
