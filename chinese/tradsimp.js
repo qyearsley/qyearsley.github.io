@@ -4,6 +4,11 @@
  * Converts Traditional Chinese characters to Simplified Chinese.
  * Covers ~1000 most common traditional characters with different simplified equivalents.
  *
+ * Conversion is per character, which cannot be right for every character. A few
+ * traditional characters map to more than one simplified character, and the
+ * choice depends on the word. For those, a small word list runs first; see
+ * `simplifiedWords` below. The word list is not complete and never will be.
+ *
  * Quinten Yearsley
  * Created 2010, modified 2013
  */
@@ -13,8 +18,10 @@
 /**
  * Converts Traditional Chinese characters to Simplified Chinese.
  *
- * Characters not in the mapping dictionary are left unchanged.
- * This allows the function to handle mixed text and non-Chinese characters gracefully.
+ * Words in the exception list are converted first, and the characters that
+ * remain are converted one at a time. Characters not in the mapping dictionary
+ * are left unchanged. This allows the function to handle mixed text and
+ * non-Chinese characters gracefully.
  *
  * @param {string} str - The text to convert.
  * @returns {string} Text with traditional characters replaced by their simplified equivalents.
@@ -24,13 +31,108 @@
  * simplify("Hello 世界") // Returns "Hello 世界" (already simplified)
  */
 function simplify(str) {
+  return convert(str, simplifiedWords, simplified)
+}
+
+/**
+ * Converts Simplified Chinese characters to Traditional Chinese.
+ *
+ * Works the same way as `simplify`, with its own exception list. See
+ * `traditionalWords` for why this direction needs a longer one.
+ *
+ * @param {string} str - The text to convert.
+ * @returns {string} Text with simplified characters replaced by traditional equivalents.
+ */
+function traditionalize(str) {
+  return convert(str, traditionalWords, traditional)
+}
+
+/**
+ * Converts text, taking whole words from `exceptions` before single characters
+ * from `chars`. Anything in neither is left unchanged.
+ *
+ * @param {string} str - The text to convert.
+ * @param {object} exceptions - A word list, from `wordList`.
+ * @param {object} chars - A character dictionary.
+ * @returns {string} The converted text.
+ */
+function convert(str, exceptions, chars) {
+  const text = [...str]
   let result = ""
-  for (const c of str) {
-    const simp = simplified[c]
-    result += simp ? simp : c
+  let i = 0
+  while (i < text.length) {
+    const wordLength = matchWordLength(text, i, exceptions)
+    if (wordLength > 0) {
+      result += exceptions.words[text.slice(i, i + wordLength).join("")]
+      i += wordLength
+      continue
+    }
+    const c = text[i]
+    const mapped = chars[c]
+    result += mapped ? mapped : c
+    i += 1
   }
   return result
 }
+
+/**
+ * Finds the longest exception word that starts at the given position.
+ *
+ * @param {string[]} text - The text, split into characters.
+ * @param {number} start - The position to match at.
+ * @param {object} exceptions - A word list, from `wordList`.
+ * @returns {number} The length of the word, or 0 if no word matches.
+ */
+function matchWordLength(text, start, exceptions) {
+  const longest = Math.min(exceptions.maxLength, text.length - start)
+  for (let n = longest; n >= exceptions.minLength; n--) {
+    const word = text.slice(start, start + n).join("")
+    if (Object.hasOwn(exceptions.words, word)) {
+      return n
+    }
+  }
+  return 0
+}
+
+/**
+ * Prepares a word list for `convert`, measuring the shortest and longest word
+ * so that matching only has to try the lengths that can match.
+ *
+ * @param {object} words - A map of whole words to their converted form.
+ * @returns {object} The word list.
+ */
+function wordList(words) {
+  const lengths = Object.keys(words).map((word) => [...word].length)
+  return {
+    words,
+    minLength: Math.min(...lengths),
+    maxLength: Math.max(...lengths),
+  }
+}
+
+// Words that the character dictionary below gets wrong, because the
+// traditional character has two simplified forms and the word decides which.
+//
+// 著 is two words. As the aspect particle (看著, 穿著) it simplifies to 着, and
+// that is the common case, so the character dictionary holds it. In the zhù
+// sense ("write", "notable") it stays 著, and those words are listed here.
+//
+// 乾 is the same shape: 乾淨 becomes 干净, but the qián of 乾坤 and 乾隆 is a
+// different word that keeps 乾. So are 瞭 (瞭解 to 了解, but 瞭望 keeps 瞭) and
+// 鍊 (鍛鍊 to 锻炼, but 項鍊 is 项链, a different character).
+//
+// This list is short on purpose. Each entry has to be a word where the reading
+// is certain; anything doubtful is better left to the character dictionary,
+// which at least converts it the common way.
+// prettier-ignore
+const simplifiedWords = wordList({
+  "著名": "著名", "著作": "著作", "著者": "著者", "著述": "著述",
+  "著稱": "著称", "著錄": "著录", "顯著": "显著", "昭著": "昭著",
+  "卓著": "卓著", "名著": "名著", "原著": "原著", "巨著": "巨著",
+  "專著": "专著", "編著": "编著", "論著": "论著", "土著": "土著",
+  "乾坤": "乾坤", "乾隆": "乾隆", "乾卦": "乾卦", "乾嘉": "乾嘉",
+  "瞭望": "瞭望", "項鍊": "项链",
+})
 
 // A dictionary of the ~1000 most common traditional characters that have
 // different simplified equivalents.
@@ -38,7 +140,7 @@ function simplify(str) {
 const simplified = {
   "資": "资", "這": "这", "個": "个", "會": "会", "為": "为",
   "來": "来", "學": "学", "時": "时", "說": "说", "沒": "没",
-  "問": "问", "過": "过", "請": "请", "們": "们", "麼": "麽",
+  "問": "问", "過": "过", "請": "请", "們": "们", "麼": "么",
   "還": "还", "電": "电", "對": "对", "機": "机", "訊": "讯",
   "國": "国", "發": "发", "無": "无", "當": "当", "於": "于",
   "嗎": "吗", "現": "现", "點": "点", "題": "题", "樣": "样",
@@ -104,7 +206,7 @@ const simplified = {
   "鍵": "键", "趕": "赶", "筆": "笔", "註": "注", "樹": "树",
   "鐵": "铁", "榮": "荣", "歸": "归", "葉": "叶", "彈": "弹",
   "衛": "卫", "銘": "铭", "塊": "块", "漢": "汉", "賞": "赏",
-  "載": "载", "險": "险", "鐘": "钟", "構": "构", "囉": "罗",
+  "載": "载", "險": "险", "鐘": "钟", "構": "构", "囉": "啰",
   "螢": "萤", "偉": "伟", "薦": "荐", "啟": "启", "燈": "灯",
   "檢": "检", "媽": "妈", "豬": "猪", "濟": "济", "訓": "训",
   "藍": "蓝", "劃": "划", "擔": "担", "紙": "纸", "貼": "贴",
@@ -114,7 +216,7 @@ const simplified = {
   "緊": "紧", "購": "购", "僅": "仅", "帳": "帐", "層": "层",
   "鏡": "镜", "贊": "赞", "顆": "颗", "詩": "诗", "曉": "晓",
   "擁": "拥", "慶": "庆", "績": "绩", "獅": "狮", "圍": "围",
-  "餘": "馀", "鬥": "斗", "範": "范", "輝": "辉", "譯": "译",
+  "餘": "余", "鬥": "斗", "範": "范", "輝": "辉", "譯": "译",
   "廳": "厅", "蓋": "盖", "揮": "挥", "積": "积", "驚": "惊",
   "碩": "硕", "籃": "篮", "丟": "丢", "盤": "盘", "宮": "宫",
   "帥": "帅", "貨": "货", "虛": "虚", "遺": "遗", "掛": "挂",
@@ -166,7 +268,7 @@ const simplified = {
   "盃": "杯", "濃": "浓", "擋": "挡", "釣": "钓", "遜": "逊",
   "嘆": "叹", "蹟": "迹", "惱": "恼", "滄": "沧", "蔣": "蒋",
   "潔": "洁", "奪": "夺", "萊": "莱", "貪": "贪", "跡": "迹",
-  "鍾": "锺", "穌": "稣", "療": "疗", "礎": "础", "僑": "侨",
+  "鍾": "钟", "穌": "稣", "療": "疗", "礎": "础", "僑": "侨",
   "霧": "雾", "徹": "彻", "謀": "谋", "犧": "牺", "繞": "绕",
   "壽": "寿", "爺": "爷", "騷": "骚", "繪": "绘", "飽": "饱",
   "鳴": "鸣", "貢": "贡", "壢": "坜", "鈴": "铃", "撿": "捡",
@@ -227,7 +329,7 @@ const simplified = {
   "姦": "奸", "摯": "挚", "鴉": "鸦", "嚐": "尝", "璿": "璇",
   "撈": "捞", "綁": "绑", "貳": "贰", "燭": "烛", "懲": "惩",
   "爍": "烁", "膩": "腻", "樸": "朴", "頌": "颂", "遼": "辽",
-  "妝": "妆", "諮": "谘", "蘿": "萝", "嚮": "向", "馮": "冯",
+  "妝": "妆", "諮": "咨", "蘿": "萝", "嚮": "向", "馮": "冯",
   "灘": "滩", "屢": "屡", "歎": "叹", "礦": "矿", "脹": "胀",
   "賈": "贾", "譴": "谴", "煉": "炼", "蠶": "蚕", "闢": "辟",
   "嘍": "喽", "盞": "盏", "飼": "饲", "鋁": "铝", "鉛": "铅",
@@ -236,31 +338,71 @@ const simplified = {
   "綽": "绰", "柵": "栅", "煥": "焕", "鷗": "鸥", "蠅": "蝇",
   "潰": "溃", "攪": "搅", "棲": "栖", "繭": "茧", "鴿": "鸽",
   "繩": "绳", "暱": "昵", "瞞": "瞒",
+  // These come last so that the reverse dictionary below keeps the traditional
+  // character it already chose: 干 maps back to 幹, not 乾.
+  "乾": "干", "後": "后", "鏈": "链", "鍛": "锻",
 }
+
+// Simplified characters that must not be converted back at all, because the
+// traditional form depends on the word and no default is safe.
+//
+// 余 is the simplification of 餘 (其餘, 業餘), but it is also a common surname
+// and the classical pronoun, both written 余 in traditional too. The surname
+// can be followed by any given name, so no word list can recognise it. The
+// 餘 words are listed in `traditionalWords` below instead, and a bare 余 is
+// left alone.
+//
+// 了 is the simplification of 瞭 (瞭解), but nearly every 了 in running text is
+// the particle (好了, 來了), which is 了 in traditional as well. 了解 is also a
+// standard traditional spelling, so leaving 了 alone is right in both senses.
+const ambiguousSimplified = new Set(["余", "了"])
 
 // Build reverse mapping (simplified -> traditional).
 // When multiple traditional chars map to the same simplified char,
 // the first one in the dictionary wins.
 const traditional = {}
 for (const [trad, simp] of Object.entries(simplified)) {
-  if (!traditional[simp]) {
+  if (!traditional[simp] && !ambiguousSimplified.has(simp)) {
     traditional[simp] = trad
   }
 }
 
-/**
- * Converts Simplified Chinese characters to Traditional Chinese.
- *
- * @param {string} str - The text to convert.
- * @returns {string} Text with simplified characters replaced by traditional equivalents.
- */
-function traditionalize(str) {
-  let result = ""
-  for (const c of str) {
-    const trad = traditional[c]
-    result += trad ? trad : c
-  }
-  return result
-}
+// Words that the reverse dictionary gets wrong. It needs a longer list than
+// the forward direction, because simplification merges characters: 23 of the
+// simplified characters above stand for two traditional characters each, and
+// the reverse dictionary can only pick one of them.
+//
+// 后 is the worst of them. Almost every 后 is 後 (以後, 然後, 最後), so that is
+// the default; the empress 后 is a small closed set of words, listed here.
+//
+// 余 has no safe default, so it is not in the reverse dictionary at all. The
+// words that really are 餘 are listed here and everything else is left alone.
+//
+// 钟 defaults to 鐘 (時鐘, 分鐘); 鍾 is the smaller set. 咨 defaults to 諮
+// (諮詢), with the 咨文 sense listed here.
+//
+// 干 needs both kinds of entry, because it stands for three traditional
+// characters. The default is 幹 (幹活, 樹幹, 幹部); the dry sense is 乾 and the
+// interfere sense is 干, and both are listed here. This direction only became
+// ambiguous when 乾 was added to the dictionary above, so it is settled here.
+// prettier-ignore
+const traditionalWords = wordList({
+  "皇后": "皇后", "太后": "太后", "王后": "王后", "后宫": "后宮",
+  "后妃": "后妃", "母后": "母后", "天后": "天后", "后羿": "后羿",
+  "后土": "后土", "后稷": "后稷",
+  "其余": "其餘", "业余": "業餘", "剩余": "剩餘", "多余": "多餘",
+  "富余": "富餘", "盈余": "盈餘", "残余": "殘餘", "节余": "節餘",
+  "课余": "課餘", "有余": "有餘", "余额": "餘額", "余下": "餘下",
+  "余地": "餘地", "余生": "餘生", "余数": "餘數", "余暇": "餘暇",
+  "余味": "餘味", "余温": "餘溫", "余年": "餘年", "余力": "餘力",
+  "余波": "餘波", "余热": "餘熱", "余晖": "餘暉", "余音": "餘音",
+  "钟情": "鍾情", "钟爱": "鍾愛", "钟意": "鍾意", "钟灵": "鍾靈",
+  "咨文": "咨文",
+  "干净": "乾淨", "干燥": "乾燥", "干杯": "乾杯", "干脆": "乾脆",
+  "干旱": "乾旱", "干枯": "乾枯", "干洗": "乾洗", "干渴": "乾渴",
+  "干粮": "乾糧", "饼干": "餅乾",
+  "干扰": "干擾", "干涉": "干涉", "干预": "干預", "若干": "若干",
+  "干戈": "干戈",
+})
 
 export { simplify, traditionalize }
