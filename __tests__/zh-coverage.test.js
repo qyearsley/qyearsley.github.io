@@ -34,6 +34,22 @@
  * A page below its baseline fails with the number to paste in. That failure is
  * the ratchet -- it is what stops a baseline rotting upward after someone
  * improves a page.
+ *
+ * The suite also checks that no page file shadows `zh-common.json`. build.js
+ * merges the two as `{...common, ...page}`, so a key defined in both resolves to
+ * the page value and nothing warns. On 2026-09-20 that cost us three pages:
+ * `chinese/index.zh.json` held its own `Character Converter` and `Encoding
+ * Explorer`, so the index kept the old Chinese after the shared file changed,
+ * and `javascript/life-calculator.zh.json` held its own `Life Calculator`, so
+ * that page's breadcrumb disagreed with every other page.
+ *
+ * An exact duplicate fails too. It translates correctly today, but it is the
+ * same trap with the pin still in: the next edit to the shared value will not
+ * reach that page. That is how those 15 name conflicts arose -- every one of
+ * them started life as a harmless copy of the shared string.
+ *
+ * Keys starting with `_` are exempt. `_title` and `_description` are per-page by
+ * design and `zh-common.json` carries its own pair for the homepage.
  */
 import { describe, expect, test } from "@jest/globals"
 import { readFileSync, existsSync } from "node:fs"
@@ -148,6 +164,36 @@ describe("Chinese coverage", () => {
     const { zh, unmatched } = translated(page)
     const { english } = englishNodes(zh)
     const allowed = BASELINE[page] ?? 0
+
+    test("no key shadows zh-common.json", () => {
+      const jsonPath = page.replace(/\.html$/, ".zh.json")
+      const pageTranslations = JSON.parse(readFileSync(jsonPath, "utf-8"))
+      const shadowed = Object.keys(pageTranslations).filter(
+        (key) => !key.startsWith("_") && key in common,
+      )
+      if (shadowed.length === 0) return
+
+      const detail = shadowed
+        .map((key) => {
+          const same = pageTranslations[key] === common[key]
+          return (
+            `  ${JSON.stringify(key)}${same ? "  (identical value)" : ""}\n` +
+            `    ${jsonPath}: ${JSON.stringify(pageTranslations[key])}\n` +
+            `    zh-common.json: ${JSON.stringify(common[key])}`
+          )
+        })
+        .join("\n")
+
+      throw new Error(
+        `${jsonPath} redefines ${shadowed.length} key(s) that zh-common.json already defines:\n` +
+          `${detail}\n` +
+          `Delete the key from ${jsonPath}. build.js merges the two files as ` +
+          `{...common, ...page}, so the page value silently wins and no warning is printed.\n` +
+          `An identical value is a failure too: it is correct today, but the next edit to ` +
+          `zh-common.json will not reach this page, and the page will quietly disagree with ` +
+          `every other one. zh-common.json is the single place a shared string is translated.`,
+      )
+    })
 
     test("every translation key matches something", () => {
       // A key that matches nothing translates nothing. It means the page text
