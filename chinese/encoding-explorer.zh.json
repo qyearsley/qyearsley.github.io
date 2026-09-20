@@ -1,22 +1,20 @@
 {
-  "_title": "编码浏览器 - Quinten Yearsley",
+  "_title": "编码查看器 - Quinten Yearsley",
   "_description": "查看字符在UTF-8、UTF-16和GB2312中的编码",
 
-  "Encoding Explorer": "编码浏览器",
   "See how characters are encoded in UTF-8, UTF-16, and GB2312": "查看字符在UTF-8、UTF-16和GB2312中的编码",
   "Type or paste characters:": "输入或粘贴字符：",
   "How encodings work": "编码的工作原理",
   "UTF-8": "UTF-8",
-  "Variable-length: 1 byte for ASCII, 2 for Latin/Greek, 3 for most CJK, 4 for emoji and rare characters. The leading bits of each byte indicate its role:": "可变长度：ASCII用1字节，拉丁/希腊文用2字节，多数CJK用3字节，表情和稀有字符用4字节。每字节的前导位表示其角色：",
+  "Variable-length: 1 byte for ASCII, 2 for Latin/Greek, 3 for most CJK, 4 for emoji and rare characters. The leading bits of each byte indicate its role:": "可变长度：ASCII用1字节，拉丁/希腊文用2字节，多数CJK用3字节，表情符号和罕见字符用4字节。每个字节的前导位表明它的作用：",
   "<code>0xxxxxxx</code> -- single byte (ASCII)": "<code>0xxxxxxx</code> —— 单字节（ASCII）",
   "<code>110xxxxx 10xxxxxx</code> -- 2 bytes": "<code>110xxxxx 10xxxxxx</code> —— 2字节",
   "<code>1110xxxx 10xxxxxx 10xxxxxx</code> -- 3 bytes": "<code>1110xxxx 10xxxxxx 10xxxxxx</code> —— 3字节",
   "<code>11110xxx 10xxxxxx 10xxxxxx 10xxxxxx</code> -- 4 bytes": "<code>11110xxx 10xxxxxx 10xxxxxx 10xxxxxx</code> —— 4字节",
   "The <span style=\"color: #a0aec0\">grey bits</span> are structure; the <strong style=\"color: #3182ce\">blue bits</strong> carry the code point.": "<span style=\"color: #a0aec0\">灰色位</span>是结构位，<strong style=\"color: #3182ce\">蓝色位</strong>承载码点。",
   "UTF-16": "UTF-16",
-  "Fixed 2 bytes for characters in the Basic Multilingual Plane (U+0000 to U+FFFF), which includes all common CJK. Characters above U+FFFF use a surrogate pair (4 bytes).": "基本多文种平面（U+0000到U+FFFF）的字符固定2字节，包括所有常用CJK。U+FFFF以上的字符使用代理对（4字节）。",
+  "Fixed 2 bytes for characters in the Basic Multilingual Plane (U+0000 to U+FFFF), which includes all common CJK. Characters above U+FFFF use a surrogate pair (4 bytes).": "基本多文种平面（U+0000到U+FFFF）内的字符固定占2字节，该平面包含所有常用汉字。U+FFFF以上的字符使用代理对（4字节）。",
   "GB2312": "GB2312",
-  "A legacy Chinese encoding from 1980. Maps ~7,000 simplified Chinese characters to 2-byte codes. ASCII characters use 1 byte. This tool shows GB2312 values for a curated set of common characters.": "1980年的传统中文编码。将约7000个简体中文字符映射为2字节码。ASCII字符用1字节。此工具显示一组常用字符的GB2312值。",
-  "See also": "另见",
+  "A legacy Chinese encoding from 1980. Maps ~7,000 simplified Chinese characters to 2-byte codes. ASCII characters use 1 byte. This tool shows GB2312 values for a curated set of common characters.": "1980年的旧式中文编码。将约7000个简体汉字映射为2字节编码。ASCII字符用1字节。此工具显示一组精选常用汉字的GB2312值。",
   "— convert between traditional and simplified Chinese": "——繁简中文字符转换"
 }

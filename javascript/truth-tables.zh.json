@@ -4,7 +4,6 @@
 
   "Truth Table Generator": "真值表生成器",
   "Generate truth tables for boolean expressions (AND, OR, NOT, XOR, and more)": "为布尔表达式生成真值表（AND、OR、NOT、XOR等）",
-  "Truth Tables": "真值表",
   "Generate Truth Table": "生成真值表",
   "Boolean Expression:": "布尔表达式：",
   "How It Works": "工作原理",
@@ -18,6 +17,5 @@
   "XOR Gate": "异或门",
   "XNOR (Equivalence)": "同或（等价）",
   "Implication": "蕴含",
-  "See also": "另见",
   "— derive conclusions from premises using inference rules": "——用推理规则从前提推导结论"
 }

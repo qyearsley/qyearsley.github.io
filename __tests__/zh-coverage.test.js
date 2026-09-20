@@ -74,9 +74,10 @@ const BASELINE = {
   "chinese/encoding-explorer.html": 3,
   "chinese/pinyin-abbreviations.html": 16,
   "javascript/truth-tables.html": 1,
-  // Technology names, employer names and project titles on the resume. See
-  // docs/improvements.md -- some of these should be translated and are not.
-  "resume/index.html": 20,
+  // Technology names and the parenthetical tech stacks on each project heading.
+  // Correctly Latin on a Chinese resume. Everything else on the page is
+  // translated -- see docs/zh-translation.md.
+  "resume/index.html": 10,
 }
 
 const common = JSON.parse(readFileSync("zh-common.json", "utf-8"))

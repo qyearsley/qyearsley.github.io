@@ -2,16 +2,15 @@
   "_title": "浮点数揭秘 - Quinten Yearsley",
   "_description": "查看任意数字的IEEE 754位布局",
 
-  "Floating Point Exposed": "浮点数揭秘",
   "See the IEEE 754 bit layout of any number": "查看任意数字的IEEE 754位布局",
   "Enter a number or expression:": "输入数字或表达式：",
   "2^53 (max safe int)": "2^53（最大安全整数）",
   "smallest": "最小正数",
   "How IEEE 754 double-precision works": "IEEE 754双精度的工作原理",
-  "JavaScript numbers are 64-bit IEEE 754 \"double precision\" floats. The 64 bits are divided into three fields:": "JavaScript数字是64位IEEE 754「双精度」浮点数。64位分为三个字段：",
+  "JavaScript numbers are 64-bit IEEE 754 \"double precision\" floats. The 64 bits are divided into three fields:": "JavaScript数字是64位IEEE 754“双精度”浮点数。64位分为三个字段：",
   "<strong style=\"color: #e53e3e\">Sign</strong> (1 bit) &mdash; 0 for positive, 1 for negative": "<strong style=\"color: #e53e3e\">符号位</strong>（1位）&mdash;&mdash;0为正，1为负",
   "<strong style=\"color: #805ad5\">Exponent</strong> (11 bits) &mdash; stored with a bias of 1023. Raw value 0 means denormalized; 2047 means Infinity or NaN.": "<strong style=\"color: #805ad5\">指数</strong>（11位）&mdash;&mdash;以1023为偏移量存储。原始值0表示非规格化数，2047表示无穷大或NaN。",
   "<strong style=\"color: #3182ce\">Mantissa</strong> (52 bits) &mdash; the fractional part. There's an implicit leading 1 (for normal numbers), so you get 53 bits of precision total.": "<strong style=\"color: #3182ce\">尾数</strong>（52位）&mdash;&mdash;小数部分。规格化数有一个隐含的前导1，所以总共有53位精度。",
   "The value is: &plusmn;1.mantissa &times; 2<sup>(exponent - 1023)</sup>": "数值为：&plusmn;1.尾数 &times; 2<sup>(指数 - 1023)</sup>",
-  "This is why <code>0.1 + 0.2 !== 0.3</code> &mdash; 0.1 and 0.2 can't be represented exactly in binary, so the sum accumulates a tiny rounding error. Try clicking \"0.1 + 0.2\" and \"0.3\" to compare their bits.": "这就是<code>0.1 + 0.2 !== 0.3</code>的原因&mdash;&mdash;0.1和0.2无法用二进制精确表示，求和时会累积微小的舍入误差。可以点击「0.1 + 0.2」和「0.3」比较它们的位。"
+  "This is why <code>0.1 + 0.2 !== 0.3</code> &mdash; 0.1 and 0.2 can't be represented exactly in binary, so the sum accumulates a tiny rounding error. Try clicking \"0.1 + 0.2\" and \"0.3\" to compare their bits.": "这就是<code>0.1 + 0.2 !== 0.3</code>的原因&mdash;&mdash;0.1和0.2无法用二进制精确表示，求和时会累积微小的舍入误差。可以点击“0.1 + 0.2”和“0.3”比较它们的二进制位。"
 }

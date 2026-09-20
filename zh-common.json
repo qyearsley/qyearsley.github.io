@@ -36,18 +36,20 @@
   "Truth Tables": "真值表",
   "Coin Flipper": "抛硬币",
   "Series Tester": "级数测试",
-  "Life Calculator": "寿命计算器",
+  "Life Calculator": "活了多久",
   "Floating Point Exposed": "浮点数揭秘",
   "Hash Collision Lab": "散列冲突实验室",
   "Markov Chain": "马尔可夫链",
   "Password Generator": "密码生成器",
-  "Cellular Automata": "细胞自动机",
+  "Cellular Automata": "元胞自动机",
 
-  "Character Converter": "字符转换",
-  "Encoding Explorer": "编码浏览器",
+  "Character Converter": "简繁转换",
+  "Encoding Explorer": "编码查看器",
   "Tone Table": "声调表",
   "Pinyin Tone Tables": "拼音声调表",
   "Syllabary": "音译音节表",
   "Homophones": "同音字",
-  "Pinyin Abbreviations": "拼音缩写"
+  "Pinyin Abbreviations": "拼音缩写",
+
+  "See also": "另见"
 }

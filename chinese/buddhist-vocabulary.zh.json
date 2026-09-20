@@ -4,21 +4,21 @@
 
   "Translating Buddhist Terms into Chinese": "佛教术语的汉译",
   "How Indian Buddhist vocabulary was rendered into Chinese, and why.": "印度佛教词汇如何译成汉语，以及为什么。",
-  "Buddhist Terms": "佛教词语",
+  "Buddhist Terms": "佛教术语",
 
   "Two strategies": "两种策略",
-  "When Buddhism reached China around the 1st century CE, translators had a choice for every unfamiliar term: <strong>borrow the sound</strong> (音譯 <em>yīnyì</em>) or <strong>translate the meaning</strong> (義譯 <em>yìyì</em>). <em>Nirvāṇa</em> took the first path and became 涅槃 (<em>nièpán</em>) — characters chosen purely for their sound. <em>Śūnyatā</em> took the second and became 空 (<em>kōng</em>, \"empty\") — a character that already meant the right thing. Many terms ended up with both forms in circulation.": "佛教约在公元1世纪传入中国，译者对每一个陌生的词都要作出选择：<strong>借用读音</strong>（音譯 <em>yīnyì</em>），还是<strong>翻译意思</strong>（義譯 <em>yìyì</em>）。<em>Nirvāṇa</em>走了第一条路，成了涅槃（<em>nièpán</em>）——这两个字纯粹按音选取。<em>Śūnyatā</em>走了第二条路，成了空（<em>kōng</em>）——这个字本来就有正合适的意思。许多词最后是两种形式并行。",
+  "When Buddhism reached China around the 1st century CE, translators had a choice for every unfamiliar term: <strong>borrow the sound</strong> (音譯 <em>yīnyì</em>) or <strong>translate the meaning</strong> (義譯 <em>yìyì</em>). <em>Nirvāṇa</em> took the first path and became 涅槃 (<em>nièpán</em>) — characters chosen purely for their sound. <em>Śūnyatā</em> took the second and became 空 (<em>kōng</em>, \"empty\") — a character that already meant the right thing. Many terms ended up with both forms in circulation.": "佛教约在公元1世纪传入中国，译者对每一个陌生的词都要作出选择：<strong>借用读音</strong>（音译 <em>yīnyì</em>），还是<strong>翻译意思</strong>（意译 <em>yìyì</em>）。<em>Nirvāṇa</em>走了第一条路，成了涅槃（<em>nièpán</em>）——这两个字纯粹按音选取。<em>Śūnyatā</em>走了第二条路，成了空（<em>kōng</em>）——这个字本来就有正合适的意思。许多词最后是两种形式并行。",
 
   "Xuanzang's five categories not to translate": "玄奘的五种不翻",
-  "The 7th-century monk-translator <strong>Xuánzàng</strong> (玄奘) — the same one who traveled to India and inspired the novel <em>Journey to the West</em> — codified the principles for when to transliterate rather than translate. His <strong>五種不翻</strong> (<em>wǔ zhǒng bù fān</em>, \"five categories not to translate\"):": "7世纪的译经僧<strong>玄奘</strong>（Xuánzàng）——就是西行取经、并启发了小说《西游记》的那位高僧——归纳出何时该音译、何时该意译。他的<strong>五種不翻</strong>（<em>wǔ zhǒng bù fān</em>，即五种不加翻译的情形）：",
-  "<strong>Esoteric (秘密故)</strong> — mantras and dhāraṇīs, kept phonetic so their ritual power isn't lost.": "<strong>秘密故</strong>——真言和陀罗尼保持音译，以免失去其法力。",
+  "The 7th-century monk-translator <strong>Xuánzàng</strong> (玄奘) — the same one who traveled to India and inspired the novel <em>Journey to the West</em> — codified the principles for when to transliterate rather than translate. His <strong>五種不翻</strong> (<em>wǔ zhǒng bù fān</em>, \"five categories not to translate\"):": "7世纪的译经僧<strong>玄奘</strong>（Xuánzàng）——就是西行取经、并启发了小说《西游记》的那位高僧——归纳出何时该音译、何时该意译。他的<strong>五种不翻</strong>（<em>wǔ zhǒng bù fān</em>，即五种不加翻译的情形）：",
+  "<strong>Esoteric (秘密故)</strong> — mantras and dhāraṇīs, kept phonetic so their ritual power isn't lost.": "<strong>秘密故</strong>——真言和陀罗尼保持音译，以免失去其咒力。",
   "<strong>Multivalent (多含故)</strong> — words with many meanings at once, like <em>bhagavān</em>, which combines \"lord,\" \"fortunate,\" and \"destroyer of evil.\"": "<strong>多含故</strong>——一个词同时含多义，如<em>bhagavān</em>，兼有“主宰”“吉祥”“破恶”之义。",
-  "<strong>Absent referent (此無故)</strong> — things that don't exist in China, like the <em>jambū</em> tree.": "<strong>此無故</strong>——中国没有的事物，如<em>jambū</em>树。",
-  "<strong>Following precedent (順古故)</strong> — terms with long-established transliterations, even when a translation would now be possible.": "<strong>順古故</strong>——音译早已沿用成习的词，即使今天可以意译。",
-  "<strong>To inspire reverence (生善故)</strong> — keeping the foreign word when a translation would sound too mundane. <em>Prajñā</em> stayed as 般若 (<em>bōrě</em>) rather than the everyday 智慧 (<em>zhìhuì</em>, \"wisdom\") for exactly this reason.": "<strong>生善故</strong>——意译听起来太平常时，就保留外来词。<em>Prajñā</em>正因如此留作般若（<em>bōrě</em>），而没有用日常的智慧（<em>zhìhuì</em>）。",
+  "<strong>Absent referent (此無故)</strong> — things that don't exist in China, like the <em>jambū</em> tree.": "<strong>此无故</strong>——中国没有的事物，如<em>jambū</em>树。",
+  "<strong>Following precedent (順古故)</strong> — terms with long-established transliterations, even when a translation would now be possible.": "<strong>顺古故</strong>——音译早已沿用成习的词，即使今天可以意译。",
+  "<strong>To inspire reverence (生善故)</strong> — keeping the foreign word when a translation would sound too mundane. <em>Prajñā</em> stayed as 般若 (<em>bōrě</em>) rather than the everyday 智慧 (<em>zhìhuì</em>, \"wisdom\") for exactly this reason.": "<strong>生善故</strong>——意译听起来太平常时，就保留外来词。<em>Prajñā</em>正因如此仍译作般若（<em>bōrě</em>），而没有用日常的智慧（<em>zhìhuì</em>）。",
 
   "The vocabulary": "词汇表",
-  "A working glossary of important terms. It shows which strategy won for each term, and why.": "重要术语的实用词表。它列出每个词最后采用了哪种策略，以及为什么。",
+  "A working glossary of important terms. It shows which strategy won for each term, and why.": "重要术语的实用词表，列出每个词最后采用了哪种策略，以及为什么。",
 
   "Transliterations that dominated": "以音译为主的词",
   "Sanskrit / Pali": "梵语／巴利语",
@@ -27,47 +27,47 @@
   "Why transliteration won": "音译胜出的原因",
 
   "佛 (<em>fó</em>); full: 佛陀 (<em>fótuó</em>)": "佛（<em>fó</em>）；全称佛陀（<em>fótuó</em>）",
-  "覺者 (<em>juézhě</em>) \"awakened one\" — used as gloss only": "覺者（<em>juézhě</em>）——仅用作释义",
+  "覺者 (<em>juézhě</em>) \"awakened one\" — used as gloss only": "觉者（<em>juézhě</em>）——仅用作释义",
   "Precedent; 佛 became fully naturalized as a Chinese character": "顺古；佛已完全汉化，成为汉语常用字",
 
   "涅槃 (<em>nièpán</em>)": "涅槃（<em>nièpán</em>）",
-  "滅度 (<em>mièdù</em>) \"extinction-crossing\"": "滅度（<em>mièdù</em>）",
-  "Reverence — 滅 sounded too negative": "生善——滅字听来太消极",
+  "滅度 (<em>mièdù</em>) \"extinction-crossing\"": "灭度（<em>mièdù</em>）",
+  "Reverence — 滅 sounded too negative": "生善——灭字听来太消极",
 
-  "菩薩 (<em>púsà</em>); full: 菩提薩埵 (<em>pútísàduǒ</em>)": "菩薩（<em>púsà</em>）；全称菩提薩埵（<em>pútísàduǒ</em>）",
-  "覺有情 (<em>juéyǒuqíng</em>) \"awakening sentient being\"": "覺有情（<em>juéyǒuqíng</em>）",
-  "Kumārajīva's shorter 菩薩 spread first; conciseness won": "鸠摩罗什较短的菩薩先流行开来；简洁胜出",
+  "菩薩 (<em>púsà</em>); full: 菩提薩埵 (<em>pútísàduǒ</em>)": "菩萨（<em>púsà</em>）；全称菩提萨埵（<em>pútísàduǒ</em>）",
+  "覺有情 (<em>juéyǒuqíng</em>) \"awakening sentient being\"": "觉有情（<em>juéyǒuqíng</em>）",
+  "Kumārajīva's shorter 菩薩 spread first; conciseness won": "鸠摩罗什较短的菩萨先流行开来；简洁胜出",
 
   "般若 (<em>bōrě</em>)": "般若（<em>bōrě</em>）",
   "智慧 (<em>zhìhuì</em>) \"wisdom\"": "智慧（<em>zhìhuì</em>）",
   "Xuanzang's rule #5 — reverence; 智慧 too mundane": "玄奘第五条——生善；智慧太平常",
 
-  "阿羅漢 (<em>āluóhàn</em>); short: 羅漢 (<em>luóhàn</em>)": "阿羅漢（<em>āluóhàn</em>）；简称羅漢（<em>luóhàn</em>）",
-  "應供 (<em>yìnggōng</em>) \"worthy of offerings\"": "應供（<em>yìnggōng</em>）",
+  "阿羅漢 (<em>āluóhàn</em>); short: 羅漢 (<em>luóhàn</em>)": "阿罗汉（<em>āluóhàn</em>）；简称罗汉（<em>luóhàn</em>）",
+  "應供 (<em>yìnggōng</em>) \"worthy of offerings\"": "应供（<em>yìnggōng</em>）",
   "Precedent": "顺古",
 
-  "阿彌陀 (<em>Āmítuó</em>)": "阿彌陀（<em>Āmítuó</em>）",
-  "無量光 (<em>wúliángguāng</em>) \"infinite light\"": "無量光（<em>wúliángguāng</em>）",
-  "Both used: 阿彌陀 in chanting, 無量光 in scholarship": "两者并用：念诵用阿彌陀，著述用無量光",
+  "阿彌陀 (<em>Āmítuó</em>)": "阿弥陀（<em>Āmítuó</em>）",
+  "無量光 (<em>wúliángguāng</em>) \"infinite light\"": "无量光（<em>wúliángguāng</em>）",
+  "Both used: 阿彌陀 in chanting, 無量光 in scholarship": "两者并用：念诵用阿弥陀，著述用无量光",
 
-  "釋迦牟尼 (<em>Shìjiāmóuní</em>)": "釋迦牟尼（<em>Shìjiāmóuní</em>）",
+  "釋迦牟尼 (<em>Shìjiāmóuní</em>)": "释迦牟尼（<em>Shìjiāmóuní</em>）",
   "能仁 (<em>néngrén</em>) \"able sage\" — rare": "能仁（<em>néngrén</em>）——罕用",
   "It's a name; transliteration default": "这是人名；人名默认音译",
 
-  "禪 (<em>chán</em>); from 禪那 (<em>chánnà</em>)": "禪（<em>chán</em>）；出自禪那（<em>chánnà</em>）",
+  "禪 (<em>chán</em>); from 禪那 (<em>chánnà</em>)": "禅（<em>chán</em>）；出自禅那（<em>chánnà</em>）",
   "思惟修 (<em>sīwéixiū</em>) \"contemplation cultivation\"": "思惟修（<em>sīwéixiū</em>）",
-  "Precedent; 禪 became its own concept (the Chán / Zen school)": "顺古；禪后来自成一个概念（禪宗）",
+  "Precedent; 禪 became its own concept (the Chán / Zen school)": "顺古；禅后来自成一个概念（禅宗）",
 
   "塔 (<em>tǎ</em>); from 塔婆 (<em>tǎpó</em>) or 窣堵波 (<em>sūdǔbō</em>)": "塔（<em>tǎ</em>）；出自塔婆（<em>tǎpó</em>）或窣堵波（<em>sūdǔbō</em>）",
-  "廟 (<em>miào</em>) \"temple\" — too generic": "廟（<em>miào</em>）——太笼统",
+  "廟 (<em>miào</em>) \"temple\" — too generic": "庙（<em>miào</em>）——太笼统",
   "塔 became the generic Chinese word for \"pagoda\"": "塔成了汉语中这类建筑的通称",
 
   "魔 (<em>mó</em>)": "魔（<em>mó</em>）",
   "A character invented for this concept; later generalized to \"demon\"": "为这个概念新造的字；后来泛指鬼怪、恶魔",
 
   "namo (homage)": "namo（敬礼）",
-  "南無 (<em>nāmó</em>)": "南無（<em>nāmó</em>）",
-  "Liturgical only — used in chants like 南無阿彌陀佛": "只用于仪轨——如念诵南無阿彌陀佛",
+  "南無 (<em>nāmó</em>)": "南无（<em>nāmó</em>）",
+  "Liturgical only — used in chants like 南無阿彌陀佛": "只用于仪轨——如念诵南无阿弥陀佛",
 
   "Translations that dominated": "以意译为主的词",
   "Chinese (translation)": "汉语（意译）",
@@ -75,10 +75,10 @@
   "Notes": "说明",
 
   "法 (<em>fǎ</em>)": "法（<em>fǎ</em>）",
-  "達摩 (<em>dámó</em>)": "達摩（<em>dámó</em>）",
-  "達摩 survives only in proper names (e.g., Bodhidharma 菩提達摩)": "達摩只在专名中保留下来（如菩提達摩）",
+  "達摩 (<em>dámó</em>)": "达摩（<em>dámó</em>）",
+  "達摩 survives only in proper names (e.g., Bodhidharma 菩提達摩)": "达摩只在专名中保留下来（如菩提达摩）",
 
-  "業 (<em>yè</em>)": "業（<em>yè</em>）",
+  "業 (<em>yè</em>)": "业（<em>yè</em>）",
   "羯磨 (<em>jiémó</em>)": "羯磨（<em>jiémó</em>）",
   "羯磨 retained for monastic legal procedures only": "羯磨只用于僧团的戒律程序",
 
@@ -88,27 +88,27 @@
   "苦 (<em>kǔ</em>) \"bitter, suffering\"": "苦（<em>kǔ</em>）",
   "Simple, vivid translation": "简单而形象的意译",
 
-  "輪迴 (<em>lúnhuí</em>) \"wheel-turning\"": "輪迴（<em>lúnhuí</em>）",
-  "Translation captures the imagery": "意译保住了原来的意象",
+  "輪迴 (<em>lúnhuí</em>) \"wheel-turning\"": "轮回（<em>lúnhuí</em>）",
+  "Translation captures the imagery": "意译保留了原来的意象",
 
-  "緣起 (<em>yuánqǐ</em>) \"condition-arising\"": "緣起（<em>yuánqǐ</em>）",
+  "緣起 (<em>yuánqǐ</em>) \"condition-arising\"": "缘起（<em>yuánqǐ</em>）",
   "Dependent origination": "即因缘生起",
 
   "道 (<em>dào</em>) \"way, path\"": "道（<em>dào</em>）",
-  "Borrowed from Daoism, where 道 was already the central term for \"the Way\"": "借自道家，道在那里本来就是核心概念",
+  "Borrowed from Daoism, where 道 was already the central term for \"the Way\"": "借自道家，道本来就是道家的核心概念",
 
-  "maitrī + karuṇā": "maitrī 与 karuṇā",
+  "maitrī + karuṇā": "maitrī与karuṇā",
   "慈悲 (<em>cíbēi</em>) \"loving-kindness + compassion\"": "慈悲（<em>cíbēi</em>）",
   "Pairs two existing Chinese words": "把两个已有的汉语词合在一起",
 
-  "觀世音 (<em>Guānshìyīn</em>) \"Observer of the World's Sounds\"": "觀世音（<em>Guānshìyīn</em>）",
-  "Kumārajīva's translation; Xuanzang later proposed the more literal 觀自在 (<em>Guānzìzài</em>), used in the Heart Sutra": "鸠摩罗什的译法；玄奘后来提出更贴近原文的觀自在（<em>Guānzìzài</em>），《心经》用的就是它",
+  "觀世音 (<em>Guānshìyīn</em>) \"Observer of the World's Sounds\"": "观世音（<em>Guānshìyīn</em>）",
+  "Kumārajīva's translation; Xuanzang later proposed the more literal 觀自在 (<em>Guānzìzài</em>), used in the Heart Sutra": "鸠摩罗什的译法；玄奘后来提出更贴近原文的观自在（<em>Guānzìzài</em>），《心经》用的就是它",
 
   "五戒 (<em>wǔjiè</em>) \"five precepts\"": "五戒（<em>wǔjiè</em>）",
 
   "The translators": "译者",
   "Two figures shaped most of the surviving vocabulary:": "留传下来的词汇，大半出自两个人之手：",
-  "<a href=\"https://en.wikipedia.org/wiki/Kumarajiva\"><strong>Kumārajīva</strong></a> (鳩摩羅什, 344–413) — translated the Lotus, Diamond, and Heart Sutras. Favored fluent Chinese over literal accuracy; most terms that \"feel\" Chinese (觀世音, 般若波羅蜜) come from his workshop.": "<a href=\"https://en.wikipedia.org/wiki/Kumarajiva\"><strong>鸠摩罗什</strong></a>（Kumārajīva，344–413）——译出《法华经》《金刚经》《心经》。他重视汉语的流畅，胜过字面的准确；那些读起来“像汉语”的词（觀世音、般若波羅蜜）多半出自他的译场。",
+  "<a href=\"https://en.wikipedia.org/wiki/Kumarajiva\"><strong>Kumārajīva</strong></a> (鳩摩羅什, 344–413) — translated the Lotus, Diamond, and Heart Sutras. Favored fluent Chinese over literal accuracy; most terms that \"feel\" Chinese (觀世音, 般若波羅蜜) come from his workshop.": "<a href=\"https://en.wikipedia.org/wiki/Kumarajiva\"><strong>鸠摩罗什</strong></a>（Kumārajīva，344–413）——译出《法华经》《金刚经》《心经》。他重视汉语的流畅，胜过字面的准确；那些读起来“像汉语”的词（观世音、般若波罗蜜）多半出自他的译场。",
   "<a href=\"https://en.wikipedia.org/wiki/Xuanzang\"><strong>Xuánzàng</strong></a> (玄奘, 602–664) — traveled overland to India for 17 years and produced famously precise translations. Where Kumārajīva smoothed, Xuanzang preferred to leave the Sanskrit visible.": "<a href=\"https://en.wikipedia.org/wiki/Xuanzang\"><strong>玄奘</strong></a>（Xuánzàng，602–664）——陆路西行印度十七年，所出译本以精确著称。鸠摩罗什把文字磨平的地方，玄奘宁愿让梵语的痕迹留着。",
-  "Earlier translators (2nd–4th centuries) also used <a href=\"https://en.wikipedia.org/wiki/Geyi\"><strong>géyì</strong></a> (格義, \"matching meanings\"), reaching for Daoist vocabulary to render Buddhist concepts — calling <em>nirvāṇa</em> 無為 (<em>wúwéi</em>), for instance. Most such renderings were later abandoned, but 道 for <em>mārga</em> stuck.": "更早的译者（2至4世纪）还用过<a href=\"https://en.wikipedia.org/wiki/Geyi\"><strong>格義</strong></a>（<em>géyì</em>，即“比配意义”），拿道家的词来表达佛教概念——例如把<em>nirvāṇa</em>称作無為（<em>wúwéi</em>）。这类译法后来多被舍弃，只有<em>mārga</em>译作道留了下来。"
+  "Earlier translators (2nd–4th centuries) also used <a href=\"https://en.wikipedia.org/wiki/Geyi\"><strong>géyì</strong></a> (格義, \"matching meanings\"), reaching for Daoist vocabulary to render Buddhist concepts — calling <em>nirvāṇa</em> 無為 (<em>wúwéi</em>), for instance. Most such renderings were later abandoned, but 道 for <em>mārga</em> stuck.": "更早的译者（2至4世纪）还用过<a href=\"https://en.wikipedia.org/wiki/Geyi\"><strong>格义</strong></a>（<em>géyì</em>，即“比附义理”），借道家的词来表达佛教概念——例如把<em>nirvāṇa</em>称作无为（<em>wúwéi</em>）。这类译法后来多被舍弃，只有<em>mārga</em>译作道留了下来。"
 }

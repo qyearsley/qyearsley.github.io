@@ -4,7 +4,6 @@
 
   "Logic Proof Engine": "逻辑证明引擎",
   "Derive conclusions from premises using classical logic rules": "用经典逻辑规则从前提推导结论",
-  "Logic Engine": "逻辑引擎",
   "Add Premises": "添加前提",
   "Enter premises separated by commas (e.g., <code>p, p -&gt; q</code>)": "输入前提，用逗号分隔（如 <code>p, p -&gt; q</code>）",
   "Add": "添加",
@@ -25,7 +24,7 @@
   "Constructive Dilemma": "构造性二难",
   "Resolution": "消解",
   "Adjunction": "合取引入",
-  "The indentation shows derivation depth. Premises sit at the left margin. Each conclusion is indented by the number of inference steps from the premises.": "缩进表示推导深度。前提位于左边距。每个结论按它与前提之间的推理步数缩进。",
+  "The indentation shows derivation depth. Premises sit at the left margin. Each conclusion is indented by the number of inference steps from the premises.": "缩进表示推导深度。前提顶格排列。每个结论按它与前提之间的推理步数缩进。",
   "Supported Operators": "支持的运算符",
   "<code>~P</code> or <code>not P</code> — Negation": "<code>~P</code> 或 <code>not P</code>——否定",
   "<code>P & Q</code> or <code>P and Q</code> — Conjunction": "<code>P & Q</code> 或 <code>P and Q</code>——合取",
@@ -36,6 +35,5 @@
   "<code>P nand Q</code> — Not AND": "<code>P nand Q</code>——与非",
   "<code>P nor Q</code> — Not OR": "<code>P nor Q</code>——或非",
   "<code>P xnor Q</code> — Exclusive NOR": "<code>P xnor Q</code>——同或",
-  "See also": "另见",
   "— generate truth tables for boolean expressions": "——为布尔表达式生成真值表"
 }
