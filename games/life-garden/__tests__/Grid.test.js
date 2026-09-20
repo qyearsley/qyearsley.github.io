@@ -129,6 +129,19 @@ describe("Grid basics", () => {
     expect(grid.countSpeciesInZone(SPECIES.GRASS, { x: 2, y: 2, w: 10, h: 10 })).toBe(1)
   })
 
+  test("countAll agrees with countSpecies, one species at a time or several", () => {
+    const grid = makeGrid(6, 6)
+    grid.setCell(2, 2, SPECIES.GRASS)
+    grid.setCell(3, 2, SPECIES.GRASS)
+    grid.setCell(2, 3, SPECIES.RABBIT)
+    grid.setCell(4, 4, SPECIES.FOX)
+    const asked = [SPECIES.GRASS, SPECIES.FLOWERING_GRASS, SPECIES.BEE, SPECIES.RABBIT, SPECIES.FOX]
+    expect(grid.countAll(asked)).toEqual(asked.map((id) => grid.countSpecies(id)))
+    // Order is the caller's, and a species nobody asked about is not counted
+    expect(grid.countAll([SPECIES.FOX, SPECIES.GRASS])).toEqual([1, 2])
+    expect(grid.countAll([])).toEqual([])
+  })
+
   test("clone is independent on both layers", () => {
     const grid = makeGrid(4, 4)
     grid.setCell(1, 1, SPECIES.GRASS)

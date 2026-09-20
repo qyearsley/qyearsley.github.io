@@ -161,6 +161,39 @@ export class Grid {
     return count
   }
 
+  /**
+   * Count several species in one pass over the board.
+   *
+   * `countSpecies` walks all the cells on both layers for every call, so asking
+   * it for five species costs five walks. Anything that wants a whole
+   * population snapshot -- the chart, a test that simulates hundreds of
+   * generations -- should ask for the species together instead.
+   *
+   * @param {number[]} speciesIds - Which species to count, in order
+   * @returns {number[]} One count per entry in `speciesIds`, in the same order
+   */
+  countAll(speciesIds) {
+    const counts = new Array(speciesIds.length).fill(0)
+    // Species ids are small integers, so a plain array indexed by id turns a
+    // cell into one lookup instead of a scan of speciesIds. A repeated id would
+    // only be counted into its last slot, which is not a meaningful request.
+    const slotOf = []
+    for (let i = 0; i < speciesIds.length; i++) slotOf[speciesIds[i]] = i
+    for (let y = 0; y < this.height; y++) {
+      const plantRow = this.plants[y]
+      const animalRow = this.animals[y]
+      for (let x = 0; x < this.width; x++) {
+        const plantSlot = slotOf[plantRow[x].species]
+        if (plantSlot !== undefined) counts[plantSlot]++
+        const animal = animalRow[x]
+        if (!animal) continue
+        const animalSlot = slotOf[animal.species]
+        if (animalSlot !== undefined) counts[animalSlot]++
+      }
+    }
+    return counts
+  }
+
   /** Count cells of a species within a rectangular zone. */
   countSpeciesInZone(speciesId, zone) {
     let count = 0
