@@ -97,14 +97,6 @@ export const one = (season) => season.itemName.toLowerCase()
 /** A season's collectible, plural, exactly as the game writes it in a sentence. */
 export const many = (season) => season.itemPlural.toLowerCase()
 
-/**
- * The noun for a count of items -- singular only at one.
- * @param {Object} season - The season being played
- * @param {number} count - How many
- * @returns {string} The lowercase noun
- */
-export const itemNoun = (season, count) => (count === 1 ? one(season) : many(season))
-
 /** The HUD count line, unparsed. Empty string when the HUD has not been drawn. */
 export const countLine = () => byId("item-count")?.textContent ?? ""
 

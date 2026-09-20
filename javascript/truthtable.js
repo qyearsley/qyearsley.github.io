@@ -351,5 +351,4 @@ export {
   TruthTable,
   parseInfix,
   tokenize,
-  listCombinations,
 }

@@ -119,14 +119,6 @@ export function getRandomMessage(areaId) {
 }
 
 /**
- * Get all area IDs in order
- * @returns {Array<string>} Array of area IDs
- */
-export function getAllAreaIds() {
-  return Object.keys(AREA_THEMES)
-}
-
-/**
  * Get visual emoji for area
  * @param {string} areaId - Area identifier
  * @param {number} [set=1] - Emoji set (1 or 2)

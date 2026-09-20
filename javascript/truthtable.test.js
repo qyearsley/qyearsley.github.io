@@ -38,8 +38,17 @@ describe("BoolExpr", () => {
     ).toEqual(true)
   })
 
+  test("eval not", () => {
+    expect(new tt.BoolExprUnary("not", new tt.BoolExprConst(true)).eval()).toEqual(false)
+    expect(new tt.BoolExprUnary("not", new tt.BoolExprConst(false)).eval()).toEqual(true)
+  })
+
   test("vars", () => {
     expect(new tt.BoolExprVar("asdf").vars()).toEqual(["asdf"])
+  })
+
+  test("vars through a unary operator", () => {
+    expect(new tt.BoolExprUnary("not", new tt.BoolExprVar("a")).vars()).toEqual(["a"])
   })
 
   test("vars with repetition", () => {

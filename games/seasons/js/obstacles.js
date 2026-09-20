@@ -61,7 +61,7 @@ const OBSTACLES = {
 export const OBSTACLE_KINDS = Object.freeze(Object.keys(OBSTACLES))
 
 /** The kind used when a route names one that does not exist. @type {Obstacle} */
-export const DEFAULT_OBSTACLE = OBSTACLES[OBSTACLE_KINDS[0]]
+const DEFAULT_OBSTACLE = OBSTACLES[OBSTACLE_KINDS[0]]
 
 /**
  * Whether a value is a known obstacle kind. The strict check; use this to
