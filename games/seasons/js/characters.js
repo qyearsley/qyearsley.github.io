@@ -8,15 +8,14 @@
  * existing effect fields; a genuinely new *kind* of effect is a new field in
  * DEFAULT_EFFECTS plus the code in GameState that honours it.
  *
- * - `penaltyScale` deliberately does not name a specific punishment. The active
- *   WRONG_ANSWER rule in constants.js decides *what* a wrong answer costs; the
- *   scale decides how much of it this character takes. That keeps every
- *   character meaningful whichever rule is active, so playtesting the rules
- *   does not invalidate the roster.
  * - Art lives in art/, keyed by character id. Nothing here describes an
  *   appearance beyond the id.
- * - Each character trades safety against ceiling, so a careful player and a
- *   risky one can both reach the same demand by different routes.
+ * - No perk changes how many items a character collects, and none can. A
+ *   season's demand is exactly what a finished trail pays plus the boss's
+ *   rescue, so an animal who collected a different amount from a mountain could
+ *   not reach it. The roster trades on time, hints and patience instead.
+ * - Each perk is free. The costs went with the wrong-answer penalty they were
+ *   priced against: there is no longer an item to charge one in.
  *
  * Error Handling: `getCharacter` returns the first character rather than null
  * for an unknown id, so a corrupted save selects a playable animal instead of
@@ -41,10 +40,16 @@ import { DEFAULT_EFFECTS } from "./constants.js"
 /**
  * The animals, in display order.
  *
- * The Porcupine's perk is a placeholder: Ella has not designed it yet. It is
- * built as a comeback mechanic so the slot is playable in the meantime, and so
- * there is something concrete for her to react to. Replacing it should not
- * require touching anything outside this file.
+ * Rebuilt on 2026-09-21, when the wrong-answer penalty was removed and three of
+ * the four perks stopped doing anything. Each animal now owns exactly one field
+ * of DEFAULT_EFFECTS, which is what `characters.test.js` holds them to.
+ *
+ * Two of them -- the Slug and the Sloth -- only matter when the countdown is
+ * switched on, and it is off by default. That is a known soft spot rather than
+ * an oversight: they are the animals for a player who wants the clock, one
+ * without it and one with more of it. If the roster needs a second always-on
+ * perk, give the Slug `hintsPerSeason: 2` and the note in
+ * `docs/seasons-plan.md` explains the trade.
  *
  * @type {Character[]}
  */
@@ -53,9 +58,9 @@ const ROSTER = [
     id: "banana-slug",
     name: "Banana Slug",
     perkName: "Slow and Steady",
-    perkText: "Wrong answers never take anything away from you.",
-    costText: "Glowing challenges give you 2 items instead of 3.",
-    effects: { penaltyScale: 0, glowingItems: 2 },
+    perkText: "No countdown, ever. You can take as long as you like.",
+    costText: "",
+    effects: { noTimer: true },
   },
   {
     id: "sloth",
@@ -69,17 +74,17 @@ const ROSTER = [
     id: "phoenix",
     name: "Phoenix",
     perkName: "Rising Again",
-    perkText: "Once each season, a wrong answer costs you nothing at all.",
-    costText: "Every other wrong answer hurts twice as much.",
-    effects: { penaltyScale: 2, forgivenessPerSeason: 1 },
+    perkText: "The first time you slip each season, two wrong answers disappear.",
+    costText: "",
+    effects: { hintsPerSeason: 1 },
   },
   {
     id: "porcupine",
     name: "Porcupine",
     perkName: "Bounce Back",
-    perkText: "Right after a wrong answer, your next correct answer is worth double.",
+    perkText: "Get one wrong and you go straight on, with no extra question.",
     costText: "",
-    effects: { comebackBonus: true },
+    effects: { skipsExtra: true },
   },
 ]
 

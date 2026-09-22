@@ -100,7 +100,8 @@ distractor choice; the trail is not random at all — the art pack's `layout()` 
 fixed deterministic geometry, computed from the season's route.
 
 `game.js` also calls `start()` at the bottom of the module, so importing it
-starts the game. `game.test.js` works around that: it writes the real
+starts the game. The `game.*.test.js` suites work around that: each writes the
+real
 `index.html` into the document first, then imports `../js/game.js?load=N` with
 a fresh query string each time so the module is re-evaluated rather than served
 from the ESM cache.
@@ -108,14 +109,22 @@ from the ESM cache.
 ## Where a question comes from
 
 Worth tracing once, because it explains why the save file is so small.
-`GameState` holds `seed`, `seasonId`, `attempt`, and `questionsAsked`;
+`GameState` holds `seed`, `seasonId`, `attempt`, `position` and `extrasDone`;
 `_questionRng` builds a generator from
-`` `${seed}:${seasonId}:${attempt}:${questionsAsked}` `` (`attempt` is in there
-so replaying a lost season asks different questions); `_makeQuestion` picks the
-form list, **phase first** — in `PHASE.BOSS` always `boss.forms`, wherever the
-position happens to be, otherwise `glowingForms` on a glowing space and `forms`
-everywhere else; `challenges/index.js` resolves the season's challenge type to a
-module; and that module's `generate(forms, rng)` returns the question.
+`` `${seed}:${seasonId}:${attempt}:${position}:${extrasDone}` ``; `_makeQuestion`
+picks the form list, **phase first** — in `PHASE.BOSS` always `boss.forms`,
+wherever the position happens to be, otherwise `glowingForms` on a glowing space
+and `forms` everywhere else; `challenges/index.js` resolves the season's
+challenge type to a module; and that module's `generate(forms, rng)` returns the
+question.
+
+The key is where the player is standing, not how many questions have been asked.
+That is what makes a retry recoverable: a wrong answer keeps the question and
+still counts against `questionsAsked`, so a key built from that counter would
+hand a reloading page a different question from the one she is working on. Every
+space is visited once and asks at most two questions — its own, and the extra one
+a miss owes — so `position` plus `extrasDone` names a question uniquely.
+`attempt` is in there so that a replayed season asks different questions.
 
 So a question is a pure function of the state, and `storage.js` deliberately
 does not persist it — persisting it would store a value that could contradict
@@ -132,9 +141,11 @@ A pack exports twelve required names plus one optional one, and
 - `palette(seasonId)` → CSS custom properties, `--season-*` only; the game's
   chrome (`--sn-*`) is hard-coded in `styles/main.css` and out of a pack's reach.
 - `character(id, onTrail)`, `item(seasonId, rare)`, `obstacle(kind, seasonId)`,
-  `villain()` → a `Drawing`, `{element, viewBox}`. An obstacle is drawn with its
-  origin on the ground so `layout` can place it by translation alone, and takes a
-  season so one drawing recolours for all four. `onTrail` picks a **pose**,
+  `villain(happy)` → a `Drawing`, `{element, viewBox}`. An obstacle is drawn with
+  its origin on the ground so `layout` can place it by translation alone, and takes
+  a season so one drawing recolours for all four. `villain(true)` is the same
+  character pleased rather than a second drawing — a wider grin, closed eyes, and
+  the flask raised — which the end-of-run screen uses. `onTrail` picks a **pose**,
   not a subset of shapes — the sloth hangs from a branch on its card and walks on
   the trail. It used to strip out anything tagged `data-hangs-from`, which got
   the branch off the trail but left the sloth walking with its arms above its
@@ -202,23 +213,31 @@ Recipes: [Replace the art](../README.md#replace-the-art) for a whole pack,
 
 ### Challenge type — `challenges/`
 
-A module exports exactly two functions:
+A module exports two required functions and one optional one:
 
 ```js
 generate(forms: Array<Object>, rng: Rng) -> Question
 check(question: Question, given: unknown) -> boolean
+explain(question: Question) -> {equation: string, model: Object|null}|null
 ```
 
 A `Question` must carry `prompt` (a string to show) and `choices` (values to
 render as buttons). Anything else on it belongs to the challenge module —
-`arithmetic.js` adds `answer` and `kind`. That is what lets a new challenge type
-reuse the whole play screen. `forms` is opaque to everything except the
-challenge module and the seasons that use it; `challenges/index.js` never
-inspects it.
+`arithmetic.js` adds `answer`, `kind` and `parts`. That is what lets a new
+challenge type reuse the whole play screen. `forms` is opaque to everything
+except the challenge module and the seasons that use it; `challenges/index.js`
+never inspects it.
+
+`explain` feeds the reinforcement card, which comes up once a missed question is
+finally answered right. `equation` is the fact in full ("4 + 7 = 11"); `model`
+describes a picture of it by `kind`, and `GameUI._renderModel` draws the kinds it
+knows (`array`, `groups`, `tenFrames`, `steps`) and nothing for a kind it does
+not. A module without `explain`, or one returning `null`, simply gets no card.
+The module decides _what_ explains a fact; `GameUI` decides how it looks.
 
 **Known leak.** `game.js` reads `state.question?.answer` in `_onAnswer`, to hand
-`GameUI.flashAnswer` the value to highlight and to write "The answer was 42"
-into the feedback line. That is the one place outside `arithmetic.js` that
+`GameUI.flashAnswer` the value to highlight and to work out which wrong choices
+the Phoenix's hint may remove. That is the one place outside `arithmetic.js` that
 depends on a field the seam calls private, so a challenge type whose answer is
 not a renderable scalar would need this fixed — most likely by having the
 challenge module expose a `describeAnswer(question)`, or by moving the highlight
@@ -230,20 +249,19 @@ Recipe: [Add a new kind of challenge](../README.md#add-a-new-kind-of-challenge).
 
 Perks are values in an `effects` object, merged over `DEFAULT_EFFECTS`. There
 is no function on a character and no `if (character.id === ...)` in GameState.
-The current fields:
+One field per animal, which is not a coincidence: with no penalty left to scale,
+the roster was rebuilt around the four things a perk can still touch.
 
-| Field                  | Read by                           | Meaning                                                                 |
-| ---------------------- | --------------------------------- | ----------------------------------------------------------------------- |
-| `penaltyScale`         | `GameState._applyPenalty`         | Multiplier on whatever the active wrong-answer rule costs. 0 is immune. |
-| `glowingItems`         | `GameState.answer`                | Items from a glowing space                                              |
-| `extraSeconds`         | `GameState.questionSeconds`       | Added to a timed question                                               |
-| `forgivenessPerSeason` | `GameState.startSeason`, `answer` | Wrong answers waved away                                                |
-| `comebackBonus`        | `GameState.answer`                | Doubles the first correct answer after a wrong one                      |
+| Field            | Read by                           | Meaning                                            |
+| ---------------- | --------------------------------- | -------------------------------------------------- |
+| `extraSeconds`   | `GameState.questionSeconds`       | Added to a timed question                          |
+| `noTimer`        | `GameState.questionSeconds`       | Never runs a countdown, whatever the setting says  |
+| `hintsPerSeason` | `GameState.startSeason`, `answer` | Misses per season that take two wrong choices away |
+| `skipsExtra`     | `GameState.answer`                | A miss goes straight on, with no extra question    |
 
-`penaltyScale` deliberately does not name a punishment. The active
-`RULES.WRONG_ANSWER` decides _what_ a wrong answer costs; the scale decides how
-much of it this character takes. That keeps every character meaningful under
-all three rules, so playtesting the rules cannot invalidate the roster.
+**No perk may touch an item count.** The demand is met exactly — see
+[Reachability](#reachability) below — and that only holds while every space pays
+the same to everyone. `characters.test.js` asserts it.
 
 Recipe: [Add or change an animal](../README.md#add-or-change-an-animal).
 
@@ -274,51 +292,65 @@ No SVG geometry is measured: every coordinate comes from `layout()`, which is
 arithmetic. That is why `GameUI` needs no test-only branch under jsdom, which
 implements no SVG geometry at all.
 
-## The rule switches
+## The retry rule
 
-`RULES.WRONG_ANSWER` and `RULES.BOSS_FAILURE` in `constants.js` are the two
-design questions Ella has not settled;
-[`../README.md`](../README.md#two-rules-that-are-not-decided-yet) describes what
-each option does and
-[the recipe](../README.md#change-what-a-wrong-answer-costs-or-what-a-missed-boss-costs)
-covers switching one. `RULES` is deliberately **not** frozen: `GameState.test.js`
-flips it in `beforeEach` and restores it in `afterEach` to cover every option,
-which is far simpler than module mocking under ESM. Nothing in the running game
-ever writes to it.
+A wrong answer costs nothing. It keeps the question on screen with the choice
+just taken struck off, and the player goes again until she has it. Four fields
+carry that, and they are easy to confuse:
 
-`BOSS_TRIES` (currently 2) sits alongside them but is not one of the open
-questions — it is Ella's decided rule, and `RULES.BOSS_FAILURE` only applies once
-the tries run out. `_applyPenalty` is skipped on the boss branch, which is the
-mechanism behind a boss that [never opens a gap](../README.md#how-it-plays).
+- **`retrying`** — this question has already been missed once. Set by a wrong
+  answer, cleared when the question is finally answered. While it is set,
+  `questionSeconds` returns `null`: the retry is **untimed**.
+- **`owed`** — 0 or 1. A miss owes one more question at this space before it
+  pays out.
+- **`extrasDone`** — 0 or 1. The extra question has been asked, so another miss
+  owes nothing. This is the cap: at most two distinct questions per space.
+- **`hintsLeft`** — the Phoenix's hints, banked per season.
+
+`_freshSpace()` clears the first three whenever the character moves, so a debt
+cannot follow her onto the next obstacle.
+
+The untimed retry is not a courtesy — it is what guarantees a season makes
+progress. A timeout is a wrong answer, and a wrong answer keeps the question, so
+a clock on the retry would time the same question out again forever for exactly
+the child who could not answer it.
+
+### Reachability
+
+Every space pays `PLAY.ITEMS_PER_SPACE`, every glowing space
+`PLAY.ITEMS_PER_GLOWING_SPACE`, and the snake woman's own question pays
+`boss.rescue`. A season's `demand` is the sum of all three, exactly:
+
+```
+demand === maxItems(season) + season.boss.rescue
+```
+
+`seasons.test.js` asserts it for every season. So the last answer of a season is
+always the one that completes the count, which is the whole point of the 2026-09-21
+retune. Two things follow, and both are held by tests: no perk may change what a
+space pays, and nothing may take an item away.
 
 ## State shape
 
-`GameState` is a flat object of serializable values. Three fields carry the
-wilt rule and are easy to confuse:
-
-- **`items`** — banked and safe. This is what counts toward the demand.
-- **`wilting`** — at risk. Does not count. The next correct answer moves it back
-  into `items`; the next _wrong_ answer moves it into `lost`.
-- **`lost`** — gone for good. Shown in the season summary and nowhere else.
-
-Keeping `wilting` separate from both is what makes a wilt visible on screen and
-one mistake recoverable where two in a row are not. `GameUI.renderItemTrack`
-fills `#item-track` with one pip per slot to show it: the art pack's `item()`
-drawing when earned, greyed and tilted when wilting, a dashed outline when owed.
+`GameState` is a flat object of serializable values. `items` is banked and safe,
+and it is the only item counter — there used to be a `wilting` pool and a `lost`
+tally beside it, both of which went with the wrong-answer penalties.
+`GameUI.renderItemTrack` fills `#item-track` with one pip per slot: the art
+pack's `item()` drawing when earned, a dashed outline when still owed.
 
 ## Testing
 
-`__tests__/` holds 11 Jest suites for 14 modules. The mapping is not
+`__tests__/` holds 14 Jest suites for 14 modules. The mapping is not
 one-to-one: `art.test.js` covers both files in `art/`, `obstacles.js` is checked
 through the suites that consume it, and `constants.js` has no suite of its own —
 it is data with no behaviour, and every other suite reads it. Three of them guard
 things a normal unit test would miss: `seasons.test.js` asserts every demand is
-reachable by every character with headroom; `arithmetic.test.js` parses each
-generated prompt and recomputes it, over hundreds of seeds and every form list
-the real seasons use; and `art.test.js` holds the pack contract test.
+met exactly by a perfect run; `arithmetic.test.js` parses each generated prompt
+and recomputes it, over hundreds of seeds and every form list the real seasons
+use; and `art.test.js` holds the pack contract test.
 
-`game.test.js` drives `game.js` black-box through the real `index.html` — see
-[Purity](#purity) for why it has to. It and `GameUI.test.js` run at the current
-`RULES` defaults and assert the exact copy those produce, which is why flipping a
-switch makes a handful of them fail. See
-[Seeing your change](../README.md#seeing-your-change) for how to run them.
+The `game.*.test.js` suites drive `game.js` black-box through the real
+`index.html` — see [Purity](#purity) for why they have to. They are split by
+subject only so Jest can run them in parallel; everything they share lives in
+`game-harness.js`. See [Seeing your change](../README.md#seeing-your-change) for
+how to run them.

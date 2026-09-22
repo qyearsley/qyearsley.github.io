@@ -672,9 +672,14 @@ function _coils() {
  * path looks identical in a browser but vanishes in any renderer that treats
  * `stroke-width` loosely, and the coils read better as a solid body anyway.
  *
+ * @param {boolean} [happy] - Draw her delighted rather than merely pleased: an
+ *   open grin, eyes curved shut, and the potion raised. Only the end-of-run
+ *   screen asks for it, and only there is she drawn large enough for the
+ *   difference to carry -- the HUD portrait is 62px, where a changed mouth is
+ *   about two pixels of difference and not worth the branch.
  * @returns {import("./index.js").Drawing} The drawing
  */
-export function villain() {
+export function villain(happy = false) {
   return _drawing([
     // Her coils: one tapering body wound twice. See `_coils`.
     ..._coils(),
@@ -725,9 +730,28 @@ export function villain() {
     svg("ellipse", { cx: 53.6, cy: 45, rx: 2.2, ry: 1.6, fill: "#d9c4e3" }),
     svg("circle", { cx: 45, cy: 45, r: 2.6, fill: "#d9a0b8", "fill-opacity": 0.45 }),
     svg("circle", { cx: 61, cy: 45, r: 2.6, fill: "#d9a0b8", "fill-opacity": 0.45 }),
-    // She is pleased to see you and she still wants eleven roses. A filled
-    // crescent rather than a stroked arc, for the same reason as the brows.
-    svg("path", { d: "M48.8 48.2 Q53 52.4 57.2 48.2 Q53 50.6 48.8 48.2 Z", fill: "#a8506e" }),
+    // She is pleased to see you. A filled crescent rather than a stroked arc,
+    // for the same reason as the brows. `happy` widens it into an open grin and
+    // curves the eyes shut, which is the whole difference between the two
+    // drawings -- see the note on the parameter.
+    happy
+      ? svg("path", { d: "M45.6 47.4 Q53 57.6 60.4 47.4 Q53 51.6 45.6 47.4 Z", fill: "#a8506e" })
+      : svg("path", { d: "M48.8 48.2 Q53 52.4 57.2 48.2 Q53 50.6 48.8 48.2 Z", fill: "#a8506e" }),
+    // Eyes closed in a smile, drawn over the open ones above. Two strokes are
+    // cheaper than branching the whole face, and at this size a closed eye is
+    // the strongest single signal that somebody is delighted.
+    ...(happy
+      ? [
+          svg("path", {
+            d: "M44.4 40.6 Q47.8 36.4 51.2 40.6 Q47.8 38.6 44.4 40.6 Z",
+            fill: "#1e1728",
+          }),
+          svg("path", {
+            d: "M54.8 40.6 Q58.2 36.4 61.6 40.6 Q58.2 38.6 54.8 40.6 Z",
+            fill: "#1e1728",
+          }),
+        ]
+      : []),
     // The hat, drawn over the head so the brim sits on the forehead. Leaning a
     // little, because a perfectly upright cone looks like a traffic marker.
     svg("path", { d: "M60 1 C55 9 49 19 42 28 L67 28 C65 19 63 9 60 1 Z", fill: "#3f2a52" }),
@@ -738,16 +762,23 @@ export function villain() {
     }),
     svg("ellipse", { cx: 54, cy: 28, rx: 20.5, ry: 4.4, fill: "#3f2a52" }),
     // Her right arm and the potion, in front of everything: the flask is the
-    // clearest thing in the drawing that says what she does.
-    svg("path", { d: "M62 57 C68 58 74 62 78 68 L73 72 C70 67 66 64 59 62 Z", fill: "#573a6f" }),
-    svg("circle", { cx: 79, cy: 71, r: 4.6, fill: "#ece0f2" }),
-    svg("rect", { x: 78.5, y: 51, width: 7, height: 3.6, rx: 1.4, fill: "#8a6a4a" }),
-    svg("rect", { x: 79.5, y: 54, width: 5, height: 6, fill: "#8fd4ee" }),
-    svg("circle", { cx: 82, cy: 64, r: 6.5, fill: "#8fd4ee" }),
-    // The arc's ends sit on the circle, so the potion fills the flask exactly to
-    // the line rather than spilling out of the glass.
-    svg("path", { d: "M75.82 64 A6.5 6.5 0 0 0 88.18 64 Z", fill: "#7fb08b" }),
-    svg("circle", { cx: 79.6, cy: 63, r: 1.8, fill: "#fff", "fill-opacity": 0.6 }),
+    // clearest thing in the drawing that says what she does. Grouped so `happy`
+    // can raise the whole limb with one rotation about the shoulder, rather
+    // than a second copy of seven shapes at new coordinates.
+    svg("g", happy ? { transform: "rotate(-32 62 57)" } : {}, [
+      svg("path", {
+        d: "M62 57 C68 58 74 62 78 68 L73 72 C70 67 66 64 59 62 Z",
+        fill: "#573a6f",
+      }),
+      svg("circle", { cx: 79, cy: 71, r: 4.6, fill: "#ece0f2" }),
+      svg("rect", { x: 78.5, y: 51, width: 7, height: 3.6, rx: 1.4, fill: "#8a6a4a" }),
+      svg("rect", { x: 79.5, y: 54, width: 5, height: 6, fill: "#8fd4ee" }),
+      svg("circle", { cx: 82, cy: 64, r: 6.5, fill: "#8fd4ee" }),
+      // The arc's ends sit on the circle, so the potion fills the flask
+      // exactly to the line rather than spilling out of the glass.
+      svg("path", { d: "M75.82 64 A6.5 6.5 0 0 0 88.18 64 Z", fill: "#7fb08b" }),
+      svg("circle", { cx: 79.6, cy: 63, r: 1.8, fill: "#fff", "fill-opacity": 0.6 }),
+    ]),
   ])
 }
 

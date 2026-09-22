@@ -182,9 +182,10 @@ describe("leaving and coming back", () => {
   it("stops the clock while hidden and restarts it on return", async () => {
     // Read from the season rather than written as a literal: the clock is meant
     // to be retunable, and this test is about the pause, not the length. The
-    // Banana Slug has no timer perk, so what the season says is what shows.
+    // Porcupine's perk is about the extra question and touches no clock, so what
+    // the season says is what shows.
     const full = getSeason("summer").timerSeconds
-    await bootInto({ characterId: "banana-slug", seasonId: "summer", position: 1 }, TIMED)
+    await bootInto({ characterId: "porcupine", seasonId: "summer", position: 1 }, TIMED)
     expect(byId("timer").textContent).toBe(String(full))
 
     jest.advanceTimersByTime(3_000)
@@ -406,12 +407,11 @@ describe("the debug query string", () => {
     expect(kinds).toContain(liveQuestionKind())
   })
 
-  it.each([
-    ["won", "screen-result"],
-    ["lost", "screen-result"],
-  ])("jumps to the %s screen", async (phase, screen) => {
-    await bootWith(`?season=summer&phase=${phase}`)
-    expect(isActive(screen)).toBe(true)
+  // There used to be a `lost` phase here too. A season cannot be lost since
+  // 2026-09-21, so the phase, the screen and the shortcut to it are all gone.
+  it("jumps to the won screen", async () => {
+    await bootWith("?season=summer&phase=won")
+    expect(isActive("screen-result")).toBe(true)
   })
 
   it("opens every season when asked for nothing else", async () => {

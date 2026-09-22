@@ -1,16 +1,9 @@
 /** Finishing a season, the boss at the end of one, and finishing the run. */
 
 import { beforeEach, describe, expect, it, jest } from "@jest/globals"
-import { BOSS_FAILURE, BOSS_TRIES, PHASE, PLAY, SEASON_ORDER } from "../js/constants.js"
+import { PHASE, PLAY, SEASON_ORDER } from "../js/constants.js"
 import { getSeason } from "../js/seasons.js"
-import {
-  hudCount,
-  itWithASecondTry,
-  many,
-  resultButtons,
-  summaryRows,
-  useRules,
-} from "./helpers.js"
+import { hudCount, many, resultButtons, summaryRows } from "./helpers.js"
 import {
   SPRING,
   SUMMER,
@@ -29,7 +22,7 @@ import {
   tapWrong,
   answerCorrectly,
   answerWrongly,
-  missEveryBossTry,
+  missThenRecover,
   playSeasonPerfectly,
   bootInto,
   setupGameHarness,
@@ -317,172 +310,109 @@ describe("finishing the whole journey", () => {
   })
 })
 
-// Ella's rule: "if you miss the boss question you get a chance to go back and
-// try again." A miss draws a fresh boss question rather than ending the season,
-// and only running out of tries hands over to the failure rule -- which is the
-// other undecided switch, so each of its three options gets its own block below
-// rather than whichever one happens to be shipping.
+// The boss cannot be failed. Ella's rule was "if you miss the boss question you
+// get a chance to go back and try again"; since 2026-09-21 the chance is the only
+// outcome there is. Her question stays up until it is answered, the slip owes one
+// more question, and the season resolves as won the moment both are done. The
+// three failure options this block used to pin -- and the spare tries they
+// counted -- are gone.
 describe("the boss question", () => {
-  /** Spring's boss, reached with two items banked and the demand well short. */
-  const bootIntoBoss = () => bootInto({ phase: PHASE.BOSS, position: SPRING.spaces, items: 2 })
-
-  // Independent of the failure rule: this is about the tries, not what happens
-  // once they are gone.
-  itWithASecondTry(
-    "gives another try after the first miss instead of ending the season",
-    async () => {
-      await bootIntoBoss()
-      answerWrongly()
-      expect(isActive("screen-play")).toBe(true)
-      expect(saved().run.phase).toBe(PHASE.BOSS)
-      expect(saved().run.bossTriesLeft).toBe(BOSS_TRIES - 1)
-      expect(saved().run.position).toBe(SPRING.spaces)
-      expect(choices()).toHaveLength(PLAY.CHOICE_COUNT)
-    },
-  )
-
-  describe("under the retry-season rule", () => {
-    useRules({ bossFailure: BOSS_FAILURE.RETRY_SEASON })
-    beforeEach(bootIntoBoss)
-
-    it("loses the season once the tries run out", () => {
-      missEveryBossTry()
-      expect(isActive("screen-result")).toBe(true)
-      expect(byId("result-title").textContent).toBe(TITLE.seasonLost)
-      // Shape, not sentence: the losing copy has to state both numbers -- what she
-      // wanted, and what actually arrived -- in that order.
-      expect(byId("result-text").textContent).toMatch(
-        new RegExp(`\\b${SPRING.demand}\\b[\\s\\S]*\\b2\\b`),
-      )
-      expect(resultButtons().map((button) => button.textContent)).toEqual([
-        "Try Spring again",
-        "Pick a new character",
-      ])
-      expect(saved().run.phase).toBe(PHASE.SEASON_LOST)
-      expect(saved().run.runOver).toBe(false)
-      expect(saved().totals.seasonsCleared).toBe(0)
-      expect(saved().unlocked).toEqual(["spring"])
+  /**
+   * Spring's boss, reached with everything the trail pays already banked. Which
+   * is the only way to arrive since the retune: her rescue makes up the rest of
+   * the demand exactly.
+   */
+  const bootIntoBoss = () =>
+    bootInto({
+      phase: PHASE.BOSS,
+      position: SPRING.spaces,
+      items: SPRING.demand - SPRING.boss.rescue,
     })
 
-    it("replays the season from the top, with different questions", () => {
-      missEveryBossTry()
-      resultButtons()[0].click()
+  it("keeps her question up after a miss, without ending the season", async () => {
+    await bootIntoBoss()
+    answerWrongly()
 
-      expect(isActive("screen-play")).toBe(true)
-      expect(byId("season-name").textContent).toBe("Spring")
-      expect(hudCount()).toMatchObject({ items: 0 })
-      expect(saved().run.position).toBe(0)
-      expect(saved().run.items).toBe(0)
-      expect(saved().run.phase).toBe(PHASE.TRAIL)
-      // `attempt` is folded into the question seed, so a retry is real practice
-      // rather than the same twenty questions in the same order.
-      expect(saved().run.attempt).toBe(1)
-    })
-
-    it("clears the run when the second button is confirmed", () => {
-      jest.spyOn(window, "confirm").mockReturnValue(true)
-      missEveryBossTry()
-      resultButtons()[1].click()
-
-      expect(window.confirm).toHaveBeenCalledTimes(1)
-      expect(isActive("screen-character")).toBe(true)
-      expect(saved().run.phase).toBe(PHASE.CHARACTER_SELECT)
-      expect(saved().run.seasonId).toBeNull()
-    })
-
-    it("keeps the run when the confirm is dismissed", () => {
-      jest.spyOn(window, "confirm").mockReturnValue(false)
-      missEveryBossTry()
-      resultButtons()[1].click()
-
-      expect(window.confirm).toHaveBeenCalledTimes(1)
-      expect(isActive("screen-result")).toBe(true)
-      expect(saved().run.phase).toBe(PHASE.SEASON_LOST)
-    })
+    expect(isActive("screen-play")).toBe(true)
+    expect(saved().run.phase).toBe(PHASE.BOSS)
+    expect(saved().run.retrying).toBe(true)
+    expect(saved().run.owed).toBe(1)
+    expect(saved().run.position).toBe(SPRING.spaces)
+    expect(choices()).toHaveLength(PLAY.CHOICE_COUNT)
+    // Nothing has been taken, and nothing has been banked either.
+    expect(hudCount()).toMatchObject({ items: SPRING.demand - SPRING.boss.rescue })
   })
 
-  describe("under the always-pass rule", () => {
-    useRules({ bossFailure: BOSS_FAILURE.ALWAYS_PASS })
-    beforeEach(bootIntoBoss)
+  it("asks one more for the slip, then clears the season with the demand met", async () => {
+    await bootIntoBoss()
+    await missThenRecover()
 
-    it("clears the season anyway, banking only what was collected", () => {
-      missEveryBossTry()
-      expect(isActive("screen-result")).toBe(true)
-      expect(byId("result-title").textContent).toBe(TITLE.seasonComplete(SPRING))
-      expect(saved().run.phase).toBe(PHASE.SEASON_WON)
-      expect(saved().run.runOver).toBe(false)
-      expect(saved().run.collected.spring).toBe(2)
-      expect(saved().totals.seasonsCleared).toBe(1)
-      expect(saved().unlocked).toEqual(["spring", "summer"])
-      // One way on, and it goes to the next season rather than back here.
-      expect(resultButtons().map((button) => button.textContent)).toEqual(["On to Summer"])
-    })
+    expect(isActive("screen-result")).toBe(true)
+    expect(byId("result-title").textContent).toBe(TITLE.seasonComplete(SPRING))
+    expect(saved().run.phase).toBe(PHASE.SEASON_WON)
+    expect(saved().run.collected.spring).toBe(SPRING.demand)
+    expect(saved().totals.seasonsCleared).toBe(1)
+    expect(saved().unlocked).toEqual(["spring", "summer"])
+    // One way on, and it goes to the next season rather than back here.
+    expect(resultButtons().map((button) => button.textContent)).toEqual(["On to Summer"])
   })
 
-  describe("under the end-run rule", () => {
-    useRules({ bossFailure: BOSS_FAILURE.END_RUN })
-    beforeEach(bootIntoBoss)
+  // The alignment the retune is for: the last answer of a season is the one that
+  // finishes the count, however many tries it took to get there.
+  it("lands on exactly the demand, missing nothing and overshooting nothing", async () => {
+    await bootIntoBoss()
+    await missThenRecover()
 
-    it("ends the whole run once the tries run out", () => {
-      missEveryBossTry()
-      expect(isActive("screen-result")).toBe(true)
-      expect(byId("result-title").textContent).toBe(TITLE.runOver)
-      expect(saved().run.phase).toBe(PHASE.SEASON_LOST)
-      expect(saved().run.runOver).toBe(true)
-      expect(saved().totals.seasonsCleared).toBe(0)
-      // "Start again", not "Try Spring again": the run is over, so the retry
-      // goes back to the first season rather than replaying this one.
-      expect(resultButtons().map((button) => button.textContent)).toEqual([
-        "Start again",
-        "Pick a new character",
-      ])
-
-      resultButtons()[0].click()
-      expect(isActive("screen-play")).toBe(true)
-      expect(byId("season-name").textContent).toBe(getSeason(SEASON_ORDER[0]).name)
-      expect(saved().run.runOver).toBe(false)
-      expect(saved().run.items).toBe(0)
-    })
+    expect(saved().run.items).toBe(SPRING.demand)
+    expect(summaryRows().slice(0, 2)).toEqual([
+      [`${SPRING.itemPlural} delivered`, String(SPRING.demand)],
+      ["She asked for", String(SPRING.demand)],
+    ])
   })
 })
 
 /**
- * The boss label and the missed-boss line. Both exist because Ella designed two
- * things the screen never told the player: that a missed boss question earns
- * another go, and that answering it makes up for items missed earlier. Before
- * this, both were only discoverable by getting it right.
+ * The label above the boss question. It exists because Ella designed something
+ * the screen never told the player: that answering the snake woman makes up for
+ * the items the trail did not pay. Before this it was discoverable only by
+ * getting it right.
  */
 describe("the boss says what is at stake", () => {
+  const atBoss = (run = {}) =>
+    bootInto({
+      phase: PHASE.BOSS,
+      position: SPRING.spaces,
+      items: SPRING.demand - SPRING.boss.rescue,
+      ...run,
+    })
+
   it("says what the question is worth, before it is answered", async () => {
-    await bootInto({ phase: PHASE.BOSS, position: SPRING.spaces, items: 4 })
+    await atBoss()
     const tag = byId("question-tag").textContent
     expect(tag).toContain(String(SPRING.boss.rescue))
     expect(tag).toContain(SPRING.itemPlural.toLowerCase())
+    expect(tag).toContain("snake woman")
     expect(byId("question-tag").classList.contains("hidden")).toBe(false)
   })
 
-  it("says it is the last try once the spare one is gone", async () => {
-    await bootInto({ phase: PHASE.BOSS, position: SPRING.spaces, items: 4, bossTriesLeft: 1 })
-    expect(byId("question-tag").textContent).toMatch(/last try/i)
+  // Her question has already happened by then, so the label says which one this
+  // is rather than announcing her twice.
+  it("says which question is which once the extra one is up", async () => {
+    await atBoss({ extrasDone: 1 })
+    const tag = byId("question-tag").textContent
+    expect(tag).toMatch(/one more for her/i)
+    expect(tag).toContain(String(SPRING.boss.rescue))
+    expect(tag).not.toContain("snake woman")
   })
 
-  it("does not say last try while a spare remains", async () => {
-    await bootInto({ phase: PHASE.BOSS, position: SPRING.spaces, items: 4, bossTriesLeft: 2 })
-    expect(byId("question-tag").textContent).not.toMatch(/last try/i)
-  })
-
-  it("offers another go after a miss, rather than the generic line", async () => {
-    await bootInto({ phase: PHASE.BOSS, position: SPRING.spaces, items: 4, bossTriesLeft: 2 })
+  // The rule Ella asked for applies to the boss like anywhere else: find the
+  // answer yourself. Her question is the one place stating it would be most
+  // tempting, since it is the last question of the season.
+  it("gives nothing away when her question is missed", async () => {
+    await atBoss()
     const answer = tapWrong()
-    expect(feedback()).toBe(`Not quite. The answer was ${answer}. One more go!`)
+    expect(feedback()).not.toContain(String(answer))
+    expect(feedback()).toBe("Not quite — have another look.")
     expect(saved().run.phase).toBe(PHASE.BOSS)
-    expect(saved().run.bossTriesLeft).toBe(1)
-  })
-
-  it("drops the offer once the tries are spent", async () => {
-    await bootInto({ phase: PHASE.BOSS, position: SPRING.spaces, items: 4, bossTriesLeft: 1 })
-    const answer = tapWrong()
-    expect(feedback()).not.toMatch(/one more go/i)
-    expect(feedback()).toContain(`The answer was ${answer}.`)
   })
 })

@@ -5,8 +5,8 @@
 
 import { describe, expect, it, jest } from "@jest/globals"
 import { getCharacter } from "../js/characters.js"
-import { PHASE, WRONG_ANSWER } from "../js/constants.js"
-import { hudCount, many, one, useRules } from "./helpers.js"
+import { PHASE } from "../js/constants.js"
+import { hudCount, one } from "./helpers.js"
 import {
   SPRING,
   SUMMER,
@@ -32,7 +32,7 @@ import {
   tapRight,
   tapWrong,
   answerCorrectly,
-  answerWrongly,
+  dismissReinforcement,
   bootInto,
   TIMED,
   setupGameHarness,
@@ -66,27 +66,21 @@ describe("crossing the obstacle in the way", () => {
     expect(trailSpace()).toEqual({ space: mountain + 2, of: SPRING.spaces })
   })
 
-  // Pinned to the gentle rule so that "where it was" can be exact: the step-back
-  // rule moves the token *backwards*, which is what "what a wrong answer costs"
-  // covers. What matters here is that no rule crosses anything.
-  describe("a wrong answer", () => {
-    useRules({ wrongAnswer: WRONG_ANSWER.GENTLE })
+  it("crosses nothing on a wrong answer and leaves the character where it was", async () => {
+    const start = ordinarySpace(SPRING)
+    await bootInto({ position: start, items: 2 })
+    const crossings = watchCrossings()
 
-    it("crosses nothing and leaves the character where it was", async () => {
-      const start = ordinarySpace(SPRING)
-      await bootInto({ position: start, items: 2, forgivenessLeft: 0 })
-      const crossings = watchCrossings()
+    tapWrong()
 
-      answerWrongly()
-
-      expect(crossings).not.toHaveBeenCalled()
-      expect(isCrossing()).toBe(false)
-      expect(saved().run.position).toBe(start)
-      expect(trailSpace()).toEqual({ space: start + 1, of: SPRING.spaces })
-      // And the next question is already up: there was nothing to wait for.
-      expect(saved().run.questionsAsked).toBe(1)
-      expect(choices().every((button) => button.getAttribute("aria-disabled") === null)).toBe(true)
-    })
+    expect(crossings).not.toHaveBeenCalled()
+    expect(isCrossing()).toBe(false)
+    expect(saved().run.position).toBe(start)
+    expect(trailSpace()).toEqual({ space: start + 1, of: SPRING.spaces })
+    // And the same question is still up, with every choice but the one just
+    // struck off still live: there is nothing to wait for on this path.
+    expect(saved().run.retrying).toBe(true)
+    expect(choices().filter((button) => !button.classList.contains("is-out"))).toHaveLength(3)
   })
 
   it("crosses nothing at the boss, where there is no obstacle past the last space", async () => {
@@ -175,23 +169,11 @@ describe("crossing the obstacle in the way", () => {
     expect(isCrossing()).toBe(true)
   })
 
-  // The other half of the rule. A wrong answer's flash is carrying the line
-  // that says what the answer actually was, so hurrying past it would skip the
-  // only part of the loop that teaches.
-  it("holds the full flash after a wrong answer, however fast she taps", async () => {
-    const start = ordinarySpace(SPRING)
-    await bootInto({ position: start, items: 0 })
-
-    tapWrong()
-    jest.advanceTimersByTime(100)
-    document.dispatchEvent(new Event("pointerdown"))
-
-    // Still locked: the verdict is still on screen.
-    expect(choices().some((button) => button.getAttribute("aria-disabled") === "true")).toBe(true)
-
-    jest.advanceTimersByTime(FLASH_MS)
-    expect(choices().every((button) => button.getAttribute("aria-disabled") === null)).toBe(true)
-  })
+  // A wrong answer used to hold the page for the full flash, because the flash
+  // was carrying the line that said what the answer had been. Since 2026-09-21 it
+  // says no such thing: the choice is struck off, the guard comes straight back
+  // off, and the question is hers again with no wait at all. What used to be
+  // asserted here is now "strikes the choice off and leaves the rest live".
 })
 
 // Every branch of `_feedbackFor`. Twelve of them had no assertion at all, which
@@ -213,112 +195,59 @@ describe("the verdict under the question", () => {
     expect(feedback()).toBe(`3 ${SPRING.rareItemName.toLowerCase()}s!`)
   })
 
-  it("a correct answer after a wilt says the item came back", async () => {
-    await bootInto({ position: 1, items: 0, wilting: 1, lastWasWrong: true })
-    tapRight()
-    expect(feedback()).toBe(`+1 ${one(SPRING)}, and your ${one(SPRING)} is back`)
-  })
-
-  it("the comeback bonus says it doubled", async () => {
-    await bootInto({ characterId: "porcupine", position: 1, items: 0, lastWasWrong: true })
-    tapRight()
-    expect(feedback()).toBe(`Double! +2 ${many(SPRING)}`)
-  })
-
   it("the boss question names what it rescued", async () => {
-    await bootInto({ phase: PHASE.BOSS, position: SPRING.spaces, items: 18 })
+    await bootInto({
+      phase: PHASE.BOSS,
+      position: SPRING.spaces,
+      items: SPRING.demand - SPRING.boss.rescue,
+    })
     tapRight()
     expect(feedback()).toBe(`Yes! That is ${SPRING.boss.rescue} more for the potion.`)
   })
 
-  // A miss always states the correct answer, because that is the only teaching
-  // this screen does -- the right-hand button turning green was otherwise the
-  // sole way to learn it.
-  it("a miss with nothing to lose still states the answer", async () => {
+  // The rule Ella asked for, and the assertion that holds it: the answer is
+  // **not** stated. She has to find it herself, and the reinforcement card
+  // afterwards is where the fact gets taught. Saying it here would skip both.
+  it("a miss does not give the answer away", async () => {
     await bootInto({ position: 0, items: 0 })
     const answer = tapWrong()
-    expect(feedback()).toBe(`Not quite. The answer was ${answer}.`)
+    expect(feedback()).toBe("Not quite — have another look.")
+    expect(feedback()).not.toContain(String(answer))
     expect(byId("feedback").classList.contains("error")).toBe(true)
   })
 
-  // Three of the miss branches only exist under one wrong-answer rule, so each
-  // one pins the rule it is describing rather than inheriting whichever is
-  // shipping today. Flipping the switch in constants.js has to stay a one-line
-  // change that costs nobody a red suite.
-  describe("under the wilt rule", () => {
-    useRules({ wrongAnswer: WRONG_ANSWER.WILT })
+  it("the extra question says the way on is clear once it is answered", async () => {
+    await bootInto({ position: 1, items: 1 })
+    tapWrong()
+    jest.advanceTimersByTime(FLASH_MS)
+    tapRight()
+    jest.advanceTimersByTime(FLASH_MS)
+    dismissReinforcement()
+    expect(saved().run.owed).toBe(0)
+    expect(saved().run.extrasDone).toBe(1)
 
-    it.each([
-      ["sloth", 1, `Your ${one(SPRING)} is wilting.`],
-      ["phoenix", 3, `Your ${many(SPRING)} are wilting.`],
-    ])("a miss as the %s says what is wilting", async (characterId, items, clause) => {
-      await bootInto({ characterId, position: 1, items, forgivenessLeft: 0 })
-      const answer = tapWrong()
-      expect(feedback()).toBe(`${clause} The answer was ${answer}.`)
-    })
-
-    it("a second miss in a row says what was lost for good", async () => {
-      await bootInto({ position: 1, items: 1, wilting: 1, lastWasWrong: true })
-      const answer = tapWrong()
-      expect(feedback()).toBe(`Lost 1 ${one(SPRING)}. The answer was ${answer}.`)
-    })
-
-    // The perk only spends itself on a miss that was going to cost something,
-    // so it needs a rule that costs something. The gentle case below is the
-    // other half of that.
-    it("a forgiven miss names the perk that saved it", async () => {
-      await bootInto({ characterId: "phoenix", position: 1, items: 1, forgivenessLeft: 1 })
-      const answer = tapWrong()
-      expect(feedback()).toBe(
-        `${getCharacter("phoenix").perkName} saved you! The answer was ${answer}.`,
-      )
-      expect(saved().run.forgivenessLeft).toBe(0)
-    })
+    tapRight()
+    expect(feedback()).toBe(`+1 ${one(SPRING)}`)
   })
 
-  describe("under the step-back rule", () => {
-    useRules({ wrongAnswer: WRONG_ANSWER.STEP_BACK })
-
-    // Only reachable under this rule, and only with nothing left to take: with
-    // items in hand the line reports the loss instead.
-    it("a miss with nothing to lose but ground says how far back it went", async () => {
-      await bootInto({ position: 2, items: 0, forgivenessLeft: 0 })
-      const answer = tapWrong()
-      expect(feedback()).toBe(`Back 1. The answer was ${answer}.`)
-      expect(saved().run.position).toBe(1)
-    })
-
-    it("a miss that costs an item says so", async () => {
-      await bootInto({ position: 2, items: 2, forgivenessLeft: 0 })
-      const answer = tapWrong()
-      expect(feedback()).toBe(`Lost 1 ${one(SPRING)}. The answer was ${answer}.`)
-    })
+  it("the phoenix's hint names the perk that fired it", async () => {
+    await bootInto({ characterId: "phoenix", position: 1, items: 1 })
+    tapWrong()
+    expect(feedback()).toBe(`${getCharacter("phoenix").perkName} — two of them are gone!`)
+    expect(saved().run.hintsLeft).toBe(0)
   })
 
-  describe("under the gentle rule", () => {
-    useRules({ wrongAnswer: WRONG_ANSWER.GENTLE })
-
-    // Nothing is ever lost, so the miss says only what the answer was -- and
-    // the perk stays in hand, because spending it on a free mistake reads as a
-    // bug to a player.
-    it("a miss says only what the answer was, and keeps the perk", async () => {
-      await bootInto({ characterId: "phoenix", position: 1, items: 1, forgivenessLeft: 1 })
-      const answer = tapWrong()
-      expect(feedback()).toBe(`Not quite. The answer was ${answer}.`)
-      expect(saved().run.forgivenessLeft).toBe(1)
-    })
-  })
-
-  // Running out of time is its own branch, and it still has to teach the
-  // answer. Summer is the first season with a clock.
-  it("a timeout says so, and states the answer", async () => {
-    await bootInto({ characterId: "banana-slug", seasonId: "summer", position: 1 }, TIMED)
+  // Running out of time is its own branch, and it has to say that the clock is
+  // gone as well as that it ran out -- the retry is deliberately untimed.
+  it("a timeout says so, and promises the clock is off", async () => {
+    await bootInto({ characterId: "porcupine", seasonId: "summer", position: 1 }, TIMED)
     const answer = liveQuestion().answer
     expect(byId("timer").textContent).toBe(String(SUMMER.timerSeconds))
 
     jest.advanceTimersByTime(SUMMER.timerSeconds * 1000)
 
-    expect(feedback()).toBe(`Time ran out! The answer was ${answer}.`)
+    expect(feedback()).toBe("Time ran out. Take as long as you like now.")
+    expect(feedback()).not.toContain(String(answer))
     expect(saved().run.questionsAsked).toBe(1)
     expect(saved().run.correctCount).toBe(0)
   })
@@ -330,78 +259,197 @@ describe("the verdict under the question", () => {
   })
 
   // One branch of `_feedbackFor` has no case here: the bare "Right!" for a
-  // correct answer that gained nothing. It needs either a boss whose
-  // `rescue` is 0 or a character whose `glowingItems` is 0, and no shipped
-  // season or character has either -- the smallest rescue is spring's 3 and
-  // the smallest glowing payout is the banana slug's 2. So the line is
-  // unreachable through the real game today, and the only way to assert it
-  // would be to invent content the player cannot meet. If a season or
-  // character ever does zero one of those out, add the case here.
+  // correct answer that gained nothing outside the extra-question path. It
+  // needs a boss whose `rescue` is 0, and no shipped season has one -- the
+  // smallest is spring's 3. So the line is unreachable through the real game
+  // today, and the only way to assert it would be to invent content the player
+  // cannot meet.
 })
 
-// The wrong-answer rule is the switch Ella is still choosing between, so each
-// option gets an end-to-end case of what it actually costs -- not just what the
-// verdict line says about it. GameState.test.js proves the arithmetic; these
-// prove the save and the screen agree with it.
+// The retry rule end to end: what the screen and the save do, not just what the
+// verdict line says. GameState.test.js proves the arithmetic; these prove the
+// two agree with it.
 describe("what a wrong answer costs", () => {
-  describe("under the gentle rule", () => {
-    useRules({ wrongAnswer: WRONG_ANSWER.GENTLE })
+  it("takes nothing, moves nothing, and keeps the question up", async () => {
+    await bootInto({ position: 2, items: 2 })
+    const question = byId("question-prompt").textContent
+    tapWrong()
 
-    it("takes nothing and moves nothing", async () => {
-      await bootInto({ position: 2, items: 2, forgivenessLeft: 0 })
-      answerWrongly()
-      expect(hudCount()).toMatchObject({ items: 2 })
-      expect(earnedPips()).toBe(2)
-      expect(saved().run.items).toBe(2)
-      expect(saved().run.position).toBe(2)
-      expect(saved().run.wilting).toBe(0)
-      expect(saved().run.lost).toBe(0)
-      // A fresh question, though: the player is not stuck on the one they
-      // missed.
-      expect(saved().run.questionsAsked).toBe(1)
-      expect(isActive("screen-play")).toBe(true)
-    })
+    expect(hudCount()).toMatchObject({ items: 2 })
+    expect(earnedPips()).toBe(2)
+    expect(saved().run.items).toBe(2)
+    expect(saved().run.position).toBe(2)
+    // The same question, not a fresh one: she has to find the answer she missed.
+    expect(byId("question-prompt").textContent).toBe(question)
+    expect(saved().run.retrying).toBe(true)
+    expect(isActive("screen-play")).toBe(true)
   })
 
-  describe("under the wilt rule", () => {
-    useRules({ wrongAnswer: WRONG_ANSWER.WILT })
+  it("strikes the choice off and leaves the rest live, with no flash to wait out", async () => {
+    await bootInto({ position: 2, items: 2 })
+    const pressed = choices()[correctIndex() === 0 ? 1 : 0]
+    pressed.click()
 
-    it("sets the newest item wilting, and the next right answer brings it back", async () => {
-      await bootInto({ position: 2, items: 2, forgivenessLeft: 0 })
-      answerWrongly()
-      expect(hudCount()).toMatchObject({ items: 1 })
-      expect(saved().run.wilting).toBe(1)
-      expect(saved().run.position).toBe(2)
-      expect(byId("wilt-note").classList.contains("hidden")).toBe(false)
-
-      await answerCorrectly()
-      expect(hudCount()).toMatchObject({ items: 3 })
-      expect(saved().run.wilting).toBe(0)
-      expect(saved().run.lost).toBe(0)
-      expect(byId("wilt-note").classList.contains("hidden")).toBe(true)
-    })
+    expect(pressed.classList.contains("is-out")).toBe(true)
+    expect(pressed.getAttribute("aria-disabled")).toBe("true")
+    const live = choices().filter((button) => !button.classList.contains("is-out"))
+    expect(live).toHaveLength(3)
+    for (const button of live) expect(button.getAttribute("aria-disabled")).toBeNull()
+    // Nothing is marked correct: the answer is not given away.
+    expect(choices().some((button) => button.classList.contains("is-correct"))).toBe(false)
   })
 
-  describe("under the step-back rule", () => {
-    useRules({ wrongAnswer: WRONG_ANSWER.STEP_BACK })
+  it("ignores a second tap on a choice already struck off", async () => {
+    await bootInto({ position: 2, items: 2 })
+    const pressed = choices()[correctIndex() === 0 ? 1 : 0]
+    pressed.click()
+    expect(saved().run.questionsAsked).toBe(1)
+    pressed.click()
+    pressed.click()
+    expect(saved().run.questionsAsked).toBe(1)
+  })
 
-    it("moves the token back a space and takes the item outright", async () => {
-      await bootInto({ position: 2, items: 2, forgivenessLeft: 0 })
-      answerWrongly()
-      expect(saved().run.position).toBe(1)
-      expect(saved().run.items).toBe(1)
-      expect(saved().run.lost).toBe(1)
-      expect(saved().run.wilting).toBe(0)
-      expect(hudCount()).toMatchObject({ items: 1 })
-      expect(earnedPips()).toBe(1)
-      // Nothing is wilting, so nothing is promised back.
-      expect(byId("wilt-note").classList.contains("hidden")).toBe(true)
-      // The drawn trail has to agree with the save. `_onAnswer` used to redraw
-      // only the HUD, so the token stayed a space ahead of where the player
-      // actually was -- visible only under this rule, since it is the one that
-      // moves you backwards.
-      expect(trailSpace()).toMatchObject({ space: 2 })
-    })
+  it("owes one more question before the item is paid", async () => {
+    const start = ordinarySpace(SPRING)
+    await bootInto({ position: start, items: 2 })
+    tapWrong()
+    jest.advanceTimersByTime(FLASH_MS)
+
+    // Right at last: no item yet, and the card comes up.
+    tapRight()
+    jest.advanceTimersByTime(FLASH_MS)
+    dismissReinforcement()
+    expect(saved().run.items).toBe(2)
+    expect(saved().run.position).toBe(start)
+
+    // The extra question pays out and moves her on.
+    await answerCorrectly()
+    expect(saved().run.items).toBe(3)
+    expect(saved().run.position).toBe(start + 1)
+  })
+
+  it("lets the porcupine go straight on without the extra question", async () => {
+    const start = ordinarySpace(SPRING)
+    await bootInto({ characterId: "porcupine", position: start, items: 2 })
+    tapWrong()
+    jest.advanceTimersByTime(FLASH_MS)
+    expect(saved().run.owed).toBe(0)
+
+    tapRight()
+    jest.advanceTimersByTime(FLASH_MS)
+    dismissReinforcement()
+    await settleCrossing()
+    expect(saved().run.items).toBe(3)
+    expect(saved().run.position).toBe(start + 1)
+  })
+
+  it("takes the clock off a question being retried", async () => {
+    // The hole the retry rule would otherwise open: a timeout is a wrong
+    // answer, and a wrong answer keeps the question -- so a clock on the retry
+    // would time the same question out again, forever, for the child who could
+    // not answer it.
+    await bootInto({ characterId: "porcupine", seasonId: "summer", position: 1 }, TIMED)
+    expect(byId("timer-wrap").classList.contains("hidden")).toBe(false)
+
+    tapWrong()
+
+    expect(byId("timer-wrap").classList.contains("hidden")).toBe(true)
+    // And it stays off however long she takes.
+    jest.advanceTimersByTime(SUMMER.timerSeconds * 3000)
+    expect(isActive("screen-play")).toBe(true)
+    expect(saved().run.questionsAsked).toBe(1)
+  })
+})
+
+// The card is the only teaching the loop does now that a miss no longer states
+// the answer, and the only screen in the game with no clock on it.
+describe("the reinforcement card", () => {
+  it("comes up once a missed question is finally answered right", async () => {
+    await bootInto({ position: 1, items: 1 })
+    const question = byId("question-prompt").textContent
+    const answer = liveQuestion().answer
+
+    tapWrong()
+    jest.advanceTimersByTime(FLASH_MS)
+    expect(byId("reinforce-card").classList.contains("hidden")).toBe(true)
+
+    tapRight()
+    jest.advanceTimersByTime(FLASH_MS)
+
+    expect(byId("reinforce-card").classList.contains("hidden")).toBe(false)
+    expect(byId("reinforce-equation").textContent).toBe(`${question} = ${answer}`)
+  })
+
+  it("does not come up for a question answered right first time", async () => {
+    await bootInto({ position: 1, items: 1 })
+    tapRight()
+    jest.advanceTimersByTime(FLASH_MS)
+    expect(byId("reinforce-card").classList.contains("hidden")).toBe(true)
+  })
+
+  it("waits for the button and holds the next question behind it", async () => {
+    const start = ordinarySpace(SPRING)
+    await bootInto({ position: start, items: 1 })
+    const question = byId("question-prompt").textContent
+    tapWrong()
+    jest.advanceTimersByTime(FLASH_MS)
+    tapRight()
+    jest.advanceTimersByTime(FLASH_MS)
+
+    // No timer takes it away, however long she reads it for.
+    jest.advanceTimersByTime(60_000)
+    expect(byId("reinforce-card").classList.contains("hidden")).toBe(false)
+    expect(byId("question-prompt").textContent).toBe(question)
+
+    dismissReinforcement()
+    expect(byId("reinforce-card").classList.contains("hidden")).toBe(true)
+    expect(byId("question-prompt").textContent).not.toBe(question)
+  })
+
+  it("swallows the answer keys while it is up", async () => {
+    await bootInto({ position: 1, items: 1 })
+    tapWrong()
+    jest.advanceTimersByTime(FLASH_MS)
+    tapRight()
+    jest.advanceTimersByTime(FLASH_MS)
+    const asked = saved().run.questionsAsked
+
+    pressKey("a")
+    pressKey("b")
+
+    expect(saved().run.questionsAsked).toBe(asked)
+  })
+
+  it("draws a dot array for a times fact", async () => {
+    // Spring's ordinary spaces include `mul` with small tables, so a seeded run
+    // reaches one. Which model appears is the challenge module's call; what is
+    // asserted here is that GameUI draws whatever it was handed.
+    await bootInto({ position: 1, items: 1 })
+    tapWrong()
+    jest.advanceTimersByTime(FLASH_MS)
+    tapRight()
+    jest.advanceTimersByTime(FLASH_MS)
+
+    const picture = byId("reinforce-picture")
+    expect(picture.querySelectorAll(".dot").length).toBeGreaterThan(0)
+  })
+
+  it("goes away when the journey is thrown out from under it", async () => {
+    // It waits for a tap rather than a timer, so a restart while it is up would
+    // otherwise leave it covering the character screen with a "Got it" button
+    // wired to a run that no longer exists.
+    await bootInto({ position: 1, items: 1 })
+    tapWrong()
+    jest.advanceTimersByTime(FLASH_MS)
+    tapRight()
+    jest.advanceTimersByTime(FLASH_MS)
+    expect(byId("reinforce-card").classList.contains("hidden")).toBe(false)
+
+    window.confirm = () => true
+    byId("restart").click()
+
+    expect(byId("reinforce-card").classList.contains("hidden")).toBe(true)
+    expect(isActive("screen-character")).toBe(true)
   })
 })
 
@@ -424,9 +472,15 @@ describe("the countdown setting", () => {
     byId("close-settings").click()
   }
 
-  /** A timed season, part-way along, so there is a clock to look at. */
+  /**
+   * A timed season, part-way along, so there is a clock to look at.
+   *
+   * The Porcupine on purpose: her perk is about the extra question and touches
+   * no clock. The Banana Slug used to serve here and cannot any more -- since
+   * 2026-09-21 she has no countdown at all, whatever the setting says.
+   */
   const bootIntoSummer = (save = TIMED) =>
-    bootInto({ characterId: "banana-slug", seasonId: "summer", position: 1 }, save)
+    bootInto({ characterId: "porcupine", seasonId: "summer", position: 1 }, save)
 
   it("defaults to off, so a player who never opens settings is never raced", async () => {
     await bootIntoSummer({})

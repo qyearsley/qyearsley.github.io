@@ -91,19 +91,14 @@ describe("the roster", () => {
     // The Sloth overrides extraSeconds and nothing else.
     const sloth = getCharacter("sloth")
     expect(sloth.effects.extraSeconds).toBe(10)
-    expect(sloth.effects.penaltyScale).toBe(DEFAULT_EFFECTS.penaltyScale)
-    expect(sloth.effects.glowingItems).toBe(DEFAULT_EFFECTS.glowingItems)
-    expect(sloth.effects.forgivenessPerSeason).toBe(DEFAULT_EFFECTS.forgivenessPerSeason)
-    expect(sloth.effects.comebackBonus).toBe(DEFAULT_EFFECTS.comebackBonus)
+    expect(sloth.effects.noTimer).toBe(DEFAULT_EFFECTS.noTimer)
+    expect(sloth.effects.hintsPerSeason).toBe(DEFAULT_EFFECTS.hintsPerSeason)
+    expect(sloth.effects.skipsExtra).toBe(DEFAULT_EFFECTS.skipsExtra)
   })
 
   it("gives an overriding character the defaults for everything else", () => {
     const slug = getCharacter("banana-slug")
-    expect(slug.effects).toEqual({
-      ...DEFAULT_EFFECTS,
-      penaltyScale: 0,
-      glowingItems: 2,
-    })
+    expect(slug.effects).toEqual({ ...DEFAULT_EFFECTS, noTimer: true })
   })
 
   it("does not share one effects object between characters", () => {
@@ -132,19 +127,19 @@ describe("immutability", () => {
     expect(Object.isFrozen(character.effects)).toBe(true)
 
     const originalName = character.name
-    const originalScale = character.effects.penaltyScale
+    const originalSeconds = character.effects.extraSeconds
     expect(() => {
       character.name = "Hacked"
     }).toThrow(TypeError)
     expect(() => {
-      character.effects.penaltyScale = 99
+      character.effects.extraSeconds = 99
     }).toThrow(TypeError)
     expect(() => {
       character.effects.newField = 1
     }).toThrow(TypeError)
 
     expect(character.name).toBe(originalName)
-    expect(character.effects.penaltyScale).toBe(originalScale)
+    expect(character.effects.extraSeconds).toBe(originalSeconds)
     expect("newField" in character.effects).toBe(false)
   })
 
@@ -185,46 +180,10 @@ describe("getEffects", () => {
   // it. A new character does not need a row -- add one only if its perk is
   // worth pinning.
   it.each([
-    [
-      "banana-slug",
-      {
-        penaltyScale: 0,
-        glowingItems: 2,
-        extraSeconds: 0,
-        forgivenessPerSeason: 0,
-        comebackBonus: false,
-      },
-    ],
-    [
-      "sloth",
-      {
-        penaltyScale: 1,
-        glowingItems: 3,
-        extraSeconds: 10,
-        forgivenessPerSeason: 0,
-        comebackBonus: false,
-      },
-    ],
-    [
-      "phoenix",
-      {
-        penaltyScale: 2,
-        glowingItems: 3,
-        extraSeconds: 0,
-        forgivenessPerSeason: 1,
-        comebackBonus: false,
-      },
-    ],
-    [
-      "porcupine",
-      {
-        penaltyScale: 1,
-        glowingItems: 3,
-        extraSeconds: 0,
-        forgivenessPerSeason: 0,
-        comebackBonus: true,
-      },
-    ],
+    ["banana-slug", { extraSeconds: 0, noTimer: true, hintsPerSeason: 0, skipsExtra: false }],
+    ["sloth", { extraSeconds: 10, noTimer: false, hintsPerSeason: 0, skipsExtra: false }],
+    ["phoenix", { extraSeconds: 0, noTimer: false, hintsPerSeason: 1, skipsExtra: false }],
+    ["porcupine", { extraSeconds: 0, noTimer: false, hintsPerSeason: 0, skipsExtra: true }],
   ])("returns the merged effects for %s", (id, expected) => {
     expect(getEffects(id)).toEqual(expected)
   })
@@ -246,16 +205,32 @@ describe("getEffects", () => {
 })
 
 describe("balance", () => {
-  it("exercises the penalty scale in both directions", () => {
-    const scales = CHARACTERS.map((character) => character.effects.penaltyScale)
-    // Somebody has to be immune, or penaltyScale: 0 is dead code in GameState.
-    expect(scales).toContain(0)
-    expect(Math.max(...scales)).toBeGreaterThan(DEFAULT_EFFECTS.penaltyScale)
+  it("gives each animal exactly one perk", () => {
+    // One field per animal is the shape the roster was rebuilt to on
+    // 2026-09-21, and it is what keeps the cards readable: a card that lists
+    // two perks and no cost is a card nobody compares.
+    for (const character of CHARACTERS) {
+      const changed = EFFECT_KEYS.filter((key) => character.effects[key] !== DEFAULT_EFFECTS[key])
+      expect([character.id, changed.length]).toEqual([character.id, 1])
+    }
   })
 
-  it("gives at least one character per-season forgiveness", () => {
-    const forgiving = CHARACTERS.filter((character) => character.effects.forgivenessPerSeason > 0)
-    expect(forgiving.length).toBeGreaterThan(0)
+  it("charges nobody a cost", () => {
+    // Every perk is free now. The costs were priced against an item penalty
+    // that no longer exists, so a card claiming one would be describing a rule
+    // the game does not have.
+    for (const character of CHARACTERS) {
+      expect([character.id, character.costText]).toEqual([character.id, ""])
+    }
+  })
+
+  it("lets no perk change what a space pays", () => {
+    // The alignment in seasons.js depends on this: a demand equal to what the
+    // trail pays cannot survive a character who collects a different amount.
+    for (const character of CHARACTERS) {
+      expect(character.effects).not.toHaveProperty("glowingItems")
+      expect(character.effects).not.toHaveProperty("itemsPerSpace")
+    }
   })
 
   it("exercises every effect field on at least one character", () => {
@@ -266,12 +241,6 @@ describe("balance", () => {
         (character) => character.effects[key] !== DEFAULT_EFFECTS[key],
       )
       expect([key, differs]).toEqual([key, true])
-    }
-  })
-
-  it("keeps glowing items positive for everyone", () => {
-    for (const character of CHARACTERS) {
-      expect(character.effects.glowingItems).toBeGreaterThan(0)
     }
   })
 })

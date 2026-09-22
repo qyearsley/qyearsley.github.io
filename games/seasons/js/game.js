@@ -7,7 +7,11 @@
  * comes back from GameState, and every pixel comes from GameUI.
  *
  * The answer cycle is deliberately explicit, because it is the one place where
- * timing matters:
+ * timing matters. A **wrong** answer is the short path: stop the clock, strike
+ * the choice off, show the line, and hand the same question straight back. No
+ * flash, no wait, no penalty -- see `rejectAnswer`.
+ *
+ * A **correct** answer is the long one:
  *
  *   1. stop the countdown, so a timeout cannot fire during the flash
  *   2. note where the character stands and what it is facing, before the answer
@@ -15,15 +19,20 @@
  *   3. ask GameState what the answer did
  *   4. save immediately -- progress survives a closed tab mid-flash
  *   5. flash the result on the buttons for `flashDuration`
- *   6. animate the character across the obstacle it just got past, if it did
- *   7. draw whatever comes next: the following question, or the result screen
+ *   6. if the question had been missed, hold up the reinforcement card and wait
+ *      for a tap -- the one step in the loop with no timer on it
+ *   7. animate the character across the obstacle it just got past, if it did
+ *   8. draw whatever comes next: the following question, or the result screen
  *
  * The module-level `answering` flag guards the whole cycle, the crossing
  * included. Without it a fast double-tap, or a tap landing in the same frame as
  * a timeout, would score twice -- and a tap mid-crossing would answer a question
  * that is not on screen yet. `aria-disabled` on the buttons only announces that;
  * this is what enforces it. A `pointerdown` anywhere cuts the crossing short
- * rather than shortening the guard.
+ * rather than shortening the guard. The flag comes off early on the wrong-answer
+ * path, because there the point is that the buttons stay live -- which is why
+ * `renderQuestion` refuses a click on a choice already struck off, rather than
+ * leaving that to the guard.
  *
  * This file exports nothing and calls `start()` at the bottom, so importing it
  * starts the game -- which is why index.html needs no bootstrap call, and why
@@ -45,7 +54,6 @@ import {
   createState,
   questionSeconds,
   rehydrate,
-  retry,
 } from "./GameState.js"
 import { isGlowingAt, kindAt } from "./Journey.js"
 import { CHARACTERS, getCharacter } from "./characters.js"
@@ -82,7 +90,6 @@ const DEBUG_PHASES = {
   trail: PHASE.TRAIL,
   boss: PHASE.BOSS,
   won: PHASE.SEASON_WON,
-  lost: PHASE.SEASON_LOST,
   end: PHASE.RUN_COMPLETE,
 }
 
@@ -160,17 +167,17 @@ function _debugRun() {
   const base = { characterId, seasonId: season.id }
   switch (debug.phase) {
     case PHASE.BOSS:
-      // Left three short, so the boss's rescue has something to rescue.
-      return { ...base, phase: PHASE.TRAIL, position: season.spaces, items: season.demand - 3 }
-    case PHASE.SEASON_WON:
-      return { ...base, phase: PHASE.SEASON_WON, position: season.spaces, items: season.demand + 1 }
-    case PHASE.SEASON_LOST:
+      // Exactly the rescue short, which is where a real walk of the trail
+      // arrives: the demand is what the trail pays plus what she pays, so her
+      // question is the one that fills the jar.
       return {
         ...base,
-        phase: PHASE.SEASON_LOST,
+        phase: PHASE.TRAIL,
         position: season.spaces,
-        items: Math.max(0, season.demand - 4),
+        items: season.demand - season.boss.rescue,
       }
+    case PHASE.SEASON_WON:
+      return { ...base, phase: PHASE.SEASON_WON, position: season.spaces, items: season.demand }
     default:
       return { ...base, phase: PHASE.TRAIL, position: 0, items: 0 }
   }
@@ -227,6 +234,10 @@ function _cancelFlash() {
   flashSkip = null
   cycle += 1
   ui.skipTraversal()
+  // The reinforcement card waits for a tap rather than a timer, so a restart
+  // while it is up would otherwise leave it covering the character screen with
+  // a "Got it" button wired to a run that no longer exists.
+  ui.hideReinforcement()
   answering = false
 }
 
@@ -375,25 +386,29 @@ function _startClock() {
 function _questionTag(season, isBoss, glowing) {
   if (isBoss) {
     const worth = `worth ${season.boss.rescue} more ${season.itemPlural.toLowerCase()}`
-    // Not "her last question" for the first attempt: that reads as "last try",
-    // which is what the other branch says, so the two got confused.
-    return state.bossTriesLeft > 1 ? `The snake woman's question — ${worth}` : `Last try — ${worth}`
+    // Once she has already been answered right and is asking the extra
+    // question, the rescue is still what clearing this space pays -- but "her
+    // question" has already happened, so the label says which one this is.
+    if (state.extrasDone > 0) return `One more for her — ${worth}`
+    return `The snake woman's question — ${worth}`
   }
-  return glowing ? "Glowing challenge" : ""
+  if (glowing) return "Glowing challenge"
+  return state.extrasDone > 0 ? "One more before you go on" : ""
 }
 
 /**
  * A one-line verdict for the player.
  *
  * Deliberately one clause, never several joined by a separator: the whole line
- * has to be readable inside the 900ms flash by a child who is still learning to
- * read. A miss always states the correct answer, because that is the only
- * teaching this screen does.
+ * has to be readable at a glance by a child who is still learning to read.
  *
- * @private
- * @param {Object} outcome - An Outcome, plus a `correctAnswer` the caller
- *   injects: the answer lives on the question, not the outcome, and a miss has
- *   to be able to state it
+ * **A miss never states the answer.** It used to, because the flash after a
+ * wrong answer was the only teaching in the loop. Under the retry rule the
+ * question stays up and she has to find it herself, and the reinforcement card
+ * afterwards is where the fact gets taught -- so saying it here would skip
+ * straight past both.
+ *
+ * @param {Object} outcome - An Outcome
  * @param {import("./seasons.js").Season} season - The season being played
  * @param {boolean} timedOut - Whether the clock ran out rather than a tap
  * @returns {string} The line to show under the question
@@ -404,6 +419,7 @@ function _feedbackFor(outcome, season, timedOut) {
   const name = (n) => (n === 1 ? item : items)
 
   if (outcome.correct) {
+    if (outcome.extra) return "Right! Now you can go on."
     if (outcome.rescued > 0) return `Yes! That is ${outcome.rescued} more for the potion.`
     if (outcome.itemsGained === 0) return "Right!"
     if (outcome.glowing) {
@@ -411,26 +427,12 @@ function _feedbackFor(outcome, season, timedOut) {
       const rare = outcome.itemsGained === 1 ? season.rareItemName : `${season.rareItemName}s`
       return `${outcome.itemsGained} ${rare.toLowerCase()}!`
     }
-    if (outcome.doubled) return `Double! +${outcome.itemsGained} ${name(outcome.itemsGained)}`
-    if (outcome.revived > 0)
-      return `+${outcome.itemsGained} ${name(outcome.itemsGained)}, and your ${item} is back`
     return `+${outcome.itemsGained} ${name(outcome.itemsGained)}`
   }
 
-  // One clause, not several. A child has 900ms to read it.
-  const answer = outcome.correctAnswer
-  const right = answer === undefined ? "" : ` The answer was ${answer}.`
-  // A missed boss question with a try in hand is the one miss that is not a
-  // setback, so it gets its own line instead of the generic one.
-  if (outcome.wasBoss && outcome.bossTriesLeft > 0) return `Not quite.${right} One more go!`
-  if (timedOut) return `Time ran out!${right}`
-  if (outcome.forgiven) return `${getCharacter(state.characterId).perkName} saved you!${right}`
-  if (outcome.lostNow > 0) return `Lost ${outcome.lostNow} ${name(outcome.lostNow)}.${right}`
-  if (outcome.wiltedNow > 0) {
-    return `Your ${name(outcome.wiltedNow)} ${outcome.wiltedNow === 1 ? "is" : "are"} wilting.${right}`
-  }
-  if (outcome.steppedBack > 0) return `Back ${outcome.steppedBack}.${right}`
-  return `Not quite.${right}`
+  if (outcome.hinted) return `${getCharacter(state.characterId).perkName} — two of them are gone!`
+  if (timedOut) return "Time ran out. Take as long as you like now."
+  return "Not quite — have another look."
 }
 
 /**
@@ -451,34 +453,44 @@ function _onAnswer(value, button) {
   const wasAt = state.position
   const facing = kindAt(season, wasAt)
   const result = applyAnswer(state, value)
-  const crossed =
-    result.outcome.correct && !result.outcome.wasBoss && facing
-      ? { from: wasAt, kind: facing }
-      : null
+  const outcome = result.outcome
   state = result.state
   save = {
     ...save,
     totals: {
       ...save.totals,
       questionsAnswered: save.totals.questionsAnswered + 1,
-      questionsCorrect: save.totals.questionsCorrect + (result.outcome.correct ? 1 : 0),
+      questionsCorrect: save.totals.questionsCorrect + (outcome.correct ? 1 : 0),
     },
   }
   _save()
-
-  ui.flashAnswer(
-    result.outcome,
-    button,
-    correctValue,
-    _feedbackFor({ ...result.outcome, correctAnswer: correctValue }, season, value === null),
-  )
   ui.renderHud(state, getSeason(state.seasonId))
 
-  const advance = () => {
-    flashTimer = null
-    flashSkip = null
-    if (state.phase === PHASE.SEASON_WON) _unlockAfter(season.id)
-    if (state.phase === PHASE.SEASON_WON || state.phase === PHASE.SEASON_LOST) {
+  // A wrong answer resolves nothing. The question stays up, the choice just
+  // taken is struck off, and the player goes again immediately -- so there is
+  // no flash to wait out and the guard comes off here rather than in `advance`.
+  if (outcome.retry) {
+    const message = _feedbackFor(outcome, season, value === null)
+    ui.rejectAnswer(button, message, outcome.hinted ? ui.hintTargets(correctValue) : [])
+    answering = false
+    // The clock does not come back. `questionSeconds` returns null while
+    // retrying, so this both hides the bar and makes the point on screen: the
+    // retry is not a race.
+    _startClock()
+    return
+  }
+
+  const crossed =
+    outcome.correct && !outcome.wasBoss && !outcome.extra && facing
+      ? { from: wasAt, kind: facing }
+      : null
+
+  ui.flashAnswer(outcome, button, correctValue, _feedbackFor(outcome, season, value === null))
+
+  /** What happens once any reinforcement card has been dismissed. */
+  const proceed = () => {
+    if (state.phase === PHASE.SEASON_WON) {
+      _unlockAfter(season.id)
       answering = false
       _save()
       render()
@@ -488,10 +500,6 @@ function _onAnswer(value, button) {
     // play that before asking the next question. `answering` stays true for the
     // duration, which is what stops a fast tapper answering mid-leap.
     if (crossed === null) {
-      // Redraw before asking: a wrong answer can still move the character.
-      // Under the step-back rule the save said one position while the drawn
-      // token and the trail's label still showed the old one, because nothing
-      // else runs between two questions.
       ui.renderTrail(getSeason(state.seasonId), state.position, state.characterId)
       answering = false
       _askQuestion()
@@ -506,9 +514,21 @@ function _onAnswer(value, button) {
     })
   }
 
+  const advance = () => {
+    flashTimer = null
+    flashSkip = null
+    // The reinforcement card, if this answer earned one. It waits for a tap
+    // rather than a timer, so everything after it is the continuation.
+    if (outcome.reinforce) {
+      ui.showReinforcement(outcome.reinforce, proceed)
+      return
+    }
+    proceed()
+  }
+
   flashTimer = setTimeout(advance, ui.flashDuration)
   // Armed only for a correct answer; see the `flashSkip` declaration.
-  flashSkip = result.outcome.correct
+  flashSkip = outcome.correct
     ? () => {
         clearTimeout(flashTimer)
         advance()
@@ -543,39 +563,19 @@ function _renderResult(season) {
     return
   }
 
-  if (state.phase === PHASE.SEASON_WON) {
-    const next = SEASON_ORDER[SEASON_ORDER.indexOf(season.id) + 1]
-    ui.renderResult(
-      state,
-      season,
-      [
-        {
-          label: next ? `On to ${getSeason(next).name}` : "Finish the journey",
-          onClick: _onAdvance,
-          primary: true,
-        },
-      ],
-      `${season.name} complete`,
-      `She counts the ${season.itemPlural.toLowerCase()} into her jar, nods once, and writes something down. That is her being delighted.`,
-    )
-    return
-  }
-
+  const next = SEASON_ORDER[SEASON_ORDER.indexOf(season.id) + 1]
   ui.renderResult(
     state,
     season,
     [
       {
-        label: state.runOver ? "Start again" : `Try ${season.name} again`,
-        onClick: _onRetry,
+        label: next ? `On to ${getSeason(next).name}` : "Finish the journey",
+        onClick: _onAdvance,
         primary: true,
       },
-      { label: "Pick a new character", onClick: _confirmNewRun },
     ],
-    state.runOver ? "Back to the beginning" : "Not quite enough",
-    state.runOver
-      ? "The potion will have to wait for another journey. She does not seem worried about it."
-      : `She needed ${season.demand} and counted ${state.items}. "No matter," she says, already tidying the jar. "Again, from the top."`,
+    `${season.name} complete`,
+    `She counts the ${season.itemPlural.toLowerCase()} into her jar, nods once, and writes something down. That is her being delighted.`,
   )
 }
 
@@ -600,17 +600,6 @@ function _onAdvance() {
   if (state.phase === PHASE.RUN_COMPLETE) {
     save = { ...save, totals: { ...save.totals, runsCompleted: save.totals.runsCompleted + 1 } }
   }
-  _save()
-  render()
-}
-
-/**
- * Season failed: play it again, or start over if the rule ends the run.
- * @private
- */
-function _onRetry() {
-  _cancelFlash()
-  state = retry(state)
   _save()
   render()
 }
@@ -736,8 +725,10 @@ function _onKeyDown(event) {
   // button and anything else the dialog grows. The site's own help overlay --
   // the one `?` opens, from shared/nav.js -- covers them just as thoroughly and
   // is just as easy to miss: it publishes `__helpOverlayIsOpen` for exactly
-  // this, and until now nothing in any game asked.
-  if (ui.settingsOpen || window.__helpOverlayIsOpen?.()) return
+  // this. The reinforcement card is the third such layer, and the only one this
+  // game owns: it covers the choices while she reads the fact she just worked
+  // out, and A-D must not answer the next question from behind it.
+  if (ui.settingsOpen || ui.reinforcementOpen || window.__helpOverlayIsOpen?.()) return
   if (answering) return
   if (!_onPlayScreen()) return
   // Single characters only, so "F5" and "ArrowLeft" never reach the arithmetic.

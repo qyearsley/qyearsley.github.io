@@ -24,6 +24,7 @@ import {
   tapRight,
   answerCorrectly,
   answerWrongly,
+  payoutThrough,
   setupGameHarness,
 } from "./game-harness.js"
 
@@ -49,15 +50,16 @@ describe("answering", () => {
     expect(earnedPips()).toBe(0)
     expect(saved().run.items).toBe(0)
     expect(saved().run.position).toBe(0)
-    expect(wrong.classList.contains("is-wrong")).toBe(true)
+    // Struck off rather than marked wrong: the question is still hers to answer.
+    expect(wrong.classList.contains("is-out")).toBe(true)
   })
 
   // `aria-disabled`, not `disabled`: disabling the element that has focus drops
   // focus to <body>, so a keyboard user had to tab in from the top of the
   // document before every single question.
-  it("shows the right answer either way, and locks the buttons without disabling them", () => {
+  it("marks the right answer and locks the buttons without disabling them", () => {
     const answer = String(liveQuestion().answer)
-    const pressed = choices()[(correctIndex() + 1) % PLAY.CHOICE_COUNT]
+    const pressed = choices()[correctIndex()]
     pressed.focus()
     pressed.click()
 
@@ -67,6 +69,22 @@ describe("answering", () => {
     expect(choices().every((button) => button.getAttribute("aria-disabled") === "true")).toBe(true)
     expect(choices().every((button) => button.classList.contains("is-locked"))).toBe(true)
     expect(choices().every((button) => button.disabled === false)).toBe(true)
+    expect(document.activeElement).toBe(pressed)
+  })
+
+  // A miss locks one button and nothing else. It used to mark the correct answer
+  // too; since 2026-09-21 it gives nothing away, so the only thing that changes
+  // on screen is the choice she has ruled out.
+  it("strikes off a wrong answer without locking the rest or losing focus", () => {
+    const pressed = choices()[(correctIndex() + 1) % PLAY.CHOICE_COUNT]
+    pressed.focus()
+    pressed.click()
+
+    expect(document.querySelectorAll("#choices .is-correct")).toHaveLength(0)
+    expect(pressed.getAttribute("aria-disabled")).toBe("true")
+    expect(pressed.disabled).toBe(false)
+    const live = choices().filter((button) => button !== pressed)
+    expect(live.every((button) => button.getAttribute("aria-disabled") === null)).toBe(true)
     expect(document.activeElement).toBe(pressed)
   })
 
@@ -98,12 +116,13 @@ describe("answering", () => {
     expect(trailSpace()).toEqual({ space: 2, of: SPRING.spaces })
   })
 
-  it("three correct answers in a row collect three items", async () => {
+  it("three correct answers in a row bank what those three spaces are worth", async () => {
     for (let i = 0; i < 3; i += 1) {
       await answerCorrectly()
     }
-    expect(hudCount()).toMatchObject({ items: 3 })
-    expect(earnedPips()).toBe(3)
+    const banked = payoutThrough(SPRING, 3)
+    expect(hudCount()).toMatchObject({ items: banked })
+    expect(earnedPips()).toBe(banked)
     expect(saved().run.position).toBe(3)
     expect(trailSpace()).toEqual({ space: 4, of: SPRING.spaces })
   })
@@ -122,6 +141,29 @@ describe("the letter keys", () => {
     chooseCharacter("sloth")
   })
 
+  /**
+   * What the screen does after a key has answered.
+   *
+   * The two branches differ, and they have to: a right answer locks the whole row
+   * and marks itself, a wrong one strikes off the single choice it ruled out and
+   * hands the question straight back.
+   *
+   * @param {HTMLButtonElement} button - The choice the key pressed
+   * @param {boolean} wasCorrect - Whether it held the answer
+   */
+  function expectKeyLanded(button, wasCorrect) {
+    if (wasCorrect) {
+      expect(choices().every((option) => option.getAttribute("aria-disabled") === "true")).toBe(
+        true,
+      )
+      expect(button.classList.contains("is-correct")).toBe(true)
+    } else {
+      expect(button.classList.contains("is-out")).toBe(true)
+      expect(choices().filter((option) => option.classList.contains("is-out"))).toHaveLength(1)
+    }
+    expect(saved().run.questionsAsked).toBe(1)
+  }
+
   it.each([
     ["a", 0],
     ["b", 1],
@@ -131,8 +173,7 @@ describe("the letter keys", () => {
     const button = choices()[index]
     const wasCorrect = button.dataset.value === String(liveQuestion().answer)
     pressKey(key)
-    expect(choices().every((option) => option.getAttribute("aria-disabled") === "true")).toBe(true)
-    expect(button.classList.contains(wasCorrect ? "is-correct" : "is-wrong")).toBe(true)
+    expectKeyLanded(button, wasCorrect)
     expect(hudCount()).toMatchObject({ items: wasCorrect ? 1 : 0 })
   })
 
@@ -141,7 +182,7 @@ describe("the letter keys", () => {
     const button = choices()[2]
     const wasCorrect = button.dataset.value === String(liveQuestion().answer)
     pressKey("C")
-    expect(button.classList.contains(wasCorrect ? "is-correct" : "is-wrong")).toBe(true)
+    expectKeyLanded(button, wasCorrect)
     expect(hudCount()).toMatchObject({ items: wasCorrect ? 1 : 0 })
   })
 
@@ -206,7 +247,7 @@ describe("the letter keys", () => {
 
 // The `answering` guard in game.js. Without it a fast double-tap, or a tap
 // landing in the same frame as a timeout, scores twice: here the second press
-// would apply a wrong answer and wilt the item the first one just collected.
+// would apply a wrong answer to a question that had already been banked.
 //
 // The buttons are no longer `disabled`, so a second `.click()` really does reach
 // game.js -- which is the point. Every assertion below is on the *score*, not on
@@ -243,18 +284,27 @@ describe("the double-tap guard", () => {
     expect(buttons[other].classList.contains("is-wrong")).toBe(false)
   })
 
-  it("a wrong tap followed by the right one still counts only the wrong tap", () => {
+  // A wrong tap no longer ends the question, so the guard has nothing to hold
+  // shut here: tapping on is exactly what the player is meant to do. What the
+  // screen must not do is let her press the same ruled-out choice again.
+  it("hands the question back after a wrong tap, minus the choice she ruled out", () => {
     const buttons = choices()
     const right = correctIndex()
     const other = (right + 1) % PLAY.CHOICE_COUNT
 
     buttons[other].click()
-    buttons[right].click()
-
-    expect(hudCount()).toMatchObject({ items: 0 })
     expect(saved().run.questionsAsked).toBe(1)
-    expect(saved().run.correctCount).toBe(0)
+    buttons[other].click()
+    buttons[other].click()
+
+    // Three taps, one answer: the two after the strike-off went nowhere.
+    expect(saved().run.questionsAsked).toBe(1)
     expect(saved().totals.questionsAnswered).toBe(1)
+
+    // And the right one is still live.
+    buttons[right].click()
+    expect(saved().run.questionsAsked).toBe(2)
+    expect(saved().run.correctCount).toBe(1)
   })
 
   it("the same button tapped ten times scores once", () => {

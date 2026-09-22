@@ -41,7 +41,7 @@
 import { BaseGameUI } from "../../shared/BaseGameUI.js"
 import { activePack, svg } from "./art/index.js"
 import { CHARACTERS, getCharacter } from "./characters.js"
-import { PLAY, RULES, WRONG_ANSWER } from "./constants.js"
+import { HINT_CHOICES_LEFT, PLAY } from "./constants.js"
 import { buildTrail } from "./Journey.js"
 import { getObstacle } from "./obstacles.js"
 
@@ -83,6 +83,14 @@ const CAMERA_REDUCED_MS = 300
  * @private
  */
 const MAX_ITEM_PIPS = 60
+
+/**
+ * How many collectibles fly out of the jar when a season is cleared. Twelve is
+ * a ring dense enough to read as a burst and sparse enough that each mark is
+ * still recognisably a rose.
+ * @private
+ */
+const BURST_MARKS = 12
 
 /**
  * Code point of "A", so the nth answer button can be named A, B, C, D.
@@ -130,7 +138,6 @@ export class GameUI extends BaseGameUI {
       "villain-portrait",
       "item-count",
       "item-track",
-      "wilt-note",
       "perk-note",
       "trail",
       "question-prompt",
@@ -140,6 +147,11 @@ export class GameUI extends BaseGameUI {
       "timer-wrap",
       "timer-bar",
       "feedback",
+      "reinforce-card",
+      "reinforce-equation",
+      "reinforce-note",
+      "reinforce-picture",
+      "reinforce-done",
       "result-title",
       "result-text",
       "result-haul",
@@ -685,36 +697,20 @@ export class GameUI extends BaseGameUI {
         : `${state.items} of ${season.demand} ${noun.toLowerCase()} — ${short} to go`,
     )
 
-    const wilting = state.wilting > 0
-    this.setVisible("wilt-note", wilting)
-    if (wilting) {
-      const wiltNoun = state.wilting === 1 ? season.itemName : season.itemPlural
-      this.setText(
-        "wilt-note",
-        RULES.WRONG_ANSWER === WRONG_ANSWER.WILT
-          ? `${state.wilting} ${wiltNoun.toLowerCase()} wilting — get the next one right to bring ${
-              state.wilting === 1 ? "it" : "them"
-            } back`
-          : `${state.wilting} ${wiltNoun.toLowerCase()} at risk`,
-      )
-    }
-
     const character = getCharacter(state.characterId)
-    const hasForgiveness = state.forgivenessLeft > 0
-    this.setVisible("perk-note", hasForgiveness)
-    if (hasForgiveness) {
-      const mistakes =
-        state.forgivenessLeft === 1 ? "1 free mistake" : `${state.forgivenessLeft} free mistakes`
-      this.setText("perk-note", `${character.perkName}: ${mistakes} left`)
+    const hasHint = state.hintsLeft > 0
+    this.setVisible("perk-note", hasHint)
+    if (hasHint) {
+      const hints = state.hintsLeft === 1 ? "1 hint" : `${state.hintsLeft} hints`
+      this.setText("perk-note", `${character.perkName}: ${hints} left`)
     }
   }
 
   /**
    * Draw one slot per item the snake woman asked for: filled with the season's
-   * collectible when earned, drooping and drained when wilting, a faint outline
-   * when still owed. Showing the goods rather than a numeral is what makes
-   * "fetch eleven roses" legible to a child, and it is the only place the wilt
-   * rule is visible at all.
+   * collectible when earned, a faint outline when still owed. Showing the goods
+   * rather than a numeral is what makes "fetch fifteen roses" legible to a
+   * child.
    *
    * Every pip uses the plain variant. `item()` also offers a brighter `rare`
    * one, but which items came from glowing spaces is not tracked -- the state
@@ -733,13 +729,11 @@ export class GameUI extends BaseGameUI {
     track.replaceChildren()
 
     const earned = Math.max(0, state.items)
-    const wilting = Math.max(0, state.wilting)
-    // Slots grow past the demand if she overshoots, so a good run still shows
-    // every item rather than capping at the quota -- but bounded, because
-    // `items` comes off a save file that storage only clamps to non-negative.
-    // A hand-edited `items: 5000000` would otherwise build five million spans,
-    // each with its own SVG, on this render and every one after it.
-    const slots = Math.min(MAX_ITEM_PIPS, Math.max(season.demand, earned + wilting))
+    // Slots never exceed the demand in a real run -- the trail plus the boss
+    // pays exactly that -- but `items` comes off a save file that storage only
+    // clamps to non-negative, so a hand-edited `items: 5000000` must not build
+    // five million spans on this render and every one after it.
+    const slots = Math.min(MAX_ITEM_PIPS, Math.max(season.demand, earned))
 
     // Which pips are new since the last render, so only those pop in. The row
     // is rebuilt from scratch every time, so without this an animation on
@@ -758,12 +752,9 @@ export class GameUI extends BaseGameUI {
     for (let i = 0; i < slots; i += 1) {
       const pip = document.createElement("span")
       const isEarned = i < earned
-      const isWilting = !isEarned && i < earned + wilting
       const isNew = isEarned && i >= newFrom
-      pip.className = `item-pip${isEarned ? " is-earned" : ""}${isWilting ? " is-wilting" : ""}${
-        isNew ? " is-new" : ""
-      }`
-      if (isEarned || isWilting) {
+      pip.className = `item-pip${isEarned ? " is-earned" : ""}${isNew ? " is-new" : ""}`
+      if (isEarned) {
         this._mount(pip, this.pack.item(season.id, false), "item-svg")
       }
       track.append(pip)
@@ -806,18 +797,90 @@ export class GameUI extends BaseGameUI {
       const key = String.fromCodePoint(FIRST_CHOICE_KEY + index)
       button.dataset.key = key
       button.setAttribute("aria-label", `Answer ${key}: ${value}`)
-      button.addEventListener("click", () => onAnswer(value, button))
+      // A struck-out choice must not answer again. The `answering` guard in
+      // game.js is released the instant a wrong answer is rejected -- that is
+      // the point of the retry, the buttons stay live -- so it is no longer the
+      // thing that stops a second tap on the button just eliminated.
+      button.addEventListener("click", () => {
+        if (button.classList.contains("is-out")) return
+        onAnswer(value, button)
+      })
       choices.append(button)
     })
     this.hideFeedback()
   }
 
   /**
+   * Reject a wrong answer without resolving the question.
+   *
+   * The counterpart to `flashAnswer` under the retry rule, and deliberately not
+   * a flash: there is nothing to wait out. The pressed button is struck off,
+   * every other button stays live, and the player tries again immediately. The
+   * correct answer is **not** marked, which is the whole point -- Ella's rule is
+   * that the student finds it rather than being shown it.
+   *
+   * @param {HTMLButtonElement|null} pressed - The button pressed, null on timeout
+   * @param {string} message - The line to show under the question
+   * @param {number[]} [eliminate] - Extra values to strike off, for the hint
+   */
+  rejectAnswer(pressed, message, eliminate = []) {
+    if (pressed) {
+      this._strikeOut(pressed)
+      this.shakeElement(pressed)
+    }
+    const choices = this.elements.choices
+    if (choices && eliminate.length > 0) {
+      for (const button of choices.querySelectorAll("button")) {
+        if (eliminate.includes(Number(button.dataset.value))) this._strikeOut(button)
+      }
+    }
+    this.showFeedback(message, "error")
+  }
+
+  /**
+   * Mark one choice as spent: struck out, and no longer an answer.
+   * @private
+   * @param {HTMLButtonElement} button - The choice to strike off
+   */
+  _strikeOut(button) {
+    button.classList.add("is-out")
+    button.setAttribute("aria-disabled", "true")
+  }
+
+  /**
+   * Which wrong choices the hint should remove.
+   *
+   * Leaves HINT_CHOICES_LEFT buttons standing, counting the ones already struck
+   * off, and never the answer. Computed here rather than in GameState because
+   * it depends on what is on screen: the player has usually eliminated one
+   * herself by pressing it, and removing a full two more on top of that would
+   * leave the answer alone and unmissable.
+   *
+   * @param {number} correctValue - The answer, which is never removed
+   * @returns {number[]} Values to strike off
+   */
+  hintTargets(correctValue) {
+    const choices = this.elements.choices
+    if (!choices) return []
+    const live = [...choices.querySelectorAll("button")].filter(
+      (button) => !button.classList.contains("is-out"),
+    )
+    const wrong = live
+      .map((button) => Number(button.dataset.value))
+      .filter((value) => value !== correctValue)
+    // One of the live buttons is the answer, so leaving N standing means
+    // striking off all but N-1 of the wrong ones.
+    return wrong.slice(0, Math.max(0, wrong.length - (HINT_CHOICES_LEFT - 1)))
+  }
+
+  /**
    * Flash the result of an answer on the buttons, then lock them.
    *
-   * The correct button is always marked, including when the player got it
-   * wrong, because seeing the right answer is the only teaching this screen
-   * does.
+   * For an answer that resolved the question. Since 2026-09-21 that means a
+   * right answer: a wrong one leaves the question up and goes to `rejectAnswer`
+   * instead. The `outcome.correct` branches below are kept because a timeout on
+   * the *last* allowed try would come through here, and because this method's
+   * job is to draw the outcome it is handed rather than to assume one.
    *
    * @param {import("./GameState.js").Outcome} outcome - What happened
    * @param {HTMLButtonElement|null} pressed - The button pressed, null on timeout
@@ -854,6 +917,167 @@ export class GameUI extends BaseGameUI {
    */
   get flashDuration() {
     return FLASH_MS
+  }
+
+  /**
+   * Show the reinforcement card: the fact she just worked out, in full, with a
+   * picture of it.
+   *
+   * This is the one screen in the game that waits for the player rather than a
+   * timer. It appears after a missed question is finally answered right, and it
+   * is the only teaching the loop does now that a wrong answer no longer states
+   * the answer. Rushing it on a timeout would defeat the point, so the only way
+   * past is the button.
+   *
+   * The card draws whichever model kinds it knows and shows the equation alone
+   * for anything else, so a challenge module can describe a new kind of picture
+   * without this file being the thing that blocks it.
+   *
+   * @param {{equation: string, model: Object|null, }} explanation - From the
+   *   challenge module's `explain`
+   * @param {function(): void} onDone - Called when the player dismisses it
+   */
+  showReinforcement(explanation, onDone) {
+    const card = this.elements["reinforce-card"]
+    if (!card || !explanation) {
+      onDone()
+      return
+    }
+    this.setText("reinforce-equation", explanation.equation)
+    const model = explanation.model
+    this.setText("reinforce-note", model?.note ?? "")
+    this.setVisible("reinforce-note", Boolean(model?.note))
+    this._renderModel(model)
+
+    card.classList.remove("hidden")
+    const done = this.elements["reinforce-done"]
+    if (done instanceof HTMLElement) {
+      // Replaced rather than added to: the card is reused for every fact, so a
+      // listener per appearance would fire once per question missed this run.
+      done.onclick = () => {
+        card.classList.add("hidden")
+        done.onclick = null
+        onDone()
+      }
+      done.focus()
+    }
+  }
+
+  /**
+   * Whether the reinforcement card is on screen. game.js asks before letting a
+   * keypress reach the answer buttons behind it.
+   * @returns {boolean} True while the card is up
+   */
+  get reinforcementOpen() {
+    return this.elements["reinforce-card"]?.classList.contains("hidden") === false
+  }
+
+  /**
+   * Take the reinforcement card down without running its continuation. For a
+   * teardown -- a restart, a new run -- where the run the card belonged to is
+   * about to stop existing. Safe to call when it is not showing.
+   */
+  hideReinforcement() {
+    const card = this.elements["reinforce-card"]
+    if (!card) return
+    card.classList.add("hidden")
+    const done = this.elements["reinforce-done"]
+    if (done instanceof HTMLElement) done.onclick = null
+  }
+
+  /**
+   * Draw a described model under the equation.
+   * @private
+   * @param {Object|null} model - A model from `explain`, or null
+   */
+  _renderModel(model) {
+    const host = this.elements["reinforce-picture"]
+    if (!host) return
+    host.replaceChildren()
+    if (!model) return
+
+    if (model.kind === "array") {
+      host.append(this._dotGrid(model.rows, model.cols))
+      return
+    }
+    if (model.kind === "groups") {
+      const wrap = document.createElement("div")
+      wrap.className = "dot-groups"
+      for (let g = 0; g < model.groups; g += 1)
+        wrap.append(this._dotGrid(1, model.per, "dot-group"))
+      host.append(wrap)
+      return
+    }
+    if (model.kind === "tenFrames") {
+      host.append(this._tenFrames(model))
+      return
+    }
+    if (model.kind === "steps") {
+      const list = document.createElement("div")
+      list.className = "reinforce-steps"
+      for (const line of model.lines ?? []) {
+        const step = document.createElement("p")
+        step.className = "reinforce-step"
+        step.textContent = line
+        list.append(step)
+      }
+      host.append(list)
+    }
+  }
+
+  /**
+   * A grid of dots, `rows` by `cols`. The building block of every picture here.
+   * @private
+   * @param {number} rows - How many rows
+   * @param {number} cols - How many per row
+   * @param {string} [className] - Extra class on the wrapper
+   * @returns {HTMLElement} The grid
+   */
+  _dotGrid(rows, cols, className = "") {
+    const grid = document.createElement("div")
+    grid.className = `dot-grid${className ? ` ${className}` : ""}`
+    grid.style.setProperty("--dot-cols", String(cols))
+    for (let i = 0; i < rows * cols; i += 1) {
+      const dot = document.createElement("span")
+      dot.className = "dot"
+      grid.append(dot)
+    }
+    return grid
+  }
+
+  /**
+   * Two ten-frames, for an addition or subtraction fact inside twenty.
+   *
+   * Addition fills the first `a` cells in one colour and the next `b` in
+   * another, so the total is one continuous run and the crossing of ten is
+   * where the first frame ends. Subtraction fills `a` and crosses `b` of them
+   * off from the end, which is the action the question describes.
+   *
+   * @private
+   * @param {Object} model - A `tenFrames` model
+   * @returns {HTMLElement} The frames
+   */
+  _tenFrames(model) {
+    const adding = model.op === "add"
+    // How many dots are drawn at all, and where the second colour starts.
+    // Addition draws the total and tints the second addend; subtraction draws
+    // the minuend and strikes off the last `b` of them. Both mark from the same
+    // index -- only the meaning of the mark differs.
+    const filled = adding ? model.answer : model.a
+    const marksFrom = adding ? model.a : model.a - model.b
+    const wrap = document.createElement("div")
+    wrap.className = "ten-frames"
+    for (let frame = 0; frame < 2; frame += 1) {
+      const grid = this._dotGrid(2, 5, "ten-frame")
+      grid.querySelectorAll(".dot").forEach((dot, index) => {
+        const n = frame * 10 + index
+        if (n >= filled) return
+        dot.classList.add("is-filled")
+        if (n >= marksFrom) dot.classList.add(adding ? "is-second" : "is-gone")
+      })
+      wrap.append(grid)
+    }
+    return wrap
   }
 
   /**
@@ -964,7 +1188,6 @@ export class GameUI extends BaseGameUI {
     this.setText("result-text", text)
     if (finale) this._renderFinale()
     else this._renderHaul(state, season, rows)
-
     const summary = this.elements["result-summary"]
     if (summary && (season || rows)) {
       summary.replaceChildren()
@@ -973,7 +1196,6 @@ export class GameUI extends BaseGameUI {
         ["She asked for", String(season.demand)],
         ["Questions right", `${state.correctCount} of ${state.questionsAsked}`],
         ["Best streak", String(state.bestStreak)],
-        ...(state.lost > 0 ? [[`${season.itemPlural} lost`, String(state.lost)]] : []),
       ]
       for (const [label, value] of lines) {
         const row = document.createElement("div")
@@ -1016,17 +1238,22 @@ export class GameUI extends BaseGameUI {
    * season played.
    *
    * What it draws instead is the thing the whole run was for: one rare
-   * collectible from each season, suspended in the finished flask. It needs no
-   * per-season counts, it is the only screen where all four seasons appear at
-   * once, and it comes free from art the pack already has. The flask is CSS and
-   * the collectibles are the pack's, the same split as the jar -- so a new art
-   * pack changes what is in it without owning the glass.
+   * collectible from each season, suspended in the finished flask, and the
+   * snake woman beside it with the one expression the game has never shown --
+   * her actually pleased, drawn large rather than at the 62px the HUD portrait
+   * gets. It needs no per-season counts, it is the only screen where all four
+   * seasons appear at once, and it comes free from art the pack already has.
+   * The flask is CSS and the collectibles are the pack's, the same split as the
+   * jar -- so a new art pack changes what is in it without owning the glass.
    * @private
    */
   _renderFinale() {
     const host = this.elements["result-haul"]
     if (!host) return
     host.replaceChildren()
+
+    const scene = document.createElement("div")
+    scene.className = "finale-scene"
 
     const flask = document.createElement("div")
     flask.className = "finale-flask"
@@ -1047,7 +1274,13 @@ export class GameUI extends BaseGameUI {
     const neck = document.createElement("div")
     neck.className = "finale-neck"
     flask.prepend(neck)
-    host.append(flask)
+
+    const portrait = document.createElement("div")
+    portrait.className = "finale-villain"
+    this._mount(portrait, this.pack.villain(true), "villain-svg")
+
+    scene.append(flask, portrait)
+    host.append(scene)
 
     const caption = document.createElement("p")
     caption.className = "haul-caption"
@@ -1056,16 +1289,21 @@ export class GameUI extends BaseGameUI {
   }
 
   /**
-   * Draw the season's haul going into the snake woman's jar.
+   * Draw the season's haul going into the snake woman's jar, with the animal
+   * that fetched it jumping beside it.
    *
-   * After fifteen questions of gathering roses the payoff used to be five rows
-   * of numbers. The collectibles are already drawn by the art pack for the HUD,
-   * so showing the pile she actually delivered costs nothing new to draw.
+   * After a season of gathering roses the payoff used to be five rows of
+   * numbers. The collectibles are already drawn by the art pack for the HUD, so
+   * showing the pile she actually delivered costs nothing new to draw, and the
+   * burst and the jump are CSS on art that already exists -- which is what gets
+   * `prefers-reduced-motion` for free, the same bargain the weather and the
+   * item pips already take.
    *
    * Only for the per-season screen. When the caller passes its own `rows` it is
    * the end-of-run screen, and every per-season counter on `state` belongs to
-   * the last season played -- a jar of seventeen icicles labelled as the whole
-   * journey would be a lie. There is no lifetime item count to draw instead.
+   * the last season played -- a jar of twenty-three icicles labelled as the
+   * whole journey would be a lie. There is no lifetime item count to draw
+   * instead.
    *
    * The jar is CSS; the items are the art pack's. That split is deliberate, so
    * a replacement art pack changes what is in the jar without owning the jar.
@@ -1083,6 +1321,9 @@ export class GameUI extends BaseGameUI {
 
     const delivered = Math.max(0, state?.items ?? 0)
     if (delivered < 1) return
+
+    const scene = document.createElement("div")
+    scene.className = "haul-scene"
 
     const jar = document.createElement("div")
     jar.className = "haul-jar"
@@ -1103,13 +1344,61 @@ export class GameUI extends BaseGameUI {
       contents.append(slot)
     }
     jar.append(contents)
-    host.append(jar)
+
+    scene.append(this._burst(season), jar, this._cheer(state))
+    host.append(scene)
 
     const caption = document.createElement("p")
     caption.className = "haul-caption"
     const noun = delivered === 1 ? season.itemName : season.itemPlural
     caption.textContent = `${delivered} ${noun.toLowerCase()} into her jar`
     host.append(caption)
+  }
+
+  /**
+   * The burst behind the jar: a ring of the season's collectible thrown
+   * outward.
+   *
+   * Placed by arithmetic rather than at random, for the reason the whole art
+   * pack is -- nothing in this game calls `Math.random`, so the same season
+   * bursts the same way every time and a rebuild cannot make it flicker. Each
+   * mark carries its own angle and delay as custom properties and the
+   * stylesheet does the moving.
+   * @private
+   * @param {import("./seasons.js").Season} season - The season just finished
+   * @returns {HTMLElement} The burst
+   */
+  _burst(season) {
+    const burst = document.createElement("div")
+    burst.className = "haul-burst"
+    for (let i = 0; i < BURST_MARKS; i += 1) {
+      const mark = document.createElement("span")
+      mark.className = "burst-mark"
+      mark.style.setProperty("--burst-angle", `${(i * 360) / BURST_MARKS}deg`)
+      // Coprime with the count, so the delays cycle through the ring rather
+      // than landing in a block on one side of it.
+      mark.style.setProperty("--burst-delay", `${((i * 7) % BURST_MARKS) * 40}ms`)
+      this._mount(mark, this.pack.item(season.id, i % 3 === 0), "item-svg")
+      burst.append(mark)
+    }
+    return burst
+  }
+
+  /**
+   * The animal that walked the trail, jumping.
+   *
+   * The pack's standing pose, moved by the stylesheet. A jump is a transform,
+   * so this needs no new drawing and no new export -- which also means a
+   * replacement pack gets the celebration without knowing it exists.
+   * @private
+   * @param {Object} state - The finished GameState
+   * @returns {HTMLElement} The character
+   */
+  _cheer(state) {
+    const holder = document.createElement("div")
+    holder.className = "haul-cheer"
+    this._mount(holder, this.pack.character(state?.characterId, false), "cheer-svg")
+    return holder
   }
 
   /**

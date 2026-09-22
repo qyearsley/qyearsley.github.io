@@ -15,6 +15,16 @@
  *
  *   `forms` is opaque here: its shape is a contract between one challenge
  *   module and the seasons that use it, and this file never inspects it.
+ * - A third function is **optional**:
+ *
+ *     explain(question: Question) -> {equation: string, model: Object|null}|null
+ *
+ *   It describes the fact behind a question for the reinforcement card, which
+ *   the game shows once a missed question is finally answered right. A module
+ *   that does not export it simply gets no card, which is why it is optional
+ *   rather than part of the contract: a matching game has no equation to show.
+ *   The model is *described*, never drawn -- GameUI renders the kinds it knows
+ *   and falls back to the equation alone for anything else.
  * - A Question must carry `prompt` (a string to show) and `choices` (an array
  *   of options to render as buttons). Anything else on it belongs to the
  *   challenge module, which is what lets a new challenge type reuse the whole
@@ -35,6 +45,7 @@ import * as arithmetic from "./arithmetic.js"
  * @typedef {Object} Challenge
  * @property {function(Array<Object>, import("../rng.js").Rng): Object} generate
  * @property {function(Object, unknown): boolean} check
+ * @property {function(Object): (Object|null)} [explain] - Optional; see above
  */
 
 /**

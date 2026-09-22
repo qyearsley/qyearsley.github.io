@@ -34,7 +34,7 @@
 
 import { StorageManager as BaseStorageManager } from "../../shared/StorageManager.js"
 import { CHARACTER_IDS, DEFAULT_CHARACTER } from "./characters.js"
-import { BOSS_TRIES, PHASE, SEASON_ORDER, STORAGE } from "./constants.js"
+import { PHASE, SEASON_ORDER, STORAGE } from "./constants.js"
 
 /**
  * Every valid phase value, for coercing a persisted `phase`.
@@ -59,19 +59,17 @@ const SEASON_IDS = new Set(SEASON_ORDER)
  * @property {string|null} seasonId
  * @property {number} seed
  * @property {number} attempt
- * @property {number} bossTriesLeft
  * @property {number} position
  * @property {number} items
- * @property {number} wilting
- * @property {number} lost
- * @property {number} forgivenessLeft
- * @property {boolean} lastWasWrong
+ * @property {boolean} retrying
+ * @property {number} owed
+ * @property {number} extrasDone
+ * @property {number} hintsLeft
  * @property {number} streak
  * @property {number} bestStreak
  * @property {number} questionsAsked
  * @property {number} correctCount
  * @property {Object<string, number>} collected
- * @property {boolean} runOver
  */
 
 /**
@@ -165,7 +163,12 @@ function _normalizeUnlocked(raw) {
  *
  * `position` is clamped to non-negative but not to the season's length; only
  * Journey knows that bound. Booleans are strict (`=== true`) so a truthy `1`
- * from a hand-edited save cannot silently grant `runOver`.
+ * from a hand-edited save cannot silently grant one.
+ *
+ * `owed` and `extrasDone` are clamped to 0 or 1 rather than merely to
+ * non-negative. Both are flags the rules read as "is there one outstanding",
+ * and a hand-edited `owed: 40` would owe forty extra questions at a single
+ * hill -- which the retry loop would happily serve.
  *
  * @private
  * @param {unknown} raw - Persisted value of unknown shape
@@ -181,19 +184,12 @@ function _normalizeRun(raw) {
     seasonId: SEASON_IDS.has(source.seasonId) ? source.seasonId : null,
     seed: _nonNegativeInt(source.seed) || 1,
     attempt: _nonNegativeInt(source.attempt),
-    // Falls back to a full allowance rather than 0. A save written before
-    // BOSS_TRIES existed has no such key, and a plain _nonNegativeInt would
-    // load it with zero shots at the boss -- the first miss would end the
-    // season. `?? BOSS_TRIES` would not help: the coercion returns 0, which is
-    // not nullish. STORAGE.VERSION is deliberately not bumped for this, since
-    // the fallback makes old saves loadable rather than discardable.
-    bossTriesLeft: _nonNegativeInt(source.bossTriesLeft) || BOSS_TRIES,
     position: _nonNegativeInt(source.position),
     items: _nonNegativeInt(source.items),
-    wilting: _nonNegativeInt(source.wilting),
-    lost: _nonNegativeInt(source.lost),
-    forgivenessLeft: _nonNegativeInt(source.forgivenessLeft),
-    lastWasWrong: source.lastWasWrong === true,
+    retrying: source.retrying === true,
+    owed: Math.min(1, _nonNegativeInt(source.owed)),
+    extrasDone: Math.min(1, _nonNegativeInt(source.extrasDone)),
+    hintsLeft: _nonNegativeInt(source.hintsLeft),
     streak,
     // A high-water mark can never sit below the value it tracks.
     bestStreak: Math.max(_nonNegativeInt(source.bestStreak), streak),
@@ -201,7 +197,6 @@ function _normalizeRun(raw) {
     // Correct answers can never outnumber the questions they came from.
     correctCount: Math.min(_nonNegativeInt(source.correctCount), questionsAsked),
     collected: _normalizeCollected(source.collected),
-    runOver: source.runOver === true,
   }
 }
 

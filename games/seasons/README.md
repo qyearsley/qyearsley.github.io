@@ -5,8 +5,8 @@ maths questions to gather what a snake woman needs for her potion — roses in
 spring, diamonds in summer, leaves in autumn, icicles in winter. She is not a
 threat; the snake lady is actually nice and is using the things to help making a
 potion, and she gives you a quest to test you. Get a question right and you
-collect something and move on; get one wrong and the active wrong-answer rule
-decides what it costs, which by default is recoverable.
+collect something and move on; get one wrong and nothing is taken away — the
+question stays up until you find the answer.
 
 The game is Ella's idea, and this is the foundation for it rather than the
 finished thing — so the docs are organised around
@@ -16,14 +16,16 @@ finished thing — so the docs are organised around
 ## How it plays
 
 **Choose an animal.** Four of them, and the choice matters — each one changes a
-rule rather than just the picture:
+rule rather than just the picture. None of them costs anything: the demand is met
+exactly by a complete season, so a perk that changed an item count would break
+the arithmetic. They change time and hints instead.
 
-|             | Perk                                                     | Cost                                         |
-| ----------- | -------------------------------------------------------- | -------------------------------------------- |
-| Banana Slug | Wrong answers never take anything away                   | Glowing challenges give 2 instead of 3       |
-| Sloth       | 10 extra seconds on every timed question                 | —                                            |
-| Phoenix     | Once a season, a wrong answer costs nothing              | Every other wrong answer hurts twice as much |
-| Porcupine   | The first right answer after a wrong one is worth double | —                                            |
+|             | Perk            | What it does                                                  |
+| ----------- | --------------- | ------------------------------------------------------------- |
+| Banana Slug | Slow and Steady | No countdown, ever. Take as long as you like.                 |
+| Sloth       | Takes His Time  | 10 extra seconds on every timed question.                     |
+| Phoenix     | Rising Again    | The first slip each season makes two wrong answers disappear. |
+| Porcupine   | Bounce Back     | Get one wrong and you go straight on, with no extra question. |
 
 **Walk the trail.** Every space is an **obstacle** — a hill, a river, a thicket,
 a boulder, a gap, or a mountain — and the question is how you get past it. A
@@ -33,50 +35,31 @@ much wider than the screen. Tap anywhere to cut a crossing short. The
 **mountains** are the **glowing spaces** — the season's hardest question, lit up,
 worth three items instead of one, tagged "Glowing challenge" on screen.
 
+**Get one wrong and try again.** Nothing is taken. The choice you pressed is
+struck off, the question stays up, and the clock goes away for good on that
+question — the retry is never a race. Once you find the answer, a card comes up
+showing the fact in full with a picture of it (a dot array for a times fact, ten
+frames for an add) and waits for "Got it". Then one more question at the same
+space before you move on, so a slip costs a question rather than an item. That is
+the whole cost, and it caps there: a second slip at the same space owes nothing
+more.
+
 **Face the boss.** At the end of the trail the snake woman is waiting with one
 last question — the hardest thing the season asks, which is division in spring
 through autumn and a two-step by winter — worth a block of items (3 in spring,
-rising to 6 in winter), which is how a run that fell a little short can still make
-the demand. The label says what it is worth before
-you answer it. Missing it is not the end: `BOSS_TRIES` in
-[`js/constants.js`](js/constants.js) is 2, so a wrong boss answer says "One more
-go!", draws a fresh question, and lets you try again — Ella's rule, "if you miss
-the boss question you get a chance to go back and try again." A miss also costs
-nothing at all, so it can close a gap but never open one. Only running out of
-tries _and_ still being short hands over to `RULES.BOSS_FAILURE` below.
+rising to 6 in winter). The label says what it is worth before you answer it.
+**Her question is the one that completes the count.** A season's demand is exactly
+what the trail pays plus what she rescues, so answering her is the moment you have
+enough — which is the point of it being the last question. Missing it changes
+nothing except that she asks one more: Ella's rule, "if you miss the boss question
+you get a chance to go back and try again," is now the only outcome there is. A
+season that has started cannot be lost.
 
-Replaying a lost season gives different questions rather than the same twenty
-again: the attempt number is folded into the question seed. Seasons get harder
-in both directions at once — the maths steps up _and_ the clock tightens, the
-demand rises, and more of the trail glows.
-
-## Two rules that are not decided yet
-
-Ella has not settled these, so the game implements every option and each is one
-constant away in `RULES` in [`js/constants.js`](js/constants.js). This section
-is the canonical description of what each option does; the code comments point
-back here, and
-[the recipe](#change-what-a-wrong-answer-costs-or-what-a-missed-boss-costs)
-covers switching one.
-
-**`RULES.WRONG_ANSWER`** — what a wrong answer costs:
-
-- `GENTLE` — nothing. You stay put and the question changes. Good for a bad
-  day, or a younger player.
-- `WILT` — **the current default.** Your most recent item wilts: it stops
-  counting toward the demand, but the _next_ correct answer revives it. Two
-  wrong answers in a row and the first one is gone for good. Visible,
-  recoverable, and it still stings.
-- `STEP_BACK` — you move back a space and lose an item outright.
-
-**`RULES.BOSS_FAILURE`** — what happens when the demand is missed, and every
-boss try has been used up too:
-
-- `RETRY_SEASON` — **the current default.** The season restarts, with fresh
-  questions.
-- `ALWAYS_PASS` — you continue with fewer items banked and an unbothered snake
-  woman. No frustration, and no tension either.
-- `END_RUN` — the whole run ends and you start from spring.
+Seasons get harder in both directions at once — the maths steps up _and_ the clock
+tightens, the demand rises, and more of the trail glows. A whole run is 42
+questions when nothing is missed: 38 trail spaces and four boss questions. It was
+72 before the 2026-09-21 retune, which is why a season now ends close to when it
+feels finished.
 
 ## Difficulty
 
@@ -111,12 +94,12 @@ a season has means placing that many mountains. The kinds are listed in
 [`js/obstacles.js`](js/obstacles.js), where `hard` is a property of the _kind_
 rather than of the space; the mountain is the only kind that carries it.
 
-|        | Ordinary spaces                        | Glowing spaces           | Boss         | Timer | Trail | Glowing | Demand |
-| ------ | -------------------------------------- | ------------------------ | ------------ | ----- | ----- | ------- | ------ |
-| Spring | + and − facts 6–18, ×2 ×3 ×4 ×5 ×10    | `40 ÷ 5`                 | `35 ÷ 5`     | none  | 14    | 2       | 11     |
-| Summer | × facts to 10×10, + and − facts 11–18  | `48 ÷ 6`                 | `72 ÷ 9`     | 30s   | 16    | 3       | 13     |
-| Autumn | ×2 3 4 6 7 8 9, − facts 11–18, × 10–50 | `54 ÷ 9`                 | `56 ÷ 8`     | 28s   | 18    | 4       | 15     |
-| Winter | ×4 6 7 8 9, − facts 11–18, × 10–70     | `8 × 7 + 9`, or `63 ÷ 9` | `8 × 9 - 17` | 25s   | 20    | 5       | 17     |
+|        | Ordinary spaces                        | Glowing spaces           | Boss         | Timer | Trail | Glowing | Rescue | Demand |
+| ------ | -------------------------------------- | ------------------------ | ------------ | ----- | ----- | ------- | ------ | ------ |
+| Spring | + and − facts 6–18, ×2 ×3 ×4 ×5 ×10    | `40 ÷ 5`                 | `35 ÷ 5`     | none  | 8     | 2       | 3      | 15     |
+| Summer | × facts to 10×10, + and − facts 11–18  | `48 ÷ 6`                 | `72 ÷ 9`     | 30s   | 9     | 2       | 4      | 17     |
+| Autumn | ×2 3 4 6 7 8 9, − facts 11–18, × 10–50 | `54 ÷ 9`                 | `56 ÷ 8`     | 28s   | 10    | 3       | 5      | 21     |
+| Winter | ×4 6 7 8 9, − facts 11–18, × 10–70     | `8 × 7 + 9`, or `63 ÷ 9` | `8 × 9 - 17` | 25s   | 11    | 3       | 6      | 23     |
 
 **The clock is deliberately loose**, when it runs at all — it is off unless a
 player turns it on; see [Settings](#settings). It was 20/18/16s, and played that
@@ -135,13 +118,21 @@ chaining. Winter is the one season whose lit mountains are not simply division �
 by then a single division fact within 100 is easier than its ordinary spaces, so
 its climax is the two-step.
 
-Demands are tuned against the **Banana Slug**, who collects 2 from a glowing
-space rather than 3, because her handicap grows with the number of glowing spaces
-and that number grows every season. Each demand sits near 68% of a perfect run
-for her and 57–61% for everyone else, so the ratio eases slightly across the year
-while the demand _number_ rises — escalation should come from harder maths and a
-tighter clock, not from needing a higher hit rate as well.
-[Retuning](#retune-a-seasons-difficulty) has the invariant the tests hold this to.
+**The demand is met exactly.** Ordinary spaces pay 1, glowing spaces pay 3, and
+the snake woman's own question pays the rescue, so:
+
+```
+demand === (spaces − glowing) + glowing × 3 + rescue
+```
+
+Spring is 6 + 6 + 3 = 15, and so on. This is the invariant the 2026-09-21 retune
+is built on, and `seasons.test.js` asserts it for every season. Before it, the
+demand was around 60% of a perfect run and you kept walking after you already had
+enough, which is the thing Ella asked to fix. It has two consequences worth
+knowing before you touch anything: **no perk may change an item count**, and
+**nothing may take an item away**. Both are held by tests.
+[Retuning](#retune-a-seasons-difficulty) has the arithmetic to redo when you move
+a number.
 
 ## Graphics
 
@@ -164,7 +155,7 @@ each is a place where a change that looks harmless is not:
   trail's full width, which is what guarantees no gap opens at either end; the
   arithmetic is on `backdrop` in
   [`js/art/placeholder.js`](js/art/placeholder.js) and `art.test.js` checks it
-  at both ends of winter's twenty-space trail.
+  at both ends of winter's eleven-space trail.
 - **The ground has a top edge made of something.** `layout()` returns
   `groundEdges` beside `groundSegments`: a band of grass, fallen leaves or snow
   crust whose underside is the ground line sample for sample, so it follows a
@@ -190,6 +181,13 @@ full crossing and `reducedTraversal()` is the plain slide a player who has asked
 for less motion gets instead — 240ms, straight line, no arc and no squash. That
 used to be no crossing at all, which meant the trail's main piece of feedback
 silently stopped happening for anyone with the system setting on.
+
+**Finishing is drawn, not just written.** Clearing a season bursts twelve of its
+collectibles out of the jar and makes the animal jump; finishing the run draws the
+filled flask beside a larger snake woman who is visibly pleased — `villain(true)`
+gives her a wide grin, closed eyes, and the flask raised. Both are CSS animations
+on shapes the pack builds, which is what makes `prefers-reduced-motion` cover them
+without a second code path.
 
 ## Answer input
 
@@ -269,6 +267,11 @@ Touch is the primary input; the keyboard is an accessibility fallback.
 - **Escape** — close the settings dialog
 - **j/k** — move between page links (site-wide; press **?** for the full list)
 
+The answer keys are swallowed while the settings dialog or the reinforcement card
+is up, so a letter aimed at either cannot answer the question behind it. The card
+has no Escape: its "Got it" button takes focus when it appears and is the only way
+past it, because rushing it is the one thing the card exists to prevent.
+
 ## How to change things
 
 Ella redesigns this game as she has new ideas, so these are the paths meant to
@@ -286,29 +289,30 @@ difficulty number.
 [the route model](#difficulty).
 
 Move `demandText` with the demand — it spells the number out — and move the
-demand with the route length, because both bounds are fractions of `maxItems`
-(one item per ordinary space, plus the character's `glowingItems` per glowing
-one). `seasons.test.js` requires `demand ≤ 0.75 × maxItems` for **every**
-character, which is the 25% headroom, and `demand > 0.5 × maxItems` so the trail
-still matters; the Banana Slug is the binding case, as [above](#difficulty).
+demand with the route, because the demand is not a target to tune independently:
+it **is** what the season pays.
+
+```
+demand = (spaces − glowing) + glowing × 3 + boss.rescue
+```
+
+Redo that sum every time you touch `route` or `boss.rescue`.
+`seasons.test.js › demand alignment` fails otherwise, and it fails for a reason
+the player would feel: the count would stop lining up with the last question.
 Update the [Difficulty](#difficulty) table too.
 
 Expected failures depend on which number moved. A **route** change fails
-`seasons.test.js › maxItems › counts <season> at N items…` for that season, plus
-`adds one per ordinary space…` if it was spring — hand-written literals,
-recomputed as `(spaces − glowing) + glowing × 3`, and `× 2` for the Slug. Raising
-**spring's demand** starts failing the
-`GameUI.test.js › renderItemTrack › grows to N earned plus M wilting = K slots`
-rows, whose slot count is `max(demand, earned + wilting)` — the first at a demand
-of 13, all three by 16. Changing **summer's timer** fails
-`game.test.js › stops the clock while hidden and restarts it on return`, which
-counts down from a literal 20. Nothing pins `demandText` or `boss.rescue`
-anywhere, and `Journey.test.js › bossPosition`, `art.test.js`'s layout checks and
-the HUD count sentence all derive from the season. Genuine breakage looks
-different: `reachability` or `difficulty escalation` in `seasons.test.js`, which
-also require the demand to rise strictly spring→winter, the trail not to shorten,
-the timer not to loosen, the glowing count not to fall, and `boss.rescue` to stay
-under the demand.
+`seasons.test.js › maxItems › counts <season> at N items…` for that season —
+hand-written literals, recomputed as `(spaces − glowing) + glowing × 3` — and
+`demand alignment` until you move the demand with it. Changing **summer's timer**
+fails `game.boot.test.js › stops the clock while hidden and restarts it on
+return`, which reads the length off the season but pins the pause. Nothing pins
+`demandText` anywhere, and `Journey.test.js › bossPosition`, `art.test.js`'s layout
+checks and the HUD count sentence all derive from the season. Genuine breakage
+looks different: `demand alignment` or `difficulty escalation` in
+`seasons.test.js`, which also require the demand to rise strictly spring→winter,
+the trail not to shorten, the timer not to loosen, the glowing count not to fall,
+and `boss.rescue` to stay under the demand.
 
 Changing **the maths** has its own set. `difficulty escalation` scores each form
 list structurally — mental steps, not answer size — and requires the ordinary
@@ -358,7 +362,7 @@ fails there too. If the new kind is `hard`, expect the
    its `CHARACTERS` map, returning `svg(...)` shapes in the `0 0 100 100` box.
    Skip it and the animal renders as a grey disc.
 
-The five effect fields, and which function reads each, are tabulated in
+The four effect fields, and which function reads each, are tabulated in
 [`js/README.md`](js/README.md#character-perks--charactersjs). A perk built from
 those is pure data: no code to write, and no `if (character.id === …)` anywhere.
 A genuinely new _kind_ of effect needs two more edits — a field in
@@ -367,35 +371,18 @@ A genuinely new _kind_ of effect needs two more edits — a field in
 requires every character to carry every `DEFAULT_EFFECTS` key and at least one
 character to differ from the default on each, so a field nothing uses fails.
 
+**A perk may not touch an item count, and may not cost anything.** The demand is
+exactly what a season pays, so an animal who collected 2 from a glowing space
+could never finish one. `characters.test.js › balance` holds all three halves of
+that: one perk each, no costs, and no `effects` key that changes a payout. Spend
+the design budget on time, hints, and the extra question instead.
+
 Expected failures when the roster grows: exactly two. One in `characters.test.js`
 — `has exactly the expected characters, in display order`, the deliberate
 `EXPECTED_IDS` pin and the only test there that names the roster — and
 `art.test.js › draws the character <id>`, which fails on _distinctness_ until step
 2 exists, because the fallback grey disc is what an unknown id gets too. The three
-card counts in `game.test.js` are all `CHARACTERS.length`, so they pass.
-Invariant: `seasons.test.js` pairs every season with every character, and
-`glowingItems: 1` still _reaches_ every demand — winter's 17 against 15 + 5 × 1 = 20. What it fails is the 25% headroom ceiling, in all four seasons (winter:
-0.75 × 20 = 15). Express a penalty perk as `penaltyScale`, never as a named
-punishment — the active rule below decides what a wrong answer actually costs.
-
-### Change what a wrong answer costs, or what a missed boss costs
-
-One line each, all in [`js/constants.js`](js/constants.js):
-
-- `RULES.WRONG_ANSWER` → `WRONG_ANSWER.GENTLE`, `.WILT`, or `.STEP_BACK`
-- `RULES.BOSS_FAILURE` → `BOSS_FAILURE.RETRY_SEASON`, `.ALWAYS_PASS`, `.END_RUN`
-- `BOSS_TRIES` (2) — set to 1 for a single-shot boss
-
-[Two rules that are not decided yet](#two-rules-that-are-not-decided-yet) says
-what each option does to a player. All of them are already implemented in
-`GameState.js` and covered by `GameState.test.js`, which flips `RULES` per case,
-so there is no rule to write and no other file to touch.
-
-The tests are not quite free: `GameUI.test.js` and `game.test.js` run at whatever
-the defaults are and assert the copy those produce. Measured once — `GENTLE` five
-failures, `STEP_BACK` four, `ALWAYS_PASS` four, `END_RUN` one, `BOSS_TRIES = 1`
-twelve — so treat those as orders of magnitude; every one names the old default
-rather than a broken rule. Move the "**the current default**" markers above too.
+card counts in `game.boot.test.js` are all `CHARACTERS.length`, so they pass.
 
 ### Change the maths
 
@@ -524,22 +511,28 @@ There is no strings file; copy sits beside the code that shows it.
 | The one-line verdict after each answer                                   | `_feedbackFor` in `js/game.js`                                            |
 | Result titles, her verdicts, the buttons, the two "are you sure" prompts | `_renderResult` and its neighbours in `js/game.js`                        |
 | Animal names, perk names, perk and cost text                             | `ROSTER` in `js/characters.js`                                            |
-| The count sentence, wilt note, perk note, trail label                    | `renderHud` and `_describeTrail` in `js/GameUI.js`                        |
-| The question label — "Glowing challenge", and the boss's worth and tries | `_questionTag` in `js/game.js`                                            |
+| The count sentence, perk note, trail label                               | `renderHud` and `_describeTrail` in `js/GameUI.js`                        |
+| The question label — "Glowing challenge", and the boss's worth           | `_questionTag` in `js/game.js`                                            |
+| The reinforcement card's equation and its "Ten first" notes              | `explain` in `js/challenges/arithmetic.js`                                |
 | Summary-row labels on the result screen                                  | `renderResult` in `js/GameUI.js`                                          |
 | The jar caption on the result screen — "11 roses into her jar"           | `_renderHaul` in `js/GameUI.js`                                           |
 | The "Your journey" panel and its lifetime-totals sentence                | `renderJourneySoFar` in `js/GameUI.js`                                    |
 | The top-bar season title — "Autumn"                                      | `name` in `js/seasons.js`                                                 |
 | Headings, the intro paragraph, top-bar titles                            | `index.html`                                                              |
 
-Two suites pin copy, and both are meant to be updated with it: `game.test.js`
-holds the exact feedback lines ("+1 rose", "3 everlasting roses!", "One more
-go!"), the boss label (`the boss says what is at stake`), the result titles
-("Spring complete", "Not quite enough", "The potion is finished") and substrings
-of her paragraphs; `GameUI.test.js` holds the count sentence, the wilt note, and
-the perk and cost text on the cards — a question tag reaches it as an argument,
-so it pins the rendering rather than the words. `seasons.test.js` and `characters.test.js` only check the fields are
-non-empty strings. If you touch `index.html`, `index.zh.json` holds Chinese for
+Two suites pin copy, and both are meant to be updated with it:
+`game.feedback.test.js` holds the exact verdict lines ("+1 rose", "3 everlasting
+roses!", "Not quite — have another look.") and `game.journey.test.js` the boss
+label and the result titles ("Spring complete", "The potion is finished") plus
+substrings of her paragraphs; `GameUI.test.js` holds the count sentence, the perk
+note, and the perk text on the cards — a question tag reaches it as an argument,
+so it pins the rendering rather than the words. `seasons.test.js` and
+`characters.test.js` only check the fields are non-empty strings.
+
+**One line is a rule, not copy.** A miss must not state the answer. The card
+afterwards is where the fact gets taught, and saying it in the verdict skips
+both — `game.feedback.test.js › a miss does not give the answer away` asserts the
+answer is absent from the line, not just that the line reads a certain way. If you touch `index.html`, `index.zh.json` holds Chinese for
 five of its strings, matched by exact text — a stale key makes `npm run build`
 warn `no match for "…"`.
 
@@ -560,7 +553,7 @@ playing three to get there:
 | `?season=summer&character=sloth` | Picks the animal too                                         |
 | `?phase=end`                     | The last screen in the game, four seasons of haul already in |
 | `?season=autumn&phase=boss`      | Straight to that season's boss, three items short            |
-| `?phase=won` / `?phase=lost`     | The end-of-season screens                                    |
+| `?phase=won`                     | The end-of-season screen                                     |
 | `?debug=1`                       | Character screen, with all four seasons shown open           |
 
 `?phase=` also takes the raw `PHASE` values. The run it builds is handed to
@@ -574,52 +567,58 @@ rather than a console paste being good enough. A small "debug — not saving" ba
 sits in the corner so the session cannot be mistaken for broken saving. An
 unknown season or character id is ignored and the game starts normally.
 
-**Jump straight to any state.** For anything the URL does not cover — mid-boss,
-a specific item count, a lost season — the game restores whatever is in
-`localStorage` under `seasonsProgress`, so any screen is one paste into the
+**Jump straight to any state.** For anything the URL does not cover — mid-boss, a
+specific item count, a question already missed once — the game restores whatever
+is in `localStorage` under `seasonsProgress`, so any screen is one paste into the
 browser console and a reload away:
 
 ```js
 localStorage.setItem(
   "seasonsProgress",
   JSON.stringify({
-    version: "1.0",
+    version: "2.0",
     run: {
       phase: "boss",
       seasonId: "winter",
       characterId: "phoenix",
-      position: 20,
-      items: 15,
-      wilting: 0,
-      bossTriesLeft: 2,
+      position: 11,
+      items: 17,
+      retrying: false,
+      owed: 0,
+      extrasDone: 0,
+      hintsLeft: 1,
     },
   }),
 )
 ```
 
-`version` has to match `STORAGE.VERSION` (`"1.0"`) or the save is discarded, and
+`version` has to match `STORAGE.VERSION` (`"2.0"`) or the save is discarded, and
 the payload needs a `run`. Everything inside it is coerced into range on load,
 so only the fields you care about have to be there:
 
-- **`phase`** — `characterSelect`, `trail`, `boss`, `seasonWon`, `seasonLost`,
-  `runComplete`
+- **`phase`** — `characterSelect`, `trail`, `boss`, `seasonWon`, `runComplete`
 - **`seasonId`** — `spring`, `summer`, `autumn`, `winter`
 - **`position`** — 0 up to that season's `spaces`. The last value is the boss,
   and a `trail` phase that has already reached it is promoted to `boss` on load.
   Land on a space whose `route` entry is `mountain` to get a glowing challenge.
-- **`items`** — what counts toward the demand; set it just short to see a loss
-- **`wilting`** — at risk, and what makes the wilt note appear
-- **`bossTriesLeft`** — set it to 1 so the next boss miss resolves the season.
-  Not 0: that is coerced back to the full `BOSS_TRIES`, a deliberate fallback
-  for saves written before the field existed.
+- **`items`** — what counts toward the demand. `demand − boss.rescue` is what a
+  complete trail banks, which is what the boss screen should show.
+- **`retrying`** — `true` to arrive at a question already missed once, with no
+  clock on it
+- **`owed`** / **`extrasDone`** — 0 or 1 each. `owed: 1` means one more question
+  before this space pays; `extrasDone: 1` means the extra one has been asked, and
+  the question tag says "One more before you go on".
+- **`hintsLeft`** — the Phoenix's hints. Set it to 1 to watch two wrong choices
+  vanish on the next miss.
 
 Unknown keys are dropped, counters clamp to non-negative, and an unrecognised
 `characterId` becomes the Banana Slug. The question is never saved: it is
-regenerated from `seed:seasonId:attempt:questionsAsked`, so a fixed `seed`
-replays a run exactly.
+regenerated from `seed:seasonId:attempt:position:extrasDone`, so a fixed `seed`
+replays a run exactly — and a reload during a retry brings back the same question
+rather than a new one.
 
 ```bash
-npm test -- --roots="<rootDir>/games/seasons"   # this game, 11 suites
+npm test -- --roots="<rootDir>/games/seasons"   # this game, 14 suites
 ```
 
 `npm test -- --testPathPatterns seasons` works too, but matches twice as many
@@ -636,7 +635,7 @@ icon.svg        # The only icon: manifest and apple-touch-icon both point here
 index.zh.json   # Chinese strings, used by the site build
 styles/main.css # The whole stylesheet, light and dark
 js/             # 14 modules; the dependency graph is in js/README.md
-__tests__/      # 11 Jest suites
+__tests__/      # 14 Jest suites
 ```
 
 [`js/README.md`](js/README.md) is the canonical reference: what to read first,
@@ -663,8 +662,11 @@ discoverable, and lock with `aria-disabled` rather than `disabled` — disabling
 the focused element drops focus to `<body>`. Colour is never the only signal:
 the correct and wrong buttons get ✓ and ✗ glyphs, and each season carries a
 text-safe accent separate from the one that paints the trail, because six of the
-eight original accent-on-surface pairs failed 4.5:1. All animation is disabled
-under `prefers-reduced-motion`.
+eight original accent-on-surface pairs failed 4.5:1. A choice struck off during a
+retry is ruled through as well as faded, for the same reason. All animation is
+disabled under `prefers-reduced-motion`, including the season's burst and the
+character's jump — the reduced block zeroes delays as well as durations, because a
+staggered animation with its delay intact is invisible and then abrupt.
 
 Built for a shared iPad: 64px tap targets, iOS web-app meta tags, and suppressed
 double-tap zoom, tap highlight, and text selection. Switching away from the tab
@@ -703,7 +705,12 @@ still missing. **The
 page can still scroll mid-question on a small phone**, because
 `min-height: 100dvh` sets a floor rather than a ceiling; the target device is a
 shared iPad, where it fits. **`save.unlocked` and `save.totals` are written but
-never surfaced** — there is no season picker and no stats screen.
+never surfaced** — there is no season picker and no stats screen. **The
+reinforcement card's picture is `aria-hidden`** — the equation above it is read
+out, the dot array is not, so a screen-reader user gets the fact but not the model
+of it. **The card is not a focus trap** — it takes focus and swallows the answer
+keys, and the choices behind it are locked by then, so Tab reaches nothing that
+does anything; it is still not a `role="dialog"` the way the settings modal is.
 
 **What is planned next** is NPCs, items, and trading, and the route model was
 shaped to take them: a route entry is a value in a list, so a
@@ -715,12 +722,12 @@ a position, and the trail is always derived from the route.
 
 Ella's, not mine:
 
-- The two rules above.
-- The Porcupine's perk. The comeback bonus is a placeholder so the slot is
-  playable; it is hers to replace.
 - The snake woman's name.
 - Whether there is anything to spend collected items on, or whether the snake
   woman simply keeps them for the potion.
+- Whether a cleared season should be replayable from a picker. Nothing replays a
+  season today, so `attempt` is always 0 — it stays in the question key because a
+  picker is the one feature that would need it.
 
 These, the planned NPC and trading phase, and the polish that was deferred
 rather than missed, are written up in

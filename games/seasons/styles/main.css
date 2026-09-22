@@ -435,10 +435,9 @@ select:focus-visible {
   color: var(--season-accent-ink);
 }
 
-/* One slot per item she asked for. Earned slots hold the season's collectible,
-   wilting ones are drained and dropped, and the rest are empty outlines -- so
-   the goal, the progress and the shortfall all read at a glance instead of
-   being arithmetic on a counter. */
+/* One slot per item she asked for. Earned slots hold the season's collectible
+   and the rest are empty outlines -- so the goal, the progress and the
+   shortfall all read at a glance instead of being arithmetic on a counter. */
 .item-track {
   display: flex;
   flex-wrap: wrap;
@@ -454,15 +453,8 @@ select:focus-visible {
   border-radius: 50%;
 }
 
-.item-pip.is-earned,
-.item-pip.is-wilting {
+.item-pip.is-earned {
   border: 0;
-}
-
-.item-pip.is-wilting {
-  opacity: 0.4;
-  filter: grayscale(85%);
-  transform: translateY(3px) rotate(12deg);
 }
 
 /* Only the pip just earned carries `is-new`; GameUI works out which that is.
@@ -495,10 +487,6 @@ select:focus-visible {
   margin-top: 4px;
   font-size: 0.86rem;
   line-height: 1.35;
-}
-
-.note-wilt {
-  color: var(--sn-wrong);
 }
 
 .note-perk {
@@ -932,6 +920,167 @@ body.is-glowing-question .question-prompt {
   content: "✗";
 }
 
+/* A choice struck off during a retry. Different from `.is-wrong`, which marks
+   the answer that resolved a question: this one stays on screen while the
+   player keeps trying, so it has to read as spent rather than as a verdict.
+   Faded and ruled through, and `pointer-events: none` on top of the guard in
+   renderQuestion -- belt and braces, because a second tap on a dead choice
+   during a retry is the easiest mis-tap in the game to make. */
+.choice.is-out {
+  border-color: var(--sn-border);
+  background: transparent;
+  color: var(--sn-muted);
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* ==================== The reinforcement card ==================== */
+
+/*
+ * Shown after a missed question is finally answered right. The one screen in
+ * the game with no clock on it: a wrong answer no longer states the answer, so
+ * this is where the fact actually gets taught, and hurrying it would leave the
+ * loop teaching nothing at all.
+ */
+.reinforce-card {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: #0008;
+}
+
+.reinforce-inner {
+  display: flex;
+  max-width: 460px;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 22px;
+  border-radius: 18px;
+  background: var(--sn-surface);
+  box-shadow: 0 18px 46px #0000004d;
+  gap: 14px;
+  text-align: center;
+  animation: reinforce-in 260ms cubic-bezier(0.34, 1.26, 0.64, 1) both;
+}
+
+@keyframes reinforce-in {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.reinforce-equation {
+  margin: 0;
+  font-size: clamp(1.7rem, 6vw, 2.4rem);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--sn-primary);
+}
+
+.reinforce-note {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--sn-muted);
+}
+
+.reinforce-picture {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.reinforce-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.reinforce-step {
+  margin: 0;
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The dot models. One grid rule serves the array, the groups and the ten
+   frames; `--dot-cols` is the only thing that differs, and GameUI sets it. */
+.dot-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--dot-cols, 5), 1fr);
+  gap: 4px;
+}
+
+.dot {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--sn-border);
+  border-radius: 50%;
+}
+
+.dot-groups {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* Each group is one ring, so "56 shared into 8" reads as eight things rather
+   than as one long row that happens to have gaps in it. */
+.dot-group {
+  padding: 6px;
+  border: 2px dashed var(--sn-border);
+  border-radius: 12px;
+}
+
+.dot-grid:not(.dot-group, .ten-frame) .dot,
+.dot-group .dot {
+  border-color: transparent;
+  background: var(--sn-primary);
+}
+
+/* A ten-frame keeps its empty cells visible: the gap between what is filled
+   and ten is the thing the model is for. */
+.ten-frame {
+  padding: 6px;
+  border: 2px solid var(--sn-border);
+  border-radius: 8px;
+}
+
+.ten-frames {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.ten-frame .dot.is-filled {
+  border-color: transparent;
+  background: var(--sn-primary);
+}
+
+.ten-frame .dot.is-second {
+  background: var(--sn-accent, var(--season-accent-ink));
+}
+
+.ten-frame .dot.is-gone {
+  background: transparent;
+  border-color: var(--sn-wrong);
+  opacity: 0.55;
+}
+
 .feedback {
   min-height: 1.5em;
   margin-top: 14px;
@@ -988,18 +1137,45 @@ body.is-glowing-question .question-prompt {
 /* ==================== The finished potion ==================== */
 
 /*
- * The last picture in the game. A round-bottomed flask with a narrow neck,
- * holding one rare collectible from each season. The silhouette does the work:
- * a jar is square-shouldered, a flask is not, and the difference is what makes
- * this read as the finished potion rather than another day's gathering.
+ * The last picture in the game: the flask, and the snake woman beside it with
+ * the one expression the rest of the game never shows her wearing.
  */
+.finale-scene {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 26px;
+  gap: 8px;
+}
+
+/* Drawn large, which is the point of it. Every other appearance she makes is
+   the 62px HUD portrait, where the difference between pleased and delighted is
+   about two pixels; here there is room for it to land. */
+.finale-villain {
+  width: clamp(120px, 34vw, 168px);
+  animation: finale-greet 620ms ease-out 700ms backwards;
+}
+
+.finale-villain .villain-svg {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes finale-greet {
+  from {
+    opacity: 0;
+    transform: translateX(22px) rotate(6deg);
+  }
+}
+
 .finale-flask {
   position: relative;
   display: flex;
   align-items: center;
   width: 168px;
   height: 168px;
-  margin: 6px auto 0;
+  flex: 0 0 auto;
+  margin: 6px 0 0;
   padding: 18px;
   background: radial-gradient(
     circle at 38% 32%,
@@ -1051,12 +1227,103 @@ body.is-glowing-question .question-prompt {
   }
 }
 
+/* ==================== Clearing a season ==================== */
+
+/*
+ * The jar, a burst of what went into it, and the animal that fetched it all
+ * jumping beside it. Every part of this is CSS on art the pack already draws,
+ * which is the same bargain the weather and the item pips take: the blanket
+ * `prefers-reduced-motion` rule at the foot of this file turns all of it off,
+ * and a replacement art pack gets the celebration without knowing it exists.
+ */
+.haul-scene {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+}
+
+/* Behind the jar, and out of the flow: the ring is decoration and must not
+   push the jar off centre. */
+.haul-burst {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.burst-mark {
+  position: absolute;
+  display: block;
+  width: 22px;
+  height: 22px;
+  margin: -11px;
+  animation: burst-out 900ms ease-out backwards;
+  animation-delay: var(--burst-delay, 0ms);
+  opacity: 0;
+}
+
+/* Thrown out along its own angle and left there faded, rather than returning:
+   a mark that flies back to the centre reads as a mistake being undone. */
+@keyframes burst-out {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--burst-angle, 0deg)) translateY(0) scale(0.3);
+  }
+
+  35% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: rotate(var(--burst-angle, 0deg)) translateY(-120px) scale(1);
+  }
+}
+
+/* The animal, jumping. Three beats and then still, because it sits next to a
+   button the player is about to read and a permanent loop beside a call to
+   action is the kind of movement that stops being a reward. */
+.haul-cheer {
+  width: 74px;
+  flex: 0 0 auto;
+  animation: haul-jump 560ms cubic-bezier(0.34, 1.2, 0.64, 1) 3;
+}
+
+.cheer-svg {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes haul-jump {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+
+  18% {
+    transform: translateY(0) scaleY(0.86);
+  }
+
+  50% {
+    transform: translateY(-26px) scaleY(1.06);
+  }
+
+  82% {
+    transform: translateY(0) scaleY(0.92);
+  }
+}
+
 .haul-jar {
   display: flex;
   align-items: flex-end;
   width: 190px;
   min-height: 132px;
-  margin: 0 auto;
+  flex: 0 0 auto;
+  margin: 0;
   padding: 12px 12px 14px;
   background: color-mix(in srgb, var(--season-sky) 55%, var(--sn-surface));
   border: 3px solid var(--sn-border);
@@ -1314,6 +1581,14 @@ body.is-glowing-question .question-prompt {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+
+    /* Delays have to go too, not just durations. Several of the celebration
+       animations stagger themselves with a delay and start from `opacity: 0`
+       under `backwards` fill, so collapsing the duration alone leaves the thing
+       invisible for the whole of its delay and then popping in -- which is a
+       worse flicker than the animation it was meant to remove. */
+    animation-delay: 0ms !important;
+    transition-delay: 0ms !important;
   }
 }
 

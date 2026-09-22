@@ -31,15 +31,15 @@
  * `<script>` payload, and the assertion is that it comes back as text and no
  * element was ever created.
  *
- * One thing this file must not do is inherit a rule. `renderHud` words the wilt
- * note differently under `RULES.WRONG_ANSWER = WILT` than under the other two
- * options, so the tests about that wording pin the rule they are describing
- * with `useRules` -- see helpers.js -- and say which one in their name.
+ * Nothing here inherits a rule any more. `renderHud` used to word a "wilting"
+ * note differently under each `RULES.WRONG_ANSWER` option, so the tests about
+ * that wording had to pin the option they described. A wrong answer costs
+ * nothing as of 2026-09-21: the note, the rule and the pinning are all gone.
  */
 
 import { afterEach, beforeEach, describe, expect, it, jest } from "@jest/globals"
 import { CHARACTERS, getCharacter } from "../js/characters.js"
-import { PLAY, WRONG_ANSWER } from "../js/constants.js"
+import { HINT_CHOICES_LEFT, PLAY } from "../js/constants.js"
 import { GameUI } from "../js/GameUI.js"
 import { buildTrail, kindAt } from "../js/Journey.js"
 import { getObstacle, isHardKind } from "../js/obstacles.js"
@@ -51,12 +51,9 @@ import {
   madeUpSeason,
   many,
   mountIndexBody,
-  one,
   pips,
-  restoreRulesBetweenTests,
   resultButtons,
   summaryRows,
-  useRules,
 } from "./helpers.js"
 
 const SPRING = getSeason("spring")
@@ -91,7 +88,6 @@ const CACHED_IDS = [
   "villain-portrait",
   "item-count",
   "item-track",
-  "wilt-note",
   "perk-note",
   "trail",
   "question-prompt",
@@ -101,6 +97,11 @@ const CACHED_IDS = [
   "timer-wrap",
   "timer-bar",
   "feedback",
+  "reinforce-card",
+  "reinforce-equation",
+  "reinforce-note",
+  "reinforce-picture",
+  "reinforce-done",
   "result-title",
   "result-text",
   "result-haul",
@@ -123,7 +124,7 @@ let ui
  * @returns {Object} A state-shaped object
  */
 function hudState(overrides = {}) {
-  return { items: 0, wilting: 0, forgivenessLeft: 0, characterId: "banana-slug", ...overrides }
+  return { items: 0, hintsLeft: 0, characterId: "banana-slug", ...overrides }
 }
 
 /**
@@ -149,7 +150,7 @@ function questionState(overrides = {}) {
  * @returns {Object} A state-shaped object
  */
 function resultState(overrides = {}) {
-  return { items: 11, correctCount: 12, questionsAsked: 15, bestStreak: 6, lost: 0, ...overrides }
+  return { items: 11, correctCount: 12, questionsAsked: 15, bestStreak: 6, ...overrides }
 }
 
 /**
@@ -255,9 +256,6 @@ function watchPack(target) {
   return spies
 }
 
-/** The single save/restore for the whole file. See helpers.js. */
-restoreRulesBetweenTests()
-
 beforeEach(() => {
   mountIndexBody()
   ui = new GameUI()
@@ -279,18 +277,19 @@ describe("the fixture", () => {
 
   // #item-demand and #item-label are gone: the count is one sentence in one
   // node now. Asserting their absence keeps a half-finished revert from leaving
-  // three elements each holding a fragment of a sentence.
-  it.each(["item-demand", "item-label"])("index.html no longer contains #%s", (id) => {
+  // three elements each holding a fragment of a sentence. #wilt-note went with
+  // the wilting rule on 2026-09-21.
+  it.each(["item-demand", "item-label", "wilt-note"])("index.html no longer contains #%s", (id) => {
     expect(document.getElementById(id)).toBeNull()
   })
 
   // #item-count is the whole state of the game in one line, so it has to be
-  // announced; #wilt-note deliberately is not, because #feedback already says
-  // the same thing and two polite regions read it twice.
-  it("puts the count in a live region and keeps the wilt note out of one", () => {
+  // announced; #perk-note deliberately is not, because it changes only when a
+  // perk fires and #feedback already says so.
+  it("puts the count in a live region and keeps the perk note out of one", () => {
     expect(document.getElementById("item-count").getAttribute("role")).toBe("status")
-    expect(document.getElementById("wilt-note").getAttribute("aria-live")).toBeNull()
-    expect(document.getElementById("wilt-note").getAttribute("role")).toBeNull()
+    expect(document.getElementById("perk-note").getAttribute("aria-live")).toBeNull()
+    expect(document.getElementById("perk-note").getAttribute("role")).toBeNull()
   })
 
   // The old version of this test compared each cached node to
@@ -703,12 +702,15 @@ describe("renderTrail", () => {
   // The token moves with `style.transform`, not the presentation attribute:
   // that is the half the pack's transforms and the crossing animation both
   // write, and mixing the two would have them fight.
-  it.each([0, 1, 7, 14])("stands the token on stop %i, where the pack says", (position) => {
-    const plan = ui.pack.layout(SPRING)
-    ui.renderTrail(SPRING, position, "sloth")
-    expect(trailToken().getAttribute("transform")).toBeNull()
-    expect(trailToken().style.transform).toBe(ui.pack.standing(plan.stops[position]))
-  })
+  it.each([0, 1, 4, SPRING.spaces - 1])(
+    "stands the token on stop %i, where the pack says",
+    (position) => {
+      const plan = ui.pack.layout(SPRING)
+      ui.renderTrail(SPRING, position, "sloth")
+      expect(trailToken().getAttribute("transform")).toBeNull()
+      expect(trailToken().style.transform).toBe(ui.pack.standing(plan.stops[position]))
+    },
+  )
 
   it("asks the pack where to stand rather than working it out here", () => {
     const spies = watchPack(ui)
@@ -1325,84 +1327,22 @@ describe("renderHud", () => {
     expect(countLine()).toBe("0 of 1 pebble — 1 to go")
   })
 
-  // Visibility follows `state.wilting` alone, whichever wrong-answer rule is
-  // in force -- only the wording of the note changes with the rule, and that is
-  // pinned in the two blocks below.
-  it("shows the wilt note only when something is wilting", () => {
-    const note = document.getElementById("wilt-note")
-    ui.renderHud(hudState({ wilting: 0 }), MADE_UP)
-    expect(note.classList.contains("hidden")).toBe(true)
-
-    ui.renderHud(hudState({ items: 3, wilting: 1 }), MADE_UP)
-    expect(note.classList.contains("hidden")).toBe(false)
-    expect(note.textContent).toContain(`1 ${one(MADE_UP)}`)
-
-    ui.renderHud(hudState({ items: 3, wilting: 2 }), MADE_UP)
-    expect(note.textContent).toContain(`2 ${many(MADE_UP)}`)
-
-    ui.renderHud(hudState({ wilting: 0 }), MADE_UP)
-    expect(note.classList.contains("hidden")).toBe(true)
-  })
-
-  // The wilt rule is the only one that gives an item back, so it is the only
-  // one whose note may promise it. Pinned rather than inherited: which rule
-  // ships is still an open question.
-  describe("under the wilt rule", () => {
-    useRules({ wrongAnswer: WRONG_ANSWER.WILT })
-
-    it("the wilt note says the next right answer brings the items back", () => {
-      const note = document.getElementById("wilt-note")
-      ui.renderHud(hudState({ items: 3, wilting: 1 }), MADE_UP)
-      expect(note.textContent).toBe(
-        `1 ${one(MADE_UP)} wilting — get the next one right to bring it back`,
-      )
-
-      ui.renderHud(hudState({ items: 3, wilting: 2 }), MADE_UP)
-      expect(note.textContent).toBe(
-        `2 ${many(MADE_UP)} wilting — get the next one right to bring them back`,
-      )
-    })
-  })
-
-  // Under the other two options nothing comes back, so the note only warns.
-  // Step-back never leaves anything wilting in a real run, but `renderHud` is
-  // handed whatever state it is handed and must not promise a revival that the
-  // active rule will not deliver.
-  describe("under the step-back rule", () => {
-    useRules({ wrongAnswer: WRONG_ANSWER.STEP_BACK })
-
-    it("the wilt note only says the items are at risk", () => {
-      const note = document.getElementById("wilt-note")
-      ui.renderHud(hudState({ items: 3, wilting: 1 }), MADE_UP)
-      expect(note.textContent).toBe(`1 ${one(MADE_UP)} at risk`)
-
-      ui.renderHud(hudState({ items: 3, wilting: 2 }), MADE_UP)
-      expect(note.textContent).toBe(`2 ${many(MADE_UP)} at risk`)
-      expect(note.textContent).not.toContain("back")
-    })
-  })
-
-  it("names the season's own collectible in the wilt note", () => {
-    ui.renderHud(hudState({ items: 3, wilting: 2 }), SUMMER)
-    expect(document.getElementById("wilt-note").textContent).toContain(many(SUMMER))
-  })
-
-  it("shows the perk note only while the perk is still in hand", () => {
+  it("shows the perk note only while the hint is still in hand", () => {
     const note = document.getElementById("perk-note")
-    // The perk's name comes from the roster; the ": N free mistake(s) left"
-    // half is this screen's own copy, so that is the half pinned literally.
+    // The perk's name comes from the roster; the ": N hint(s) left" half is this
+    // screen's own copy, so that is the half pinned literally.
     const perk = getCharacter("phoenix").perkName
-    ui.renderHud(hudState({ characterId: "phoenix", forgivenessLeft: 0 }), SPRING)
+    ui.renderHud(hudState({ characterId: "phoenix", hintsLeft: 0 }), SPRING)
     expect(note.classList.contains("hidden")).toBe(true)
 
-    ui.renderHud(hudState({ characterId: "phoenix", forgivenessLeft: 1 }), SPRING)
+    ui.renderHud(hudState({ characterId: "phoenix", hintsLeft: 1 }), SPRING)
     expect(note.classList.contains("hidden")).toBe(false)
-    expect(note.textContent).toBe(`${perk}: 1 free mistake left`)
+    expect(note.textContent).toBe(`${perk}: 1 hint left`)
 
-    ui.renderHud(hudState({ characterId: "phoenix", forgivenessLeft: 3 }), SPRING)
-    expect(note.textContent).toBe(`${perk}: 3 free mistakes left`)
+    ui.renderHud(hudState({ characterId: "phoenix", hintsLeft: 3 }), SPRING)
+    expect(note.textContent).toBe(`${perk}: 3 hints left`)
 
-    ui.renderHud(hudState({ characterId: "phoenix", forgivenessLeft: 0 }), SPRING)
+    ui.renderHud(hudState({ characterId: "phoenix", hintsLeft: 0 }), SPRING)
     expect(note.classList.contains("hidden")).toBe(true)
   })
 
@@ -1418,8 +1358,7 @@ describe("renderHud", () => {
 // The art pack has always exported `item()` and drawn a rose, a diamond, a leaf
 // and an icicle -- and until now nothing ever called it. A child told to fetch
 // eleven roses was shown the numeral 11. This group protects the game's central
-// metaphor actually being on screen, and it is also the only place the wilt rule
-// becomes visible rather than an item silently leaving a count.
+// metaphor actually being on screen.
 describe("renderItemTrack", () => {
   /** How many pips carry a given state class. */
   const countOf = (className) => pips().filter((pip) => pip.classList.contains(className)).length
@@ -1441,41 +1380,30 @@ describe("renderItemTrack", () => {
     },
   )
 
-  // Slots grow past the demand if she overshoots, so a good run still shows
-  // every item rather than capping at the quota and hiding the surplus.
+  // Slots grow past the demand if she overshoots. A real run cannot overshoot
+  // since the 2026-09-21 retune -- the trail plus the boss pays the demand
+  // exactly -- but an old save can, and it should still show every item rather
+  // than capping at the quota and hiding the surplus.
   it.each([
-    [12, 0, 12],
-    [11, 3, 14],
-    [0, 15, 15],
-  ])("grows to %i earned plus %i wilting = %i slots", (items, wilting, slots) => {
-    ui.renderItemTrack(hudState({ items, wilting }), SPRING)
+    [SPRING.demand - 1, SPRING.demand],
+    [SPRING.demand, SPRING.demand],
+    [SPRING.demand + 4, SPRING.demand + 4],
+  ])("draws %i earned items in %i slots", (items, slots) => {
+    ui.renderItemTrack(hudState({ items }), SPRING)
     expect(pips()).toHaveLength(slots)
   })
 
-  it.each([
-    [0, 0],
-    [1, 0],
-    [4, 2],
-    [9, 2],
-  ])("fills %i earned and %i wilting slots, leaving the rest empty", (items, wilting) => {
-    ui.renderItemTrack(hudState({ items, wilting }), SPRING)
+  it.each([0, 1, 4, 9])("fills %i slots, leaving the rest empty", (items) => {
+    ui.renderItemTrack(hudState({ items }), SPRING)
     expect(countOf("is-earned")).toBe(items)
-    expect(countOf("is-wilting")).toBe(wilting)
-    // Earned first, then wilting, then the outlines she still owes.
-    const state = pips().map((pip) =>
-      pip.classList.contains("is-earned")
-        ? "earned"
-        : pip.classList.contains("is-wilting")
-          ? "wilting"
-          : "empty",
-    )
+    // Earned first, then the outlines she still owes.
+    const state = pips().map((pip) => (pip.classList.contains("is-earned") ? "earned" : "empty"))
     expect(state.slice(0, items).every((s) => s === "earned")).toBe(true)
-    expect(state.slice(items, items + wilting).every((s) => s === "wilting")).toBe(true)
-    expect(state.slice(items + wilting).every((s) => s === "empty")).toBe(true)
+    expect(state.slice(items).every((s) => s === "empty")).toBe(true)
   })
 
   it("puts the season's own drawing in a filled slot and nothing in an empty one", () => {
-    ui.renderItemTrack(hudState({ items: 2, wilting: 1 }), SPRING)
+    ui.renderItemTrack(hudState({ items: 3 }), SPRING)
     const filled = pips().slice(0, 3)
     const empty = pips().slice(3)
     for (const pip of filled) {
@@ -1806,6 +1734,198 @@ describe("flashAnswer", () => {
   })
 })
 
+// What a miss draws, which since 2026-09-21 is the other half of answering. The
+// question stays up, so this method must strike off exactly what the player has
+// ruled out and leave everything else answerable.
+describe("rejectAnswer", () => {
+  // 73 is the answer; 72, 74 and 83 are not. See `questionState`.
+  beforeEach(() => {
+    ui.renderQuestion(questionState(), {}, () => {})
+  })
+
+  it("strikes off the choice pressed and nothing else", () => {
+    const buttons = choiceButtons()
+    ui.rejectAnswer(buttons[3], "Not quite — have another look.")
+
+    expect(buttons[3].classList.contains("is-out")).toBe(true)
+    expect(buttons[3].getAttribute("aria-disabled")).toBe("true")
+    expect(document.querySelectorAll("#choices .is-out")).toHaveLength(1)
+    // Nothing is locked and nothing is marked: the answer is not given away.
+    expect(document.querySelectorAll("#choices .is-locked")).toHaveLength(0)
+    expect(document.querySelectorAll("#choices .is-correct")).toHaveLength(0)
+    for (const button of [buttons[0], buttons[1], buttons[2]]) {
+      expect(button.getAttribute("aria-disabled")).toBeNull()
+    }
+  })
+
+  it("puts the message up as an error", () => {
+    ui.rejectAnswer(choiceButtons()[1], "Not quite.")
+    const feedback = document.getElementById("feedback")
+    expect(feedback.textContent).toBe("Not quite.")
+    expect(feedback.classList.contains("error")).toBe(true)
+  })
+
+  it("marks nothing when the clock ran out and no button was pressed", () => {
+    ui.rejectAnswer(null, "Time ran out.")
+    expect(document.querySelectorAll("#choices .is-out")).toHaveLength(0)
+    expect(document.getElementById("feedback").textContent).toBe("Time ran out.")
+  })
+
+  it("strikes off the extra values it is handed as well", () => {
+    const buttons = choiceButtons()
+    ui.rejectAnswer(buttons[3], "Two of them are gone!", [72, 74])
+
+    const out = Array.from(document.querySelectorAll("#choices .is-out"))
+    expect(out.map((button) => button.dataset.value).sort()).toEqual(["72", "74", "83"])
+    // The answer is the one thing still standing.
+    expect(buttons[0].classList.contains("is-out")).toBe(false)
+  })
+
+  it("survives being called with no question on screen", () => {
+    document.getElementById("choices").replaceChildren()
+    expect(() => ui.rejectAnswer(null, "x", [72])).not.toThrow()
+  })
+})
+
+// The phoenix's hint. The arithmetic is here rather than in GameState because it
+// depends on what is on screen: the player has usually struck one choice off
+// herself by pressing it, and taking a full two more would leave the answer
+// standing alone.
+describe("hintTargets", () => {
+  beforeEach(() => {
+    ui.renderQuestion(questionState(), {}, () => {})
+  })
+
+  it("leaves the answer and HINT_CHOICES_LEFT - 1 wrong ones standing", () => {
+    const targets = ui.hintTargets(73)
+    expect(targets).not.toContain(73)
+    const live = PLAY.CHOICE_COUNT - targets.length
+    expect(live).toBe(HINT_CHOICES_LEFT)
+  })
+
+  // The usual case: she has pressed one already, so one more goes and the
+  // question is down to a straight choice between two.
+  it("counts the choice she has already ruled out", () => {
+    ui.rejectAnswer(choiceButtons()[3], "Not quite.")
+    const targets = ui.hintTargets(73)
+    expect(targets).toHaveLength(HINT_CHOICES_LEFT - 1)
+    expect(targets).not.toContain(73)
+    expect(targets).not.toContain(83)
+  })
+
+  it("removes nothing once only the answer and one other are left", () => {
+    ui.rejectAnswer(choiceButtons()[3], "Not quite.")
+    ui.rejectAnswer(choiceButtons()[2], "Not quite.")
+    expect(ui.hintTargets(73)).toEqual([])
+  })
+
+  it("survives being called with no question on screen", () => {
+    document.getElementById("choices").replaceChildren()
+    expect(ui.hintTargets(73)).toEqual([])
+  })
+})
+
+// The one screen in the game that waits for the player rather than a timer. It
+// is the only teaching the loop does now that a miss states no answer.
+describe("showReinforcement", () => {
+  const card = () => document.getElementById("reinforce-card")
+  const isUp = () => card().classList.contains("hidden") === false
+
+  it("shows the equation and waits for the button", () => {
+    const onDone = jest.fn()
+    ui.showReinforcement({ equation: "4 + 7 = 11", model: null }, onDone)
+
+    expect(isUp()).toBe(true)
+    expect(ui.reinforcementOpen).toBe(true)
+    expect(document.getElementById("reinforce-equation").textContent).toBe("4 + 7 = 11")
+    expect(onDone).not.toHaveBeenCalled()
+
+    document.getElementById("reinforce-done").click()
+
+    expect(isUp()).toBe(false)
+    expect(ui.reinforcementOpen).toBe(false)
+    expect(onDone).toHaveBeenCalledTimes(1)
+  })
+
+  // The card is reused for every fact, so a listener added rather than replaced
+  // would fire once per question missed this run.
+  it("runs the newest continuation only, however many facts it has shown", () => {
+    const first = jest.fn()
+    const second = jest.fn()
+    ui.showReinforcement({ equation: "a", model: null }, first)
+    ui.showReinforcement({ equation: "b", model: null }, second)
+    document.getElementById("reinforce-done").click()
+
+    expect(first).not.toHaveBeenCalled()
+    expect(second).toHaveBeenCalledTimes(1)
+  })
+
+  it("shows a note only when the model carries one", () => {
+    const note = () => document.getElementById("reinforce-note")
+    ui.showReinforcement({ equation: "a", model: { kind: "steps", lines: ["x"] } }, () => {})
+    expect(note().classList.contains("hidden")).toBe(true)
+
+    ui.showReinforcement(
+      { equation: "a", model: { kind: "steps", lines: ["x"], note: "Ten first." } },
+      () => {},
+    )
+    expect(note().classList.contains("hidden")).toBe(false)
+    expect(note().textContent).toBe("Ten first.")
+  })
+
+  it.each([
+    ["array", { kind: "array", rows: 3, cols: 4 }, ".dot-grid .dot", 12],
+    ["groups", { kind: "groups", groups: 3, per: 2 }, ".dot-group", 3],
+    ["tenFrames", { kind: "tenFrames", op: "add", a: 4, b: 7, answer: 11 }, ".ten-frame", 2],
+    ["steps", { kind: "steps", lines: ["4 + 7", "= 11"] }, ".reinforce-step", 2],
+  ])("draws a %s model", (_name, model, selector, count) => {
+    ui.showReinforcement({ equation: "x", model }, () => {})
+    expect(document.querySelectorAll(`#reinforce-picture ${selector}`)).toHaveLength(count)
+  })
+
+  // A challenge module may describe a picture this file has never heard of. The
+  // equation alone is still worth showing, so an unknown kind draws nothing
+  // rather than throwing the card away.
+  it("shows the equation alone for a model kind it does not know", () => {
+    ui.showReinforcement({ equation: "4 + 7 = 11", model: { kind: "hologram" } }, () => {})
+    expect(isUp()).toBe(true)
+    expect(document.getElementById("reinforce-picture").childElementCount).toBe(0)
+  })
+
+  it("draws a fresh picture rather than stacking them up", () => {
+    const model = { kind: "array", rows: 2, cols: 3 }
+    ui.showReinforcement({ equation: "x", model }, () => {})
+    ui.showReinforcement({ equation: "x", model }, () => {})
+    expect(document.querySelectorAll("#reinforce-picture .dot")).toHaveLength(6)
+  })
+
+  it("runs the continuation straight through when there is nothing to explain", () => {
+    const onDone = jest.fn()
+    ui.showReinforcement(null, onDone)
+    expect(onDone).toHaveBeenCalledTimes(1)
+    expect(isUp()).toBe(false)
+  })
+
+  // For a teardown -- a restart, a new run -- where the run the card belonged to
+  // is about to stop existing. It must not run the continuation into it.
+  it("hideReinforcement takes it down without running the continuation", () => {
+    const onDone = jest.fn()
+    ui.showReinforcement({ equation: "a", model: null }, onDone)
+    ui.hideReinforcement()
+
+    expect(isUp()).toBe(false)
+    expect(onDone).not.toHaveBeenCalled()
+    // And the dead button is inert, not still wired to the run that has gone.
+    document.getElementById("reinforce-done").click()
+    expect(onDone).not.toHaveBeenCalled()
+  })
+
+  it("hideReinforcement is safe when no card is up", () => {
+    expect(() => ui.hideReinforcement()).not.toThrow()
+    expect(ui.reinforcementOpen).toBe(false)
+  })
+})
+
 describe("the countdown", () => {
   beforeEach(() => {
     jest.useFakeTimers()
@@ -2036,11 +2156,14 @@ describe("renderResult", () => {
     expect(summaryRows()[0][0]).toBe(`${SUMMER.itemPlural} delivered`)
   })
 
-  it("adds a fifth row only when something was lost for good", () => {
+  // There used to be a fifth row, "Pebbles lost", for items a wrong answer had
+  // taken for good. Nothing takes an item any more, so the row is gone and the
+  // default summary is exactly four lines whatever the state says.
+  it("draws four rows and no more", () => {
     ui.renderResult(resultState({ lost: 3 }), MADE_UP, [], "t", "x")
     const rows = Array.from(document.querySelectorAll("#result-summary .summary-row"))
-    expect(rows).toHaveLength(5)
-    expect(rows[4].textContent).toBe("Pebbles lost3")
+    expect(rows).toHaveLength(4)
+    expect(document.getElementById("result-summary").textContent).not.toContain("lost")
   })
 
   // The run-complete screen passes its own rows. Every per-season counter has
@@ -2270,11 +2393,27 @@ describe("content is written as text, never as markup", () => {
 
   // The count sentence embeds the item name rather than being it, so the
   // payload is a substring here rather than the whole value.
-  it.each(["item-count", "wilt-note"])("#%s embeds a hostile item name as text", (id) => {
-    ui.renderHud(hudState({ items: 1, wilting: 1 }), evilSeason)
-    const element = document.getElementById(id)
+  it("#item-count embeds a hostile item name as text", () => {
+    ui.renderHud(hudState({ items: 1 }), evilSeason)
+    const element = document.getElementById("item-count")
     expect(element.textContent).toContain(XSS.toLowerCase())
     expect(element.children).toHaveLength(0)
+    expectNoInjection()
+  })
+
+  // The reinforcement card writes an equation the challenge module composed, and
+  // a note it may attach to a model. Both are strings from outside this file.
+  it("#reinforce-equation and #reinforce-note hold the payload as text", () => {
+    ui.showReinforcement(
+      { equation: XSS, model: { kind: "steps", lines: [XSS], note: XSS } },
+      () => {},
+    )
+    for (const id of ["reinforce-equation", "reinforce-note"]) {
+      const element = document.getElementById(id)
+      expect(element.textContent).toBe(XSS)
+      expect(element.children).toHaveLength(0)
+    }
+    expect(document.getElementById("reinforce-picture").textContent).toContain(XSS)
     expectNoInjection()
   })
 

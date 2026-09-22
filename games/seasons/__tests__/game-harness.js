@@ -61,20 +61,20 @@
  * fake `Element.animate` instead and holds the crossing open for exactly as long
  * as a test needs it. See `installFakeAnimations`.
  *
- * Finally, nothing here may inherit a rule. `RULES.WRONG_ANSWER` and
- * `RULES.BOSS_FAILURE` are undecided design switches, so a test that depends on
- * one pins it with `useRules` (see helpers.js) and names it, and a test that
- * only wanted *some* state change is written not to care which.
+ * Nothing here inherits a rule any more. `RULES.WRONG_ANSWER` and
+ * `RULES.BOSS_FAILURE` were undecided design switches until 2026-09-21, when a
+ * wrong answer stopped costing anything; both are gone, and with them the
+ * `useRules` pinning every suite used to need.
  */
 
 import { afterEach, beforeEach, expect, jest } from "@jest/globals"
-import { BOSS_TRIES, PLAY, SEASON_ORDER, STORAGE } from "../js/constants.js"
+import { PLAY, SEASON_ORDER, STORAGE } from "../js/constants.js"
 import { createState, rehydrate, startSeason } from "../js/GameState.js"
 import { GameUI } from "../js/GameUI.js"
 import { isHardKind } from "../js/obstacles.js"
 import { getSeason } from "../js/seasons.js"
 import { toSavedRun } from "../js/storage.js"
-import { many, mountIndexDocument, restoreRulesBetweenTests, zeroTotals } from "./helpers.js"
+import { many, mountIndexDocument, zeroTotals } from "./helpers.js"
 
 export const SPRING = getSeason("spring")
 export const SUMMER = getSeason("summer")
@@ -84,26 +84,25 @@ export const LAST_SEASON = getSeason(SEASON_ORDER[SEASON_ORDER.length - 1])
  * Player-facing copy this file pins on purpose, collected in one place.
  *
  * Everything else about the result screens is asserted by shape -- that the
- * losing text states both numbers, that the winning text names the collectible
- * -- precisely so Ella can rewrite the villain's voice without a red suite. But
- * the *titles* are how a test tells one branch of `_renderResult` from another,
- * and there is no shape-level way to say "this is the end-of-run screen and not
- * the end-of-season one". So they are pinned, and pinned here: rewording them is
- * one edit to this block.
+ * winning text names the collectible -- precisely so Ella can rewrite the
+ * villain's voice without a red suite. But the *titles* are how a test tells one
+ * branch of `_renderResult` from another, and there is no shape-level way to say
+ * "this is the end-of-run screen and not the end-of-season one". So they are
+ * pinned, and pinned here: rewording them is one edit to this block.
  */
 export const TITLE = {
   runComplete: "The potion is finished",
   seasonComplete: (season) => `${season.name} complete`,
-  seasonLost: "Not quite enough",
-  runOver: "Back to the beginning",
 }
 
 /**
- * What a perfect run of a season banks: every ordinary space, every glowing one
- * at the default rate, and the boss's rescue on top.
+ * What clearing a season banks: every ordinary space, every glowing one, and
+ * the boss's rescue on top. Since the 2026-09-21 retune this is the demand
+ * exactly -- `seasons.test.js` holds that -- and it is computed here rather
+ * than read off `season.demand` so a test can tell the two apart.
  *
  * @param {Object} season - The season to measure
- * @returns {number} Items delivered by a run that misses nothing
+ * @returns {number} Items delivered by clearing every space
  */
 export function perfectRun(season) {
   return (
@@ -114,6 +113,26 @@ export function perfectRun(season) {
 }
 
 export const PERFECT_SPRING = perfectRun(SPRING)
+
+/**
+ * What the first `spaces` spaces of a season pay, glowing ones included.
+ *
+ * Asked of the real route rather than remembered. A test that counts "three
+ * answers, three items" is a test that goes red the moment Ella moves a glowing
+ * space to the front, and the thing it meant to assert -- that every answer
+ * banks what that space is worth -- has not changed at all.
+ *
+ * @param {Object} season - The season being played
+ * @param {number} spaces - How many spaces have been cleared
+ * @returns {number} Items banked
+ */
+export function payoutThrough(season, spaces) {
+  let total = 0
+  for (let i = 0; i < spaces; i += 1) {
+    total += season.glowingAt.includes(i) ? PLAY.ITEMS_PER_GLOWING_SPACE : PLAY.ITEMS_PER_SPACE
+  }
+  return total
+}
 
 /** The answer flash, in ms: what `GameUI.flashDuration` reports and a player waits. */
 export const FLASH_MS = 900
@@ -335,11 +354,27 @@ export function tapWrong() {
 }
 
 /**
- * Wait out the flash, land the character, and let the next screen be drawn. The
- * one place that knows the answer cycle has two waits in it.
+ * Tap the reinforcement card away, if one is up. A no-op otherwise, so a helper
+ * that might or might not have earned one can simply call it.
+ */
+export function dismissReinforcement() {
+  if (byId("reinforce-card")?.classList.contains("hidden") === false) {
+    byId("reinforce-done").click()
+  }
+}
+
+/**
+ * Wait out the flash, dismiss any reinforcement card, land the character, and
+ * let the next screen be drawn. The one place that knows how many waits the
+ * answer cycle has in it.
+ *
+ * The card is the third, and unlike the other two it waits for a tap rather
+ * than a timer -- so advancing the clock alone leaves every later assertion
+ * looking at a question that has not been drawn yet.
  */
 export async function landAnswer() {
   jest.advanceTimersByTime(FLASH_MS)
+  dismissReinforcement()
   finishCrossing()
   await settleCrossing()
 }
@@ -354,27 +389,34 @@ export async function answerCorrectly() {
 }
 
 /**
- * Tap a wrong answer and let the flash run out.
+ * Tap a wrong answer.
  *
- * Synchronous, unlike `answerCorrectly`, and that is the point: a wrong answer
- * crosses nothing, so `_onAnswer` asks the next question from inside the flash
- * timeout with no promise in between. If a wrong answer ever does start a
- * crossing, every sequence built on this helper stops finding its buttons rather
- * than quietly drifting.
+ * Synchronous, unlike `answerCorrectly`, and more so than it used to be: under
+ * the retry rule a wrong answer has no flash to wait out at all. The question
+ * stays up with the choice just taken struck off, and the guard comes off
+ * immediately -- so there is nothing to advance the clock for.
  */
 export function answerWrongly() {
   tapWrong()
-  jest.advanceTimersByTime(FLASH_MS)
 }
 
 /**
- * Miss the boss question until there are no tries left, so the failure rule
- * has to resolve the season. Spends `BOSS_TRIES` rather than a hard-coded two,
- * because making the boss single-shot again is a supported tuning change.
+ * Miss the question on screen, find the answer, read the card, and answer the
+ * extra question -- the whole cost of one mistake, ending on the space after
+ * the one it was made on.
+ *
+ * The Porcupine skips the extra question, so this helper serves her too: the
+ * last `answerCorrectly` is the payout either way.
  */
-export function missEveryBossTry() {
-  for (let i = 0; i < BOSS_TRIES; i += 1) {
-    answerWrongly()
+export async function missThenRecover() {
+  tapWrong()
+  tapRight()
+  jest.advanceTimersByTime(FLASH_MS)
+  dismissReinforcement()
+  finishCrossing()
+  await settleCrossing()
+  if (isActive("screen-play") && Number(saved().run.extrasDone) === 1) {
+    await answerCorrectly()
   }
 }
 
@@ -433,15 +475,11 @@ export const TIMED = { settings: { timer: true } }
  * Install the per-test setup every `game.*.test.js` suite needs: fake timers,
  * the fake Web Animations API, a cleared storage, and a freshly started game.
  *
- * Call it once at the top of a suite, before any `describe`. It registers the
- * rules save/restore as well, so a suite that also calls `useRules` still gets
- * the value back afterwards -- see helpers.js.
+ * Call it once at the top of a suite, before any `describe`.
  *
  * @returns {void}
  */
 export function setupGameHarness() {
-  restoreRulesBetweenTests()
-
   beforeEach(async () => {
     jest.useFakeTimers()
     installFakeAnimations()

@@ -247,6 +247,22 @@ job on adjacent pages and were the clearest symptom._
 
 ## Settled
 
+### Landed 2026-09-21
+
+- **Seasons: a wrong answer costs a question, not an item.** A miss keeps the
+  question up until she finds the answer, shows the fact with a picture of it, and
+  asks one more at the same space. Trails are roughly 40% shorter and each demand
+  is now exactly what a season pays, so the snake woman's question is the one that
+  fills the jar. New roster of perks built from time and hints, since a perk that
+  changed an item count would break that. `WRONG_ANSWER`, `BOSS_FAILURE`,
+  `BOSS_TRIES` and the lost-season screen are all gone. See
+  [`seasons-plan.md`](seasons-plan.md).
+
+  It also fixed a real bug nobody had hit yet: the question key was
+  `seed:seasonId:attempt:questionsAsked`, so a reload part-way through a retry
+  handed back a different question from the one on screen. The key is now keyed on
+  the space instead.
+
 ### Landed 2026-09-20, third pass
 
 - **`tradsimp.js` was wrong in both directions, and the reverse was worse.**

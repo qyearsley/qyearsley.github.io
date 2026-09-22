@@ -495,6 +495,16 @@ describe("the placeholder pack fulfils the art-pack contract", () => {
     expectDrawing(pack.villain())
   })
 
+  // The end-of-run screen asks for her pleased. It is the same character in a
+  // different mood, not a second drawing, so this checks it is both valid and
+  // actually different -- a `happy` flag nothing reads would pass a structure
+  // check and show the player the same face at the end of the journey.
+  it("draws the villain pleased, and differently", () => {
+    expectDrawing(pack.villain(true))
+    expect(markup(pack.villain(true))).not.toBe(markup(pack.villain()))
+    expect(markup(pack.villain(false))).toBe(markup(pack.villain()))
+  })
+
   it("hands back a fresh element every call, so one drawing cannot be reparented", () => {
     // GameUI mounts the same drawing in several places on one screen.
     const first = pack.character("phoenix").element

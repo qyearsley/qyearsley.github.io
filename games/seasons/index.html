@@ -88,11 +88,6 @@
               <p id="demand-line" class="demand-line"></p>
               <p id="item-count" class="demand-count" role="status">0</p>
               <div id="item-track" class="item-track" aria-hidden="true"></div>
-              <!-- Not a live region: #feedback already announces the same
-                   sentence when the wilt happens, and two polite regions
-                   carrying near-identical text queue up and read twice. This
-                   is the persistent indicator, not the event. -->
-              <p id="wilt-note" class="note note-wilt hidden"></p>
               <p id="perk-note" class="note note-perk hidden"></p>
             </div>
           </div>
@@ -122,6 +117,21 @@
           <div id="result-actions" class="result-actions"></div>
         </section>
       </main>
+    </div>
+
+    <!-- The reinforcement card. Shown once a missed question is finally
+         answered right, and the only thing in the game that waits for the
+         player rather than a timer. Outside .game-main so it overlays the
+         choices it is explaining. Not `role="dialog"`: it interrupts nothing
+         the player asked for, and announcing it as a dialog would put a screen
+         reader into a mode it then has to be got out of. -->
+    <div id="reinforce-card" class="reinforce-card hidden">
+      <div class="reinforce-inner" role="status">
+        <p id="reinforce-equation" class="reinforce-equation"></p>
+        <div id="reinforce-picture" class="reinforce-picture" aria-hidden="true"></div>
+        <p id="reinforce-note" class="reinforce-note hidden"></p>
+        <button id="reinforce-done" class="big-btn is-primary" type="button">Got it</button>
+      </div>
     </div>
 
     <!-- Settings. One control so far, and it is the one that decides whether a

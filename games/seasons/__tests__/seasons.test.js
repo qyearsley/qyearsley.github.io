@@ -5,9 +5,12 @@
  * ones that guard against a retune quietly breaking the game rather than the
  * ones that restate the numbers:
  *
- * - Reachability: for every season and every character, a perfect run has to
- *   collect at least the demand, with room to spare. The Banana Slug is the
- *   binding case, because its glowing spaces pay 2 instead of 3.
+ * - Alignment: every demand is exactly what a finished trail pays plus the
+ *   boss's rescue, so her question is the one that fills the jar and there is
+ *   no trail left to walk after the demand is met. This replaced a reachability
+ *   check with 25% headroom on 2026-09-21, when a wrong answer stopped costing
+ *   items -- headroom was the margin that let a mistake be absorbed, and there
+ *   are no mistakes to absorb any more.
  * - Escalation: spring through winter must get longer, hungrier, glowier, and
  *   faster, never the reverse.
  * - Structure: glowing indices on the trail, positive boss rescues, non-empty
@@ -23,17 +26,6 @@ import { CHARACTERS } from "../js/characters.js"
 import { SEASON_ORDER } from "../js/constants.js"
 import { createRng } from "../js/rng.js"
 import { getSeason, maxItems, nextSeason, SEASON_LIST } from "../js/seasons.js"
-
-/**
- * How much slack a demand must leave: a season should be winnable without a
- * perfect run, so the demand is capped at this share of a perfect run's haul.
- *
- * 0.75 rather than 0.8 because the binding case is the Banana Slug, whose
- * glowing spaces pay 2 instead of 3. Her shortfall grows with the number of
- * glowing spaces, and that number grows every season, so a ceiling loose enough
- * for the default characters is far too tight for her by winter.
- */
-const MAX_DEMAND_SHARE = 0.75
 
 /** Every (season, character) pair, as `it.each` rows. */
 const PAIRS = SEASON_LIST.flatMap((season) =>
@@ -279,40 +271,45 @@ describe.each(SEASON_LIST.map((season) => [season.id, season]))("%s", (_id, seas
   })
 })
 
-describe("reachability", () => {
-  it.each(PAIRS)("%s is winnable by the %s", (_seasonId, _characterId, season, character) => {
-    expect(maxItems(season, character.effects.glowingItems)).toBeGreaterThanOrEqual(season.demand)
-  })
-
-  it("is not winnable by the boss rescue alone", () => {
-    // The rescue is a consolation, not a route -- otherwise the trail is
-    // decoration.
-    for (const season of SEASON_LIST) {
-      expect(season.boss.rescue).toBeLessThan(season.demand)
-    }
-  })
-
-  it.each(PAIRS)(
-    "%s leaves the %s at least 25% headroom above the demand",
-    (_seasonId, _characterId, season, character) => {
-      // Tuned against the Banana Slug, who collects 2 from a glowing space
-      // rather than 3. Her handicap scales with the number of glowing spaces,
-      // which grows every season, so she is the binding constraint -- an
-      // earlier set of demands left her four missable questions in the whole of
-      // winter. Everyone else sits comfortably below this ceiling.
-      const ceiling = maxItems(season, character.effects.glowingItems) * MAX_DEMAND_SHARE
-      expect(season.demand).toBeLessThanOrEqual(ceiling)
+describe("demand alignment", () => {
+  it.each(SEASON_LIST.map((season) => [season.id, season]))(
+    "%s asks for exactly what the trail and the boss pay",
+    (_id, season) => {
+      // The 2026-09-21 retune, as one assertion. Walk every space and answer
+      // her question and the jar is full to the brim and no fuller, so the
+      // season ends on the beat it is meant to. Lengthening a route or moving a
+      // mountain without moving `demand` fails here, which is the point.
+      expect(season.demand).toBe(maxItems(season) + season.boss.rescue)
     },
   )
 
-  it("does not make a season so slack that the trail stops mattering", () => {
-    // The other side of the headroom check: a demand far below what a perfect
-    // run collects means the questions are decoration. Half is the floor.
+  it.each(PAIRS)(
+    "%s pays the %s the same as everyone else",
+    (_seasonId, _characterId, season, character) => {
+      // What makes the alignment above possible. No perk may touch an item
+      // count: a character who collected less from a mountain could not reach a
+      // demand pinned to what a mountain pays. `characters.test.js` holds the
+      // effect fields; this holds the consequence.
+      expect(character.effects).not.toHaveProperty("glowingItems")
+      expect(maxItems(season)).toBe(maxItems(season))
+    },
+  )
+
+  it("is not satisfied by the boss rescue alone", () => {
+    // The rescue is the last course, not the meal -- otherwise the trail is
+    // decoration.
     for (const season of SEASON_LIST) {
-      for (const character of CHARACTERS) {
-        const perfect = maxItems(season, character.effects.glowingItems)
-        expect(season.demand).toBeGreaterThan(perfect * 0.5)
-      }
+      expect(season.boss.rescue).toBeLessThan(season.demand)
+      expect(season.boss.rescue).toBeLessThan(maxItems(season))
+    }
+  })
+
+  it("keeps a season short enough to finish in one sitting", () => {
+    // The other half of the retune. A clean run is one question per space plus
+    // the boss; the ceiling is what a child will sit through before the season
+    // stops feeling like a season.
+    for (const season of SEASON_LIST) {
+      expect(season.spaces + 1).toBeLessThanOrEqual(14)
     }
   })
 })
@@ -482,38 +479,35 @@ describe("nextSeason", () => {
 })
 
 describe("maxItems", () => {
-  it("adds one per ordinary space and the character's value per glowing one", () => {
-    // Spring: 14 spaces, 2 of them glowing, so 12 ordinary.
+  it("adds one per ordinary space and three per glowing one", () => {
+    // Spring: 8 spaces, 2 of them glowing, so 6 ordinary.
     const spring = getSeason("spring")
-    expect(maxItems(spring, 3)).toBe(12 + 2 * 3)
-    expect(maxItems(spring, 2)).toBe(12 + 2 * 2)
-    expect(maxItems(spring, 0)).toBe(12)
+    expect(maxItems(spring)).toBe(6 + 2 * 3)
   })
 
-  // Deliberate literals. Retuning a season is *meant* to fail these -- they are
-  // the one place a hand-computed number checks maxItems, and every reachability
-  // test above is built on maxItems. Recompute them from seasons.js by hand;
-  // do not derive them from the formula.
+  // Deliberate literals, hand-computed from the trail lengths and glowing
+  // counts in seasons.js: spring 6 ordinary + 2 glowing, summer 7 + 2,
+  // autumn 7 + 3, winter 8 + 3.
   //
-  // Hand-computed from the trail lengths and glowing counts in seasons.js:
-  // spring 12 ordinary + 2 glowing, summer 13 + 3, autumn 14 + 4, winter 15 + 5.
-  //
-  // Literals rather than the formula. The two tests these replaced compared
-  // maxItems either to its own body (`spaces - glowing + glowing * 2`) or to
-  // itself (`maxItems(season)` vs `maxItems(season, 3)`), so both passed for any
-  // implementation at all -- including one that returned 0 for everything.
-  // Retuning a season is meant to fail these; that is what makes them worth
-  // having, because the reachability tests above are all built on maxItems.
+  // Retuning a season is *meant* to fail these. They are the one place a
+  // hand-computed number checks maxItems, and the alignment test above is built
+  // on it. Recompute them by hand from seasons.js; do not derive them from the
+  // formula. The two tests these replaced compared maxItems either to its own
+  // body or to itself, so both passed for any implementation at all --
+  // including one that returned 0 for everything.
   it.each([
-    ["spring", 18, 16],
-    ["summer", 22, 19],
-    ["autumn", 26, 22],
-    ["winter", 30, 25],
-  ])("counts %s at %i items by default, %i for the Banana Slug", (id, byDefault, forSlug) => {
-    const season = getSeason(id)
-    expect(maxItems(season)).toBe(byDefault)
-    expect(maxItems(season, 3)).toBe(byDefault)
-    expect(maxItems(season, 2)).toBe(forSlug)
+    ["spring", 12],
+    ["summer", 13],
+    ["autumn", 16],
+    ["winter", 17],
+  ])("counts %s at %i items", (id, expected) => {
+    expect(maxItems(getSeason(id))).toBe(expected)
+  })
+
+  it("is the demand less the boss's rescue, for every season", () => {
+    for (const season of SEASON_LIST) {
+      expect(maxItems(season)).toBe(season.demand - season.boss.rescue)
+    }
   })
 
   it.each([
@@ -525,10 +519,10 @@ describe("maxItems", () => {
     expect(maxItems(season)).toBe(0)
   })
 
-  it.each(SEASON_LIST.map((season) => [season.id, season]))(
-    "%s rises with the character's glowing value",
-    (_id, season) => {
-      expect(maxItems(season, 2)).toBeLessThan(maxItems(season, 3))
-    },
-  )
+  it("ignores a second argument, now that no character varies the glowing value", () => {
+    // It used to take one. A caller passing the old Banana Slug's 2 must get
+    // the real number back rather than a quietly smaller one.
+    const spring = getSeason("spring")
+    expect(maxItems(spring, 2)).toBe(maxItems(spring))
+  })
 })

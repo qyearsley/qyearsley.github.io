@@ -38,17 +38,21 @@
  *   and winter's does -- by then plain division within 100 has run out of room,
  *   so its climax is the two-step instead.
  *
- * Reachability: `maxItems` below is what a perfect run collects, and
- * seasons.test.js asserts every demand is reachable by every character with
- * headroom to spare, so a retune cannot quietly make a season impossible. The
- * Banana Slug is always the binding case; ../README.md says why.
+ * Reachability: `maxItems` below is what a finished trail collects, and since
+ * 2026-09-21 every demand is exactly that plus the boss's rescue --
+ * `seasons.test.js` holds the equality. That is the point of the retune: the
+ * snake woman's question is the one that fills the jar, so there is no stretch
+ * of trail left to walk after the demand is already met. It only works because
+ * no character collects a different amount from a glowing space any more, and
+ * because a wrong answer costs questions rather than items, so a finished trail
+ * always pays the same total.
  *
  * Error Handling: `getSeason` returns null for an unknown id. Unlike a
  * character, there is no sensible fallback season -- playing spring when the
  * save says winter would silently erase progress -- so the caller must handle it.
  */
 
-import { SEASON_ORDER } from "./constants.js"
+import { PLAY, SEASON_ORDER } from "./constants.js"
 import { isHardKind } from "./obstacles.js"
 
 /**
@@ -107,6 +111,14 @@ const tensTo = (highest) => TENS.filter((table) => table <= highest)
 /**
  * The four seasons, keyed by id. Play order lives in SEASON_ORDER.
  *
+ * Every trail was shortened on 2026-09-21, from 14/16/18/20 spaces to
+ * 8/9/10/11, and every demand reset to exactly what the trail plus the boss
+ * pays. A clean run is 42 questions where it was 72. The old lengths existed to
+ * give a player room to recover from an item lost to a wrong answer; nothing
+ * takes an item any more, so the margin had no job and a child who was not
+ * making mistakes spent a third of every season collecting things she did not
+ * need.
+ *
  * @type {Object<string, Season>}
  */
 const SEASONS = {
@@ -116,24 +128,9 @@ const SEASONS = {
     itemName: "Rose",
     itemPlural: "Roses",
     rareItemName: "Everlasting Rose",
-    demandText: "Eleven roses for my potion, please. The ones that never wilt.",
-    route: [
-      "hill",
-      "river",
-      "thicket",
-      "boulder",
-      "mountain",
-      "gap",
-      "hill",
-      "river",
-      "thicket",
-      "mountain",
-      "boulder",
-      "gap",
-      "hill",
-      "river",
-    ],
-    demand: 11,
+    demandText: "Fifteen roses for my potion, please. The ones that never wilt.",
+    route: ["hill", "river", "mountain", "thicket", "boulder", "mountain", "gap", "river"],
+    demand: 15,
     timerSeconds: null,
     challenge: "arithmetic",
     // One addition fact and one subtraction fact, both inside 18, plus the easy
@@ -158,7 +155,7 @@ const SEASONS = {
     itemName: "Diamond",
     itemPlural: "Diamonds",
     rareItemName: "Blazing Diamond",
-    demandText: "Thirteen diamonds next. My potion needs something that catches light.",
+    demandText: "Seventeen diamonds next. My potion needs something that catches light.",
     route: [
       "river",
       "thicket",
@@ -167,17 +164,10 @@ const SEASONS = {
       "gap",
       "hill",
       "river",
-      "thicket",
-      "mountain",
-      "boulder",
-      "gap",
-      "hill",
-      "river",
       "mountain",
       "thicket",
-      "boulder",
     ],
-    demand: 13,
+    demand: 17,
     timerSeconds: 30,
     challenge: "arithmetic",
     // The step up is the whole times table rather than the easy half of it, and
@@ -200,28 +190,20 @@ const SEASONS = {
     itemName: "Leaf",
     itemPlural: "Leaves",
     rareItemName: "Golden Leaf",
-    demandText: "Fifteen leaves, before they all fall. The gold ones are strongest.",
+    demandText: "Twenty-one leaves, before they all fall. The gold ones are strongest.",
     route: [
       "thicket",
       "boulder",
-      "gap",
       "mountain",
-      "hill",
-      "river",
-      "thicket",
-      "mountain",
-      "boulder",
       "gap",
       "hill",
       "mountain",
       "river",
       "thicket",
-      "boulder",
       "mountain",
-      "gap",
-      "hill",
+      "boulder",
     ],
-    demand: 15,
+    demand: 21,
     timerSeconds: 28,
     challenge: "arithmetic",
     // Two steps up: the facts lose the easiest two, and place value arrives as
@@ -246,30 +228,21 @@ const SEASONS = {
     itemName: "Icicle",
     itemPlural: "Icicles",
     rareItemName: "Frostfire Icicle",
-    demandText: "Seventeen icicles and the potion is finished. This is the hard part.",
+    demandText: "Twenty-three icicles and the potion is finished. This is the hard part.",
     route: [
       "gap",
       "hill",
-      "river",
       "mountain",
-      "thicket",
-      "boulder",
-      "gap",
-      "mountain",
-      "hill",
       "river",
       "thicket",
-      "mountain",
       "boulder",
+      "mountain",
       "gap",
       "hill",
       "mountain",
       "river",
-      "thicket",
-      "mountain",
-      "boulder",
     ],
-    demand: 17,
+    demand: 23,
     timerSeconds: 25,
     challenge: "arithmetic",
     // Nearly all hard facts, and the tens run further than autumn's. The 4 table
@@ -354,22 +327,23 @@ export function obstacleAt(season, index) {
 }
 
 /**
- * The most items a perfect run of a season can collect, for a character with
- * the given glowing-space value.
+ * The most items a finished trail collects, before the boss's rescue.
  *
- * This exists so seasons.test.js can assert every demand is actually reachable.
- * Editing a season's numbers without checking this is how a season becomes
- * quietly impossible.
+ * Not "a perfect run" any more: under the retry rule every question is
+ * eventually answered, so this is simply what a trail pays, whoever walks it
+ * and however many tries it took. `seasons.test.js` holds every demand to
+ * `maxItems(season) + season.boss.rescue`, which is what makes the snake
+ * woman's question the one that fills the jar.
+ *
+ * It lost a `glowingItems` parameter with the roster rebuild. No character
+ * varies what a mountain pays, and one that did would break the equality above.
  *
  * @param {Season} season - The season to measure
- * @param {number} [glowingItems] - Items per glowing space; defaults to the
- *   unmodified PLAY.ITEMS_PER_GLOWING_SPACE value
- * @returns {number} Items collected by answering every space correctly, before
- *   the boss's rescue
+ * @returns {number} Items collected by clearing every space
  */
-export function maxItems(season, glowingItems = 3) {
+export function maxItems(season) {
   if (!season || !Array.isArray(season.glowingAt) || !Number.isFinite(season.spaces)) return 0
   const glowing = season.glowingAt.length
   const ordinary = season.spaces - glowing
-  return ordinary + glowing * glowingItems
+  return ordinary + glowing * PLAY.ITEMS_PER_GLOWING_SPACE
 }

@@ -11,34 +11,207 @@ true; this one is allowed to speculate.
 ## Where it stands
 
 Playable end to end. Four seasons, four characters, a trail of obstacles with a
-crossing animation, collectibles shown as items, a boss with two tries, and a
-snake woman who is making a potion.
+crossing animation, collectibles shown as items, a snake woman who is making a
+potion, and a season that ends the moment she has been answered.
 
-Every rule Ella has decided is implemented. The two she has not are switches in
-`js/constants.js` with every option built and tested.
+Every rule Ella has decided is implemented. Nothing is behind a switch any more:
+the two undecided rule switches were settled on 2026-09-21 and deleted along with
+every option behind them.
+
+## Redesign of 2026-09-21: retry, shorter seasons, no losing
+
+**Built.** This section is the design record for what shipped, kept because the
+reasoning is worth more than the diff. It came from Ella playing the previous
+build and saying two things: you keep walking after the jar is already full, and a
+level takes too long. Four changes follow from that, and they settled both open
+rule switches.
+
+One thing came out of building it that the design did not foresee. The question
+key was `seed:seasonId:attempt:questionsAsked`, and a wrong answer still counts
+against `questionsAsked` — so a reload part-way through a retry handed back a
+different question from the one on screen. The key is now
+`seed:seasonId:attempt:position:extrasDone`: keyed on _where she is standing_,
+which does not move during a retry. See
+[`js/README.md`](../games/seasons/js/README.md#where-a-question-comes-from).
+
+The four are one change, not four. Removing the item penalty makes a finished
+trail yield a fixed number of items, which is what lets the demand line up
+exactly, which is what makes the trail safe to shorten.
+
+A whole run went from 72 questions to 42.
+
+### 1. A wrong answer costs questions, not items
+
+The per-space loop, replacing `RULES.WRONG_ANSWER` and every option of it:
+
+| Step                           | What the player sees                                                                 |
+| ------------------------------ | ------------------------------------------------------------------------------------ |
+| Wrong answer                   | "Not quite — have another look." That choice is struck off. The same question stays. |
+| The answer is **not** revealed | Ella's rule: make the student find it.                                               |
+| Right at last                  | A reinforcement card, then a "Got it" button.                                        |
+| One more question              | Same obstacle, worth no items.                                                       |
+| Right                          | The item, and the crossing.                                                          |
+
+A mistake costs about two extra questions. Cap it at one extra question per
+obstacle, however many tries the first question took, so a bad space cannot
+spiral. If the extra question is also missed, it retries and reinforces but adds
+no second extra.
+
+Three consequences worth knowing before building it:
+
+- **Three wrong taps leave one choice, which is the answer.** Accepted. It is
+  the Phoenix's hint, earned the hard way.
+- **The reinforcement card takes over the teaching the wrong-answer flash does
+  today.** That flash is the only reason a tap cannot skip ahead after a wrong
+  answer, so that rule in `js/game.js` can go.
+- **A timeout is still a wrong answer** and takes the same path, which is the
+  property worth keeping from the current design. **This is why the retry is
+  untimed.** Caught while critiquing the plan rather than while playing it: a
+  clock on the retry would time the same question out again, forever, for exactly
+  the child who could not answer it in time. `questionSeconds` returns `null`
+  while `retrying`, which is also the only thing in the design that guarantees a
+  season makes progress.
+
+### 2. The reinforcement card
+
+Shown once the missed question is answered right. The equation in full, large,
+and a picture under it when one fits:
+
+| Question          | Picture                                           |
+| ----------------- | ------------------------------------------------- |
+| `6 × 7`           | a 6 × 7 grid of dots                              |
+| `56 ÷ 8`          | 56 dots in 8 groups                               |
+| `8 + 7`, `15 − 9` | two ten-frames                                    |
+| `6 × 80`          | the related fact: `6 × 8 = 48`, so `6 × 80 = 480` |
+| `8 × 7 + 9`       | the two steps written out                         |
+
+**Built as a third export on the challenge module**, `explain(question)`,
+returning a described model rather than a drawing. `GameUI` draws the model
+kinds it knows and falls back to the bare equation for anything else. The
+alternative — `GameUI` reading `question.parts` — widens the leak that
+`js/README.md` already documents at `state.question?.answer`.
+
+The card is an outcome payload, not a phase: `outcome.reinforce` carries the
+explanation and nothing UI-shaped lands in the save file. It waits for its button
+rather than a timer, which is the one screen in the game that does.
+
+### 3. Seasons lined up, and about 40% shorter
+
+Every glowing space is worth 3 to every character, so a finished trail always
+yields the same total. Demand is that total plus the boss's rescue, which makes
+her question the one that fills the jar.
+
+|        | Spaces | Glowing | Trail items | Rescue | Demand | Questions |
+| ------ | ------ | ------- | ----------- | ------ | ------ | --------- |
+| Spring | 8      | 2       | 12          | +3     | 15     | 9         |
+| Summer | 9      | 2       | 13          | +4     | 17     | 10        |
+| Autumn | 10     | 3       | 16          | +5     | 21     | 11        |
+| Winter | 11     | 3       | 17          | +6     | 23     | 12        |
+
+42 questions for a clean run, against 72 today. Every escalation invariant in
+`seasons.test.js` still holds: the trail does not shorten, the glowing count does
+not fall, the demand rises strictly, and each rescue stays under its demand.
+
+The reachability test inverts. `demand ≤ 0.75 × maxItems` for every character
+becomes `demand === maxItems(season) + season.boss.rescue`, and `maxItems` loses
+its `glowingItems` parameter because no character varies it any more.
+
+Move `demandText` with the demand — it spells the number out.
+
+### 4. The roster
+
+Every perk is free now. There is no economy left to charge a cost against.
+
+|             | Perk                                                                |
+| ----------- | ------------------------------------------------------------------- |
+| Banana Slug | **Slow and Steady** — no countdown, ever, even with the timer on    |
+| Sloth       | **Takes His Time** — 10 extra seconds on every timed question       |
+| Phoenix     | **Rising Again** — once a season, a mistake hides two wrong choices |
+| Porcupine   | **Bounce Back** — after a mistake, no extra question                |
+
+The Phoenix's hint fires on the first retry of the season, so it needs no button.
+`hintsPerSeason` is the new field; `penaltyScale`, `forgivenessPerSeason`,
+`comebackBonus` and `glowingItems` all went.
+
+"Two wrong choices disappear" needed one adjustment to survive contact with the
+screen. Read literally against four buttons it leaves the answer standing alone —
+the player has already struck one off by pressing it. So the perk is expressed as
+`HINT_CHOICES_LEFT = 2` and `GameUI.hintTargets` works out the removals from what
+is still live, which leaves a straight fifty-fifty and still asks her to choose.
+
+**Open, and Ella's.** The countdown is off by default, so the Slug and the Sloth
+both do nothing unless a player turns it on, and they sit on the same axis. The
+alternative is to give the Slug a second always-on perk — two hints a season
+against the Phoenix's one.
+
+### 5. Finishing a season, and finishing the game
+
+Ella asked for a small bursting effect and a character that jumps.
+
+- **Season complete.** A burst of the season's items scattering outward, the
+  character drawn mid-jump beside the jar, and the haul arcing in. CSS keyframes,
+  so `prefers-reduced-motion` covers it for free — the same split the weather and
+  the item pips already use.
+- **The finale.** A large drawing of the snake woman looking happy beside the
+  finished flask. `villain()` takes a `happy` argument; the current drawing is
+  already pleased rather than threatening, so this is a wider smile and a raised
+  arm rather than a new character.
+
+### What got deleted
+
+The run can no longer be lost, because her question retries like any other. That
+removed more code than it added:
+
+| Gone                                                         | Where                                   |
+| ------------------------------------------------------------ | --------------------------------------- |
+| `WRONG_ANSWER`, all three options, and `_applyPenalty`       | `constants.js`, `GameState.js`          |
+| `BOSS_FAILURE`, all three options, and `BOSS_TRIES`          | `constants.js`, `GameState.js`          |
+| `wilting`, `lost`, `runOver`, `retry()`, `PHASE.SEASON_LOST` | `GameState.js`, `storage.js`, `game.js` |
+| The "Not quite enough" screen and `?phase=lost`              | `game.js`                               |
+| Wilt pips and the wilt note                                  | `GameUI.js`, `main.css`                 |
+
+Nine source files and nine test suites. Git keeps anything that turns out to be
+wanted.
+
+One thing survived the cull that looks like it should not have: `attempt`, in the
+question key. It is always 0, because nothing replays a season. It stays because a
+season picker is the one feature that would need it, and
+`GameState.test.js › startSeason's attempt counter` covers the capability so it
+cannot rot.
+
+### What this decides against
+
+The 2026-09-18 note below recommends the **early finish** over the shorter trail,
+on the grounds that cutting spaces takes the recovery margin away from everybody.
+That reasoning depended on a wrong answer costing an item. It no longer does, so
+there is no margin to protect and no reason to keep walking after the jar is
+full. Read that section as a record of the measurement, not as the current plan.
 
 ## Open questions for Ella
 
-Roughly in order of how much each would change the game.
+Roughly in order of how much each would change the game. Questions 1 and 3 are
+answered by the redesign above and are kept here for the reasoning only.
 
-1. **What is the Porcupine's power?** The other three animals each change a rule:
-   the Banana Slug is immune to wrong answers but collects less from a glowing
-   space, the Sloth gets more time, the Phoenix gets one free mistake a season.
-   The Porcupine's "next right answer after a wrong one is worth double" is a
-   placeholder to keep the slot playable. Replacing it is one entry in
-   `js/characters.js` as long as it reuses an existing effect field.
+1. ~~**What is the Porcupine's power?**~~ **Answered 2026-09-21, and built:**
+   after a mistake, no extra question. The whole roster was rebuilt around time
+   and hints at the same time, because with no penalty left to scale there was
+   nothing for the old perks to act on — and because a perk that changes an item
+   count cannot exist once the demand is met exactly.
 
 2. **What is the snake woman called?** She has a personality, a witch's hat, a
    potion in her hand, and no name.
 
-3. **What should a wrong answer cost?** `RULES.WRONG_ANSWER`, currently `WILT`.
+3. ~~**What should a wrong answer cost?**~~ **Answered 2026-09-21, and built:**
+   nothing. You retry the question, then answer one more. The three options that
+   were on the table are gone from the code along with the switch:
    - `GENTLE` -- nothing happens, the question just changes
    - `WILT` -- your last item wilts and comes back if the next answer is right;
      two wrong in a row and the first is gone
    - `STEP_BACK` -- you move back a space and lose an item outright
 
-   Worth playing all three before deciding. Flipping one is a one-line edit; a
-   handful of tests pin copy specific to the active rule and would need a look.
+   None was played. The retry rule answers the question all three were asking —
+   what a mistake should teach — in a way none of them did: the answer is not
+   stated, she has to find it, and then the card shows her why.
 
 4. **Does she ever give anything back?** Right now she only collects. This is the
    hook for the next phase -- see below.
@@ -49,6 +222,9 @@ Roughly in order of how much each would change the game.
    thicket, and anything weather-shaped.
 
 ## How long a season is, and whether it can end early
+
+**Superseded 2026-09-21** by the redesign above, which shortens the trail
+instead. Kept for the measurement.
 
 Asked 2026-09-18: should a season be shorter, or should it be possible to go to
 the snake woman as soon as the demand is met? Measured before answering, against

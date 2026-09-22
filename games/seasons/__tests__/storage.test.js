@@ -16,7 +16,7 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals"
 import { StorageManager as BaseStorageManager } from "../../shared/StorageManager.js"
 import { CHARACTERS, DEFAULT_CHARACTER } from "../js/characters.js"
-import { BOSS_TRIES, PHASE, SEASON_ORDER, STORAGE } from "../js/constants.js"
+import { PHASE, SEASON_ORDER, STORAGE } from "../js/constants.js"
 import { defaultSave, normalizeSave, StorageManager, toSavedRun } from "../js/storage.js"
 
 /** The four keys a save always has, before the base class stamps its two. */
@@ -29,19 +29,17 @@ const RUN_KEYS = [
   "seasonId",
   "seed",
   "attempt",
-  "bossTriesLeft",
   "position",
   "items",
-  "wilting",
-  "lost",
-  "forgivenessLeft",
-  "lastWasWrong",
+  "retrying",
+  "owed",
+  "extrasDone",
+  "hintsLeft",
   "streak",
   "bestStreak",
   "questionsAsked",
   "correctCount",
   "collected",
-  "runOver",
 ]
 
 /**
@@ -57,19 +55,17 @@ function populatedSave() {
       seasonId: "autumn",
       seed: 987654,
       attempt: 2,
-      bossTriesLeft: 1,
       position: 7,
       items: 12,
-      wilting: 1,
-      lost: 2,
-      forgivenessLeft: 1,
-      lastWasWrong: true,
+      retrying: true,
+      owed: 1,
+      extrasDone: 1,
+      hintsLeft: 1,
       streak: 4,
       bestStreak: 9,
       questionsAsked: 20,
       correctCount: 16,
       collected: { spring: 11, summer: 15 },
-      runOver: false,
     },
     unlocked: ["spring", "summer", "autumn"],
     totals: {
@@ -127,19 +123,17 @@ describe("defaultSave", () => {
         seasonId: null,
         seed: 1,
         attempt: 0,
-        bossTriesLeft: BOSS_TRIES,
         position: 0,
         items: 0,
-        wilting: 0,
-        lost: 0,
-        forgivenessLeft: 0,
-        lastWasWrong: false,
+        retrying: false,
+        owed: 0,
+        extrasDone: 0,
+        hintsLeft: 0,
         streak: 0,
         bestStreak: 0,
         questionsAsked: 0,
         correctCount: 0,
         collected: {},
-        runOver: false,
       },
       unlocked: [SEASON_ORDER[0]],
       totals: {
@@ -156,7 +150,7 @@ describe("defaultSave", () => {
     const { run } = defaultSave()
     expect(run.phase).toBe(PHASE.CHARACTER_SELECT)
     expect(run.seasonId).toBeNull()
-    expect(run.runOver).toBe(false)
+    expect(run.retrying).toBe(false)
   })
 
   it("unlocks only the first season", () => {
@@ -329,29 +323,27 @@ describe("normalizeSave", () => {
         run: {
           position: -5,
           items: -1,
-          wilting: -2,
-          lost: -3,
-          forgivenessLeft: -4,
+          owed: -2,
+          extrasDone: -3,
+          hintsLeft: -4,
           streak: -6,
           bestStreak: -7,
           questionsAsked: -8,
           correctCount: -9,
           attempt: -2,
-          bossTriesLeft: -1,
         },
       })
       expect(run).toMatchObject({
         position: 0,
         items: 0,
-        wilting: 0,
-        lost: 0,
-        forgivenessLeft: 0,
+        owed: 0,
+        extrasDone: 0,
+        hintsLeft: 0,
         streak: 0,
         bestStreak: 0,
         questionsAsked: 0,
         correctCount: 0,
         attempt: 0,
-        bossTriesLeft: BOSS_TRIES,
       })
     })
 
@@ -441,16 +433,12 @@ describe("normalizeSave", () => {
       ["an object", {}],
       ["an array", []],
       ["'true'", "true"],
-    ])("reads a merely truthy %s as false for runOver and lastWasWrong", (_label, value) => {
-      const { run } = normalizeSave({ run: { runOver: value, lastWasWrong: value } })
-      expect(run.runOver).toBe(false)
-      expect(run.lastWasWrong).toBe(false)
+    ])("reads a merely truthy %s as false for retrying", (_label, value) => {
+      expect(normalizeSave({ run: { retrying: value } }).run.retrying).toBe(false)
     })
 
-    it("keeps a strictly true runOver and lastWasWrong", () => {
-      const { run } = normalizeSave({ run: { runOver: true, lastWasWrong: true } })
-      expect(run.runOver).toBe(true)
-      expect(run.lastWasWrong).toBe(true)
+    it("keeps a strictly true retrying", () => {
+      expect(normalizeSave({ run: { retrying: true } }).run.retrying).toBe(true)
     })
 
     it.each([
@@ -475,14 +463,10 @@ describe("normalizeSave", () => {
       expect(normalizeSave({ run: { seasonId: "spring", position: 500 } }).run.position).toBe(500)
     })
 
-    it("keeps a usable attempt and bossTriesLeft", () => {
-      // `attempt` feeds the question seed and `bossTriesLeft` is how many shots
-      // at the boss are left, so both have to survive a reload intact -- losing
-      // the attempt hands a replaying player the questions they just failed,
-      // and losing the tries takes away a chance the game already promised.
-      const { run } = normalizeSave({ run: { attempt: 3, bossTriesLeft: 2 } })
-      expect(run.attempt).toBe(3)
-      expect(run.bossTriesLeft).toBe(2)
+    it("keeps a usable attempt", () => {
+      // `attempt` feeds the question seed, so it has to survive a reload intact
+      // -- losing it would hand a replaying player the questions she just saw.
+      expect(normalizeSave({ run: { attempt: 3 } }).run.attempt).toBe(3)
     })
 
     it.each([
@@ -496,33 +480,35 @@ describe("normalizeSave", () => {
       ["an object", {}],
       ["an array", []],
       ["true", true],
-    ])("reads a %s attempt as zero and restores a full boss allowance", (_label, value) => {
-      const { run } = normalizeSave({ run: { attempt: value, bossTriesLeft: value } })
+    ])("reads a %s attempt as zero", (_label, value) => {
+      const { run } = normalizeSave({ run: { attempt: value } })
       expect(run.attempt).toBe(0)
-      // Unusable input means "we do not know", and the safe reading for a shot
-      // count is a full allowance, not none -- zero would end a season on the
-      // first boss miss. `attempt` has no such floor because 0 is a valid value.
-      expect(run.bossTriesLeft).toBe(BOSS_TRIES)
       expect(Number.isInteger(run.attempt)).toBe(true)
-      expect(Number.isInteger(run.bossTriesLeft)).toBe(true)
     })
 
-    it("floors a fractional attempt and bossTriesLeft", () => {
-      const { run } = normalizeSave({ run: { attempt: 2.9, bossTriesLeft: 1.5 } })
-      expect(run.attempt).toBe(2)
-      expect(run.bossTriesLeft).toBe(1)
+    it("floors a fractional attempt", () => {
+      expect(normalizeSave({ run: { attempt: 2.9 } }).run.attempt).toBe(2)
     })
 
-    it("gives a save that predates the boss tries a full allowance", () => {
-      // The migration case, and the reason `bossTriesLeft` has a `|| BOSS_TRIES`
-      // fallback where the other counters do not. STORAGE.VERSION was not bumped
-      // when the field was added, so real saves in the wild have no such key.
-      // Coerced to 0 they would give the player no shot at the boss at all --
-      // the first miss would end the season -- and `?? BOSS_TRIES` cannot help,
-      // because the coercion produces 0 and 0 is not nullish.
-      const legacy = { phase: PHASE.TRAIL, seasonId: "spring", position: 4, items: 4 }
-      expect(normalizeSave({ run: legacy }).run.bossTriesLeft).toBe(BOSS_TRIES)
-      expect(normalizeSave({ run: legacy }).run.attempt).toBe(0)
+    it("caps owed and extrasDone at one", () => {
+      // Both are flags the rules read as "is there one outstanding", not
+      // counters. A hand-edited `owed: 40` would owe forty extra questions at a
+      // single hill, and the retry loop would serve every one of them.
+      const { run } = normalizeSave({ run: { owed: 40, extrasDone: 99 } })
+      expect(run.owed).toBe(1)
+      expect(run.extrasDone).toBe(1)
+    })
+
+    it("keeps a legitimate owed and extrasDone", () => {
+      const { run } = normalizeSave({ run: { owed: 1, extrasDone: 0 } })
+      expect(run.owed).toBe(1)
+      expect(run.extrasDone).toBe(0)
+    })
+
+    it("does not cap hintsLeft, which is a real count", () => {
+      // Unlike the two above: a perk giving two hints a season is a supported
+      // roster change, so the coercion must not quietly halve it.
+      expect(normalizeSave({ run: { hintsLeft: 2 } }).run.hintsLeft).toBe(2)
     })
   })
 
@@ -696,25 +682,27 @@ describe("toSavedRun", () => {
     expect(saved.collected).not.toBe(state.collected)
   })
 
-  it("carries the attempt and the boss tries off a live state", () => {
+  it("carries the attempt and the retry fields off a live state", () => {
     // Both are live GameState fields, not derived ones, so `toSavedRun` has to
     // persist them rather than letting them fall back to zero on the next load.
     const saved = toSavedRun({
       ...populatedSave().run,
       attempt: 4,
-      bossTriesLeft: 2,
+      retrying: true,
+      owed: 1,
       question: { prompt: "48 ÷ 6", answer: 8 },
     })
     expect(saved.attempt).toBe(4)
-    expect(saved.bossTriesLeft).toBe(2)
+    expect(saved.retrying).toBe(true)
+    expect(saved.owed).toBe(1)
   })
 
-  it("coerces a nonsense attempt and boss tries off a live state", () => {
-    const saved = toSavedRun({ ...populatedSave().run, attempt: -1, bossTriesLeft: Number.NaN })
+  it("coerces a nonsense attempt and owed count off a live state", () => {
+    const saved = toSavedRun({ ...populatedSave().run, attempt: -1, owed: Number.NaN })
     expect(saved.attempt).toBe(0)
     // Unusable shot counts restore a full allowance rather than none; see the
     // migration test above for why zero is the dangerous reading.
-    expect(saved.bossTriesLeft).toBe(BOSS_TRIES)
+    expect(saved.owed).toBe(0)
   })
 })
 
@@ -739,11 +727,11 @@ describe("StorageManager", () => {
     })
 
     it("normalizes on the way in", () => {
-      expect(manager.saveRun({ run: { runOver: 1, streak: 9, bestStreak: 0 }, highScore: 5 })).toBe(
-        true,
-      )
+      expect(
+        manager.saveRun({ run: { retrying: 1, streak: 9, bestStreak: 0 }, highScore: 5 }),
+      ).toBe(true)
       const stored = JSON.parse(localStorage.getItem(STORAGE.KEY))
-      expect(stored.run.runOver).toBe(false)
+      expect(stored.run.retrying).toBe(false)
       expect(stored.run.bestStreak).toBe(9)
       expect("highScore" in stored).toBe(false)
     })
@@ -803,39 +791,39 @@ describe("StorageManager", () => {
       expect(manager.loadRun()).toMatchObject(save)
     })
 
-    it("round-trips the attempt and the boss tries through localStorage", () => {
+    it("round-trips the attempt and the retry fields through localStorage", () => {
       const save = defaultSave()
       save.run.phase = PHASE.BOSS
       save.run.seasonId = "winter"
       save.run.attempt = 3
-      save.run.bossTriesLeft = 1
+      save.run.owed = 1
       expect(manager.saveRun(save)).toBe(true)
 
       const loaded = manager.loadRun()
       expect(loaded.run.attempt).toBe(3)
-      expect(loaded.run.bossTriesLeft).toBe(1)
+      expect(loaded.run.owed).toBe(1)
     })
 
-    it("coerces a hostile attempt and boss tries off localStorage", () => {
+    it("coerces a hostile attempt and owed count off localStorage", () => {
       writeRaw({
-        run: { attempt: -7, bossTriesLeft: "lots" },
+        run: { attempt: -7, owed: "lots" },
         version: STORAGE.VERSION,
       })
       const loaded = manager.loadRun()
       expect(loaded.run.attempt).toBe(0)
-      expect(loaded.run.bossTriesLeft).toBe(BOSS_TRIES)
+      expect(loaded.run.owed).toBe(0)
     })
 
     it("normalizes a hostile payload written straight to localStorage", () => {
       writeRaw({
-        run: { runOver: 1, streak: 8, bestStreak: 2, collected: { spring: -4, monsoon: 3 } },
+        run: { retrying: 1, streak: 8, bestStreak: 2, collected: { spring: -4, monsoon: 3 } },
         unlocked: ["winter", "winter", "monsoon"],
         totals: { questionsAnswered: 2, questionsCorrect: 88 },
         highScore: 9,
         version: STORAGE.VERSION,
       })
       const loaded = manager.loadRun()
-      expect(loaded.run.runOver).toBe(false)
+      expect(loaded.run.retrying).toBe(false)
       expect(loaded.run.bestStreak).toBe(8)
       expect(loaded.run.collected).toEqual({ spring: 0 })
       expect(loaded.unlocked).toEqual(["spring", "winter"])

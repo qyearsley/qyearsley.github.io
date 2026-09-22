@@ -332,16 +332,18 @@ describe("cross-function invariants over the real seasons", () => {
   })
 
   it.each(SEASONS)("%s: walking every space collects maxItems", (_name, season) => {
-    // The trail's shape has to agree with the reachability figure seasons.js
-    // publishes for its demands. Payout lives in GameState, so this values the
-    // spaces the same way it does. `maxItems` is called rather than its formula
-    // copied: a copy would let the two drift apart and stay green, which is the
-    // opposite of what this test is for.
+    // The trail's shape has to agree with the figure seasons.js publishes for
+    // its demands. Payout lives in GameState, so this values the spaces the
+    // same way it does. `maxItems` is called rather than its formula copied: a
+    // copy would let the two drift apart and stay green, which is the opposite
+    // of what this test is for.
     const total = buildTrail(season).reduce(
       (sum, space) => sum + (space.glowing ? PLAY.ITEMS_PER_GLOWING_SPACE : PLAY.ITEMS_PER_SPACE),
       0,
     )
-    expect(total).toBe(maxItems(season, PLAY.ITEMS_PER_GLOWING_SPACE))
-    expect(total).toBeGreaterThanOrEqual(season.demand)
+    expect(total).toBe(maxItems(season))
+    // The trail alone falls exactly the boss's rescue short of the demand,
+    // which is what makes her question the one that fills the jar.
+    expect(total).toBe(season.demand - season.boss.rescue)
   })
 })

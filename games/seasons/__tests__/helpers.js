@@ -16,18 +16,15 @@
  * place, usually against `madeUpSeason` so that Ella retuning spring does not
  * rewrite a copy assertion that has nothing to do with the retune.
  *
- * The rule helpers at the bottom are here for the same reason: `RULES` is a
- * pair of undecided design switches, so no suite may assume the value either
- * one happens to be shipping with today.
+ * This file used to end with a set of rule helpers, for pinning the two
+ * undecided `RULES` switches per suite. Both switches were settled on
+ * 2026-09-21 and deleted along with every option behind them, so there is no
+ * longer a rule for a test to hold still.
  */
 
 import { readFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
-
-import { afterEach, beforeEach, it } from "@jest/globals"
-
-import { BOSS_TRIES, RULES } from "../js/constants.js"
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 
@@ -161,70 +158,6 @@ export function madeUpSeason(overrides = {}) {
     ...overrides,
   }
 }
-
-/**
- * The shipped values of the two rule switches, read once at import time and so
- * before any test has had a chance to change them.
- */
-const DEFAULT_RULES = { ...RULES }
-
-/**
- * Make every test in the file start and end on the shipped rules.
- *
- * Call this once at the top level of a suite, above any other hook. `RULES` is
- * a mutable object in constants.js -- deliberately not frozen -- so a test can
- * put a different design option in force simply by assigning to it. This is the
- * single save/restore that stops one doing so from leaking into whatever Jest
- * runs next, and it runs whether or not the test changed anything and whether
- * or not it failed part way through.
- *
- * @returns {void}
- */
-export function restoreRulesBetweenTests() {
-  beforeEach(() => {
-    Object.assign(RULES, DEFAULT_RULES)
-  })
-
-  afterEach(() => {
-    Object.assign(RULES, DEFAULT_RULES)
-  })
-}
-
-/**
- * Put the given rules in force for every test in the enclosing describe block.
- *
- * Call this at the top of a describe block instead of writing a bespoke
- * `beforeEach`/`afterEach` pair. There is no matching teardown to forget:
- * `restoreRulesBetweenTests` owns the restore.
- *
- * The assignment happens in a `beforeEach`, so it lands after any hook an
- * enclosing block registered. That is fine for anything that reads `RULES` when
- * it runs -- which is everything in GameState and GameUI -- but a block whose
- * *setup* depends on the rule should do that setup in its own `beforeEach`,
- * declared after this call.
- *
- * @param {Object} rules - The switches to change
- * @param {string} [rules.wrongAnswer] - A WRONG_ANSWER option
- * @param {string} [rules.bossFailure] - A BOSS_FAILURE option
- * @returns {void}
- */
-export function useRules({ wrongAnswer, bossFailure } = {}) {
-  beforeEach(() => {
-    if (wrongAnswer !== undefined) RULES.WRONG_ANSWER = wrongAnswer
-    if (bossFailure !== undefined) RULES.BOSS_FAILURE = bossFailure
-  })
-}
-
-/**
- * `it`, unless the boss is single-shot.
- *
- * `BOSS_TRIES` is a plain number rather than a field on a mutable object, so a
- * test cannot pin it the way `useRules` pins a rule. Setting it to 1 is a
- * supported tuning choice ("make the boss single-shot again"), and it deletes
- * the second try rather than changing it -- so the cases about what the second
- * try does have nothing left to assert and skip themselves instead of failing.
- */
-export const itWithASecondTry = BOSS_TRIES > 1 ? it : it.skip
 
 /** A zeroed lifetime-totals block, the shape `defaultSave` starts from. */
 export const zeroTotals = () => ({

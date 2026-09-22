@@ -2,9 +2,9 @@
  * Seasons arithmetic challenge -- generates and checks maths questions.
  *
  * A challenge module, conforming to the contract in challenges/index.js. It
- * exports `generate` and `check` and nothing else, and it knows nothing about
- * seasons, characters, trails, or the DOM. It is handed a list of forms and an
- * Rng, and hands back a question.
+ * exports `generate`, `check` and the optional `explain`, and it knows nothing
+ * about seasons, characters, trails, or the DOM. It is handed a list of forms
+ * and an Rng, and hands back a question.
  *
  * A *form* describes a shape of question rather than a specific one, so a
  * season can say "two-digit subtraction that needs regrouping" once and get a
@@ -74,6 +74,7 @@ const BIG_ANSWER = 100
  * @property {string} kind      - The form kind that produced it
  * @property {string} prompt    - The question text, e.g. "7 × 8"
  * @property {number} answer    - The correct answer
+ * @property {number[]} parts   - The operands the generator used, for `explain`
  * @property {number[]} choices - CHOICE_COUNT distinct options including the answer
  */
 
@@ -580,9 +581,11 @@ export function generate(forms, rng) {
   const form = (Array.isArray(forms) && rng.pick(forms)) || { kind: "add", max: 20 }
   const kind = Object.hasOwn(GENERATORS, form.kind) ? form.kind : "add"
   const { prompt, answer, parts } = GENERATORS[kind](form, rng)
-  // `parts` is deliberately not returned: it exists so the distractors can be
-  // believable, and nothing outside this module has any use for it.
-  return { kind, prompt, answer, choices: _choices(answer, kind, parts, rng) }
+  // `parts` used to be dropped here, on the grounds that it existed only so the
+  // distractors could be believable. `explain` needs the same operands to draw
+  // a 6 × 7 grid, and recovering them by parsing `prompt` back into numbers
+  // would be a second, worse copy of what the generator already knows.
+  return { kind, prompt, answer, parts, choices: _choices(answer, kind, parts, rng) }
 }
 
 /**
@@ -612,4 +615,138 @@ export function check(question, given) {
   if (typeof given === "string" && given.trim() === "") return false
   const value = Number(given)
   return Number.isFinite(value) && value === question.answer
+}
+
+/**
+ * Most dots a picture may draw. Past this the array stops being something a
+ * child counts and becomes texture -- and `9 × 80` would ask for 720 of them.
+ * @private
+ */
+const MAX_DOTS = 60
+
+/**
+ * Longest side of a dot array. A 2 × 30 strip is within MAX_DOTS and still
+ * unreadable, because nothing about it looks like two rows of thirty.
+ * @private
+ */
+const MAX_GRID_SIDE = 12
+
+/**
+ * Largest total a pair of ten-frames will show. Two frames hold twenty, which
+ * is also where every `add` and `sub` form in the game stops.
+ * @private
+ */
+const MAX_FRAME_TOTAL = 20
+
+/**
+ * A picture of a fact, for the reinforcement card.
+ *
+ * @typedef {Object} Explanation
+ * @property {string} equation - The fact in full, e.g. "6 × 7 = 42"
+ * @property {Model|null} model - A picture to draw under it, or null for none
+ *
+ * @typedef {Object} Model
+ * @property {string} kind - "array", "groups", "tenFrames" or "steps"
+ */
+
+/**
+ * Split a multiplication into a multiple of ten and a single digit, if it is
+ * one. `6 × 80` is on grade as place value rather than as a fact to memorise,
+ * so the picture worth drawing is the related fact and not 480 dots.
+ * @private
+ * @param {number[]} parts - The two operands
+ * @returns {{unit: number, tens: number}|null} The split, or null
+ */
+function _tensSplit(parts) {
+  const [a, b] = parts
+  if (a >= 10 && a % 10 === 0 && b < 10) return { unit: b, tens: a }
+  if (b >= 10 && b % 10 === 0 && a < 10) return { unit: a, tens: b }
+  return null
+}
+
+/**
+ * Explain a question, for the card shown after a missed question is finally
+ * answered right.
+ *
+ * The optional third export of the challenge contract; see challenges/index.js.
+ * Returning null for a question it cannot picture is normal and expected -- the
+ * card then shows the equation alone.
+ *
+ * Two decisions worth keeping. The equation is built from the question's own
+ * `prompt`, so the card cannot drift from what was on screen a second earlier;
+ * re-deriving it from `parts` would be a second renderer of the same fact. And
+ * every model is *described* rather than drawn, because this module has no DOM
+ * and the UI has no arithmetic -- GameUI draws the kinds it knows and falls back
+ * to the equation for anything it does not, so a new model kind is additive.
+ *
+ * @param {Question} question - The question that was finally answered
+ * @returns {Explanation|null} What to show, or null for an unusable question
+ */
+export function explain(question) {
+  if (!question || !Number.isFinite(question.answer) || typeof question.prompt !== "string") {
+    return null
+  }
+  const parts = Array.isArray(question.parts) ? question.parts : []
+  const equation = `${question.prompt} = ${question.answer}`
+  return { equation, model: _model(question, parts) }
+}
+
+/**
+ * The picture for a question, or null if none of them fit.
+ * @private
+ * @param {Question} question - The question being explained
+ * @param {number[]} parts - The operands the generator used
+ * @returns {Model|null} A described model, or null
+ */
+function _model(question, parts) {
+  const [a, b, c] = parts
+
+  if (question.kind === "mul" && Number.isFinite(a) && Number.isFinite(b)) {
+    const rows = Math.min(a, b)
+    const cols = Math.max(a, b)
+    // Rows short side up, so the grid is always wider than it is tall. The
+    // prompt shows its operands in either order and the grid is the same fact
+    // whichever way round it is read.
+    if (cols <= MAX_GRID_SIDE && rows * cols <= MAX_DOTS) return { kind: "array", rows, cols }
+    const split = _tensSplit(parts)
+    if (split) {
+      return {
+        kind: "steps",
+        lines: [
+          `${split.unit} × ${split.tens / 10} = ${(split.unit * split.tens) / 10}`,
+          `${split.unit} × ${split.tens} = ${question.answer}`,
+        ],
+        note: "Ten times as many",
+      }
+    }
+    return null
+  }
+
+  if (question.kind === "div" && Number.isFinite(a) && Number.isFinite(b)) {
+    // parts is [divisor, quotient]: the dividend shared into `a` groups of `b`.
+    if (a * b <= MAX_DOTS) return { kind: "groups", groups: a, per: b }
+    return null
+  }
+
+  if ((question.kind === "add" || question.kind === "sub") && Number.isFinite(a)) {
+    const total = question.kind === "add" ? question.answer : a
+    if (total <= MAX_FRAME_TOTAL) {
+      return { kind: "tenFrames", op: question.kind, a, b, answer: question.answer }
+    }
+    return null
+  }
+
+  if (question.kind === "twoStep" && Number.isFinite(a) && Number.isFinite(b)) {
+    const product = a * b
+    // The sign is recoverable rather than parsed out of the prompt: `_twoStep`
+    // only ever adds or subtracts `c` from the product.
+    const sign = question.answer === product + c ? "+" : "-"
+    return {
+      kind: "steps",
+      lines: [`${a} × ${b} = ${product}`, `${product} ${sign} ${c} = ${question.answer}`],
+      note: "One step, then the other",
+    }
+  }
+
+  return null
 }

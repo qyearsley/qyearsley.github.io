@@ -2,13 +2,12 @@
  * Seasons constants -- every shared value in the game. This module imports
  * nothing, so it can be read by any other module without a cycle.
  *
- * This is the tuning surface. `RULES.WRONG_ANSWER` and `RULES.BOSS_FAILURE` are
- * the undecided design questions, exposed as switches rather than baked into
- * GameState: change the constant, reload, play. GameState implements every
- * option and GameState.test.js covers every option, so flipping one is a
- * one-line change and not a rewrite. ../README.md is the canonical description
- * of what each option means to a player; the enums below carry a one-line
- * reminder each.
+ * This is the tuning surface. It used to carry two switches, `RULES.WRONG_ANSWER`
+ * and `RULES.BOSS_FAILURE`, holding three options each for design questions Ella
+ * had not settled. She settled them on 2026-09-21, both in the same direction: a
+ * wrong answer costs no items at all. You keep the question until you get it
+ * right, then you answer one more before moving on. The switches and every option
+ * behind them are gone; `docs/seasons-plan.md` records what they were.
  *
  * Season difficulty lives in seasons.js, not here, because it is content rather
  * than mechanism.
@@ -20,10 +19,16 @@
  * localStorage identity. Bumping VERSION clears every existing save, which the
  * shared StorageManager does on a version mismatch. Bump it whenever the save
  * shape changes incompatibly.
+ *
+ * Bumped to "2.0" on 2026-09-21. The retry rule dropped four run fields and the
+ * retune shortened every trail, so a save from 1.0 carries a position and an
+ * item count that belong to a season that no longer exists at that length.
+ * Coercing it would land a player somewhere arbitrary; clearing it starts her
+ * at spring, which is at least a place the game means.
  */
 export const STORAGE = {
   KEY: "seasonsProgress",
-  VERSION: "1.0",
+  VERSION: "2.0",
 }
 
 /**
@@ -32,63 +37,6 @@ export const STORAGE = {
  * @type {string[]}
  */
 export const SEASON_ORDER = ["spring", "summer", "autumn", "winter"]
-
-/**
- * What a wrong answer costs. Ella has not settled this yet, so every option is
- * implemented and any of them can be the active rule. ../README.md explains
- * each in full.
- *
- * - GENTLE:    nothing happens; you stay put and the question changes.
- * - WILT:      your most recent item stops counting, and the *next* correct
- *              answer revives it. Two wrong in a row and it is gone for good.
- * - STEP_BACK: you move back a space and lose an item outright.
- *
- * @enum {string}
- */
-export const WRONG_ANSWER = {
-  GENTLE: "gentle",
-  WILT: "wilt",
-  STEP_BACK: "stepBack",
-}
-
-/**
- * What happens when the demand is missed *and* every boss try (BOSS_TRIES) has
- * been used up. Also undecided, also implemented every way; ../README.md
- * explains each in full.
- *
- * - RETRY_SEASON: the season restarts, with fresh questions.
- * - ALWAYS_PASS:  you continue with fewer items banked.
- * - END_RUN:      the whole run ends and you start from spring.
- *
- * @enum {string}
- */
-export const BOSS_FAILURE = {
-  RETRY_SEASON: "retrySeason",
-  ALWAYS_PASS: "alwaysPass",
-  END_RUN: "endRun",
-}
-
-/**
- * The active rules -- the two switches described in the file header.
- *
- * WILT and RETRY_SEASON are the starting defaults because they are the middle
- * option of each set: they have real stakes without ending anything. Change
- * either one here and play; nothing else needs to move.
- */
-export const RULES = {
-  WRONG_ANSWER: WRONG_ANSWER.WILT,
-  BOSS_FAILURE: BOSS_FAILURE.RETRY_SEASON,
-}
-
-/**
- * How many shots you get at the boss question.
- *
- * Ella's rule: "if you miss the boss question you get a chance to go back and
- * try again." So a miss is not the end of the season -- you face a fresh boss
- * question, and only running out of tries hands over to RULES.BOSS_FAILURE.
- * Set to 1 to make the boss single-shot again.
- */
-export const BOSS_TRIES = 2
 
 /**
  * Values that apply to every season regardless of difficulty.
@@ -104,30 +52,44 @@ export const PLAY = {
   CHOICE_COUNT: 4,
   /** Items awarded by an ordinary space. */
   ITEMS_PER_SPACE: 1,
-  /** Items awarded by a glowing space, before the character's own modifier. */
+  /**
+   * Items awarded by a glowing space. The same for every character since
+   * 2026-09-21: a season's demand is now exactly what a finished trail pays
+   * plus the boss's rescue, and a character who collected a different amount
+   * from a mountain could not hit that number. See seasons.js.
+   */
   ITEMS_PER_GLOWING_SPACE: 3,
 }
+
+/**
+ * How many choices the Phoenix's hint leaves standing.
+ *
+ * Two, not one. "Two wrong choices vanish" is the promise on the card, and read
+ * literally against four buttons it would leave the answer alone on screen --
+ * the player has already struck one off by pressing it. Leaving two is the
+ * fifty-fifty the perk sounds like, and it still asks her to choose.
+ */
+export const HINT_CHOICES_LEFT = 2
 
 /**
  * Defaults for a character that does not override them. characters.js merges
  * each character's `effects` over this object, so a character only states what
  * it changes.
  *
- * `penaltyScale` multiplies whatever the active WRONG_ANSWER rule costs: 0 is
- * immune, 1 is normal, 2 is double. Keeping the scale separate from the rule is
- * what lets a character stay meaningful whichever rule is active.
+ * One field per animal, which is not a coincidence: with no penalty left to
+ * scale, the roster was rebuilt around the four things a perk can still touch.
+ * `penaltyScale`, `forgivenessPerSeason`, `comebackBonus` and `glowingItems` all
+ * went with the wrong-answer rules.
  */
 export const DEFAULT_EFFECTS = {
-  /** Multiplier on the wrong-answer penalty. 0 means immune. */
-  penaltyScale: 1,
-  /** Items from a glowing space, overriding PLAY.ITEMS_PER_GLOWING_SPACE. */
-  glowingItems: PLAY.ITEMS_PER_GLOWING_SPACE,
   /** Seconds added to a timed question. Ignored when the season has no timer. */
   extraSeconds: 0,
-  /** Wrong answers fully ignored per season, before any penalty applies. */
-  forgivenessPerSeason: 0,
-  /** Whether the first correct answer after a wrong one pays double. */
-  comebackBonus: false,
+  /** Whether this character never runs a countdown, whatever the setting says. */
+  noTimer: false,
+  /** Hints per season: a miss that leaves HINT_CHOICES_LEFT choices standing. */
+  hintsPerSeason: 0,
+  /** Whether a mistake skips the extra question and goes straight on. */
+  skipsExtra: false,
 }
 
 /**
@@ -141,6 +103,10 @@ export const ART = {
 
 /**
  * Phases of a run. GameState is a state machine over these.
+ *
+ * There is no lost phase. A missed question is retried rather than charged for,
+ * including the snake woman's, so a season that has started always ends in
+ * SEASON_WON.
  * @enum {string}
  */
 export const PHASE = {
@@ -152,8 +118,6 @@ export const PHASE = {
   BOSS: "boss",
   /** The season was cleared. */
   SEASON_WON: "seasonWon",
-  /** The demand was missed and the boss did not save it. */
-  SEASON_LOST: "seasonLost",
   /** Every season cleared. */
   RUN_COMPLETE: "runComplete",
 }
