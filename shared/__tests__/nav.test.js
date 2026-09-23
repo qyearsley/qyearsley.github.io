@@ -401,7 +401,7 @@ describe("nav.js", () => {
       `
     }
 
-    it.each(["h", "j", "k", "u", "l"])("%s is left alone", (key) => {
+    it.each(["h", "j", "k", "u", "l", "r"])("%s is left alone", (key) => {
       makeGamePage()
       const event = pressKey(key)
       expect(event.defaultPrevented).toBe(false)
@@ -431,6 +431,7 @@ describe("nav.js", () => {
       )
       expect(keys).not.toContain("h")
       expect(keys).not.toContain("u")
+      expect(keys).not.toContain("r")
       expect(keys).toContain("?")
     })
 
@@ -438,6 +439,18 @@ describe("nav.js", () => {
       document.body.innerHTML = `<main id="game-container"></main>`
       const event = pressKey("h")
       expect(event.defaultPrevented).toBe(false)
+    })
+
+    // Registration is module-wide, so this runs last in the block: after it,
+    // `u` is advertised with the game's description.
+    it("advertises a suppressed key the game registered, with its description", () => {
+      makeGamePage()
+      window.__registerShortcut("u", "Undo move")
+      pressKey("?")
+      const entries = Array.from(document.querySelectorAll(".shortcut-list dt")).map(
+        (dt) => dt.textContent + " " + dt.nextElementSibling.textContent,
+      )
+      expect(entries).toContain("u Undo move")
     })
   })
 
@@ -455,6 +468,40 @@ describe("nav.js", () => {
       const event = pressKey("t")
       expect(event.defaultPrevented).toBe(false)
       if (saved) window.__themeToggle = saved
+    })
+  })
+
+  describe("random page key (r)", () => {
+    afterEach(() => {
+      delete global.fetch
+    })
+
+    it("is advertised in the help overlay", () => {
+      pressKey("?")
+      const descriptions = Array.from(document.querySelectorAll(".shortcut-list dd")).map(
+        (dd) => dd.textContent,
+      )
+      expect(descriptions).toContain("Go to a random page")
+    })
+
+    it("prevents the default action and fetches /pages.json", () => {
+      global.fetch = jest.fn(() => Promise.reject(new Error("no dist/pages.json")))
+
+      const event = pressKey("r")
+
+      expect(event.defaultPrevented).toBe(true)
+      expect(global.fetch).toHaveBeenCalledWith("/pages.json")
+    })
+
+    it("does nothing when the fetch fails (e.g. npm run dev, no build)", async () => {
+      global.fetch = jest.fn(() => Promise.reject(new Error("no dist/pages.json")))
+
+      pressKey("r")
+      await new Promise((resolve) => setTimeout(resolve, 0))
+
+      // No navigation attempt is directly observable in jsdom; the absence
+      // of a thrown/unhandled rejection is the assertion here.
+      expect(global.fetch).toHaveBeenCalled()
     })
   })
 })

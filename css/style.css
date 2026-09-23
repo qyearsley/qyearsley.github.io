@@ -382,6 +382,32 @@ p {
   margin: 0 auto 0.75rem;
 }
 
+/* Wraps .profile-image so the avatar's Game of Life glider (shared/discover.js)
+   is a real button -- focusable and Enter/Space-activated for free -- rather
+   than a div with hand-rolled key handling. Resets the button chrome and
+   hands sizing straight back to .profile-image, which already centers itself. */
+.profile-image-button {
+  display: block;
+  margin: 0 auto 1rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+}
+
+.header.compact .profile-image-button {
+  margin: 0 auto 0.75rem;
+}
+
+.profile-image-button .profile-image {
+  margin: 0;
+}
+
+.profile-image-button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
 /* Main Content */
 .main-content {
   padding: 2rem 3rem;
@@ -467,6 +493,42 @@ p {
 }
 
 .external-links a:hover {
+  text-decoration: underline;
+}
+
+/* "See also" cross-links at the end of a tool page's <main>. Quiet on
+   purpose -- a top border and muted heading, from the same tokens as the
+   rest of the page, so it reads as an afterthought rather than a new
+   section competing with the page's own content. */
+.see-also {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.see-also h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.see-also ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.see-also li {
+  margin-bottom: 0.25rem;
+}
+
+.see-also a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.see-also a:hover {
   text-decoration: underline;
 }
 
@@ -1044,5 +1106,35 @@ kbd {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* Print
+   Aimed at the Tone Table and Syllabary pages -- someone printing a
+   reference table wants the table, not the site chrome around it, and
+   doesn't want a row cut in half by a page break. */
+@media print {
+  .skip-link,
+  .header-controls,
+  .theme-toggle,
+  .breadcrumbs,
+  .keyboard-help-backdrop,
+  .see-also,
+  #table-filter,
+  #filter-count {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+  }
+
+  a {
+    color: #000;
+  }
+
+  tr {
+    break-inside: avoid;
   }
 }

@@ -50,6 +50,7 @@
     { key: "u", description: "Up to section index", condition: "breadcrumb" },
     { key: "?", description: "Show keyboard shortcuts" },
     { key: "h", description: "Go to homepage" },
+    { key: "r", description: "Go to a random page" },
     { key: "l", description: "Toggle language", condition: "lang" },
     { key: "t", description: "Cycle theme", condition: "theme" },
     { key: "Escape", description: "Close overlay" },
@@ -59,6 +60,13 @@
     const existing = shortcuts.find((s) => s.key === key)
     if (existing) {
       existing.handler = handler
+      // A game that claims a page-navigation key (Life Garden and Turing Tape
+      // use `r` for Reset) owns it there, so the overlay lists the game's
+      // meaning instead of hiding the key.
+      if (PAGE_NAV_KEYS.indexOf(key) !== -1) {
+        existing.description = description
+        existing.claimed = true
+      }
       return
     }
     shortcuts.push({ key: key, description: description, handler: handler })
@@ -106,7 +114,7 @@
       if (s.condition === "breadcrumb" && !getParentLink()) continue
       if (s.condition === "lang" && !getLangToggleUrl()) continue
       // Suppressed on game pages, so don't advertise them there.
-      if (PAGE_NAV_KEYS.indexOf(s.key) !== -1 && isGamePage()) continue
+      if (PAGE_NAV_KEYS.indexOf(s.key) !== -1 && isGamePage() && !s.claimed) continue
 
       const dt = document.createElement("dt")
       dt.innerHTML = "<kbd>" + s.key + "</kbd>"
@@ -206,7 +214,7 @@
 
   // --- Navigation helpers ---
 
-  const PAGE_NAV_KEYS = ["h", "j", "k", "u", "l"]
+  const PAGE_NAV_KEYS = ["h", "j", "k", "u", "l", "r"]
 
   // Every game page is built around one of these two containers and no other
   // page uses either, so the presence of one is the signal that page-navigation
@@ -294,6 +302,33 @@
             }
             window.location.href = langUrl
           }
+          return
+        }
+
+        // Duplicated rather than shared with shared/discover.js's randomPick:
+        // nav.js has no imports (see the Shared Module Contract in
+        // docs/development.md), and the logic is a handful of lines.
+        case "r": {
+          e.preventDefault()
+          fetch("/pages.json")
+            .then(function (response) {
+              if (!response.ok) throw new Error("pages.json request failed")
+              return response.json()
+            })
+            .then(function (pages) {
+              if (!Array.isArray(pages) || pages.length === 0) return
+              const currentPath = isZhPage ? location.pathname.slice(3) : location.pathname
+              const candidates = pages.filter(function (p) {
+                return p.path !== currentPath
+              })
+              const pool = candidates.length > 0 ? candidates : pages
+              const pick = pool[Math.floor(Math.random() * pool.length)]
+              window.location.href = isZhPage && pick.zh ? "/zh" + pick.path : pick.path
+            })
+            .catch(function () {
+              // No dist/pages.json (npm run dev) or a network hiccup. Nothing
+              // to navigate to, so do nothing rather than error.
+            })
           return
         }
 

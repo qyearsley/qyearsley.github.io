@@ -56,6 +56,7 @@ shared/
   table-filter.js           Searchable table filtering
   contact-form.js           Contact form submission
   life-background.js        Game of Life animation (404 page)
+  discover.js               "Try something" homepage picker + 404 random-page link
 
 zh-common.json              Shared translations (see docs/translations.md)
 *.zh.json                   Per-page translations (co-located with HTML)
@@ -78,9 +79,10 @@ Because the page only exists after a build, `npm run dev` does not serve
 2. **Copy** -- copy all static files to `dist/` (skips config files, dev-only dirs)
 3. **Render resume** -- convert `resume/resume.md` to HTML via `marked`, inject into `resume/template.html`
 4. **Translate** -- for each translatable page, generate a Chinese version at `/zh/` using text-matching against co-located `*.zh.json` files. Both the `/zh/` and the English copy also get `hreflang` links and a language-switch link in the header.
-5. **Inject paths** -- write `window.__translatedPaths` into every HTML file so `nav.js` can persist language preference client-side
-6. **Sitemap** -- generate `dist/sitemap.xml` from all HTML files, excluding `/404.html` and the `/zh/` pages (those appear as `hreflang` alternates)
-7. **Validate** -- check every internal `href` and `src`, absolute or relative, against the files in `dist/`. A broken link fails the build, which is what keeps it off the live site: the deploy workflow uploads `dist/` only after build, test and lint all pass.
+5. **Page registry** -- write `dist/pages.json`: every tool/game page under `games/`, `javascript/`, and `chinese/` (excluding each section's own index), with its English and (if translated) Chinese title. `shared/discover.js` fetches this for the homepage's "Try something" picker, the 404 page's random-page link, and the `r` keyboard shortcut.
+6. **Inject paths** -- write `window.__translatedPaths` into every HTML file so `nav.js` can persist language preference client-side
+7. **Sitemap** -- generate `dist/sitemap.xml` from all HTML files, excluding `/404.html` and the `/zh/` pages (those appear as `hreflang` alternates)
+8. **Validate** -- check every internal `href` and `src`, absolute or relative, against the files in `dist/`. A broken link fails the build, which is what keeps it off the live site: the deploy workflow uploads `dist/` only after build, test and lint all pass.
 
 Why this rather than a site generator, and what would change our mind:
 [`build-system-options.md`](build-system-options.md).
@@ -130,7 +132,7 @@ Tests use Jest with `--experimental-vm-modules` for ESM support.
 
 - `build.test.js` -- unit tests for build functions (text matching, translation, link rewriting, hreflang)
 - `__tests__/html.test.js` -- structural checks across every source HTML page (unclosed script tags, placeholder SRI hashes, etc.)
-- `shared/__tests__/` -- tests for `nav.js`, `theme.js`, `table-filter.js`, and `contact-form.js`
+- `shared/__tests__/` -- tests for `nav.js`, `theme.js`, `table-filter.js`, `contact-form.js`, and `discover.js`
 - `javascript/*.test.js`, `chinese/*.test.js` -- tests for experiment and tool logic
 - `games/*/__tests__/` -- tests for game logic and level/preset data
 
@@ -213,6 +215,7 @@ cross-module call, so `nav.js` and `theme.js` work in either order.
 | `__themePopoverIsOpen()`                        | `theme.js`                           | `nav.js`   | Whether the theme popover is open (so `Escape` closes it first)                  |
 | `__themePopoverClose()`                         | `theme.js`                           | tests      | Close the theme popover                                                          |
 | `__prefersDark()`                               | `theme.js`                           | games      | Whether dark applies right now, honouring an explicit choice over the OS         |
+| `__discover`                                    | `discover.js`                        | tests      | `{ dailyPick, randomPick, pageLink, lifeStep }` -- the picker's pure logic       |
 
 `theme.js` also dispatches a `themechange` event on `window` when the picker
 changes the theme. Stylesheets re-resolve themselves; anything painted into a
@@ -222,6 +225,11 @@ and that event (see `games/life-garden/js/Renderer.js`).
 When adding a cross-module global, prefix it with `__`, expose it as soon as the
 module initializes, and guard every read (`if (window.__foo)`) so load order
 never matters.
+
+`nav.js`'s `r` shortcut ("Go to a random page") duplicates `discover.js`'s
+`randomPick` rather than reading it off `window.__discover`: both files have no
+imports, and the pick logic is a handful of lines, so a global for it would be
+more ceremony than the duplication it avoids.
 
 ## Stylesheets
 

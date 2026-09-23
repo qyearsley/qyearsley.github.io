@@ -19,8 +19,10 @@ import {
   clean,
   copyTree,
   discoverTranslatablePages,
+  discoverToolPages,
   findDuplicateKeys,
   findHtmlFiles,
+  generatePagesRegistry,
   generateSitemap,
   injectLangMeta,
   injectTranslatedPaths,
@@ -1223,6 +1225,155 @@ describe("discoverTranslatablePages", () => {
   test("returns empty array when no .zh.json files exist", () => {
     writeFile(tmp, "page.html", "<p/>")
     expect(discoverTranslatablePages(tmp)).toEqual([])
+  })
+})
+
+describe("discoverToolPages", () => {
+  let tmp
+
+  beforeEach(() => {
+    tmp = mkdtempSync(join(tmpdir(), "build-tools-"))
+  })
+
+  afterEach(() => {
+    rmSync(tmp, { recursive: true, force: true })
+  })
+
+  test("excludes each section's own index.html", () => {
+    writeFile(tmp, "games/index.html", "<title>Games - Quinten Yearsley</title>")
+    writeFile(tmp, "javascript/index.html", "<title>Experiments - Quinten Yearsley</title>")
+    writeFile(tmp, "chinese/index.html", "<title>Chinese Language Notes - Quinten Yearsley</title>")
+
+    expect(discoverToolPages(tmp)).toEqual([])
+  })
+
+  test("reports a flat page at its filename", () => {
+    writeFile(tmp, "javascript/coin-flipper.html", "<title>Coin Flipper - Quinten Yearsley</title>")
+
+    const pages = discoverToolPages(tmp)
+
+    expect(pages).toEqual([
+      { path: "/javascript/coin-flipper.html", title: "Coin Flipper", zhTitle: null, zh: false },
+    ])
+  })
+
+  test("collapses a directory-style page to its directory URL", () => {
+    writeFile(tmp, "games/seasons/index.html", "<title>Seasons - Quinten Yearsley</title>")
+
+    const pages = discoverToolPages(tmp)
+
+    expect(pages).toEqual([{ path: "/games/seasons/", title: "Seasons", zhTitle: null, zh: false }])
+  })
+
+  test("strips the site-name suffix from the title", () => {
+    writeFile(tmp, "javascript/coin-flipper.html", "<title>Coin Flipper - Quinten Yearsley</title>")
+
+    expect(discoverToolPages(tmp)[0].title).toBe("Coin Flipper")
+  })
+
+  test("reports zh: true and a stripped zhTitle when a .zh.json sits alongside the page", () => {
+    writeFile(
+      tmp,
+      "chinese/tone-table.html",
+      "<title>Pinyin Tone Tables - Quinten Yearsley</title>",
+    )
+    writeFile(
+      tmp,
+      "chinese/tone-table.zh.json",
+      JSON.stringify({ _title: "拼音声调表 - Quinten Yearsley" }),
+    )
+
+    const pages = discoverToolPages(tmp)
+
+    expect(pages).toEqual([
+      {
+        path: "/chinese/tone-table.html",
+        title: "Pinyin Tone Tables",
+        zhTitle: "拼音声调表",
+        zh: true,
+      },
+    ])
+  })
+
+  test("reports zh: false and zhTitle: null when no .zh.json exists", () => {
+    writeFile(tmp, "chinese/homophones.html", "<title>Homophones - Quinten Yearsley</title>")
+
+    expect(discoverToolPages(tmp)[0]).toEqual(expect.objectContaining({ zh: false, zhTitle: null }))
+  })
+
+  test("excludes games/shared/, which holds code shared between games", () => {
+    writeFile(tmp, "games/shared/BaseGameUI.js", "export {}")
+    writeFile(tmp, "games/shared/__tests__/BaseGameUI.test.js", "// test")
+
+    expect(discoverToolPages(tmp)).toEqual([])
+  })
+
+  test("skips dev-only directories nested under a game (__tests__, etc.)", () => {
+    writeFile(tmp, "games/seasons/index.html", "<title>Seasons - Quinten Yearsley</title>")
+    writeFile(tmp, "games/seasons/__tests__/fixture.html", "<title>Fixture</title>")
+
+    const pages = discoverToolPages(tmp)
+
+    expect(pages).toEqual([{ path: "/games/seasons/", title: "Seasons", zhTitle: null, zh: false }])
+  })
+
+  test("ignores sections outside games/, javascript/, and chinese/", () => {
+    writeFile(tmp, "contact/index.html", "<title>Contact - Quinten Yearsley</title>")
+    writeFile(tmp, "resume/index.html", "<title>Resume - Quinten Yearsley</title>")
+    writeFile(
+      tmp,
+      "colophon/index.html",
+      "<title>How This Site Is Built - Quinten Yearsley</title>",
+    )
+
+    expect(discoverToolPages(tmp)).toEqual([])
+  })
+
+  test("sorts the result by path", () => {
+    writeFile(tmp, "javascript/truth-tables.html", "<title>Truth Tables - Quinten Yearsley</title>")
+    writeFile(tmp, "chinese/syllabary.html", "<title>Syllabary - Quinten Yearsley</title>")
+    writeFile(tmp, "games/turing-tape/index.html", "<title>Turing Tape - Quinten Yearsley</title>")
+
+    const paths = discoverToolPages(tmp).map((p) => p.path)
+
+    expect(paths).toEqual([
+      "/chinese/syllabary.html",
+      "/games/turing-tape/",
+      "/javascript/truth-tables.html",
+    ])
+  })
+
+  test("falls back to the path when a page has no <title>", () => {
+    writeFile(tmp, "javascript/untitled.html", "<p>no title here</p>")
+
+    expect(discoverToolPages(tmp)[0].title).toBe("/javascript/untitled.html")
+  })
+})
+
+describe("generatePagesRegistry", () => {
+  let tmp, src, dist
+
+  beforeEach(() => {
+    tmp = mkdtempSync(join(tmpdir(), "build-registry-"))
+    src = join(tmp, "src")
+    dist = join(tmp, "dist")
+    mkdirSync(dist, { recursive: true })
+  })
+
+  afterEach(() => {
+    rmSync(tmp, { recursive: true, force: true })
+  })
+
+  test("writes dist/pages.json with the discovered pages", () => {
+    writeFile(src, "javascript/coin-flipper.html", "<title>Coin Flipper - Quinten Yearsley</title>")
+
+    const pages = generatePagesRegistry(dist, src)
+
+    const written = JSON.parse(readFileSync(join(dist, "pages.json"), "utf-8"))
+    expect(written).toEqual(pages)
+    expect(written).toEqual([
+      { path: "/javascript/coin-flipper.html", title: "Coin Flipper", zhTitle: null, zh: false },
+    ])
   })
 })
 

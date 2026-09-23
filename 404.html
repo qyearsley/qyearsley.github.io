@@ -50,6 +50,13 @@
         text-align: center;
         padding: 2rem 0;
       }
+
+      /* shared/discover.js unhides this once /pages.json has loaded. Margin
+         only on the left, so the hidden state leaves no gap next to the
+         homepage link. */
+      #discover-404-random {
+        margin-left: 0.75rem;
+      }
     </style>
   </head>
   <body>
@@ -65,10 +72,12 @@
           <div class="not-found-code">404</div>
           <p class="not-found-message">The page you're looking for doesn't exist.</p>
           <a href="/" class="back-link">Go to homepage</a>
+          <a href="#" id="discover-404-random" class="back-link" hidden>Or try a random page</a>
           <p class="not-found-hint">Conway's Game of Life runs in the background.</p>
         </section>
       </main>
     </div>
+    <script src="/shared/discover.js"></script>
     <script src="/shared/nav.js"></script>
     <script src="/shared/life-background.js"></script>
   </body>

@@ -6,9 +6,10 @@
 //   1. Copy static files to dist/ (skip dev-only files)
 //   2. Render resume from markdown
 //   3. Generate Chinese (/zh/) translations via text-matching
-//   4. Inject translated-paths data for client-side language persistence
-//   5. Generate sitemap.xml
-//   6. Validate internal links
+//   4. Write dist/pages.json (tool/game page registry for shared/discover.js)
+//   5. Inject translated-paths data for client-side language persistence
+//   6. Generate sitemap.xml
+//   7. Validate internal links
 //
 
 import {
@@ -300,6 +301,90 @@ function reportStaleCommonKeys(commonKeys, matchedCommon) {
   return stale
 }
 
+// ── Page registry ───────────────────────────────────────────────
+
+// Sections that hold tools and games worth surfacing on the homepage's
+// "Try something" picker (shared/discover.js). Each section's own index.html
+// is the section listing, not a tool, and is excluded in walkToolSection.
+const TOOL_SECTIONS = ["games", "javascript", "chinese"]
+
+// Every page's <title> ends in " - Quinten Yearsley" (or, on the homepage,
+// " — Quinten Yearsley"), including on translated pages, where only the part
+// before the separator is Chinese. Stripped here so the picker reads
+// "Today's pick: Turing Tape" rather than repeating the site name.
+function stripSiteName(title) {
+  return title.replace(/\s*[-—]\s*Quinten Yearsley\s*$/, "")
+}
+
+function extractTitle(html) {
+  const match = html.match(/<title>([\s\S]*?)<\/title>/)
+  return match ? stripSiteName(match[1].trim()) : null
+}
+
+// Walks one section directory, collecting `{ section, relDir, name }` for
+// every HTML file that is a page rather than plumbing. `js/`, `styles/`,
+// `__tests__/` and friends are skipped via the same SKIP_DIRS used for the
+// rest of the build; `shared/` (games/shared/BaseGameUI.js etc.) is skipped
+// here too, since it holds code shared between games, not a page.
+function walkToolSection(dir, section, relDir, pages) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const name = entry.name
+    if (name.startsWith(".")) continue
+    if (entry.isDirectory()) {
+      if (SKIP_DIRS.has(name) || name === "shared") continue
+      walkToolSection(join(dir, name), section, relDir + name + "/", pages)
+      continue
+    }
+    if (!name.endsWith(".html")) continue
+    if (relDir === "" && name === "index.html") continue // section index, not a tool
+    pages.push({ section, relDir, name })
+  }
+}
+
+// Discovers every tool/game page under games/, javascript/ and chinese/.
+// Walking the tree means a new page joins automatically -- there is no list
+// to update. A directory-style page (`games/seasons/index.html`) is reported
+// at its directory URL (`/games/seasons/`); a flat page keeps its filename.
+function discoverToolPages(rootDir = ROOT) {
+  const found = []
+  for (const section of TOOL_SECTIONS) {
+    const sectionDir = join(rootDir, section)
+    if (!existsSync(sectionDir)) continue
+    walkToolSection(sectionDir, section, "", found)
+  }
+
+  const pages = found.map(({ section, relDir, name }) => {
+    const relPath = section + "/" + relDir + name
+    const path = name === "index.html" ? "/" + section + "/" + relDir : "/" + relPath
+
+    const html = readFileSync(join(rootDir, relPath), "utf-8")
+    const title = extractTitle(html) || path
+
+    const zhJsonPath = join(rootDir, relPath.replace(/\.html$/, ".zh.json"))
+    const zh = existsSync(zhJsonPath)
+    let zhTitle = null
+    if (zh) {
+      const translations = JSON.parse(readFileSync(zhJsonPath, "utf-8"))
+      zhTitle = translations._title ? stripSiteName(translations._title) : null
+    }
+
+    return { path, title, zhTitle, zh }
+  })
+
+  pages.sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0))
+  return pages
+}
+
+// Writes dist/pages.json for shared/discover.js to fetch client-side. Run
+// after translation so `zh` and `zhTitle` reflect the *.zh.json files that
+// were just read for the /zh/ pages.
+function generatePagesRegistry(distDir = DIST, rootDir = ROOT) {
+  const pages = discoverToolPages(rootDir)
+  writeFileSync(join(distDir, "pages.json"), JSON.stringify(pages, null, 2))
+  console.log(`  Wrote pages.json (${pages.length} pages)`)
+  return pages
+}
+
 // Adds hreflang <link> tags and a language switcher link to an HTML page.
 //
 // Two mount points, because the site has two kinds of page. A document page has
@@ -576,6 +661,9 @@ function build() {
 
   reportStaleCommonKeys(commonKeys, matchedCommon)
 
+  console.log("Generating page registry...")
+  generatePagesRegistry()
+
   console.log("Injecting translated paths...")
   injectTranslatedPaths()
 
@@ -610,6 +698,8 @@ export {
   findHtmlFiles,
   loadTranslations,
   discoverTranslatablePages,
+  discoverToolPages,
+  generatePagesRegistry,
   generateSitemap,
   validateLinks,
   injectTranslatedPaths,
