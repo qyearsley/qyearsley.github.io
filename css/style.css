@@ -462,12 +462,18 @@ p {
   color: var(--color-text-muted);
 }
 
-/* Homepage hint for the ? overlay (shared/nav.js). Hidden where there is
-   no hover, which in practice means touch-only devices with no keyboard. */
-.shortcut-hint {
-  margin-top: 0.75rem;
-  font-size: 0.9rem;
+/* Homepage footer. Holds the hint for the ? overlay (shared/nav.js), which is
+   hidden where there is no hover -- in practice, touch-only devices with no
+   keyboard. */
+.site-footer {
+  padding: 0 3rem 1.5rem;
+  text-align: center;
+  font-size: 0.8rem;
   color: var(--color-text-muted);
+}
+
+.site-footer kbd {
+  font-size: 0.75rem;
 }
 
 @media (hover: none) {
@@ -1086,6 +1092,10 @@ kbd {
 
   .main-content {
     padding: 1.5rem;
+  }
+
+  .site-footer {
+    padding: 0 1.5rem 1.5rem;
   }
 }
 
