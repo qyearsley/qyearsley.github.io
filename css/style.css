@@ -273,6 +273,7 @@ p {
    get a language switch, so the button would then be one height beside a
    sibling and another alone. The min-height sizes each control on its own. */
 .lang-switch,
+.header-controls .help-toggle,
 .header-controls .theme-toggle {
   display: inline-flex;
   align-items: center;
@@ -298,9 +299,25 @@ p {
 }
 
 .lang-switch:hover,
+.header-controls .help-toggle:hover,
+.header-controls .help-toggle:focus,
 .header-controls .theme-toggle:hover,
 .header-controls .theme-toggle:focus {
   opacity: 1;
+}
+
+/* The ? button nav.js adds to open the shortcut list. Buttons don't inherit
+   the font the way the anchor beside them does. Hidden where there is no
+   hover, which in practice means touch-only devices with no keyboard. */
+.header-controls .help-toggle {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+@media (hover: none) {
+  .header-controls .help-toggle {
+    display: none;
+  }
 }
 
 /* Where build.js puts the language switcher on a page that has no `<header>`:
@@ -460,26 +477,6 @@ p {
 .internal-links a span {
   font-weight: 400;
   color: var(--color-text-muted);
-}
-
-/* Homepage footer. Holds the hint for the ? overlay (shared/nav.js), which is
-   hidden where there is no hover -- in practice, touch-only devices with no
-   keyboard. */
-.site-footer {
-  padding: 0 3rem 1.5rem;
-  text-align: center;
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
-}
-
-.site-footer kbd {
-  font-size: 0.75rem;
-}
-
-@media (hover: none) {
-  .shortcut-hint {
-    display: none;
-  }
 }
 
 /* Marks a link that leaves the site. The homepage lists GitHub, the blog and
@@ -1092,10 +1089,6 @@ kbd {
 
   .main-content {
     padding: 1.5rem;
-  }
-
-  .site-footer {
-    padding: 0 1.5rem 1.5rem;
   }
 }
 

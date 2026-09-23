@@ -198,6 +198,32 @@
 
   window.__helpOverlayIsOpen = isHelpOpen
 
+  // A ? button beside the language switch and theme toggle, so the shortcuts
+  // can be found without already knowing the key. Pages without a site header
+  // (the full-screen games) get no button. The header lookup matches
+  // theme.js: Number Garden and Times Trail reuse `.header` inside `.screen`.
+  function addHelpButton() {
+    const header = Array.from(document.querySelectorAll(".header")).find(function (el) {
+      return !el.closest(".screen")
+    })
+    if (!header || header.querySelector(".help-toggle")) return
+    let controls = header.querySelector(".header-controls")
+    if (!controls) {
+      controls = document.createElement("div")
+      controls.className = "header-controls"
+      header.appendChild(controls)
+    }
+    const btn = document.createElement("button")
+    btn.type = "button"
+    btn.className = "help-toggle"
+    btn.setAttribute("aria-label", "Keyboard shortcuts")
+    btn.textContent = "?"
+    btn.addEventListener("click", showHelp)
+    controls.insertBefore(btn, controls.firstChild)
+  }
+
+  document.addEventListener("DOMContentLoaded", addHelpButton)
+
   // --- Language toggle ---
   function getLangToggleUrl() {
     const langSwitch = document.querySelector(".lang-switch")

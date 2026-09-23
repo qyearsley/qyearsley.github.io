@@ -75,6 +75,49 @@ describe("nav.js", () => {
     })
   })
 
+  describe("help button", () => {
+    function addHeader(inner) {
+      const header = document.createElement("header")
+      header.className = "header"
+      header.innerHTML = inner
+      document.body.prepend(header)
+      document.dispatchEvent(new Event("DOMContentLoaded"))
+      return header
+    }
+
+    it("goes first in the header controls, before the language switch", () => {
+      const header = addHeader(
+        '<div class="header-controls"><a class="lang-switch" href="/zh/">中文</a></div>',
+      )
+      const controls = header.querySelector(".header-controls")
+      expect(controls.firstElementChild.className).toBe("help-toggle")
+      expect(controls.children).toHaveLength(2)
+    })
+
+    it("creates the header controls when the header has none", () => {
+      const header = addHeader("<h1>Title</h1>")
+      expect(header.querySelector(".header-controls .help-toggle")).not.toBeNull()
+    })
+
+    it("opens the overlay on click", () => {
+      const header = addHeader("<h1>Title</h1>")
+      header.querySelector(".help-toggle").click()
+      expect(window.__helpOverlayIsOpen()).toBe(true)
+    })
+
+    it("is added once, however many times DOMContentLoaded fires", () => {
+      const header = addHeader("<h1>Title</h1>")
+      document.dispatchEvent(new Event("DOMContentLoaded"))
+      expect(header.querySelectorAll(".help-toggle")).toHaveLength(1)
+    })
+
+    it("skips a .header inside a game .screen", () => {
+      document.body.innerHTML = '<div class="screen"><div class="header"></div></div>'
+      document.dispatchEvent(new Event("DOMContentLoaded"))
+      expect(document.querySelector(".help-toggle")).toBeNull()
+    })
+  })
+
   describe("help overlay", () => {
     it("opens on ? key", () => {
       pressKey("?")
