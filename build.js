@@ -9,9 +9,11 @@
 //   4. Write dist/pages.json (tool/game page registry for shared/discover.js)
 //   5. Inject translated-paths data for client-side language persistence
 //   6. Generate sitemap.xml
-//   7. Validate internal links
+//   7. Cache-bust local script URLs and JS import specifiers
+//   8. Validate internal links (and JS import specifiers)
 //
 
+import { createHash } from "node:crypto"
 import {
   copyFileSync,
   existsSync,
@@ -98,8 +100,13 @@ function copyTree(src, dest) {
   for (const entry of readdirSync(src, { withFileTypes: true })) {
     const name = entry.name
     if (name.startsWith(".")) continue
+    // Checked before the isDirectory branch below so it also catches a
+    // symlinked node_modules (as in a git worktree, to share one install
+    // across worktrees) -- entry.isDirectory() is false for a symlink
+    // regardless of what it points to, so that check alone would miss it
+    // and copyFileSync would then fail trying to copy it as a plain file.
+    if (SKIP_DIRS.has(name)) continue
     if (entry.isDirectory()) {
-      if (SKIP_DIRS.has(name)) continue
       copyTree(join(src, name), join(dest, name))
     } else {
       if (SKIP_FILES.has(name)) continue
@@ -542,6 +549,188 @@ function resolveLink(href, fromPath) {
   }
 }
 
+// ── Cache busting ───────────────────────────────────────────────
+//
+// GitHub Pages serves this site with a short cache lifetime and no custom
+// headers, so right after a deploy a browser can be left holding a mix of an
+// old page and new JS modules (or the reverse) until every cached file
+// expires -- and a page's module graph fails to load if any two files in it
+// come from different deploys. Appending `?v=<buildId>` to every local
+// script URL -- in HTML, and inside the modules' own relative imports --
+// makes a deploy change every URL a browser might have cached, rather than
+// relying on the browser to notice a file changed underneath an unversioned
+// one.
+//
+// The id is a content hash, not a timestamp or a git rev: rebuilding from
+// unchanged sources produces the same id (so a no-op rebuild doesn't churn
+// every URL), and the build gains no dependency on git.
+
+function findJsFiles(dir) {
+  const files = []
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (entry.isDirectory()) {
+      files.push(...findJsFiles(join(dir, entry.name)))
+    } else if (entry.name.endsWith(".js")) {
+      files.push(join(dir, entry.name))
+    }
+  }
+  return files
+}
+
+// Hashes every JS file that made it into dist/ -- path and content, so a
+// rename changes the id even if no file's contents did. Sorted first: file
+// order from readdirSync is not guaranteed, and an id that depended on it
+// wouldn't be deterministic.
+function computeBuildId(distDir = DIST) {
+  const hash = createHash("sha256")
+  for (const file of findJsFiles(distDir).sort()) {
+    hash.update(file.slice(distDir.length))
+    hash.update(readFileSync(file))
+  }
+  return hash.digest("hex").slice(0, 10)
+}
+
+// True for a script `src` this build shouldn't touch: a CDN or other
+// cross-origin URL, rather than a file this site ships itself.
+function isExternalScriptSrc(src) {
+  return src.startsWith("//") || /^[a-z][a-z0-9+.-]*:/i.test(src)
+}
+
+// Sets (replacing, not appending to) the `?v=` query on a same-site
+// specifier or URL.
+function versionSpecifier(spec, buildId) {
+  const queryIndex = spec.indexOf("?")
+  const path = queryIndex === -1 ? spec : spec.slice(0, queryIndex)
+  return `${path}?v=${buildId}`
+}
+
+// Appends `?v=<buildId>` to every local `<script src="...js">` in an HTML
+// page -- module or classic, since GitHub Pages' caching doesn't care which.
+// A `src` that already carries a query string (Number Garden's
+// hand-maintained `?v=7`, before this build took over versioning it) has
+// that query replaced rather than appended to, so there's exactly one `v`.
+function addCacheBustToHtml(html, buildId) {
+  return html.replace(
+    /(<script\b[^>]*\ssrc=")([^"]+\.js)(?:\?[^"]*)?(")/g,
+    (match, prefix, src, suffix) => {
+      if (isExternalScriptSrc(src)) return match
+      return `${prefix}${versionSpecifier(src, buildId)}${suffix}`
+    },
+  )
+}
+
+// `import ... from "./x.js"`, `export ... from "./x.js"`, and bare
+// `import "./x.js"` (no bindings).
+//
+// Both patterns require the keyword at the very start of a line. A real
+// import/export statement is always written that way in this codebase (one
+// statement per line -- Prettier here uses no semicolons), which is also
+// what keeps this from matching a comment that merely talks about an
+// import: see games/times-trail/js/storage.js, whose JSDoc spells out
+// `import { StorageManager } from "./storage.js"` as prose, on a line that
+// starts with `*`, not `import`.
+//
+// The `from` clause can span several lines (a long destructured import
+// list). The character class between the keyword and `from` is restricted
+// to what an import/export clause can actually contain -- identifiers,
+// `{ } , *` and whitespace -- so the lazy match can't run past the
+// statement it started on into unrelated code that happens to contain a
+// later `from "....js"`.
+const STATIC_IMPORT_RE = /^([ \t]*(?:import|export)\b[\w\s{},*]*?\bfrom\s*)(["'])([^"']+)\2/gm
+const BARE_IMPORT_RE = /^([ \t]*import\s*)(["'])([^"']+)\2/gm
+
+// Dynamic `import("./x.js")`. Unlike a static import this can appear
+// mid-expression rather than at the start of a line, so it isn't anchored
+// the same way. Instead, any line that -- once leading whitespace is
+// trimmed -- starts with `*` or `//` is skipped entirely: every JSDoc
+// `import("./x.js").Type` type reference in this codebase (see
+// games/life-garden/js/Species.js's consumers, or MasteryModel.js's) lives
+// on a comment line written exactly that way, and none of them span
+// multiple physical lines.
+const DYNAMIC_IMPORT_RE = /(\bimport\(\s*)(["'])([^"']+)\2(\s*\))/g
+
+function isCommentLine(line) {
+  const trimmed = line.trimStart()
+  return trimmed.startsWith("*") || trimmed.startsWith("//") || trimmed.startsWith("/*")
+}
+
+// Rewrites relative import/export specifiers in one JS file's source to add
+// `?v=<buildId>`, so a module imported from two different files -- or at two
+// different `../` depths -- resolves to the exact same URL. That matters
+// because a module fetched under two different URLs is instantiated twice by
+// the browser (two StorageManager copies, two sets of state), so every
+// reference to a given file has to produce an identical URL.
+function rewriteJsImports(source, buildId) {
+  // STATIC_IMPORT_RE and BARE_IMPORT_RE have 3 capture groups (no trailing
+  // punctuation to preserve); DYNAMIC_IMPORT_RE has a 4th for the closing
+  // `)`. Two separate callbacks, rather than one with an optional 4th
+  // parameter, because `String.replace` always passes the match offset and
+  // input string as the arguments right after the last capture group -- a
+  // shared callback would treat that offset as the 4th group's value on the
+  // 3-group regexes.
+  const versionThreeGroup = (match, prefix, quote, spec) => {
+    if (!spec.startsWith(".")) return match
+    return `${prefix}${quote}${versionSpecifier(spec, buildId)}${quote}`
+  }
+  const versionFourGroup = (match, prefix, quote, spec, suffix) => {
+    if (!spec.startsWith(".")) return match
+    return `${prefix}${quote}${versionSpecifier(spec, buildId)}${quote}${suffix}`
+  }
+
+  let result = source.replace(STATIC_IMPORT_RE, versionThreeGroup)
+  result = result.replace(BARE_IMPORT_RE, versionThreeGroup)
+  result = result
+    .split("\n")
+    .map((line) => (isCommentLine(line) ? line : line.replace(DYNAMIC_IMPORT_RE, versionFourGroup)))
+    .join("\n")
+  return result
+}
+
+// The same three patterns as rewriteJsImports, but collecting specifiers
+// instead of rewriting them. Used by validateLinks to check that every
+// relative import in dist resolves to a file that actually exists -- the
+// check a renamed-but-still-imported module would otherwise only fail at
+// runtime in a browser, since this build never executes the game code.
+function findRelativeImportSpecifiers(source) {
+  const specs = []
+  for (const re of [STATIC_IMPORT_RE, BARE_IMPORT_RE]) {
+    for (const m of source.matchAll(re)) specs.push(m[3])
+  }
+  for (const line of source.split("\n")) {
+    if (isCommentLine(line)) continue
+    for (const m of line.matchAll(DYNAMIC_IMPORT_RE)) specs.push(m[3])
+  }
+  return specs.filter((spec) => spec.startsWith("."))
+}
+
+// Applies cache-busting to every HTML and JS file already written to
+// distDir: HTML script tags get `?v=`, and JS files get it on their own
+// relative imports. Returns counts for the build log; only rewrites a file
+// that actually changed.
+function applyCacheBusting(distDir, buildId) {
+  let htmlCount = 0
+  for (const file of findHtmlFiles(distDir)) {
+    const html = readFileSync(file, "utf-8")
+    const versioned = addCacheBustToHtml(html, buildId)
+    if (versioned !== html) {
+      writeFileSync(file, versioned)
+      htmlCount++
+    }
+  }
+
+  let jsCount = 0
+  for (const file of findJsFiles(distDir)) {
+    const source = readFileSync(file, "utf-8")
+    const versioned = rewriteJsImports(source, buildId)
+    if (versioned !== source) {
+      writeFileSync(file, versioned)
+      jsCount++
+    }
+  }
+
+  return { htmlCount, jsCount }
+}
+
 function validateLinks(distDir = DIST) {
   const htmlFiles = findHtmlFiles(distDir)
   const existingPaths = new Set()
@@ -579,10 +768,28 @@ function validateLinks(distDir = DIST) {
     }
   }
 
+  // Same idea, but for a JS file's own relative import specifiers rather
+  // than an HTML page's href/src. `?v=` queries are already on these files
+  // by the time this runs (see build()); resolveLink strips them via
+  // URL.pathname the same way it strips one from an HTML link.
+  for (const file of findJsFiles(distDir)) {
+    const source = readFileSync(file, "utf-8")
+    const fromPath = file.slice(distDir.length).replace(/\\/g, "/")
+    for (const spec of findRelativeImportSpecifiers(source)) {
+      const resolved = resolveLink(spec, fromPath)
+      if (resolved === null) continue
+      if (!existingPaths.has(resolved)) {
+        const relFile = file.slice(distDir.length + 1)
+        console.warn(`  Broken import in ${relFile}: ${spec}`)
+        brokenCount++
+      }
+    }
+  }
+
   if (brokenCount > 0) {
     console.warn(`  ${brokenCount} broken link(s) found.`)
   } else {
-    console.log("  All internal links valid.")
+    console.log("  All internal links and imports valid.")
   }
   return brokenCount
 }
@@ -619,6 +826,11 @@ function build() {
 
   console.log("Copying files...")
   copyTree(ROOT, DIST)
+
+  // Computed from the JS files as just copied -- byte-for-byte from
+  // source, before any rewriting below -- so the id is a pure function of
+  // the sources, not of this build's own output.
+  const buildId = computeBuildId(DIST)
 
   console.log("Generating resume from markdown...")
   generateResume()
@@ -670,6 +882,10 @@ function build() {
   console.log("Generating sitemap...")
   generateSitemap()
 
+  console.log(`Cache-busting JS (build ${buildId})...`)
+  const { htmlCount, jsCount } = applyCacheBusting(DIST, buildId)
+  console.log(`  Versioned ${htmlCount} HTML file(s), ${jsCount} JS file(s)`)
+
   console.log("Validating links...")
   const broken = validateLinks()
   if (broken > 0) {
@@ -703,6 +919,12 @@ export {
   generateSitemap,
   validateLinks,
   injectTranslatedPaths,
+  findJsFiles,
+  computeBuildId,
+  addCacheBustToHtml,
+  rewriteJsImports,
+  findRelativeImportSpecifiers,
+  applyCacheBusting,
   TRANSLATABLE_PAGES,
   TRANSLATED_URLS,
 }

@@ -33,6 +33,11 @@ import {
   translateHtml,
   validateLinks,
   checkUntranslated,
+  computeBuildId,
+  addCacheBustToHtml,
+  rewriteJsImports,
+  findRelativeImportSpecifiers,
+  applyCacheBusting,
   TRANSLATABLE_PAGES,
   TRANSLATED_URLS,
 } from "./build.js"
@@ -1083,6 +1088,283 @@ describe("validateLinks", () => {
     writeFile(tmp, "about.html", "<p/>")
 
     expect(validateLinks(tmp)).toBe(0)
+  })
+
+  test("flags a JS file's relative import that resolves to nothing", () => {
+    writeFile(tmp, "index.html", "<p/>")
+    writeFile(tmp, "js/game.js", 'import { X } from "./missing.js"')
+
+    const broken = validateLinks(tmp)
+
+    expect(broken).toBe(1)
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("./missing.js"))
+  })
+
+  test("passes a JS file's relative import that resolves to a real file", () => {
+    writeFile(tmp, "index.html", "<p/>")
+    writeFile(tmp, "js/game.js", 'import { X } from "./helper.js"')
+    writeFile(tmp, "js/helper.js", "export const X = 1")
+
+    expect(validateLinks(tmp)).toBe(0)
+  })
+
+  test("ignores the ?v= query on an already-versioned import", () => {
+    writeFile(tmp, "index.html", "<p/>")
+    writeFile(tmp, "js/game.js", 'import { X } from "./helper.js?v=abc123"')
+    writeFile(tmp, "js/helper.js", "export const X = 1")
+
+    expect(validateLinks(tmp)).toBe(0)
+  })
+
+  test("does not flag a JSDoc type-import as a broken import", () => {
+    writeFile(tmp, "index.html", "<p/>")
+    writeFile(tmp, "js/game.js", "/** @param {import('./missing.js').Thing} x */\nexport {}")
+
+    expect(validateLinks(tmp)).toBe(0)
+  })
+})
+
+describe("computeBuildId", () => {
+  let tmp
+
+  beforeEach(() => {
+    tmp = mkdtempSync(join(tmpdir(), "build-id-"))
+  })
+
+  afterEach(() => {
+    rmSync(tmp, { recursive: true, force: true })
+  })
+
+  test("is deterministic for the same sources", () => {
+    writeFile(tmp, "js/a.js", "export const A = 1")
+    writeFile(tmp, "js/b.js", "export const B = 2")
+
+    expect(computeBuildId(tmp)).toBe(computeBuildId(tmp))
+  })
+
+  test("changes when a JS file's contents change", () => {
+    writeFile(tmp, "js/a.js", "export const A = 1")
+    const before = computeBuildId(tmp)
+
+    writeFile(tmp, "js/a.js", "export const A = 2")
+    const after = computeBuildId(tmp)
+
+    expect(after).not.toBe(before)
+  })
+
+  test("changes when a JS file is renamed, even with identical content", () => {
+    writeFile(tmp, "js/a.js", "export const A = 1")
+    const before = computeBuildId(tmp)
+
+    rmSync(join(tmp, "js/a.js"))
+    writeFile(tmp, "js/renamed.js", "export const A = 1")
+    const after = computeBuildId(tmp)
+
+    expect(after).not.toBe(before)
+  })
+
+  test("is unaffected by non-JS files", () => {
+    writeFile(tmp, "js/a.js", "export const A = 1")
+    const before = computeBuildId(tmp)
+
+    writeFile(tmp, "index.html", "<p>hi</p>")
+    const after = computeBuildId(tmp)
+
+    expect(after).toBe(before)
+  })
+})
+
+describe("addCacheBustToHtml", () => {
+  const buildId = "abc123"
+
+  test("versions a module script src", () => {
+    const html = '<script type="module" src="js/game.js"></script>'
+    expect(addCacheBustToHtml(html, buildId)).toBe(
+      '<script type="module" src="js/game.js?v=abc123"></script>',
+    )
+  })
+
+  test("versions a classic script src", () => {
+    const html = '<script src="/shared/nav.js"></script>'
+    expect(addCacheBustToHtml(html, buildId)).toBe(
+      '<script src="/shared/nav.js?v=abc123"></script>',
+    )
+  })
+
+  test("replaces an existing query rather than appending to it", () => {
+    const html = '<script type="module" src="js/game.js?v=7"></script>'
+    expect(addCacheBustToHtml(html, buildId)).toBe(
+      '<script type="module" src="js/game.js?v=abc123"></script>',
+    )
+  })
+
+  test("leaves an external script untouched", () => {
+    const html =
+      '<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" crossorigin="anonymous"></script>'
+    expect(addCacheBustToHtml(html, buildId)).toBe(html)
+  })
+
+  test("leaves a protocol-relative script untouched", () => {
+    const html = '<script src="//example.com/x.js"></script>'
+    expect(addCacheBustToHtml(html, buildId)).toBe(html)
+  })
+
+  test("leaves a non-.js script untouched", () => {
+    const html = '<script src="/data.json"></script>'
+    expect(addCacheBustToHtml(html, buildId)).toBe(html)
+  })
+
+  test("versions a src split across multiple lines", () => {
+    const html = '<script\n      src="js/game.js"\n      defer\n    ></script>'
+    expect(addCacheBustToHtml(html, buildId)).toContain('src="js/game.js?v=abc123"')
+  })
+
+  test("gives every reference to the same buildId the same query", () => {
+    const html =
+      '<script src="/shared/theme.js"></script>\n<script type="module" src="js/game.js"></script>'
+    const result = addCacheBustToHtml(html, buildId)
+    expect(result).toContain('/shared/theme.js?v=abc123"')
+    expect(result).toContain('js/game.js?v=abc123"')
+  })
+})
+
+describe("rewriteJsImports", () => {
+  const buildId = "abc123"
+
+  test("versions a single-line named import", () => {
+    const source = 'import { X } from "./constants.js"'
+    expect(rewriteJsImports(source, buildId)).toBe('import { X } from "./constants.js?v=abc123"')
+  })
+
+  test("versions a multi-line destructured import", () => {
+    const source = ["import {", "  A,", "  B,", '} from "./constants.js"'].join("\n")
+    expect(rewriteJsImports(source, buildId)).toBe(
+      ["import {", "  A,", "  B,", '} from "./constants.js?v=abc123"'].join("\n"),
+    )
+  })
+
+  test("versions a bare side-effect import", () => {
+    const source = 'import "./polyfill.js"'
+    expect(rewriteJsImports(source, buildId)).toBe('import "./polyfill.js?v=abc123"')
+  })
+
+  test("versions an export ... from", () => {
+    const source = 'export { X } from "./constants.js"'
+    expect(rewriteJsImports(source, buildId)).toBe('export { X } from "./constants.js?v=abc123"')
+  })
+
+  test("versions a dynamic import() call", () => {
+    const source = 'const mod = await import("./lazy.js")'
+    expect(rewriteJsImports(source, buildId)).toBe('const mod = await import("./lazy.js?v=abc123")')
+  })
+
+  test("versions a ../ import at a different depth the same as a ./ import", () => {
+    const a = rewriteJsImports('import { X } from "../../shared/StorageManager.js"', buildId)
+    const b = rewriteJsImports('import { X } from "../shared/StorageManager.js"', buildId)
+    expect(a).toBe('import { X } from "../../shared/StorageManager.js?v=abc123"')
+    expect(b).toBe('import { X } from "../shared/StorageManager.js?v=abc123"')
+  })
+
+  test("leaves a bare (non-relative) specifier untouched", () => {
+    const source = 'import { marked } from "marked"'
+    expect(rewriteJsImports(source, buildId)).toBe(source)
+  })
+
+  test("does not touch a JSDoc type-import inside a block comment", () => {
+    const source =
+      "/**\n * @param {import('./Species.js').SpeciesRegistry} registry\n */\nexport {}"
+    expect(rewriteJsImports(source, buildId)).toBe(source)
+  })
+
+  test("does not touch a JSDoc type-import with a generic wrapper", () => {
+    const source =
+      "/**\n * @param {Object<string, import('./MasteryModel.js').MasteryRecord>} records\n */\nexport {}"
+    expect(rewriteJsImports(source, buildId)).toBe(source)
+  })
+
+  test("does not touch a comment that spells out an import as prose", () => {
+    const source =
+      ' * - Game code imports THIS class (`import { StorageManager } from "./storage.js"`),\n * never the base class.'
+    expect(rewriteJsImports(source, buildId)).toBe(source)
+  })
+
+  test("does not touch a real import/export statement's own text", () => {
+    // Sanity check the fixture above isn't accidentally passing because
+    // nothing in it looks like an import at all.
+    const commentSource =
+      ' * - Game code imports THIS class (`import { StorageManager } from "./storage.js"`),'
+    const codeSource = 'import { StorageManager } from "./storage.js"'
+    expect(rewriteJsImports(commentSource, buildId)).toBe(commentSource)
+    expect(rewriteJsImports(codeSource, buildId)).toBe(
+      'import { StorageManager } from "./storage.js?v=abc123"',
+    )
+  })
+
+  test("does not rewrite past an unrelated statement without a matching from", () => {
+    const source = ["export function foo() {}", "", 'import { X } from "./real.js"'].join("\n")
+    expect(rewriteJsImports(source, buildId)).toBe(
+      ["export function foo() {}", "", 'import { X } from "./real.js?v=abc123"'].join("\n"),
+    )
+  })
+})
+
+describe("findRelativeImportSpecifiers", () => {
+  test("collects static, bare, and dynamic import specifiers", () => {
+    const source = [
+      'import { A } from "./a.js"',
+      'import "./b.js"',
+      'export { C } from "./c.js"',
+      'const d = await import("./d.js")',
+    ].join("\n")
+    expect(findRelativeImportSpecifiers(source).sort()).toEqual(
+      ["./a.js", "./b.js", "./c.js", "./d.js"].sort(),
+    )
+  })
+
+  test("ignores a JSDoc type-import", () => {
+    const source = "/** @param {import('./missing.js').Thing} x */\nexport {}"
+    expect(findRelativeImportSpecifiers(source)).toEqual([])
+  })
+
+  test("ignores a bare (non-relative) specifier", () => {
+    const source = 'import { marked } from "marked"'
+    expect(findRelativeImportSpecifiers(source)).toEqual([])
+  })
+})
+
+describe("applyCacheBusting", () => {
+  let tmp
+
+  beforeEach(() => {
+    tmp = mkdtempSync(join(tmpdir(), "build-cachebust-"))
+  })
+
+  afterEach(() => {
+    rmSync(tmp, { recursive: true, force: true })
+  })
+
+  test("versions HTML script tags and JS import specifiers with the same id", () => {
+    writeFile(tmp, "index.html", '<script type="module" src="js/game.js"></script>')
+    writeFile(tmp, "js/game.js", 'import { X } from "./helper.js"\nexport { X }')
+    writeFile(tmp, "js/helper.js", "export const X = 1")
+
+    const buildId = computeBuildId(tmp)
+    const { htmlCount, jsCount } = applyCacheBusting(tmp, buildId)
+
+    expect(htmlCount).toBe(1)
+    expect(jsCount).toBe(1)
+    expect(readFileSync(join(tmp, "index.html"), "utf-8")).toContain(`js/game.js?v=${buildId}`)
+    expect(readFileSync(join(tmp, "js/game.js"), "utf-8")).toContain(`./helper.js?v=${buildId}`)
+  })
+
+  test("does not rewrite a file with nothing to version", () => {
+    writeFile(tmp, "index.html", "<p>no scripts here</p>")
+    writeFile(tmp, "js/standalone.js", "export const X = 1")
+
+    const { htmlCount, jsCount } = applyCacheBusting(tmp, computeBuildId(tmp))
+
+    expect(htmlCount).toBe(0)
+    expect(jsCount).toBe(0)
   })
 })
 

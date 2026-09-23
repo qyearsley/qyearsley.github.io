@@ -82,10 +82,45 @@ Because the page only exists after a build, `npm run dev` does not serve
 5. **Page registry** -- write `dist/pages.json`: every tool/game page under `games/`, `javascript/`, and `chinese/` (excluding each section's own index), with its English and (if translated) Chinese title. `shared/discover.js` fetches this for the homepage's "Try something" picker, the 404 page's random-page link, and the `r` keyboard shortcut.
 6. **Inject paths** -- write `window.__translatedPaths` into every HTML file so `nav.js` can persist language preference client-side
 7. **Sitemap** -- generate `dist/sitemap.xml` from all HTML files, excluding `/404.html` and the `/zh/` pages (those appear as `hreflang` alternates)
-8. **Validate** -- check every internal `href` and `src`, absolute or relative, against the files in `dist/`. A broken link fails the build, which is what keeps it off the live site: the deploy workflow uploads `dist/` only after build, test and lint all pass.
+8. **Cache-bust** -- append `?v=<buildId>` to every local `<script src>` in `dist/` and to every relative import/export specifier inside `dist/`'s own JS files. See "Cache busting" below.
+9. **Validate** -- check every internal `href` and `src`, and every relative JS import specifier, against the files in `dist/`. A broken link or import fails the build, which is what keeps it off the live site: the deploy workflow uploads `dist/` only after build, test and lint all pass.
 
 Why this rather than a site generator, and what would change our mind:
 [`build-system-options.md`](build-system-options.md).
+
+## Cache Busting
+
+GitHub Pages serves this site with a short cache lifetime and no custom
+headers. Right after a deploy, a browser can be left holding a mix of an old
+page and new JS modules (or the reverse) until every cached file expires --
+and a page's module graph fails to load if two files in it come from
+different deploys.
+
+To avoid that, the build computes one `buildId` per run: a short hash of the
+path and contents of every JS file copied to `dist/`. Same sources always
+produce the same id, so a rebuild with no JS changes doesn't churn any URL.
+It then appends `?v=<buildId>` to:
+
+- every local `<script src="...js">` in `dist/`'s HTML, module or classic
+  (an external URL, like the Chart.js CDN script on the coin flipper page, is
+  left alone)
+- every relative `import`/`export ... from` specifier and dynamic `import()`
+  call inside `dist/`'s own JS files
+
+The same id everywhere matters: a module fetched under two different URLs is
+instantiated twice by the browser (two `StorageManager` copies, two sets of
+state), so every reference to a given file has to produce the identical URL.
+Number Garden's `js/game.js?v=7` used to be hand-maintained and only covered
+the entry file; the build now owns versioning for every script and import.
+
+This only versions script URLs and JS imports -- it can't do anything about
+the HTML page itself being served stale, since GitHub Pages doesn't let this
+site set cache headers on it.
+
+`validateLinks` (in `build.js`) also checks that every relative JS import
+specifier in `dist/` resolves to a real file, the same way it already checked
+HTML `href`/`src`. That catches a renamed-but-still-imported module, a break
+that would otherwise only surface at runtime in a browser.
 
 ## Commands
 
