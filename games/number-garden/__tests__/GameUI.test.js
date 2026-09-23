@@ -243,6 +243,25 @@ describe("GameUI", () => {
 
       jest.useRealTimers()
     })
+
+    test("cancels a previous call's still-pending items instead of injecting them later", () => {
+      jest.useFakeTimers()
+
+      // Three items stagger in over 200ms. Switch activities partway through --
+      // before the second and third have fired -- the way a fast tap through
+      // two questions does.
+      gameUI.displayVisualItems(["🌸", "🌸", "🌸"])
+      jest.advanceTimersByTime(50)
+
+      gameUI.displayVisualItems(["🌟"])
+      jest.runAllTimers()
+
+      const visualItems = document.querySelectorAll(".visual-item")
+      expect(visualItems.length).toBe(1)
+      expect(visualItems[0].textContent).toBe("🌟")
+
+      jest.useRealTimers()
+    })
   })
 
   describe("displayAnswerOptions", () => {
@@ -404,6 +423,26 @@ describe("GameUI", () => {
       jest.runAllTimers()
 
       expect(document.getElementById("garden-canvas").innerHTML).not.toContain("old")
+
+      jest.useRealTimers()
+    })
+
+    test("cancels a previous render's still-pending flowers instead of injecting them later", () => {
+      jest.useFakeTimers()
+
+      const stale = [
+        { color: "red", emoji: "🌹" },
+        { color: "yellow", emoji: "🌻" },
+      ]
+      gameUI.renderGarden(stale)
+      jest.advanceTimersByTime(50)
+
+      gameUI.renderGarden([{ color: "purple", emoji: "💜" }])
+      jest.runAllTimers()
+
+      const flowers = document.querySelectorAll(".garden-item")
+      expect(flowers.length).toBe(1)
+      expect(flowers[0].textContent).toBe("💜")
 
       jest.useRealTimers()
     })

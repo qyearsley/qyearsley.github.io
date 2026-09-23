@@ -247,6 +247,11 @@ class NumberGarden {
     // level-complete screen appeared on top of the hub, or a second
     // `generateActivity` overwrote a freshly-drawn question.
     this._clearPendingAdvance()
+    // Same reasoning for the staggered visual-item and garden-flower
+    // animations: leaving mid-stagger used to let them keep injecting the old
+    // question's items into whatever screen came next.
+    this.ui.clearVisualItemTimers()
+    this.ui.clearGardenTimers()
     // The activity screen paints the body from the area's own theme; every
     // other screen shares that body and should not inherit it.
     if (screenId !== "activity-screen") this.ui.clearBodyTheme()
@@ -448,12 +453,13 @@ document.addEventListener("DOMContentLoaded", () => {
     // Create instances with dependency injection
     const storageManager = new StorageManager()
     const rewardSystem = new RewardSystem()
-    const activityGenerator = new ActivityGenerator()
 
+    // Let the constructor build the ActivityGenerator from the game's own
+    // GameState -- building one here, before that state exists, is what used
+    // to leave it with no gameState and stuck on the fallback difficulty.
     window.game = new NumberGarden({
       storageManager,
       rewardSystem,
-      activityGenerator,
     })
   } catch (error) {
     console.error("Failed to initialize Number Garden:", error)

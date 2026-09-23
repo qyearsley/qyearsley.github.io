@@ -16,6 +16,11 @@ export class GameUI extends BaseGameUI {
     super()
     this.elements = this.cacheElements()
     this.castle = new CastleUI(this.elements)
+    // Pending setTimeout ids for the staggered visual-item and garden-flower
+    // animations. Each is cleared before its area is re-rendered -- see
+    // `clearVisualItemTimers` and `clearGardenTimers`.
+    this._visualItemTimers = []
+    this._gardenTimers = []
   }
 
   /**
@@ -140,6 +145,7 @@ export class GameUI extends BaseGameUI {
     if (shouldShowVisual) {
       this.displayVisualItems(activity.visual)
     } else {
+      this.clearVisualItemTimers()
       this.elements.visualArea.innerHTML = ""
     }
 
@@ -158,11 +164,15 @@ export class GameUI extends BaseGameUI {
    * @param {Array} visualItems - Array of visual items
    */
   displayVisualItems(visualItems) {
+    // Cancel any items still staggering in from a previous call -- otherwise
+    // switching activities within the stagger window lets the old question's
+    // items land in the new #visual-area after this one clears it.
+    this.clearVisualItemTimers()
     this.elements.visualArea.innerHTML = ""
 
     if (visualItems && visualItems.length > 0) {
       visualItems.forEach((item, index) => {
-        setTimeout(() => {
+        const timerId = setTimeout(() => {
           const visualItem = document.createElement("div")
           visualItem.className = "visual-item"
 
@@ -184,8 +194,17 @@ export class GameUI extends BaseGameUI {
 
           this.elements.visualArea.appendChild(visualItem)
         }, index * VISUAL_ITEM_ANIMATION_DELAY_MS)
+        this._visualItemTimers.push(timerId)
       })
     }
+  }
+
+  /**
+   * Cancel any visual-item animations still staggering in.
+   */
+  clearVisualItemTimers() {
+    this._visualItemTimers.forEach((timerId) => clearTimeout(timerId))
+    this._visualItemTimers = []
   }
 
   /**
@@ -383,16 +402,28 @@ export class GameUI extends BaseGameUI {
    * @param {Array} garden - Array of flower objects
    */
   renderGarden(garden) {
+    // Cancel any flowers still staggering in from a previous render -- same
+    // reasoning as `clearVisualItemTimers`.
+    this.clearGardenTimers()
     this.elements.gardenCanvas.innerHTML = ""
 
     garden.forEach((flower, index) => {
-      setTimeout(() => {
+      const timerId = setTimeout(() => {
         const flowerElement = document.createElement("div")
         flowerElement.className = `garden-item flower flower-${flower.color}`
         flowerElement.textContent = flower.emoji
         this.elements.gardenCanvas.appendChild(flowerElement)
       }, index * 100)
+      this._gardenTimers.push(timerId)
     })
+  }
+
+  /**
+   * Cancel any garden-flower animations still staggering in.
+   */
+  clearGardenTimers() {
+    this._gardenTimers.forEach((timerId) => clearTimeout(timerId))
+    this._gardenTimers = []
   }
 
   /**
