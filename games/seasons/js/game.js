@@ -330,8 +330,14 @@ function render() {
 /**
  * Show the current question and start its clock.
  * @private
+ * @param {boolean} [focusFirst] - Move focus onto the first choice once it is
+ *   drawn. Set only by the reinforcement card's continuation, whose focused
+ *   "Got it" button has just been hidden and has nowhere else to send a
+ *   keyboard or screen-reader user. Left false on the ordinary
+ *   question-to-question turnover, which deliberately leaves focus where it
+ *   was -- see the comment in `render`.
  */
-function _askQuestion() {
+function _askQuestion(focusFirst = false) {
   const season = getSeason(state.seasonId)
   const isBoss = state.phase === PHASE.BOSS
   const glowing = !isBoss && isGlowingAt(season, state.position)
@@ -340,6 +346,7 @@ function _askQuestion() {
     { tag: _questionTag(season, isBoss, glowing), lit: isBoss || glowing },
     _onAnswer,
   )
+  if (focusFirst) ui.focusFirstChoice()
   // The flash timeout can land while the tab is hidden, which would start a
   // clock on a question nobody is looking at. `visibilitychange` starts it when
   // the page comes back.
@@ -471,7 +478,10 @@ function _onAnswer(value, button) {
   // no flash to wait out and the guard comes off here rather than in `advance`.
   if (outcome.retry) {
     const message = _feedbackFor(outcome, season, value === null)
-    ui.rejectAnswer(button, message, outcome.hinted ? ui.hintTargets(correctValue) : [])
+    // `outcome.hinted` and `correctValue` go through as-is; `rejectAnswer`
+    // strikes the pressed button first and only then works out the hint, which
+    // is what stops it taking one wrong choice too many -- see its comment.
+    ui.rejectAnswer(button, message, outcome.hinted, correctValue)
     answering = false
     // The clock does not come back. `questionSeconds` returns null while
     // retrying, so this both hides the bar and makes the point on screen: the
@@ -487,8 +497,15 @@ function _onAnswer(value, button) {
 
   ui.flashAnswer(outcome, button, correctValue, _feedbackFor(outcome, season, value === null))
 
-  /** What happens once any reinforcement card has been dismissed. */
-  const proceed = () => {
+  /**
+   * What happens once any reinforcement card has been dismissed.
+   * @param {boolean} [focusFirst] - Passed through to `_askQuestion`. True only
+   *   when this run is resuming after the reinforcement card: its "Got it"
+   *   button was focused and is now hidden, so the next question's first
+   *   choice needs to pick focus up. False on the ordinary path, which leaves
+   *   focus alone -- see `_askQuestion`.
+   */
+  const proceed = (focusFirst = false) => {
     if (state.phase === PHASE.SEASON_WON) {
       _unlockAfter(season.id)
       answering = false
@@ -502,7 +519,7 @@ function _onAnswer(value, button) {
     if (crossed === null) {
       ui.renderTrail(getSeason(state.seasonId), state.position, state.characterId)
       answering = false
-      _askQuestion()
+      _askQuestion(focusFirst)
       return
     }
     const generation = cycle
@@ -510,7 +527,7 @@ function _onAnswer(value, button) {
       // Stale if the run was torn down while the character was still moving.
       if (generation !== cycle) return
       answering = false
-      _askQuestion()
+      _askQuestion(focusFirst)
     })
   }
 
@@ -520,7 +537,7 @@ function _onAnswer(value, button) {
     // The reinforcement card, if this answer earned one. It waits for a tap
     // rather than a timer, so everything after it is the continuation.
     if (outcome.reinforce) {
-      ui.showReinforcement(outcome.reinforce, proceed)
+      ui.showReinforcement(outcome.reinforce, () => proceed(true))
       return
     }
     proceed()

@@ -5,7 +5,7 @@
 
 import { describe, expect, it, jest } from "@jest/globals"
 import { getCharacter } from "../js/characters.js"
-import { PHASE } from "../js/constants.js"
+import { HINT_CHOICES_LEFT, PHASE, PLAY } from "../js/constants.js"
 import { hudCount, one } from "./helpers.js"
 import {
   SPRING,
@@ -33,6 +33,7 @@ import {
   tapWrong,
   answerCorrectly,
   dismissReinforcement,
+  landAnswer,
   bootInto,
   TIMED,
   setupGameHarness,
@@ -235,6 +236,23 @@ describe("the verdict under the question", () => {
     tapWrong()
     expect(feedback()).toBe(`${getCharacter("phoenix").perkName} — two of them are gone!`)
     expect(saved().run.hintsLeft).toBe(0)
+  })
+
+  // Regression test for the audit's bug A. `hintTargets` used to be worked out
+  // by game.js before the pressed button was struck off, so it saw all four
+  // choices live and could remove a full two more wrong ones on top of the one
+  // she just pressed -- leaving nothing standing but the answer, for whichever
+  // wrong choice was not among the two it happened to pick. `tapWrong` always
+  // reaches for the same choice, which is why this presses every wrong one in
+  // turn, on a fresh run each time, rather than relying on that helper.
+  it("the phoenix's hint always leaves exactly HINT_CHOICES_LEFT choices standing, whichever wrong one she presses", async () => {
+    for (let index = 0; index < PLAY.CHOICE_COUNT; index += 1) {
+      await bootInto({ characterId: "phoenix", position: 1, items: 1 })
+      if (index === correctIndex()) continue
+      choices()[index].click()
+      const live = choices().filter((button) => !button.classList.contains("is-out"))
+      expect(live).toHaveLength(HINT_CHOICES_LEFT)
+    }
   })
 
   // Running out of time is its own branch, and it has to say that the clock is
@@ -450,6 +468,22 @@ describe("the reinforcement card", () => {
 
     expect(byId("reinforce-card").classList.contains("hidden")).toBe(true)
     expect(isActive("screen-character")).toBe(true)
+  })
+
+  // Regression test for the audit's bug B. The "Got it" button is focused when
+  // the card opens; its onclick only hides the card, and nothing ever sent
+  // focus anywhere afterwards. jsdom does not blur an element for merely being
+  // `display: none` -- real browsers do -- so the meaningful half of this
+  // assertion is the positive one: focus has to land explicitly on the next
+  // question's first choice, not just "somewhere that is not <body>".
+  it("moves focus onto the next question rather than dropping it", async () => {
+    await bootInto({ position: 1, items: 1 })
+    tapWrong()
+    tapRight()
+    await landAnswer()
+
+    expect(document.activeElement).toBe(choices()[0])
+    expect(document.activeElement).not.toBe(document.body)
   })
 })
 

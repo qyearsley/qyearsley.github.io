@@ -811,6 +811,25 @@ export class GameUI extends BaseGameUI {
   }
 
   /**
+   * Move focus onto the first live answer choice.
+   *
+   * The one caller that needs this is `_askQuestion` in game.js, and only right
+   * after the reinforcement card closes: its "Got it" button was focused, the
+   * card is now `display: none`, and a keyboard or screen-reader user has
+   * nowhere left to land -- see `showReinforcement`. The ordinary
+   * question-to-question turnover does not call this: moving focus with no user
+   * action behind it would interrupt a screen reader mid-sentence, which is why
+   * `render` in game.js only refocuses the heading on arrival, never between
+   * questions.
+   *
+   * @returns {void}
+   */
+  focusFirstChoice() {
+    const button = this.elements.choices?.querySelector("button:not([aria-disabled='true'])")
+    if (button instanceof HTMLElement) button.focus()
+  }
+
+  /**
    * Reject a wrong answer without resolving the question.
    *
    * The counterpart to `flashAnswer` under the retry rule, and deliberately not
@@ -819,19 +838,29 @@ export class GameUI extends BaseGameUI {
    * correct answer is **not** marked, which is the whole point -- Ella's rule is
    * that the student finds it rather than being shown it.
    *
+   * The pressed button is struck off *before* the hint is computed, not after.
+   * `hintTargets` looks at which buttons are still live to decide how many more
+   * to take, and the one just pressed is the player's own elimination -- get the
+   * order backwards and a hint can end up taking both of the other wrong choices
+   * instead of one, leaving nothing standing but the answer.
+   *
    * @param {HTMLButtonElement|null} pressed - The button pressed, null on timeout
    * @param {string} message - The line to show under the question
-   * @param {number[]} [eliminate] - Extra values to strike off, for the hint
+   * @param {boolean} [hinted] - Whether to also apply the phoenix's hint
+   * @param {number} [correctValue] - The answer, needed only when `hinted` is true
    */
-  rejectAnswer(pressed, message, eliminate = []) {
+  rejectAnswer(pressed, message, hinted = false, correctValue = null) {
     if (pressed) {
       this._strikeOut(pressed)
       this.shakeElement(pressed)
     }
-    const choices = this.elements.choices
-    if (choices && eliminate.length > 0) {
-      for (const button of choices.querySelectorAll("button")) {
-        if (eliminate.includes(Number(button.dataset.value))) this._strikeOut(button)
+    if (hinted) {
+      const eliminate = this.hintTargets(correctValue)
+      const choices = this.elements.choices
+      if (choices) {
+        for (const button of choices.querySelectorAll("button")) {
+          if (eliminate.includes(Number(button.dataset.value))) this._strikeOut(button)
+        }
       }
     }
     this.showFeedback(message, "error")

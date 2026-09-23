@@ -1622,6 +1622,38 @@ describe("renderQuestion", () => {
   })
 })
 
+// The one caller is game.js's `_askQuestion`, and only once the reinforcement
+// card has been dismissed -- see the comment on the method. Everywhere else
+// focus is deliberately left alone between questions.
+describe("focusFirstChoice", () => {
+  it("focuses the first live choice", () => {
+    ui.renderQuestion(questionState(), {}, () => {})
+    ui.focusFirstChoice()
+    expect(document.activeElement).toBe(choiceButtons()[0])
+  })
+
+  it("skips a choice already struck off or locked", () => {
+    ui.renderQuestion(questionState(), {}, () => {})
+    const buttons = choiceButtons()
+    ui.rejectAnswer(buttons[0], "Not quite.")
+    ui.focusFirstChoice()
+    expect(document.activeElement).toBe(buttons[1])
+  })
+
+  it("does nothing once every choice is locked", () => {
+    ui.renderQuestion(questionState(), {}, () => {})
+    const buttons = choiceButtons()
+    ui.flashAnswer({ correct: true }, buttons[0], 73, "Right!")
+    ui.focusFirstChoice()
+    expect(buttons.every((button) => document.activeElement !== button)).toBe(true)
+  })
+
+  it("survives being called with no question on screen", () => {
+    document.getElementById("choices").replaceChildren()
+    expect(() => ui.focusFirstChoice()).not.toThrow()
+  })
+})
+
 describe("flashAnswer", () => {
   const correct = { correct: true }
   const wrong = { correct: false }
@@ -1771,19 +1803,36 @@ describe("rejectAnswer", () => {
     expect(document.getElementById("feedback").textContent).toBe("Time ran out.")
   })
 
-  it("strikes off the extra values it is handed as well", () => {
-    const buttons = choiceButtons()
-    ui.rejectAnswer(buttons[3], "Two of them are gone!", [72, 74])
+  // Regression test. The hint used to be computed by the caller and handed in
+  // as a list of values to eliminate, which meant it was worked out from
+  // whatever was on screen *before* the pressed button was struck off. Every
+  // wrong button had 4 live choices in front of it, so the hint could remove a
+  // full two more on top -- leaving nothing standing but the answer, roughly a
+  // third of the time depending on which wrong choice she pressed. Striking the
+  // pressed button first, inside this method, before `hintTargets` looks at
+  // what is still live, is what fixes that -- see this method's comment.
+  it.each([1, 2, 3])(
+    "strikes the pressed choice before working out the hint, leaving exactly HINT_CHOICES_LEFT standing (button %i)",
+    (index) => {
+      const buttons = choiceButtons()
+      ui.rejectAnswer(buttons[index], "Two of them are gone!", true, 73)
 
-    const out = Array.from(document.querySelectorAll("#choices .is-out"))
-    expect(out.map((button) => button.dataset.value).sort()).toEqual(["72", "74", "83"])
-    // The answer is the one thing still standing.
-    expect(buttons[0].classList.contains("is-out")).toBe(false)
+      const live = buttons.filter((button) => !button.classList.contains("is-out"))
+      expect(live).toHaveLength(HINT_CHOICES_LEFT)
+      // The answer is never one of the ones taken away.
+      expect(buttons[0].classList.contains("is-out")).toBe(false)
+    },
+  )
+
+  it("does not touch the hint at all when it was not the phoenix's turn", () => {
+    const buttons = choiceButtons()
+    ui.rejectAnswer(buttons[3], "Not quite.", false)
+    expect(document.querySelectorAll("#choices .is-out")).toHaveLength(1)
   })
 
   it("survives being called with no question on screen", () => {
     document.getElementById("choices").replaceChildren()
-    expect(() => ui.rejectAnswer(null, "x", [72])).not.toThrow()
+    expect(() => ui.rejectAnswer(null, "x", true, 72)).not.toThrow()
   })
 })
 
