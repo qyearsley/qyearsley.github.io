@@ -103,11 +103,12 @@
     if (!daily || !random) return
 
     const dailyEl = document.getElementById("discover-daily")
+    const dailyTitleEl = document.getElementById("discover-daily-title")
     const randomEl = document.getElementById("discover-random")
     if (dailyEl) {
       const link = pageLink(daily, info.isZh)
       dailyEl.href = link.href
-      dailyEl.textContent = link.title
+      if (dailyTitleEl) dailyTitleEl.textContent = link.title
     }
     if (randomEl) {
       randomEl.href = pageLink(random, info.isZh).href

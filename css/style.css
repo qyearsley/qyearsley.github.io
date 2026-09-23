@@ -462,6 +462,20 @@ p {
   color: var(--color-text-muted);
 }
 
+/* Homepage hint for the ? overlay (shared/nav.js). Hidden where there is
+   no hover, which in practice means touch-only devices with no keyboard. */
+.shortcut-hint {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+@media (hover: none) {
+  .shortcut-hint {
+    display: none;
+  }
+}
+
 /* Marks a link that leaves the site. The homepage lists GitHub, the blog and
    LinkedIn in the same list as internal pages, and nothing distinguished them.
    The `/ ""` is alternative text for the accessibility tree: empty, because a

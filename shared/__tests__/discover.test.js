@@ -127,8 +127,11 @@ describe("homepage picker", () => {
     document.body.innerHTML = `
       <section id="discover-section" hidden>
         <h2>Try something</h2>
-        <p>Today's pick: <a id="discover-daily" href="#"></a></p>
-        <a id="discover-random" href="#">Random page</a>
+        <a id="discover-daily" href="#">
+          <strong>Today's pick</strong>
+          <span id="discover-daily-title"></span>
+        </a>
+        <a id="discover-random" href="#"><strong>Random page</strong></a>
       </section>
     `
   }
@@ -169,11 +172,14 @@ describe("homepage picker", () => {
 
     const section = document.getElementById("discover-section")
     const daily = document.getElementById("discover-daily")
+    const dailyTitle = document.getElementById("discover-daily-title")
     const random = document.getElementById("discover-random")
 
     expect(section.hidden).toBe(false)
     expect(daily.getAttribute("href")).not.toBe("#")
-    expect(daily.textContent).not.toBe("")
+    expect(dailyTitle.textContent).not.toBe("")
+    // The title goes in the span, leaving the label in place.
+    expect(daily.querySelector("strong").textContent).toBe("Today's pick")
     expect(random.getAttribute("href")).not.toBe("#")
   })
 })
