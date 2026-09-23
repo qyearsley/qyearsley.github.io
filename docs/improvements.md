@@ -247,6 +247,43 @@ job on adjacent pages and were the clearest symptom._
 
 ## Settled
 
+### Landed 2026-09-23, bug audit
+
+A five-agent read of every game found seven bugs. Each fix has a test that
+fails without it. Four slipped through because no test ran the real boot or
+click path.
+
+- **Times Trail: choosing a trail threw.** `chooseTrail` called
+  `this.saveProgress()`, which does not exist. The trail changed in memory, but
+  the picker did not redraw and the choice was not saved.
+- **Number Garden: the difficulty setting did nothing.** The page bootstrap
+  built the `ActivityGenerator` with no game state, so every question used the
+  default difficulty.
+- **Number Garden: stale items from the last question.** The staggered
+  visual-item and flower timeouts were never cancelled. A fast switch let the old
+  question's items land in the new one.
+- **Seasons: the phoenix's hint could leave only the answer.** The hint was
+  computed before the pressed button was struck off. About one time in three it
+  took both of the other wrong choices.
+- **Seasons: "Got it" dropped focus to `<body>`.** Focus now moves to the first
+  choice of the next question. Seen in WebKit before and after.
+- **Life Garden: no `touchcancel`.** A system gesture that cancelled a touch
+  left the drag on, so a later trackpad or Pencil hover painted cells.
+- **Every game: a deploy could mix old and new modules.** The build now adds one
+  content-hash `?v=` to every local script tag and relative import in `dist/`,
+  and checks that every import resolves. Number Garden's hand-kept `?v=7` is
+  gone. This is the likely cause of Seasons not booting in Safari on an iPad
+  right after the 2026-09-21 deploy. Not confirmed on the device. See
+  [`development.md`](development.md#cache-busting).
+
+### Decided 2026-09-23, no change
+
+- **Life Garden's mouse drag cannot get stuck.** The audit reported a release
+  off the canvas. `mouseleave` already ends the drag before that can happen.
+- **`generateMathOptions` loops until it finds three wrong answers.** It never
+  ends if `maxRange` is too small. The only caller passes 40 or more, so real
+  play cannot reach it. Only a test that pins `Math.random` can.
+
 ### Landed 2026-09-21
 
 - **Seasons: a wrong answer costs a question, not an item.** A miss keeps the
@@ -524,7 +561,8 @@ headless browser in the dev dependencies -- so this needs a person, on the
 actual iPad. In rough order of how much is unverified:
 
 - **Times Trail's trail picker.** A whole new screen, and the largest single
-  piece of unlooked-at work: five rows of 16 to 20 spaces each, three space
+  piece of unlooked-at work. Since 2026-09-23 a test clicks a row, but nobody has
+  seen the layout: five rows of 16 to 20 spaces each, three space
   states, and a `grid-auto-flow: column` row that has to hold a 20-space trail
   and a 2-space one without the spaces stretching into bars.
 - **Number Garden's dark theme.** Every colour in the game moved onto a token
