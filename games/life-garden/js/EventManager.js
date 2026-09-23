@@ -58,10 +58,16 @@ export class EventManager {
       }
     })
 
-    canvas.addEventListener("touchend", () => {
+    const endTouchDrag = () => {
       this._dragging = false
       this._dragMode = null
-    })
+    }
+    canvas.addEventListener("touchend", endTouchDrag)
+    // iPadOS fires touchcancel instead of touchend when a system gesture
+    // (edge swipe, notification) interrupts the touch. Without this, drag
+    // state would stick and a later mouse/trackpad/Pencil hover would be
+    // routed to onCanvasDrag with no button held.
+    canvas.addEventListener("touchcancel", endTouchDrag)
   }
 
   _canvasPos(e) {

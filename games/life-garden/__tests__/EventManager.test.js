@@ -152,6 +152,21 @@ describe("EventManager", () => {
       canvas.dispatchEvent(event)
       expect(event.defaultPrevented).toBe(true)
     })
+
+    test("touchcancel ends the drag, like touchend", () => {
+      // iPadOS fires touchcancel instead of touchend for a system-interrupted
+      // touch (edge swipe, notification). If drag state survives that, a later
+      // mouse/trackpad/Pencil hover gets routed to onCanvasDrag with no button
+      // held.
+      canvas.dispatchEvent(touch("touchstart", 60, 95))
+      canvas.dispatchEvent(new Event("touchcancel", { bubbles: true }))
+      callbacks.onCanvasDrag.mockClear()
+
+      canvas.dispatchEvent(mouse("mousemove", 110, 95))
+
+      expect(callbacks.onCanvasDrag).not.toHaveBeenCalled()
+      expect(callbacks.onCanvasHover).toHaveBeenCalled()
+    })
   })
 
   describe("buttons", () => {
