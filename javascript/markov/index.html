@@ -43,6 +43,7 @@
               <button class="preset-btn active" data-preset="shakespeare">Shakespeare</button>
               <button class="preset-btn" data-preset="nursery">Nursery Rhyme</button>
               <button class="preset-btn" data-preset="technical">Technical</button>
+              <button class="preset-btn" data-preset="analects">Analects</button>
               <button class="preset-btn" data-preset="custom">Paste Your Own</button>
             </div>
             <textarea
@@ -104,7 +105,20 @@
             This generator builds a probability model from the input text, then generates new text
             by randomly selecting the next character or word based on learned probabilities.
           </p>
+          <p>
+            Chinese text has no spaces between words, so a word n-gram model would otherwise treat
+            the whole input as a single token. This generator detects Chinese text and tokenizes it
+            by character instead, joining the generated output back together without spaces.
+          </p>
         </section>
+
+        <aside class="see-also">
+          <h2>See also</h2>
+          <ul>
+            <li><a href="/javascript/coin-flipper.html">Coin Flipper</a></li>
+            <li><a href="/chinese/encoding-explorer.html">Encoding Explorer</a></li>
+          </ul>
+        </aside>
       </main>
     </div>
 
@@ -118,6 +132,14 @@
           "Humpty Dumpty sat on a wall, Humpty Dumpty had a great fall. All the king's horses and all the king's men couldn't put Humpty together again. Jack and Jill went up the hill to fetch a pail of water. Jack fell down and broke his crown, and Jill came tumbling after. Mary had a little lamb whose fleece was white as snow, and everywhere that Mary went the lamb was sure to go.",
         technical:
           "A hash table is a data structure that maps keys to values using a hash function. The hash function computes an index into an array of buckets, from which the desired value can be found. Ideally, the hash function will assign each key to a unique bucket, but most hash table designs employ an imperfect hash function, which might cause hash collisions where the hash function generates the same index for more than one key.",
+        // The Analects (论语), sayings of Confucius recorded by his disciples,
+        // compiled around the 5th century BCE -- public domain everywhere.
+        // Selected verses, quoted from memory: 学而 1.1, 1.3, 1.4, 1.6, 1.16;
+        // 为政 2.4, 2.11, 2.15; 里仁 4.17; 述而 7.22; 卫灵公 15.24 (chapter and
+        // verse numbers per the standard modern numbering). Worth checking
+        // against a source such as ctext.org before treating as authoritative.
+        analects:
+          "子曰：“学而时习之，不亦说乎？有朋自远方来，不亦乐乎？人不知而不愠，不亦君子乎？”曾子曰：“吾日三省吾身：为人谋而不忠乎？与朋友交而不信乎？传不习乎？”子曰：“弟子入则孝，出则弟，谨而信，泛爱众，而亲仁，行有余力，则以学文。”子曰：“巧言令色，鲜矣仁。”子曰：“不患人之不己知，患不知人也。”子曰：“吾十有五而志于学，三十而立，四十而不惑，五十而知天命，六十而耳顺，七十而从心所欲，不逾矩。”子曰：“温故而知新，可以为师矣。”子曰：“学而不思则罔，思而不学则殆。”子曰：“见贤思齐焉，见不贤而内自省也。”子曰：“三人行，必有我师焉：择其善者而从之，其不善者而改之。”子曰：“己所不欲，勿施于人。”",
       }
 
       let chain = null
@@ -202,8 +224,9 @@
       document.getElementById("ngram-size").addEventListener("change", generate)
       document.getElementById("output-length").addEventListener("change", generate)
 
-      // Load default
-      setPreset("shakespeare")
+      // Load default. build.js marks the /zh/ version of this page with
+      // lang="zh" on <html>, so default to the Chinese sample there.
+      setPreset(document.documentElement.lang === "zh" ? "analects" : "shakespeare")
     </script>
     <script src="/shared/nav.js"></script>
   </body>

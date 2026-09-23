@@ -9,6 +9,7 @@
   "Shakespeare": "莎士比亚",
   "Nursery Rhyme": "童谣",
   "Technical": "技术文本",
+  "Analects": "论语",
   "Paste Your Own": "粘贴自定义",
   "N-gram Type:": "N-gram类型：",
   "Characters": "字符",
@@ -24,6 +25,7 @@
   "What are Markov Chains?": "什么是马尔可夫链？",
   "A Markov chain predicts the next state based only on the current state, ignoring history. For text generation, we use n-grams (sequences of n characters or words) to predict what comes next.": "马尔可夫链仅基于当前状态预测下一状态，忽略历史。在文本生成中，我们用n-gram（n个字符或词的序列）预测下一个内容。",
   "This generator builds a probability model from the input text, then generates new text by randomly selecting the next character or word based on learned probabilities.": "生成器从输入文本建立概率模型，然后根据学到的概率随机选择下一个字符或词，从而生成新文本。",
+  "Chinese text has no spaces between words, so a word n-gram model would otherwise treat the whole input as a single token. This generator detects Chinese text and tokenizes it by character instead, joining the generated output back together without spaces.": "中文词与词之间没有空格，因此按词分割的n-gram模型会把整段输入当作一个词元。本生成器会检测中文文本，改为按字符分词，生成结果里的字符直接连接、不加空格。",
 
   "Transition Probabilities (sample):": "转移概率（示例）："
 }

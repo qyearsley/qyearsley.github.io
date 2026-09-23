@@ -1,3 +1,34 @@
+// Han character ranges covering ordinary Chinese text: CJK Unified
+// Ideographs, Extension A, and the CJK Compatibility Ideographs block. This
+// does not attempt to cover the rarer Han extension blocks outside the
+// Basic Multilingual Plane.
+const HAN_CHAR_PATTERN = /[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/
+
+// Detects Chinese-dominant text, i.e. text where whitespace tokenization
+// would not work because Chinese does not put spaces between words. This is
+// a ratio over non-whitespace characters, not "contains any Han character",
+// so a Chinese term quoted inside mostly-English prose does not flip it.
+export function isChineseText(text) {
+  const chars = Array.from(text).filter((ch) => !/\s/.test(ch))
+  if (chars.length === 0) return false
+  const hanCount = chars.filter((ch) => HAN_CHAR_PATTERN.test(ch)).length
+  return hanCount / chars.length > 0.3
+}
+
+// Splits text into the tokens n-grams are built from. "word" mode splits on
+// whitespace -- but Chinese has no whitespace between words, so without this
+// check the whole input would become a single token. For Chinese text,
+// tokenize falls back to characters even when "word" mode is selected: each
+// Han character, and each punctuation mark, becomes its own token. The
+// caller (see `joinWithSpace` below) then joins tokens back together
+// without spaces, the same way "char" mode always has.
+export function tokenize(text, type) {
+  if (type === "word" && !isChineseText(text)) {
+    return text.split(/\s+/).filter((t) => t.length > 0)
+  }
+  return Array.from(text)
+}
+
 export class MarkovChain {
   constructor(text, type = "char", ngramSize = 3) {
     this.ngrams = new Map()
@@ -15,12 +46,14 @@ export class MarkovChain {
     if (!text || text.trim().length === 0) return
 
     text = text.trim()
-    const tokens = type === "word" ? text.split(/\s+/).filter((t) => t.length > 0) : text.split("")
+    const tokens = tokenize(text, type)
+    this.joinWithSpace = type === "word" && !isChineseText(text)
+    this.ngramSize = ngramSize
 
     if (tokens.length < ngramSize) return
 
+    const sep = this.joinWithSpace ? " " : ""
     for (let i = 0; i <= tokens.length - ngramSize; i++) {
-      const sep = type === "word" ? " " : ""
       const ngram = tokens.slice(i, i + ngramSize).join(sep)
       const nextToken = tokens[i + ngramSize]
 
@@ -39,7 +72,6 @@ export class MarkovChain {
   }
 
   generate(length) {
-    const type = this.type || "char"
     if (this.ngrams.size === 0) {
       return "No training data available."
     }
@@ -48,9 +80,9 @@ export class MarkovChain {
     const startOptions = this.startNgrams.filter((ng) => this.ngrams.has(ng))
     if (startOptions.length === 0) return "Unable to generate text."
 
+    const sep = this.joinWithSpace ? " " : ""
     let currentNgram = startOptions[Math.floor(Math.random() * startOptions.length)]
-    const sep = type === "word" ? " " : ""
-    const initialTokens = type === "word" ? currentNgram.split(" ") : currentNgram.split("")
+    const initialTokens = this.joinWithSpace ? currentNgram.split(" ") : Array.from(currentNgram)
     tokens.push(...initialTokens)
 
     const ngramSize = this.getNgramSize()
@@ -70,8 +102,7 @@ export class MarkovChain {
 
   getNgramSize() {
     if (this.ngrams.size === 0) return 0
-    const firstKey = this.ngrams.keys().next().value
-    return firstKey.includes(" ") ? firstKey.split(" ").length : firstKey.length
+    return this.ngramSize || 0
   }
 
   getTransitions() {
