@@ -1,0 +1,30 @@
+{
+  "_title": "建站说明 - Quinten Yearsley",
+  "_description": "本站是怎么搭建的：手写HTML、一个小型构建脚本，还有机器翻译的中文页面",
+
+  "How This Site Is Built": "本站是如何搭建的",
+  "Plain HTML, a small build script, and no framework.": "纯手写HTML、一个小型构建脚本，没有框架。",
+
+  "Hand-written": "手写代码",
+  "Every page is hand-written HTML, CSS, and vanilla JavaScript. There's no framework and no bundler. Each tool on this site is a self-contained HTML file that works on its own.": "每个页面都是手写的HTML、CSS和原生JavaScript，没有框架，也没有打包工具。本站的每个工具都是一个独立的HTML文件，可以单独运行。",
+
+  "The build script": "构建脚本",
+  "A small script, <code>build.js</code>, turns the source files into the live site. It:": "有一个小脚本<code>build.js</code>，负责把源文件变成上线的网站。它会：",
+  "Renders the resume from a Markdown file into HTML": "把简历从Markdown文件渲染成HTML",
+  "Generates a Chinese version of each translated page": "为每个已翻译的页面生成中文版本",
+  "Builds the sitemap": "生成网站地图",
+  "Checks every internal link, and fails the build if one is broken": "检查每一个内部链接，链接失效就让构建失败",
+  "There's no static site generator behind any of this. With around 30 pages that change slowly, copying a bit of markup between files is cheaper than adopting a new tool.": "这背后没有用静态网站生成器。本站大约有30个页面，改动不频繁，在文件之间复制一点标记，比换一套新工具更省事。",
+
+  "Chinese pages": "中文页面",
+  "Each Chinese page is generated at build time. The build script matches English text in the page against a translation file and swaps in the Chinese. The translation was done with machine help, and it hasn't been checked yet by a native Chinese speaker.": "每个中文页面都是在构建时生成的。构建脚本会把页面里的英文文本和一个翻译文件做匹配，然后换成中文。这些翻译是借助机器完成的，还没有请母语是中文的人检查过。",
+
+  "Testing and linting": "测试与代码检查",
+  "Tests run on Jest. Linting and formatting run on ESLint, Prettier, Stylelint, and HTMLHint. Git hooks run the linters before a commit and the tests before a push, and the site deploys to GitHub Pages only after the build, the tests, and the linters all pass.": "测试用Jest运行，代码检查和格式化用ESLint、Prettier、Stylelint和HTMLHint。Git钩子会在提交前运行检查工具，在推送前运行测试，只有构建、测试和检查全部通过，网站才会部署到GitHub Pages。",
+
+  "Design": "设计",
+  "The theme switcher cycles between light, dark, and your system setting. Keyboard shortcuts work across the site — press <strong>?</strong> to see the list. Text uses your system's own font, not a downloaded one.": "主题切换器可以在浅色、深色和跟随系统之间切换。全站支持键盘快捷键——按<strong>?</strong>可以查看快捷键列表。文字用的是你系统自带的字体，不是额外下载的字体。",
+
+  "Source": "源代码",
+  "View the source on GitHub": "在GitHub上查看源代码"
+}
