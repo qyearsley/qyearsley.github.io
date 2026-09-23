@@ -188,4 +188,41 @@ describe("game", () => {
     // barely narrows anything; narrowing works by unticking everything else.
     expect(byId("pool-size").textContent).toBe("35 facts in play")
   })
+
+  // Regression: chooseTrail() used to call a save method the class does not
+  // have, which threw after the trail was already switched -- so the picker
+  // never redrew to show the new current row, and the two calls after it in
+  // the same handler (showTrail(), _refreshHud()) never ran either.
+  test("choosing a non-current trail redraws the picker and is saved", () => {
+    click("trail-button")
+    expect(byId("trail-screen").classList.contains("active")).toBe(true)
+
+    const doublesRow = document.querySelector('[data-trail-id="doubles"]')
+    expect(doublesRow.classList.contains("is-current")).toBe(true)
+
+    const fivesRow = document.querySelector('[data-trail-id="fives"]')
+    expect(fivesRow.disabled).toBe(false)
+    expect(fivesRow.classList.contains("is-current")).toBe(false)
+
+    fivesRow.click()
+    expect(console.error).not.toHaveBeenCalled()
+
+    // The handler redraws the same screen in place, with fives now current.
+    expect(byId("trail-screen").classList.contains("active")).toBe(true)
+    expect(
+      document.querySelector('[data-trail-id="doubles"]').classList.contains("is-current"),
+    ).toBe(false)
+    const redrawnFives = document.querySelector('[data-trail-id="fives"]')
+    expect(redrawnFives.classList.contains("is-current")).toBe(true)
+    expect(redrawnFives.getAttribute("aria-pressed")).toBe("true")
+
+    // Reboot onto fresh markup WITHOUT clearing storage, the way a reload does.
+    document.documentElement.innerHTML = html.replace(/<!DOCTYPE[^>]*>/i, "")
+    document.dispatchEvent(new Event("DOMContentLoaded"))
+
+    click("trail-button")
+    expect(document.querySelector('[data-trail-id="fives"]').classList.contains("is-current")).toBe(
+      true,
+    )
+  })
 })

@@ -1391,7 +1391,7 @@ class TimesTrail {
     this._clampCurrentTrail()
     this.selector.reset()
     this._refreshGatePriority()
-    this.saveProgress()
+    this._save()
   }
 
   /**
