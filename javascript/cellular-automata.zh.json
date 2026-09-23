@@ -35,6 +35,5 @@
   "Evolution produces pseudo-random, aperiodic patterns.": "演化产生伪随机、非周期模式。",
   "Class IV — Complex": "第四类——复杂",
   "Localized structures emerge and interact in complicated ways. Capable of universal computation.": "局部结构出现并以复杂方式互动。能够进行通用计算。",
-  "The progression from Class I to Class IV mirrors a phase transition: too little activity produces uniformity, too much produces chaos, and the boundary between order and chaos — Class IV — is where complex, computation-capable behavior appears. Rule 110, a Class IV rule, has been proven Turing-complete, meaning it can simulate any computation given sufficient time and space.": "从第一类到第四类的演进如同相变：活动太少产生均匀，太多产生混沌，而有序与混沌的边界——第四类——正是复杂的、具备计算能力的行为出现之处。第四类的规则110已被证明图灵完备，即只要时间和空间足够，它可以模拟任何计算。",
-  "— 2D cellular automata (Conway's Game of Life)": "——二维元胞自动机（康威生命游戏）"
+  "The progression from Class I to Class IV mirrors a phase transition: too little activity produces uniformity, too much produces chaos, and the boundary between order and chaos — Class IV — is where complex, computation-capable behavior appears. Rule 110, a Class IV rule, has been proven Turing-complete, meaning it can simulate any computation given sufficient time and space.": "从第一类到第四类的演进如同相变：活动太少产生均匀，太多产生混沌，而有序与混沌的边界——第四类——正是复杂的、具备计算能力的行为出现之处。第四类的规则110已被证明图灵完备，即只要时间和空间足够，它可以模拟任何计算。"
 }

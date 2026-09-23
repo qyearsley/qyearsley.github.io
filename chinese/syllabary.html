@@ -1062,18 +1062,48 @@
             </table>
           </div>
         </section>
-        <section class="section">
-          <h3>See also</h3>
+        <aside class="see-also">
+          <h2>See also</h2>
           <ul>
-            <li>
-              <a href="/chinese/tone-table.html">Tone Table</a> — visual guide to characters with
-              different tones
-            </li>
+            <li><a href="/chinese/buddhist-vocabulary.html">Buddhist Terms</a></li>
+            <li><a href="/chinese/tone-table.html">Tone Table</a></li>
           </ul>
-        </section>
+        </aside>
       </main>
     </div>
     <script src="/shared/table-filter.js"></script>
+    <script type="module">
+      // Keeps the filter box's search term shareable via `?q=`. table-filter.js
+      // owns the actual filtering (attached to #table-filter's "input" event);
+      // this only reads and writes that input, so shared/table-filter.js stays
+      // untouched.
+      import { resolveTextParam } from "./url-state.js"
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const input = document.getElementById("table-filter")
+        if (!input) return
+
+        const params = new URLSearchParams(window.location.search)
+        const initial = resolveTextParam(params.get("q"), "")
+        if (initial) {
+          input.value = initial
+          input.dispatchEvent(new Event("input"))
+        }
+
+        input.addEventListener("input", () => {
+          const p = new URLSearchParams(window.location.search)
+          if (input.value) {
+            p.set("q", input.value)
+          } else {
+            p.delete("q")
+          }
+          const query = p.toString()
+          const newUrl =
+            window.location.pathname + (query ? `?${query}` : "") + window.location.hash
+          window.history.replaceState(null, "", newUrl)
+        })
+      })
+    </script>
     <script src="/shared/nav.js"></script>
   </body>
 </html>

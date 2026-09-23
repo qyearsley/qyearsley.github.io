@@ -273,15 +273,13 @@
             sufficient time and space.
           </p>
         </section>
-        <section class="section">
-          <h3>See also</h3>
+        <aside class="see-also">
+          <h2>See also</h2>
           <ul>
-            <li>
-              <a href="/games/life-garden/">Life Garden</a> — 2D cellular automata (Conway's Game of
-              Life)
-            </li>
+            <li><a href="/games/life-garden/">Life Garden</a></li>
+            <li><a href="/games/turing-tape/">Turing Tape</a></li>
           </ul>
-        </section>
+        </aside>
       </main>
     </div>
     <script>
@@ -361,6 +359,11 @@
           renderDiagram(ruleNum)
           generate(ruleNum)
 
+          // Keep the address bar a link to what's on screen.
+          const params = new URLSearchParams(window.location.search)
+          params.set("rule", ruleNum)
+          window.history.replaceState(null, "", `${window.location.pathname}?${params}`)
+
           // Update active preset button
           document.querySelectorAll(".preset-btn[data-rule]").forEach(function (btn) {
             btn.classList.toggle("active", parseInt(btn.dataset.rule, 10) === ruleNum)
@@ -384,6 +387,13 @@
           ruleInput.value = Math.floor(Math.random() * 256)
           update()
         })
+
+        // Load rule from URL if present and valid; otherwise keep the
+        // page's own default (falls back silently).
+        const ruleParam = parseInt(new URLSearchParams(window.location.search).get("rule"), 10)
+        if (Number.isInteger(ruleParam) && ruleParam >= 0 && ruleParam <= 255) {
+          ruleInput.value = ruleParam
+        }
 
         update()
       })()

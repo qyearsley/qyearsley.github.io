@@ -16,7 +16,24 @@
     <script type="module">
       "use strict"
 
-      import { TruthTable } from "./truthtable.js"
+      import { TruthTable, exprFromSearch } from "./truthtable.js"
+
+      /**
+       * Keeps the address bar in sync with the current expression, via
+       * `history.replaceState` so it never adds a back-button entry.
+       *
+       * @param {string} expr - The current contents of the expression input.
+       */
+      function syncUrl(expr) {
+        const params = new URLSearchParams(window.location.search)
+        if (expr) {
+          params.set("expr", expr)
+        } else {
+          params.delete("expr")
+        }
+        const query = params.toString()
+        window.history.replaceState(null, "", window.location.pathname + (query ? `?${query}` : ""))
+      }
 
       /**
        * Updates the truth table output based on the input expression.
@@ -27,6 +44,7 @@
         const output = document.getElementById("output")
         output.innerHTML = ""
         error.innerHTML = ""
+        syncUrl(input)
 
         if (!input.trim()) {
           error.innerHTML = '<span class="error-message">Please enter an expression</span>'
@@ -53,12 +71,10 @@
 
       // Set up event listeners on page load.
       document.addEventListener("DOMContentLoaded", () => {
-        // Load expression from URL if present
-        const params = new URLSearchParams(window.location.search)
-        const expr = params.get("expr")
-        if (expr) {
-          document.getElementById("input").value = expr
-        }
+        // Load expression from URL if present, falling back to the input's
+        // own default when the param is missing or fails to parse.
+        const inputEl = document.getElementById("input")
+        inputEl.value = exprFromSearch(window.location.search, inputEl.value)
 
         update()
         document.getElementById("form").addEventListener("submit", handleSubmit)
@@ -160,15 +176,13 @@
             </div>
           </div>
         </section>
-        <section class="section">
-          <h3>See also</h3>
+        <aside class="see-also">
+          <h2>See also</h2>
           <ul>
-            <li>
-              <a href="/javascript/logic-engine/">Logic Engine</a> — derive conclusions from
-              premises using inference rules
-            </li>
+            <li><a href="/javascript/logic-engine/">Logic Engine</a></li>
+            <li><a href="/games/turing-tape/">Turing Tape</a></li>
           </ul>
-        </section>
+        </aside>
       </main>
     </div>
     <script src="/shared/nav.js"></script>

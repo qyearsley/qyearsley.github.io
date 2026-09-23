@@ -1,5 +1,5 @@
 import { describe, test, expect } from "@jest/globals"
-import { levels, demos } from "../js/levels.js"
+import { levels, demos, levelFromParam } from "../js/levels.js"
 import { TuringMachine } from "../js/TuringMachine.js"
 
 // Step bound for the demo halting test. Every demo halts in under 20 steps, so
@@ -102,5 +102,32 @@ describe("demos", () => {
       // hitting the 500-step cap would mean it never terminates.
       expect(tm.haltReason).not.toBe("max-steps")
     }
+  })
+})
+
+describe("levelFromParam", () => {
+  test("resolves a 1-based index to the matching level", () => {
+    expect(levelFromParam("1")).toBe(levels[0])
+    expect(levelFromParam("2")).toBe(levels[1])
+    expect(levelFromParam(String(levels.length))).toBe(levels[levels.length - 1])
+  })
+
+  test("returns null when the value is missing", () => {
+    expect(levelFromParam(null)).toBeNull()
+  })
+
+  test("returns null for non-numeric input", () => {
+    expect(levelFromParam("flip-it")).toBeNull()
+    expect(levelFromParam("")).toBeNull()
+  })
+
+  test("returns null for a non-integer number", () => {
+    expect(levelFromParam("1.5")).toBeNull()
+  })
+
+  test("returns null when the index is out of range", () => {
+    expect(levelFromParam("0")).toBeNull()
+    expect(levelFromParam("-1")).toBeNull()
+    expect(levelFromParam(String(levels.length + 1))).toBeNull()
   })
 })

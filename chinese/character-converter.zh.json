@@ -12,7 +12,5 @@
   "Traditional Chinese Text:": "繁体中文：",
   "Simplified text will appear here...": "简体文本将显示在这里……",
   "Example Conversions": "转换示例",
-  "Click any example to try it:": "点击任一示例即可试用：",
-  "— homophone substitutions during character simplification": "——汉字简化中的同音替换",
-  "— see how characters are encoded in UTF-8, UTF-16, and GB2312": "——查看字符在UTF-8、UTF-16和GB2312中的编码"
+  "Click any example to try it:": "点击任一示例即可试用："
 }

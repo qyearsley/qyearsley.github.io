@@ -21,6 +21,24 @@ Interactive tools and visualizations built with vanilla JavaScript.
 
 **JavaScript modules**: Some pages like `truth-tables.html` load separate JS files (`truthtable.js`) with core logic. These JS files have corresponding test files (`truthtable.test.js`).
 
+**Shareable URL state**: A few pages read their main input from the query
+string on load and keep it in sync via `history.replaceState` as it changes,
+so the address bar is always a link to what's on screen. An invalid or
+missing value falls back to the page's own default, silently.
+
+- `truth-tables.html?expr=<expression>` — the boolean expression (URL-encoded).
+- `cellular-automata.html?rule=<0-255>` — the rule number.
+- `floating-point.html?n=<number or expression>` — the input value.
+- `logic-engine/?example=<name>` — a predefined example, by its exact name
+  (e.g. `?example=Modus%20Ponens`). Only set when a predefined example was
+  clicked; manually adding or clearing premises drops the param, since the
+  page can't represent an arbitrary proof in one query param.
+
+Other tools (Hash Collision Lab, Series Tester, Coin Flipper) take more than
+one input to describe their state, so they don't have this. Password
+Generator and Life Calculator are deliberately excluded: a password or a
+birthdate isn't something to put in a shareable link.
+
 ## Testing
 
 Tests use Jest and follow the `*.test.js` pattern, sitting next to the code they

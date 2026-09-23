@@ -133,9 +133,40 @@
         render()
       }
 
+      /**
+       * Keeps the address bar a link to what's on screen, via
+       * `history.replaceState` so it never adds a back-button entry.
+       */
+      function syncUrl(input) {
+        const params = new URLSearchParams(window.location.search)
+        if (input) {
+          params.set("n", input)
+        } else {
+          params.delete("n")
+        }
+        const query = params.toString()
+        window.history.replaceState(null, "", window.location.pathname + (query ? `?${query}` : ""))
+      }
+
+      /**
+       * Evaluates a number or simple numeric expression, e.g. "0.1 + 0.2".
+       * Returns null rather than throwing when the input isn't a safe,
+       * evaluable numeric expression.
+       */
+      function parseNumericExpr(input) {
+        if (!/^[\d.+\-*/() eENaInfity]+$/.test(input)) return null
+        try {
+          const value = Function(`"use strict"; return (${input})`)()
+          return typeof value === "number" ? value : null
+        } catch {
+          return null
+        }
+      }
+
       function updateFromInput() {
         const input = document.getElementById("input").value.trim()
         const output = document.getElementById("output")
+        syncUrl(input)
 
         if (!input) {
           output.innerHTML = '<div class="placeholder">Enter a number above</div>'
@@ -170,6 +201,13 @@
       document.addEventListener("DOMContentLoaded", () => {
         const inputEl = document.getElementById("input")
         const output = document.getElementById("output")
+
+        // Load from URL if present and valid; otherwise keep the page's
+        // own default (falls back silently).
+        const nParam = new URLSearchParams(window.location.search).get("n")
+        if (nParam !== null && parseNumericExpr(nParam.trim()) !== null) {
+          inputEl.value = nParam
+        }
 
         inputEl.addEventListener("input", updateFromInput)
 
@@ -489,6 +527,14 @@
             0.2" and "0.3" to compare their bits.
           </p>
         </section>
+
+        <aside class="see-also">
+          <h2>See also</h2>
+          <ul>
+            <li><a href="/javascript/hash-collision-lab.html">Hash Collision Lab</a></li>
+            <li><a href="/chinese/encoding-explorer.html">Encoding Explorer</a></li>
+          </ul>
+        </aside>
       </main>
     </div>
     <script src="/shared/nav.js"></script>

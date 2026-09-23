@@ -159,11 +159,22 @@ npm test                                        # all tests, including this game
 npm test -- --testPathPatterns turing-tape      # just this game
 ```
 
-Two suites, 47 tests: `TuringMachine.test.js` (stepping, tape growth, halting,
+Two suites, 52 tests: `TuringMachine.test.js` (stepping, tape growth, halting,
 both match functions, plus a solution for every level and demo) and
-`levels.test.js` (the shape of the level and demo data).
+`levels.test.js` (the shape of the level and demo data, plus `levelFromParam`
+below).
 
-The game reads nothing from the URL -- there are no debug or unlock parameters.
+## URL parameters
+
+`?level=N` opens the Nth puzzle (1-based, in nav order -- `?level=2` is Flip
+It), and the URL updates to match whichever puzzle is showing as you switch
+between them. There is no lock or progress gate on any level, so this is a
+plain deep link rather than a bypass of one. A missing, non-numeric, or
+out-of-range value falls back to the first level silently.
+
+Demos aren't addressable this way -- loading one clears `?level=` rather than
+pointing it at a level that isn't actually on screen. Parsing lives in
+`levelFromParam()` in [`js/levels.js`](js/levels.js).
 
 ## Known gaps
 

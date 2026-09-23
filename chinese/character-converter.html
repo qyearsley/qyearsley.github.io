@@ -17,13 +17,18 @@
       "use strict"
 
       import { simplify, traditionalize } from "./tradsimp.js"
+      import { resolveTextParam, resolveEnumParam } from "./url-state.js"
+
+      const DIRECTIONS = ["trad-to-simp", "simp-to-trad"]
+      const DEFAULT_DIRECTION = "trad-to-simp"
 
       let lastOutput = ""
-      let direction = "trad-to-simp" // or "simp-to-trad"
+      let direction = DEFAULT_DIRECTION // or "simp-to-trad"
 
       function updateConversion() {
         const input = document.getElementById("input").value
         const output = document.getElementById("output")
+        syncUrlToState(input)
         const placeholder =
           direction === "trad-to-simp"
             ? "Simplified text will appear here..."
@@ -47,6 +52,27 @@
         } catch (e) {
           output.innerHTML = '<span class="error">Error: ' + e + "</span>"
         }
+      }
+
+      // Keeps `?text=` and `?dir=` in sync with the current input and
+      // direction, so the current conversion can be shared with a link.
+      // `dir` is dropped when it's the default, so the common case
+      // (trad-to-simp) doesn't clutter the URL.
+      function syncUrlToState(input) {
+        const params = new URLSearchParams(window.location.search)
+        if (input) {
+          params.set("text", input)
+        } else {
+          params.delete("text")
+        }
+        if (direction !== DEFAULT_DIRECTION) {
+          params.set("dir", direction)
+        } else {
+          params.delete("dir")
+        }
+        const query = params.toString()
+        const newUrl = window.location.pathname + (query ? `?${query}` : "") + window.location.hash
+        window.history.replaceState(null, "", newUrl)
       }
 
       function loadExamples() {
@@ -153,7 +179,18 @@
       // Initialize when page loads
       document.addEventListener("DOMContentLoaded", () => {
         loadExamples()
-        updateConversion()
+
+        const params = new URLSearchParams(window.location.search)
+        const initialDirection = resolveEnumParam(params.get("dir"), DIRECTIONS, DEFAULT_DIRECTION)
+        document.getElementById("input").value = resolveTextParam(params.get("text"), "")
+
+        // setDirection also renders, via updateConversion -- skip the second
+        // render when the direction is already the default.
+        if (initialDirection !== direction) {
+          setDirection(initialDirection)
+        } else {
+          updateConversion()
+        }
 
         document.getElementById("input").addEventListener("input", updateConversion)
         document
@@ -325,19 +362,13 @@
           <p>Click any example to try it:</p>
           <div id="examples" class="examples"></div>
         </section>
-        <section class="section">
-          <h3>See also</h3>
+        <aside class="see-also">
+          <h2>See also</h2>
           <ul>
-            <li>
-              <a href="/chinese/homophones.html">Homophones</a> — homophone substitutions during
-              character simplification
-            </li>
-            <li>
-              <a href="/chinese/encoding-explorer.html">Encoding Explorer</a> — see how characters
-              are encoded in UTF-8, UTF-16, and GB2312
-            </li>
+            <li><a href="/chinese/homophones.html">Homophones</a></li>
+            <li><a href="/chinese/encoding-explorer.html">Encoding Explorer</a></li>
           </ul>
-        </section>
+        </aside>
       </main>
     </div>
     <script src="/shared/nav.js"></script>

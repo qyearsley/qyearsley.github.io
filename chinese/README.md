@@ -43,3 +43,23 @@ table generator, kept for reference; use the Python one.
 `tradsimp.js` holds the traditional/simplified conversion mapping used by
 `character-converter.html`. It has unit tests in `tradsimp.test.js`, run by
 `npm test` from the repository root.
+
+`url-state.js` holds pure helpers (`resolveTextParam`, `resolveEnumParam`) for
+reading a query parameter with a silent fallback. Tests live in
+`url-state.test.js`.
+
+## URL parameters
+
+Several tool pages read their main input from the query string on load, and
+keep the URL in sync via `history.replaceState` as it changes, so the current
+state can be shared with a link. An invalid or missing value falls back to
+the page's default without an error.
+
+- `encoding-explorer.html`: `?text=` -- the characters to analyze, e.g.
+  `?text=%E6%B1%89%E5%AD%97`.
+- `character-converter.html`: `?text=` -- the text to convert, and `?dir=` --
+  `trad-to-simp` (default, omitted from the URL) or `simp-to-trad`.
+- `syllabary.html`, `homophones.html`, `tone-table.html`: `?q=` -- the filter
+  box's search term. This reads and writes the existing `#table-filter` input
+  rather than changing `shared/table-filter.js`, which owns the filtering
+  itself.

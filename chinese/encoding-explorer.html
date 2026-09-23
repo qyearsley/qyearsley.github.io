@@ -16,6 +16,8 @@
     <script type="module">
       "use strict"
 
+      import { resolveTextParam } from "./url-state.js"
+
       // --- GB2312 lookup for common characters ---
       // Each entry: Unicode code point -> [high byte, low byte]
       // These are the EUC-CN encoded values (GB2312 + 0x80 offset)
@@ -210,6 +212,7 @@
       function update() {
         const input = document.getElementById("input").value
         const output = document.getElementById("output")
+        syncUrlToInput(input)
 
         if (!input.trim()) {
           output.innerHTML = '<div class="placeholder">Type or paste characters above</div>'
@@ -222,8 +225,28 @@
         output.innerHTML = html
       }
 
+      // Keeps the URL's `?text=` in sync with the input, so the current
+      // characters can be shared with a link. Dropping the param entirely
+      // when the input is empty keeps a cleared field from producing a
+      // trailing "?text=" in the address bar.
+      function syncUrlToInput(input) {
+        const params = new URLSearchParams(window.location.search)
+        if (input) {
+          params.set("text", input)
+        } else {
+          params.delete("text")
+        }
+        const query = params.toString()
+        const newUrl = window.location.pathname + (query ? `?${query}` : "") + window.location.hash
+        window.history.replaceState(null, "", newUrl)
+      }
+
       document.addEventListener("DOMContentLoaded", () => {
-        document.getElementById("input").addEventListener("input", update)
+        const params = new URLSearchParams(window.location.search)
+        const input = document.getElementById("input")
+        input.value = resolveTextParam(params.get("text"), input.value)
+
+        input.addEventListener("input", update)
 
         // Example buttons
         document.querySelectorAll(".example-btn").forEach((btn) => {
@@ -482,15 +505,13 @@
             common characters.
           </p>
         </section>
-        <section class="section">
-          <h3>See also</h3>
+        <aside class="see-also">
+          <h2>See also</h2>
           <ul>
-            <li>
-              <a href="/chinese/character-converter.html">Character Converter</a> — convert between
-              traditional and simplified Chinese
-            </li>
+            <li><a href="/chinese/character-converter.html">Character Converter</a></li>
+            <li><a href="/javascript/floating-point.html">Floating Point Exposed</a></li>
           </ul>
-        </section>
+        </aside>
       </main>
     </div>
     <script src="/shared/nav.js"></script>

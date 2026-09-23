@@ -79,3 +79,14 @@ export const PREDEFINED_EXAMPLES = [
     premises: ["raining", "~raining"],
   },
 ]
+
+/**
+ * Finds a predefined example by name.
+ *
+ * @param {string} name - The example name to look up (e.g. "Modus Ponens").
+ * @returns {{name: string, description?: string, premises: string[]}|undefined}
+ *   The matching example, or undefined if no example has that name.
+ */
+export function findExampleByName(name) {
+  return PREDEFINED_EXAMPLES.find((example) => example.name === name)
+}

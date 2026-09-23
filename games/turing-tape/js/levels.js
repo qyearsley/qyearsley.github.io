@@ -148,3 +148,23 @@ export const demos = [
     ],
   },
 ]
+
+/**
+ * Resolves a `?level=` query value to a level, for deep-linking to a puzzle.
+ *
+ * The value is a 1-based index into `levels`, matching the order they appear
+ * in the nav (`?level=2` for Flip It) rather than the level's `id`, so a
+ * link survives a level being renamed. Nothing here is locked or gated by
+ * progress -- every level is reachable from the nav regardless of what's
+ * been solved -- so a missing, non-numeric, or out-of-range value just
+ * falls back to `null` and the caller opens the default first level.
+ *
+ * @param {string | null} rawValue - Result of `URLSearchParams.get("level")`.
+ * @returns {object | null} The matching level, or null.
+ */
+export function levelFromParam(rawValue) {
+  if (rawValue === null) return null
+  const index = Number(rawValue)
+  if (!Number.isInteger(index) || index < 1 || index > levels.length) return null
+  return levels[index - 1]
+}

@@ -18,8 +18,53 @@ import {
   loadExample,
 } from "./state.js"
 import { inferNextSteps } from "./inference.js"
-import { PREDEFINED_EXAMPLES } from "./examples.js"
+import { PREDEFINED_EXAMPLES, findExampleByName } from "./examples.js"
 import { tokenize, Parser } from "./parser.js"
+
+/**
+ * Sets the `example` query param to the given name, via
+ * `history.replaceState` so it never adds a back-button entry.
+ *
+ * @param {string} name - The example name to record.
+ */
+function setExampleParam(name) {
+  const url = new window.URL(window.location.href)
+  url.searchParams.set("example", name)
+  window.history.replaceState(null, "", url)
+}
+
+/**
+ * Removes the `example` query param, once the on-screen state no longer
+ * matches the example it named (a premise was added or cleared by hand).
+ */
+function clearExampleParam() {
+  const url = new window.URL(window.location.href)
+  if (url.searchParams.has("example")) {
+    url.searchParams.delete("example")
+    window.history.replaceState(null, "", url)
+  }
+}
+
+/**
+ * Parses and loads a predefined example's premises, skipping (and warning
+ * about) any premise that fails to parse.
+ *
+ * @param {{premises: string[]}} example - A predefined example.
+ */
+function loadPredefinedExample(example) {
+  const parsedPremises = []
+  for (const premise of example.premises) {
+    try {
+      const tokens = tokenize(premise)
+      const ast = new Parser(tokens).parse()
+      parsedPremises.push({ expression: premise, ast })
+    } catch (e) {
+      console.warn(`Failed to parse example premise: ${premise}`, e)
+      // Skip invalid premises
+    }
+  }
+  loadExample(parsedPremises)
+}
 
 /**
  * Initializes the UI and sets up event listeners
@@ -71,6 +116,7 @@ export function initUI() {
           })
           premiseInput.value = ""
           clearError()
+          clearExampleParam()
           render()
         }
       }
@@ -116,6 +162,7 @@ export function initUI() {
   // Clear all
   clearButton.addEventListener("click", () => {
     clearAll()
+    clearExampleParam()
     render()
   })
 
@@ -128,23 +175,22 @@ export function initUI() {
       button.title = example.description
     }
     button.addEventListener("click", () => {
-      // Parse all premises before loading
-      const parsedPremises = []
-      for (const premise of example.premises) {
-        try {
-          const tokens = tokenize(premise)
-          const ast = new Parser(tokens).parse()
-          parsedPremises.push({ expression: premise, ast })
-        } catch (e) {
-          console.warn(`Failed to parse example premise: ${premise}`, e)
-          // Skip invalid premises
-        }
-      }
-      loadExample(parsedPremises)
+      loadPredefinedExample(example)
+      setExampleParam(example.name)
       render()
     })
     examplesContainer.appendChild(button)
   })
+
+  // Load an example from the URL if present and recognized; otherwise keep
+  // the page's own default (an empty proof) and fall back silently.
+  const exampleName = new URLSearchParams(window.location.search).get("example")
+  if (exampleName) {
+    const example = findExampleByName(exampleName)
+    if (example) {
+      loadPredefinedExample(example)
+    }
+  }
 
   // Initial render
   render()

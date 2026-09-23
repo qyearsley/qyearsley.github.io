@@ -342,6 +342,29 @@ class TruthTable {
   }
 }
 
+/**
+ * Reads the `expr` query parameter from a URL search string, falling back to
+ * a default when the parameter is missing or does not parse as a boolean
+ * expression.
+ *
+ * Used so the page can be loaded from a shared link (e.g. `?expr=a+and+b`)
+ * without showing an error for a stale or hand-edited link.
+ *
+ * @param {string} search - A URL search string, e.g. "?expr=a%20and%20b".
+ * @param {string} defaultExpr - The expression to fall back to.
+ * @returns {string} The `expr` param if it parses, otherwise `defaultExpr`.
+ */
+function exprFromSearch(search, defaultExpr) {
+  const expr = new URLSearchParams(search).get("expr")
+  if (!expr) return defaultExpr
+  try {
+    parseInfix(expr)
+    return expr
+  } catch {
+    return defaultExpr
+  }
+}
+
 export {
   BoolExpr,
   BoolExprConst,
@@ -351,4 +374,5 @@ export {
   TruthTable,
   parseInfix,
   tokenize,
+  exprFromSearch,
 }

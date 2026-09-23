@@ -133,3 +133,23 @@ describe("TruthTable", () => {
     ])
   })
 })
+
+describe("exprFromSearch", () => {
+  test("returns the expr param when it parses", () => {
+    expect(tt.exprFromSearch("?expr=a%20and%20b", "default")).toEqual("a and b")
+  })
+
+  test("falls back to the default when expr is missing", () => {
+    expect(tt.exprFromSearch("", "default")).toEqual("default")
+    expect(tt.exprFromSearch("?other=1", "default")).toEqual("default")
+  })
+
+  test("falls back to the default when expr does not parse", () => {
+    expect(tt.exprFromSearch("?expr=a%20and%20", "default")).toEqual("default")
+    expect(tt.exprFromSearch("?expr=(a", "default")).toEqual("default")
+  })
+
+  test("falls back to the default for an empty expr value", () => {
+    expect(tt.exprFromSearch("?expr=", "default")).toEqual("default")
+  })
+})

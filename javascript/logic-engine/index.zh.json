@@ -34,6 +34,5 @@
   "<code>P xor Q</code> — Exclusive OR": "<code>P xor Q</code>——异或",
   "<code>P nand Q</code> — Not AND": "<code>P nand Q</code>——与非",
   "<code>P nor Q</code> — Not OR": "<code>P nor Q</code>——或非",
-  "<code>P xnor Q</code> — Exclusive NOR": "<code>P xnor Q</code>——同或",
-  "— generate truth tables for boolean expressions": "——为布尔表达式生成真值表"
+  "<code>P xnor Q</code> — Exclusive NOR": "<code>P xnor Q</code>——同或"
 }

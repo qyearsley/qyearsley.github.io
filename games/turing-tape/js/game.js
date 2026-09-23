@@ -1,5 +1,5 @@
 import { TuringMachine } from "./TuringMachine.js"
-import { levels, demos } from "./levels.js"
+import { levels, demos, levelFromParam } from "./levels.js"
 
 const STORAGE_KEY = "turingTape"
 const PLAY_INTERVAL_MS = 400
@@ -33,7 +33,8 @@ const addRuleBtn = $("add-rule-btn")
 try {
   buildLevelNav()
   buildDemoNav()
-  loadLevel(levels[0])
+  const params = new URLSearchParams(window.location.search)
+  loadLevel(levelFromParam(params.get("level")) || levels[0])
 } catch (error) {
   console.error("Failed to initialize Turing Tape:", error)
 }
@@ -93,6 +94,7 @@ function loadLevel(level) {
   levelTitle.textContent = level.name
   levelDescription.textContent = level.description
   updateNavHighlight(level.id)
+  syncUrlToLevel(level)
 
   // Show target tape for puzzles
   targetSection.classList.remove("hidden")
@@ -105,6 +107,23 @@ function loadLevel(level) {
   updateDisplay()
 }
 
+// Keeps `?level=` in sync with the puzzle on screen, so it can be shared
+// with a link. Demos aren't addressable this way (see loadDemo), so the
+// param is cleared there rather than left pointing at a level that isn't
+// actually showing.
+function syncUrlToLevel(level) {
+  const index = levels.indexOf(level)
+  const params = new URLSearchParams(window.location.search)
+  if (index === -1) {
+    params.delete("level")
+  } else {
+    params.set("level", String(index + 1))
+  }
+  const query = params.toString()
+  const newUrl = window.location.pathname + (query ? `?${query}` : "") + window.location.hash
+  window.history.replaceState(null, "", newUrl)
+}
+
 function loadDemo(demo) {
   stopPlay()
   isDemo = true
@@ -115,6 +134,7 @@ function loadDemo(demo) {
   levelTitle.textContent = demo.name
   levelDescription.textContent = demo.description
   updateNavHighlight(demo.id)
+  syncUrlToLevel(demo)
 
   // Hide target tape for demos
   targetSection.classList.add("hidden")

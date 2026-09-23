@@ -19,5 +19,5 @@
   "Country transliterations": "国名音译",
   "Name transliterations": "人名音译",
   "Generated using <a href=\"syllabary/make_syllabary.py\">make_syllabary.py</a> from <a href=\"syllabary/translit_char_freqs_pronunciation.txt\">frequency data</a>": "由 <a href=\"syllabary/make_syllabary.py\">make_syllabary.py</a> 根据<a href=\"syllabary/translit_char_freqs_pronunciation.txt\">频率数据</a>生成",
-  "— visual guide to characters with different tones": "——不同声调汉字的视觉指南"
+  "Buddhist Terms": "佛教术语"
 }
