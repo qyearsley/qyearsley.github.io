@@ -11,6 +11,7 @@
   "Test mathematical series for convergence": "测试级数收敛性",
   "Random passwords you can tune": "可调节的随机密码",
   "The IEEE 754 bits behind a number": "数字背后的IEEE 754位模式",
+  "Two's complement bits, ranges, and overflow": "补码的位、取值范围与溢出",
   "Watch strings collide in hash buckets": "观察字符串在散列桶中冲突",
   "Run the elementary one-dimensional rules": "运行一维初等规则",
   "Chance and Number": "概率与数",

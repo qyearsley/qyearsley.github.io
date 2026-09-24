@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Integer Explorer - Quinten Yearsley</title>
+    <meta
+      name="description"
+      content="See the two's complement bits behind an integer, its signed and unsigned range, and what overflow does when it wraps"
+    />
+    <meta name="theme-color" content="#2d3748" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/components.css" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script type="module">
+      "use strict"
+
+      import {
+        parseIntegerInput,
+        describeState,
+        evaluateValue,
+        widthRange,
+        increment,
+        decrement,
+        negateBits,
+        toggleBit,
+      } from "./integer-explorer.js"
+
+      // State: the current bit pattern (unsigned BigInt in [0, 2^width)),
+      // plus the width and signedness controls. Updated by input, by the
+      // value/operation buttons, and by clicking bits.
+      let currentBits = 0n
+      let lastOverflow = false
+
+      function currentWidth() {
+        return Number(document.getElementById("width").value)
+      }
+
+      function currentSigned() {
+        return document.getElementById("signed").value === "signed"
+      }
+
+      function renderBitBoxes(binary, width, signed) {
+        return binary
+          .split("")
+          .map((b, i) => {
+            const isSign = signed && i === 0
+            const className = isSign ? "sign" : "value"
+            const title = isSign
+              ? "Click to toggle the sign bit"
+              : `Click to toggle bit ${width - 1 - i}`
+            const groupEnd = i < width - 1 && (width - 1 - i) % 8 === 0 ? " byte-boundary" : ""
+            return `<span class="bit ${className} ${b === "1" ? "one" : "zero"}${groupEnd}" data-index="${i}" role="button" tabindex="0" title="${title}">${b}</span>`
+          })
+          .join("")
+      }
+
+      function renderRepresentation() {
+        const width = currentWidth()
+        const signed = currentSigned()
+        const state = describeState(currentBits, width, signed)
+
+        const overflowHtml = lastOverflow
+          ? `<div class="formula overflow-note">Overflow: the value wrapped around to fit in ${width} bits</div>`
+          : ""
+
+        return `
+          <div class="int-result">
+            <div class="value-display">${state.value}</div>
+            ${overflowHtml}
+
+            <div class="bit-layout">
+              <div class="bit-group">
+                <div class="bit-label">Bits (${width})</div>
+                <div class="bit-row">${renderBitBoxes(state.binary, width, signed)}</div>
+                <div class="bit-value">
+                  unsigned ${state.unsignedValue}, signed ${state.signedValue}
+                </div>
+              </div>
+            </div>
+
+            <div class="hex-display">Hex: 0x${state.hex}</div>
+            <div class="range-display">
+              Range (${signed ? "signed" : "unsigned"} ${width}-bit): ${state.min} to ${state.max}
+            </div>
+            <div class="bit-hint">Click any bit to toggle it</div>
+          </div>
+        `
+      }
+
+      function render() {
+        document.getElementById("output").innerHTML = renderRepresentation()
+      }
+
+      function setBits(bits, overflowed) {
+        currentBits = bits
+        lastOverflow = overflowed
+        render()
+      }
+
+      function updateFromInput() {
+        const raw = document.getElementById("input").value.trim()
+        const output = document.getElementById("output")
+
+        if (!raw) {
+          output.innerHTML = '<div class="placeholder">Enter a number above</div>'
+          return
+        }
+
+        const value = parseIntegerInput(raw)
+        if (value === null) {
+          output.innerHTML =
+            '<div class="error-msg">Enter a decimal, 0x hex, or 0b binary integer</div>'
+          return
+        }
+
+        const { bits, overflowed } = evaluateValue(value, currentWidth(), currentSigned())
+        setBits(bits, overflowed)
+      }
+
+      function setInputText(text) {
+        document.getElementById("input").value = text
+        updateFromInput()
+      }
+
+      function applyPreset(name) {
+        const width = currentWidth()
+        const signed = currentSigned()
+        const { min, max } = widthRange(width, signed)
+        const value = { min, max, "minus-one": -1n, zero: 0n }[name]
+        setInputText(String(value))
+      }
+
+      function applyOperation(name) {
+        const width = currentWidth()
+        const signed = currentSigned()
+        const op = { increment, decrement, negate: negateBits }[name]
+        const result = op(currentBits, width, signed)
+        setBits(result.bits, result.overflowed)
+        // Keep the text input in sync so it reflects the new value.
+        const state = describeState(currentBits, width, signed)
+        document.getElementById("input").value = String(state.value)
+      }
+
+      function handleToggleBit(index) {
+        const width = currentWidth()
+        const signed = currentSigned()
+        currentBits = toggleBit(currentBits, width, index)
+        lastOverflow = false
+        const state = describeState(currentBits, width, signed)
+        document.getElementById("input").value = String(state.value)
+        render()
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const inputEl = document.getElementById("input")
+        const output = document.getElementById("output")
+
+        inputEl.addEventListener("input", updateFromInput)
+        document.getElementById("width").addEventListener("change", updateFromInput)
+        document.getElementById("signed").addEventListener("change", updateFromInput)
+
+        document.querySelectorAll(".preset-btn[data-preset]").forEach((btn) => {
+          btn.addEventListener("click", () => applyPreset(btn.dataset.preset))
+        })
+
+        document.querySelectorAll(".op-btn[data-op]").forEach((btn) => {
+          btn.addEventListener("click", () => applyOperation(btn.dataset.op))
+        })
+
+        // Delegate click/keyboard on bits
+        output.addEventListener("click", (e) => {
+          const bit = e.target.closest(".bit[data-index]")
+          if (bit) handleToggleBit(Number(bit.dataset.index))
+        })
+        output.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            const bit = e.target.closest(".bit[data-index]")
+            if (bit) {
+              e.preventDefault()
+              const index = bit.dataset.index
+              handleToggleBit(Number(index))
+              // The redraw replaced the bit, so put focus back on its replacement.
+              output.querySelector(`.bit[data-index="${index}"]`).focus()
+            }
+          }
+        })
+
+        updateFromInput()
+      })
+    </script>
+    <style>
+      .int-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 1.3rem;
+        font-family: "SF Mono", Menlo, Consolas, monospace;
+        border: 2px solid var(--color-border-dark);
+        border-radius: 8px;
+        background: var(--color-bg-input);
+        color: var(--color-text);
+        margin-bottom: 0.75rem;
+      }
+
+      .int-input:focus {
+        outline: none;
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px rgb(49, 130, 206, 0.2);
+      }
+
+      .controls-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
+      .controls-row label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--color-text-secondary);
+        margin-right: 0.35rem;
+      }
+
+      .presets-row,
+      .ops-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .placeholder,
+      .error-msg {
+        text-align: center;
+        padding: 2rem;
+        font-style: italic;
+        color: var(--color-text-muted);
+      }
+
+      .error-msg {
+        color: var(--color-error);
+      }
+
+      /* Result */
+      .int-result {
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        padding: 1.25rem;
+        background: var(--color-bg-card);
+      }
+
+      .value-display {
+        font-size: 1.8rem;
+        font-family: "SF Mono", Menlo, Consolas, monospace;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+      }
+
+      .formula {
+        font-family: "SF Mono", Menlo, Consolas, monospace;
+        font-size: 0.95rem;
+        color: var(--color-text-tertiary);
+        margin-bottom: 1rem;
+      }
+
+      .overflow-note {
+        color: var(--color-error);
+        font-style: italic;
+      }
+
+      /* Bit layout */
+      .bit-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+      }
+
+      .bit-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+      }
+
+      .bit-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--color-text-tertiary);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .bit-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1px;
+      }
+
+      .bit {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.15rem;
+        height: 1.5rem;
+        font-family: "SF Mono", Menlo, Consolas, monospace;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border-radius: 2px;
+        color: #fff;
+        cursor: pointer;
+        transition:
+          transform 0.1s,
+          filter 0.1s;
+        user-select: none;
+      }
+
+      .bit.byte-boundary {
+        margin-right: 0.3rem;
+      }
+
+      .bit:hover {
+        transform: scale(1.2);
+        filter: brightness(1.2);
+        z-index: 1;
+      }
+
+      .bit:focus-visible {
+        outline: 2px solid var(--color-primary);
+        outline-offset: 1px;
+      }
+
+      .bit-hint {
+        font-size: 0.8rem;
+        color: var(--color-text-muted);
+        margin-top: 0.5rem;
+        font-style: italic;
+      }
+
+      .bit.sign {
+        background: #e53e3e;
+      }
+
+      .bit.sign.zero {
+        background: #38a169;
+      }
+
+      .bit.value {
+        background: #3182ce;
+      }
+
+      .bit.value.zero {
+        background: #90cdf4;
+        color: #2a4365;
+      }
+
+      .bit-value {
+        font-size: 0.8rem;
+        color: var(--color-text-muted);
+      }
+
+      .hex-display,
+      .range-display {
+        font-family: "SF Mono", Menlo, Consolas, monospace;
+        font-size: 0.85rem;
+        color: var(--color-text-tertiary);
+      }
+
+      .range-display {
+        margin-top: 0.25rem;
+      }
+
+      /* Dark mode — only bit-specific color overrides remain;
+         everything else is handled by CSS variables. */
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) .bit.sign {
+          background: #c53030;
+        }
+        :root:not([data-theme="light"]) .bit.sign.zero {
+          background: #276749;
+        }
+        :root:not([data-theme="light"]) .bit.value {
+          background: #2b6cb0;
+        }
+        :root:not([data-theme="light"]) .bit.value.zero {
+          background: #2a4365;
+          color: #90cdf4;
+        }
+      }
+
+      [data-theme="dark"] .bit.sign {
+        background: #c53030;
+      }
+      [data-theme="dark"] .bit.sign.zero {
+        background: #276749;
+      }
+      [data-theme="dark"] .bit.value {
+        background: #2b6cb0;
+      }
+      [data-theme="dark"] .bit.value.zero {
+        background: #2a4365;
+        color: #90cdf4;
+      }
+    </style>
+    <script src="/shared/theme.js"></script>
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="container">
+      <header class="header">
+        <h1>Integer Explorer</h1>
+        <p>See the two's complement bits behind an integer</p>
+      </header>
+
+      <main id="main-content" class="main-content">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="/">Home</a>
+          <span class="separator" aria-hidden="true">/</span>
+          <a href="/javascript/">Experiments</a>
+          <span class="separator" aria-hidden="true">/</span>
+          <span class="current" aria-current="page">Integer Explorer</span>
+        </nav>
+
+        <section class="section">
+          <label for="input"><strong>Enter a number:</strong></label>
+          <input
+            id="input"
+            type="text"
+            class="int-input"
+            value="42"
+            autocomplete="off"
+            placeholder="42, -1, 0xFF, 0b1010"
+          />
+
+          <div class="controls-row">
+            <div>
+              <label for="width">Width:</label>
+              <select id="width" class="form-select">
+                <option value="8">8 bits</option>
+                <option value="16">16 bits</option>
+                <option value="32" selected>32 bits</option>
+                <option value="64">64 bits</option>
+              </select>
+            </div>
+            <div>
+              <label for="signed">Interpret as:</label>
+              <select id="signed" class="form-select">
+                <option value="signed" selected>signed</option>
+                <option value="unsigned">unsigned</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="presets-row">
+            <button class="preset-btn" data-preset="min">Min</button>
+            <button class="preset-btn" data-preset="max">Max</button>
+            <button class="preset-btn" data-preset="minus-one">-1</button>
+            <button class="preset-btn" data-preset="zero">0</button>
+          </div>
+
+          <div class="ops-row">
+            <button class="btn-primary op-btn" data-op="increment">+1</button>
+            <button class="btn-secondary op-btn" data-op="decrement">&minus;1</button>
+            <button class="btn-tertiary op-btn" data-op="negate">Negate</button>
+          </div>
+
+          <div id="output"></div>
+        </section>
+
+        <section class="how-section">
+          <h2>How two's complement works</h2>
+          <p>
+            A fixed-width integer is stored as a pattern of bits with no separate sign field.
+            Instead, the top bit doubles as a sign in signed mode: 0 for non-negative, 1 for
+            negative. Flipping every bit and adding 1 negates a value, which is also why
+            incrementing the all-ones pattern rolls it back to all zeros.
+          </p>
+          <p>
+            The same bits mean different things depending on how they're read. The byte
+            <code>11111111</code> is 255 unsigned, but &minus;1 signed. Because signed and unsigned
+            ranges are offset rather than symmetric, negating the most negative signed value (like
+            &minus;128 for 8 bits) has no positive counterpart to land on -- it overflows and
+            produces itself back.
+          </p>
+          <p>
+            Try the Min, Max, -1, and 0 buttons, then +1 or Negate, to see where a width's range
+            wraps around.
+          </p>
+        </section>
+
+        <aside class="see-also">
+          <h2>See also</h2>
+          <ul>
+            <li><a href="/javascript/floating-point.html">Floating Point Exposed</a></li>
+            <li><a href="/javascript/hash-collision-lab.html">Hash Collision Lab</a></li>
+          </ul>
+        </aside>
+      </main>
+    </div>
+    <script src="/shared/nav.js"></script>
+  </body>
+</html>
