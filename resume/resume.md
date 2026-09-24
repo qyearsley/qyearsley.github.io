@@ -29,7 +29,7 @@ Built tools and automation to improve the efficiency and reliability of device l
 
 #### Device Recovery Automation _(Python)_
 
-- Overhauled system: added comprehensive test coverage and improved recovery rates across all hardware models
+- Overhauled the system: added comprehensive test coverage and improved recovery rates across all hardware models
 
 #### Fleet Operations & Monitoring _(Ansible, Splunk)_
 
