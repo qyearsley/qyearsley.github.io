@@ -13,6 +13,7 @@
   "The IEEE 754 bits behind a number": "数字背后的IEEE 754位模式",
   "Two's complement bits, ranges, and overflow": "补码的位、取值范围与溢出",
   "Watch strings collide in hash buckets": "观察字符串在散列桶中冲突",
+  "Train a tiny tokenizer and count tokens in English and Chinese": "训练一个小分词器，比较中英文的词元数",
   "Run the elementary one-dimensional rules": "运行一维初等规则",
   "Watch a perfect maze carve itself, then solve it": "看完美迷宫自己生成，然后求解",
   "Chance and Number": "概率与数",

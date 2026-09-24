@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tokenizer Comparison - Quinten Yearsley</title>
+    <meta
+      name="description"
+      content="Train a tiny byte-level BPE tokenizer and see how its training text decides whether English or Chinese needs more tokens for the same sentence"
+    />
+    <meta name="theme-color" content="#2d3748" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/components.css" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script type="module">
+      "use strict"
+
+      import {
+        MAX_MERGES,
+        DEFAULT_MERGES,
+        DEFAULT_MIX_PERCENT,
+        PRESET_PAIRS,
+        trainBPE,
+        buildTrainingSequences,
+        tokenStats,
+        tokenizeForDisplay,
+      } from "./tokenizer-comparison.js"
+
+      const CHIP_COLORS = 10
+
+      let mixInput
+      let mixValue
+      let mergesInput
+      let mergesValue
+      let trainingInfo
+      let enInput
+      let zhInput
+      let enChips
+      let zhChips
+      let enStats
+      let zhStats
+
+      let merges = []
+
+      function retrain() {
+        const mixPercent = Number(mixInput.value)
+        const numMerges = Number(mergesInput.value)
+        mixValue.textContent = `${mixPercent}% English`
+        mergesValue.textContent = String(numMerges)
+
+        const sequences = buildTrainingSequences(mixPercent)
+        const trainingBytes = sequences.reduce((sum, seq) => sum + seq.length, 0)
+
+        const start = window.performance.now()
+        merges = trainBPE(sequences, numMerges)
+        const elapsedMs = window.performance.now() - start
+
+        trainingInfo.textContent =
+          `Learned ${merges.length} merge${merges.length === 1 ? "" : "s"} ` +
+          `(vocabulary size ${256 + merges.length}) from ${trainingBytes} training bytes ` +
+          `in ${elapsedMs.toFixed(1)} ms.`
+
+        renderComparison()
+      }
+
+      function renderChips(container, text) {
+        container.innerHTML = ""
+        if (!text) {
+          const placeholder = document.createElement("p")
+          placeholder.className = "tc-placeholder"
+          placeholder.textContent = "Type some text above"
+          container.appendChild(placeholder)
+          return
+        }
+        const chips = tokenizeForDisplay(text, merges)
+        for (const chip of chips) {
+          const span = document.createElement("span")
+          span.className = `tc-chip tc-chip-color-${chip.id % CHIP_COLORS}`
+          if (!chip.isText) span.classList.add("tc-chip-bytes")
+          span.textContent = chip.label
+          span.title = `token id ${chip.id} -- bytes: ${chip.bytes
+            .map((b) => b.toString(16).toUpperCase().padStart(2, "0"))
+            .join(" ")}`
+          container.appendChild(span)
+        }
+      }
+
+      function renderStats(container, text) {
+        const stats = tokenStats(text, merges)
+        container.textContent =
+          `${stats.chars} character${stats.chars === 1 ? "" : "s"}, ` +
+          `${stats.bytes} UTF-8 byte${stats.bytes === 1 ? "" : "s"}, ` +
+          `${stats.tokens} token${stats.tokens === 1 ? "" : "s"}, ` +
+          `${stats.tokensPerChar.toFixed(2)} tokens per character`
+      }
+
+      function renderComparison() {
+        const enText = enInput.value
+        const zhText = zhInput.value
+        renderChips(enChips, enText)
+        renderChips(zhChips, zhText)
+        renderStats(enStats, enText)
+        renderStats(zhStats, zhText)
+      }
+
+      function applyPreset(preset) {
+        enInput.value = preset.en
+        zhInput.value = preset.zh
+        renderComparison()
+      }
+
+      function populatePresets() {
+        const container = document.getElementById("preset-buttons")
+        for (const preset of PRESET_PAIRS) {
+          const button = document.createElement("button")
+          button.type = "button"
+          button.className = "preset-btn"
+          button.textContent = preset.label
+          button.addEventListener("click", () => applyPreset(preset))
+          container.appendChild(button)
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        mixInput = document.getElementById("mix")
+        mixValue = document.getElementById("mix-value")
+        mergesInput = document.getElementById("merges")
+        mergesValue = document.getElementById("merges-value")
+        trainingInfo = document.getElementById("training-info")
+        enInput = document.getElementById("en-input")
+        zhInput = document.getElementById("zh-input")
+        enChips = document.getElementById("en-chips")
+        zhChips = document.getElementById("zh-chips")
+        enStats = document.getElementById("en-stats")
+        zhStats = document.getElementById("zh-stats")
+
+        mergesInput.max = String(MAX_MERGES)
+        mergesInput.value = String(DEFAULT_MERGES)
+        mixInput.value = String(DEFAULT_MIX_PERCENT)
+
+        populatePresets()
+        applyPreset(PRESET_PAIRS[0])
+
+        mixInput.addEventListener("input", retrain)
+        mergesInput.addEventListener("input", retrain)
+        enInput.addEventListener("input", renderComparison)
+        zhInput.addEventListener("input", renderComparison)
+
+        retrain()
+      })
+    </script>
+    <style>
+      .tc-corpus-note {
+        font-size: 0.85rem;
+        color: var(--color-text-muted);
+        margin-bottom: 1rem;
+      }
+
+      .tc-training-info {
+        font-size: 0.85rem;
+        color: var(--color-text-secondary);
+        font-style: italic;
+        margin-top: 0.5rem;
+      }
+
+      .tc-sentence-block {
+        margin-bottom: 1.5rem;
+      }
+
+      .tc-sentence-block label {
+        display: block;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--color-text-secondary);
+        margin-bottom: 0.3rem;
+      }
+
+      .tc-chip-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        min-height: 2.25rem;
+        padding: 0.5rem;
+        border: 1px solid var(--color-border);
+        border-radius: 6px;
+        background: var(--color-bg-card);
+        margin: 0.4rem 0;
+      }
+
+      .tc-placeholder {
+        color: var(--color-text-muted);
+        font-style: italic;
+        margin: 0;
+      }
+
+      .tc-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-family: "SF Mono", Menlo, Consolas, monospace;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #fff;
+        white-space: pre;
+      }
+
+      .tc-chip-bytes {
+        font-size: 0.75rem;
+        letter-spacing: 0.03em;
+      }
+
+      .tc-stats {
+        font-size: 0.85rem;
+        color: var(--color-text-muted);
+      }
+
+      .tc-chip-color-0 {
+        background: #3182ce;
+      }
+      .tc-chip-color-1 {
+        background: #805ad5;
+      }
+      .tc-chip-color-2 {
+        background: #d69e2e;
+      }
+      .tc-chip-color-3 {
+        background: #38a169;
+      }
+      .tc-chip-color-4 {
+        background: #dd6b20;
+      }
+      .tc-chip-color-5 {
+        background: #e53e3e;
+      }
+      .tc-chip-color-6 {
+        background: #319795;
+      }
+      .tc-chip-color-7 {
+        background: #d53f8c;
+      }
+      .tc-chip-color-8 {
+        background: #6b46c1;
+      }
+      .tc-chip-color-9 {
+        background: #718096;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) .tc-chip-color-0 {
+          background: #2b6cb0;
+        }
+        :root:not([data-theme="light"]) .tc-chip-color-1 {
+          background: #6b46c1;
+        }
+        :root:not([data-theme="light"]) .tc-chip-color-2 {
+          background: #b7791f;
+        }
+        :root:not([data-theme="light"]) .tc-chip-color-3 {
+          background: #2f855a;
+        }
+        :root:not([data-theme="light"]) .tc-chip-color-4 {
+          background: #c05621;
+        }
+        :root:not([data-theme="light"]) .tc-chip-color-5 {
+          background: #c53030;
+        }
+        :root:not([data-theme="light"]) .tc-chip-color-6 {
+          background: #2c7a7b;
+        }
+        :root:not([data-theme="light"]) .tc-chip-color-7 {
+          background: #b83280;
+        }
+        :root:not([data-theme="light"]) .tc-chip-color-8 {
+          background: #553c9a;
+        }
+        :root:not([data-theme="light"]) .tc-chip-color-9 {
+          background: #4a5568;
+        }
+      }
+
+      [data-theme="dark"] .tc-chip-color-0 {
+        background: #2b6cb0;
+      }
+      [data-theme="dark"] .tc-chip-color-1 {
+        background: #6b46c1;
+      }
+      [data-theme="dark"] .tc-chip-color-2 {
+        background: #b7791f;
+      }
+      [data-theme="dark"] .tc-chip-color-3 {
+        background: #2f855a;
+      }
+      [data-theme="dark"] .tc-chip-color-4 {
+        background: #c05621;
+      }
+      [data-theme="dark"] .tc-chip-color-5 {
+        background: #c53030;
+      }
+      [data-theme="dark"] .tc-chip-color-6 {
+        background: #2c7a7b;
+      }
+      [data-theme="dark"] .tc-chip-color-7 {
+        background: #b83280;
+      }
+      [data-theme="dark"] .tc-chip-color-8 {
+        background: #553c9a;
+      }
+      [data-theme="dark"] .tc-chip-color-9 {
+        background: #4a5568;
+      }
+    </style>
+    <script src="/shared/theme.js"></script>
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="container">
+      <header class="header">
+        <h1>Tokenizer Comparison</h1>
+        <p>How the training text decides whether English or Chinese needs more tokens</p>
+      </header>
+
+      <main id="main-content" class="main-content">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="/">Home</a>
+          <span class="separator" aria-hidden="true">/</span>
+          <a href="/javascript/">Experiments</a>
+          <span class="separator" aria-hidden="true">/</span>
+          <span class="current" aria-current="page">Tokenizer Comparison</span>
+        </nav>
+
+        <section class="section">
+          <h2>Train the tokenizer</h2>
+          <p class="tc-corpus-note">
+            Trained on a mix of two short built-in texts: a few paragraphs of everyday English and a
+            few paragraphs of everyday Chinese, both written for this page.
+          </p>
+
+          <div class="controls-row">
+            <label for="mix">Corpus mix:</label>
+            <input id="mix" type="range" min="0" max="100" step="5" value="50" />
+            <span id="mix-value" class="tc-stats">50% English</span>
+          </div>
+
+          <div class="controls-row">
+            <label for="merges">Merges:</label>
+            <input id="merges" type="range" min="0" max="200" step="5" value="50" />
+            <span id="merges-value" class="tc-stats">50</span>
+          </div>
+
+          <p id="training-info" class="tc-training-info" aria-live="polite"></p>
+        </section>
+
+        <section class="section">
+          <h2>Compare a sentence</h2>
+
+          <div id="preset-buttons" class="controls-row"></div>
+
+          <div class="tc-sentence-block">
+            <label for="en-input">English</label>
+            <input id="en-input" type="text" class="form-input" autocomplete="off" />
+            <div id="en-chips" class="tc-chip-row" aria-live="polite"></div>
+            <p id="en-stats" class="tc-stats"></p>
+          </div>
+
+          <div class="tc-sentence-block">
+            <label for="zh-input">Chinese</label>
+            <input id="zh-input" type="text" class="form-input" autocomplete="off" />
+            <div id="zh-chips" class="tc-chip-row" aria-live="polite"></div>
+            <p id="zh-stats" class="tc-stats"></p>
+          </div>
+        </section>
+
+        <section class="how-section">
+          <h2>How it works</h2>
+          <p>
+            The tokenizer starts by treating every UTF-8 <b>byte</b> as its own token: 256 possible
+            tokens, one per byte value. Training then repeatedly looks at the built-in corpus, finds
+            whichever two adjacent tokens appear next to each other most often, and
+            <b>merges</b> them into one new token. Each merge shrinks the corpus a little and grows
+            the vocabulary by one. Do that a few dozen or a few hundred times and common patterns --
+            English words like "the" or "ing", for instance -- end up as a single token instead of
+            several bytes.
+          </p>
+          <p>
+            Which patterns get merged depends entirely on the training text. A tokenizer trained
+            only on English learns English-shaped merges and has nothing useful to offer a Chinese
+            sentence, because the two languages barely share any byte patterns -- that is what the
+            <b>corpus mix</b> slider controls: how much of the training text is English versus
+            Chinese.
+          </p>
+          <p>
+            Common Chinese characters take 3 bytes each in UTF-8, versus 1 byte per common English
+            letter. Move the corpus mix toward Chinese and add a few merges, and Chinese sentences
+            start collapsing into fewer tokens the same way English ones do -- move it toward
+            English instead, and Chinese stays close to 3 tokens per character while English keeps
+            shrinking. A chip that is not valid UTF-8 on its own -- one byte out of a 3-byte
+            character, say -- shows as hex bytes rather than a broken character, since browsers do
+            not have a glyph for "a third of a character."
+          </p>
+          <p>
+            This is a toy tokenizer trained on a couple of paragraphs, not a real production
+            tokenizer -- it is only meant to show the shape of the effect, not to match any specific
+            model's numbers.
+          </p>
+        </section>
+
+        <aside class="see-also">
+          <h2>See also</h2>
+          <ul>
+            <li><a href="/chinese/encoding-explorer.html">Encoding Explorer</a></li>
+            <li><a href="/javascript/markov/index.html">Markov Chain Text Generator</a></li>
+          </ul>
+        </aside>
+      </main>
+    </div>
+    <script src="/shared/nav.js"></script>
+  </body>
+</html>
