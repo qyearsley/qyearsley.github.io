@@ -43,4 +43,6 @@ Generate a random maze on a grid and draw it. Pick the size, then step through
 the generator (for example, depth-first backtracking) or show the result at
 once. It could also solve the maze and draw the path.
 
-Added 2026-09-24.
+A proof of concept landed on 2026-09-24 as `javascript/maze-generator.html`,
+with all of the above and a `?seed=` link. It has not been looked at in a
+browser yet.

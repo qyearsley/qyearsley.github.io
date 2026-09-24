@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Maze Generator - Quinten Yearsley</title>
+    <meta
+      name="description"
+      content="Watch a perfect maze carve itself with randomized depth-first backtracking, then solve it with breadth-first search"
+    />
+    <meta name="theme-color" content="#2d3748" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/components.css" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script type="module">
+      "use strict"
+
+      import { SIZE_PRESETS, createRng, generateMaze, solveMaze } from "./maze-generator.js"
+
+      const DEFAULT_SIZE = SIZE_PRESETS.includes(20) ? 20 : SIZE_PRESETS[0]
+      const CANVAS_PIXELS = 600
+
+      // Mutable generation state. `gen` is the step-able sequence from
+      // generateMaze(); `mazeResult` is set once it's exhausted, and is the
+      // single source of truth for "generation is finished" everywhere below.
+      let canvas
+      let ctx
+      let sizeSelect
+      let newBtn
+      let playBtn
+      let speedInput
+      let instantBtn
+      let solveBtn
+      let statusEl
+
+      let width = DEFAULT_SIZE
+      let height = DEFAULT_SIZE
+      let seed
+      let gen = null
+      let mazeResult = null
+      let gridSnapshot = null
+      let stack = []
+      let current = null
+      let playing = false
+      let timerId = null
+      let solving = false
+
+      function prefersReducedMotion() {
+        return (
+          typeof window.matchMedia === "function" &&
+          window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        )
+      }
+
+      function readSeedFromUrl() {
+        const raw = new URLSearchParams(window.location.search).get("seed")
+        return raw ? raw : null
+      }
+
+      function readSizeFromUrl() {
+        const raw = parseInt(new URLSearchParams(window.location.search).get("size"), 10)
+        return SIZE_PRESETS.includes(raw) ? raw : null
+      }
+
+      function randomSeed() {
+        return Math.floor(Math.random() * 0xffffffff)
+      }
+
+      function updateUrl() {
+        const params = new URLSearchParams(window.location.search)
+        params.set("seed", String(seed))
+        params.set("size", String(width))
+        window.history.replaceState(null, "", `${window.location.pathname}?${params}`)
+      }
+
+      function colors() {
+        const style = getComputedStyle(document.documentElement)
+        const read = (name, fallback) => style.getPropertyValue(name).trim() || fallback
+        return {
+          bg: read("--color-bg-container", "#fff"),
+          wall: read("--color-text", "#333"),
+          current: read("--color-error", "#dc3545"),
+          trail: read("--color-primary", "#3182ce"),
+          solved: read("--color-success", "#16a34a"),
+        }
+      }
+
+      function cellSize() {
+        return CANVAS_PIXELS / width
+      }
+
+      function draw() {
+        const grid = mazeResult ? mazeResult.grid : gridSnapshot
+        if (!grid) return
+        const c = colors()
+        const cs = cellSize()
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        ctx.fillStyle = c.bg
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+        // The backtracking stack: the path generation is currently standing on.
+        if (!mazeResult && stack.length > 0) {
+          ctx.fillStyle = c.trail
+          ctx.globalAlpha = 0.25
+          for (const cell of stack) {
+            ctx.fillRect(cell.x * cs, cell.y * cs, cs, cs)
+          }
+          ctx.globalAlpha = 1
+        }
+
+        // The solved path, when requested.
+        if (solving && mazeResult) {
+          const path = solveMaze(mazeResult.grid, width, height)
+          ctx.fillStyle = c.solved
+          ctx.globalAlpha = 0.35
+          for (const cell of path) {
+            ctx.fillRect(cell.x * cs, cell.y * cs, cs, cs)
+          }
+          ctx.globalAlpha = 1
+        }
+
+        // The cell generation is standing on right now.
+        if (!mazeResult && current) {
+          ctx.fillStyle = c.current
+          ctx.globalAlpha = 0.6
+          ctx.fillRect(current.x * cs, current.y * cs, cs, cs)
+          ctx.globalAlpha = 1
+        }
+
+        // Walls. Each cell draws its own N and W walls; drawing E only for the
+        // rightmost column and S only for the bottom row means every internal
+        // wall is drawn exactly once, from the cell on the other side of it.
+        ctx.strokeStyle = c.wall
+        ctx.lineWidth = Math.max(1, cs * 0.08)
+        ctx.beginPath()
+        for (let y = 0; y < height; y += 1) {
+          for (let x = 0; x < width; x += 1) {
+            const cell = grid[y][x]
+            const px = x * cs
+            const py = y * cs
+            if (cell.N) {
+              ctx.moveTo(px, py)
+              ctx.lineTo(px + cs, py)
+            }
+            if (cell.W) {
+              ctx.moveTo(px, py)
+              ctx.lineTo(px, py + cs)
+            }
+            if (x === width - 1 && cell.E) {
+              ctx.moveTo(px + cs, py)
+              ctx.lineTo(px + cs, py + cs)
+            }
+            if (y === height - 1 && cell.S) {
+              ctx.moveTo(px, py + cs)
+              ctx.lineTo(px + cs, py + cs)
+            }
+          }
+        }
+        ctx.stroke()
+      }
+
+      function updateStatus() {
+        if (mazeResult) {
+          statusEl.textContent = solving
+            ? `Maze complete (${width} by ${height}). Showing the shortest path from top-left to bottom-right.`
+            : `Maze complete (${width} by ${height}).`
+        } else {
+          // Static text, so the live region announces once, not on every step.
+          statusEl.textContent = "Generating the maze..."
+        }
+      }
+
+      function stopTimer() {
+        if (timerId !== null) {
+          clearTimeout(timerId)
+          timerId = null
+        }
+      }
+
+      function speedDelayMs() {
+        // The slider runs 1 (slow) to 100 (fast); map that to a delay in ms.
+        const value = Number(speedInput.value)
+        return Math.max(2, 210 - value * 2)
+      }
+
+      function tick() {
+        if (!gen || mazeResult) return
+        const result = gen.next()
+        if (result.done) {
+          mazeResult = result.value
+          stack = []
+          current = null
+          playing = false
+          stopTimer()
+          playBtn.textContent = "Play"
+          playBtn.disabled = true
+          solveBtn.disabled = false
+        } else {
+          gridSnapshot = result.value.grid
+          stack = result.value.stack
+          current = result.value.current
+        }
+        draw()
+        updateStatus()
+      }
+
+      function scheduleTick() {
+        stopTimer()
+        timerId = setTimeout(() => {
+          tick()
+          if (playing && !mazeResult) scheduleTick()
+        }, speedDelayMs())
+      }
+
+      function play() {
+        if (mazeResult || !gen) return
+        playing = true
+        playBtn.textContent = "Pause"
+        scheduleTick()
+      }
+
+      function pause() {
+        playing = false
+        playBtn.textContent = "Play"
+        stopTimer()
+      }
+
+      function togglePlay() {
+        if (playing) pause()
+        else play()
+      }
+
+      function instantFinish() {
+        pause()
+        if (!gen || mazeResult) return
+        let result = gen.next()
+        while (!result.done) result = gen.next()
+        mazeResult = result.value
+        stack = []
+        current = null
+        playBtn.disabled = true
+        solveBtn.disabled = false
+        draw()
+        updateStatus()
+      }
+
+      function toggleSolve() {
+        if (!mazeResult) return
+        solving = !solving
+        solveBtn.textContent = solving ? "Hide Solution" : "Show Solution"
+        solveBtn.setAttribute("aria-pressed", String(solving))
+        draw()
+        updateStatus()
+      }
+
+      function newMaze(randomizeSeed) {
+        stopTimer()
+        playing = false
+        solving = false
+        mazeResult = null
+
+        width = Number(sizeSelect.value)
+        height = width
+        if (randomizeSeed) seed = randomSeed()
+        updateUrl()
+
+        gen = generateMaze(width, height, createRng(seed))
+        const first = gen.next().value
+        gridSnapshot = first.grid
+        stack = first.stack
+        current = first.current
+
+        playBtn.disabled = false
+        playBtn.textContent = "Play"
+        solveBtn.disabled = true
+        solveBtn.textContent = "Show Solution"
+        solveBtn.setAttribute("aria-pressed", "false")
+
+        canvas.setAttribute(
+          "aria-label",
+          `Maze grid, ${width} by ${height} cells, showing generation in progress and, once solved, the shortest path from top-left to bottom-right`,
+        )
+
+        draw()
+        updateStatus()
+
+        if (prefersReducedMotion()) instantFinish()
+        else play()
+      }
+
+      function populateSizeOptions() {
+        sizeSelect.innerHTML = ""
+        for (const size of SIZE_PRESETS) {
+          const option = document.createElement("option")
+          option.value = String(size)
+          option.textContent = `${size} × ${size}`
+          sizeSelect.appendChild(option)
+        }
+        sizeSelect.value = String(readSizeFromUrl() ?? DEFAULT_SIZE)
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        canvas = document.getElementById("canvas")
+        ctx = canvas.getContext("2d")
+        canvas.width = CANVAS_PIXELS
+        canvas.height = CANVAS_PIXELS
+        sizeSelect = document.getElementById("size")
+        newBtn = document.getElementById("new-btn")
+        playBtn = document.getElementById("play-btn")
+        speedInput = document.getElementById("speed")
+        instantBtn = document.getElementById("instant-btn")
+        solveBtn = document.getElementById("solve-btn")
+        statusEl = document.getElementById("status")
+
+        populateSizeOptions()
+        width = Number(sizeSelect.value)
+        height = width
+        seed = readSeedFromUrl() ?? randomSeed()
+
+        sizeSelect.addEventListener("change", () => newMaze(true))
+        newBtn.addEventListener("click", () => newMaze(true))
+        playBtn.addEventListener("click", togglePlay)
+        instantBtn.addEventListener("click", instantFinish)
+        solveBtn.addEventListener("click", toggleSolve)
+
+        // The canvas paints its own colors, so a theme change needs an
+        // explicit repaint -- see docs/development.md's Shared Module Contract.
+        window.addEventListener("themechange", draw)
+        window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw)
+
+        newMaze(false)
+      })
+    </script>
+    <style>
+      .controls-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
+      .controls-row label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--color-text-secondary);
+      }
+
+      .speed-control {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .canvas-container {
+        border: 1px solid var(--color-border);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 0.75rem;
+        line-height: 0;
+      }
+
+      .canvas-container canvas {
+        display: block;
+        width: 100%;
+        aspect-ratio: 1 / 1;
+      }
+
+      .maze-status {
+        font-size: 0.85rem;
+        color: var(--color-text-muted);
+        font-style: italic;
+        margin-bottom: 1rem;
+      }
+    </style>
+    <script src="/shared/theme.js"></script>
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="container">
+      <header class="header">
+        <h1>Maze Generator</h1>
+        <p>Watch a perfect maze carve itself, then solve it</p>
+      </header>
+
+      <main id="main-content" class="main-content">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="/">Home</a>
+          <span class="separator" aria-hidden="true">/</span>
+          <a href="/javascript/">Experiments</a>
+          <span class="separator" aria-hidden="true">/</span>
+          <span class="current" aria-current="page">Maze Generator</span>
+        </nav>
+
+        <section class="section">
+          <div class="controls-row">
+            <label for="size">Size:</label>
+            <select id="size" class="form-select"></select>
+            <button id="new-btn" class="preset-btn">New Maze</button>
+          </div>
+
+          <div class="controls-row">
+            <button id="play-btn" class="btn-primary">Play</button>
+            <div class="speed-control">
+              <label for="speed">Speed:</label>
+              <input id="speed" type="range" min="1" max="100" value="50" />
+            </div>
+            <button id="instant-btn" class="btn-tertiary">Instant</button>
+            <button id="solve-btn" class="btn-secondary" aria-pressed="false" disabled>
+              Show Solution
+            </button>
+          </div>
+
+          <div class="canvas-container">
+            <canvas
+              id="canvas"
+              width="600"
+              height="600"
+              aria-label="Maze grid, showing generation in progress and, once solved, the shortest path from top-left to bottom-right"
+            ></canvas>
+          </div>
+
+          <p id="status" class="maze-status" aria-live="polite"></p>
+        </section>
+
+        <section class="section">
+          <h2>How It Works</h2>
+          <p>
+            The maze is a <b>perfect maze</b>: a spanning tree over the grid of cells, so there is
+            exactly one path between any two cells and no loops. It's carved with
+            <b>randomized depth-first backtracking</b>. Starting from the top-left cell, the
+            generator repeatedly steps to a random unvisited neighbor, knocking down the wall
+            between them, and keeps a stack of the cells it passed through. When a cell has no
+            unvisited neighbor left, the generator backtracks along the stack until it finds one
+            that does, or the stack runs out and the maze is done.
+          </p>
+          <p>
+            <b>Play</b> and <b>Speed</b> animate one carve or backtrack at a time, highlighting the
+            current cell and the backtracking stack. <b>Instant</b> jumps straight to the finished
+            maze. <b>Show Solution</b> runs a <b>breadth-first search</b> from the top-left cell to
+            the bottom-right cell and highlights the shortest path -- breadth-first search always
+            finds it first because it explores the maze one step of distance at a time.
+          </p>
+          <p>
+            The maze is generated from a seed, kept in the page's URL as <code>?seed=</code>, so
+            reloading or sharing the link reproduces the exact same maze.
+          </p>
+        </section>
+
+        <aside class="see-also">
+          <h2>See also</h2>
+          <ul>
+            <li><a href="/javascript/cellular-automata.html">Cellular Automata</a></li>
+            <li><a href="/games/turing-tape/">Turing Tape</a></li>
+          </ul>
+        </aside>
+      </main>
+    </div>
+    <script src="/shared/nav.js"></script>
+  </body>
+</html>

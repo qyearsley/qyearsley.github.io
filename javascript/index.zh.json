@@ -14,6 +14,7 @@
   "Two's complement bits, ranges, and overflow": "补码的位、取值范围与溢出",
   "Watch strings collide in hash buckets": "观察字符串在散列桶中冲突",
   "Run the elementary one-dimensional rules": "运行一维初等规则",
+  "Watch a perfect maze carve itself, then solve it": "看完美迷宫自己生成，然后求解",
   "Chance and Number": "概率与数",
   "Inside the Machine": "机器内部",
   "Generators and Simulations": "生成与模拟"
