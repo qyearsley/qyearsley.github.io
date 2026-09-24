@@ -355,7 +355,11 @@ const simplified = {
 // 了 is the simplification of 瞭 (瞭解), but nearly every 了 in running text is
 // the particle (好了, 來了), which is 了 in traditional as well. 了解 is also a
 // standard traditional spelling, so leaving 了 alone is right in both senses.
-const ambiguousSimplified = new Set(["余", "了"])
+//
+// 面 is the other kind: it is the simplification of 麵 (noodles, flour), but
+// most 面 is the face and side sense, which is 面 in traditional too. So a bare
+// 面 is left alone, and the 麵 words are listed in `traditionalWords`.
+const ambiguousSimplified = new Set(["余", "了", "面"])
 
 // Build reverse mapping (simplified -> traditional).
 // When multiple traditional chars map to the same simplified char,
@@ -385,6 +389,16 @@ for (const [trad, simp] of Object.entries(simplified)) {
 // characters. The default is 幹 (幹活, 樹幹, 幹部); the dry sense is 乾 and the
 // interfere sense is 干, and both are listed here. This direction only became
 // ambiguous when 乾 was added to the dictionary above, so it is settled here.
+//
+// The other twelve are one default and one list each. The default is the
+// traditional character that the dictionary above lists first, and it is the
+// more common one: 發 over 髮, 復 over 複, 臺 over 颱. The words below are the
+// other character.
+//
+// Matching is greedy and knows nothing about word boundaries, so a listed word
+// can straddle two real words: 长发 would turn 成长发展 into 成長髮展. The lists
+// leave out words that often straddle like that, and 方面 and 全面 are listed
+// only so that 方面包括 does not become 方麵包括.
 // prettier-ignore
 const traditionalWords = wordList({
   "皇后": "皇后", "太后": "太后", "王后": "王后", "后宫": "后宮",
@@ -403,6 +417,37 @@ const traditionalWords = wordList({
   "干粮": "乾糧", "饼干": "餅乾",
   "干扰": "干擾", "干涉": "干涉", "干预": "干預", "若干": "若干",
   "干戈": "干戈",
+  "系统": "系統", "系列": "系列", "体系": "體系", "派系": "派系",
+  "星系": "星系", "银河系": "銀河系", "太阳系": "太陽系", "直系": "直系",
+  "旁系": "旁系", "语系": "語系", "系主任": "系主任",
+  "联系": "聯繫", "维系": "維繫",
+  "心脏": "心臟", "肝脏": "肝臟", "肾脏": "腎臟", "肺脏": "肺臟",
+  "脾脏": "脾臟", "内脏": "內臟", "脏器": "臟器", "五脏": "五臟",
+  "脏腑": "臟腑",
+  "复杂": "複雜", "复制": "複製", "复数": "複數", "重复": "重複",
+  "复印": "複印", "复合": "複合", "复习": "複習", "繁复": "繁複",
+  "复式": "複式", "复诊": "複診", "复选": "複選", "复查": "複查",
+  "反复": "反覆", "答复": "答覆",
+  "词汇": "詞彙", "字汇": "字彙", "语汇": "語彙", "汇编": "彙編",
+  "汇总": "彙總",
+  "头发": "頭髮", "发型": "髮型", "白发": "白髮", "毛发": "毛髮",
+  "假发": "假髮", "洗发": "洗髮", "染发": "染髮", "烫发": "燙髮",
+  "发廊": "髮廊", "发夹": "髮夾", "发丝": "髮絲", "秀发": "秀髮",
+  "面条": "麵條", "面包": "麵包", "面粉": "麵粉", "拉面": "拉麵",
+  "方便面": "方便麵", "挂面": "掛麵", "汤面": "湯麵", "炒面": "炒麵",
+  "面食": "麵食", "面团": "麵團", "凉面": "涼麵", "牛肉面": "牛肉麵",
+  "方面": "方面", "全面": "全面",
+  "尽管": "儘管", "尽量": "儘量", "尽快": "儘快", "尽早": "儘早",
+  "日历": "日曆", "历法": "曆法", "农历": "農曆", "阳历": "陽曆",
+  "阴历": "陰曆", "公历": "公曆", "挂历": "掛曆",
+  "收获": "收穫",
+  "赞美": "讚美", "称赞": "稱讚", "赞扬": "讚揚", "赞赏": "讚賞",
+  "夸赞": "誇讚", "赞颂": "讚頌", "盛赞": "盛讚",
+  "书签": "書籤", "标签": "標籤", "抽签": "抽籤", "牙签": "牙籤",
+  "求签": "求籤", "竹签": "竹籤",
+  "冲水": "沖水", "冲洗": "沖洗", "冲泡": "沖泡", "冲凉": "沖涼",
+  "冲刷": "沖刷", "冲淡": "沖淡", "冲积": "沖積",
+  "台风": "颱風",
 })
 
 export { simplify, traditionalize }

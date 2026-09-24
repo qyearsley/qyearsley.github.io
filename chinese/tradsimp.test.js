@@ -271,6 +271,48 @@ describe("traditionalize 干", () => {
   })
 })
 
+describe("traditionalize the twelve merged pairs", () => {
+  // Each of these simplified characters stands for two traditional ones. The
+  // more common one is the default, and a word list picks the other.
+  const cases = [
+    ["系", ["关系", "關係"], ["系统", "系統"], ["联系", "聯繫"]],
+    ["脏", ["脏话", "髒話"], ["心脏", "心臟"]],
+    ["复", ["恢复", "恢復"], ["复杂", "複雜"], ["反复", "反覆"]],
+    ["汇", ["汇率", "匯率"], ["词汇", "詞彙"]],
+    ["发", ["发现", "發現"], ["头发", "頭髮"]],
+    ["尽", ["尽力", "盡力"], ["尽管", "儘管"]],
+    ["历", ["历史", "歷史"], ["日历", "日曆"]],
+    ["获", ["获得", "獲得"], ["收获", "收穫"]],
+    ["赞", ["赞成", "贊成"], ["赞美", "讚美"]],
+    ["签", ["签名", "簽名"], ["书签", "書籤"]],
+    ["冲", ["冲突", "衝突"], ["冲水", "沖水"]],
+    ["台", ["台湾", "臺灣"], ["台风", "颱風"]],
+  ]
+
+  test.each(cases)("%s converts by default and by word", (_, ...pairs) => {
+    for (const [input, expected] of pairs) {
+      expect(traditionalize(input)).toBe(expected)
+    }
+  })
+})
+
+describe("traditionalize 面", () => {
+  test("leaves the face and side sense alone", () => {
+    expect(traditionalize("面对")).toBe("面對")
+    expect(traditionalize("见面")).toBe("見面")
+  })
+
+  test("converts 面 to 麵 for noodles and flour", () => {
+    expect(traditionalize("面条")).toBe("麵條")
+    expect(traditionalize("面包")).toBe("麵包")
+    expect(traditionalize("方便面")).toBe("方便麵")
+  })
+
+  test("does not read 面包 across a word boundary", () => {
+    expect(traditionalize("这方面包括")).toBe("這方面包括")
+  })
+})
+
 describe("round trip", () => {
   // simplify and traditionalize are not exact inverses, because several
   // traditional characters share one simplified character. These cases do
@@ -305,9 +347,9 @@ describe("round trip", () => {
   })
 
   test("does not round trip where the mapping is many-to-one", () => {
-    // 髮 and 發 both simplify to 发, so only the first one comes back. There
-    // are about 20 more pairs like this; see the comment on traditionalWords.
-    expect(simplify("頭髮")).toBe("头发")
-    expect(traditionalize("头发")).toBe("頭發")
+    // 髮 and 發 both simplify to 发. 頭髮 comes back because it is listed; 長髮
+    // is left out of the list on purpose, so it does not.
+    expect(simplify("長髮")).toBe("长发")
+    expect(traditionalize("长发")).toBe("長發")
   })
 })
