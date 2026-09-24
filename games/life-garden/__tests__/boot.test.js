@@ -268,7 +268,7 @@ describe("the rules on the page match the rules in the code", () => {
     expect(prose).toContain(`${bloom.bloomDuration} generations later`)
     // Grass spreads on exactly 3, and is crowded out above its survive list
     expect(prose).toContain(`exactly ${grass.birth[0]} plants beside it`)
-    expect(prose).toContain(`${Math.max(...grass.survive) + 1} or more neighbours`)
+    expect(prose).toContain(`${Math.max(...grass.survive) + 1} or more neighbors`)
     // The two multipliers are spelled out in the prose, so compare in words
     const words = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight"]
     expect(prose).toContain(`${words[bloom.sproutChance / grass.sproutChance]} times as likely`)

@@ -60,8 +60,8 @@ export class GameUI extends BaseGameUI {
             ["Splits at", String(def.breedAt)],
           ]
         : [
-            ["Lives on", `${def.survive.join(", ")} neighbours`],
-            ["Spreads on", `${def.birth.join(", ")} neighbours`],
+            ["Lives on", `${def.survive.join(", ")} neighbors`],
+            ["Spreads on", `${def.birth.join(", ")} neighbors`],
             [
               def.bloomsInto ? "Blooms after" : "Lasts",
               `${def.bloomAge ?? def.bloomDuration} gens`,

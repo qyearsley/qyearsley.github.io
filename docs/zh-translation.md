@@ -195,9 +195,9 @@ overwrites the same node later.
 | 3   | `四季` does not read as a game name                            | S    |
 | 4   | Runtime-rendered English on `/zh/` pages                       | M    |
 
-Questions 1 and 2 were settled on 2026-09-24 with no change. The English keeps
-`義譯` and the Chinese keeps `意译`; titles keep `Quinten Yearsley` and page
-bodies keep `叶昆廷`.
+Questions 1, 2 and 3 were settled on 2026-09-24 with no change. The English
+keeps `義譯` and the Chinese keeps `意译`; titles keep `Quinten Yearsley` and
+page bodies keep `叶昆廷`; and `四季` stays as the name of Seasons.
 
 These are tracked in [`improvements.md`](improvements.md).
 

@@ -573,7 +573,7 @@ function _renderResult(season) {
       season,
       [{ label: "Play again", onClick: _confirmNewRun, primary: true }],
       "The potion is finished",
-      "She stirs in the last icicle, and the whole jar turns the colour of a morning you have not had yet. She says you passed.",
+      "She stirs in the last icicle, and the whole jar turns the color of a morning you have not had yet. She says you passed.",
       rows,
       { finale: true },
     )

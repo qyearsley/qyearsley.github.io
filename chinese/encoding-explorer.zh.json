@@ -11,7 +11,7 @@
   "<code>110xxxxx 10xxxxxx</code> -- 2 bytes": "<code>110xxxxx 10xxxxxx</code> —— 2字节",
   "<code>1110xxxx 10xxxxxx 10xxxxxx</code> -- 3 bytes": "<code>1110xxxx 10xxxxxx 10xxxxxx</code> —— 3字节",
   "<code>11110xxx 10xxxxxx 10xxxxxx 10xxxxxx</code> -- 4 bytes": "<code>11110xxx 10xxxxxx 10xxxxxx 10xxxxxx</code> —— 4字节",
-  "The <span style=\"color: #a0aec0\">grey bits</span> are structure; the <strong style=\"color: #3182ce\">blue bits</strong> carry the code point.": "<span style=\"color: #a0aec0\">灰色位</span>是结构位，<strong style=\"color: #3182ce\">蓝色位</strong>承载码点。",
+  "The <span style=\"color: #a0aec0\">gray bits</span> are structure; the <strong style=\"color: #3182ce\">blue bits</strong> carry the code point.": "<span style=\"color: #a0aec0\">灰色位</span>是结构位，<strong style=\"color: #3182ce\">蓝色位</strong>承载码点。",
   "UTF-16": "UTF-16",
   "Fixed 2 bytes for characters in the Basic Multilingual Plane (U+0000 to U+FFFF), which includes all common CJK. Characters above U+FFFF use a surrogate pair (4 bytes).": "基本多文种平面（U+0000到U+FFFF）内的字符固定占2字节，该平面包含所有常用汉字。U+FFFF以上的字符使用代理对（4字节）。",
   "GB2312": "GB2312",
