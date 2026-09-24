@@ -1,7 +1,7 @@
 {
   "name": "Number Garden",
   "short_name": "Number Garden",
-  "description": "Grow a garden by answering maths questions across six themed areas",
+  "description": "Grow a garden by answering math questions across six themed areas",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

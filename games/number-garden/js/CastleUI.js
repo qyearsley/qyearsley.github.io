@@ -105,11 +105,15 @@ export class CastleUI {
       spaceship: "Building Your Rocket!",
     }
 
+    const completedTitles = {
+      castle: "Completed Your Castle!",
+      garden: "Grew Your Garden!",
+      robot: "Completed Your Robot!",
+      spaceship: "Completed Your Rocket!",
+    }
+
     const visual = projectVisuals[projectType]?.[completedCount - 1] || "🎯"
-    const title = isComplete
-      ? projectTitles[projectType]?.replace("Building", "Completed") ||
-        projectTitles[projectType]?.replace("Growing", "Grew")
-      : projectTitles[projectType]
+    const title = (isComplete ? completedTitles : projectTitles)[projectType]
 
     this.elements.projectModalTitle.textContent = title
     this.elements.projectVisual.textContent = visual

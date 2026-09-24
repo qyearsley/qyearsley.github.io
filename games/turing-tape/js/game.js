@@ -408,7 +408,7 @@ function checkWin() {
   } else if (machine.haltReason === "no-rule") {
     showResult(
       "error",
-      `No rule for state ${machine.state} reading "${machine.tape[machine.head]}". Add a rule or adjust your rules.`,
+      `No rule for state ${machine.state} reading "${machine.tape[machine.head]}". Add one, or fix an existing rule.`,
     )
   } else {
     showResult("error", "Tape doesn't match the goal. Reset and try again.")

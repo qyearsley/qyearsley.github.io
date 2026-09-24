@@ -41,7 +41,7 @@ export class RewardSystem {
         { color: "gold", emoji: "⏱️", name: "Stopwatch" },
         { color: "gold", emoji: "🕐", name: "One O'Clock" },
         { color: "yellow", emoji: "⏳", name: "Hourglass" },
-        { color: "gold", emoji: "🕰️", name: "Mantle Clock" },
+        { color: "gold", emoji: "🕰️", name: "Mantel Clock" },
         { color: "yellow", emoji: "⭐", name: "Time Star" },
         { color: "white", emoji: "✨", name: "Sparkles" },
       ],
