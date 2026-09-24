@@ -195,13 +195,9 @@ overwrites the same node later.
 | 3   | `四季` does not read as a game name                            | S    |
 | 4   | Runtime-rendered English on `/zh/` pages                       | M    |
 
-On question 1: `義` simplifies to `义`, not `意`, so `義譯` and `意译` are
-different words rather than script variants. `義譯` does occur in Buddhological
-writing, so it may be deliberate. The Chinese now uses `意译` consistently; the
-English is unchanged, pending a decision.
-
-On question 2: a reader sees `叶昆廷` in the page header and `Quinten Yearsley`
-in the browser tab. Either is defensible; the split is not.
+Questions 1 and 2 were settled on 2026-09-24 with no change. The English keeps
+`義譯` and the Chinese keeps `意译`; titles keep `Quinten Yearsley` and page
+bodies keep `叶昆廷`.
 
 These are tracked in [`improvements.md`](improvements.md).
 
