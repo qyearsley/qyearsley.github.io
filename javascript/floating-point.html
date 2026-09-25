@@ -228,7 +228,10 @@
             const bit = e.target.closest(".bit[data-index]")
             if (bit) {
               e.preventDefault()
-              toggleBit(Number(bit.dataset.index))
+              const index = bit.dataset.index
+              toggleBit(Number(index))
+              // The redraw replaced the bit, so put focus back on its replacement.
+              output.querySelector(`.bit[data-index="${index}"]`).focus()
             }
           }
         })
@@ -491,7 +494,9 @@
             <button class="example-btn" data-text="-0">-0</button>
             <button class="example-btn" data-text="Infinity">Infinity</button>
             <button class="example-btn" data-text="NaN">NaN</button>
-            <button class="example-btn" data-text="9007199254740992">2^53 (max safe int)</button>
+            <button class="example-btn" data-text="9007199254740992">
+              2^53 (first unsafe int)
+            </button>
             <button class="example-btn" data-text="0.1">0.1</button>
             <button class="example-btn" data-text="5e-324">smallest</button>
           </div>

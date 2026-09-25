@@ -12,17 +12,7 @@ last long version of this file is `git show 3ceed17:docs/improvements.md`.
 
 ## Open
 
-1. **Floating Point's `2^53 (max safe int)` button is loose.** S · decision owed.
-   The button loads 2^53 = `9007199254740992`, but `Number.MAX_SAFE_INTEGER` is
-   2^53 − 1. The value is probably the right part (2^53 and 2^53+1 have the same
-   bits), so the label is what would change. In `javascript/floating-point.html`.
-2. **`tradsimp.js` lacks the long tail of characters.** M · open. The forward map
-   is a top-1000 list, so 糧, 紗, 綢, 纜, 艙, 薑, 蟬, 軀, 顱, 騾, 鹼, 黴 and many more
-   pass through unconverted. Expand it from an OpenCC table, not by hand.
-3. **Floating Point's bits lose keyboard focus when toggled.** S · open. Enter or
-   Space on a bit redraws the output, so focus drops to `<body>`. Integer
-   Explorer had the same code and was fixed on 2026-09-24 by refocusing the
-   redrawn bit; copy that fix into `javascript/floating-point.html`.
+Nothing open.
 
 ## Deferred
 
@@ -65,8 +55,13 @@ Decided with no change, so these are not re-proposed:
 - **Life Garden's mouse drag cannot get stuck.** `mouseleave` ends the drag.
 - **`generateMathOptions` can loop forever if `maxRange` is tiny.** The only
   caller passes 40 or more.
+- **`tradsimp.js` keeps its top-1000 character map.** It is not meant to be
+  complete, so rare characters such as 糧 and 纜 pass through (2026-09-25).
 - **Commit `0f300d7` carries the work email address.** Rewriting public history
   would not remove it, because GitHub keeps orphaned commits reachable.
+
+Landed 2026-09-25: Floating Point's 2^53 button now says `first unsafe int`, and
+its bits keep focus when toggled.
 
 Landed 2026-09-24: `traditionalize` now converts the 13 merged pairs by word
 (系統, 心臟, 複雜, 詞彙, 頭髮, 面對, 儘管, 日曆, 收穫, 讚美, 書籤, 沖水, 颱風).

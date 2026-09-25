@@ -4,7 +4,7 @@
 
   "See the IEEE 754 bit layout of any number": "查看任意数字的IEEE 754位布局",
   "Enter a number or expression:": "输入数字或表达式：",
-  "2^53 (max safe int)": "2^53（最大安全整数）",
+  "2^53 (first unsafe int)": "2^53（第一个不安全整数）",
   "smallest": "最小正数",
   "How IEEE 754 double-precision works": "IEEE 754双精度的工作原理",
   "JavaScript numbers are 64-bit IEEE 754 \"double precision\" floats. The 64 bits are divided into three fields:": "JavaScript数字是64位IEEE 754“双精度”浮点数。64位分为三个字段：",
