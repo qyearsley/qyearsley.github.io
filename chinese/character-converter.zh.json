@@ -6,6 +6,7 @@
   "Convert between traditional and simplified Chinese characters": "繁简中文字符转换",
   "How It Works": "工作原理",
   "This tool converts between traditional and simplified Chinese characters. It uses a dictionary of common character mappings.": "本工具在繁体与简体中文字符之间互相转换，依据的是一部常用汉字对照表。",
+  "It is a toy. Beyond single characters it knows only a short list of words, such as 头发 → 頭髮, so it gets many other words wrong. For real text, use <a href=\"https://github.com/BYVoid/OpenCC\">OpenCC</a>, which converts whole phrases and handles regional variants.": "这只是个小玩具。除了单字对照，它只认得一小批词，比如头发 → 頭髮，所以很多别的词会转错。正式使用请用<a href=\"https://github.com/BYVoid/OpenCC\">OpenCC</a>，它能按整个词组转换，也能处理地区差异。",
   "Convert Text": "转换文本",
   "Traditional → Simplified": "繁体→简体",
   "Simplified → Traditional": "简体→繁体",
