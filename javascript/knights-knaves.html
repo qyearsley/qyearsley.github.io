@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Knights and Knaves Solver - Quinten Yearsley</title>
+    <meta
+      name="description"
+      content="Solve knights-and-knaves logic puzzles by building the truth table for what each islander says"
+    />
+    <meta name="theme-color" content="#2d3748" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/components.css" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script type="module">
+      "use strict"
+
+      import { solvePuzzle, PRESETS } from "./knights-knaves.js"
+
+      // The puzzle currently being edited: an array of { name, statement }.
+      // Kept in sync with the row inputs by their own event listeners, so a
+      // keystroke never has to re-render the rows (which would lose focus).
+      let islanders = PRESETS[0].islanders.map((isl) => ({ ...isl }))
+
+      let islandersEl
+      let addBtn
+      let form
+      let errorEl
+      let constraintsEl
+      let summaryEl
+      let tableOutputEl
+      let examplesEl
+
+      /**
+       * Rebuilds the islander-row editor from the `islanders` array. Only
+       * called on load, add, remove, and preset selection -- not on every
+       * keystroke.
+       */
+      function renderIslanders() {
+        islandersEl.innerHTML = ""
+        islanders.forEach((isl, index) => {
+          const row = document.createElement("div")
+          row.className = "islander-row"
+
+          const nameInput = document.createElement("input")
+          nameInput.type = "text"
+          nameInput.className = "islander-name form-input"
+          nameInput.maxLength = 3
+          nameInput.value = isl.name
+          nameInput.setAttribute("aria-label", `Islander ${index + 1} name`)
+          nameInput.addEventListener("input", () => {
+            isl.name = nameInput.value
+          })
+
+          const statementInput = document.createElement("input")
+          statementInput.type = "text"
+          statementInput.className = "islander-statement form-input"
+          statementInput.placeholder = "e.g. not b (leave blank if silent)"
+          statementInput.value = isl.statement
+          statementInput.setAttribute("aria-label", `Islander ${index + 1} statement`)
+          statementInput.addEventListener("input", () => {
+            isl.statement = statementInput.value
+          })
+
+          const removeBtn = document.createElement("button")
+          removeBtn.type = "button"
+          removeBtn.className = "islander-remove btn-tertiary"
+          removeBtn.textContent = "Remove"
+          removeBtn.setAttribute("aria-label", `Remove islander ${index + 1}`)
+          removeBtn.disabled = islanders.length <= 1
+          removeBtn.addEventListener("click", () => {
+            islanders.splice(index, 1)
+            renderIslanders()
+          })
+
+          row.appendChild(nameInput)
+          row.appendChild(statementInput)
+          row.appendChild(removeBtn)
+          islandersEl.appendChild(row)
+        })
+      }
+
+      /** The next unused letter, for a freshly added islander's default name. */
+      function nextName() {
+        const used = new Set(islanders.map((isl) => isl.name.trim().toUpperCase()))
+        for (let code = 65; code < 65 + 26; code += 1) {
+          const letter = String.fromCharCode(code)
+          if (!used.has(letter)) return letter
+        }
+        return ""
+      }
+
+      function addIslander() {
+        islanders.push({ name: nextName(), statement: "" })
+        renderIslanders()
+      }
+
+      /** Builds the <table> for a solved puzzle, with solution rows highlighted. */
+      function renderTable(result) {
+        const solutionSet = new Set(result.solutionRows)
+        const table = document.createElement("table")
+
+        const thead = document.createElement("thead")
+        const headRow = document.createElement("tr")
+        for (const heading of result.table.rows[0]) {
+          const th = document.createElement("th")
+          th.textContent = heading
+          headRow.appendChild(th)
+        }
+        thead.appendChild(headRow)
+        table.appendChild(thead)
+
+        const tbody = document.createElement("tbody")
+        for (const row of result.table.rows.slice(1)) {
+          const tr = document.createElement("tr")
+          if (solutionSet.has(row)) tr.classList.add("solution-row")
+          for (const cell of row) {
+            const td = document.createElement("td")
+            td.textContent = cell
+            tr.appendChild(td)
+          }
+          tbody.appendChild(tr)
+        }
+        table.appendChild(tbody)
+        return table
+      }
+
+      function solutionSummary(result) {
+        if (result.solutionCount === 0) {
+          return "No solution: these statements can't all come out true for knights and false for knaves at once."
+        }
+        if (result.solutionCount === 1) {
+          return "Exactly one solution:"
+        }
+        return `${result.solutionCount} solutions -- the statements don't pin down everyone:`
+      }
+
+      function solve() {
+        errorEl.innerHTML = ""
+        constraintsEl.innerHTML = ""
+        summaryEl.textContent = ""
+        tableOutputEl.innerHTML = ""
+
+        try {
+          const result = solvePuzzle(islanders)
+
+          for (const line of result.constraintDescriptions) {
+            const li = document.createElement("li")
+            li.textContent = line
+            constraintsEl.appendChild(li)
+          }
+
+          summaryEl.textContent = solutionSummary(result)
+          tableOutputEl.appendChild(renderTable(result))
+        } catch (e) {
+          errorEl.innerHTML = `<span class="error-message">Error: ${e.message}</span>`
+        }
+      }
+
+      function loadPreset(preset) {
+        islanders = preset.islanders.map((isl) => ({ ...isl }))
+        renderIslanders()
+        solve()
+      }
+
+      function renderExamples() {
+        examplesEl.innerHTML = ""
+        for (const preset of PRESETS) {
+          const item = document.createElement("div")
+          item.className = "example-item"
+          item.tabIndex = 0
+          item.setAttribute("role", "button")
+          item.setAttribute("aria-label", `Load puzzle: ${preset.title}`)
+
+          const title = document.createElement("strong")
+          title.textContent = preset.title
+
+          const summary = document.createElement("span")
+          summary.textContent = preset.summary
+
+          const code = document.createElement("code")
+          code.innerHTML = preset.islanders
+            .filter((isl) => isl.english)
+            .map((isl) => `${isl.name} says: "${isl.english}"`)
+            .join("<br>")
+
+          item.appendChild(title)
+          item.appendChild(summary)
+          item.appendChild(code)
+
+          item.addEventListener("click", () => loadPreset(preset))
+          item.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault()
+              loadPreset(preset)
+            }
+          })
+
+          examplesEl.appendChild(item)
+        }
+      }
+
+      function handleSubmit(event) {
+        event.preventDefault()
+        solve()
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        islandersEl = document.getElementById("islanders")
+        addBtn = document.getElementById("add-islander-btn")
+        form = document.getElementById("form")
+        errorEl = document.getElementById("error")
+        constraintsEl = document.getElementById("constraints")
+        summaryEl = document.getElementById("summary")
+        tableOutputEl = document.getElementById("output")
+        examplesEl = document.getElementById("examples")
+
+        renderIslanders()
+        renderExamples()
+        form.addEventListener("submit", handleSubmit)
+        addBtn.addEventListener("click", addIslander)
+
+        solve()
+      })
+    </script>
+    <style>
+      .islander-row {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        margin-bottom: 0.5rem;
+      }
+
+      .islander-name {
+        flex: 0 0 4rem;
+        min-width: 0;
+        text-align: center;
+      }
+
+      .islander-statement {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .islander-remove {
+        flex-shrink: 0;
+      }
+
+      .add-islander-row {
+        margin-bottom: 1rem;
+      }
+
+      .constraints-list {
+        font-family: monospace;
+        font-size: 0.95rem;
+        margin: 1rem 0;
+        padding-left: 1.5rem;
+      }
+
+      .solution-summary {
+        font-weight: 600;
+        margin: 1rem 0;
+      }
+
+      .truth-table tbody tr.solution-row {
+        background: var(--color-success-bg);
+      }
+
+      .truth-table tbody tr.solution-row td {
+        color: var(--color-success-text);
+        font-weight: 600;
+      }
+    </style>
+    <script src="/shared/theme.js"></script>
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="container">
+      <header class="header">
+        <h1>Knights and Knaves Solver</h1>
+        <p>Knights always tell the truth, knaves always lie. Who's who?</p>
+      </header>
+
+      <main id="main-content" class="main-content">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="/">Home</a>
+          <span class="separator" aria-hidden="true">/</span>
+          <a href="/javascript/">Experiments</a>
+          <span class="separator" aria-hidden="true">/</span>
+          <span class="current" aria-current="page">Knights and Knaves</span>
+        </nav>
+
+        <section class="section">
+          <h2>Set Up the Puzzle</h2>
+          <p>
+            Give each islander a one-letter name and, if they speak, a statement. Write a statement
+            the way <a href="/javascript/truth-tables.html">Truth Tables</a> does: other islanders'
+            names (lowercase) stand for "that islander is a knight," combined with <code>and</code>,
+            <code>or</code>, <code>not</code>, <code>xor</code>, <code>nand</code>,
+            <code>implies</code>, and <code>eq</code>. Leave a statement blank for an islander who
+            says nothing.
+          </p>
+          <form id="form" class="form-container">
+            <div id="islanders"></div>
+            <div class="add-islander-row">
+              <button type="button" id="add-islander-btn" class="btn-secondary">
+                Add Islander
+              </button>
+            </div>
+            <button type="submit" class="submit-btn">Solve</button>
+          </form>
+
+          <div id="error"></div>
+        </section>
+
+        <section class="section">
+          <h2>Solution</h2>
+          <p>
+            The rule "knights tell the truth, knaves lie" becomes the constraint "islander is a
+            knight if and only if the statement is true," for every islander who speaks:
+          </p>
+          <ul id="constraints" class="constraints-list"></ul>
+          <p id="summary" class="solution-summary" aria-live="polite"></p>
+          <p>
+            Every row is a possible assignment of knight/knave to each islander (<code>true</code>
+            means knight, <code>false</code> means knave). The last column is the combined
+            constraint above; rows where it's <code>true</code> are highlighted -- those are the
+            puzzle's solutions.
+          </p>
+          <div id="output" class="truth-table"></div>
+        </section>
+
+        <section class="section">
+          <h2>Example Puzzles</h2>
+          <p>Click a puzzle to load it:</p>
+          <div id="examples" class="examples"></div>
+        </section>
+
+        <section class="section">
+          <h2>How It Works</h2>
+          <p>
+            Each islander is a boolean variable: <code>true</code> if they're a knight,
+            <code>false</code> if they're a knave. A knight's statement is true; a knave's is false
+            -- so for an islander <code>x</code> with a statement, the puzzle requires
+            <code>x eq (statement)</code>. ANDing that constraint together for every islander who
+            speaks gives one combined expression, which
+            <a href="/javascript/truth-tables.html">the same truth-table code</a> this page reuses
+            can parse and evaluate over every combination of knight/knave.
+          </p>
+          <p>
+            A puzzle can come out three ways: exactly one row satisfies the constraint (a unique
+            solution), no row does (the statements contradict each other, however anyone is
+            assigned), or more than one row does (the statements are consistent but don't pin down
+            every islander).
+          </p>
+        </section>
+
+        <aside class="see-also">
+          <h2>See also</h2>
+          <ul>
+            <li><a href="/javascript/truth-tables.html">Truth Tables</a></li>
+            <li><a href="/javascript/logic-engine/">Logic Engine</a></li>
+          </ul>
+        </aside>
+      </main>
+    </div>
+    <script src="/shared/nav.js"></script>
+  </body>
+</html>
