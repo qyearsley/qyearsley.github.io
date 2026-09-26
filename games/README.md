@@ -15,11 +15,6 @@ Educational web games built with JavaScript.
 
 ## Chinese pages
 
-Turing Tape and Life Garden have a `/zh/` page. Number Garden, Seasons and Times
-Trail do not.
-
-The build translates static HTML, and a game writes most of its text at runtime,
-so a `/zh/` game page is Chinese chrome around English gameplay. The three games
-with the most runtime text lost their page rather than claim a language they do
-not speak. See
+Only Turing Tape and Life Garden have a `/zh/` page, because the other games
+write most of their text at runtime. See
 [`docs/translations.md`](../docs/translations.md#which-pages-have-a-chinese-version-and-why).

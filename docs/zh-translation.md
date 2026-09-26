@@ -68,8 +68,8 @@ renders it, and match.
 
 ## What the review found
 
-Five agents reviewed all 27 files -- 659 keys, about 11,400 Chinese characters.
-Four read one section each against its English source; the fifth read the whole
+Five agents reviewed every translation file on 2026-09-20. Pages added since
+then have not had this review. Four read one section each against its English source; the fifth read the whole
 corpus for consistency, which is the only way to see a term rendered two ways in
 two files.
 

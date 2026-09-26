@@ -12,7 +12,12 @@ last long version of this file is `git show 3ceed17:docs/improvements.md`.
 
 ## Open
 
-Nothing open.
+1. **Improve test coverage of the DOM-wiring modules.**
+   `games/turing-tape/js/game.js` and `javascript/logic-engine/ui.js` have no
+   tests. Both look up elements at import time, so they need injected elements
+   first, as the Seasons `GameUI` takes them. `shared/life-background.js` is
+   untested too, but it is only the 404 page's animation. Verify with
+   `npm test -- --coverage` and `coverage/lcov-report/`.
 
 ## Deferred
 
