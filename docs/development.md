@@ -61,7 +61,7 @@ shared/
   table-filter.js           Searchable table filtering
   contact-form.js           Contact form submission
   life-background.js        Game of Life animation (404 page)
-  discover.js               "Try something" homepage picker + 404 random-page link
+  discover.js               Random-page link (homepage footer + 404) and avatar glider
   __tests__/
     theme-placement.test.js Where theme.js places its toggle, against a DOM with a hidden .header
 
@@ -86,7 +86,7 @@ Because the page only exists after a build, `npm run dev` does not serve
 2. **Copy** -- copy all static files to `dist/` (skips config files, dev-only dirs)
 3. **Render resume** -- convert `resume/resume.md` to HTML via `marked`, inject into `resume/template.html`
 4. **Translate** -- for each translatable page, generate a Chinese version at `/zh/` using text-matching against co-located `*.zh.json` files. Both the `/zh/` and the English copy also get `hreflang` links and a language-switch link in the header.
-5. **Page registry** -- write `dist/pages.json`: every tool/game page under `games/`, `javascript/`, and `chinese/` (excluding each section's own index), with its English and (if translated) Chinese title. `shared/discover.js` fetches this for the homepage's "Try something" picker, the 404 page's random-page link, and the `r` keyboard shortcut.
+5. **Page registry** -- write `dist/pages.json`: every tool/game page under `games/`, `javascript/`, and `chinese/` (excluding each section's own index), with its English and (if translated) Chinese title. `shared/discover.js` fetches this for the random-page link in the homepage footer and on the 404 page, and `nav.js` for the `r` keyboard shortcut.
 6. **Inject paths** -- write `window.__translatedPaths` into every HTML file so `nav.js` can persist language preference client-side
 7. **Sitemap** -- generate `dist/sitemap.xml` from all HTML files, excluding `/404.html` and the `/zh/` pages (those appear as `hreflang` alternates)
 8. **Cache-bust** -- append `?v=<buildId>` to every local `<script src>` in `dist/` and to every relative import/export specifier inside `dist/`'s own JS files. See "Cache busting" below.
@@ -261,7 +261,7 @@ cross-module call, so `nav.js` and `theme.js` work in either order.
 | `__themePopoverIsOpen()`                        | `theme.js`                           | `nav.js`   | Whether the theme popover is open (so `Escape` closes it first)                  |
 | `__themePopoverClose()`                         | `theme.js`                           | tests      | Close the theme popover                                                          |
 | `__prefersDark()`                               | `theme.js`                           | games      | Whether dark applies right now, honouring an explicit choice over the OS         |
-| `__discover`                                    | `discover.js`                        | tests      | `{ dailyPick, randomPick, pageLink, lifeStep }` -- the picker's pure logic       |
+| `__discover`                                    | `discover.js`                        | tests      | `{ randomPick, pageLink, lifeStep }` -- the random-page link's pure logic        |
 
 `theme.js` also dispatches a `themechange` event on `window` when the picker
 changes the theme. Stylesheets re-resolve themselves; anything painted into a

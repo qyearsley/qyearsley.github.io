@@ -436,6 +436,9 @@ p {
 
 /* A one-line footer on the homepage, for the colophon link. */
 .site-footer {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
   padding: 1rem 3rem 1.5rem;
   border-top: 1px solid var(--color-border);
   font-size: 0.875rem;

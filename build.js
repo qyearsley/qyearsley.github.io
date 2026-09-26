@@ -310,15 +310,15 @@ function reportStaleCommonKeys(commonKeys, matchedCommon) {
 
 // ── Page registry ───────────────────────────────────────────────
 
-// Sections that hold tools and games worth surfacing on the homepage's
-// "Try something" picker (shared/discover.js). Each section's own index.html
+// Sections that hold tools and games worth surfacing through the
+// random-page link (shared/discover.js). Each section's own index.html
 // is the section listing, not a tool, and is excluded in walkToolSection.
 const TOOL_SECTIONS = ["games", "javascript", "chinese"]
 
 // Every page's <title> ends in " - Quinten Yearsley" (or, on the homepage,
 // " — Quinten Yearsley"), including on translated pages, where only the part
 // before the separator is Chinese. Stripped here so the picker reads
-// "Today's pick: Turing Tape" rather than repeating the site name.
+// "Turing Tape" rather than "Turing Tape - Quinten Yearsley".
 function stripSiteName(title) {
   return title.replace(/\s*[-—]\s*Quinten Yearsley\s*$/, "")
 }

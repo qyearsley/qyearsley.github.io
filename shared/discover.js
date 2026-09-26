@@ -1,41 +1,16 @@
-// "Try something" homepage picker, the 404 page's random-page link, and the
+// The random-page link in the homepage footer and on the 404 page, and the
 // Game of Life glider in the homepage avatar.
 //
-// The picker fetches /pages.json (written by build.js from the tool pages
+// The link fetches /pages.json (written by build.js from the tool pages
 // under games/, javascript/, and chinese/). That file only exists after a
 // build -- `npm run dev` serves source directly and never runs build.js -- so
-// a failed fetch is expected, not an error: the markup it would have filled
-// in stays hidden.
+// a failed fetch is expected, not an error: the link stays hidden.
 ;(function () {
   "use strict"
 
   // --- Pure picking logic ---
   // Exposed on window.__discover (no bundler here, so this is how Jest gets
   // at them -- see the Shared Module Contract in docs/development.md).
-
-  function sortByPath(pages) {
-    return pages.slice().sort(function (a, b) {
-      return a.path < b.path ? -1 : a.path > b.path ? 1 : 0
-    })
-  }
-
-  // Whole days since 1970-01-01 in the visitor's *local* date, not UTC, so
-  // the pick changes at local midnight rather than at a fixed UTC hour.
-  function daysSinceEpoch(date) {
-    const local = new Date(date.getFullYear(), date.getMonth(), date.getDate())
-    return Math.floor(local.getTime() / 86400000)
-  }
-
-  // Cycles through every page once before repeating, and keeps working as
-  // pages are added or removed -- there is no stored "last shown" state to
-  // go stale.
-  function dailyPick(pages, date) {
-    if (pages.length === 0) return null
-    const sorted = sortByPath(pages)
-    const days = daysSinceEpoch(date)
-    const index = ((days % sorted.length) + sorted.length) % sorted.length
-    return sorted[index]
-  }
 
   // Uniform, excluding the page at `excludePath` when there's another page to
   // pick from.
@@ -83,9 +58,9 @@
     return next
   }
 
-  window.__discover = { dailyPick, randomPick, pageLink, lifeStep }
+  window.__discover = { randomPick, pageLink, lifeStep }
 
-  // --- DOM wiring: homepage picker + 404 random link ---
+  // --- DOM wiring: random-page link ---
 
   function currentPageInfo() {
     const isZh = location.pathname.indexOf("/zh/") === 0
@@ -93,32 +68,8 @@
     return { isZh: isZh, path: path }
   }
 
-  function renderHomepagePicker(pages) {
-    const section = document.getElementById("discover-section")
-    if (!section) return
-
-    const info = currentPageInfo()
-    const daily = dailyPick(pages, new Date())
-    const random = randomPick(pages, info.path)
-    if (!daily || !random) return
-
-    const dailyEl = document.getElementById("discover-daily")
-    const dailyTitleEl = document.getElementById("discover-daily-title")
-    const randomEl = document.getElementById("discover-random")
-    if (dailyEl) {
-      const link = pageLink(daily, info.isZh)
-      dailyEl.href = link.href
-      if (dailyTitleEl) dailyTitleEl.textContent = link.title
-    }
-    if (randomEl) {
-      randomEl.href = pageLink(random, info.isZh).href
-    }
-
-    section.hidden = false
-  }
-
-  function renderNotFoundLink(pages) {
-    const link = document.getElementById("discover-404-random")
+  function renderRandomLink(pages) {
+    const link = document.getElementById("discover-random")
     if (!link) return
 
     const info = currentPageInfo()
@@ -129,13 +80,8 @@
     link.hidden = false
   }
 
-  function initPicker() {
-    if (
-      !document.getElementById("discover-section") &&
-      !document.getElementById("discover-404-random")
-    ) {
-      return
-    }
+  function initRandomLink() {
+    if (!document.getElementById("discover-random")) return
     fetch("/pages.json")
       .then(function (response) {
         if (!response.ok) throw new Error("pages.json request failed")
@@ -143,12 +89,11 @@
       })
       .then(function (pages) {
         if (!Array.isArray(pages) || pages.length === 0) return
-        renderHomepagePicker(pages)
-        renderNotFoundLink(pages)
+        renderRandomLink(pages)
       })
       .catch(function () {
-        // No dist/pages.json (npm run dev) or a network hiccup. The picker
-        // markup starts hidden, so there's nothing to undo.
+        // No dist/pages.json (npm run dev) or a network hiccup. The link
+        // starts hidden, so there's nothing to undo.
       })
   }
 
@@ -199,7 +144,7 @@
   }
 
   document.addEventListener("DOMContentLoaded", function () {
-    initPicker()
+    initRandomLink()
     initGliderAvatar()
   })
 })()

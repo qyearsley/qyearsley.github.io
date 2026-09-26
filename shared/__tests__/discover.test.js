@@ -21,41 +21,9 @@ function jsonResponse(ok, payload) {
 
 describe("window.__discover", () => {
   test("is exposed with the pure picking functions", () => {
-    expect(typeof window.__discover.dailyPick).toBe("function")
     expect(typeof window.__discover.randomPick).toBe("function")
     expect(typeof window.__discover.pageLink).toBe("function")
     expect(typeof window.__discover.lifeStep).toBe("function")
-  })
-})
-
-describe("dailyPick", () => {
-  const { dailyPick } = window.__discover
-
-  test("returns null for an empty list", () => {
-    expect(dailyPick([], new Date("2026-09-23"))).toBeNull()
-  })
-
-  test("cycles through every page sorted by path before repeating", () => {
-    const list = pages() // 3 pages
-    const sorted = [...list].sort((a, b) => (a.path < b.path ? -1 : 1))
-
-    // Four consecutive local calendar days, however they happen to line up
-    // with the epoch on this machine's timezone: day+1 must be the next
-    // page in path order, and day+3 must wrap back to day+0.
-    const picks = [0, 1, 2, 3].map((offset) => dailyPick(list, new Date(2026, 0, 1 + offset)))
-    const start = sorted.findIndex((p) => p.path === picks[0].path)
-
-    expect(picks[1]).toEqual(sorted[(start + 1) % sorted.length])
-    expect(picks[2]).toEqual(sorted[(start + 2) % sorted.length])
-    expect(picks[3]).toEqual(picks[0])
-  })
-
-  test("uses the visitor's local date, not UTC", () => {
-    // 1970-01-01T23:00 local is still local day 0 even though its UTC value
-    // has already rolled into a different UTC day for negative-offset zones.
-    const list = pages()
-    const localMidnight = new Date(1970, 0, 1, 23, 0, 0)
-    expect(dailyPick(list, localMidnight)).toEqual(dailyPick(list, new Date(1970, 0, 1, 0, 0, 0)))
   })
 })
 
@@ -122,93 +90,31 @@ describe("lifeStep", () => {
   })
 })
 
-describe("homepage picker", () => {
-  function setupHomepageDOM() {
-    document.body.innerHTML = `
-      <section id="discover-section" hidden>
-        <h2>Try something</h2>
-        <a id="discover-daily" href="#">
-          <strong>Today's pick</strong>
-          <span id="discover-daily-title"></span>
-        </a>
-        <a id="discover-random" href="#"><strong>Random page</strong></a>
-      </section>
-    `
-  }
-
+describe("random-page link", () => {
   afterEach(() => {
     delete global.fetch
   })
 
   test("stays hidden when the fetch fails (e.g. npm run dev, no build)", async () => {
-    setupHomepageDOM()
+    document.body.innerHTML = `<a id="discover-random" href="#" hidden>Random page</a>`
     global.fetch = jest.fn(() => Promise.reject(new Error("no dist/pages.json")))
 
     document.dispatchEvent(new Event("DOMContentLoaded"))
     await new Promise((resolve) => setTimeout(resolve, 0))
     await new Promise((resolve) => setTimeout(resolve, 0))
 
-    expect(document.getElementById("discover-section").hidden).toBe(true)
-  })
-
-  test("stays hidden on a non-ok response", async () => {
-    setupHomepageDOM()
-    global.fetch = jest.fn(() => Promise.resolve(jsonResponse(false, null)))
-
-    document.dispatchEvent(new Event("DOMContentLoaded"))
-    await new Promise((resolve) => setTimeout(resolve, 0))
-    await new Promise((resolve) => setTimeout(resolve, 0))
-
-    expect(document.getElementById("discover-section").hidden).toBe(true)
-  })
-
-  test("unhides and fills in the picks on a successful fetch", async () => {
-    setupHomepageDOM()
-    global.fetch = jest.fn(() => Promise.resolve(jsonResponse(true, pages())))
-
-    document.dispatchEvent(new Event("DOMContentLoaded"))
-    await new Promise((resolve) => setTimeout(resolve, 0))
-    await new Promise((resolve) => setTimeout(resolve, 0))
-
-    const section = document.getElementById("discover-section")
-    const daily = document.getElementById("discover-daily")
-    const dailyTitle = document.getElementById("discover-daily-title")
-    const random = document.getElementById("discover-random")
-
-    expect(section.hidden).toBe(false)
-    expect(daily.getAttribute("href")).not.toBe("#")
-    expect(dailyTitle.textContent).not.toBe("")
-    // The title goes in the span, leaving the label in place.
-    expect(daily.querySelector("strong").textContent).toBe("Today's pick")
-    expect(random.getAttribute("href")).not.toBe("#")
-  })
-})
-
-describe("404 random link", () => {
-  afterEach(() => {
-    delete global.fetch
-  })
-
-  test("stays hidden when the fetch fails", async () => {
-    document.body.innerHTML = `<a id="discover-404-random" href="#" hidden>Or try a random page</a>`
-    global.fetch = jest.fn(() => Promise.reject(new Error("no dist/pages.json")))
-
-    document.dispatchEvent(new Event("DOMContentLoaded"))
-    await new Promise((resolve) => setTimeout(resolve, 0))
-    await new Promise((resolve) => setTimeout(resolve, 0))
-
-    expect(document.getElementById("discover-404-random").hidden).toBe(true)
+    expect(document.getElementById("discover-random").hidden).toBe(true)
   })
 
   test("unhides with a resolved href on a successful fetch", async () => {
-    document.body.innerHTML = `<a id="discover-404-random" href="#" hidden>Or try a random page</a>`
+    document.body.innerHTML = `<a id="discover-random" href="#" hidden>Random page</a>`
     global.fetch = jest.fn(() => Promise.resolve(jsonResponse(true, pages())))
 
     document.dispatchEvent(new Event("DOMContentLoaded"))
     await new Promise((resolve) => setTimeout(resolve, 0))
     await new Promise((resolve) => setTimeout(resolve, 0))
 
-    const link = document.getElementById("discover-404-random")
+    const link = document.getElementById("discover-random")
     expect(link.hidden).toBe(false)
     expect(link.getAttribute("href")).not.toBe("#")
   })
