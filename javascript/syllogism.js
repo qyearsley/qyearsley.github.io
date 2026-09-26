@@ -1,99 +1,42 @@
 /**
  * syllogism.js
  *
- * Checks a categorical syllogism -- two premises and a conclusion, each in one
- * of the four classical forms (A/E/I/O) over three terms -- against the
- * three-circle Venn diagram method, under the modern (Boolean) reading with no
- * existential import: "All A are B" only says A minus B is empty, it does not
- * assume A has any members.
+ * Checks a categorical syllogism -- two premises and a conclusion, each one of
+ * the four classical forms (A/E/I/O) over three terms -- under the modern
+ * (Boolean) reading with no existential import: "All A are B" only says A
+ * minus B is empty, it does not assume A has any members.
  *
- * The diagram has three circles, one per term, and 2^3 = 8 regions, one for
- * every combination of being inside or outside each circle. A region is
- * identified by a three-character key of "1" (inside) or "0" (outside), in
- * `TERM_SLOTS` order -- e.g. "101" is inside term1 and term3, outside term2.
+ * The three terms divide the page into 8 regions, one for each combination of
+ * being inside or outside each term's circle. A region is numbered 0-7, one
+ * bit per term in TERM_SLOTS order (bit 0 is term1, and so on), and also has
+ * a 3-character key of the same bits as "1"/"0" -- e.g. "101" is inside term1
+ * and term3, outside term2. That key is what syllogism.html uses to place
+ * shading and marks on the diagram.
  *
- * A universal statement (A or E) shades two regions empty. A particular
- * statement (I or O) claims that at least one of two regions is non-empty --
- * an "X" that sits on the boundary between them until something pins it to
- * one side. The two regions a statement touches always agree on its subject
- * and predicate term and differ only on the third, unmentioned term, since a
- * statement about two terms says nothing about the third.
- *
- * `computeDiagramState` folds both premises into that diagram: which regions
- * are shaded, which are pinned non-empty, and which still carry an
- * unresolved X. `checkConclusion` then asks whether the conclusion's own
- * claim is already settled by that diagram. Nothing here draws the diagram --
- * that's DOM work, left to syllogism.html -- this module only computes the
- * region states and the verdict.
+ * An *assignment* says, for each of the 8 regions, whether it holds a member:
+ * an 8-bit number, bit r set if region r is non-empty. A statement is true
+ * under an assignment exactly when that assignment satisfies its claim (see
+ * `holds`). A syllogism is valid iff every assignment that satisfies both
+ * premises also satisfies the conclusion -- checked here by brute force over
+ * all 256 assignments, rather than by reasoning about which regions must be
+ * shaded.
  */
 
-/** The three term slots every statement and region is defined over. */
 const TERM_SLOTS = ["term1", "term2", "term3"]
+const REGION_NUMS = [0, 1, 2, 3, 4, 5, 6, 7]
 
-/**
- * The four classical categorical forms, each keyed by its traditional letter.
- *
- * `subjectBit`/`predicateBit` are the region membership ("in" the circle, or
- * "out" of it) that the form's own two regions share. A and O share the same
- * two regions (subject in, predicate out) because "All S are P" and "Some S
- * are not P" are contradictories -- one shades exactly what the other
- * claims is non-empty -- and likewise E and I (subject in, predicate in).
- */
-const FORMS = {
-  A: { label: "All", trailer: "are", type: "universal", subjectBit: "in", predicateBit: "out" },
-  E: { label: "No", trailer: "are", type: "universal", subjectBit: "in", predicateBit: "in" },
-  I: { label: "Some", trailer: "are", type: "particular", subjectBit: "in", predicateBit: "in" },
-  O: {
-    label: "Some",
-    trailer: "are not",
-    type: "particular",
-    subjectBit: "in",
-    predicateBit: "out",
-  },
+/** Whether region `r` (0-7) is inside `slot`'s circle. */
+function isIn(r, slot) {
+  return ((r >> TERM_SLOTS.indexOf(slot)) & 1) === 1
 }
 
-/**
- * The term slot that isn't either of the two given.
- *
- * @param {string} a - A slot from `TERM_SLOTS`.
- * @param {string} b - A different slot from `TERM_SLOTS`.
- * @returns {string} The remaining slot.
- */
-function otherSlot(a, b) {
-  return TERM_SLOTS.find((slot) => slot !== a && slot !== b)
+/** The 3-character "in"/"out" key for a region, in TERM_SLOTS order. */
+function regionKey(r) {
+  return TERM_SLOTS.map((slot) => (isIn(r, slot) ? "1" : "0")).join("")
 }
 
-/**
- * The eight-character-free, three-character region key for a set of
- * per-slot memberships.
- *
- * @param {Object<string, "in"|"out">} bits - Membership for every slot in
- *   `TERM_SLOTS`.
- * @returns {string} A three-character key of "1" (in) / "0" (out), in
- *   `TERM_SLOTS` order.
- */
-function regionKeyFromBits(bits) {
-  return TERM_SLOTS.map((slot) => (bits[slot] === "in" ? "1" : "0")).join("")
-}
-
-/**
- * The per-slot membership a region key encodes.
- *
- * @param {string} key - A three-character region key, as from `regionKeyFromBits`.
- * @returns {Object<string, "in"|"out">}
- */
-function regionBitsFromKey(key) {
-  const bits = {}
-  TERM_SLOTS.forEach((slot, i) => {
-    bits[slot] = key[i] === "1" ? "in" : "out"
-  })
-  return bits
-}
-
-/** All eight regions of the diagram, key and membership together. */
-const ALL_REGIONS = Array.from({ length: 8 }, (_, i) => i.toString(2).padStart(3, "0")).map(
-  (key) => ({ key, bits: regionBitsFromKey(key) }),
-)
+/** All eight region keys, e.g. ["000", "001", ..., "111"]. */
+const ALL_REGIONS = REGION_NUMS.map(regionKey)
 
 /**
  * A statement: a quantifier over an ordered pair of distinct term slots, e.g.
@@ -104,169 +47,112 @@ const ALL_REGIONS = Array.from({ length: 8 }, (_, i) => i.toString(2).padStart(3
  */
 
 /**
- * The two regions a statement's own claim is about: subject and predicate
- * fixed per its form, the third (unmentioned) term free.
+ * Whether `stmt` is true under `assignment` (an 8-bit number, bit r set if
+ * region r is non-empty).
  *
  * @param {Statement} stmt
- * @returns {[string, string]} Two region keys.
- * @throws {Error} If the subject and predicate are the same slot, or the
- *   quantifier isn't one of A/E/I/O.
+ * @param {number} assignment
+ * @returns {boolean}
+ */
+function holds(stmt, assignment) {
+  const subjectRegions = REGION_NUMS.filter((r) => isIn(r, stmt.subject))
+  const inPredicate = (r) => isIn(r, stmt.predicate)
+  const nonEmpty = (r) => ((assignment >> r) & 1) === 1
+  switch (stmt.quantifier) {
+    case "A":
+      return subjectRegions.every((r) => inPredicate(r) || !nonEmpty(r))
+    case "E":
+      return subjectRegions.every((r) => !inPredicate(r) || !nonEmpty(r))
+    case "I":
+      return subjectRegions.some((r) => inPredicate(r) && nonEmpty(r))
+    case "O":
+      return subjectRegions.some((r) => !inPredicate(r) && nonEmpty(r))
+    default:
+      throw new Error(`Unknown quantifier: ${stmt.quantifier}`)
+  }
+}
+
+/** Every assignment (0-255) that satisfies both premises. */
+function satisfyingAssignments(premise1, premise2) {
+  const assignments = []
+  for (let a = 0; a < 256; a++) {
+    if (holds(premise1, a) && holds(premise2, a)) assignments.push(a)
+  }
+  return assignments
+}
+
+/**
+ * The two regions a statement's own claim is about: inside the subject's
+ * circle, inside or outside the predicate's circle depending on the
+ * quantifier, and either way on the third, unmentioned term. A universal
+ * statement (A/E) claims both regions are empty; a particular one (I/O)
+ * claims at least one of them isn't.
+ *
+ * @param {Statement} stmt
+ * @returns {string[]} Two region keys.
  */
 function statementRegions(stmt) {
-  const { quantifier, subject, predicate } = stmt
-  if (subject === predicate) {
+  if (stmt.subject === stmt.predicate) {
     throw new Error("A statement's subject and predicate must be different terms")
   }
-  const form = FORMS[quantifier]
-  if (!form) {
-    throw new Error(`Unknown quantifier: ${quantifier}`)
-  }
-  const other = otherSlot(subject, predicate)
-  const base = { [subject]: form.subjectBit, [predicate]: form.predicateBit }
-  return [
-    regionKeyFromBits({ ...base, [other]: "in" }),
-    regionKeyFromBits({ ...base, [other]: "out" }),
-  ]
+  const predicateIn = stmt.quantifier === "E" || stmt.quantifier === "I"
+  return REGION_NUMS.filter(
+    (r) => isIn(r, stmt.subject) && isIn(r, stmt.predicate) === predicateIn,
+  ).map(regionKey)
 }
 
 /**
- * Whether two region-key pairs name the same two regions, regardless of order.
+ * Checks a syllogism by brute force: every assignment that satisfies both
+ * premises must also satisfy the conclusion.
  *
- * @param {string[]} a
- * @param {string[]} b
- * @returns {boolean}
- */
-function sameRegionPair(a, b) {
-  return a.length === b.length && a.every((r) => b.includes(r))
-}
-
-/**
- * Folds both premises into the diagram's region state.
- *
- * Universal premises (A/E) shade their two regions outright. A particular
- * premise (I/O) contributes an X across its two regions, which the *other*
- * premise's shading can pin to one side: if exactly one of its two regions is
- * already shaded, the X must fall on the other one, so that region is now
- * known non-empty. If both are shaded, the premises contradict each other on
- * this diagram (each premise, alone, is consistent -- it's the pair that
- * isn't). If neither is shaded, the X stays an unresolved boundary mark.
- *
- * @param {Statement} premise1
- * @param {Statement} premise2
- * @returns {{
- *   shaded: Set<string>,
- *   definiteNonempty: Set<string>,
- *   marks: Array<{regions: string[], resolved: boolean, contradictory?: boolean}>,
- *   contradiction: boolean,
- * }}
- */
-function computeDiagramState(premise1, premise2) {
-  const shaded = new Set()
-  const existentialPairs = []
-
-  for (const stmt of [premise1, premise2]) {
-    const form = FORMS[stmt.quantifier]
-    const regions = statementRegions(stmt)
-    if (form.type === "universal") {
-      regions.forEach((r) => shaded.add(r))
-    } else {
-      existentialPairs.push(regions)
-    }
-  }
-
-  const definiteNonempty = new Set()
-  const marks = []
-  let contradiction = false
-
-  for (const [r1, r2] of existentialPairs) {
-    const shaded1 = shaded.has(r1)
-    const shaded2 = shaded.has(r2)
-    if (shaded1 && shaded2) {
-      contradiction = true
-      marks.push({ regions: [r1, r2], resolved: false, contradictory: true })
-    } else if (shaded1) {
-      definiteNonempty.add(r2)
-      marks.push({ regions: [r2], resolved: true })
-    } else if (shaded2) {
-      definiteNonempty.add(r1)
-      marks.push({ regions: [r1], resolved: true })
-    } else {
-      marks.push({ regions: [r1, r2], resolved: false })
-    }
-  }
-
-  return { shaded, definiteNonempty, marks, contradiction }
-}
-
-/**
- * Whether the diagram (as folded from the premises) already settles the
- * conclusion's own claim.
- *
- * A universal conclusion follows iff both of its regions are shaded. A
- * particular conclusion follows iff one of its two regions is known
- * non-empty, or an unresolved X sits across exactly those same two regions --
- * i.e. a premise already asserted precisely the disjunction the conclusion
- * needs.
- *
- * @param {Statement} conclusion
- * @param {ReturnType<typeof computeDiagramState>} diagramState
- * @returns {boolean}
- */
-function checkConclusion(conclusion, diagramState) {
-  const form = FORMS[conclusion.quantifier]
-  const regions = statementRegions(conclusion)
-
-  if (form.type === "universal") {
-    return regions.every((r) => diagramState.shaded.has(r))
-  }
-
-  if (regions.some((r) => diagramState.definiteNonempty.has(r))) {
-    return true
-  }
-  return diagramState.marks.some(
-    (mark) => !mark.resolved && !mark.contradictory && sameRegionPair(mark.regions, regions),
-  )
-}
-
-/**
- * Checks a full syllogism: folds the premises into a diagram, then checks the
- * conclusion against it, and writes the verdict as one sentence.
+ * Also works out what to draw: a region is shaded if it's empty in every
+ * assignment satisfying the premises, and each particular premise gets an
+ * "X" mark on its own two regions -- narrowed to one if shading has already
+ * ruled out the other.
  *
  * @param {Statement} premise1
  * @param {Statement} premise2
  * @param {Statement} conclusion
  * @returns {{
- *   diagramState: ReturnType<typeof computeDiagramState>,
  *   valid: boolean,
  *   contradiction: boolean,
  *   explanation: string,
+ *   shaded: Set<string>,
+ *   marks: Array<{regions: string[]}>,
  * }}
  */
 function checkSyllogism(premise1, premise2, conclusion) {
-  const diagramState = computeDiagramState(premise1, premise2)
+  const assignments = satisfyingAssignments(premise1, premise2)
 
-  if (diagramState.contradiction) {
+  if (assignments.length === 0) {
     return {
-      diagramState,
       valid: false,
       contradiction: true,
       explanation:
-        "The premises contradict each other on this diagram, so there's nothing left to check the conclusion against.",
+        "The premises contradict each other -- no way of filling in the diagram satisfies both -- so there's nothing left to check the conclusion against.",
+      shaded: new Set(),
+      marks: [],
     }
   }
 
-  const valid = checkConclusion(conclusion, diagramState)
-  const form = FORMS[conclusion.quantifier]
-  const explanation =
-    form.type === "universal"
-      ? valid
-        ? "Valid: the premises already shade every region this conclusion needs empty."
-        : "Invalid: the premises leave at least one region open that this conclusion needs empty."
-      : valid
-        ? "Valid: the premises guarantee a non-empty region inside what this conclusion needs."
-        : "Invalid: nothing in the premises guarantees the non-empty region this conclusion needs."
+  const valid = assignments.every((a) => holds(conclusion, a))
+  const shaded = new Set(
+    REGION_NUMS.filter((r) => assignments.every((a) => ((a >> r) & 1) === 0)).map(regionKey),
+  )
+  const marks = [premise1, premise2]
+    .filter((p) => p.quantifier === "I" || p.quantifier === "O")
+    .map((p) => ({ regions: statementRegions(p).filter((r) => !shaded.has(r)) }))
 
-  return { diagramState, valid, contradiction: false, explanation }
+  const universal = conclusion.quantifier === "A" || conclusion.quantifier === "E"
+  const explanation = universal
+    ? valid
+      ? "Valid: the premises already shade every region this conclusion needs empty."
+      : "Invalid: the premises leave at least one region open that this conclusion needs empty."
+    : valid
+      ? "Valid: the premises guarantee a non-empty region inside what this conclusion needs."
+      : "Invalid: nothing in the premises guarantees the non-empty region this conclusion needs."
+
+  return { valid, contradiction: false, explanation, shaded, marks }
 }
 
 /**
@@ -277,29 +163,23 @@ function checkSyllogism(premise1, premise2, conclusion) {
  * @returns {string}
  */
 function formatStatement(stmt, terms) {
-  const form = FORMS[stmt.quantifier]
-  return `${form.label} ${terms[stmt.subject]} ${form.trailer} ${terms[stmt.predicate]}`
+  const label = { A: "All", E: "No", I: "Some", O: "Some" }[stmt.quantifier]
+  const trailer = stmt.quantifier === "O" ? "are not" : "are"
+  return `${label} ${terms[stmt.subject]} ${trailer} ${terms[stmt.predicate]}`
 }
-
-/** Default term names, matching the example in the Logic and Proof idea doc. */
-const DEFAULT_TERMS = { term1: "A", term2: "B", term3: "C" }
 
 /**
  * The page's starting state: "All A are B; some C are A; so some C are B" --
- * the example from the idea doc itself, which happens to be valid.
+ * the example from the idea doc, which happens to be valid.
  */
 const DEFAULT_STATE = {
-  terms: { ...DEFAULT_TERMS },
+  terms: { term1: "A", term2: "B", term3: "C" },
   premise1: { quantifier: "A", subject: "term1", predicate: "term2" },
   premise2: { quantifier: "I", subject: "term3", predicate: "term1" },
   conclusion: { quantifier: "I", subject: "term3", predicate: "term2" },
 }
 
-/**
- * Preset syllogisms: three classically valid moods (Barbara, Celarent,
- * Darii), plus two classically-taught invalid ones. Each preset supplies its
- * own term names, chosen so the example reads naturally.
- */
+/** Three classic syllogisms: two valid moods, and one classic invalid one. */
 const PRESETS = [
   {
     key: "barbara",
@@ -309,15 +189,6 @@ const PRESETS = [
     premise1: { quantifier: "A", subject: "term2", predicate: "term3" },
     premise2: { quantifier: "A", subject: "term1", predicate: "term2" },
     conclusion: { quantifier: "A", subject: "term1", predicate: "term3" },
-  },
-  {
-    key: "celarent",
-    label: "Celarent (EAE-1) — valid",
-    valid: true,
-    terms: { term1: "Snakes", term2: "Reptiles", term3: "Birds" },
-    premise1: { quantifier: "E", subject: "term2", predicate: "term3" },
-    premise2: { quantifier: "A", subject: "term1", predicate: "term2" },
-    conclusion: { quantifier: "E", subject: "term1", predicate: "term3" },
   },
   {
     key: "darii",
@@ -337,41 +208,6 @@ const PRESETS = [
     premise2: { quantifier: "A", subject: "term1", predicate: "term3" },
     conclusion: { quantifier: "A", subject: "term1", predicate: "term2" },
   },
-  {
-    key: "existential-fallacy",
-    label: "Existential Fallacy (AAI-1) — invalid without existential import",
-    valid: false,
-    terms: { term1: "Kittens", term2: "Cats", term3: "Mammals" },
-    premise1: { quantifier: "A", subject: "term2", predicate: "term3" },
-    premise2: { quantifier: "A", subject: "term1", predicate: "term2" },
-    conclusion: { quantifier: "I", subject: "term1", predicate: "term3" },
-  },
 ]
 
-/**
- * Looks up a preset by its key.
- *
- * @param {string} key
- * @returns {(typeof PRESETS)[number]|null}
- */
-function presetByKey(key) {
-  return PRESETS.find((preset) => preset.key === key) ?? null
-}
-
-export {
-  TERM_SLOTS,
-  FORMS,
-  ALL_REGIONS,
-  DEFAULT_TERMS,
-  DEFAULT_STATE,
-  PRESETS,
-  otherSlot,
-  regionKeyFromBits,
-  regionBitsFromKey,
-  statementRegions,
-  computeDiagramState,
-  checkConclusion,
-  checkSyllogism,
-  formatStatement,
-  presetByKey,
-}
+export { TERM_SLOTS, ALL_REGIONS, DEFAULT_STATE, PRESETS, checkSyllogism, formatStatement }

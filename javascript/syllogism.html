@@ -20,17 +20,13 @@
         TERM_SLOTS,
         DEFAULT_STATE,
         PRESETS,
-        presetByKey,
         checkSyllogism,
         formatStatement,
         ALL_REGIONS,
       } from "./syllogism.js"
 
-      // The diagram's fixed geometry: term1 is the top circle, term2 the
-      // bottom-left, term3 the bottom-right. Only the term *names* are
-      // editable -- which circle is which slot never changes, so these
-      // coordinates can be plain constants rather than something computed per
-      // render.
+      // Fixed diagram geometry: term1 is the top circle, term2 bottom-left,
+      // term3 bottom-right. Only the term names are editable.
       const VIEW_W = 300
       const VIEW_H = 260
       const CIRCLES = {
@@ -44,13 +40,7 @@
         term3: { x: 258, y: 246 },
       }
 
-      // One representative point inside each of the 8 regions, picked by
-      // hand to sit inside that region and no other (checked against
-      // CIRCLES above, not against a rendered picture -- this page has not
-      // been looked at in a browser). A boundary "X" -- a premise's
-      // unresolved either-or -- is drawn at the midpoint of its two regions'
-      // points, which approximates "on the boundary between them" without
-      // solving for the actual arc.
+      // One point inside each of the 8 regions, picked by hand.
       const REGION_POINTS = {
         "000": { x: 20, y: 240 },
         100: { x: 150, y: 45 },
@@ -62,9 +52,7 @@
         111: { x: 150, y: 150 },
       }
 
-      // Mutable app state: the three term names and the three statements
-      // (premise1, premise2, conclusion). Shaped exactly like
-      // syllogism.js's DEFAULT_STATE / PRESETS entries.
+      // App state, shaped like syllogism.js's DEFAULT_STATE / PRESETS.
       let state = cloneState(DEFAULT_STATE)
 
       function cloneState(s) {
@@ -96,23 +84,8 @@
 
       const STATEMENT_KEYS = ["premise1", "premise2", "conclusion"]
 
-      function syncUrl(presetKey) {
-        const params = new URLSearchParams(window.location.search)
-        if (presetKey) {
-          params.set("preset", presetKey)
-        } else {
-          params.delete("preset")
-        }
-        const query = params.toString()
-        window.history.replaceState(null, "", window.location.pathname + (query ? `?${query}` : ""))
-      }
-
-      /**
-       * Refreshes every subject/predicate <option>'s visible text to match
-       * the current term names. The <option value="termN"> elements
-       * themselves are only ever built once, in setUpControls -- renaming a
-       * term shouldn't disturb which slot is currently selected anywhere.
-       */
+      // Refreshes every subject/predicate <option>'s visible text to match
+      // the current term names.
       function refreshTermOptionLabels() {
         for (const slot of TERM_SLOTS) {
           document
@@ -134,55 +107,43 @@
         }
       }
 
-      /**
-       * Builds one region's fill as nested clip-paths (AND, one per circle
-       * the region is inside) around a rect masked to exclude the circles
-       * the region is outside of. Letting the browser compute the
-       * intersection this way, rather than hand-deriving each region's path
-       * data, is what makes the diagram correct for this fixed circle
-       * layout without solving any circle-circle intersection geometry.
-       */
-      function regionFillMarkup(region) {
-        const insideSlots = TERM_SLOTS.filter((slot) => region.bits[slot] === "in")
-        let content = `<rect x="0" y="0" width="${VIEW_W}" height="${VIEW_H}" mask="url(#syl-mask-${region.key})" />`
-        for (const slot of insideSlots) {
-          content = `<g clip-path="url(#syl-clip-${slot})">${content}</g>`
-        }
-        return content
-      }
-
-      function regionMaskMarkup(region) {
-        const outsideSlots = TERM_SLOTS.filter((slot) => region.bits[slot] === "out")
-        const circles = outsideSlots
+      // A shaded region's fill: clip to the circles it's inside of, then
+      // mask out the circles it's outside of (a mask, not another clip,
+      // because the "outside" circles can overlap each other).
+      function regionMarkup(key) {
+        const insideSlots = TERM_SLOTS.filter((slot, i) => key[i] === "1")
+        const outsideSlots = TERM_SLOTS.filter((slot, i) => key[i] === "0")
+        const maskId = `syl-mask-${key}`
+        const outsideCircles = outsideSlots
           .map((slot) => {
             const c = CIRCLES[slot]
             return `<circle cx="${c.cx}" cy="${c.cy}" r="${c.r}" fill="black" />`
           })
           .join("")
-        return `<mask id="syl-mask-${region.key}"><rect x="0" y="0" width="${VIEW_W}" height="${VIEW_H}" fill="white" />${circles}</mask>`
+        const mask = `<mask id="${maskId}"><rect width="${VIEW_W}" height="${VIEW_H}" fill="white" />${outsideCircles}</mask>`
+        let fill = `<rect width="${VIEW_W}" height="${VIEW_H}" mask="url(#${maskId})" />`
+        for (const slot of insideSlots) {
+          fill = `<g clip-path="url(#syl-clip-${slot})">${fill}</g>`
+        }
+        return { mask, fill }
       }
 
       function markMarkup(mark) {
-        if (mark.regions.length === 1) {
-          const p = REGION_POINTS[mark.regions[0]]
-          return `<text class="venn-mark" x="${p.x}" y="${p.y}" text-anchor="middle" dominant-baseline="middle">X</text>`
-        }
-        const [p1, p2] = mark.regions.map((r) => REGION_POINTS[r])
-        const mx = ((p1.x + p2.x) / 2).toFixed(1)
-        const my = ((p1.y + p2.y) / 2).toFixed(1)
-        const cls = mark.contradictory ? "venn-mark venn-mark-contradictory" : "venn-mark"
-        return `<text class="${cls}" x="${mx}" y="${my}" text-anchor="middle" dominant-baseline="middle">X</text>`
+        const points = mark.regions.map((r) => REGION_POINTS[r])
+        const x = points.reduce((sum, p) => sum + p.x, 0) / points.length
+        const y = points.reduce((sum, p) => sum + p.y, 0) / points.length
+        return `<text class="venn-mark" x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle">X</text>`
       }
 
-      function buildDiagramSvg(diagramState, terms) {
+      function buildDiagramSvg(result, terms) {
         const clipDefs = TERM_SLOTS.map((slot) => {
           const c = CIRCLES[slot]
           return `<clipPath id="syl-clip-${slot}"><circle cx="${c.cx}" cy="${c.cy}" r="${c.r}" /></clipPath>`
         }).join("")
-        const shadedRegions = ALL_REGIONS.filter((r) => diagramState.shaded.has(r.key))
-        const maskDefs = shadedRegions.map(regionMaskMarkup).join("")
-        const regionFills = shadedRegions
-          .map((r) => `<g class="venn-region-shaded">${regionFillMarkup(r)}</g>`)
+        const shadedRegions = ALL_REGIONS.filter((key) => result.shaded.has(key)).map(regionMarkup)
+        const maskDefs = shadedRegions.map((r) => r.mask).join("")
+        const fills = shadedRegions
+          .map((r) => `<g class="venn-region-shaded">${r.fill}</g>`)
           .join("")
         const circleOutlines = TERM_SLOTS.map((slot) => {
           const c = CIRCLES[slot]
@@ -194,13 +155,13 @@
             terms[slot],
           )}</text>`
         }).join("")
-        const marks = diagramState.marks.map(markMarkup).join("")
+        const marks = result.marks.map(markMarkup).join("")
         const ariaLabel = `Three-circle Venn diagram for ${terms.term1}, ${terms.term2}, and ${terms.term3}, shaded and marked from the two premises`
 
         return (
           `<svg viewBox="0 0 ${VIEW_W} ${VIEW_H}" role="img" aria-label="${escapeXml(ariaLabel)}">` +
           `<defs>${clipDefs}${maskDefs}</defs>` +
-          regionFills +
+          fills +
           circleOutlines +
           labels +
           marks +
@@ -222,44 +183,36 @@
           els.preview.textContent = formatStatement(state[key], state.terms)
         }
         renderVerdict(result)
-        document.getElementById("diagram").innerHTML = buildDiagramSvg(
-          result.diagramState,
-          state.terms,
-        )
+        document.getElementById("diagram").innerHTML = buildDiagramSvg(result, state.terms)
       }
 
       function handleTermNameChange(slot, value) {
         state.terms[slot] = value || state.terms[slot]
         refreshTermOptionLabels()
-        syncUrl(null)
         render()
       }
 
       function handleStatementChange(key, field, value) {
         const stmt = state[key]
         stmt[field] = value
-        // Subject and predicate must stay distinct: if this change made them
-        // equal, push the other one off to whichever slot is left over.
+        // Keep subject and predicate distinct: bump the other one off.
         if (stmt.subject === stmt.predicate) {
           const otherField = field === "subject" ? "predicate" : "subject"
           stmt[otherField] = TERM_SLOTS.find((slot) => slot !== stmt[field])
           statementEls(key)[otherField].value = stmt[otherField]
         }
-        syncUrl(null)
         render()
       }
 
       function applyPreset(preset) {
         state = cloneState(preset)
         syncControlsFromState()
-        syncUrl(preset.key)
         render()
       }
 
       function resetToDefault() {
         state = cloneState(DEFAULT_STATE)
         syncControlsFromState()
-        syncUrl(null)
         render()
       }
 
@@ -313,11 +266,6 @@
 
       document.addEventListener("DOMContentLoaded", () => {
         setUpControls()
-        const presetKey = new URLSearchParams(window.location.search).get("preset")
-        const preset = presetKey && presetByKey(presetKey)
-        if (preset) {
-          state = cloneState(preset)
-        }
         syncControlsFromState()
         render()
       })
@@ -396,10 +344,6 @@
         fill: var(--color-error);
       }
 
-      .venn-mark-contradictory {
-        fill: var(--color-primary);
-      }
-
       .venn-legend {
         font-size: 0.85rem;
         color: var(--color-text-muted);
@@ -464,16 +408,19 @@
 
             <div class="presets-row">
               <button class="preset-btn" data-preset="barbara">Barbara</button>
-              <button class="preset-btn" data-preset="celarent">Celarent</button>
               <button class="preset-btn" data-preset="darii">Darii</button>
               <button class="preset-btn" data-preset="undistributed-middle">
                 Undistributed Middle (invalid)
               </button>
-              <button class="preset-btn" data-preset="existential-fallacy">
-                Existential Fallacy (invalid)
-              </button>
               <button id="reset-btn" class="btn-tertiary">Reset</button>
             </div>
+            <p class="statement-preview" style="margin-left: 0">
+              Barbara and Darii are medieval mnemonic names: their vowels give the three statements'
+              types in order (A = All, E = No, I = Some, O = Some ... not), so Barbara is
+              All-All-All and Darii is All-Some-Some. See
+              <a href="https://en.wikipedia.org/wiki/Syllogism">Wikipedia's syllogism article</a>
+              for the rest of the names. The invalid preset just gets a plain descriptive name.
+            </p>
 
             <div class="statement-row">
               <span class="statement-label">Premise 1:</span>
@@ -529,10 +476,9 @@
             outright that nothing can be there. A particular statement ("Some", "Some ... are not")
             marks its two regions with an <strong>X</strong>, meaning at least one of them has a
             member — but not necessarily both, and the diagram doesn't yet know which. If the other
-            premise has already shaded one of those two regions, the X moves definitively onto the
-            other one. The conclusion follows exactly when the premises' shading and marks already
-            settle its own claim: both of its regions shaded, for a universal conclusion, or one of
-            them known to hold a member, for a particular one.
+            premise has already shaded one of those two regions, the X moves onto the other one. The
+            conclusion follows exactly when every way of filling in the diagram that satisfies both
+            premises also satisfies the conclusion.
           </p>
           <p>
             <strong
@@ -540,9 +486,7 @@
               import:</strong
             >
             "All A are B" only claims that A minus B is empty — it does not assume A has any members
-            at all. That's why the <strong>Existential Fallacy</strong> preset is marked invalid:
-            two universal premises alone never guarantee that anything exists, so they can't validly
-            support a "Some ..." conclusion.
+            at all.
           </p>
         </section>
 
