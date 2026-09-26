@@ -6,7 +6,7 @@
     <title>Colophon - Quinten Yearsley</title>
     <meta
       name="description"
-      content="How this site is built: hand-written HTML, a small build script, and machine-translated Chinese pages"
+      content="How this site is built: plain HTML, a small build script, and machine-translated Chinese pages"
     />
     <meta name="theme-color" content="#2d3748" />
     <link rel="stylesheet" href="/css/style.css" />
@@ -30,61 +30,33 @@
         </nav>
 
         <section class="section">
-          <h2>Hand-written</h2>
           <p>
-            Every page is hand-written HTML, CSS, and vanilla JavaScript. There's no framework and
-            no bundler. Each tool on this site is a self-contained HTML file that works on its own.
+            The source for this site is
+            <a href="https://github.com/qyearsley/qyearsley.github.io">on GitHub</a>.
+          </p>
+          <p>
+            Pages are plain HTML, CSS, and JavaScript, with no framework or bundler. A small build
+            script, <code>build.js</code>, renders the resume, generates the Chinese pages, builds
+            the sitemap, and checks every internal link. Tests run on Jest, and ESLint, Prettier,
+            Stylelint, and HTMLHint handle linting and formatting. The site deploys to GitHub Pages
+            only if all of them pass.
+          </p>
+          <p>
+            The Chinese pages were translated with machine help, and no native Chinese speaker has
+            checked them yet.
+          </p>
+          <p>
+            Press <strong>?</strong> for keyboard shortcuts. The theme button switches between
+            light, dark, and your system setting.
           </p>
         </section>
 
         <section class="section">
-          <h2>The build script</h2>
+          <h2>Why "colophon"?</h2>
           <p>
-            A small script, <code>build.js</code>, turns the source files into the live site. It:
-          </p>
-          <ul>
-            <li>Renders the resume from a Markdown file into HTML</li>
-            <li>Generates a Chinese version of each translated page</li>
-            <li>Builds the sitemap</li>
-            <li>Checks every internal link, and fails the build if one is broken</li>
-          </ul>
-          <p>
-            There's no static site generator behind any of this. With around 30 pages that change
-            slowly, copying a bit of markup between files is cheaper than adopting a new tool.
-          </p>
-        </section>
-
-        <section class="section">
-          <h2>Chinese pages</h2>
-          <p>
-            Each Chinese page is generated at build time. The build script matches English text in
-            the page against a translation file and swaps in the Chinese. The translation was done
-            with machine help, and it hasn't been checked yet by a native Chinese speaker.
-          </p>
-        </section>
-
-        <section class="section">
-          <h2>Testing and linting</h2>
-          <p>
-            Tests run on Jest. Linting and formatting run on ESLint, Prettier, Stylelint, and
-            HTMLHint. Git hooks run the linters before a commit and the tests before a push, and the
-            site deploys to GitHub Pages only after the build, the tests, and the linters all pass.
-          </p>
-        </section>
-
-        <section class="section">
-          <h2>Design</h2>
-          <p>
-            The theme switcher cycles between light, dark, and your system setting. Keyboard
-            shortcuts work across the site — press <strong>?</strong> to see the list. Text uses
-            your system's own font, not a downloaded one.
-          </p>
-        </section>
-
-        <section class="section">
-          <h2>Source</h2>
-          <p>
-            <a href="https://github.com/qyearsley/qyearsley.github.io">View the source on GitHub</a>
+            A colophon is the note at the end of a book that says how it was made: the typeface, the
+            paper, the printer. The word comes from the Greek <i>kolophōn</i>, "summit" or
+            "finishing touch".
           </p>
         </section>
       </main>
