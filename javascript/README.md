@@ -5,6 +5,8 @@ Interactive tools and visualizations built with vanilla JavaScript.
 ## Available Tools
 
 - **[Truth Tables](truth-tables.html)** - Generate truth tables for boolean expressions
+- **[Knights and Knaves](knights-knaves.html)** - Solve truth-teller and liar puzzles with a truth table
+- **[Syllogism Checker](syllogism.html)** - Check a syllogism with a three-circle Venn diagram
 - **[Password Generator](password-generator.html)** - Generate secure random passwords
 - **[Coin Flipper](coin-flipper.html)** - Visualize probability with coin flips
 - **[Life Calculator](life-calculator.html)** - Calculate how long you've lived

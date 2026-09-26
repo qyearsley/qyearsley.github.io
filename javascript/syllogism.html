@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Syllogism Checker - Quinten Yearsley</title>
+    <meta
+      name="description"
+      content="Build a categorical syllogism and see whether the conclusion follows, shaded onto a three-circle Venn diagram"
+    />
+    <meta name="theme-color" content="#2d3748" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/components.css" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script type="module">
+      "use strict"
+
+      import {
+        TERM_SLOTS,
+        DEFAULT_STATE,
+        PRESETS,
+        presetByKey,
+        checkSyllogism,
+        formatStatement,
+        ALL_REGIONS,
+      } from "./syllogism.js"
+
+      // The diagram's fixed geometry: term1 is the top circle, term2 the
+      // bottom-left, term3 the bottom-right. Only the term *names* are
+      // editable -- which circle is which slot never changes, so these
+      // coordinates can be plain constants rather than something computed per
+      // render.
+      const VIEW_W = 300
+      const VIEW_H = 260
+      const CIRCLES = {
+        term1: { cx: 150, cy: 90, r: 80 },
+        term2: { cx: 95, cy: 170, r: 80 },
+        term3: { cx: 205, cy: 170, r: 80 },
+      }
+      const LABEL_POINTS = {
+        term1: { x: 150, y: 18 },
+        term2: { x: 42, y: 246 },
+        term3: { x: 258, y: 246 },
+      }
+
+      // One representative point inside each of the 8 regions, picked by
+      // hand to sit inside that region and no other (checked against
+      // CIRCLES above, not against a rendered picture -- this page has not
+      // been looked at in a browser). A boundary "X" -- a premise's
+      // unresolved either-or -- is drawn at the midpoint of its two regions'
+      // points, which approximates "on the boundary between them" without
+      // solving for the actual arc.
+      const REGION_POINTS = {
+        "000": { x: 20, y: 240 },
+        100: { x: 150, y: 45 },
+        "010": { x: 55, y: 205 },
+        "001": { x: 245, y: 205 },
+        110: { x: 120, y: 130 },
+        101: { x: 180, y: 130 },
+        "011": { x: 150, y: 195 },
+        111: { x: 150, y: 150 },
+      }
+
+      // Mutable app state: the three term names and the three statements
+      // (premise1, premise2, conclusion). Shaped exactly like
+      // syllogism.js's DEFAULT_STATE / PRESETS entries.
+      let state = cloneState(DEFAULT_STATE)
+
+      function cloneState(s) {
+        return {
+          terms: { ...s.terms },
+          premise1: { ...s.premise1 },
+          premise2: { ...s.premise2 },
+          conclusion: { ...s.conclusion },
+        }
+      }
+
+      function escapeXml(str) {
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+      }
+
+      function statementEls(key) {
+        return {
+          quantifier: document.getElementById(`${key}-quantifier`),
+          subject: document.getElementById(`${key}-subject`),
+          predicate: document.getElementById(`${key}-predicate`),
+          trailer: document.getElementById(`${key}-trailer`),
+          preview: document.getElementById(`${key}-preview`),
+        }
+      }
+
+      const STATEMENT_KEYS = ["premise1", "premise2", "conclusion"]
+
+      function syncUrl(presetKey) {
+        const params = new URLSearchParams(window.location.search)
+        if (presetKey) {
+          params.set("preset", presetKey)
+        } else {
+          params.delete("preset")
+        }
+        const query = params.toString()
+        window.history.replaceState(null, "", window.location.pathname + (query ? `?${query}` : ""))
+      }
+
+      /**
+       * Refreshes every subject/predicate <option>'s visible text to match
+       * the current term names. The <option value="termN"> elements
+       * themselves are only ever built once, in setUpControls -- renaming a
+       * term shouldn't disturb which slot is currently selected anywhere.
+       */
+      function refreshTermOptionLabels() {
+        for (const slot of TERM_SLOTS) {
+          document
+            .querySelectorAll(`option[value="${slot}"]`)
+            .forEach((opt) => (opt.textContent = state.terms[slot]))
+        }
+      }
+
+      function syncControlsFromState() {
+        for (const slot of TERM_SLOTS) {
+          document.getElementById(`${slot}-name`).value = state.terms[slot]
+        }
+        refreshTermOptionLabels()
+        for (const key of STATEMENT_KEYS) {
+          const els = statementEls(key)
+          els.quantifier.value = state[key].quantifier
+          els.subject.value = state[key].subject
+          els.predicate.value = state[key].predicate
+        }
+      }
+
+      /**
+       * Builds one region's fill as nested clip-paths (AND, one per circle
+       * the region is inside) around a rect masked to exclude the circles
+       * the region is outside of. Letting the browser compute the
+       * intersection this way, rather than hand-deriving each region's path
+       * data, is what makes the diagram correct for this fixed circle
+       * layout without solving any circle-circle intersection geometry.
+       */
+      function regionFillMarkup(region) {
+        const insideSlots = TERM_SLOTS.filter((slot) => region.bits[slot] === "in")
+        let content = `<rect x="0" y="0" width="${VIEW_W}" height="${VIEW_H}" mask="url(#syl-mask-${region.key})" />`
+        for (const slot of insideSlots) {
+          content = `<g clip-path="url(#syl-clip-${slot})">${content}</g>`
+        }
+        return content
+      }
+
+      function regionMaskMarkup(region) {
+        const outsideSlots = TERM_SLOTS.filter((slot) => region.bits[slot] === "out")
+        const circles = outsideSlots
+          .map((slot) => {
+            const c = CIRCLES[slot]
+            return `<circle cx="${c.cx}" cy="${c.cy}" r="${c.r}" fill="black" />`
+          })
+          .join("")
+        return `<mask id="syl-mask-${region.key}"><rect x="0" y="0" width="${VIEW_W}" height="${VIEW_H}" fill="white" />${circles}</mask>`
+      }
+
+      function markMarkup(mark) {
+        if (mark.regions.length === 1) {
+          const p = REGION_POINTS[mark.regions[0]]
+          return `<text class="venn-mark" x="${p.x}" y="${p.y}" text-anchor="middle" dominant-baseline="middle">X</text>`
+        }
+        const [p1, p2] = mark.regions.map((r) => REGION_POINTS[r])
+        const mx = ((p1.x + p2.x) / 2).toFixed(1)
+        const my = ((p1.y + p2.y) / 2).toFixed(1)
+        const cls = mark.contradictory ? "venn-mark venn-mark-contradictory" : "venn-mark"
+        return `<text class="${cls}" x="${mx}" y="${my}" text-anchor="middle" dominant-baseline="middle">X</text>`
+      }
+
+      function buildDiagramSvg(diagramState, terms) {
+        const clipDefs = TERM_SLOTS.map((slot) => {
+          const c = CIRCLES[slot]
+          return `<clipPath id="syl-clip-${slot}"><circle cx="${c.cx}" cy="${c.cy}" r="${c.r}" /></clipPath>`
+        }).join("")
+        const shadedRegions = ALL_REGIONS.filter((r) => diagramState.shaded.has(r.key))
+        const maskDefs = shadedRegions.map(regionMaskMarkup).join("")
+        const regionFills = shadedRegions
+          .map((r) => `<g class="venn-region-shaded">${regionFillMarkup(r)}</g>`)
+          .join("")
+        const circleOutlines = TERM_SLOTS.map((slot) => {
+          const c = CIRCLES[slot]
+          return `<circle class="venn-circle" cx="${c.cx}" cy="${c.cy}" r="${c.r}" />`
+        }).join("")
+        const labels = TERM_SLOTS.map((slot) => {
+          const p = LABEL_POINTS[slot]
+          return `<text class="venn-label" x="${p.x}" y="${p.y}" text-anchor="middle">${escapeXml(
+            terms[slot],
+          )}</text>`
+        }).join("")
+        const marks = diagramState.marks.map(markMarkup).join("")
+        const ariaLabel = `Three-circle Venn diagram for ${terms.term1}, ${terms.term2}, and ${terms.term3}, shaded and marked from the two premises`
+
+        return (
+          `<svg viewBox="0 0 ${VIEW_W} ${VIEW_H}" role="img" aria-label="${escapeXml(ariaLabel)}">` +
+          `<defs>${clipDefs}${maskDefs}</defs>` +
+          regionFills +
+          circleOutlines +
+          labels +
+          marks +
+          `</svg>`
+        )
+      }
+
+      function renderVerdict(result) {
+        const el = document.getElementById("verdict")
+        el.className = result.valid ? "success-message" : "error-message"
+        el.textContent = result.explanation
+      }
+
+      function render() {
+        const result = checkSyllogism(state.premise1, state.premise2, state.conclusion)
+        for (const key of STATEMENT_KEYS) {
+          const els = statementEls(key)
+          els.trailer.textContent = state[key].quantifier === "O" ? "are not" : "are"
+          els.preview.textContent = formatStatement(state[key], state.terms)
+        }
+        renderVerdict(result)
+        document.getElementById("diagram").innerHTML = buildDiagramSvg(
+          result.diagramState,
+          state.terms,
+        )
+      }
+
+      function handleTermNameChange(slot, value) {
+        state.terms[slot] = value || state.terms[slot]
+        refreshTermOptionLabels()
+        syncUrl(null)
+        render()
+      }
+
+      function handleStatementChange(key, field, value) {
+        const stmt = state[key]
+        stmt[field] = value
+        // Subject and predicate must stay distinct: if this change made them
+        // equal, push the other one off to whichever slot is left over.
+        if (stmt.subject === stmt.predicate) {
+          const otherField = field === "subject" ? "predicate" : "subject"
+          stmt[otherField] = TERM_SLOTS.find((slot) => slot !== stmt[field])
+          statementEls(key)[otherField].value = stmt[otherField]
+        }
+        syncUrl(null)
+        render()
+      }
+
+      function applyPreset(preset) {
+        state = cloneState(preset)
+        syncControlsFromState()
+        syncUrl(preset.key)
+        render()
+      }
+
+      function resetToDefault() {
+        state = cloneState(DEFAULT_STATE)
+        syncControlsFromState()
+        syncUrl(null)
+        render()
+      }
+
+      function buildStatementControls(key) {
+        const els = statementEls(key)
+        for (const [quantifier, label] of Object.entries({
+          A: "All",
+          E: "No",
+          I: "Some",
+          O: "Some ... not",
+        })) {
+          const opt = document.createElement("option")
+          opt.value = quantifier
+          opt.textContent = label
+          els.quantifier.appendChild(opt)
+        }
+        for (const select of [els.subject, els.predicate]) {
+          for (const slot of TERM_SLOTS) {
+            const opt = document.createElement("option")
+            opt.value = slot
+            opt.textContent = state.terms[slot]
+            select.appendChild(opt)
+          }
+        }
+        els.quantifier.addEventListener("change", () =>
+          handleStatementChange(key, "quantifier", els.quantifier.value),
+        )
+        els.subject.addEventListener("change", () =>
+          handleStatementChange(key, "subject", els.subject.value),
+        )
+        els.predicate.addEventListener("change", () =>
+          handleStatementChange(key, "predicate", els.predicate.value),
+        )
+      }
+
+      function setUpControls() {
+        for (const slot of TERM_SLOTS) {
+          document
+            .getElementById(`${slot}-name`)
+            .addEventListener("input", (e) => handleTermNameChange(slot, e.target.value))
+        }
+        for (const key of STATEMENT_KEYS) {
+          buildStatementControls(key)
+        }
+        for (const preset of PRESETS) {
+          const btn = document.querySelector(`.preset-btn[data-preset="${preset.key}"]`)
+          if (btn) btn.addEventListener("click", () => applyPreset(preset))
+        }
+        document.getElementById("reset-btn").addEventListener("click", resetToDefault)
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        setUpControls()
+        const presetKey = new URLSearchParams(window.location.search).get("preset")
+        const preset = presetKey && presetByKey(presetKey)
+        if (preset) {
+          state = cloneState(preset)
+        }
+        syncControlsFromState()
+        render()
+      })
+    </script>
+    <style>
+      .term-names-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .term-names-row .form-group {
+        margin-bottom: 0;
+        min-width: 120px;
+      }
+
+      .presets-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .statement-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .statement-row .statement-label {
+        font-weight: 600;
+        color: var(--color-text-heading);
+        min-width: 5.5rem;
+      }
+
+      .statement-preview {
+        font-family: monospace;
+        color: var(--color-text-tertiary);
+        margin: 0 0 1.25rem 5.5rem;
+        font-size: 0.9rem;
+      }
+
+      .venn-diagram-container {
+        margin: 1.5rem 0;
+        text-align: center;
+      }
+
+      .venn-diagram-container svg {
+        width: 100%;
+        max-width: 380px;
+      }
+
+      .venn-circle {
+        fill: none;
+        stroke: var(--color-text);
+        stroke-width: 2;
+      }
+
+      .venn-region-shaded {
+        fill: var(--color-text-secondary);
+        fill-opacity: 0.4;
+      }
+
+      .venn-label {
+        font-size: 13px;
+        font-weight: 700;
+        fill: var(--color-text-heading);
+      }
+
+      .venn-mark {
+        font-size: 15px;
+        font-weight: 700;
+        fill: var(--color-error);
+      }
+
+      .venn-mark-contradictory {
+        fill: var(--color-primary);
+      }
+
+      .venn-legend {
+        font-size: 0.85rem;
+        color: var(--color-text-muted);
+        margin-top: 0.5rem;
+      }
+    </style>
+    <script src="/shared/theme.js"></script>
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="container">
+      <header class="header">
+        <h1>Syllogism Checker</h1>
+        <p>Build a categorical syllogism and see whether the conclusion follows</p>
+      </header>
+
+      <main id="main-content" class="main-content">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="/">Home</a>
+          <span class="separator" aria-hidden="true">/</span>
+          <a href="/javascript/">Experiments</a>
+          <span class="separator" aria-hidden="true">/</span>
+          <span class="current" aria-current="page">Syllogism Checker</span>
+        </nav>
+
+        <section class="section">
+          <h2>Build a Syllogism</h2>
+
+          <div class="form-container">
+            <div class="term-names-row">
+              <div class="form-group">
+                <label for="term1-name">Term 1 name:</label>
+                <input
+                  id="term1-name"
+                  type="text"
+                  class="form-input"
+                  value="A"
+                  autocomplete="off"
+                />
+              </div>
+              <div class="form-group">
+                <label for="term2-name">Term 2 name:</label>
+                <input
+                  id="term2-name"
+                  type="text"
+                  class="form-input"
+                  value="B"
+                  autocomplete="off"
+                />
+              </div>
+              <div class="form-group">
+                <label for="term3-name">Term 3 name:</label>
+                <input
+                  id="term3-name"
+                  type="text"
+                  class="form-input"
+                  value="C"
+                  autocomplete="off"
+                />
+              </div>
+            </div>
+
+            <div class="presets-row">
+              <button class="preset-btn" data-preset="barbara">Barbara</button>
+              <button class="preset-btn" data-preset="celarent">Celarent</button>
+              <button class="preset-btn" data-preset="darii">Darii</button>
+              <button class="preset-btn" data-preset="undistributed-middle">
+                Undistributed Middle (invalid)
+              </button>
+              <button class="preset-btn" data-preset="existential-fallacy">
+                Existential Fallacy (invalid)
+              </button>
+              <button id="reset-btn" class="btn-tertiary">Reset</button>
+            </div>
+
+            <div class="statement-row">
+              <span class="statement-label">Premise 1:</span>
+              <select id="premise1-quantifier" class="form-select"></select>
+              <select id="premise1-subject" class="form-select"></select>
+              <span id="premise1-trailer">are</span>
+              <select id="premise1-predicate" class="form-select"></select>
+            </div>
+            <p class="statement-preview" id="premise1-preview"></p>
+
+            <div class="statement-row">
+              <span class="statement-label">Premise 2:</span>
+              <select id="premise2-quantifier" class="form-select"></select>
+              <select id="premise2-subject" class="form-select"></select>
+              <span id="premise2-trailer">are</span>
+              <select id="premise2-predicate" class="form-select"></select>
+            </div>
+            <p class="statement-preview" id="premise2-preview"></p>
+
+            <div class="statement-row">
+              <span class="statement-label">So:</span>
+              <select id="conclusion-quantifier" class="form-select"></select>
+              <select id="conclusion-subject" class="form-select"></select>
+              <span id="conclusion-trailer">are</span>
+              <select id="conclusion-predicate" class="form-select"></select>
+            </div>
+            <p class="statement-preview" id="conclusion-preview"></p>
+          </div>
+
+          <p id="verdict" class="success-message" aria-live="polite"></p>
+
+          <div class="venn-diagram-container">
+            <div id="diagram"></div>
+            <p class="venn-legend">
+              Shaded: the premises force this region empty. <strong>X</strong>: a premise says at
+              least one of the two marked regions has a member — shown at the boundary between them
+              when the premises don't say which.
+            </p>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>How It Works</h2>
+          <p>
+            Each term gets a circle, and the three circles' overlaps divide the page into 8 regions
+            — every combination of being inside or outside each of the three circles. A statement
+            like "All A are B" or "Some A are not B" only ever talks about two of the three terms,
+            so it always marks exactly two of those regions: the two that agree on the terms it
+            names and differ on the term it doesn't mention.
+          </p>
+          <p>
+            A universal statement ("All", "No") shades both of its regions, meaning the premises say
+            outright that nothing can be there. A particular statement ("Some", "Some ... are not")
+            marks its two regions with an <strong>X</strong>, meaning at least one of them has a
+            member — but not necessarily both, and the diagram doesn't yet know which. If the other
+            premise has already shaded one of those two regions, the X moves definitively onto the
+            other one. The conclusion follows exactly when the premises' shading and marks already
+            settle its own claim: both of its regions shaded, for a universal conclusion, or one of
+            them known to hold a member, for a particular one.
+          </p>
+          <p>
+            <strong
+              >This checker uses the modern reading of "All" and "No", with no existential
+              import:</strong
+            >
+            "All A are B" only claims that A minus B is empty — it does not assume A has any members
+            at all. That's why the <strong>Existential Fallacy</strong> preset is marked invalid:
+            two universal premises alone never guarantee that anything exists, so they can't validly
+            support a "Some ..." conclusion.
+          </p>
+        </section>
+
+        <aside class="see-also">
+          <h2>See also</h2>
+          <ul>
+            <li><a href="/javascript/logic-engine/">Logic Engine</a></li>
+            <li><a href="/javascript/truth-tables.html">Truth Tables</a></li>
+          </ul>
+        </aside>
+      </main>
+    </div>
+    <script src="/shared/nav.js"></script>
+  </body>
+</html>
