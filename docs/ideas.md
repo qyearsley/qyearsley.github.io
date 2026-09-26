@@ -48,8 +48,8 @@ browser yet.
 A page in `chinese/`. Pick a character, such as 學, and see its reading in
 Mandarin, Cantonese, Japanese, Korean and Vietnamese (xué, hok, gaku, hak,
 học). The readings show what Mandarin lost, such as the old -p, -t and -k
-endings. The section could then be renamed from "Chinese Language Notes" to
-something wider. The readings need a checked source, not memory.
+endings. The section was renamed from "Chinese Language Notes" to
+"Language Notes" on 2026-09-26. The readings need a checked source, not memory.
 
 A proof of concept landed on 2026-09-26 as `chinese/five-readings.html`, with
 21 characters. The readings are from memory, and the page says so. Check them
