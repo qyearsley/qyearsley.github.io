@@ -24,8 +24,6 @@ last long version of this file is `git show 3ceed17:docs/improvements.md`.
    to read later.
    - `javascript/syllogism.html` and `.js`: drop the `?preset=` URL sync, keep
      three presets, trim the comments, and draw the shading more simply.
-   - `chinese/five-readings.html` and `.js`: drop the `?char=` URL sync, and
-     keep either the dropdown or the table.
 
    Verify with `npm test`, and look at each page in a browser. For the
    syllogism checker, also compare every verdict with a brute-force check over

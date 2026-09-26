@@ -11,7 +11,7 @@ Interactive tools for studying Chinese language and transliteration.
 - **[Pinyin Abbreviations](pinyin-abbreviations.html)** - Common pinyin abbreviation patterns
 - **[Encoding Explorer](encoding-explorer.html)** - Explore how Chinese characters are encoded in Unicode
 - **[Buddhist Vocabulary](buddhist-vocabulary.html)** - How Indian Buddhist vocabulary was rendered into Chinese, and why
-- **[One Character, Five Readings](five-readings.html)** - One character in Mandarin, Cantonese, Japanese, Korean, and Vietnamese
+- **[One Character, Five Readings](five-readings.html)** - Characters read in Mandarin, Cantonese, Japanese, Korean, and Vietnamese
 
 ## Regenerating Pages
 

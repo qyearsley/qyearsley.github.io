@@ -51,10 +51,12 @@ học). The readings show what Mandarin lost, such as the old -p, -t and -k
 endings. The section was renamed from "Chinese Language Notes" to
 "Language Notes" on 2026-09-26. The readings need a checked source, not memory.
 
-A proof of concept landed on 2026-09-26 as `chinese/five-readings.html`, with
-21 characters. The readings are from memory, and the page says so. Check them
-against Unihan before removing that warning. It has not been looked at in a
-browser yet.
+A proof of concept landed on 2026-09-26 as `chinese/five-readings.html`: static
+tables of 21 characters, with no JavaScript. The readings are from memory, and
+the page says so. Check them against Unihan before removing that note. The
+least certain are the Cantonese tones for 骨, 立, 音 and 北, and Korean 六 and 立,
+given in their surface forms 육 and 입 rather than the dictionary forms 륙 and
+립. It has not been looked at in a browser yet.
 
 ## Knights and knaves solver
 

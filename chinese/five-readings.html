@@ -6,7 +6,7 @@
     <title>One Character, Five Readings - Quinten Yearsley</title>
     <meta
       name="description"
-      content="Pick a Chinese character and compare its reading in Mandarin, Cantonese, Japanese, Korean, and Vietnamese -- and see what Mandarin lost along the way."
+      content="Chinese characters read in Mandarin, Cantonese, Japanese, Korean, and Vietnamese, grouped by how the syllable ends."
     />
     <meta name="theme-color" content="#2d3748" />
     <link rel="stylesheet" href="/css/style.css" />
@@ -15,120 +15,13 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <script src="/shared/theme.js"></script>
     <style>
-      .disclaimer {
-        background: var(--color-info-bg);
-        border: 1px solid var(--color-info-border);
-        border-radius: 8px;
-        padding: 1rem 1.25rem;
-        margin: 1.5rem 0;
-        font-size: 0.95rem;
+      .table-scroll {
+        overflow-x: auto;
       }
 
-      .disclaimer p {
-        margin: 0;
-      }
-
-      .disclaimer p + p {
-        margin-top: 0.5rem;
-      }
-
-      .picker-row {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 0.75rem;
-        margin: 1rem 0 1.5rem;
-      }
-
-      .picker-row label {
-        font-weight: 600;
-      }
-
-      #char-select {
-        font-size: 1.1rem;
-      }
-
-      .char-card {
-        background: var(--color-bg-card);
-        border: 1px solid var(--color-border);
-        border-radius: 8px;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-      }
-
-      .char-card-top {
-        display: flex;
-        align-items: center;
-        gap: 1.5rem;
-        flex-wrap: wrap;
-      }
-
-      .char-card .big-hanzi {
-        font-size: 4rem;
-        line-height: 1;
-        font-family: "Microsoft YaHei", "SimSun", serif;
-      }
-
-      .char-card .meaning {
-        color: var(--color-text-secondary);
-        font-style: italic;
-      }
-
-      .readings-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-        gap: 1rem;
-        margin-top: 1.25rem;
-      }
-
-      .reading-item {
-        background: var(--color-bg-code);
-        border-radius: 6px;
-        padding: 0.6rem 0.8rem;
-      }
-
-      .reading-item .lang-label {
-        display: block;
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.03em;
-        color: var(--color-text-muted);
-        margin-bottom: 0.15rem;
-      }
-
-      .reading-item .lang-value {
-        font-size: 1.15rem;
-      }
-
-      .group-note {
-        margin-top: 1.25rem;
-        padding-top: 1rem;
-        border-top: 1px solid var(--color-border);
-        font-size: 0.95rem;
-        color: var(--color-text-secondary);
-      }
-
-      .group-note .group-label {
-        font-weight: 600;
-        color: var(--color-text);
-      }
-
-      #readings-table td:first-child {
-        font-family: "Microsoft YaHei", "SimSun", serif;
-        font-size: 1.3rem;
+      .readings td.hanzi {
+        font-size: 1.4rem;
         text-align: center;
-      }
-
-      #readings-table tbody tr {
-        cursor: pointer;
-      }
-
-      #readings-table tbody tr:hover {
-        background: var(--color-bg-code);
-      }
-
-      #readings-table tbody tr.selected {
-        background: var(--color-info-bg);
       }
     </style>
   </head>
@@ -137,7 +30,7 @@
     <div class="container">
       <header class="header">
         <h1>One Character, Five Readings</h1>
-        <p>The same character, read the way five languages inherited it from Middle Chinese.</p>
+        <p>The same characters in Mandarin, Cantonese, Japanese, Korean, and Vietnamese.</p>
       </header>
 
       <main id="main-content" class="main-content">
@@ -151,79 +44,341 @@
 
         <section class="section">
           <p>
-            Chinese characters spread across East and Southeast Asia long before Mandarin became
-            standard. Japanese, Korean, and Vietnamese each borrowed a layer of Chinese vocabulary
-            wholesale, at a time closer to Middle Chinese than to modern Mandarin -- and Cantonese
-            branched off from a common ancestor early enough that it kept some things Mandarin later
-            dropped. Reading the same character's five reflexes side by side shows some of what
-            Mandarin lost on its way to becoming Mandarin: the checked-tone endings
-            <em>-p</em>, <em>-t</em>, and <em>-k</em>, and the distinction between nasal endings
-            <em>-m</em> and <em>-n</em>.
+            Japanese, Korean, and Vietnamese borrowed many words from Chinese, mostly between about
+            500 and 1000 AD. Their readings of Chinese characters, called
+            <a href="https://en.wikipedia.org/wiki/Sino-Xenic_vocabularies">Sino-Xenic</a>
+            readings, often keep sounds from
+            <a href="https://en.wikipedia.org/wiki/Middle_Chinese">Middle Chinese</a> that Mandarin
+            no longer has.
           </p>
           <p>
-            Romanization: <strong>Hanyu Pinyin</strong> for Mandarin, <strong>Jyutping</strong> for
-            Cantonese, <strong>Hepburn</strong> for Japanese on'yomi,
-            <strong>Revised Romanization</strong> (with Hangul) for Korean, and
-            <strong>Quốc Ngữ</strong> for Vietnamese.
+            Two of these are easy to see. Middle Chinese syllables could end in <em>-p</em>,
+            <em>-t</em>, or <em>-k</em> (the
+            <a href="https://en.wikipedia.org/wiki/Checked_tone">checked tone</a>), and they could
+            end in <em>-m</em> as well as <em>-n</em>. Mandarin has none of these endings.
+            Cantonese, Korean, and Vietnamese keep most of them.
+          </p>
+          <p>
+            Romanization: Hanyu Pinyin for Mandarin, Jyutping for Cantonese, Hepburn for Japanese,
+            and Revised Romanization for Korean. The Japanese readings are on'yomi.
+          </p>
+          <p>
+            <strong>These readings have not been checked</strong> against
+            <a href="https://www.unicode.org/charts/unihan.html">Unihan</a> or another dictionary
+            yet.
           </p>
         </section>
 
-        <div class="disclaimer">
+        <section class="section">
+          <h2>Final <em>-k</em></h2>
           <p>
-            <strong>Unverified readings.</strong> These readings have not been checked against
-            Unihan or another dictionary yet. They are here to show the sound patterns, not to serve
-            as a reference.
+            Mandarin has no final consonant here. Cantonese and Korean end in <em>-k</em>, and
+            Vietnamese spells it <em>-c</em> or <em>-ch</em>. Japanese adds a vowel: <em>-ku</em>.
           </p>
-        </div>
-
-        <section class="section">
-          <h2>Pick a character</h2>
-          <div class="picker-row">
-            <label for="char-select">Character:</label>
-            <select id="char-select" class="form-select"></select>
-          </div>
-
-          <div class="char-card" id="char-card">
-            <!-- Filled in by five-readings.html's script. -->
-          </div>
-        </section>
-
-        <section class="section">
-          <h2>What Mandarin lost</h2>
-          <p>
-            Middle Chinese syllables could end in a stop consonant -- <em>-p</em>, <em>-t</em>, or
-            <em>-k</em> -- forming the "checked tone" (入聲 <em>rùshēng</em>) category. Mandarin
-            simply dropped these final stops, folding each syllable into one of its four modern
-            tones by other rules. Middle Chinese also had three nasal endings, <em>-m</em>,
-            <em>-n</em>, and <em>-ng</em>; Mandarin merged <em>-m</em> into <em>-n</em>, so words
-            that used to end differently now rhyme. Cantonese, the Sino-Korean vocabulary layer, and
-            Sino-Vietnamese vocabulary all kept these distinctions much better than Mandarin did;
-            Japanese on'yomi kept the checked endings (approximated, since Japanese doesn't allow a
-            syllable to end in a bare consonant) but merged <em>-m</em> into <em>-n</em> on its own,
-            independently of Mandarin.
-          </p>
-
-          <div id="group-notes"></div>
-        </section>
-
-        <section class="section">
-          <h2>All the characters</h2>
-          <p>Select a row to see it in the card above.</p>
-          <div style="overflow-x: auto">
-            <table id="readings-table">
+          <div class="table-scroll">
+            <table class="readings">
               <thead>
                 <tr>
-                  <th>Character</th>
+                  <th></th>
                   <th>Meaning</th>
                   <th>Mandarin</th>
                   <th>Cantonese</th>
                   <th>Japanese</th>
                   <th>Korean</th>
                   <th>Vietnamese</th>
-                  <th>Pattern</th>
                 </tr>
               </thead>
-              <tbody id="readings-table-body"></tbody>
+              <tbody>
+                <tr>
+                  <td class="hanzi">學</td>
+                  <td>study</td>
+                  <td>xué</td>
+                  <td>hok6</td>
+                  <td>gaku</td>
+                  <td>학 hak</td>
+                  <td>học</td>
+                </tr>
+                <tr>
+                  <td class="hanzi">六</td>
+                  <td>six</td>
+                  <td>liù</td>
+                  <td>luk6</td>
+                  <td>roku</td>
+                  <td>육 yuk</td>
+                  <td>lục</td>
+                </tr>
+                <tr>
+                  <td class="hanzi">國</td>
+                  <td>country</td>
+                  <td>guó</td>
+                  <td>gwok3</td>
+                  <td>koku</td>
+                  <td>국 guk</td>
+                  <td>quốc</td>
+                </tr>
+                <tr>
+                  <td class="hanzi">木</td>
+                  <td>tree</td>
+                  <td>mù</td>
+                  <td>muk6</td>
+                  <td>moku</td>
+                  <td>목 mok</td>
+                  <td>mộc</td>
+                </tr>
+                <tr>
+                  <td class="hanzi">白</td>
+                  <td>white</td>
+                  <td>bái</td>
+                  <td>baak6</td>
+                  <td>haku</td>
+                  <td>백 baek</td>
+                  <td>bạch</td>
+                </tr>
+                <tr>
+                  <td class="hanzi">北</td>
+                  <td>north</td>
+                  <td>běi</td>
+                  <td>bak1</td>
+                  <td>hoku</td>
+                  <td>북 buk</td>
+                  <td>bắc</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>Final <em>-t</em></h2>
+          <p>
+            Mandarin has no final consonant here. Cantonese and Vietnamese end in <em>-t</em>, and
+            Korean has <em>-l</em>. Japanese adds a vowel: <em>-chi</em> or <em>-tsu</em>.
+          </p>
+          <div class="table-scroll">
+            <table class="readings">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Meaning</th>
+                  <th>Mandarin</th>
+                  <th>Cantonese</th>
+                  <th>Japanese</th>
+                  <th>Korean</th>
+                  <th>Vietnamese</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="hanzi">日</td>
+                  <td>sun, day</td>
+                  <td>rì</td>
+                  <td>jat6</td>
+                  <td>nichi</td>
+                  <td>일 il</td>
+                  <td>nhật</td>
+                </tr>
+                <tr>
+                  <td class="hanzi">一</td>
+                  <td>one</td>
+                  <td>yī</td>
+                  <td>jat1</td>
+                  <td>ichi</td>
+                  <td>일 il</td>
+                  <td>nhất</td>
+                </tr>
+                <tr>
+                  <td class="hanzi">八</td>
+                  <td>eight</td>
+                  <td>bā</td>
+                  <td>baat3</td>
+                  <td>hachi</td>
+                  <td>팔 pal</td>
+                  <td>bát</td>
+                </tr>
+                <tr>
+                  <td class="hanzi">骨</td>
+                  <td>bone</td>
+                  <td>gǔ</td>
+                  <td>gwat1</td>
+                  <td>kotsu</td>
+                  <td>골 gol</td>
+                  <td>cốt</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>Final <em>-p</em></h2>
+          <p>
+            Mandarin has no final consonant here. Cantonese, Korean, and Vietnamese end in
+            <em>-p</em>. In Japanese it became a long vowel (<em>jū</em>) or <em>-tsu</em>.
+          </p>
+          <div class="table-scroll">
+            <table class="readings">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Meaning</th>
+                  <th>Mandarin</th>
+                  <th>Cantonese</th>
+                  <th>Japanese</th>
+                  <th>Korean</th>
+                  <th>Vietnamese</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="hanzi">十</td>
+                  <td>ten</td>
+                  <td>shí</td>
+                  <td>sap6</td>
+                  <td>jū</td>
+                  <td>십 sip</td>
+                  <td>thập</td>
+                </tr>
+                <tr>
+                  <td class="hanzi">入</td>
+                  <td>enter</td>
+                  <td>rù</td>
+                  <td>jap6</td>
+                  <td>nyū</td>
+                  <td>입 ip</td>
+                  <td>nhập</td>
+                </tr>
+                <tr>
+                  <td class="hanzi">立</td>
+                  <td>stand</td>
+                  <td>lì</td>
+                  <td>laap6</td>
+                  <td>ritsu</td>
+                  <td>입 ip</td>
+                  <td>lập</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>Final <em>-m</em></h2>
+          <p>
+            Mandarin and Japanese end in <em>-n</em> here. Cantonese, Korean, and Vietnamese end in
+            <em>-m</em>.
+          </p>
+          <div class="table-scroll">
+            <table class="readings">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Meaning</th>
+                  <th>Mandarin</th>
+                  <th>Cantonese</th>
+                  <th>Japanese</th>
+                  <th>Korean</th>
+                  <th>Vietnamese</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="hanzi">三</td>
+                  <td>three</td>
+                  <td>sān</td>
+                  <td>saam1</td>
+                  <td>san</td>
+                  <td>삼 sam</td>
+                  <td>tam</td>
+                </tr>
+                <tr>
+                  <td class="hanzi">心</td>
+                  <td>heart</td>
+                  <td>xīn</td>
+                  <td>sam1</td>
+                  <td>shin</td>
+                  <td>심 sim</td>
+                  <td>tâm</td>
+                </tr>
+                <tr>
+                  <td class="hanzi">金</td>
+                  <td>gold</td>
+                  <td>jīn</td>
+                  <td>gam1</td>
+                  <td>kin</td>
+                  <td>금 geum</td>
+                  <td>kim</td>
+                </tr>
+                <tr>
+                  <td class="hanzi">南</td>
+                  <td>south</td>
+                  <td>nán</td>
+                  <td>naam4</td>
+                  <td>nan</td>
+                  <td>남 nam</td>
+                  <td>nam</td>
+                </tr>
+                <tr>
+                  <td class="hanzi">音</td>
+                  <td>sound</td>
+                  <td>yīn</td>
+                  <td>jam1</td>
+                  <td>on</td>
+                  <td>음 eum</td>
+                  <td>âm</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>Final <em>-n</em></h2>
+          <p>
+            For comparison: these characters ended in <em>-n</em> in Middle Chinese too, and all
+            five readings end in <em>-n</em>.
+          </p>
+          <div class="table-scroll">
+            <table class="readings">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Meaning</th>
+                  <th>Mandarin</th>
+                  <th>Cantonese</th>
+                  <th>Japanese</th>
+                  <th>Korean</th>
+                  <th>Vietnamese</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="hanzi">人</td>
+                  <td>person</td>
+                  <td>rén</td>
+                  <td>jan4</td>
+                  <td>jin</td>
+                  <td>인 in</td>
+                  <td>nhân</td>
+                </tr>
+                <tr>
+                  <td class="hanzi">天</td>
+                  <td>sky</td>
+                  <td>tiān</td>
+                  <td>tin1</td>
+                  <td>ten</td>
+                  <td>천 cheon</td>
+                  <td>thiên</td>
+                </tr>
+                <tr>
+                  <td class="hanzi">山</td>
+                  <td>mountain</td>
+                  <td>shān</td>
+                  <td>saan1</td>
+                  <td>san</td>
+                  <td>산 san</td>
+                  <td>sơn</td>
+                </tr>
+              </tbody>
             </table>
           </div>
         </section>
@@ -237,127 +392,6 @@
         </aside>
       </main>
     </div>
-    <script type="module">
-      "use strict"
-
-      import { CHARACTERS, GROUPS, findCharacter, findGroup } from "./five-readings.js"
-      import { resolveEnumParam } from "./url-state.js"
-
-      const VALID_HANZI = CHARACTERS.map((c) => c.hanzi)
-      const DEFAULT_HANZI = "學"
-
-      function renderGroupNotes() {
-        const container = document.getElementById("group-notes")
-        container.innerHTML = GROUPS.map(
-          (g) => `<p><span class="group-label">${g.label}:</span> ${g.note}</p>`,
-        ).join("")
-      }
-
-      function renderSelect(selected) {
-        const select = document.getElementById("char-select")
-        select.innerHTML = GROUPS.map((g) => {
-          const options = CHARACTERS.filter((c) => c.group === g.id)
-            .map(
-              (c) =>
-                `<option value="${c.hanzi}"${c.hanzi === selected ? " selected" : ""}>` +
-                `${c.hanzi} -- ${c.meaning} (${c.mandarin})</option>`,
-            )
-            .join("")
-          return `<optgroup label="${g.label}">${options}</optgroup>`
-        }).join("")
-      }
-
-      function renderTable(selected) {
-        const body = document.getElementById("readings-table-body")
-        body.innerHTML = CHARACTERS.map((c) => {
-          const group = findGroup(c.group)
-          const isSelected = c.hanzi === selected ? " selected" : ""
-          return (
-            `<tr data-hanzi="${c.hanzi}" class="${isSelected.trim()}">` +
-            `<td>${c.hanzi}</td>` +
-            `<td>${c.meaning}</td>` +
-            `<td>${c.mandarin}</td>` +
-            `<td>${c.cantonese}</td>` +
-            `<td>${c.japanese}</td>` +
-            `<td>${c.korean.hangul} (${c.korean.romanization})</td>` +
-            `<td>${c.vietnamese}</td>` +
-            `<td>${group.label}</td>` +
-            "</tr>"
-          )
-        }).join("")
-
-        body.querySelectorAll("tr").forEach((row) => {
-          row.addEventListener("click", () => selectCharacter(row.dataset.hanzi))
-        })
-      }
-
-      function renderCard(hanzi) {
-        const c = findCharacter(hanzi) || findCharacter(DEFAULT_HANZI)
-        const group = findGroup(c.group)
-        document.getElementById("char-card").innerHTML =
-          '<div class="char-card-top">' +
-          `<div class="big-hanzi">${c.hanzi}</div>` +
-          `<div class="meaning">${c.meaning}</div>` +
-          "</div>" +
-          '<div class="readings-grid">' +
-          readingItem("Mandarin", c.mandarin) +
-          readingItem("Cantonese", c.cantonese) +
-          readingItem("Japanese", c.japanese) +
-          readingItem("Korean", `${c.korean.hangul} (${c.korean.romanization})`) +
-          readingItem("Vietnamese", c.vietnamese) +
-          "</div>" +
-          '<div class="group-note">' +
-          `<span class="group-label">${group.label}:</span> ${group.note}` +
-          "</div>"
-      }
-
-      function readingItem(label, value) {
-        return (
-          '<div class="reading-item">' +
-          `<span class="lang-label">${label}</span>` +
-          `<span class="lang-value">${value}</span>` +
-          "</div>"
-        )
-      }
-
-      // Keeps `?char=` in sync with the current selection, so the current
-      // character can be shared with a link. Mirrors the pattern in
-      // character-converter.html -- see chinese/README.md.
-      function syncUrlToState(hanzi) {
-        const params = new URLSearchParams(window.location.search)
-        if (hanzi !== DEFAULT_HANZI) {
-          params.set("char", hanzi)
-        } else {
-          params.delete("char")
-        }
-        const query = params.toString()
-        const newUrl = window.location.pathname + (query ? `?${query}` : "") + window.location.hash
-        window.history.replaceState(null, "", newUrl)
-      }
-
-      function selectCharacter(hanzi) {
-        document.getElementById("char-select").value = hanzi
-        renderCard(hanzi)
-        document.querySelectorAll("#readings-table-body tr").forEach((row) => {
-          row.classList.toggle("selected", row.dataset.hanzi === hanzi)
-        })
-        syncUrlToState(hanzi)
-      }
-
-      document.addEventListener("DOMContentLoaded", () => {
-        const params = new URLSearchParams(window.location.search)
-        const initial = resolveEnumParam(params.get("char"), VALID_HANZI, DEFAULT_HANZI)
-
-        renderGroupNotes()
-        renderSelect(initial)
-        renderTable(initial)
-        renderCard(initial)
-
-        document.getElementById("char-select").addEventListener("change", (e) => {
-          selectCharacter(e.target.value)
-        })
-      })
-    </script>
     <script src="/shared/nav.js"></script>
   </body>
 </html>
