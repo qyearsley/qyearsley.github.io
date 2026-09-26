@@ -26,7 +26,7 @@
   "Overhauled the system: added comprehensive test coverage and improved recovery rates across all hardware models": "全面改造系统：新增测试覆盖，提升所有硬件型号恢复率",
   "Fleet Operations & Monitoring <em>(Ansible, Splunk)</em>": "机群运维与监控 <em>（Ansible, Splunk）</em>",
   "Led qualification and deployment of OS upgrades using orchestration playbooks with preflight checks and post-upgrade verification": "主导OS升级的评估认证与部署，使用编排脚本，包含升级前预检和升级后验证",
-  "Maintained and improved agent provisioning system: pinned dependencies for reproducibility, standardized logging, added CI pipelines": "维护并改进代理配置系统：固定依赖以保证可复现、标准化日志、添加CI流水线",
+  "Maintained and improved the provisioning system for lab test hosts: pinned dependencies for reproducibility, standardized logging, added CI pipelines": "维护并改进实验室测试主机的配置系统：固定依赖以保证可复现、标准化日志、添加CI流水线",
   "Built operational Splunk dashboards for device recovery rates, OS rollout tracking, and fleet utilization": "构建Splunk仪表盘，跟踪恢复率、OS部署和机群利用率",
 
   "— July 2013 - March 2023": "— 2013年7月至2023年3月",

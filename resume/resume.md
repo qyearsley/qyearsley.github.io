@@ -32,7 +32,7 @@ Built tools and automation to improve the efficiency and reliability of device l
 #### Fleet Operations & Monitoring _(Ansible, Splunk)_
 
 - Led qualification and deployment of OS upgrades using orchestration playbooks with preflight checks and post-upgrade verification
-- Maintained and improved agent provisioning system: pinned dependencies for reproducibility, standardized logging, added CI pipelines
+- Maintained and improved the provisioning system for lab test hosts: pinned dependencies for reproducibility, standardized logging, added CI pipelines
 - Built operational Splunk dashboards for device recovery rates, OS rollout tracking, and fleet utilization
 
 ### Software Engineer
