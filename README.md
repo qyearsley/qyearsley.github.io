@@ -12,8 +12,11 @@ Personal website with educational games, JavaScript experiments, and Chinese lan
 
 The build generates Chinese translations at `/zh/` from co-located `*.zh.json` files.
 This is unrelated to the `/chinese/` directory, which contains English-language tools about Chinese.
-Every page carries an EN/中文 switcher; the games' gameplay text is still English.
-See [docs/improvements.md](docs/improvements.md) for what is left.
+Most pages carry an EN/中文 switcher; three games (Number Garden, Seasons, and
+Times Trail) have none, because their gameplay text is written at runtime and
+the build only translates static HTML. See
+[docs/translations.md](docs/translations.md#which-pages-have-a-chinese-version-and-why)
+for why, and [docs/improvements.md](docs/improvements.md) for what is left.
 
 ## Development
 
