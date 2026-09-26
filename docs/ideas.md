@@ -63,9 +63,9 @@ Knights always tell the truth and knaves always lie. The solver builds the
 truth table and shows which assignments survive. It could reuse
 `truthtable.js`.
 
-A proof of concept landed on 2026-09-26 as `javascript/knights-knaves.html`. It
-reuses `truthtable.js`, so statements are typed in its syntax (`not b`), not in
-English. It has not been looked at in a browser yet.
+**Dropped on 2026-09-26.** A proof of concept was built and then removed. To
+see it, run `git show 6a51ded`. It reused `truthtable.js`, so statements had to
+be typed in its syntax (`not b`), not in English.
 
 ## Syllogism checker
 
