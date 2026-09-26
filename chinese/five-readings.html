@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>One Character, Five Readings - Quinten Yearsley</title>
+    <meta
+      name="description"
+      content="Pick a Chinese character and compare its reading in Mandarin, Cantonese, Japanese, Korean, and Vietnamese -- and see what Mandarin lost along the way."
+    />
+    <meta name="theme-color" content="#2d3748" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/components.css" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script src="/shared/theme.js"></script>
+    <style>
+      .disclaimer {
+        background: var(--color-info-bg);
+        border: 1px solid var(--color-info-border);
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        margin: 1.5rem 0;
+        font-size: 0.95rem;
+      }
+
+      .disclaimer p {
+        margin: 0;
+      }
+
+      .disclaimer p + p {
+        margin-top: 0.5rem;
+      }
+
+      .picker-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.75rem;
+        margin: 1rem 0 1.5rem;
+      }
+
+      .picker-row label {
+        font-weight: 600;
+      }
+
+      #char-select {
+        font-size: 1.1rem;
+      }
+
+      .char-card {
+        background: var(--color-bg-card);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .char-card-top {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+      }
+
+      .char-card .big-hanzi {
+        font-size: 4rem;
+        line-height: 1;
+        font-family: "Microsoft YaHei", "SimSun", serif;
+      }
+
+      .char-card .meaning {
+        color: var(--color-text-secondary);
+        font-style: italic;
+      }
+
+      .readings-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 1rem;
+        margin-top: 1.25rem;
+      }
+
+      .reading-item {
+        background: var(--color-bg-code);
+        border-radius: 6px;
+        padding: 0.6rem 0.8rem;
+      }
+
+      .reading-item .lang-label {
+        display: block;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: var(--color-text-muted);
+        margin-bottom: 0.15rem;
+      }
+
+      .reading-item .lang-value {
+        font-size: 1.15rem;
+      }
+
+      .group-note {
+        margin-top: 1.25rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--color-border);
+        font-size: 0.95rem;
+        color: var(--color-text-secondary);
+      }
+
+      .group-note .group-label {
+        font-weight: 600;
+        color: var(--color-text);
+      }
+
+      #readings-table td:first-child {
+        font-family: "Microsoft YaHei", "SimSun", serif;
+        font-size: 1.3rem;
+        text-align: center;
+      }
+
+      #readings-table tbody tr {
+        cursor: pointer;
+      }
+
+      #readings-table tbody tr:hover {
+        background: var(--color-bg-code);
+      }
+
+      #readings-table tbody tr.selected {
+        background: var(--color-info-bg);
+      }
+    </style>
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="container">
+      <header class="header">
+        <h1>One Character, Five Readings</h1>
+        <p>The same character, read the way five languages inherited it from Middle Chinese.</p>
+      </header>
+
+      <main id="main-content" class="main-content">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="/">Home</a>
+          <span class="separator" aria-hidden="true">/</span>
+          <a href="/chinese/">Chinese</a>
+          <span class="separator" aria-hidden="true">/</span>
+          <span class="current" aria-current="page">Five Readings</span>
+        </nav>
+
+        <section class="section">
+          <p>
+            Chinese characters spread across East and Southeast Asia long before Mandarin became
+            standard. Japanese, Korean, and Vietnamese each borrowed a layer of Chinese vocabulary
+            wholesale, at a time closer to Middle Chinese than to modern Mandarin -- and Cantonese
+            branched off from a common ancestor early enough that it kept some things Mandarin later
+            dropped. Reading the same character's five reflexes side by side shows some of what
+            Mandarin lost on its way to becoming Mandarin: the checked-tone endings
+            <em>-p</em>, <em>-t</em>, and <em>-k</em>, and the distinction between nasal endings
+            <em>-m</em> and <em>-n</em>.
+          </p>
+          <p>
+            Romanization: <strong>Hanyu Pinyin</strong> for Mandarin, <strong>Jyutping</strong> for
+            Cantonese, <strong>Hepburn</strong> for Japanese on'yomi,
+            <strong>Revised Romanization</strong> (with Hangul) for Korean, and
+            <strong>Quốc Ngữ</strong> for Vietnamese.
+          </p>
+        </section>
+
+        <div class="disclaimer">
+          <p>
+            <strong>Unverified readings.</strong> These readings have not been checked against
+            Unihan or another dictionary yet. They are here to show the sound patterns, not to serve
+            as a reference.
+          </p>
+        </div>
+
+        <section class="section">
+          <h2>Pick a character</h2>
+          <div class="picker-row">
+            <label for="char-select">Character:</label>
+            <select id="char-select" class="form-select"></select>
+          </div>
+
+          <div class="char-card" id="char-card">
+            <!-- Filled in by five-readings.html's script. -->
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>What Mandarin lost</h2>
+          <p>
+            Middle Chinese syllables could end in a stop consonant -- <em>-p</em>, <em>-t</em>, or
+            <em>-k</em> -- forming the "checked tone" (入聲 <em>rùshēng</em>) category. Mandarin
+            simply dropped these final stops, folding each syllable into one of its four modern
+            tones by other rules. Middle Chinese also had three nasal endings, <em>-m</em>,
+            <em>-n</em>, and <em>-ng</em>; Mandarin merged <em>-m</em> into <em>-n</em>, so words
+            that used to end differently now rhyme. Cantonese, the Sino-Korean vocabulary layer, and
+            Sino-Vietnamese vocabulary all kept these distinctions much better than Mandarin did;
+            Japanese on'yomi kept the checked endings (approximated, since Japanese doesn't allow a
+            syllable to end in a bare consonant) but merged <em>-m</em> into <em>-n</em> on its own,
+            independently of Mandarin.
+          </p>
+
+          <div id="group-notes"></div>
+        </section>
+
+        <section class="section">
+          <h2>All the characters</h2>
+          <p>Select a row to see it in the card above.</p>
+          <div style="overflow-x: auto">
+            <table id="readings-table">
+              <thead>
+                <tr>
+                  <th>Character</th>
+                  <th>Meaning</th>
+                  <th>Mandarin</th>
+                  <th>Cantonese</th>
+                  <th>Japanese</th>
+                  <th>Korean</th>
+                  <th>Vietnamese</th>
+                  <th>Pattern</th>
+                </tr>
+              </thead>
+              <tbody id="readings-table-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <aside class="see-also">
+          <h2>See also</h2>
+          <ul>
+            <li><a href="/chinese/tone-table.html">Tone Table</a></li>
+            <li><a href="/chinese/pinyin-abbreviations.html">Pinyin Abbreviations</a></li>
+          </ul>
+        </aside>
+      </main>
+    </div>
+    <script type="module">
+      "use strict"
+
+      import { CHARACTERS, GROUPS, findCharacter, findGroup } from "./five-readings.js"
+      import { resolveEnumParam } from "./url-state.js"
+
+      const VALID_HANZI = CHARACTERS.map((c) => c.hanzi)
+      const DEFAULT_HANZI = "學"
+
+      function renderGroupNotes() {
+        const container = document.getElementById("group-notes")
+        container.innerHTML = GROUPS.map(
+          (g) => `<p><span class="group-label">${g.label}:</span> ${g.note}</p>`,
+        ).join("")
+      }
+
+      function renderSelect(selected) {
+        const select = document.getElementById("char-select")
+        select.innerHTML = GROUPS.map((g) => {
+          const options = CHARACTERS.filter((c) => c.group === g.id)
+            .map(
+              (c) =>
+                `<option value="${c.hanzi}"${c.hanzi === selected ? " selected" : ""}>` +
+                `${c.hanzi} -- ${c.meaning} (${c.mandarin})</option>`,
+            )
+            .join("")
+          return `<optgroup label="${g.label}">${options}</optgroup>`
+        }).join("")
+      }
+
+      function renderTable(selected) {
+        const body = document.getElementById("readings-table-body")
+        body.innerHTML = CHARACTERS.map((c) => {
+          const group = findGroup(c.group)
+          const isSelected = c.hanzi === selected ? " selected" : ""
+          return (
+            `<tr data-hanzi="${c.hanzi}" class="${isSelected.trim()}">` +
+            `<td>${c.hanzi}</td>` +
+            `<td>${c.meaning}</td>` +
+            `<td>${c.mandarin}</td>` +
+            `<td>${c.cantonese}</td>` +
+            `<td>${c.japanese}</td>` +
+            `<td>${c.korean.hangul} (${c.korean.romanization})</td>` +
+            `<td>${c.vietnamese}</td>` +
+            `<td>${group.label}</td>` +
+            "</tr>"
+          )
+        }).join("")
+
+        body.querySelectorAll("tr").forEach((row) => {
+          row.addEventListener("click", () => selectCharacter(row.dataset.hanzi))
+        })
+      }
+
+      function renderCard(hanzi) {
+        const c = findCharacter(hanzi) || findCharacter(DEFAULT_HANZI)
+        const group = findGroup(c.group)
+        document.getElementById("char-card").innerHTML =
+          '<div class="char-card-top">' +
+          `<div class="big-hanzi">${c.hanzi}</div>` +
+          `<div class="meaning">${c.meaning}</div>` +
+          "</div>" +
+          '<div class="readings-grid">' +
+          readingItem("Mandarin", c.mandarin) +
+          readingItem("Cantonese", c.cantonese) +
+          readingItem("Japanese", c.japanese) +
+          readingItem("Korean", `${c.korean.hangul} (${c.korean.romanization})`) +
+          readingItem("Vietnamese", c.vietnamese) +
+          "</div>" +
+          '<div class="group-note">' +
+          `<span class="group-label">${group.label}:</span> ${group.note}` +
+          "</div>"
+      }
+
+      function readingItem(label, value) {
+        return (
+          '<div class="reading-item">' +
+          `<span class="lang-label">${label}</span>` +
+          `<span class="lang-value">${value}</span>` +
+          "</div>"
+        )
+      }
+
+      // Keeps `?char=` in sync with the current selection, so the current
+      // character can be shared with a link. Mirrors the pattern in
+      // character-converter.html -- see chinese/README.md.
+      function syncUrlToState(hanzi) {
+        const params = new URLSearchParams(window.location.search)
+        if (hanzi !== DEFAULT_HANZI) {
+          params.set("char", hanzi)
+        } else {
+          params.delete("char")
+        }
+        const query = params.toString()
+        const newUrl = window.location.pathname + (query ? `?${query}` : "") + window.location.hash
+        window.history.replaceState(null, "", newUrl)
+      }
+
+      function selectCharacter(hanzi) {
+        document.getElementById("char-select").value = hanzi
+        renderCard(hanzi)
+        document.querySelectorAll("#readings-table-body tr").forEach((row) => {
+          row.classList.toggle("selected", row.dataset.hanzi === hanzi)
+        })
+        syncUrlToState(hanzi)
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const params = new URLSearchParams(window.location.search)
+        const initial = resolveEnumParam(params.get("char"), VALID_HANZI, DEFAULT_HANZI)
+
+        renderGroupNotes()
+        renderSelect(initial)
+        renderTable(initial)
+        renderCard(initial)
+
+        document.getElementById("char-select").addEventListener("change", (e) => {
+          selectCharacter(e.target.value)
+        })
+      })
+    </script>
+    <script src="/shared/nav.js"></script>
+  </body>
+</html>

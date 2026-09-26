@@ -51,6 +51,11 @@ học). The readings show what Mandarin lost, such as the old -p, -t and -k
 endings. The section could then be renamed from "Chinese Language Notes" to
 something wider. The readings need a checked source, not memory.
 
+A proof of concept landed on 2026-09-26 as `chinese/five-readings.html`, with
+21 characters. The readings are from memory, and the page says so. Check them
+against Unihan before removing that warning. It has not been looked at in a
+browser yet.
+
 ## Knights and knaves solver
 
 A page in the Logic and Proof section. The user types what each islander says.
@@ -58,12 +63,21 @@ Knights always tell the truth and knaves always lie. The solver builds the
 truth table and shows which assignments survive. It could reuse
 `truthtable.js`.
 
+A proof of concept landed on 2026-09-26 as `javascript/knights-knaves.html`. It
+reuses `truthtable.js`, so statements are typed in its syntax (`not b`), not in
+English. It has not been looked at in a browser yet.
+
 ## Syllogism checker
 
 A page in the Logic and Proof section. The user picks a syllogism, such as "All
 A are B; some C are A; so some C are B". The page draws it as a three-circle
 Venn diagram and shades the premises, so the reader can see whether the
 conclusion follows.
+
+A proof of concept landed on 2026-09-26 as `javascript/syllogism.html`. Its
+verdict matches a brute-force check over every statement combination. It has
+not been looked at in a browser yet, and the diagram layout is the least
+certain part.
 
 ## View-source links on experiments
 
