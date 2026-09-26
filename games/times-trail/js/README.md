@@ -19,8 +19,8 @@ normalization that guards it.
 **The tiles path is currently off.** `KEYPAD_MIN_STRENGTH` is 0 as a trial, so
 every question routes to the keypad and `INPUT_MODE.TILES` is never produced.
 Everything below still describes the tiles path, because reverting the trial is
-a one-line change to that constant and nothing else -- see "Keypad only, no
-multiple choice" in `docs/times-trail-plan.md`.
+a one-line change to that constant and nothing else -- see "The question
+loop" in `docs/times-trail-plan.md`.
 
 ## Dependency graph
 

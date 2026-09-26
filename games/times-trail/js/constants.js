@@ -171,8 +171,8 @@ export const DEFAULT_TABLES = ALL_TABLES
  * TRIAL (2026-08-27): 0, so the keypad is the only entry path and the tiles
  * never appear. Typing is the only honest signal of recall -- tiles carry a 25%
  * guessing floor that muddies the mastery data. Set it to 3 to get the adaptive
- * tiles-then-keypad behaviour back; nothing else needs changing. See "Possible
- * changes after first play" in docs/times-trail-plan.md.
+ * tiles-then-keypad behaviour back; nothing else needs changing. See "The
+ * question loop" in docs/times-trail-plan.md.
  */
 export const KEYPAD_MIN_STRENGTH = 0
 

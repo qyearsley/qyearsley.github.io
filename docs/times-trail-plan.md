@@ -1,638 +1,147 @@
 # Times Trail -- Design Plan
 
-Status: **Phase 1 shipped, and reshaped around themed trails on 2026-09-18.**
-Phase 2 is not planned. The game lives at `games/times-trail/`. This document
-is the design rationale behind it; the code is the source of truth for
-behavior.
+Cut on 2026-09-26. The full history is in git:
+`git show 1c19957:docs/times-trail-plan.md`.
 
-The section that matters most for a reader coming to this fresh is
-[Themed trails](#themed-trails-instead-of-one-trail-with-themed-regions----done-2026-09-18):
-the eight table-named regions described further up are gone, and everything
-below that says "region" describes the design as it was.
-
-Name is a placeholder. Alternatives considered: Factor Forest, Times Tower,
-Product Park. Avoiding a third "Garden" after Number Garden and Life Garden.
+Phase 1 shipped. Phase 2 (more modes) is not planned. The game lives at
+`games/times-trail/`. The code is the source of truth for behavior; this doc
+explains why it works this way.
 
 ## Purpose
 
-Practice the core multiplication facts, **2x2 through 9x9**. That is the whole
-scope -- not general math, and not tables 10 through 12.
+Practice the core multiplication facts, 2x2 through 9x9 -- not general math,
+and not tables 10 through 12. Target learner: a 3rd grader who understands
+what multiplication means and has 2s through 5s solid, working through 6s to
+9s. The primary device is an iPad; see [iPad constraints](#ipad-constraints).
 
-Target learner: a 3rd grader who understands what multiplication means and has
-2s through 5s solid, working through 6s to 9s. Difficulty must be configurable
-so the same game works either side of that.
+Number Garden already has a multiplication area, but it's one stop on a
+six-topic tour with small operands. It teaches the concept, but doesn't build
+fact fluency or track which facts a player actually knows. This game fills
+that gap.
 
-Primary device is an **iPad**. That is a design constraint, not a nice-to-have;
-see [iPad constraints](#ipad-constraints).
+## Core idea: one mastery engine
 
-Number Garden already has a multiplication area, but it is one stop on a
-six-topic tour with deliberately small operands (2-5 times 1-10, rendered as
-emoji groups). It teaches the concept. It does not build fact fluency, and it
-has no idea which facts the player actually knows. That gap is what this game
-fills.
+Every mode draws from the same fact set and writes mastery back to the same
+store. A mode that can't do both is decoration and gets cut -- Array Builder
+was cut for this reason: stepping to a rectangle isn't recall, so it fed the
+mastery engine weak evidence.
 
-## Core idea: one mastery engine, several modes
+**Fact set.** Operands 2-9 only, canonicalized to `min x max` so 7x8 and 8x7
+share one record: 36 facts. Both orientations are still shown, so
+commutativity gets exercised without doubling the practice load. x1 and x10
+are excluded; they're rules, not facts.
 
-Every mode draws from the **same fact set** and **writes mastery back to the
-same store**. A mode that cannot do both is decoration, and gets cut.
+**Mastery model.** Each fact has a strength from 0-5 (a Leitner box) and a due
+date. A correct answer promotes one box; a miss demotes it, two boxes if the
+fact was already mastered. Thinking time -- from the question appearing to the
+first tap or keypress, not to submit -- caps how high a correct answer can
+promote: correct-but-slow stays below "mastered," because counting up isn't
+recall. Strength decays by one point per 14 days a fact stays overdue,
+computed on read so there's no background job. Selection draws roughly 70%
+from due or weak facts and 30% from strong ones, and never repeats a fact
+twice in a row -- the 30% keeps a session from being only what the player
+can't do.
 
-The modes are therefore not separate games -- they are different routes to the
-same facts. Practicing 7x8 in the array builder makes it come up less often in
-quick recall.
-
-### Fact set
-
-Operands 2-9 only: 64 ordered pairs. Canonicalize to `min x max`, so 7x8 and 8x7
-share one mastery record, leaving **36 facts**. Both orientations are still
-_shown_ (randomized), so commutativity gets exercised without doubling the
-practice load.
-
-36 is small enough to be **completable**, which is the point. A 78-fact set
-(tables 1-12) is a slog with no visible end; 36 facts map onto an 8x8 grid a kid
-can actually fill in.
-
-x1 and x10 are rules, not facts, and are excluded rather than diluting the
-grid with 17 gimmes.
-
-Canonicalization is the one non-obvious modeling decision, and it is reversible
--- tracking the two orientations separately is defensible if she turns out to
-know one direction and not the other.
-
-### The facts that actually matter
-
-Remove the pattern-based ones (x2 doubling, x5, the x9 trick, the squares) and
-what is left is the real work:
-
-**3x7, 3x8, 4x6, 4x7, 4x8, 6x7, 6x8, 7x8, 6x6, 7x7**
-
-The journey is ordered to end in this neighborhood, and boss stops draw only
-from this pool.
-
-### Mastery model
-
-Per-fact record: strength 0-5 (Leitner-style boxes), plus `lastSeen`, `streak`,
-`totalSeen`, `totalCorrect`, and response time.
-
-Response time is used, but not shown: correct-but-slow means she is counting up
-rather than recalling, so it caps strength below mastered.
-
-Response time is measured from when the question becomes interactive to her
-**first** touch -- the first tile tap or the first keypad digit -- not to submit.
-Measuring to submit would charge her for the motor time of typing, which made
-mastery unreachable on the keypad path. Under 5 seconds is recall; over 9 is
-counting.
-
-Fact selection draws roughly 70% from due or weak facts and 30% from strong
-ones, and never repeats a fact twice in a row. The 30% is a motivation
-concession -- a session made only of what she cannot do is a session she will
-not want to repeat.
-
-Selection and mastery are pure functions over the saved record, so they are
-straightforward to test without touching the DOM.
-
-### Misses are where the teaching happens
-
-On a wrong answer: no red buzz-and-move-on, and **no point loss**. Show the
-scaffold for that specific fact -- the array lights up as 6 rows of 7 while the
-skip-count ticks `7, 14, 21...` -- then re-ask the same fact three or four
-questions later.
-
-Skip-counting is therefore the built-in help system rather than a separate mode,
-which is a better use of it.
+**Misses teach.** A wrong answer shows the product, then the fact as an array
+with the skip-count ticking through it, then re-asks the same fact a few
+questions later. No points are ever lost on a miss.
 
 ## The question loop
 
-Plain quick recall: `7 x 6 = ?`, one fact at a time, chosen by the engine. No
-dice or card draw generating the question -- the fact selection is direct.
+One fact at a time: `7 x 6 = ?`. Answers are typed on a custom on-screen
+keypad; there's no multiple-choice tile mode in this build
+(`KEYPAD_MIN_STRENGTH` is 0). Typing is the only entry mode because it's the
+only honest signal of recall -- multiple choice has a 25% guessing floor that
+would muddy the mastery data. The tile code and its distractor logic
+(`distractors.js`) are still in the codebase for a possible revert, but
+nothing currently renders a tile.
 
-Answer entry adapts per fact:
-
-- **Weak fact (strength 0-2)** -- four large multiple-choice tiles. Faster and
-  kinder while a fact is new.
-- **Strengthening fact (strength 3+)** -- typed on a **custom on-screen keypad**.
-  Typing is the only honest signal of recall; multiple choice has a 25% guessing
-  floor that muddies the mastery data.
-
-The keypad is a 3x4 grid of big digit keys plus clear and enter, drawn in-page.
-The iOS system keyboard is never invoked -- it eats half an iPad screen and
-shifts the layout.
-
-Distractors for multiple choice are chosen deliberately: near-misses in the same
-table (`6x7` -> 36, 42, 48, 49), not random numbers. Random distractors make
-wrong answers obvious without knowing the fact.
+The iOS system keyboard is never invoked; it eats half the screen and shifts
+the layout.
 
 ## Journey, points, and collection
 
-These wrap the question loop; they are the reason to open the game again
-tomorrow.
+**Five themed trails**, each themed on a pattern rather than a table: Doubles,
+Fives, Squares, Nines, and the Tough Ten (`3x4, 3x6, 3x7, 3x8, 4x6, 4x7, 4x8,
+6x7, 6x8, 7x8` -- the ten facts with no shortcut). The sets overlap on purpose
+(2x5 is a double and a five); mastery is tracked per fact and shared, so
+progress on one trail can advance another.
 
-**The trail.** A winding path of 40 spaces across 8 regions, each region themed
-on a table family. Your token advances one space per correct answer within a
-session. Regions unlock on **mastery**, not on answer count, so the trail cannot
-be walked by grinding 2x2 -- but the unlock only counts facts that are actually
-in the enabled tables, or a narrow table selection would wall the token off at
-space 4 forever.
+A trail is two spaces long per fact in it. The token moves one space per
+correct answer, and how far it may stand is
+`cap = FREE_SPACES + SPACES_PER_STRONG_FACT * (strong facts in this trail)`.
+Strengthening opens ground and answering walks it, so a trail can't be
+finished by grinding one easy fact, and because `cap` always reaches the last
+space once every fact in the trail is strong, a trail can always be finished.
+This replaced one 40-space board with eight table-named regions (cut
+2026-09-18) whose names promised themed practice that fact selection, which
+ignored the token's position, didn't deliver.
 
-A compact strip showing the current region and the token sits on the play screen
-itself, so movement is visible where she is actually looking rather than only on
-the trail screen. When the token is held at a gate, the game says what is needed
-to open it ("master 2 more facts in Doubling Meadow") instead of silently
-refusing to move.
+**Stars** pay more for facts the engine considers weak, with a streak
+multiplier, so easy facts can't be farmed for points. **Gems** come from
+milestones and are permanent; neither currency is ever spent or subtracted,
+because losing visible progress is where kids quit.
 
-**Stars** accumulate per session: a base amount per correct answer, more for
-facts the engine considered weak, with a streak multiplier. Weighting by
-weakness is what stops point-farming the easy facts.
+**36 fact cards**, one per canonical fact, go grey -> colored -> foiled as the
+fact strengthens. "Collect all 36" is the completion goal. An 8x8 mastery grid
+(rows and columns 2-9) is the at-a-glance progress view.
 
-**Gems** come from milestones and are permanent trophies -- they are never
-spent, and **neither currency is ever subtracted**. Losing visible progress is
-where kids quit. Spendable cosmetics (trail themes, token characters, card
-backs) move to Phase 2: an unspendable currency next to a shop screen that does
-nothing would be worse than shipping neither.
+**Daily goal** is 20 facts a day, with a lenient streak: one missed day dims
+it, two or more resets it. **Sessions** are 10, 20 (default), or 30 questions,
+ending with a summary of that session's stars, gems, and any new cards or
+milestones.
 
-**The card collection** is the completion goal: 36 cards, one per canonical
-fact, whose art strengthens as the fact does (grey -> colored -> foiled).
-"Collect all 36" is a clearer finish line than a percentage.
+## Modes and difficulty
 
-**Daily goal** is 20 facts, with a lenient streak calendar. A missed day shrinks
-the flame; it does not reset anything. The goal counts facts rather than minutes
-because a minutes-based goal is satisfied by walking away from an open tab.
+Only **Quick Recall** (`7 x 6 = ?`) is built. Card Match, Story Problems, Card
+Duel, Product Grid, and Lightning Round were designed for a Phase 2 that isn't
+currently planned; see the game's README for what each would have done. The
+mode registry (`js/modes/index.js`) still has just the one entry, so adding a
+mode later doesn't require restructuring.
 
-**Session shape:** 3-5 minutes, about 20 facts, ending at a trail stop with a
-star tally and a card unlock. A visible finish line matters more than an
-endless mode.
-
-The mastery map -- an 8x8 grid, rows and columns 2-9, each cell lighting up as
-that fact strengthens -- is the at-a-glance progress view, with the diagonal
-(the squares) as its own small collection. Deliberately thinner than Number
-Garden's project-piece and SVG-completion system; no reason to rebuild that
-here.
-
-## Modes
-
-| Mode                  | What she does                                                | What it builds                                  |
-| --------------------- | ------------------------------------------------------------ | ----------------------------------------------- |
-| **Quick Recall**      | `7 x 6 = ?`, tiles or keypad                                 | Direct recall; the default loop                 |
-| ~~**Array Builder**~~ | ~~Tap or step a rectangle of items to hit a target product~~ | **Cut**, see below -- not deferred, deleted     |
-| **Card Match**        | Tap to pair 6 fact cards with 6 product cards                | Recall backwards (given 42, find 6x7)           |
-| **Story Problems**    | "6 baskets, 7 apples each" plus a picture                    | Recognizing when multiplication is the tool     |
-| **Card Duel**         | Both sides flip a fact card; larger product wins the trick   | The tough-dozen facts, under mild pressure      |
-| **Product Grid**      | Slide two factor markers, claim the product, four in a row   | Factor pairs, worked backwards from the product |
-| **Lightning Round**   | Opt-in timed streak                                          | Speed, once she is already confident            |
-
-**Mixed Practice** rotates modes every few questions inside one session, all
-feeding one fact queue. Individual modes stay selectable from the hub, because
-letting her pick matters for a kid who is being asked to practice.
-
-Card Match is the best fit for touch of any mode here -- pure tapping, no
-precision, and it drills the reverse direction that division readiness needs.
-
-## Difficulty
-
-**Superseded (2026-08-28).** The plan called for Number Garden's
-`explorer` / `adventurer` / `master` presets plus a custom option. They shipped
-and were then removed -- see "Retire the difficulty presets" below. What is left
-is the per-table picker, which this section already predicted would be "likely
-the most-used setting in practice".
+There are no difficulty presets. Four used to exist (Explorer, Adventurer,
+Master, Custom), retired because once every preset shared the same keypad
+threshold, the only thing a preset changed was which tables were in play -- a
+table picker under a vaguer name. What's left: eight table toggles (all on by
+default; unticking one removes only the facts unique to it, since each fact
+belongs to two table families) and a questions-per-session choice. Spaced
+repetition, not a difficulty knob, is what makes practice easier or harder
+question by question.
 
 <a id="ipad-constraints"></a>
 
 ## iPad constraints
 
-Touch drives the design. Keyboard support stays as an accessibility fallback,
-not the primary target.
+Touch drives the design; keyboard support is an accessibility fallback, not
+the primary target.
 
-- **Tap targets 64-72px** with 16px gaps. Apple's floor is 44pt; a kid on a
-  moving iPad needs more.
-- **No scrolling during a round.** Size the play area with `100dvh` -- iPad
-  Safari's toolbars change the viewport height -- and lay out for both portrait
-  and landscape from 1024x768 up.
-- **Suppress browser gestures:** `touch-action: manipulation` (kills double-tap
-  zoom), `-webkit-tap-highlight-color: transparent`, `user-select: none`,
-  `overscroll-behavior: none` (kills rubber-band scroll).
-- **No hover-only affordances.** Every control needs a visible `:active` press
-  state; a tap that looks dead reads as broken.
-- **Every drag has a tap alternative.** Array Builder resizes by tapping the
-  far corner or using +/- steppers, never drag-only.
-- **Never invoke the system keyboard.** Custom keypad only, as above.
-- **Add to Home Screen:** a minimal `manifest.json` plus `apple-touch-icon` so
-  it launches full-screen with no address bar. No game in the repo does this
-  yet; it is cheap and makes it feel like an app.
-- **Audio needs a first user gesture** to unlock on iOS. The "start" button is
-  the unlock point, following Number Garden's `SoundManager` pattern.
+- Tap targets are 64-72px with 16px gaps -- bigger than Apple's 44pt floor,
+  because a kid on a moving iPad needs more.
+- The play area is sized with `100dvh` so Safari's toolbars can't cause
+  scrolling mid-round.
+- Double-tap zoom, tap highlight, text selection, and rubber-band scroll are
+  all suppressed, and every control has a visible pressed state.
+- The system keyboard is never invoked; see
+  [The question loop](#the-question-loop).
+- The page ships a `manifest.json` for Add to Home Screen. Its
+  `apple-touch-icon` is an SVG, which iOS ignores, so the home-screen icon is a
+  page snapshot, not a designed one.
+- Audio needs a first user gesture to unlock on iOS. There's no sound yet, but
+  a `sound` setting is persisted so a future sound pass needs no migration.
 
 ## Structure
 
 Mirrors `games/number-garden/`, reusing `games/shared/BaseGameUI` and
-`games/shared/StorageManager`.
-
-```
-games/times-trail/
-  index.html
-  index.zh.json          Opts the page into the translation pipeline
-                         (deleted 2026-09-19 -- Times Trail has no /zh/ page)
-  manifest.json          Add-to-home-screen
-  README.md
-  js/
-    game.js              Orchestrator (untested -- DOM glue, per repo convention)
-    facts.js             Fact set + canonicalization
-    MasteryModel.js      Strength, decay, due calculation      <- core
-    FactSelector.js      Picks the next fact                   <- core
-    distractors.js       Near-miss wrong answers for tiles     <- core
-    Journey.js           Trail spaces, regions, unlock gating  <- core
-    Scoring.js           Stars, gems, streaks, daily goal      <- core
-    Settings.js          Presets + custom table picker
-    storage.js           Extends shared StorageManager
-    GameUI.js            Extends shared BaseGameUI
-    Keypad.js            On-screen numeric entry
-    EventManager.js
-    modes/               One file per mode; pure challenge generation
-    constants.js
-  styles/
-    main.css
-  __tests__/             One per module above
-```
-
-Each mode exposes `createChallenge(fact, settings, rng)` returning a plain
-object with the prompt, visual data, and an answer check -- **no DOM**. Same
-split that makes Number Garden's generators testable while its `game.js` is not.
-
-Product Grid and Card Duel are where this abstraction bends: they are whole
-board or match sessions rather than one fact at a time, so each runs its own
-loop and reports mastery for the facts it happened to exercise.
-
-## Phasing
-
-**Phase 1** -- mastery engine over the 36-fact set, Quick Recall with adaptive
-tiles-then-keypad entry, scaffolded miss handling, the trail with region gating,
-stars and gems, the 36-card collection, the 8x8 mastery map, and settings. A
-complete and enjoyable game on its own. **Built and shipped**, minus Array
-Builder, which was cut rather than deferred -- see "Cut Array Builder" below,
-and the strikethrough in the Modes table above.
-
-**Phase 2** -- Card Match, Card Duel boss stops, Product Grid, Story Problems,
-Lightning Round.
-
-Phase 1 is roughly Number Garden's scale minus the project-visuals system. It is
-larger than a bare flashcard app on purpose: the trail and the collection are
-the reason the game gets opened twice.
-
-## Registration checklist
-
-Root `index.html` links to `/games/` generically, so a new game needs entries
-in:
-
-- `games/index.html` -- add to the Available Games list
-- `games/index.zh.json` -- add the tagline translation
-- `games/README.md` -- add to the Available Games list
-- `docs/development.md` -- add to the directory structure listing
-
-## Open questions
-
-1. **Pacing.** Working assumption: no timer anywhere by default, Lightning Round
-   as the only opt-in timed mode, response time measured silently to inform
-   mastery. Rationale is that timers tend to backfire on kids still building
-   confidence. Not yet confirmed.
-
-2. **Pass-and-play two-player** for Product Grid. A shared iPad is the ideal
-   device for it, and it is the mode most likely to get opened for fun, but it
-   is also the most engineering. Undecided; currently not in either phase.
-
-3. **Parent progress view** -- the same 8x8 grid as a strong/shaky heatmap,
-   showing which facts lag. Useful to an adult, invisible to the player.
-   Undecided.
-
-4. **Multiple profiles** on one device. Undecided; a single profile is assumed
-   throughout.
-
-5. **Sound and haptics.** Sound is planned. The Vibration API is not supported
-   in iOS Safari, so haptics would be a no-op on the target device and are
-   assumed out.
-
-6. **Name.** Placeholder, see top. "Trail" now fits, since the journey stayed.
-
-## Possible changes after first play
-
-Notes from playing the built game on 2026-08-27. Anything marked **done** is in
-the code; everything else is a proposal with its tradeoffs, not a commitment.
-
-### Keypad only, no multiple choice -- **done, as a trial**
-
-`KEYPAD_MIN_STRENGTH` is 0, so the tiles never appear. Revert by setting it to 3;
-nothing else needs changing. (It was a per-preset value when this was written;
-the presets are gone and it is now one constant.)
-
-- **For:** typing is the only honest signal of recall, and the plan already said
-  so -- tiles carry a 25% guessing floor that muddies the mastery data. One entry
-  affordance instead of two, and the input no longer changes under the player
-  mid-session. It also removes the keyboard ambiguity where `1`-`4` sometimes
-  select and sometimes type, which is unfixable while tiles exist because the
-  tile faces are themselves numbers.
-- **Against:** a blank keypad on a brand-new fact has nothing to grab, where four
-  tiles at least offer recognition. The counter-argument is that the miss path
-  already handles not-knowing: wrong answer, then the array and skip-count teach
-  that fact, then it returns a few questions later.
-- **Still to delete if the trial sticks:** `distractors.js` and its tests, tile
-  rendering and the freeze-and-reveal miss choreography in `GameUI`, the tile
-  keyboard listener in `EventManager`, `SCORING.KEYPAD_BONUS` (a meaningless
-  constant offset once every answer is typed), and `INPUT_MODE.TILES` itself.
-  These are deliberately still in place so a revert stays a one-line change.
-- **Cost already paid:** two `Settings` tests lost their observable. Rounding and
-  non-finite-to-0 in `inputModeFor` used to be visible through the tiles/keypad
-  boundary; with every preset at 0 the return value cannot distinguish sanitised
-  input from unsanitised. Marked `COVERAGE LOSS` in `Settings.test.js`.
-
-### Cut Array Builder -- **done**
-
-- **For:** the array scaffold in the miss path already teaches the area model, on
-  the exact fact just missed, at the moment it is wanted. Array Builder does it
-  on a random fact and takes about eleven stepper taps to build 6x7 before the
-  Check button. The mastery it writes back is weak evidence -- stepping to a
-  rectangle is not recall. By this plan's own rule that a mode earns its place by
-  feeding the mastery engine meaningfully, it is the weakest thing in Phase 1.
-- **Against:** deriving an unknown fact is the actual escape route for a kid
-  stuck on 7x8, and no other mode practises it deliberately.
-- **Knock-on:** with one mode left, the hub's "Choose a mode" screen has nothing
-  to choose, so Start should go straight to practice. That is a simplification
-  for a 3rd grader, not a loss. The mode registry stays -- Phase 2 has five modes
-  queued behind it.
-
-### Start straight into practice -- **done**
-
-Play and Keep Going now start a session directly. The hub survives as the
-progress and navigation screen -- stars, gems, streak, and the buttons for Trail,
-Fact Map, and Cards -- rather than as a toll gate on the way in. Its heading
-changed from "Choose a mode" to "Your progress" and it keeps one Practise button,
-so it is still a place you can start from.
-
-It also needed a third title-screen button, `#progress-button`. Without one the
-only routes to the hub were finishing a session or tapping Back mid-round, and
-Back always raises the "Leave this round?" confirm, because a session counts as
-in progress from the moment question 1 renders. Looking at your own card
-collection should not require abandoning a round. Like Continue and Start Fresh
-it is hidden until a save exists.
-
-### Themed trails instead of one trail with themed regions -- **done, 2026-09-18**
-
-The region names promise something the game does not deliver. `REGIONS` gives a
-region every canonical fact whose **larger** operand equals its table, so
-Doubling Meadow owns exactly one fact, 2x2, and Dragon Peak owns eight. Worse,
-fact selection ignores the token's position completely: standing in Doubling
-Meadow you get asked 6x7. The names imply themed practice; the engine does
-whole-pool practice. That is the incoherence, and renaming would only paper over
-it.
-
-Better: several short trails, each themed on a **pattern** rather than a table.
-Doubles, Fives, Squares, Nines, and a final trail of what is left. The
-decomposition is exact -- 36 facts, no gaps:
-
-| Trail   | Facts | New | Notes                                            |
-| ------- | ----- | --- | ------------------------------------------------ |
-| Doubles | 8     | 8   | everything containing a 2                        |
-| Fives   | 8     | 7   | 2x5 already a double                             |
-| Squares | 8     | 6   | 2x2, 5x5 already counted                         |
-| Nines   | 8     | 5   | 2x9, 5x9, 9x9 already counted                    |
-| Tough   | 10    | 10  | 3x4, 3x6, 3x7, 3x8, 4x6, 4x7, 4x8, 6x7, 6x8, 7x8 |
-
-- **For:** every name is true, and fact selection can be restricted to the
-  trail's own set so the theme is real. Picking "Squares" is a meaningful, kid-legible
-  choice in a way that picking "Quick Recall" over "Array Builder" never was, so
-  this replaces the mode chooser rather than adding a screen. Trails of 8-10
-  facts finish in a session or two instead of grinding 40 spaces. The overlap is
-  a feature: mastering 5x5 advances both Fives and Squares, because the mastery
-  record is per canonical fact and shared. And it structurally kills the
-  token-frozen class of bug, since a gate over 8 facts is always reachable.
-- **Against:** this is the largest change discussed and it lands on `Journey.js`,
-  the core module with the subtlest logic and the most tests -- currently built
-  around one 40-space trail with eight gated regions. Restricting selection to a
-  trail also cuts against interleaving, which is what spaced repetition wants;
-  the fix is to weight toward the current trail rather than restrict to it. A kid
-  whose class is on "the 7 times table" still cannot pick that, though Custom
-  difficulty covers it and table trails could be added later.
-
-**What was built, 2026-09-18.** All of the above, plus two things this section
-had not worked out:
-
-- **The gate model collapsed to one formula.** Eight per-region gates became
-  `cap = FREE_SPACES + SPACES_PER_STRONG_FACT * strongFacts`, with the trail
-  `SPACES_PER_FACT` spaces long per fact. Strengthening opens ground and
-  answering walks it. The arithmetic is what matters: a fully strong trail has
-  `cap = FREE + 2n` against a last space of `2n - 1`, so it can always be
-  finished, at any size, under any table selection. The frozen-token class of
-  bug is gone structurally rather than special-cased, and
-  `constants.test.js › a fully strong trail always reaches its last space`
-  asserts it at every size while `Journey.test.js` sweeps every
-  (trail, table selection) pair.
-- **A trail's length is scoped to the pool.** Two spaces per _active_ fact, not
-  per fact, so narrowing the tables shortens the trail instead of leaving ground
-  the pool can never open. A trail with no active fact at all is greyed out in
-  the picker rather than offered empty. This is the same problem the old
-  "skipped region" rule existed to solve, answered once rather than per region.
-
-Selection is weighted toward the chosen trail, not restricted to it, exactly as
-the paragraph above argued. The gate message stayed gone.
-
-There was no mode chooser left to replace -- Array Builder was cut -- so the
-picker is the trail screen itself, which was previously a read-only map. Each
-row is a button.
-
-The migration cost is one thing, taken knowingly: a save from before this
-carries a space index on the old 40-space board, and there is no honest
-translation of that onto a pattern trail, so it is dropped. The mastery records
-the trails are actually made of survive, so most of the ground re-opens in the
-first session back.
-
-- **Unaffected:** the 8x8 fact map and the 36-card collection stay as the global
-  completion view. Trails become routes through the set; the collection is the
-  total.
-- **Noticed while working this out, and since fixed (2026-08-31):**
-  `PATTERN_FREE_IDS` claimed to be what is left after doubles, fives, the x9
-  trick and squares are removed, but it listed 6x6 and 7x7, which are squares,
-  and omitted 3x4 and 3x6. The list now matches the table above, and
-  `constants.test.js` re-derives the set from that definition instead of
-  restating it, so the two cannot drift apart again. No behaviour changed:
-  `isTough` is still read by nothing outside the tests, and Phase 2 boss stops
-  are its only intended consumer. One Journey test did have to change — it
-  asserted every tough fact sits in a region of table 6 or higher, which stops
-  being true once 3x4 is in the set, since a region owns the facts whose larger
-  operand is its table. That outlier is now asserted by name, as evidence for
-  this section.
-
-### Centre the play area in landscape -- **done**
-
-Landscape was a two-column grid with entry bottom-right ("under the right
-thumb") and the left column reserved for the scaffold, so the keypad sat off to
-the right during normal play and the "Yes!" rendered in the column opposite the
-one being looked at. Portrait already centred.
-
-Landscape is now a single centred column in every state, including while the
-post-miss scaffold teaches. A first attempt gave the scaffold its own column, on
-the theory that it was too tall to sit under the question; measuring the
-stylesheet showed that was the wrong trade. The scaffold's widest row is its
-skip-count strip -- nine chips at `min-width: 44px` plus eight 8px gaps, about
-460px -- against a half-width column of roughly 480px on a 1024px-wide landscape
-iPad, and less than 400px on a landscape phone. Wrapping that strip makes the
-scaffold _taller_, which is the opposite of the goal.
-
-What the height actually needed was less furniture, so `GameUI` now marks
-`#play-area` with `.teaching` while the scaffold is up and the stylesheet uses it
-to tighten row gaps and, below 820px of viewport height, shrink the array dots
-and count chips. `showScaffold` also hides the keypad readout, which was still
-displaying the digits of the miss -- a second, wrong answer sitting in the
-player's eyeline beside an array teaching the right one.
-
-Still worth a look on a real iPad: every number above is computed from the
-stylesheet, not measured. jsdom has no layout, so no test in the repo can check
-this.
-
-### More reward for a correct answer -- **partly done**
-
-`CORRECT_FEEDBACK_MS` was 450ms against a 600ms star animation, so the reward
-outlived the window meant to show it. Now 700ms, with `WRONG_FEEDBACK_MS` raised
-to 900ms to stay longer than a correct answer as intended.
-
-Still open, in rough value order: make the trail token visibly hop on the
-play-screen strip, since advancing is currently silent and the trail is the whole
-progress metaphor; scale-pulse the correct answer; escalate the message at streak
-milestones instead of always "Yes!".
-
-### Retire the difficulty presets -- **done**
-
-Feedback from the second play session (2026-08-28) was that Settings was "not
-very useful". It was right, and for a sharper reason than it looked: once the
-keypad-only trial set every preset's `keypadMinStrength` to 0, the only thing a
-preset changed was which tables were in the pool. It was a table picker under a
-vaguer name, with a real table picker hidden behind its fourth option.
-
-Settings is now two controls: eight table toggles (all on by default, with the
-resulting pool size shown) and a questions-per-session select of 10 / 20 / 30.
-
-- **Knock-on, good:** the two table semantics collapsed into one. Presets meant a
-  ceiling (both operands enabled, so Explorer excluded `4x8`); custom meant table
-  families (either operand). Toggles read as families, which is what "which
-  tables?" means to whoever is answering it, so `factsForTables` lost its `mode`
-  argument and the modal can no longer disagree with the pool.
-- **Knock-on, awkward:** because each fact belongs to two families, unticking a
-  low table barely narrows anything -- unticking the 2s removes only `2x2`, since
-  `2x3` is still in the 3 times table. Narrowing works by unticking everything
-  _except_ what you want, which is fine for "just the 7s" and useless for "not
-  the 2s". Living with it: the alternative is bringing back a second semantic.
-- **Migration:** a preset-era save loads with all eight tables on. `customTables`
-  only ever meant anything alongside `difficulty === "custom"`, so honouring it in
-  isolation would silently narrow the pool for someone who was on a preset.
-  Mastery, stars, gems, and trail position are untouched.
-- **The daily goal did not follow the session length.** `DAILY_GOAL.FACTS` stays
-  at 20, so the 10-question session takes two to meet it and the 30 overshoots. A
-  goal that shrinks when you pick the short session is not a goal.
-
-### Say what the gate is actually waiting for -- **done**
-
-"Master 2 more facts in Triple Bridge to cross the bridge" was wrong twice over
-and useless a third time.
-
-- It said **master**, but the gate opens at `TRAIL.UNLOCK_MIN_STRENGTH` (3,
-  "strengthening"); mastery is the strength-4 bar the card collection uses. The
-  view model even carried the `strong` count in a field named `mastered`.
-- **"cross the bridge"** was hardcoded, so Beehive Hollow and Dragon Peak had
-  bridges too.
-- Worst: the count never moved. Fact selection ignores the token's position, so
-  twenty correct answers can go by without either gating fact being asked.
-
-It now names the facts -- "Keep practising 2 × 3 and 3 × 3 to open the Triple
-Bridge gate" -- ordered nearest-to-the-bar first, capped at three with an "and N
-more" tail. That is a patch on the symptom; the cause is the next section.
-
-### Label the session summary -- **done**
-
-The summary showed "⭐ 1189 stars" and "Correct: 20/20" directly above the bare
-strings "1000 stars" and "10 facts right", which are _lifetime_ gem milestones,
-and then four unexplained green cards. Nothing said which numbers were the
-session and which were the account.
-
-The tallies now say "stars this session" / "gems this session", the milestones
-sit under a "💎 New gems earned" heading, and the cards under "🃏 Cards that
-grew". Both groups hide when empty.
-
-### Reconsider the trail visualisation -- **done, 2026-09-18**
-
-Held back until the structure was settled, which was the right call: rebuilding
-the visualisation around eight table regions and then replacing those regions
-with themed trails would have been two redesigns.
-
-Both screens now show three states per space rather than two -- walked, open
-(ahead of the token but inside the cap), and not open yet -- and they look the
-same as each other, so the strip and the picker read alike.
-
-- **The play-screen strip shows the whole trail.** It used to show the five
-  spaces of the region the token stood in, so it reset every five answers and
-  never said how much was left. A themed trail is 16 to 20 spaces and fits.
-- **The trail screen is the picker.** Five rows, one per trail, each with its
-  spaces, its token, and a sentence: "3 of 8 strong", "Finished — all 8 strong",
-  or "Not in your tables right now". The spaces are `aria-hidden` and the row
-  carries the label, because twenty individually announced spaces bury the one
-  sentence that matters.
-
-Still open from the same feedback round: the **token hop** on the strip. The
-strip redraws rather than animating, so advancing is still silent. The reward
-ideas under "More reward for a correct answer" apply unchanged now that the
-structure is settled.
-
-### Bias selection toward the gate instead of explaining it -- **done**
-
-The gate message is gone. Naming the facts (above) made it honest but not
-actionable: selection ignored the token's position, so the two facts named were
-often not asked for another twenty questions, and an instruction the player
-cannot follow is worse than silence.
-
-`FactSelector.setPriorityFacts` now weights those facts up by
-`SELECTION.GATE_WEIGHT_BONUS` (3x), so the gate opens on its own and needs no
-sentence. Implementation notes worth keeping:
-
-- It is a MULTIPLIER inside the existing weighted draw, not a separate bucket, so
-  it costs no extra rng call -- the "exactly two calls per selection" contract
-  every trace test depends on is untouched.
-- It compounds with the weak/due weighting rather than overriding it, so a fact
-  that is both weak and gating comes up most, which is the right ordering.
-- It excludes nothing, so interleaving survives and a gate over facts she already
-  knows cannot hijack a session.
-- The set survives `reset()` and is reseeded at `startSession`, so question 1 is
-  already biased; it is recomputed after every scored answer, since the gating
-  region moves as facts strengthen.
-
-This was a real fix rather than a patch, but it did not resolve the underlying
-incoherence -- the regions still owned facts by larger operand. "Themed trails"
-above did, on 2026-09-18. `setPriorityFacts` survived the redesign unchanged; it
-is now fed the chosen trail's unfinished facts rather than a gating region's.
-
-### Two play-screen fixes from the same session
-
-**The keypad moved on every answer.** `.feedback-area` sets `min-height: 3rem`
-with a comment saying it reserves the space, but `.hidden` is `display: none`, so
-between answers the `extra` grid row collapsed to zero and `align-content: center`
-re-centred the whole column. The row is now sized in the `grid-template`
-shorthand as `minmax(3rem, auto)`, so the space is held whether or not the child
-is in the flow.
-
-**The post-miss explanation went by too fast.** `SCAFFOLD_DWELL_MS` 1400 -> 3500.
-That is the quiet time AFTER the last skip-count number lights, so it is reading
-time, not animation time -- the array and the numbers are already still. "Got it"
-still skips it, so being generous costs nothing.
-
-### Player profiles and reaction-time stats -- **open**
-
-Wanted (2026-08-28), not started, and bigger than it looks: both need a storage
-schema change, so they should land together.
-
-- **A name and a "practising since" date.** The fact map, the card collection,
-  and the hub totals are all cumulative across every session ever, and nothing on
-  screen says so. A name and a start date would make those numbers legible.
-- **Multiple players.** The save is a single object under one localStorage key,
-  so this means a profiles map plus an active-profile pointer, and a picker
-  somewhere before the hub. Everything downstream of `progress` is already
-  profile-shaped -- `MasteryStore` aliases whatever map it is handed -- so the
-  work is in `storage.js` and the bootstrap, not in the game logic.
-- **Reaction times per player.** Already recorded per fact (`lastMs`), already
-  used to cap a correct-but-slow answer below mastered, and deliberately not
-  shown. Worth surfacing somewhere quiet -- a grown-up view rather than the
-  child's, since "you are slow at 7x8" is the wrong message for the player.
-  Keeping a rolling median per player rather than only per fact would be the
-  cheap version.
+`games/shared/StorageManager`. See `js/README.md` for the module-by-module
+breakdown. Core modules: `facts.js` (fact set), `MasteryModel.js`
+(strength/decay/due dates), `FactSelector.js` (picks the next fact),
+`Journey.js` (trail spaces and gating), `Scoring.js` (stars/gems/streaks), and
+`Settings.js` (tables and session length). `GameUI.js` and `EventManager.js`
+handle the DOM; `game.js` is the untested orchestrator, by repo convention.
+Each mode under `js/modes/` exposes `createChallenge(fact, settings, rng)` --
+a plain object with no DOM -- which is what keeps the challenge logic
+testable.
+
+**Known gaps:** the trail token doesn't visibly hop when it advances, and
+player profiles with per-player reaction-time stats are wanted but not
+started -- both need a storage schema change, so they'd land together.
