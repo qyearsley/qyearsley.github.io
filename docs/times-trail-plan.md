@@ -1,8 +1,9 @@
 # Times Trail -- Design Plan
 
-Status: **Phase 1 built, and reshaped around themed trails on 2026-09-18.** The
-game lives at `games/times-trail/`. This document is the design rationale behind
-it; the code is the source of truth for behavior. Phase 2 (below) is not built.
+Status: **Phase 1 shipped, and reshaped around themed trails on 2026-09-18.**
+Phase 2 is not planned. The game lives at `games/times-trail/`. This document
+is the design rationale behind it; the code is the source of truth for
+behavior.
 
 The section that matters most for a reader coming to this fresh is
 [Themed trails](#themed-trails-instead-of-one-trail-with-themed-regions----done-2026-09-18):
