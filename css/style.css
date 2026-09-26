@@ -692,6 +692,12 @@ td {
   margin: 0.25rem 0;
 }
 
+/* Prose paragraphs — restore the gap the global reset removed. Scoped the
+   same way as the lists above, and the last paragraph in a section adds none. */
+.section p:not([class], :last-child) {
+  margin-bottom: 1rem;
+}
+
 /* Form Components */
 .form-container {
   background: var(--color-bg-form);
