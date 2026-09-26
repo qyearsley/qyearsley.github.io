@@ -25,18 +25,6 @@ A proof of concept landed on 2026-09-24 as
 the training text, which decides which language needs more tokens. It has not
 been looked at in a browser yet.
 
-## How embeddings work
-
-Build word vectors in the browser from a small made-up corpus: co-occurrence
-counts, PPMI, then SVD. Plot them in 2D, list nearest neighbors, and try
-analogies.
-
-A proof of concept landed on 2026-09-24 as `javascript/embeddings.html`. The
-corpus gives each word its own contexts, and king − man + woman comes out as
-queen from he/she contexts rather than from sentences that state it. It has not
-been looked at in a browser yet. It could pair with the blog post idea in
-[`blog-ideas.md`](blog-ideas.md).
-
 ## Integer explorer
 
 A companion to `floating-point.html`. It shows two's complement, the value
@@ -54,3 +42,30 @@ once. It could also solve the maze and draw the path.
 A proof of concept landed on 2026-09-24 as `javascript/maze-generator.html`,
 with all of the above and a `?seed=` link. It has not been looked at in a
 browser yet.
+
+## One character, five readings
+
+A page in `chinese/`. Pick a character, such as 學, and see its reading in
+Mandarin, Cantonese, Japanese, Korean and Vietnamese (xué, hok, gaku, hak,
+học). The readings show what Mandarin lost, such as the old -p, -t and -k
+endings. The section could then be renamed from "Chinese Language Notes" to
+something wider. The readings need a checked source, not memory.
+
+## Knights and knaves solver
+
+A page in the Logic and Proof section. The user types what each islander says.
+Knights always tell the truth and knaves always lie. The solver builds the
+truth table and shows which assignments survive. It could reuse
+`truthtable.js`.
+
+## Syllogism checker
+
+A page in the Logic and Proof section. The user picks a syllogism, such as "All
+A are B; some C are A; so some C are B". The page draws it as a three-circle
+Venn diagram and shades the premises, so the reader can see whether the
+conclusion follows.
+
+## View-source links on experiments
+
+A small, quiet link from each experiment to its source on GitHub. One place to
+add it would be `shared/nav.js`, so no page needs its own copy.
