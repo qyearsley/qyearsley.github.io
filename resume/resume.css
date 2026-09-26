@@ -93,10 +93,10 @@
 }
 
 /* Skills is the one list whose bullets are labels rather than prose, so its
-   `**Languages:**` lead-ins take the accent, as the rest of the site does for
-   a label followed by a value. */
+   `**Languages:**` lead-ins take the heading color. Not the accent: that is
+   the link color, and the labels read as links in it. */
 .resume-body h2 + ul strong {
-  color: var(--color-primary);
+  color: var(--color-text-heading);
 }
 
 @media print {

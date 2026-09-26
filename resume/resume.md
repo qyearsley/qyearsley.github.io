@@ -19,9 +19,7 @@ quality, and team effectiveness.
 
 **Apple** — August 2023 - Present
 
-Built tools and automation to improve the efficiency and reliability of device lab operations.
-
-- Wrote and maintained technical documentation including API references and onboarding guides
+Built tools and automation to improve the efficiency and reliability of device lab operations, and wrote their API references and onboarding guides.
 
 #### Fleet Management Dashboard _(Django, React, Kubernetes)_
 
@@ -43,9 +41,8 @@ Built tools and automation to improve the efficiency and reliability of device l
 
 Designed, built, and maintained open-source developer tools and services for the Chromium developer community.
 
-- Mentored junior engineers and hosted interns
+- Mentored junior engineers, hosted interns, and served as an informal technical lead
 - Diagnosed and resolved production outages during on-call rotations
-- Consistently improved maintainability, quality, and documentation of systems
 
 #### Presubmit Testing Service _(Go, App Engine)_
 
@@ -63,7 +60,7 @@ Designed, built, and maintained open-source developer tools and services for the
 
 #### Web Platform Test Infrastructure _(Python)_
 
-- Built tooling enabling developers to easily contribute to and benefit from cross-browser web platform test suites
+- Built tooling that let Chromium developers contribute to and run tests from [web-platform-tests](https://web-platform-tests.org), the cross-browser test suite shared by all major browsers
 
 #### Code Review Plugin _(JavaScript, Polymer)_
 
