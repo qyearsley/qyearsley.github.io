@@ -16,6 +16,8 @@ build.test.js               Build function tests
 
 __tests__/
   html.test.js              Structural checks over every source HTML page
+  stylesheets.test.js       Dark-theme wiring across every stylesheet
+  zh-coverage.test.js       Chinese translation coverage ratchet
 
 css/
   style.css                 Core layout, typography, design tokens (all pages)
@@ -42,6 +44,9 @@ chinese/
   tradsimp.js               Traditional/simplified conversion logic
   syllabary/                Python generators + data files (see chinese/README.md)
 
+colophon/
+  index.html                How the site is built
+
 contact/
   index.html                Contact form (see "Contact Form" below)
 
@@ -57,6 +62,8 @@ shared/
   contact-form.js           Contact form submission
   life-background.js        Game of Life animation (404 page)
   discover.js               "Try something" homepage picker + 404 random-page link
+  __tests__/
+    theme-placement.test.js Where theme.js places its toggle, against a DOM with a hidden .header
 
 zh-common.json              Shared translations (see docs/translations.md)
 *.zh.json                   Per-page translations (co-located with HTML)
@@ -167,7 +174,9 @@ Tests use Jest with `--experimental-vm-modules` for ESM support.
 
 - `build.test.js` -- unit tests for build functions (text matching, translation, link rewriting, hreflang)
 - `__tests__/html.test.js` -- structural checks across every source HTML page (unclosed script tags, placeholder SRI hashes, etc.)
-- `shared/__tests__/` -- tests for `nav.js`, `theme.js`, `table-filter.js`, `contact-form.js`, and `discover.js`
+- `__tests__/stylesheets.test.js` -- dark-theme wiring across every stylesheet (the `prefers-color-scheme` and `[data-theme="dark"]` blocks described in "Stylesheets" below)
+- `__tests__/zh-coverage.test.js` -- the translation gate: counts English text nodes in each translated page and fails if a page regresses against its recorded baseline
+- `shared/__tests__/` -- tests for `nav.js`, `theme.js`, `table-filter.js`, `contact-form.js`, and `discover.js`; `theme-placement.test.js` covers where `theme.js` places its toggle when a page has more than one `.header`
 - `javascript/*.test.js`, `chinese/*.test.js` -- tests for experiment and tool logic
 - `games/*/__tests__/` -- tests for game logic and level/preset data
 
