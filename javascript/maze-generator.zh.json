@@ -1,0 +1,16 @@
+{
+  "_title": "迷宫生成器 - Quinten Yearsley",
+  "_description": "看完美迷宫通过随机深度优先回溯自己生成，再用广度优先搜索求解",
+
+  "Watch a perfect maze carve itself, then solve it": "看完美迷宫自己生成，然后求解",
+
+  "Size:": "大小：",
+  "New Maze": "新迷宫",
+  "Speed:": "速度：",
+  "Instant": "瞬间完成",
+
+  "How It Works": "工作原理",
+  "The maze is a <b>perfect maze</b>: a spanning tree over the grid of cells, so there is exactly one path between any two cells and no loops. It's carved with <b>randomized depth-first backtracking</b>. Starting from the top-left cell, the generator repeatedly steps to a random unvisited neighbor, knocking down the wall between them, and keeps a stack of the cells it passed through. When a cell has no unvisited neighbor left, the generator backtracks along the stack until it finds one that does, or the stack runs out and the maze is done.": "这个迷宫是一个<b>完美迷宫</b>：它是格子网格上的一棵生成树，因此任意两个格子之间正好只有一条路径，没有环路。它是用<b>随机深度优先回溯</b>生成的：从左上角格子出发，生成器不断随机走向一个未访问的邻居格子，打通它们之间的墙，并把经过的格子记入一个栈。当某个格子已没有未访问的邻居时，生成器沿栈回溯，直到找到一个有未访问邻居的格子，或者栈已清空、迷宫生成完毕。",
+  "<b>Play</b> and <b>Speed</b> animate one carve or backtrack at a time, highlighting the current cell and the backtracking stack. <b>Instant</b> jumps straight to the finished maze. <b>Show Solution</b> runs a <b>breadth-first search</b> from the top-left cell to the bottom-right cell and highlights the shortest path — breadth-first search finds it first because it explores cells in order of increasing distance from the start.": "<b>Play</b>和<b>速度</b>会逐步播放动画，每步打通一道墙或回溯一步，并高亮当前格子与回溯栈。<b>瞬间完成</b>会直接跳到生成完毕的迷宫。<b>Show Solution</b>会从左上角格子到右下角格子运行一次<b>广度优先搜索</b>，并高亮最短路径——广度优先搜索之所以能最先找到它，是因为它按到起点距离递增的顺序探索各个格子。",
+  "The maze is generated from a seed, kept in the page's URL as <code>?seed=</code>, so reloading or sharing the link reproduces the exact same maze.": "迷宫由一个种子生成，该种子保存在页面网址的<code>?seed=</code>参数中，因此重新加载或分享链接都会生成完全相同的迷宫。"
+}

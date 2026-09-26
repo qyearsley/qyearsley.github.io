@@ -18,12 +18,10 @@
 
       import { SIZE_PRESETS, createRng, generateMaze, solveMaze } from "./maze-generator.js"
 
-      const DEFAULT_SIZE = SIZE_PRESETS.includes(20) ? 20 : SIZE_PRESETS[0]
+      const DEFAULT_SIZE = 20
       const CANVAS_PIXELS = 600
 
-      // Mutable generation state. `gen` is the step-able sequence from
-      // generateMaze(); `mazeResult` is set once it's exhausted, and is the
-      // single source of truth for "generation is finished" everywhere below.
+      // DOM elements, populated once the page has loaded.
       let canvas
       let ctx
       let sizeSelect
@@ -34,6 +32,9 @@
       let solveBtn
       let statusEl
 
+      // Mutable generation state. `gen` is the step-able sequence from
+      // generateMaze(); `mazeResult` is set once it's exhausted, and is the
+      // single source of truth for "generation is finished" everywhere below.
       let width = DEFAULT_SIZE
       let height = DEFAULT_SIZE
       let seed
@@ -44,7 +45,7 @@
       let current = null
       let playing = false
       let timerId = null
-      let solving = false
+      let showSolution = false
 
       function prefersReducedMotion() {
         return (
@@ -55,7 +56,7 @@
 
       function readSeedFromUrl() {
         const raw = new URLSearchParams(window.location.search).get("seed")
-        return raw ? raw : null
+        return raw || null
       }
 
       function readSizeFromUrl() {
@@ -111,7 +112,7 @@
         }
 
         // The solved path, when requested.
-        if (solving && mazeResult) {
+        if (showSolution && mazeResult) {
           const path = solveMaze(mazeResult.grid, width, height)
           ctx.fillStyle = c.solved
           ctx.globalAlpha = 0.35
@@ -163,7 +164,7 @@
 
       function updateStatus() {
         if (mazeResult) {
-          statusEl.textContent = solving
+          statusEl.textContent = showSolution
             ? `Maze complete (${width} by ${height}). Showing the shortest path from top-left to bottom-right.`
             : `Maze complete (${width} by ${height}).`
         } else {
@@ -180,23 +181,31 @@
       }
 
       function speedDelayMs() {
-        // The slider runs 1 (slow) to 100 (fast); map that to a delay in ms.
-        const value = Number(speedInput.value)
-        return Math.max(2, 210 - value * 2)
+        // The slider runs 1 (slow) to 100 (fast); map that to a delay from
+        // 208ms down to 10ms.
+        return 210 - Number(speedInput.value) * 2
+      }
+
+      // Marks generation finished: stores the completed maze, clears the
+      // now-irrelevant stepping state, and flips the buttons that depend on
+      // "generation is done" (Play has nothing left to step; Show Solution
+      // now has a maze to solve).
+      function finish(result) {
+        mazeResult = result
+        stack = []
+        current = null
+        playBtn.disabled = true
+        solveBtn.disabled = false
       }
 
       function tick() {
         if (!gen || mazeResult) return
         const result = gen.next()
         if (result.done) {
-          mazeResult = result.value
-          stack = []
-          current = null
           playing = false
           stopTimer()
           playBtn.textContent = "Play"
-          playBtn.disabled = true
-          solveBtn.disabled = false
+          finish(result.value)
         } else {
           gridSnapshot = result.value.grid
           stack = result.value.stack
@@ -237,20 +246,16 @@
         if (!gen || mazeResult) return
         let result = gen.next()
         while (!result.done) result = gen.next()
-        mazeResult = result.value
-        stack = []
-        current = null
-        playBtn.disabled = true
-        solveBtn.disabled = false
+        finish(result.value)
         draw()
         updateStatus()
       }
 
       function toggleSolve() {
         if (!mazeResult) return
-        solving = !solving
-        solveBtn.textContent = solving ? "Hide Solution" : "Show Solution"
-        solveBtn.setAttribute("aria-pressed", String(solving))
+        showSolution = !showSolution
+        solveBtn.textContent = showSolution ? "Hide Solution" : "Show Solution"
+        solveBtn.setAttribute("aria-pressed", String(showSolution))
         draw()
         updateStatus()
       }
@@ -258,7 +263,7 @@
       function newMaze(randomizeSeed) {
         stopTimer()
         playing = false
-        solving = false
+        showSolution = false
         mazeResult = null
 
         width = Number(sizeSelect.value)
@@ -440,7 +445,7 @@
             <b>Play</b> and <b>Speed</b> animate one carve or backtrack at a time, highlighting the
             current cell and the backtracking stack. <b>Instant</b> jumps straight to the finished
             maze. <b>Show Solution</b> runs a <b>breadth-first search</b> from the top-left cell to
-            the bottom-right cell and highlights the shortest path -- breadth-first search finds it
+            the bottom-right cell and highlights the shortest path — breadth-first search finds it
             first because it explores cells in order of increasing distance from the start.
           </p>
           <p>

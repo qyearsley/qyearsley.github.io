@@ -6,12 +6,13 @@
  * a breadth-first solver for the shortest path from the top-left to the
  * bottom-right cell.
  *
- * The generator is a JS generator function: each `next()` call carves at most
- * one wall and yields a snapshot of the grid, the current cell, and the
- * backtracking stack. That is what lets the page animate carving one step at
- * a time and lets `generateMazeInstant` and the tests drain the same sequence
- * to completion in one call -- there is only one code path for "how the maze
- * is built."
+ * The generator is a JS generator function: apart from the initial yield,
+ * which hands back the start cell before anything is carved, each `next()`
+ * call performs exactly one carve or one backtrack pop and yields a snapshot
+ * of the grid, the current cell, and the backtracking stack. That is what
+ * lets the page animate carving one step at a time and lets
+ * `generateMazeInstant` and the tests drain the same sequence to completion
+ * in one call -- there is only one code path for "how the maze is built."
  *
  * Randomness goes through `createRng`, a small seeded PRNG (mulberry32), so a
  * seed reproduces the exact same maze -- for tests, and for a `?seed=` link.
@@ -173,8 +174,10 @@ function passableNeighbors(grid, x, y, width, height) {
  * (recursive backtracker), implemented iteratively with an explicit stack so
  * it can be driven one carve at a time.
  *
- * Each call to `.next()` performs at most one carve (or one backtrack pop)
- * and yields `{ grid, stack, current }`, a snapshot for rendering:
+ * Apart from the initial yield, which hands back the start cell before
+ * anything is carved, each call to `.next()` performs exactly one carve or
+ * one backtrack pop and yields `{ grid, stack, current }`, a snapshot for
+ * rendering:
  * - `grid` -- a clone of the grid as it stands after this step
  * - `stack` -- the current backtracking path, from the start cell to the cell
  *   generation is standing on (empty once generation is finished)

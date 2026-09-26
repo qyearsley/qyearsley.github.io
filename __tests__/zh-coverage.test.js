@@ -90,6 +90,9 @@ const BASELINE = {
   "chinese/encoding-explorer.html": 3,
   "chinese/pinyin-abbreviations.html": 16,
   "javascript/truth-tables.html": 1,
+  // "Show Solution", on the button and in the prose that names it. The script
+  // rewrites the button label at runtime, so translating it would only flash.
+  "javascript/maze-generator.html": 2,
   // Technology names and the parenthetical tech stacks on each project heading.
   // Correctly Latin on a Chinese resume. Everything else on the page is
   // translated -- see docs/zh-translation.md.
