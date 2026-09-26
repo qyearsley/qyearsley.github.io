@@ -19,6 +19,19 @@ last long version of this file is `git show 3ceed17:docs/improvements.md`.
    untested too, but it is only the 404 page's animation. Verify with
    `npm test -- --coverage` and `coverage/lcov-report/`.
 
+2. **Simplify the three 2026-09-26 proof-of-concept pages.** They were mostly
+   AI-written and are larger than they need to be. The goal is code that is easy
+   to read later.
+   - `javascript/syllogism.html` and `.js`: drop the `?preset=` URL sync, keep
+     three presets, trim the comments, and draw the shading more simply.
+   - `chinese/five-readings.html` and `.js`: drop the `?char=` URL sync, and
+     keep either the dropdown or the table.
+   - `javascript/knights-knaves.html` and `.js`: trim the comments.
+
+   Verify with `npm test`, and look at each page in a browser. For the
+   syllogism checker, also compare every verdict with a brute-force check over
+   the 256 region patterns.
+
 ## Deferred
 
 These are known and accepted for now. Do not re-propose them unless something
