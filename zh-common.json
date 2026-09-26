@@ -19,10 +19,9 @@
   "Elsewhere": "其他链接",
   "Blog": "博客",
   "Resume": "简历",
-  "Work experience and skills": "工作经验与技能",
   "Contact": "联系",
-  "Send me a message": "给我发消息",
   "Colophon": "建站说明",
+  "Here is my <a href=\"/resume/\">resume</a>, or <a href=\"/contact/\">send me a message</a>.": "这是我的<a href=\"/resume/\">简历</a>，也可以<a href=\"/contact/\">给我发消息</a>。",
   "How this site is built": "本站的构建方式",
 
   "Try something": "随便看看",

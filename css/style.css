@@ -434,6 +434,18 @@ p {
   margin-bottom: 2rem;
 }
 
+/* A one-line footer on the homepage, for the colophon link. */
+.site-footer {
+  padding: 1rem 3rem 1.5rem;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.site-footer a {
+  color: var(--color-text-muted);
+}
+
 .section h2 {
   font-size: 1.5rem;
   font-weight: 600;
@@ -479,8 +491,8 @@ p {
   color: var(--color-text-muted);
 }
 
-/* Marks a link that leaves the site. The homepage lists GitHub, the blog and
-   LinkedIn in the same list as internal pages, and nothing distinguished them.
+/* Marks a link that leaves the site. The homepage's GitHub, blog and LinkedIn
+   cards use the same list style as internal pages, and nothing distinguished them.
    The `/ ""` is alternative text for the accessibility tree: empty, because a
    screen reader already announces the destination from the href and does not
    need to hear "north east arrow" on every one. Browsers without support for
