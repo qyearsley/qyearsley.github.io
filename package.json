@@ -7,7 +7,7 @@
     "lint": "npm run lint:js && npm run lint:html && npm run lint:css && npm run lint:format",
     "lint:js": "eslint .",
     "lint:html": "htmlhint \"**/*.html\" --ignore \"node_modules/**,coverage/**,dist/**\"",
-    "lint:css": "stylelint \"**/*.css\" --ignore-pattern \"node_modules/**\" --ignore-pattern \"coverage/**\"",
+    "lint:css": "stylelint \"**/*.css\" --ignore-pattern \"node_modules/**\" --ignore-pattern \"coverage/**\" --ignore-pattern \"dist/**\"",
     "lint:format": "prettier --check .",
     "format": "npx prettier --write .",
     "clean": "rm -rf dist node_modules",

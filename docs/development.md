@@ -186,7 +186,9 @@ Jest's `moduleNameMapper` in `package.json` strips `.js` extensions from relativ
 `npm run lint` runs four linters; their notable settings:
 
 - **ESLint** (`eslint.config.js`): `npm run lint:js` runs `eslint .`, so the config's `ignores` block (`coverage/`, `node_modules/`, `dist/`) is the only thing that decides what is skipped -- a new top-level directory is linted without touching `package.json`. The rule groups cover `javascript/`, `games/`, `chinese/`, `shared/`, `__tests__/`, and the two root build files. `no-console` allows `warn`/`error` -- the build script and shared modules use them for surfacing real problems. `jestGlobals` is included in the browser config because `*.test.js` files live alongside source under `shared/`, `javascript/`, and `games/` rather than in a separate test directory.
-- **Stylelint** (`package.json`): several rules are disabled because the codebase mixes hand-written CSS conventions with design-token patterns that the standard config rejects.
+- **Stylelint** (`package.json`): `npm run lint:css` passes `--ignore-pattern` for
+  `node_modules/**`, `coverage/**`, and `dist/**`, matching what ESLint and
+  HTMLHint skip. Several rules are disabled because the codebase mixes hand-written CSS conventions with design-token patterns that the standard config rejects.
   - `selector-class-pattern` / `selector-id-pattern` / `custom-property-pattern`: allow descriptive names like `.game-list` and `--color-bg-card` instead of forcing strict BEM.
   - `no-descending-specificity`: silenced because component CSS frequently overrides base styles in a deliberate cascade order.
   - `color-function-notation: legacy` and `alpha-value-notation: number`: pin to one notation since both are valid CSS and mixing them is noisier than picking either.
