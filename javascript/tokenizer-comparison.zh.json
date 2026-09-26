@@ -1,0 +1,19 @@
+{
+  "_title": "分词器对比 - Quinten Yearsley",
+  "_description": "训练一个微型字节级BPE分词器，看训练文本如何决定同一句话英语和中文谁需要更多词元",
+  "How the training text decides whether English or Chinese needs more tokens": "训练文本如何决定英语和中文谁需要更多词元",
+  "Train the tokenizer": "训练分词器",
+  "Trained on a mix of two built-in texts: a few pages of everyday English prose written for this page, and a Chinese translation of it. Both are shown in full below.": "训练数据是两段内置文本的混合：为本页写的几页日常英语文章，以及它的中文译文。下面会展示完整原文。",
+  "Corpus mix:": "语料混合比例：",
+  "Merges:": "合并次数：",
+  "Show training text": "显示训练文本",
+  "View the raw source on GitHub": "在GitHub上查看原始源码",
+  "English": "英文",
+  "Compare a sentence": "比较一句话",
+  "How it works": "工作原理",
+  "The tokenizer starts by treating every UTF-8 <b>byte</b> as its own token: 256 possible tokens, one per byte value. Training then repeatedly looks at the built-in corpus, finds whichever two adjacent tokens appear next to each other most often, and <b>merges</b> them into one new token. Each merge shrinks the corpus a little and grows the vocabulary by one. Do that a few dozen or a few hundred times and common patterns &mdash; English words like \"the\" or \"ing\", for instance &mdash; end up as a single token instead of several bytes.": "分词器一开始把每个UTF-8<b>字节</b>都当作独立词元：一共256种可能的词元，每个字节值对应一个。训练过程反复检查内置语料，找出最常相邻出现的两个词元，把它们<b>合并</b>成一个新词元。每次合并都会让语料稍微变短，词表则增加一个词元。这样重复几十次甚至几百次，常见的模式——比如英语里的“the”或“ing”——就会变成一个词元，而不再是好几个字节。",
+  "Which patterns get merged depends entirely on the training text. A tokenizer trained only on English learns English-shaped merges and has nothing useful to offer a Chinese sentence, because the two languages barely share any byte patterns &mdash; that is what the <b>corpus mix</b> slider controls: how much of the training text is English versus Chinese.": "哪些模式会被合并，完全取决于训练文本。只用英语训练出来的分词器，学到的合并方式也是英语形状的，对中文句子几乎没有用，因为这两种语言几乎不共享字节模式——这正是<b>语料混合</b>滑块控制的内容：训练文本里英语和中文各占多少。",
+  "Common Chinese characters take 3 bytes each in UTF-8, versus 1 byte per common English letter. Move the corpus mix toward Chinese and add a few merges, and Chinese sentences start collapsing into fewer tokens the same way English ones do &mdash; move it toward English instead, and Chinese stays close to 3 tokens per character while English keeps shrinking. A chip that is not valid UTF-8 on its own &mdash; one byte out of a 3-byte character, say &mdash; shows as hex bytes rather than a broken character, since browsers do not have a glyph for \"a third of a character.\"": "常见汉字在UTF-8里每个占3字节，而常见英语字母只占1字节。把语料混合调向中文，再加一些合并次数，中文句子就会像英语句子一样，词元数开始变少；反过来把它调向英语，中文就会一直停留在接近每字符3个词元，而英语则持续缩短。单独看不是合法UTF-8的词元——比如3字节汉字中的1个字节——会显示为十六进制字节，而不是一个破损的字符，因为浏览器没有“三分之一个字符”对应的字形。",
+  "This is a toy tokenizer trained on a few pages of text, not a real production tokenizer &mdash; it is only meant to show the shape of the effect, not to match any specific model's numbers.": "这只是一个用几页文本训练出来的玩具分词器，不是真正的生产环境分词器——它只是为了展示这种效应的大致形状，并不追求和任何具体模型的数字一致。",
+  "Markov Chain Text Generator": "马尔可夫链文本生成器"
+}

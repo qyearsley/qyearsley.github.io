@@ -69,7 +69,13 @@ describe("trainBPE: token count on the training text never increases with more m
     let previous = Infinity
     for (let k = 0; k <= merges.length; k += 1) {
       const prefix = merges.slice(0, k)
-      const total = sequences.reduce((sum, seq) => sum + tc.applyMerges(seq, prefix).length, 0)
+      // Weight each sequence's token count the same way `countPairs` weights
+      // its pairs, so this checks the same "total tokens across the mixed
+      // corpus" quantity that training is actually shrinking.
+      const total = sequences.reduce(
+        (sum, seq) => sum + seq.weight * tc.applyMerges(seq.bytes, prefix).length,
+        0,
+      )
       expect(total).toBeLessThanOrEqual(previous)
       previous = total
     }
@@ -169,21 +175,45 @@ describe("tokenizeForDisplay", () => {
 })
 
 describe("buildTrainingSequences", () => {
-  test("100% English produces only English sequences", () => {
+  test("100% English produces one English sequence weighted by MIX_SLOTS", () => {
     const sequences = tc.buildTrainingSequences(100)
     const englishBytes = tc.textToBytes(tc.ENGLISH_CORPUS)
-    for (const seq of sequences) expect(seq).toEqual(englishBytes)
+    expect(sequences).toEqual([{ bytes: englishBytes, weight: tc.MIX_SLOTS }])
   })
 
-  test("0% English produces only Chinese sequences", () => {
+  test("0% English produces one Chinese sequence weighted by MIX_SLOTS", () => {
     const sequences = tc.buildTrainingSequences(0)
     const chineseBytes = tc.textToBytes(tc.CHINESE_CORPUS)
-    for (const seq of sequences) expect(seq).toEqual(chineseBytes)
+    expect(sequences).toEqual([{ bytes: chineseBytes, weight: tc.MIX_SLOTS }])
   })
 
   test("clamps out-of-range percentages", () => {
     expect(tc.buildTrainingSequences(-50)).toEqual(tc.buildTrainingSequences(0))
     expect(tc.buildTrainingSequences(150)).toEqual(tc.buildTrainingSequences(100))
+  })
+
+  test("a mix in between produces one weighted sequence per language, weights summing to MIX_SLOTS", () => {
+    const sequences = tc.buildTrainingSequences(30)
+    expect(sequences).toHaveLength(2)
+    const totalWeight = sequences.reduce((sum, seq) => sum + seq.weight, 0)
+    expect(totalWeight).toBe(tc.MIX_SLOTS)
+  })
+
+  test("weighting a single copy gives the same merges as literally repeating the corpus", () => {
+    // buildTrainingSequences represents "N shares of this corpus" as one
+    // sequence with weight N, instead of N literal copies, purely for
+    // training speed (see the comment on the function). This checks the two
+    // representations agree.
+    const weighted = tc.buildTrainingSequences(40)
+    const englishBytes = tc.textToBytes(tc.ENGLISH_CORPUS)
+    const chineseBytes = tc.textToBytes(tc.CHINESE_CORPUS)
+    const englishSlots = Math.round((40 / 100) * tc.MIX_SLOTS)
+    const chineseSlots = tc.MIX_SLOTS - englishSlots
+    const literal = [
+      ...Array.from({ length: englishSlots }, () => englishBytes),
+      ...Array.from({ length: chineseSlots }, () => chineseBytes),
+    ]
+    expect(tc.trainBPE(weighted, 30)).toEqual(tc.trainBPE(literal, 30))
   })
 
   test("a mostly-English corpus needs more merges to shrink Chinese text as much as English text", () => {
@@ -204,6 +234,16 @@ describe("buildTrainingSequences", () => {
     const chineseReduction = (chineseNoMerge - chineseTrained) / chineseNoMerge
     expect(englishReduction).toBeGreaterThan(chineseReduction)
   })
+
+  test("at the default mix, more merges are learned at MAX_MERGES than at DEFAULT_MERGES", () => {
+    // A sanity check that MAX_MERGES is actually reachable (training doesn't
+    // stop early well before the slider's top end) given the corpus size.
+    const sequences = tc.buildTrainingSequences(tc.DEFAULT_MIX_PERCENT)
+    const atDefault = tc.trainBPE(sequences, tc.DEFAULT_MERGES)
+    const atMax = tc.trainBPE(sequences, tc.MAX_MERGES)
+    expect(atDefault).toHaveLength(tc.DEFAULT_MERGES)
+    expect(atMax).toHaveLength(tc.MAX_MERGES)
+  })
 })
 
 describe("PRESET_PAIRS", () => {
@@ -214,5 +254,24 @@ describe("PRESET_PAIRS", () => {
       expect(preset.en.length).toBeGreaterThan(0)
       expect(preset.zh.length).toBeGreaterThan(0)
     }
+  })
+})
+
+describe("corpus size and slider limits", () => {
+  test("both corpora are a few thousand UTF-8 bytes, not a couple hundred", () => {
+    // Big enough that a few hundred merges learn real recurring words and
+    // phrases instead of memorizing the whole text; see tokenizer-corpus.js.
+    const englishBytes = tc.textToBytes(tc.ENGLISH_CORPUS).length
+    const chineseBytes = tc.textToBytes(tc.CHINESE_CORPUS).length
+    expect(englishBytes).toBeGreaterThan(4000)
+    expect(englishBytes).toBeLessThan(8000)
+    expect(chineseBytes).toBeGreaterThan(4000)
+    expect(chineseBytes).toBeLessThan(8000)
+  })
+
+  test("MERGES_STEP evenly divides both DEFAULT_MERGES and MAX_MERGES", () => {
+    expect(tc.DEFAULT_MERGES % tc.MERGES_STEP).toBe(0)
+    expect(tc.MAX_MERGES % tc.MERGES_STEP).toBe(0)
+    expect(tc.DEFAULT_MERGES).toBeLessThanOrEqual(tc.MAX_MERGES)
   })
 })

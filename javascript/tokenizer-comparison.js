@@ -27,36 +27,29 @@
  * Everything here is a pure function over strings, byte arrays, and plain
  * objects -- no DOM, so it is straightforward to unit test and safe to call
  * from a slider's `input` handler.
+ *
+ * The training text itself -- a few thousand bytes of everyday English
+ * prose, and a Chinese translation of it -- lives in `tokenizer-corpus.js`,
+ * next door, so the page can link to it as the raw source of what was
+ * trained on.
  */
+
+import { ENGLISH_CORPUS, CHINESE_CORPUS } from "./tokenizer-corpus.js"
 
 /** How many corpus "shares" the mix slider divides English and Chinese into. */
 const MIX_SLOTS = 20
 
-/** Slider range and default for the merge-count control. */
-const MAX_MERGES = 200
-const DEFAULT_MERGES = 50
+/**
+ * Slider range and default for the merge-count control. Chosen so that a
+ * single `trainBPE` call -- which runs synchronously on every slider `input`
+ * event -- stays comfortably under 300ms even at `MAX_MERGES`: measured
+ * around 240ms at 500 merges on the built-in corpus (a two-language mix,
+ * the more expensive case), versus roughly 400ms at 1000.
+ */
+const MAX_MERGES = 500
+const MERGES_STEP = 20
+const DEFAULT_MERGES = 100
 const DEFAULT_MIX_PERCENT = 50
-
-/**
- * A few short paragraphs of everyday English prose, used to train the
- * tokenizer. Plain writing, not translated from anywhere -- its only job is
- * to give BPE some ordinary English letter and word patterns to learn from.
- */
-const ENGLISH_CORPUS = `Every morning I wake up around seven and make a pot of coffee before I do anything else. I like to sit by the window with my cup and watch the street outside slowly wake up too. Some days a neighbor walks by with her dog, and the dog always stops to sniff the same bush.
-
-After breakfast I usually check my email and then go for a short walk. Walking clears my head better than almost anything else, even a ten minute loop around the block. On the way back I stop at the corner store if we are out of milk or bread.
-
-In the afternoon I try to get some work done, but it is easy to get distracted by small chores around the house. A load of laundry, a pile of dishes, a plant that needs water. By evening I am usually ready to sit down, read for a while, and go to bed early.`
-
-/**
- * A few short paragraphs of everyday Chinese prose (my own writing, not a
- * translation of the English corpus above), used the same way.
- */
-const CHINESE_CORPUS = `我每天早上七点左右起床，先给自己泡一杯茶，然后才开始做别的事情。我喜欢坐在窗户旁边，一边喝茶，一边看外面的街道慢慢热闹起来。有时候邻居会牵着狗散步，那只狗总是喜欢闻同一丛花。
-
-吃过早饭以后，我通常会看看邮件，然后出去走一走。散步能让我的头脑变得清楚，哪怕只是绕着这条街走十分钟。回家的路上，如果家里没有牛奶或者面包了，我会去街角的小店买一些。
-
-下午我想做一点工作，但是家里总有一些小事让我分心。洗衣服，洗碗，还有需要浇水的植物。到了晚上，我一般会坐下来看书，然后早点休息。`
 
 /**
  * A couple of preset English/Chinese sentence pairs for the comparison tool,
@@ -226,24 +219,29 @@ function decodeTokenBytes(bytes) {
 }
 
 /**
- * Counts adjacent-pair frequency across a set of independent sequences. A
- * pair never spans two sequences, so training on `[englishBytes,
- * chineseBytes]` never learns a merge that straddles the language boundary.
+ * Counts adjacent-pair frequency across a set of independent, weighted
+ * sequences. A pair never spans two sequences, so training on `[english,
+ * chinese]` never learns a merge that straddles the language boundary. A
+ * sequence's `weight` (default 1) scales every pair it contributes -- how
+ * `buildTrainingSequences` represents "20 copies of this corpus" as one copy
+ * with weight 20, without literally repeating the bytes.
  *
- * @param {number[][]} sequences
+ * @param {Array<number[] | {bytes: number[], weight?: number}>} sequences
  * @returns {Map<string, {a: number, b: number, count: number}>} Keyed by
  *   `"a,b"` for fast lookup while counting.
  */
 function countPairs(sequences) {
   const counts = new Map()
-  for (const seq of sequences) {
+  for (const entry of sequences) {
+    const seq = Array.isArray(entry) ? entry : entry.bytes
+    const weight = Array.isArray(entry) ? 1 : (entry.weight ?? 1)
     for (let i = 0; i < seq.length - 1; i += 1) {
       const a = seq[i]
       const b = seq[i + 1]
       const key = `${a},${b}`
       const existing = counts.get(key)
-      if (existing) existing.count += 1
-      else counts.set(key, { a, b, count: 1 })
+      if (existing) existing.count += weight
+      else counts.set(key, { a, b, count: weight })
     }
   }
   return counts
@@ -300,28 +298,39 @@ function applyMergeToSequence(seq, a, b, newId) {
 }
 
 /**
- * Trains byte-level BPE merges from one or more independent byte sequences.
+ * Trains byte-level BPE merges from one or more independent, weighted byte
+ * sequences.
  *
- * Each step counts every adjacent pair across all sequences, merges the most
- * frequent one (deterministically, via `pickBestPair`) into a new token id,
- * and repeats. Training stops early, before `numMerges` merges, once no
- * sequence has an adjacent pair left to merge.
+ * Each step counts every adjacent pair across all sequences (a plain
+ * `number[]` counts as weight 1; `{bytes, weight}` scales its pairs by
+ * `weight`, see `countPairs`), merges the most frequent one (deterministically,
+ * via `pickBestPair`) into a new token id, and repeats. Training stops early,
+ * before `numMerges` merges, once no sequence has an adjacent pair left to
+ * merge.
  *
- * @param {number[][]} sequences - Independent training sequences (a pair is
- *   never counted or merged across two of them).
+ * @param {Array<number[] | {bytes: number[], weight?: number}>} sequences -
+ *   Independent training sequences (a pair is never counted or merged across
+ *   two of them).
  * @param {number} numMerges - Maximum number of merges to learn.
  * @returns {Array<{a: number, b: number, id: number}>} The learned merges,
  *   in the order they were learned. `id` starts at 256 (past the 0-255 byte
  *   vocabulary) and increases by one per merge.
  */
 function trainBPE(sequences, numMerges) {
-  let seqs = sequences.map((seq) => seq.slice())
+  let seqs = sequences.map((entry) =>
+    Array.isArray(entry)
+      ? { bytes: entry.slice(), weight: 1 }
+      : { bytes: entry.bytes.slice(), weight: entry.weight ?? 1 },
+  )
   const merges = []
   for (let i = 0; i < numMerges; i += 1) {
     const best = pickBestPair(countPairs(seqs))
     if (!best) break
     const newId = 256 + merges.length
-    seqs = seqs.map((seq) => applyMergeToSequence(seq, best.a, best.b, newId))
+    seqs = seqs.map((s) => ({
+      bytes: applyMergeToSequence(s.bytes, best.a, best.b, newId),
+      weight: s.weight,
+    }))
     merges.push({ a: best.a, b: best.b, id: newId })
   }
   return merges
@@ -388,31 +397,28 @@ function decode(tokens, merges) {
 }
 
 /**
- * Builds the training corpus for a given English/Chinese mix, as two
- * independent sequences (whole copies of each corpus, repeated to weight
- * it) rather than a truncated slice of either -- so mixing never cuts a
- * multi-byte character in half, and a 100% mix is just the one corpus.
+ * Builds the training corpus for a given English/Chinese mix, as one
+ * weighted sequence per language (rather than a truncated slice of either,
+ * or `MIX_SLOTS` literal copies of each), so mixing never cuts a multi-byte
+ * character in half, and a 100% mix is just the one corpus.
  *
  * `mixPercent` divides into `MIX_SLOTS` shares (English gets the share
- * nearest `mixPercent`, Chinese gets the rest); repeating a whole corpus N
- * times scales every pair's count by N without inventing any new patterns,
- * so this is a clean way to weight "how much this language's byte patterns
- * influence which merges get learned" without touching corpus content.
+ * nearest `mixPercent`, Chinese gets the rest). A language with zero shares
+ * is left out entirely rather than included as a zero-weight sequence, so a
+ * 100%/0% mix trains on exactly one language, as before.
  *
  * @param {number} mixPercent - 0 (all Chinese) to 100 (all English).
- * @returns {number[][]} Independent training sequences.
+ * @returns {Array<{bytes: number[], weight: number}>} Independent, weighted
+ *   training sequences.
  */
 function buildTrainingSequences(mixPercent) {
   const clamped = Math.min(100, Math.max(0, mixPercent))
   const englishSlots = Math.round((clamped / 100) * MIX_SLOTS)
   const chineseSlots = MIX_SLOTS - englishSlots
 
-  const englishBytes = textToBytes(ENGLISH_CORPUS)
-  const chineseBytes = textToBytes(CHINESE_CORPUS)
-
   const sequences = []
-  for (let i = 0; i < englishSlots; i += 1) sequences.push(englishBytes)
-  for (let i = 0; i < chineseSlots; i += 1) sequences.push(chineseBytes)
+  if (englishSlots > 0) sequences.push({ bytes: textToBytes(ENGLISH_CORPUS), weight: englishSlots })
+  if (chineseSlots > 0) sequences.push({ bytes: textToBytes(CHINESE_CORPUS), weight: chineseSlots })
   return sequences
 }
 
@@ -459,6 +465,7 @@ function tokenizeForDisplay(text, merges) {
 export {
   MIX_SLOTS,
   MAX_MERGES,
+  MERGES_STEP,
   DEFAULT_MERGES,
   DEFAULT_MIX_PERCENT,
   ENGLISH_CORPUS,

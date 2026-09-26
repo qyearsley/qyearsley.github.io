@@ -18,6 +18,7 @@
 
       import {
         MAX_MERGES,
+        MERGES_STEP,
         DEFAULT_MERGES,
         DEFAULT_MIX_PERCENT,
         PRESET_PAIRS,
@@ -26,6 +27,7 @@
         tokenStats,
         tokenizeForDisplay,
       } from "./tokenizer-comparison.js"
+      import { ENGLISH_CORPUS, CHINESE_CORPUS } from "./tokenizer-corpus.js"
 
       const CHIP_COLORS = 10
 
@@ -50,7 +52,7 @@
         mergesValue.textContent = String(numMerges)
 
         const sequences = buildTrainingSequences(mixPercent)
-        const trainingBytes = sequences.reduce((sum, seq) => sum + seq.length, 0)
+        const trainingBytes = sequences.reduce((sum, seq) => sum + seq.bytes.length * seq.weight, 0)
 
         const start = window.performance.now()
         merges = trainBPE(sequences, numMerges)
@@ -122,6 +124,11 @@
         }
       }
 
+      function populateTrainingText() {
+        document.getElementById("training-text-en").textContent = ENGLISH_CORPUS
+        document.getElementById("training-text-zh").textContent = CHINESE_CORPUS
+      }
+
       document.addEventListener("DOMContentLoaded", () => {
         mixInput = document.getElementById("mix")
         mixValue = document.getElementById("mix-value")
@@ -136,11 +143,13 @@
         zhStats = document.getElementById("zh-stats")
 
         mergesInput.max = String(MAX_MERGES)
+        mergesInput.step = String(MERGES_STEP)
         mergesInput.value = String(DEFAULT_MERGES)
         mixInput.value = String(DEFAULT_MIX_PERCENT)
 
         populatePresets()
         applyPreset(PRESET_PAIRS[0])
+        populateTrainingText()
 
         mixInput.addEventListener("input", retrain)
         mergesInput.addEventListener("input", retrain)
@@ -162,6 +171,45 @@
         color: var(--color-text-secondary);
         font-style: italic;
         margin-top: 0.5rem;
+      }
+
+      .tc-training-text-details {
+        margin-top: 0.75rem;
+        font-size: 0.85rem;
+      }
+
+      .tc-training-text-details summary {
+        cursor: pointer;
+        color: var(--color-text-secondary);
+      }
+
+      .tc-training-text-block {
+        margin-top: 0.75rem;
+      }
+
+      .tc-training-text-block h3 {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--color-text-secondary);
+        margin-bottom: 0.3rem;
+      }
+
+      .tc-training-text {
+        white-space: pre-wrap;
+        max-height: 12rem;
+        overflow-y: auto;
+        padding: 0.5rem;
+        border: 1px solid var(--color-border);
+        border-radius: 6px;
+        background: var(--color-bg-card);
+        color: var(--color-text-secondary);
+        font-size: 0.85rem;
+        line-height: 1.5;
+      }
+
+      .tc-training-text-source {
+        margin-top: 0.5rem;
+        color: var(--color-text-muted);
       }
 
       .tc-sentence-block {
@@ -333,8 +381,8 @@
         <section class="section">
           <h2>Train the tokenizer</h2>
           <p class="tc-corpus-note">
-            Trained on a mix of two short built-in texts: a few paragraphs of everyday English and a
-            few paragraphs of everyday Chinese, both written for this page.
+            Trained on a mix of two built-in texts: a few pages of everyday English prose written
+            for this page, and a Chinese translation of it. Both are shown in full below.
           </p>
 
           <div class="controls-row">
@@ -345,11 +393,29 @@
 
           <div class="controls-row">
             <label for="merges">Merges:</label>
-            <input id="merges" type="range" min="0" max="200" step="5" value="50" />
-            <span id="merges-value" class="tc-stats">50</span>
+            <input id="merges" type="range" min="0" max="500" step="20" value="100" />
+            <span id="merges-value" class="tc-stats">100</span>
           </div>
 
           <p id="training-info" class="tc-training-info" aria-live="polite"></p>
+
+          <details class="tc-training-text-details">
+            <summary>Show training text</summary>
+            <div class="tc-training-text-block">
+              <h3>English</h3>
+              <div id="training-text-en" class="tc-training-text"></div>
+            </div>
+            <div class="tc-training-text-block">
+              <h3>Chinese</h3>
+              <div id="training-text-zh" class="tc-training-text" lang="zh"></div>
+            </div>
+            <p class="tc-training-text-source">
+              <a
+                href="https://github.com/qyearsley/qyearsley.github.io/blob/main/javascript/tokenizer-corpus.js"
+                >View the raw source on GitHub</a
+              >
+            </p>
+          </details>
         </section>
 
         <section class="section">
@@ -379,29 +445,30 @@
             tokens, one per byte value. Training then repeatedly looks at the built-in corpus, finds
             whichever two adjacent tokens appear next to each other most often, and
             <b>merges</b> them into one new token. Each merge shrinks the corpus a little and grows
-            the vocabulary by one. Do that a few dozen or a few hundred times and common patterns --
-            English words like "the" or "ing", for instance -- end up as a single token instead of
-            several bytes.
+            the vocabulary by one. Do that a few dozen or a few hundred times and common patterns
+            &mdash; English words like "the" or "ing", for instance &mdash; end up as a single token
+            instead of several bytes.
           </p>
           <p>
             Which patterns get merged depends entirely on the training text. A tokenizer trained
             only on English learns English-shaped merges and has nothing useful to offer a Chinese
-            sentence, because the two languages barely share any byte patterns -- that is what the
+            sentence, because the two languages barely share any byte patterns &mdash; that is what
+            the
             <b>corpus mix</b> slider controls: how much of the training text is English versus
             Chinese.
           </p>
           <p>
             Common Chinese characters take 3 bytes each in UTF-8, versus 1 byte per common English
             letter. Move the corpus mix toward Chinese and add a few merges, and Chinese sentences
-            start collapsing into fewer tokens the same way English ones do -- move it toward
+            start collapsing into fewer tokens the same way English ones do &mdash; move it toward
             English instead, and Chinese stays close to 3 tokens per character while English keeps
-            shrinking. A chip that is not valid UTF-8 on its own -- one byte out of a 3-byte
-            character, say -- shows as hex bytes rather than a broken character, since browsers do
-            not have a glyph for "a third of a character."
+            shrinking. A chip that is not valid UTF-8 on its own &mdash; one byte out of a 3-byte
+            character, say &mdash; shows as hex bytes rather than a broken character, since browsers
+            do not have a glyph for "a third of a character."
           </p>
           <p>
-            This is a toy tokenizer trained on a couple of paragraphs, not a real production
-            tokenizer -- it is only meant to show the shape of the effect, not to match any specific
+            This is a toy tokenizer trained on a few pages of text, not a real production tokenizer
+            &mdash; it is only meant to show the shape of the effect, not to match any specific
             model's numbers.
           </p>
         </section>
