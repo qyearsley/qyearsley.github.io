@@ -18,6 +18,15 @@ last long version of this file is `git show 3ceed17:docs/improvements.md`.
    first, as the Seasons `GameUI` takes them. `shared/life-background.js` is
    untested too, but it is only the 404 page's animation. Verify with
    `npm test -- --coverage` and `coverage/lcov-report/`.
+   The answer and timer paths in `games/times-trail/js/game.js` (42% lines)
+   and `games/number-garden/js/game.js` (46%) are untested too. Drive them
+   with keypad clicks and fake timers.
+
+2. **Share one keyboard guard between the quiz games.** Times Trail, Seasons
+   and Number Garden each copy the modifier, help-overlay, text-field and
+   Escape-closes-settings checks. The copies drifted: Times Trail's keypad
+   lacked two of them until 2026-10-05. Move them into `games/shared/` and
+   verify with each game's keyboard tests.
 
 ## Deferred
 
@@ -65,6 +74,10 @@ Decided with no change, so these are not re-proposed:
 - **Commit `0f300d7` carries the work email address.** Rewriting public history
   would not remove it, because GitHub keeps orphaned commits reachable.
 
+Landed 2026-10-05: removed Times Trail's tiles path, Life Garden's puzzle
+scaffolding and dead Number Garden code; fixed the "golden leafs" plural, the
+Times Trail keypad shortcut guard and Life Garden's Space-after-click.
+
 Landed 2026-09-25: Floating Point's 2^53 button now says `first unsafe int`, and
 its bits keep focus when toggled.
 
@@ -83,3 +96,4 @@ a person to look, on an iPad where it matters:
 - The `/zh/` pages, especially the dense `chinese/` tables.
 - The syllogism checker's Venn diagram: region shading and where the X marks land.
 - Five Readings' tables on a narrow screen.
+- Life Garden: click a preset, then press Space; it should play.
