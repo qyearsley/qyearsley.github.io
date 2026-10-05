@@ -6,7 +6,7 @@ Turing Tape is the smallest game on the site: three modules, no classes beyond
 one, and no shared base classes. The split is machine, data, page.
 
 `TuringMachine.js` is the simulator and the only place tape semantics live. It
-has no DOM, no timers and no storage. `levels.js` is frozen data — five puzzles
+has no DOM, no timers and no storage. `levels.js` is plain data — five puzzles
 and three read-only demos. `game.js` is everything else: DOM references, the
 rule table, the play timer, persistence, and the keyboard.
 
@@ -81,7 +81,7 @@ the colours cannot.
 
 ### levels.js
 
-Two frozen arrays. `levels` holds the five puzzles, each with a starting `tape`,
+Two exported arrays. `levels` holds the five puzzles, each with a starting `tape`,
 a `target`, the `states` and `symbols` its dropdowns offer, and a description.
 `demos` holds three read-only programs with their `rules` pre-filled as
 `[state, read, write, move, nextState]` tuples — the 3-state busy beaver, unary
@@ -196,7 +196,7 @@ modules that can be tested without a page:
 **`game.js` has no test file.** It exports nothing and runs on import, so it can
 only be driven black-box through the real `index.html` — which is what
 `times-trail` does in `game.test.js`, and what this game could do too. The
-site-wide markup-contract test in the root `__tests__/` covers this page's ids;
+site-wide markup-contract test in `games/shared/__tests__/` covers this page's ids;
 nothing covers its behaviour.
 
 Run from the repository root:

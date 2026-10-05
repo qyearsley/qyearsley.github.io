@@ -136,7 +136,7 @@ See [js/README.md](js/README.md) for detailed module architecture documentation.
 
 ```
 index.html            # The whole page: nav, tapes, controls, rule table, "How it works"
-index.zh.json         # Chinese title and meta description only; the body is not translated
+index.zh.json         # Chinese translations of the title, meta description, and page text
 js/
 ├── TuringMachine.js  # The machine: step, run, reset, matchesTape, matchMask
 ├── levels.js         # The five puzzles and three demos, as data
