@@ -49,12 +49,10 @@ questions later. No points are ever lost on a miss.
 ## The question loop
 
 One fact at a time: `7 x 6 = ?`. Answers are typed on a custom on-screen
-keypad; there's no multiple-choice tile mode in this build
-(`KEYPAD_MIN_STRENGTH` is 0). Typing is the only entry mode because it's the
-only honest signal of recall -- multiple choice has a 25% guessing floor that
-would muddy the mastery data. The tile code and its distractor logic
-(`distractors.js`) are still in the codebase for a possible revert, but
-nothing currently renders a tile.
+keypad; there's no multiple-choice tile mode. Typing is the only entry mode
+because it's the only honest signal of recall -- multiple choice has a 25%
+guessing floor that would muddy the mastery data. The tile code and its
+distractor logic were removed on 2026-10-05; git history has them.
 
 The iOS system keyboard is never invoked; it eats half the screen and shifts
 the layout.

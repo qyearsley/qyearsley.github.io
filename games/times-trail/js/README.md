@@ -16,12 +16,6 @@ the fact pool. A `GameState` class in the middle would only forward calls, and
 the save shape it would own already lives in `storage.js` next to the
 normalization that guards it.
 
-**The tiles path is currently off.** `KEYPAD_MIN_STRENGTH` is 0 as a trial, so
-every question routes to the keypad and `INPUT_MODE.TILES` is never produced.
-Everything below still describes the tiles path, because reverting the trial is
-a one-line change to that constant and nothing else -- see "The question
-loop" in `docs/times-trail-plan.md`.
-
 ## Dependency graph
 
 Arrows point from importer to import. `constants.js` imports nothing and is the
@@ -30,17 +24,17 @@ root; `game.js` is the only module that knows about all of them.
 ```
                             constants.js
                                  │
-      ┌──────────┬───────────┬───┴────┬───────────┬──────────┐
-      ▼          ▼           ▼        ▼           ▼          ▼
-  facts.js  MasteryModel  Scoring  distractors  Keypad EventManager
-      │          │                     │
-      │          │                     │
-      ├──────────┼──► FactSelector.js  │
-      ├──────────┼──► Journey.js       │
+      ┌──────────┬───────────┬───┴────┬───────────┐
+      ▼          ▼           ▼        ▼           ▼
+  facts.js  MasteryModel  Scoring   Keypad    EventManager
+      │          │
+      │          │
+      ├──────────┼──► FactSelector.js
+      ├──────────┼──► Journey.js
       ├──────────┼──► storage.js ──► games/shared/StorageManager.js
-      ├──────────┴──► Settings.js      │
-      │                                │
-      ├──► modes/quickRecall.js ◄───────┘
+      ├──────────┴──► Settings.js
+      │
+      ├──► modes/quickRecall.js
       │         │
       │         ├──► modes/shared.js  (the one scaffold builder; imports nothing)
       │         └──► modes/index.js   (registry and dispatcher)
@@ -54,7 +48,7 @@ root; `game.js` is the only module that knows about all of them.
 Two edges are forbidden on purpose:
 
 - **Core logic never imports the UI.** Nothing in `facts`, `MasteryModel`,
-  `FactSelector`, `Journey`, `Scoring`, `Settings`, `distractors`, `storage`, or
+  `FactSelector`, `Journey`, `Scoring`, `Settings`, `storage`, or
   `modes/` touches `document`, `window`, `localStorage`, or a timer.
 - **`GameUI` never imports a mode.** It imports only `BaseGameUI`,
   `constants.js`, and `facts.js`, so it cannot recompute -- and therefore cannot
@@ -105,14 +99,6 @@ weighted pick inside the chosen bucket. Holds session state (last fact, question
 index, retry queue) and nothing else. The rng-call count per path is documented
 and fixed, which is what makes the selection testable.
 
-### distractors.js
-
-Builds the wrong answers on the tiles. `nearMissCandidates` is the pedagogy: a
-deterministic list of plausible wrong answers, most confusable first -- adjacent
-multiples, two steps out, digit slips, then adding instead of multiplying.
-`generateOptions` shuffles the top of that list and drops the answer in at a
-random position.
-
 ### Journey.js
 
 One themed trail, bound to one active fact pool. Both are construction
@@ -139,8 +125,7 @@ penalty, and gems are only ever added. The daily goal counts facts, not minutes.
 ### Settings.js
 
 The three persisted settings (`tables`, `sessionLength`, `sound`) and everything
-derived from them: the active fact pool, memoized, and `inputModeFor(strength)`,
-which decides tiles versus keypad. Persisted input is
+derived from them: the active fact pool, memoized. Persisted input is
 untrusted, so nothing throws -- a rejected update returns `false` and changes
 nothing.
 
@@ -163,8 +148,7 @@ back.
 ### modes/quickRecall.js
 
 `createChallenge(fact, settings, rng)` for the default mode: a prompt string, the
-entry affordance, the tile options when there are any, the post-miss scaffold, and
-a `check` closure. No DOM at all.
+post-miss scaffold, and a `check` closure. No DOM at all.
 
 ### modes/shared.js
 
@@ -192,32 +176,26 @@ and this game has a third save-dependent title button).
 
 ### Keypad.js
 
-The twelve-key in-page numeric pad -- digits, clear, enter -- rendered with
+The twelve-key in-page numeric pad -- digits, backspace, enter -- rendered with
 `createElement` and `textContent`. It exists so iOS never has an input to focus
 and never raises the system keyboard over the question. Owns a digit buffer,
 reports it through `value` and `display`, and fires `onChange` on every accepted
 press, which is the hook `game.js` uses to stamp thinking time. Also handles a
-physical keyboard as an accessibility fallback.
+physical keyboard as an accessibility fallback, and leaves a key alone when a
+modifier is held or the site's `?` help overlay is open.
 
 ### EventManager.js
 
 Attaches every DOM listener and translates each event into a callback supplied by
 `game.js`. Holds no state and no game logic, and never decides whether an answer
-is right -- it reports the tapped value and the tapped element. It owns two
-`document` key listeners: the `A`-`D` tile shortcuts (the letters come from
-`ANSWER_KEYS` in `constants.js`, which `GameUI` reads too), and `Escape` to close
-the settings dialog. Digit, Enter, and Backspace handling belongs to `Keypad` and
-is deliberately not duplicated; `Keypad` also owns `Escape` as clear-all, and the
+is right. It owns one `document` key listener, `Escape` to close the settings
+dialog. Digit, Enter, and Backspace handling belongs to `Keypad` and is
+deliberately not duplicated; `Keypad` also owns `Escape` as clear-all, and the
 two never collide because each bails in exactly the state the other acts in.
-
-The tile shortcut used to be `1`-`4`, which collided with the answers themselves
-on a screen where every tile face is a number. Letters keep the two key spaces
-disjoint: a digit on a tile question falls through to `Keypad`, which is disabled
-on a tile question and so types nothing.
 
 ## Challenge contract
 
-Every mode returns the same eleven keys, so `game.js` has no mode-specific branch
+Every mode returns the same nine keys, so `game.js` has no mode-specific branch
 in its answer path:
 
 | key        | meaning                                                   |
@@ -228,17 +206,14 @@ in its answer path:
 | `right`    | Right operand as displayed                                |
 | `answer`   | `left * right`                                            |
 | `prompt`   | The question, ready to render                             |
-| `entry`    | `"tiles" \| "keypad"` -- the one entry authority          |
-| `options`  | `number[]` when `entry === "tiles"`, else `null`          |
 | `visual`   | Mode-specific render data, discriminated by `visual.kind` |
 | `check`    | `(input) => boolean` -- the one correctness authority     |
 | `scaffold` | The post-miss teaching array                              |
 
-`game.js` renders by `entry`, scores by `entry`, and decides correctness with
-`check`. It never recomputes the entry mode and never compares an input to
-`answer` itself -- the entry paths can deliver different types and only `check`
-knows the difference. `Keypad` submits a `Number`, and so does a tile tap;
-`check` also accepts a digit string, so a mode or a future entry path that
+`game.js` decides correctness with `check`. It never compares an input to
+`answer` itself -- entry paths can deliver different types and only `check`
+knows the difference. `Keypad` submits a `Number`; `check` also accepts a digit
+string, so a mode or a future entry path that
 reports raw digits needs no special case at the call site.
 
 ## Data Flow
@@ -258,21 +233,20 @@ _askNextQuestion()
    │                                        │
    ├─► MasteryStore.strengthOf(factId) ─────┤  captured BEFORE the answer
    │                                        ▼
-   ├─► modes/index.createChallenge(modeId, fact, {strength, inputModeFor}, rng)
+   ├─► modes/index.createChallenge(modeId, fact, {strength}, rng)
    │                                        │
    │                                        ▼
    │                                   a Challenge
    │                                        │
    ├─► GameUI.renderQuestion(challenge) ────┤
-   ├─► Keypad.setEnabled(entry === keypad)   │
+   ├─► Keypad.setEnabled(true)               │
    └─► session.askedAt = now()   ← stamped LAST, after the DOM is written
                                             │
-                first tap / first digit
+                first digit
                                             │
                                             ▼
                             session.firstInteractionAt   (once)
                                             │
-                                      tile tap or
                                       keypad enter
                                             ▼
                                    _handleAnswer(input)
@@ -330,18 +304,17 @@ recorded here.
 
 ## Testing
 
-Tests live in the parent `__tests__/` directory -- 15 suites covering every
+Tests live in the parent `__tests__/` directory -- 14 suites covering every
 module except `modes/shared.js`, which is asserted through the two mode suites:
 
 - `constants.test.js` -- the shared tables and their cross-checks
 - `facts.test.js` -- the fact set, canonicalization, filtering
 - `MasteryModel.test.js` -- strength, decay, due dates, `MasteryStore`
 - `FactSelector.test.js` -- bucket draw, retry queue, rng-call contract
-- `distractors.test.js` -- near-miss candidates and option generation
 - `Journey.test.js` -- trail length, the cap formula, pool scoping, and a sweep
   asserting every (trail, table selection) pair can be finished
 - `Scoring.test.js` -- stars, gems, daily goal, streak calendar
-- `Settings.test.js` -- table toggles, fact pool, session length, entry mode
+- `Settings.test.js` -- table toggles, fact pool, session length
 - `storage.test.js` -- save shape, normalization, load failures
 - `quickRecall.test.js` -- the Quick Recall challenge
 - `modes.test.js` -- the registry and dispatcher
@@ -371,13 +344,12 @@ npm test -- --testPathPatterns times-trail  # just this game
   the constructor or the call, and each module documents how many `rng()` calls
   each path consumes, so a test can script an exact sequence.
 - **Core logic never imports the UI.** No `document`, `window`, `localStorage`, or
-  timer outside `game.js`, `GameUI.js`, and `Keypad.js`.
+  timer outside `game.js`, `GameUI.js`, `Keypad.js`, and `EventManager.js`.
 - **`GameUI` never imports a mode.** The UI layer cannot reach `Journey`,
   `Scoring`, `MasteryModel`, or `modes/`, so it cannot recompute what they
   decided.
-- **One authority per decision.** `challenge.entry` decides the entry affordance
-  and `challenge.check` decides correctness. Neither is ever recomputed at a call
-  site, and no answer key is written into the markup.
+- **One authority per decision.** `challenge.check` decides correctness. It is
+  never recomputed at a call site, and no answer key is written into the markup.
 - **One writer per DOM id.** The hub HUD and the play HUD, for instance, never
   write each other's counters.
 - **Untrusted persisted data.** Every loaded field is coerced back into range and

@@ -1,16 +1,14 @@
 /**
  * Settings for Times Trail -- which tables are in play, how long a session is,
- * and the fact pool and entry mode derived from them.
+ * and the fact pool derived from them.
  *
  * There are exactly three settings: `tables`, `sessionLength`, and `sound`.
  *
  * Philosophy (why the shape is this small):
  *
- * 1. **No knob defeats the design.** Entry mode is derived from a fact's
- *    strength (`inputModeFor`), never chosen by the player: a strength-5 fact
- *    answered by picking one of four tiles is a 25%-guess data point, so an
- *    `inputMode` override would corrupt the mastery signal the whole game runs
- *    on. Scaffolds fire after every miss and never after a correct answer, so
+ * 1. **No knob defeats the design.** Every answer is typed, with no entry mode
+ *    to choose: a multiple-choice override would be a 25%-guess data point and
+ *    would corrupt the mastery signal the whole game runs on. Scaffolds fire after every miss and never after a correct answer, so
  *    there is no `scaffolds` setting either -- `game.js` reads `!correct` at
  *    the call site. Reduced motion is an OS preference handled entirely by
  *    `@media (prefers-reduced-motion: reduce)` in `main.css`, so there is
@@ -48,16 +46,7 @@
  * falls back to every table rather than handing the game an unplayable session.
  */
 
-import {
-  ALL_TABLES,
-  DEFAULT_TABLES,
-  INPUT_MODE,
-  KEYPAD_MIN_STRENGTH,
-  OPERAND_MAX,
-  OPERAND_MIN,
-  SESSION,
-  STRENGTH,
-} from "./constants.js"
+import { ALL_TABLES, DEFAULT_TABLES, OPERAND_MAX, OPERAND_MIN, SESSION } from "./constants.js"
 import { factIdsForTables } from "./facts.js"
 
 /**
@@ -266,24 +255,6 @@ export class Settings {
     if (!Settings.validate("sessionLength", length)) return false
     this.data = { ...this.data, sessionLength: /** @type {number} */ (length) }
     return true
-  }
-
-  /**
-   * The entry mode a fact of this strength gets. Always adaptive: weak facts
-   * get tiles so a wrong answer is recoverable, and stronger facts get the
-   * keypad so the answer has to come from recall rather than recognition. There
-   * is no override to check first.
-   * @param {number} strength - The fact's (decayed) strength; rounded and
-   *   clamped to [0, 5], and a non-finite value is treated as 0
-   * @returns {"tiles"|"keypad"} `INPUT_MODE.KEYPAD` once `strength` reaches
-   *   `KEYPAD_MIN_STRENGTH`, else `INPUT_MODE.TILES`
-   */
-  inputModeFor(strength) {
-    if (KEYPAD_MIN_STRENGTH === null) return INPUT_MODE.TILES
-    const clamped = Number.isFinite(strength)
-      ? Math.min(STRENGTH.MAX, Math.max(STRENGTH.MIN, Math.round(strength)))
-      : STRENGTH.MIN
-    return clamped >= KEYPAD_MIN_STRENGTH ? INPUT_MODE.KEYPAD : INPUT_MODE.TILES
   }
 
   /**

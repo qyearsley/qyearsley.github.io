@@ -2,7 +2,6 @@ import { describe, test, expect } from "@jest/globals"
 import {
   FACTS,
   FACT_IDS,
-  SQUARE_IDS,
   canonicalize,
   factId,
   parseFactId,
@@ -112,29 +111,6 @@ describe("facts", () => {
       expect(FACT_IDS).toEqual(FACTS.map((f) => f.id))
       expect(Object.isFrozen(FACT_IDS)).toBe(true)
       expect(() => FACT_IDS.push("2x2")).toThrow(TypeError)
-    })
-  })
-
-  describe("SQUARE_IDS", () => {
-    test("has the 8 diagonal ids in order", () => {
-      expect(SQUARE_IDS).toEqual(["2x2", "3x3", "4x4", "5x5", "6x6", "7x7", "8x8", "9x9"])
-    })
-
-    test("every id parses to a === b", () => {
-      for (const id of SQUARE_IDS) {
-        const parsed = parseFactId(id)
-        expect(parsed).not.toBeNull()
-        expect(parsed.a).toBe(parsed.b)
-      }
-    })
-
-    test("matches the isSquare facts", () => {
-      expect(SQUARE_IDS).toEqual(FACTS.filter((f) => f.isSquare).map((f) => f.id))
-    })
-
-    test("is frozen", () => {
-      expect(Object.isFrozen(SQUARE_IDS)).toBe(true)
-      expect(() => SQUARE_IDS.push("1x1")).toThrow(TypeError)
     })
   })
 

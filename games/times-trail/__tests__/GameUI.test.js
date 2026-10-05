@@ -36,7 +36,6 @@ import { fileURLToPath } from "node:url"
 import { GameUI } from "../js/GameUI.js"
 import {
   ALL_TABLES,
-  ANSWER_KEYS,
   KEYPAD,
   OPERAND_MAX,
   OPERAND_MIN,
@@ -100,7 +99,6 @@ const CONTRACT_IDS = [
   "play-trail-strip",
   "play-area",
   "question-text",
-  "answer-tiles",
   "answer-display",
   "keypad",
   "scaffold-area",
@@ -160,30 +158,11 @@ const DELETED_IDS = [
 ]
 
 /**
- * A tiles challenge.
- * @param {Object} [overrides] - Fields to replace
- * @returns {Object} Challenge-shaped object
- */
-function tilesChallenge(overrides = {}) {
-  return { prompt: "6 × 7 = ?", entry: "tiles", options: [36, 42, 48, 49], ...overrides }
-}
-
-/**
  * A keypad challenge.
  * @returns {Object} Challenge-shaped object
  */
 function keypadChallenge() {
-  return { prompt: "8 × 9 = ?", entry: "keypad", options: null }
-}
-
-/**
- * Which of the entry affordances are currently visible.
- * @returns {string[]} Ids of the affordances lacking `.hidden`
- */
-function visibleAffordances() {
-  return ["answer-tiles", "keypad"].filter(
-    (id) => !document.getElementById(id).classList.contains("hidden"),
-  )
+  return { prompt: "8 × 9 = ?" }
 }
 
 /**
@@ -562,56 +541,13 @@ describe("GameUI", () => {
   })
 
   describe("renderQuestion", () => {
-    test("a tiles question shows tiles and nothing else", () => {
-      ui.renderQuestion(tilesChallenge())
-      expect(document.getElementById("question-text").textContent).toBe("6 × 7 = ?")
-      expect(document.querySelectorAll("#answer-tiles .answer-btn")).toHaveLength(4)
-      expect(document.getElementById("answer-tiles").classList.contains("hidden")).toBe(false)
-      expect(document.getElementById("keypad").classList.contains("hidden")).toBe(true)
-      expect(document.getElementById("scaffold-area").classList.contains("hidden")).toBe(true)
-      expect(document.getElementById("answer-display").textContent).toBe(KEYPAD.EMPTY_DISPLAY)
-    })
-
-    test.each([
-      ["tiles", tilesChallenge(), true],
-      ["keypad", keypadChallenge(), false],
-    ])("the keypad readout is hidden for entry %s: %s", (_entry, challenge, hidden) => {
-      ui.renderQuestion(challenge)
-      expect(document.getElementById("answer-display").classList.contains("hidden")).toBe(hidden)
-    })
-
-    test("the readout is hidden again when a keypad question is followed by tiles", () => {
+    test("a question shows the prompt, the readout and the keypad, and nothing else", () => {
       ui.renderQuestion(keypadChallenge())
-      expect(document.getElementById("answer-display").classList.contains("hidden")).toBe(false)
-      ui.renderQuestion(tilesChallenge())
-      expect(document.getElementById("answer-display").classList.contains("hidden")).toBe(true)
-    })
-
-    test("a keypad question leaves the tiles empty AND hidden", () => {
-      ui.renderQuestion(tilesChallenge())
-      ui.renderQuestion(keypadChallenge())
-      const tiles = document.getElementById("answer-tiles")
-      expect(tiles.children).toHaveLength(0)
-      expect(tiles.classList.contains("hidden")).toBe(true)
+      expect(document.getElementById("question-text").textContent).toBe("8 × 9 = ?")
       expect(document.getElementById("keypad").classList.contains("hidden")).toBe(false)
-    })
-
-    test.each([
-      ["tiles", tilesChallenge()],
-      ["keypad", keypadChallenge()],
-    ])("exactly one affordance is visible for entry %s", (_entry, challenge) => {
-      ui.renderQuestion(challenge)
-      expect(visibleAffordances()).toHaveLength(1)
-    })
-
-    test("switching entry types back to back never accumulates tiles", () => {
-      const sequence = [tilesChallenge(), keypadChallenge(), tilesChallenge()]
-      for (const challenge of sequence) {
-        ui.renderQuestion(challenge)
-        expect(visibleAffordances()).toHaveLength(1)
-        const expected = challenge.entry === "tiles" ? 4 : 0
-        expect(document.querySelectorAll("#answer-tiles .answer-btn")).toHaveLength(expected)
-      }
+      expect(document.getElementById("answer-display").classList.contains("hidden")).toBe(false)
+      expect(document.getElementById("answer-display").textContent).toBe(KEYPAD.EMPTY_DISPLAY)
+      expect(document.getElementById("scaffold-area").classList.contains("hidden")).toBe(true)
     })
 
     test("resets the feedback and the scaffold", () => {
@@ -622,146 +558,11 @@ describe("GameUI", () => {
       expect(document.getElementById("scaffold-area").classList.contains("hidden")).toBe(true)
     })
 
-    test("an unknown entry mode leaves every affordance hidden and warns", () => {
-      const warn = jest.spyOn(console, "warn").mockImplementation(() => {})
-      ui.renderQuestion(tilesChallenge())
-      ui.renderQuestion(tilesChallenge({ entry: "telepathy" }))
-      expect(visibleAffordances()).toHaveLength(0)
-      expect(warn).toHaveBeenCalledTimes(1)
-      warn.mockRestore()
-    })
-
     test("writes the prompt as text, never as markup", () => {
-      ui.renderQuestion(tilesChallenge({ prompt: "<img src=x>" }))
+      ui.renderQuestion({ prompt: "<img src=x>" })
       const el = document.getElementById("question-text")
       expect(el.textContent).toContain("<img src=x>")
       expect(el.querySelector("img")).toBeNull()
-    })
-  })
-
-  describe("renderTiles", () => {
-    test("gives each button data-answer, data-index, data-key, and an aria-label", () => {
-      ui.renderTiles([36, 42, 48, 49])
-      const buttons = Array.from(document.querySelectorAll("#answer-tiles .answer-btn"))
-      expect(buttons).toHaveLength(4)
-      expect(buttons.map((b) => b.dataset.answer)).toEqual(["36", "42", "48", "49"])
-      expect(buttons.map((b) => b.dataset.index)).toEqual(["0", "1", "2", "3"])
-      expect(buttons.map((b) => b.dataset.key)).toEqual(["A", "B", "C", "D"])
-      expect(buttons.map((b) => b.getAttribute("aria-label"))).toEqual([
-        "Answer A: 36",
-        "Answer B: 42",
-        "Answer C: 48",
-        "Answer D: 49",
-      ])
-      for (const button of buttons) {
-        expect(button.type).toBe("button")
-      }
-    })
-
-    test("the shortcut letters come from ANSWER_KEYS, not from a second list", () => {
-      ui.renderTiles([36, 42, 48, 49])
-      const buttons = Array.from(document.querySelectorAll("#answer-tiles .answer-btn"))
-      expect(buttons.map((b) => b.dataset.key)).toEqual(ANSWER_KEYS.map((key) => key.toUpperCase()))
-    })
-
-    test("the letter stays out of the tile's face, which is only the number", () => {
-      ui.renderTiles([36, 42, 48, 49])
-      const buttons = Array.from(document.querySelectorAll("#answer-tiles .answer-btn"))
-      expect(buttons.map((b) => b.textContent)).toEqual(["36", "42", "48", "49"])
-    })
-
-    test("a tile past the end of ANSWER_KEYS gets no letter, in the markup or the label", () => {
-      // generateOptions clamps `count` to [2, 8], so five tiles is reachable.
-      ui.renderTiles([36, 42, 48, 49, 54])
-      const extra = document.querySelectorAll("#answer-tiles .answer-btn")[4]
-      expect(extra.dataset.key).toBeUndefined()
-      expect(extra.getAttribute("aria-label")).toBe("Answer: 54")
-    })
-
-    test("fewer tiles than letters labels the ones there are", () => {
-      ui.renderTiles([36, 42])
-      const buttons = Array.from(document.querySelectorAll("#answer-tiles .answer-btn"))
-      expect(buttons.map((b) => b.dataset.key)).toEqual(["A", "B"])
-    })
-
-    test("writes no data-correct anywhere -- the answer is not in the markup", () => {
-      ui.renderTiles([36, 42, 48, 49])
-      expect(document.querySelectorAll("[data-correct]")).toHaveLength(0)
-    })
-
-    test("the inherited disableAnswerButtons reaches the rendered tiles", () => {
-      ui.renderTiles([36, 42, 48, 49])
-      ui.disableAnswerButtons()
-      const buttons = Array.from(document.querySelectorAll("#answer-tiles .answer-btn"))
-      expect(buttons.every((b) => b.disabled)).toBe(true)
-      ui.enableAnswerButtons()
-      expect(buttons.every((b) => b.disabled)).toBe(false)
-    })
-
-    test("rendering twice does not accumulate buttons", () => {
-      ui.renderTiles([36, 42, 48, 49])
-      ui.renderTiles([1, 2, 3, 4])
-      expect(document.querySelectorAll("#answer-tiles .answer-btn")).toHaveLength(4)
-    })
-  })
-
-  describe("clearTiles", () => {
-    test("empties the container", () => {
-      ui.renderTiles([36, 42, 48, 49])
-      ui.clearTiles()
-      expect(document.getElementById("answer-tiles").children).toHaveLength(0)
-    })
-
-    test("drops the frozen reveal state so the next question is interactive", () => {
-      ui.renderTiles([36, 42, 48, 49])
-      ui.freezeTiles()
-      ui.clearTiles()
-      expect(
-        document.getElementById("answer-tiles").classList.contains("answer-tiles-frozen"),
-      ).toBe(false)
-    })
-  })
-
-  describe("freezeTiles", () => {
-    test("keeps the marked tiles on screen but inert", () => {
-      ui.renderQuestion(tilesChallenge())
-      const tiles = Array.from(document.querySelectorAll("#answer-tiles .answer-btn"))
-      expect(tiles).toHaveLength(4)
-      ui.markButtonCorrect(tiles[1])
-      ui.markButtonIncorrect(tiles[0])
-
-      ui.freezeTiles()
-
-      const container = document.getElementById("answer-tiles")
-      expect(container.classList.contains("hidden")).toBe(false)
-      expect(container.classList.contains("answer-tiles-frozen")).toBe(true)
-      expect(document.querySelectorAll("#answer-tiles .answer-btn")).toHaveLength(4)
-      expect(document.querySelectorAll("#answer-tiles .answer-btn.correct")).toHaveLength(1)
-      expect(document.querySelectorAll("#answer-tiles .answer-btn.incorrect")).toHaveLength(1)
-      expect(tiles.every((tile) => tile.disabled)).toBe(true)
-    })
-
-    test("re-shows a tiles container that had been hidden", () => {
-      ui.renderQuestion(tilesChallenge())
-      ui.setTilesVisible(false)
-      ui.freezeTiles()
-      expect(document.getElementById("answer-tiles").classList.contains("hidden")).toBe(false)
-    })
-
-    test("the next question clears the marks and the frozen state", () => {
-      ui.renderQuestion(tilesChallenge())
-      ui.markButtonCorrect(document.querySelector("#answer-tiles .answer-btn"))
-      ui.freezeTiles()
-      ui.renderQuestion(tilesChallenge())
-      const container = document.getElementById("answer-tiles")
-      expect(container.classList.contains("answer-tiles-frozen")).toBe(false)
-      expect(document.querySelectorAll("#answer-tiles .answer-btn.correct")).toHaveLength(0)
-      expect(document.querySelectorAll("#answer-tiles .answer-btn")).toHaveLength(4)
-      expect(
-        Array.from(document.querySelectorAll("#answer-tiles .answer-btn")).every(
-          (tile) => tile.disabled === false,
-        ),
-      ).toBe(true)
     })
   })
 
@@ -974,7 +775,7 @@ describe("GameUI", () => {
     })
 
     test("teaching hides the readout, so the miss is not left on screen", () => {
-      ui.renderQuestion({ prompt: "2 × 6 = ?", entry: "keypad", options: null })
+      ui.renderQuestion({ prompt: "2 × 6 = ?" })
       ui.setAnswerDisplay("13")
       expect(document.getElementById("answer-display").classList.contains("hidden")).toBe(false)
       ui.showScaffold(SCAFFOLD)
@@ -984,7 +785,7 @@ describe("GameUI", () => {
     test("rendering the next question clears it, so the split cannot outlive the miss", () => {
       ui.showScaffold(SCAFFOLD)
       expect(teaching()).toBe(true)
-      ui.renderQuestion({ prompt: "6 × 7 = ?", entry: "keypad", options: null })
+      ui.renderQuestion({ prompt: "6 × 7 = ?" })
       expect(teaching()).toBe(false)
     })
 
@@ -1607,11 +1408,6 @@ describe("GameUI", () => {
       expect(cssRule(".trail-space-current")).toBe("")
     })
 
-    test("the marked tiles are not left faded by .disabled", () => {
-      expect(cssRule(".answer-btn.correct")).toContain("opacity: 1")
-      expect(cssRule(".answer-btn.incorrect")).toContain("opacity: 1")
-    })
-
     test("a correct keypad answer has a rule to paint", () => {
       expect(cssRule("#answer-display.correct")).toContain("color: var(--tt-correct)")
     })
@@ -1653,31 +1449,6 @@ describe("GameUI", () => {
       expect(cssRule(".star-fly-active")).toContain("opacity: 0")
     })
 
-    test("the frozen tiles rule the miss path depends on exists", () => {
-      expect(cssRule(".answer-tiles-frozen")).toContain("pointer-events: none")
-    })
-
-    // The guard is the requirement, not the decoration: the game is played on a
-    // shared iPad, where the shortcut does not exist and a glyph beside a
-    // two-digit product is something to misread.
-    test("the A-D tile hint is drawn only where there is a real pointer", () => {
-      const hintAt = MAIN_CSS.indexOf(".answer-btn::after")
-      expect(hintAt).toBeGreaterThan(-1)
-
-      const guardAt = MAIN_CSS.lastIndexOf("@media (hover: hover) and (pointer: fine)", hintAt)
-      expect(guardAt).toBeGreaterThan(-1)
-
-      // No closing brace of the guard block between the two, so the hint really
-      // is inside it.
-      const between = MAIN_CSS.slice(guardAt, hintAt)
-      expect(between).not.toContain("\n}")
-    })
-
-    test("the hint text comes from data-key, so the tile's face stays the number", () => {
-      const hint = MAIN_CSS.slice(MAIN_CSS.indexOf(".answer-btn::after"))
-      expect(hint.slice(0, hint.indexOf("}"))).toContain("content: attr(data-key)")
-    })
-
     test("the feedback types nothing produces have no rules", () => {
       expect(MAIN_CSS).not.toContain(".feedback-area.info")
       expect(MAIN_CSS).not.toContain(".feedback-area.encourage")
@@ -1695,16 +1466,11 @@ describe("GameUI", () => {
         bare.updateProgressBar(1, 20)
         bare.flyStars(10)
         bare.showScreen("hub-screen")
-        bare.renderQuestion(tilesChallenge())
         bare.renderQuestion(keypadChallenge())
-        bare.renderTiles([1, 2, 3, 4])
-        bare.clearTiles()
-        bare.setTilesVisible(true)
         bare.setKeypadVisible(true)
         bare.setAnswerDisplay("42")
         bare.setAnswerDisplayVisible(true)
         bare.markAnswerDisplayCorrect("42")
-        bare.freezeTiles()
         bare.showFeedback("m", "correct")
         bare.hideFeedback()
         bare.showScaffold({ rows: 2, cols: 2, product: 4, skipCounts: [2, 4], text: "x" })
@@ -1731,7 +1497,6 @@ describe("GameUI", () => {
         ui.updateHud(null)
         ui.updatePlayHud(null)
         ui.renderQuestion(null)
-        ui.renderTiles(null)
         ui.showScaffold(null)
         ui.renderPlayTrailStrip(null)
         ui.renderTrail(null)

@@ -7,8 +7,8 @@
  * `quick-recall`" and get one back without ever importing a mode, naming a mode
  * function, or branching on which mode is active. Phase 2 adds the rest.
  *
- * Architecture: a frozen registry (`MODES`) of `ModeDefinition` records plus three
- * thin lookups over it -- `getMode`, `modeIds`, and a `createChallenge` that
+ * Architecture: a frozen registry (`MODES`) of `ModeDefinition` records plus two
+ * thin lookups over it -- `getMode` and a `createChallenge` that
  * dispatches by id. There is deliberately no logic here beyond the lookup: the
  * registry adds no fields to a challenge, rewrites none, and validates none, so
  * whatever a mode returns is exactly what the caller receives. A mode's own module
@@ -17,7 +17,7 @@
  * Why a registry rather than a `switch`:
  *
  *   - **Mixed Practice (Phase 2)** rotates mode ids through this same dispatcher.
- *     It needs to enumerate the available modes (`MODES` / `modeIds()`) and then
+ *     It needs to enumerate the available modes (`MODES`) and then
  *     ask for one by id, which a `switch` inside `game.js` cannot offer.
  *   - **The menu and the dispatcher cannot drift.** `MODES` carries the label
  *     alongside the implementation, both drawn from `constants.js`, so a mode that
@@ -35,23 +35,20 @@
  * | `right`   | number                      | Right operand as displayed                                |
  * | `answer`  | number                      | `left * right`                                            |
  * | `prompt`  | string                      | The question, ready to render                             |
- * | `entry`   | `"tiles"\|"keypad"`         | The one authority on the entry affordance                 |
- * | `options` | `number[]\|null`            | Non-null **iff** `entry === "tiles"`                      |
  * | `visual`  | Object                      | Mode-specific render data, discriminated by `visual.kind` |
  * | `check`   | `(input: *) => boolean`     | The one authority on correctness                          |
  * | `scaffold`| Scaffold                    | The post-miss teaching array (§ 12.5)                     |
  *
- * Eleven keys, the same eleven from every mode. `game.js` therefore has no
- * mode-specific branch in its answer path: it renders by `challenge.entry` and
- * `challenge.visual.kind`, scores by `challenge.entry`, and decides correctness
- * with `challenge.check` -- never by recomputing an entry mode or comparing an
- * input to `challenge.answer` itself. A mode is free to accept more input types
+ * Nine keys, the same nine from every mode. `game.js` therefore has no
+ * mode-specific branch in its answer path: it renders by
+ * `challenge.visual.kind` and decides correctness with `challenge.check` --
+ * never by comparing an input to `challenge.answer` itself. A mode is free to accept more input types
  * than the entry paths currently produce, and only `check` knows which.
  *
  * Determinism and purity: this module holds no state, reads no clock, and consumes
  * no randomness of its own. `settings` and `rng` are passed straight through,
  * positionally and unchanged, so a mode's documented rng-call count is also the
- * dispatcher's (1 call on Quick Recall's keypad path). No `document`, `window`,
+ * dispatcher's (1 call on Quick Recall). No `document`, `window`,
  * `localStorage`, or `setTimeout`, and no argument is ever mutated.
  */
 
@@ -126,17 +123,6 @@ export function getMode(modeId) {
 }
 
 /**
- * The ids of every registered mode, in menu order.
- *
- * A fresh array each call, so a caller may sort, filter, or shuffle it -- which is
- * exactly what Phase 2's Mixed Practice will do -- without disturbing `MODES`.
- * @returns {string[]} A new array of `MODE_IDS` values in menu order
- */
-export function modeIds() {
-  return MODES.map((mode) => mode.id)
-}
-
-/**
  * Build a challenge in the named mode.
  *
  * This is the whole point of the module: `game.js` names a mode and a fact and
@@ -153,7 +139,7 @@ export function modeIds() {
  * `TypeError("createChallenge requires a Fact")`.
  * @param {*} modeId - A `MODE_IDS` value naming the mode to dispatch to
  * @param {Fact} fact - The fact to ask, from `facts.js`
- * @param {Object} [settings] - Challenge context (§ 12.1): `{strength?, inputModeFor?}`
+ * @param {Object} [settings] - Challenge context (§ 12.1), passed through to the mode
  * @param {() => number} [rng] - Source of randomness in [0, 1); defaults to `Math.random`
  * @returns {Challenge} The mode's challenge, exactly as the mode returned it
  * @throws {RangeError} If `modeId` names no registered mode

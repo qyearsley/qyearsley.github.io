@@ -101,7 +101,7 @@ Close the dialog with **Done** or **Escape**. Opening it mid-round pauses the
 scaffold countdown, and closing it starts that countdown again.
 
 There is deliberately no difficulty control. Four presets used to sit in front of
-the table list, but once every preset shared the same entry mode the only thing a
+the table list, but once every preset shared the same settings the only thing a
 preset changed was which tables were in play -- a table picker under a vaguer
 name, with a real table picker hidden behind its fourth option. Spaced repetition
 is what makes practice easier or harder question by question; the toggles are for
@@ -125,25 +125,14 @@ Touch is the primary input; the keyboard is an accessibility fallback.
   **⌫** key
 - **Escape** -- clear the whole entry (the only clear-all; there is no key for it
   on the pad), or close the settings dialog when it is open
-- **A-D** -- pick the first through fourth multiple-choice tile, either case.
-  Letters, not digits: a tile face is a number, so `1` read as an answer rather
-  than as a position, and the position is what it meant. Each tile prints its
-  letter in the corner, but only on a device with a real pointer -- see the
-  iPad note below. Tiles are the other entry mode, so this key does nothing
-  while the keypad is showing, and a digit does nothing while the tiles are.
 - **Tab** -- move between controls; **Enter/Space** activates a focused button
 - **j/k** -- move between page links (a site-wide shortcut; press **?** for the
   full list)
 
-The keypad shortcuts only fire while the play screen is showing and the settings
-dialog is closed. Both handlers leave a key alone when ⌘, ⌃, or ⌥ is held, so
-browser and OS shortcuts still work.
-
-Nothing produces a tile question in this version -- `KEYPAD_MIN_STRENGTH` is 0,
-so the keypad is the only entry path -- so **A-D** is the shortcut for the mode a
-revert of that trial brings back. The letters come from `ANSWER_KEYS` in
-`js/constants.js`, which both the key handler and the tile renderer read, so
-there is one place to change them.
+The keypad shortcuts only fire while the play screen is showing, the settings
+dialog is closed, and the site's **?** help overlay is closed. The keypad leaves a
+key alone when ⌘, ⌃, or ⌥ is held, so browser and OS shortcuts (such as ⌘1 to
+switch tabs) still work.
 
 ## iPad notes
 
@@ -177,7 +166,6 @@ js/
 ├── facts.js             # The 36-fact set and canonicalization
 ├── MasteryModel.js      # Per-fact strength, decay, due dates, MasteryStore
 ├── FactSelector.js      # Which fact is asked next
-├── distractors.js       # Near-miss options for the tiles
 ├── Journey.js           # One themed trail: its facts, its length, its cap
 ├── Scoring.js           # Stars, gems, daily goal, streak calendar
 ├── Settings.js          # Table toggles, session length, and the active fact pool

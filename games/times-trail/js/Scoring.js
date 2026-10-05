@@ -6,11 +6,10 @@
  * 1. **Stars are weighted toward weak facts.** A correct answer pays
  *    `STARS.BASE` plus a tier bonus that is largest for the facts she knows
  *    least: 20 for a weak fact, 15 for a strengthening one, 10 for a mastered
- *    one. Point-farming `2x2` therefore pays half as much per answer as
+ *    one. Point-farming `2x2` therefore pays about half as much per answer as
  *    working on `7x8`, so the cheapest way to a big number is to practise the
- *    thing that needs practising. The keypad bonus follows the same logic --
- *    typing an answer is strictly harder than recognising one among four
- *    tiles, so it is worth 5 more before the streak multiplier applies.
+ *    thing that needs practising. Every answer is typed, so each one also earns
+ *    the flat keypad bonus (5) before the streak multiplier applies.
  *
  * 2. **Nothing is ever subtracted.** `starsForWrong()` returns `0`, not a
  *    penalty, and gems are milestone trophies that are only ever added (§ 0,
@@ -36,15 +35,7 @@
  * argument; every one returns a fresh object.
  */
 
-import {
-  DAILY_GOAL,
-  DAY_MS,
-  FLAME_STAGES,
-  GEM_MILESTONES,
-  INPUT_MODE,
-  STARS,
-  STRENGTH,
-} from "./constants.js"
+import { DAILY_GOAL, DAY_MS, FLAME_STAGES, GEM_MILESTONES, STARS, STRENGTH } from "./constants.js"
 
 /**
  * @typedef {Object} Daily
@@ -80,7 +71,6 @@ import {
  * @typedef {Object} StarsInput
  * @property {number} strength   - The fact's strength BEFORE this answer was recorded
  * @property {number} streak     - Session streak INCLUDING this answer (1 for the first correct)
- * @property {string} inputMode  - INPUT_MODE value; "keypad" earns the honesty bonus
  */
 
 /**
@@ -252,17 +242,16 @@ export class Scoring {
 
   /**
    * Stars for one correct answer. Weak facts pay the most, the keypad adds a
-   * flat bonus before the multiplier, and the session streak scales the whole
+   * flat bonus before the multiplier (every answer is typed), and the session streak scales the whole
    * thing. The result is rounded, never truncated, so a 1.5x multiplier on an
    * odd base rounds up rather than quietly losing half a star.
    * @param {StarsInput} [input] - The answer's tier inputs
    * @returns {number} A non-negative integer
    */
   starsForCorrect(input) {
-    const { strength, streak, inputMode } = input ?? {}
+    const { strength, streak } = input ?? {}
     const tier = this.tierForStrength(strength)
-    let base = STARS.BASE + STARS.TIER_BONUS[tier]
-    if (inputMode === INPUT_MODE.KEYPAD) base += STARS.KEYPAD_BONUS
+    const base = STARS.BASE + STARS.TIER_BONUS[tier] + STARS.KEYPAD_BONUS
     return Math.max(0, Math.round(base * this.streakMultiplier(streak)))
   }
 

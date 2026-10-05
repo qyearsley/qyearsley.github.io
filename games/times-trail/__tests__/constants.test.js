@@ -3,18 +3,14 @@ import * as constants from "../js/constants.js"
 import { FACT_IDS, factIdsForTrail } from "../js/facts.js"
 import {
   ALL_TABLES,
-  ANSWER_KEYS,
   CARD_TIERS,
   DAILY_GOAL,
   DAY_MS,
   DECAY,
   DEFAULT_TABLES,
-  DISTRACTORS,
   FLAME_STAGES,
   GEM_MILESTONES,
-  INPUT_MODE,
   KEYPAD,
-  KEYPAD_MIN_STRENGTH,
   MATH,
   MINUTE_MS,
   MODE_IDS,
@@ -249,64 +245,7 @@ describe("SELECTION", () => {
   })
 })
 
-describe("DISTRACTORS", () => {
-  describe("option supply", () => {
-    test("at least two tiles are shown", () => {
-      expect(DISTRACTORS.OPTION_COUNT).toBeGreaterThanOrEqual(2)
-    })
-
-    test("the priority window covers the distractors needed, so no padding path exists", () => {
-      expect(DISTRACTORS.PRIORITY_WINDOW).toBeGreaterThanOrEqual(DISTRACTORS.OPTION_COUNT - 1)
-    })
-  })
-})
-
-describe("ANSWER_KEYS", () => {
-  describe("shape", () => {
-    test("is a-d, in tile order", () => {
-      expect(ANSWER_KEYS).toEqual(["a", "b", "c", "d"])
-    })
-
-    test("is lowercase single letters, never digits", () => {
-      for (const key of ANSWER_KEYS) {
-        expect(key).toMatch(/^[a-z]$/)
-      }
-    })
-
-    test("has no duplicates, so no two tiles share a key", () => {
-      expect(new Set(ANSWER_KEYS).size).toBe(ANSWER_KEYS.length)
-    })
-  })
-
-  describe("coverage of the tiles", () => {
-    test("there is a key for every tile a normal question shows", () => {
-      expect(ANSWER_KEYS.length).toBeGreaterThanOrEqual(DISTRACTORS.OPTION_COUNT)
-    })
-  })
-})
-
 describe("table settings", () => {
-  // Pinned by name, not just by shape: GRID was removed with the array builder
-  // and four JSDoc `entry` unions went on advertising it, because nothing failed.
-  describe("INPUT_MODE membership", () => {
-    test("is exactly TILES and KEYPAD", () => {
-      expect(Object.keys(INPUT_MODE).sort()).toEqual(["KEYPAD", "TILES"])
-    })
-  })
-
-  describe("KEYPAD_MIN_STRENGTH", () => {
-    test("starts every fact on the keypad (keypad-only trial)", () => {
-      expect(KEYPAD_MIN_STRENGTH).toBe(STRENGTH.MIN)
-    })
-
-    test("is null or a valid strength", () => {
-      if (KEYPAD_MIN_STRENGTH === null) return
-      expect(Number.isInteger(KEYPAD_MIN_STRENGTH)).toBe(true)
-      expect(KEYPAD_MIN_STRENGTH).toBeGreaterThanOrEqual(STRENGTH.MIN)
-      expect(KEYPAD_MIN_STRENGTH).toBeLessThanOrEqual(STRENGTH.MAX)
-    })
-  })
-
   describe("DEFAULT_TABLES", () => {
     test("is a non-empty subset of ALL_TABLES, ascending and unique", () => {
       expect(DEFAULT_TABLES.length).toBeGreaterThan(0)
@@ -331,18 +270,6 @@ describe("ALL_TABLES", () => {
       const expected = []
       for (let table = OPERAND_MIN; table <= OPERAND_MAX; table += 1) expected.push(table)
       expect([...ALL_TABLES]).toEqual(expected)
-    })
-  })
-})
-
-describe("INPUT_MODE", () => {
-  describe("values", () => {
-    test("are distinct kebab-case ids", () => {
-      const values = Object.values(INPUT_MODE)
-      expect(new Set(values).size).toBe(values.length)
-      for (const value of values) {
-        expect(value).toMatch(KEBAB_ID)
-      }
     })
   })
 })
@@ -903,6 +830,11 @@ describe("module surface", () => {
       "PAD_MAX_OFFSET",
       // Renamed to PATTERN_FREE_IDS: it never held twelve ids.
       "TOUGH_DOZEN_IDS",
+      // The multiple-choice tiles path, deleted: the keypad is the only entry.
+      "ANSWER_KEYS",
+      "DISTRACTORS",
+      "INPUT_MODE",
+      "KEYPAD_MIN_STRENGTH",
     ])("does not export %s", (name) => {
       expect(name in constants).toBe(false)
     })
@@ -922,7 +854,6 @@ describe("module surface", () => {
       ["CARD_TIERS", CARD_TIERS],
       ["KEYPAD.KEYS", KEYPAD.KEYS],
       ["ALL_TABLES", ALL_TABLES],
-      ["ANSWER_KEYS", ANSWER_KEYS],
     ])("%s is frozen", (_name, table) => {
       expect(Object.isFrozen(table)).toBe(true)
     })

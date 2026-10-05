@@ -24,7 +24,7 @@
  *      authority on correctness), and then updates records, stars, the trail,
  *      the daily goal, milestones, and the save file.
  *   5. A miss always reveals the answer, holds for `TIMING.WRONG_FEEDBACK_MS` so
- *      the marked tiles can actually be seen, and then shows the teaching
+ *      the marked answer can actually be seen, and then shows the teaching
  *      scaffold, whose two exits ("Got it" and a computed auto-advance timer) both
  *      run one idempotent `_resolveScaffold()`.
  *   6. After `settings.sessionLength` answers, `_finishSession()` increments
@@ -56,12 +56,12 @@
  *     assignment, because the store writes through the aliased map.
  *
  * DOM ownership: `GameUI` does the rendering. This module touches `document`
- * in exactly four spec-sanctioned places -- finding the correct tile by value
- * for presentation marking, toggling `aria-live` on `#question-text` and
+ * only for page-level jobs -- toggling `aria-live` on `#question-text` and
  * `#feedback-area` while a scaffold owns the play area, looking up the
- * `#keypad` container once to construct `Keypad`, and building the one-time
- * "this browser is not saving" banner, which has to outlive every screen and so
- * cannot be any element `GameUI` already owns.
+ * `#keypad` container once to construct `Keypad`, building the one-time
+ * "this browser is not saving" banner (which has to outlive every screen and so
+ * cannot be any element `GameUI` already owns), and the bootstrap's error
+ * fallback.
  *
  * Error Handling: the `DOMContentLoaded` bootstrap is wrapped in a `try/catch`
  * that puts a readable message on the page instead of leaving a blank screen.
@@ -81,7 +81,6 @@
 
 import {
   CARD_TIERS,
-  INPUT_MODE,
   KEYPAD,
   MODE_IDS,
   OPERAND_MAX,
@@ -166,7 +165,6 @@ const SAVE_FAILED_TEXT =
  * @property {number|null} firstInteractionAt - Epoch ms of the first touch of it
  * @property {number} strengthAtAsk       - Decayed strength before this answer
  * @property {string} tierAtAsk           - Card tier before this answer
- * @property {"tiles"|"keypad"} entry - `challenge.entry`, never recomputed
  * @property {Object|null} challenge      - The live `Challenge`, or null between questions
  * @property {boolean} goalJustMetThisSession - Today's goal was met during this session
  * @property {string|null} trailFinishedName - Trail finished this session, or null
@@ -325,7 +323,6 @@ class TimesTrail {
       onHome: () => this.showTitle(),
       onBack: (sourceScreenId) => this.goBack(sourceScreenId),
       onModeSelect: (modeId) => this.startSession(modeId),
-      onAnswerSelected: (answer, buttonEl) => this._handleTileAnswer(answer, buttonEl),
       onScaffoldContinue: () => this._resolveScaffold(),
       onShowTrail: () => this.showTrail(),
       // Redrawn, not just recorded: the picker is the screen she is looking at,
@@ -740,7 +737,7 @@ class TimesTrail {
    * Build, render, and arm one question.
    *
    * Order matters twice over. The strength and card tier are captured BEFORE the
-   * answer, because star weighting, the entry affordance, and the "new card"
+   * answer, because star weighting and the "new card"
    * check all depend on the pre-answer values. And `askedAt` is stamped LAST,
    * after the DOM is written and the question is genuinely on screen, so the
    * measured thinking time does not include the render.
@@ -760,26 +757,17 @@ class TimesTrail {
     const challenge = createChallenge(
       this.session.modeId,
       fact,
-      {
-        strength: strengthAtAsk,
-        inputModeFor: (strength) => this.settings.inputModeFor(strength),
-      },
+      { strength: strengthAtAsk },
       this._rng,
     )
 
     this.session.strengthAtAsk = strengthAtAsk
     this.session.tierAtAsk = this.store.cardTierOf(factId)
-    // `challenge.entry` is the single authority on the entry affordance. Deriving
-    // it a second time here is what let a non-keypad answer collect the
-    // keypad honesty bonus.
-    this.session.entry = challenge.entry
     this.session.challenge = challenge
 
     this.ui.renderQuestion(challenge)
 
-    // Unconditional, every render: both Keypad and EventManager listen on
-    // `document`, so this is what keeps exactly one of them acting on a digit.
-    this.keypad.setEnabled(challenge.entry === INPUT_MODE.KEYPAD)
+    this.keypad.setEnabled(true)
     this.keypad.clear()
     this.ui.setAnswerDisplay(KEYPAD.EMPTY_DISPLAY)
     this.ui.renderPlayTrailStrip(this._buildStripView())
@@ -808,8 +796,7 @@ class TimesTrail {
    * clamped to `RESPONSE_TIME.MAX_RECORDED_MS`.
    *
    * Measured to submit instead, a two-digit keypad answer paid for two deliberate
-   * taps plus a check mark, so the same recall speed read as `fluent` on tiles and
-   * `slow` on the keypad. What that cost was the collection, not the trail: a
+   * taps plus a check mark, so a fast recall read as `slow`. What that cost was the collection, not the trail: a
    * `slow` answer promotes no higher than `STRENGTH.SLOW_CAP` (3) and steps a fact
    * already above it back down by one, so a keypad fact she knew cold sat at 3
    * indefinitely and its card could never foil. Region gates read strength 3, so
@@ -831,46 +818,27 @@ class TimesTrail {
   }
 
   /**
-   * A tile was tapped. The tap is both the first interaction and the submit.
-   * @param {number} answer - The tapped value
-   * @param {HTMLElement} buttonEl - The tapped tile, for presentation only
-   * @returns {void}
-   * @private
-   */
-  _handleTileAnswer(answer, buttonEl) {
-    if (this.session.entry !== INPUT_MODE.TILES) return
-    this._markFirstInteraction()
-    this._handleAnswer(answer, buttonEl)
-  }
-
-  /**
    * The one answer handler, and the one place the double-submit guard lives. A
-   * guard on the tile path alone left a fast double-tap on the keypad's
-   * checkmark scoring twice, because that path never passed through it.
+   * fast double-tap on the keypad's checkmark must not score twice.
    *
    * `challenge.check(input)` is the sole authority on correctness. Nothing here
-   * compares `input` to `challenge.answer`, and nothing reads a `data-correct`
-   * attribute, because the markup carries none. `check` absorbs the type
-   * differences between entry paths on its own, so no call site has to know
-   * which one fired.
-   * @param {*} input - Whatever the entry path collected
-   * @param {HTMLElement|null} [buttonEl] - The tapped tile, when there was one
+   * compares `input` to `challenge.answer`. `check` absorbs the type differences
+   * between inputs on its own, so no call site has to know which one fired.
+   * @param {*} input - Whatever the keypad collected
    * @returns {void}
    * @private
    */
-  _handleAnswer(input, buttonEl = null) {
+  _handleAnswer(input) {
     if (this._isProcessingAnswer) return
     const challenge = this.session.challenge
     if (challenge === null) return
 
     this._isProcessingAnswer = true
-    this.ui.disableAnswerButtons()
     this.keypad.setEnabled(false)
 
     const responseMs = this._responseMs()
     const correct = challenge.check(input) === true
 
-    this._markTiles(challenge, correct, buttonEl)
     if (correct) {
       this._markAnswerDisplay(challenge)
       this._applyCorrect(challenge, responseMs)
@@ -925,7 +893,6 @@ class TimesTrail {
     const stars = this.scoring.starsForCorrect({
       strength: this.session.strengthAtAsk,
       streak: this.session.streak,
-      inputMode: challenge.entry,
     })
     this.session.starsEarned += stars
     this.progress.totals.starsTotal += stars
@@ -958,13 +925,10 @@ class TimesTrail {
   /**
    * Paint her typed answer green and leave it on screen, for presentation only.
    *
-   * The keypad path used to produce no positive feedback whatsoever: nothing was
-   * marked `.correct` and the readout was reset to "?" in the same turn, so the 42
-   * she typed vanished at the moment she was told it was right. Every strength-3+
-   * fact routes to the keypad, which made that the dominant path exactly as she
-   * improved.
+   * Without this the readout was reset to "?" in the same turn as the answer, so
+   * the 42 she typed vanished at the moment she was told it was right.
    *
-   * Ordering matters and is now safe from both ends: `Keypad` no longer empties its
+   * Ordering matters and is safe from both ends: `Keypad` no longer empties its
    * buffer on submit, and `GameUI` drops the `.correct` state on the next
    * `setAnswerDisplay`, which only the next keypress and the next `renderQuestion`
    * reach.
@@ -973,7 +937,6 @@ class TimesTrail {
    * @private
    */
   _markAnswerDisplay(challenge) {
-    if (challenge.entry !== INPUT_MODE.KEYPAD) return
     this.ui.markAnswerDisplayCorrect(challenge.answer)
   }
 
@@ -1099,10 +1062,8 @@ class TimesTrail {
   /**
    * Let the miss be seen, then teach it.
    *
-   * The reveal, the `.incorrect` mark on the tapped tile, its shake, and the
-   * highlight on the tile that was right all land in the same synchronous turn as
-   * the answer. Showing the scaffold in that same turn meant none of it was ever
-   * painted: a wrong tap drew nothing at all and never showed which tile was right.
+   * The wrong-answer reveal lands in the same synchronous turn as the answer.
+   * Showing the scaffold in that same turn meant none of it was ever painted.
    * `TIMING.WRONG_FEEDBACK_MS` is that gap.
    *
    * `_scaffoldResolved` is cleared here rather than in `_showScaffold`, so a "Got
@@ -1123,13 +1084,6 @@ class TimesTrail {
    * is up: the keypad goes inert and the scaffold becomes the only live region,
    * so a screen reader narrates one thing.
    *
-   * Tiles, if ever restored, are FROZEN rather than removed, so the tile
-   * marked `.correct` and the one marked `.incorrect` are still readable while the
-   * scaffold teaches -- they occupy the `entry` grid area and the scaffold occupies
-   * `extra`, so both fit. On a keypad question there are no tiles to keep,
-   * and an empty-but-visible `#answer-tiles` would take a row for nothing, so that
-   * path still clears and hides.
-   *
    * Both exits are armed here -- the "Got it" button (wired to
    * `_resolveScaffold` through `onScaffoldContinue`) and a computed auto-advance
    * fallback. The duration is computed rather than fixed because a fixed 3200 ms
@@ -1146,12 +1100,6 @@ class TimesTrail {
     }
 
     this._scaffoldResolved = false
-    if (challenge.entry === INPUT_MODE.TILES) {
-      this.ui.freezeTiles()
-    } else {
-      this.ui.clearTiles()
-      this.ui.setTilesVisible(false)
-    }
     this.ui.setKeypadVisible(false)
     this.keypad.setEnabled(false)
     this._setLiveRegions("off")
@@ -1415,7 +1363,6 @@ class TimesTrail {
       firstInteractionAt: null,
       strengthAtAsk: 0,
       tierAtAsk: CARD_TIERS[0].id,
-      entry: INPUT_MODE.TILES,
       challenge: null,
       goalJustMetThisSession: false,
       trailFinishedName: null,
@@ -1423,26 +1370,7 @@ class TimesTrail {
   }
 
   /**
-   * Mark the tiles after the fact, for presentation only. The correct tile is
-   * found by VALUE: correctness has already been decided by `challenge.check`,
-   * and the markup deliberately carries no answer key to read back.
-   * @param {Object} challenge - The live challenge
-   * @param {boolean} correct - What `challenge.check` said
-   * @param {HTMLElement|null} buttonEl - The tapped tile, if any
-   * @returns {void}
-   * @private
-   */
-  _markTiles(challenge, correct, buttonEl) {
-    if (challenge.entry !== INPUT_MODE.TILES) return
-    const correctTile = document.querySelector(`#answer-tiles [data-answer="${challenge.answer}"]`)
-    if (correctTile !== null) this.ui.markButtonCorrect(correctTile)
-    if (correct || !buttonEl || buttonEl === correctTile) return
-    this.ui.markButtonIncorrect(buttonEl)
-    this.ui.shakeButton(buttonEl)
-  }
-
-  /**
-   * Set `aria-live` on the two regions the scaffold silences. One of the four
+   * Set `aria-live` on the two regions the scaffold silences. One of the few
    * places this module touches `document` directly; `GameUI` owns the content of
    * these elements, this owns their announcement policy for the scaffold's
    * duration.

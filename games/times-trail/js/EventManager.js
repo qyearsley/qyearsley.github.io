@@ -13,18 +13,13 @@
  *
  * Statelessness: this class holds no `isProcessingAnswer` flag and exposes no
  * `resetAnswerProcessing()`. The double-submit guard lives in `game.js`, at the
- * single point where the answer paths converge.
- * Guarding only the tile path here left the other two unguarded, so the same
- * question could be answered twice while feedback was on screen.
+ * single point where the answer paths converge. A guard here would cover only
+ * some of them, and the same question could be answered twice while feedback
+ * was on screen.
  *
- * Correctness: `EventManager` never decides whether an answer is right. It
- * reports the tapped value and the tapped element; `game.js` asks
- * `challenge.check()`. Nothing here reads a `data-correct` attribute -- the
- * markup does not carry one, and an answer key in the page is both a second
- * source of truth and readable by anyone who opens the inspector.
+ * Correctness: `EventManager` never decides whether an answer is right. Answers
+ * come from the keypad, and `game.js` asks `challenge.check()`.
  */
-
-import { ANSWER_KEYS } from "./constants.js"
 
 /**
  * @typedef {Object} EventCallbacks
@@ -35,7 +30,6 @@ import { ANSWER_KEYS } from "./constants.js"
  * @property {() => void} [onHome]
  * @property {(sourceScreenId: string) => void} [onBack]
  * @property {(modeId: string) => void} [onModeSelect]
- * @property {(answer: number, buttonEl: HTMLElement) => void} [onAnswerSelected]
  * @property {() => void} [onScaffoldContinue]
  * @property {() => void} [onShowTrail]
  * @property {() => void} [onShowMap]
@@ -47,9 +41,6 @@ import { ANSWER_KEYS } from "./constants.js"
  * @property {(key: string, value: string) => void} [onSettingChange]
  * @property {(table: number, checked: boolean) => void} [onTableToggle]
  */
-
-/** Tags whose own keyboard behavior must never be hijacked. */
-const TEXT_ENTRY_TAGS = new Set(["INPUT", "TEXTAREA", "SELECT"])
 
 export class EventManager {
   /**
@@ -77,7 +68,6 @@ export class EventManager {
     this.setupHomeButton()
     this.setupBackButton()
     this.setupModeButtons()
-    this.setupAnswerTiles()
     this.setupScaffoldContinue()
     this.setupNavButtons()
     this.setupTrailPicker()
@@ -85,7 +75,6 @@ export class EventManager {
     this.setupSettingsButtons()
     this.setupSettingsControls()
     this.setupSettingsDismiss()
-    this.setupKeyboardShortcuts()
   }
 
   /**
@@ -199,26 +188,6 @@ export class EventManager {
         if (!modeId) return
         this._invoke("onModeSelect", modeId)
       })
-    })
-  }
-
-  /**
-   * Wires `#answer-tiles` to `onAnswerSelected(answer, buttonEl)` by delegation.
-   * Tiles are re-rendered every question, so per-button listeners would leak.
-   * The tapped value comes from `data-answer`; a non-numeric value does not
-   * fire. Correctness is `game.js`'s call, so no third argument is passed.
-   *
-   * @returns {void}
-   */
-  setupAnswerTiles() {
-    const container = this._element("answerTiles", "answer-tiles")
-    if (!container) return
-    container.addEventListener("click", (event) => {
-      const tile = event.target.closest(".answer-btn")
-      if (!tile || !container.contains(tile)) return
-      const answer = parseInt(tile.dataset.answer, 10)
-      if (Number.isNaN(answer)) return
-      this._invoke("onAnswerSelected", answer, tile)
     })
   }
 
@@ -344,71 +313,6 @@ export class EventManager {
       if (!modal || modal.classList.contains("hidden")) return
       event.preventDefault()
       this._invoke("onSettingsClose")
-    })
-  }
-
-  /**
-   * Report whether answer tiles are the affordance the player is currently
-   * looking at. This is the guard shared with `Keypad.handleKeyDown` (the
-   * `#play-screen` active / `#settings-modal` hidden pair) plus one extra term:
-   * `#answer-tiles` must itself be visible.
-   *
-   * The extra term still matters now that the two `document` keydown listeners
-   * no longer share a key space. `renderQuestion` shows exactly one affordance,
-   * and a tile left in the DOM from an earlier question is only hidden, not
-   * removed, until the next render clears it -- so without this term an `A`
-   * pressed on a keypad question could click a tile that is not on screen.
-   *
-   * @private
-   * @returns {boolean} True when A-D should select a tile
-   */
-  _isTileEntryActive() {
-    const playScreen = document.getElementById("play-screen")
-    const modal = document.getElementById("settings-modal")
-    const tiles = document.getElementById("answer-tiles")
-    const active = Boolean(playScreen && playScreen.classList.contains("active"))
-    const modalOpen = Boolean(modal && !modal.classList.contains("hidden"))
-    const tilesShowing = Boolean(tiles && !tiles.classList.contains("hidden"))
-    // The site's own help overlay -- the one `?` opens -- covers the tiles as
-    // thoroughly as the settings modal does. `shared/nav.js` publishes
-    // `__helpOverlayIsOpen` for exactly this, and for a while no game asked.
-    const helpOpen = window.__helpOverlayIsOpen?.() === true
-    return active && !modalOpen && !helpOpen && tilesShowing
-  }
-
-  /**
-   * Wires one `document` `keydown` listener so the `ANSWER_KEYS` letters (`a` to
-   * `d`, either case) click the matching answer tile. Gated by
-   * `_isTileEntryActive()`, skipped when the event target is a text-entry
-   * element, and skipped when a modifier is held so browser and OS shortcuts
-   * (⌘D, ⌃A) still work.
-   *
-   * Letters rather than digits: see `ANSWER_KEYS`. The two keyboards are now
-   * disjoint, which is the point -- digits mean digits and letters mean tiles,
-   * so neither listener has to reason about what the other one is doing.
-   * Digit/Enter/Backspace handling for the keypad belongs to
-   * `Keypad.handleKeyDown` and is deliberately not duplicated. A digit pressed
-   * on a tile question reaches that handler and stops there: `game.js` calls
-   * `keypad.setEnabled(challenge.entry === INPUT_MODE.KEYPAD)` on every render,
-   * so on a tile question the pad is disabled and `handleKeyDown` bails before
-   * it touches the buffer. Nothing is typed into an entry that has no submit.
-   *
-   * @returns {void}
-   */
-  setupKeyboardShortcuts() {
-    document.addEventListener("keydown", (event) => {
-      if (event.metaKey || event.ctrlKey || event.altKey) return
-      const index = ANSWER_KEYS.indexOf(String(event.key).toLowerCase())
-      if (index === -1) return
-      if (!this._isTileEntryActive()) return
-      const target = event.target
-      if (target && TEXT_ENTRY_TAGS.has(target.tagName)) return
-
-      event.preventDefault()
-      const tiles = document.querySelectorAll("#answer-tiles .answer-btn")
-      const tile = tiles[index]
-      if (!tile || tile.classList.contains("disabled")) return
-      tile.click()
     })
   }
 }

@@ -109,7 +109,6 @@ body {
 /* Every interactive class gets the same 68px floor. The header controls
    (back arrow, gear, "Home") used to be the three smallest targets on
    screen and are tapped on every screen. */
-.answer-btn,
 .keypad-key,
 .mode-button,
 .big-button,
@@ -421,7 +420,6 @@ body {
 /* Disabled controls (BaseGameUI.disableButton / disableAnswerButtons). */
 .big-button:disabled,
 .secondary-button:disabled,
-.answer-btn:disabled,
 .keypad-key:disabled,
 .disabled {
   opacity: 0.5;
@@ -431,7 +429,6 @@ body {
 /* Hover is an enhancement only -- gated so a touch device never inherits a
    sticky hover state, and every control below has an unconditional :active. */
 @media (hover: hover) and (pointer: fine) {
-  .answer-btn:hover,
   .keypad-key:hover,
   .mode-button:hover,
   .table-toggle:hover {
@@ -448,7 +445,6 @@ body {
   }
 }
 
-.answer-btn:active,
 .keypad-key:active,
 .mode-button:active,
 .big-button:active,
@@ -514,7 +510,6 @@ body {
   grid-area: readout;
 }
 
-#answer-tiles,
 #keypad {
   grid-area: entry;
 }
@@ -543,73 +538,6 @@ body {
   font-weight: 700;
   text-align: center;
   color: var(--tt-ink);
-}
-
-/* ==================== Answer Tiles ==================== */
-.answer-tiles {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--tt-tap-gap);
-  width: min(560px, 100%); /* an actual width, not just a ceiling */
-  margin: 0 auto;
-  align-content: center;
-}
-
-.answer-btn {
-  min-height: 88px;
-  font-size: 2.5rem;
-  background-color: var(--tt-surface);
-  color: var(--tt-primary);
-  border: 3px solid var(--tt-primary);
-  box-shadow: var(--tt-shadow);
-}
-
-/* The A-D shortcut, printed in the tile's corner and ONLY where there is a real
-   pointer -- a laptop, not the shared iPad this game is mostly played on.
-   `pointer: fine` is the closest thing to "there is probably a keyboard too",
-   and the guard is the whole point of this block: a stray glyph beside a
-   two-digit product is how a child misreads the answer. On the iPad the
-   shortcut does not exist, so nothing is drawn there at all.
-
-   Drawn from `data-key` (GameUI.renderTiles) rather than from the tile's text,
-   so the face stays exactly the number -- which is what the screen reader, the
-   tests, and the child all read. A tile past the fourth carries no `data-key`,
-   and `attr()` then resolves to the empty string, so nothing is drawn on it.
-
-   A letter, not a digit, for the same reason the shortcut itself moved off
-   `1`-`4`: every tile face is already a number. `currentcolor` carries the
-   marker through the correct/incorrect repaint below, where the tile turns
-   solid and its text turns white; a fixed muted ink would have gone invisible
-   there. `line-height: 1` pins the glyph to its own font size instead of
-   inheriting the 2.5rem answer's leading. */
-@media (hover: hover) and (pointer: fine) {
-  .answer-btn {
-    position: relative;
-  }
-
-  .answer-btn::after {
-    content: attr(data-key);
-    position: absolute;
-    top: 6px;
-    left: 10px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    line-height: 1;
-    color: currentcolor;
-    opacity: 0.55;
-  }
-}
-
-/* The miss reveal: the tiles stay on screen while the scaffold teaches
-   (GameUI.freezeTiles), inert, with the two tiles that carry the answer --
-   the one she tapped and the right one -- at full strength and the two
-   irrelevant tiles pushed back. */
-.answer-tiles-frozen {
-  pointer-events: none;
-}
-
-.answer-tiles-frozen .answer-btn:not(.correct, .incorrect) {
-  opacity: 0.4;
 }
 
 /* ==================== Keypad ==================== */
@@ -652,7 +580,7 @@ body {
 
 /* The one piece of positive feedback on the keypad path: her own digits,
    green, held for the feedback beat (GameUI.markAnswerDisplayCorrect). Scoped
-   to the id so it cannot repaint .feedback-area.correct or a tile. */
+   to the id so it cannot repaint .feedback-area.correct. */
 #answer-display.correct {
   color: var(--tt-correct);
   animation: pop 0.3s ease;
@@ -1254,7 +1182,7 @@ body {
 
 /* ==================== Focus Styles (Accessibility) ====================
    The site sheet rings every `:focus`, which on an iPad means a blue box left
-   around whichever tile was last tapped, and at `button:focus` (0,1,1) it also
+   around whichever button was last tapped, and at `button:focus` (0,1,1) it also
    outranked the bare `:focus-visible` rule that used to be here -- so the
    accent ring below was never the one drawn on a button. Both halves are
    replaced: the always-on ring is dropped, and the keyboard-only one is
@@ -1283,23 +1211,6 @@ select:focus-visible {
 }
 
 /* ==================== Animations ==================== */
-@keyframes shake {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-
-  20%,
-  60% {
-    transform: translateX(-8px);
-  }
-
-  40%,
-  80% {
-    transform: translateX(8px);
-  }
-}
-
 @keyframes pop {
   0% {
     transform: scale(1);
@@ -1326,32 +1237,6 @@ select:focus-visible {
   100% {
     transform: scale(1);
   }
-}
-
-.shake {
-  animation: shake 0.5s ease;
-}
-
-/* Scoped to .answer-btn: BaseGameUI's markButtonCorrect / markButtonIncorrect
-   add these classes to answer buttons, and an unscoped .correct would also
-   repaint .feedback-area.correct as a solid block.
-
-   `opacity: 1` on both is required, not decorative: every tile is disabled
-   (`.disabled`, opacity 0.5) before these classes are added, so without it the
-   revealed correct answer looked exactly as faded as the three wrong ones. */
-.answer-btn.correct {
-  background-color: var(--tt-correct);
-  border-color: var(--tt-correct);
-  color: #fff;
-  opacity: 1;
-  animation: pop 0.3s ease;
-}
-
-.answer-btn.incorrect {
-  background-color: var(--tt-incorrect);
-  border-color: var(--tt-incorrect);
-  color: #fff;
-  opacity: 1;
 }
 
 /* ==================== Reduced Motion ==================== */
@@ -1449,11 +1334,6 @@ select:focus-visible {
 
   .question {
     font-size: 1.75rem;
-  }
-
-  .answer-btn {
-    min-height: 72px;
-    font-size: 2rem;
   }
 
   .keypad {

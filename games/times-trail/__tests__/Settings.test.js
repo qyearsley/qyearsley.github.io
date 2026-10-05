@@ -23,18 +23,8 @@
 
 import { describe, expect, jest, test } from "@jest/globals"
 import { Settings } from "../js/Settings.js"
-import {
-  ALL_TABLES,
-  DEFAULT_TABLES,
-  INPUT_MODE,
-  KEYPAD_MIN_STRENGTH,
-  SESSION,
-  STRENGTH,
-} from "../js/constants.js"
+import { ALL_TABLES, DEFAULT_TABLES, SESSION } from "../js/constants.js"
 import { FACT_IDS, factIdsForTables, getFact } from "../js/facts.js"
-
-/** Every strength the model can produce, for exhaustive entry-mode coverage. */
-const ALL_STRENGTHS = [0, 1, 2, 3, 4, 5]
 
 /** Pool sizes computed from facts.js, never hardcoded in the assertions below. */
 const COMPUTED = {
@@ -203,10 +193,9 @@ describe("Settings", () => {
       expect(settings.factCount).toBe(COMPUTED.all)
     })
 
-    test("a persisted inputMode cannot override the derived entry mode", () => {
+    test("a persisted inputMode from an older build is dropped", () => {
       const settings = new Settings({ inputMode: "tiles" })
       expect("inputMode" in settings.toJSON()).toBe(false)
-      expect(settings.inputModeFor(5)).toBe(INPUT_MODE.KEYPAD)
     })
   })
 
@@ -417,61 +406,6 @@ describe("Settings", () => {
     test("reads back whatever was persisted", () => {
       for (const length of SESSION.LENGTH_OPTIONS) {
         expect(new Settings({ sessionLength: length }).sessionLength).toBe(length)
-      }
-    })
-  })
-
-  describe("inputModeFor", () => {
-    // Keypad-only trial (2026-08-27): KEYPAD_MIN_STRENGTH is 0, so the tiles path
-    // is unreachable. The threshold-agnostic test below is what keeps this honest
-    // if the threshold is raised.
-    test("uses the keypad at every strength", () => {
-      const settings = new Settings()
-      for (const strength of ALL_STRENGTHS) {
-        expect(settings.inputModeFor(strength)).toBe(INPUT_MODE.KEYPAD)
-      }
-    })
-
-    test("agrees with KEYPAD_MIN_STRENGTH at every strength", () => {
-      const settings = new Settings()
-      for (const strength of ALL_STRENGTHS) {
-        const expected =
-          KEYPAD_MIN_STRENGTH !== null && strength >= KEYPAD_MIN_STRENGTH
-            ? INPUT_MODE.KEYPAD
-            : INPUT_MODE.TILES
-        expect(settings.inputModeFor(strength)).toBe(expected)
-      }
-    })
-
-    test("does not vary with the tables in play", () => {
-      for (const tables of [[2], [9], [...ALL_TABLES]]) {
-        const settings = new Settings({ tables })
-        for (const strength of ALL_STRENGTHS) {
-          expect(settings.inputModeFor(strength)).toBe(new Settings().inputModeFor(strength))
-        }
-      }
-    })
-
-    // COVERAGE LOSS, keypad-only trial (2026-08-27): the rounding and
-    // non-finite-to-0 behaviour of inputModeFor used to be observable through
-    // the tiles/keypad boundary. With KEYPAD_MIN_STRENGTH at 0 the return value
-    // can no longer distinguish a sanitised input from an unsanitised one, so
-    // these assert only that odd input is handled without throwing. Raising the
-    // threshold should restore the two tests that were here: "rounds fractional
-    // strengths" (2.4 -> tiles, 2.5 -> keypad) and "a non-finite strength is
-    // treated as 0".
-    test("handles fractional, out-of-range, and non-finite strengths", () => {
-      const inputs = [2.4, 2.5, -99, -1, 99, STRENGTH.MAX + 1, NaN, Infinity, -Infinity, "5", {}]
-      const settings = new Settings()
-      for (const strength of inputs) {
-        expect(settings.inputModeFor(strength)).toBe(INPUT_MODE.KEYPAD)
-      }
-    })
-
-    test("only ever returns tiles or keypad, never grid", () => {
-      const settings = new Settings()
-      for (const strength of ALL_STRENGTHS) {
-        expect([INPUT_MODE.TILES, INPUT_MODE.KEYPAD]).toContain(settings.inputModeFor(strength))
       }
     })
   })

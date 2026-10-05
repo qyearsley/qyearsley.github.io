@@ -163,7 +163,6 @@
         <div id="play-trail-strip" class="play-trail-strip" aria-label="Trail position"></div>
         <div id="play-area" class="play-area">
           <p id="question-text" class="question" role="status" aria-live="polite"></p>
-          <div id="answer-tiles" class="answer-tiles"></div>
           <!-- Not a live region: this readout is reset to "?" on every question
                render, and the play screen already has four competing live
                regions. `role="status"` carries an implicit aria-live, so both
@@ -342,9 +341,6 @@
         window.__registerShortcut("Enter", "Submit answer")
         window.__registerShortcut("Backspace", "Delete a digit")
         window.__registerShortcut("Escape", "Clear entry, or close settings")
-        // Multiple choice only, and the digits above are why it is letters:
-        // every tile face is a number. See ANSWER_KEYS in js/constants.js.
-        window.__registerShortcut("A-D", "Choose a multiple-choice tile")
       }
     </script>
   </body>

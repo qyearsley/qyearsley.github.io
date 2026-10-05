@@ -109,14 +109,6 @@ export const FACTS = _buildFacts()
 export const FACT_IDS = Object.freeze(FACTS.map((fact) => fact.id))
 
 /**
- * The eight square ids, "2x2" through "9x9". Frozen.
- * @type {readonly string[]}
- */
-export const SQUARE_IDS = Object.freeze(
-  FACTS.filter((fact) => fact.isSquare).map((fact) => fact.id),
-)
-
-/**
  * Id -> Fact index, so `getFact` is O(1) rather than a scan of 36.
  * @private
  * @type {Map<string, Fact>}

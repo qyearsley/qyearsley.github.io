@@ -24,12 +24,8 @@ export const TOTAL_FACTS = 36
 
 /**
  * Leitner box boundaries. A fact's strength is an integer 0-5 and drives
- * everything: which entry mode it gets, when it comes due, what its card art
- * looks like, and whether its region counts it as mastered.
- *
- * The tier names are the whole vocabulary; the entry mode a tier gets is NOT
- * fixed here. `KEYPAD_MIN_STRENGTH` decides where the keypad starts, so a
- * tier's entry mode is a question for that constant rather than for this table.
+ * everything: when it comes due, what its card art looks like, and whether its
+ * region counts it as mastered.
  */
 export const STRENGTH = Object.freeze({
   MIN: 0,
@@ -45,10 +41,9 @@ export const STRENGTH = Object.freeze({
  *
  * What is being measured: these thresholds bound *thinking* time, not
  * thinking-plus-typing time. The clock starts when the question becomes
- * interactive and stops at the first interaction (first tile tap or first
- * keypad keypress), never at submit -- so a two-digit keypad answer costs the
- * same measured time as a one-tap tile answer, and the keypad's extra motor
- * work can never demote a fact the player actually knows.
+ * interactive and stops at the first keypad keypress, never at submit -- so a
+ * two-digit answer costs the same measured time as a one-digit answer, and the
+ * keypad's extra motor work can never demote a fact the player actually knows.
  *
  * SLOW_MS is generous on purpose. Counting up to 42 by sevens legitimately
  * takes about ten seconds, and a child who gets there is not guessing -- she is
@@ -112,34 +107,6 @@ export const SELECTION = Object.freeze({
   GATE_WEIGHT_BONUS: 3, // multiplier applied to a fact the next gate waits on
 })
 
-/**
- * Multiple-choice tile generation. Every one of the 36 facts yields at least 6
- * near-miss candidates, so OPTION_COUNT - 1 distinct distractors are always
- * available from real near-misses and there is no padding path.
- */
-export const DISTRACTORS = Object.freeze({
-  OPTION_COUNT: 4, // total tiles, including the answer
-  PRIORITY_WINDOW: 6, // shuffle only the top N near-misses
-})
-
-/**
- * Keyboard shortcuts for the multiple-choice tiles, in tile order. Lowercase
- * here; `GameUI` upper-cases them for the label and the corner hint.
- *
- * Letters, not digits. The tiles were picked with `1`-`4` and that was wrong
- * twice over. Every tile face is already a number, so a digit shortcut is
- * indistinguishable from an answer -- and it meant *position*, not value, so
- * pressing `4` on the tile showing 42 picked whatever sat fourth. It was also
- * invisible: nothing was ever drawn on the tile to say the shortcut existed.
- * Seasons and Number Garden moved to A-D for exactly these reasons.
- *
- * The list is four long because `DISTRACTORS.OPTION_COUNT` is 4, but
- * `generateOptions` clamps its `count` to [2, 8], so more tiles than letters is
- * possible. A tile past the end of this list gets no shortcut and no corner
- * hint rather than a fifth letter nobody documented.
- */
-export const ANSWER_KEYS = Object.freeze(["a", "b", "c", "d"])
-
 /** Every table the game covers, ascending. */
 export const ALL_TABLES = Object.freeze([2, 3, 4, 5, 6, 7, 8, 9])
 
@@ -163,26 +130,6 @@ export const ALL_TABLES = Object.freeze([2, 3, 4, 5, 6, 7, 8, 9])
  * behaviour and no mode argument.
  */
 export const DEFAULT_TABLES = ALL_TABLES
-
-/**
- * The strength at which a fact switches from multiple-choice tiles to keypad
- * entry. `null` would mean never use the keypad.
- *
- * TRIAL (2026-08-27): 0, so the keypad is the only entry path and the tiles
- * never appear. Typing is the only honest signal of recall -- tiles carry a 25%
- * guessing floor that muddies the mastery data. Set it to 3 to get the adaptive
- * tiles-then-keypad behaviour back; nothing else needs changing. See "The
- * question loop" in docs/times-trail-plan.md.
- */
-export const KEYPAD_MIN_STRENGTH = 0
-
-/**
- * How the player enters an answer. Derived from the fact's strength via
- * `KEYPAD_MIN_STRENGTH`, never chosen by the player, so there is no matching
- * setting. TILES is retained only so a revert of the keypad-only trial does not
- * have to reintroduce it; nothing currently produces it.
- */
-export const INPUT_MODE = Object.freeze({ TILES: "tiles", KEYPAD: "keypad" })
 
 /** Practice mode identifiers. */
 export const MODE_IDS = Object.freeze({
@@ -357,14 +304,14 @@ export const PATTERN_FREE_IDS = Object.freeze([
 
 /**
  * Star scoring. A correct answer earns BASE, plus a tier bonus that pays most
- * for the facts she knows least, plus KEYPAD_BONUS when she typed the answer
- * instead of picking a tile, all multiplied by the session-streak multiplier.
+ * for the facts she knows least, plus KEYPAD_BONUS for typing the answer, all
+ * multiplied by the session-streak multiplier.
  */
 export const STARS = Object.freeze({
   BASE: 10,
   /** Weakest facts pay the most, so practice goes where it is needed. */
   TIER_BONUS: Object.freeze({ weak: 10, strengthening: 5, mastered: 0 }),
-  KEYPAD_BONUS: 5, // typing the answer is harder than recognising it
+  KEYPAD_BONUS: 5, // typing the answer is harder than recognizing it
   /** Ascending by threshold. Largest threshold <= streak wins. */
   STREAK_MULTIPLIERS: Object.freeze([
     Object.freeze({ minStreak: 0, multiplier: 1 }),
@@ -493,8 +440,7 @@ export const CARD_TIERS = Object.freeze([
  * still running when the next question renders over it.
  *
  * WRONG_FEEDBACK_MS is the mirror of CORRECT_FEEDBACK_MS and exists for the same
- * reason: a miss marks the entry `.incorrect` and shakes it, and that is not
- * worth marking if the scaffold replaces the play area in the same synchronous
+ * reason: a miss reveals the answer, and that is not worth showing if the scaffold replaces the play area in the same synchronous
  * turn. It is longer than CORRECT_FEEDBACK_MS because a wrong answer is the one
  * moment the player needs time to look before being taught.
  *

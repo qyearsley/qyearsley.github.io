@@ -17,7 +17,7 @@
  *
  * 1. Response time caps strength, it does not add to it. `responseMs` is
  *    *thinking* time: the milliseconds from the question becoming interactive
- *    to the FIRST interaction (first tile tap or first keypad keypress), never
+ *    to the FIRST interaction (the first keypad keypress), never
  *    to submit, so the number of digits typed cannot change the band. A correct
  *    answer ALWAYS promotes by one box; what the band decides is the ceiling it
  *    may promote to. A "fluent" answer may climb all the way to STRENGTH.MAX,
@@ -388,18 +388,6 @@ export function cardTier(record, now) {
     if (candidate.minStrength <= strength) tier = candidate
   }
   return tier.id
-}
-
-/**
- * Lifetime accuracy on the fact.
- * @param {MasteryRecord} record - The fact's record
- * @returns {number} totalCorrect / totalSeen, or 0 when never asked
- */
-export function accuracy(record) {
-  if (!_isPlainObject(record)) return 0
-  const totalSeen = _count(record.totalSeen)
-  if (totalSeen === 0) return 0
-  return Math.min(_count(record.totalCorrect), totalSeen) / totalSeen
 }
 
 /**

@@ -1,13 +1,6 @@
 import { describe, test, expect } from "@jest/globals"
 import { Scoring } from "../js/Scoring.js"
-import {
-  DAILY_GOAL,
-  FLAME_STAGES,
-  GEM_MILESTONES,
-  INPUT_MODE,
-  SESSION,
-  STARS,
-} from "../js/constants.js"
+import { DAILY_GOAL, FLAME_STAGES, GEM_MILESTONES, SESSION, STARS } from "../js/constants.js"
 
 /**
  * Timezone care: `dateKey` reads LOCAL date components, so every timestamp in
@@ -203,118 +196,62 @@ describe("Scoring", () => {
   })
 
   describe("starsForCorrect", () => {
-    test("weak plus tiles at streak 1 pays 20", () => {
-      expect(
-        scoringOnDay().starsForCorrect({ strength: 0, streak: 1, inputMode: INPUT_MODE.TILES }),
-      ).toBe(20)
+    // Every answer is typed, so the keypad bonus (5) is always in the base.
+    test("weak at streak 1 pays 25", () => {
+      expect(scoringOnDay().starsForCorrect({ strength: 0, streak: 1 })).toBe(25)
     })
 
-    test("strengthening plus tiles at streak 1 pays 15", () => {
-      expect(
-        scoringOnDay().starsForCorrect({ strength: 3, streak: 1, inputMode: INPUT_MODE.TILES }),
-      ).toBe(15)
+    test("strengthening at streak 1 pays 20", () => {
+      expect(scoringOnDay().starsForCorrect({ strength: 3, streak: 1 })).toBe(20)
     })
 
-    test("mastered plus tiles at streak 1 pays 10", () => {
-      expect(
-        scoringOnDay().starsForCorrect({ strength: 5, streak: 1, inputMode: INPUT_MODE.TILES }),
-      ).toBe(10)
+    test("mastered at streak 1 pays 15", () => {
+      expect(scoringOnDay().starsForCorrect({ strength: 5, streak: 1 })).toBe(15)
     })
 
-    test("a mastered fact pays exactly half what a weak one pays at equal streak", () => {
-      const scoring = scoringOnDay()
-      const weak = scoring.starsForCorrect({
-        strength: 0,
-        streak: 1,
-        inputMode: INPUT_MODE.TILES,
-      })
-      const mastered = scoring.starsForCorrect({
-        strength: 5,
-        streak: 1,
-        inputMode: INPUT_MODE.TILES,
-      })
-      expect(weak).toBe(2 * mastered)
-    })
-
-    test("a mastered fact pays strictly less than a weak one at every streak and input mode", () => {
+    test("a mastered fact pays strictly less than a weak one at every streak", () => {
       const scoring = scoringOnDay()
       for (const streak of [0, 1, 2, 3, 5, 6, 9, 10, 20]) {
-        for (const inputMode of [INPUT_MODE.TILES, INPUT_MODE.KEYPAD, "grid"]) {
-          const weak = scoring.starsForCorrect({ strength: 0, streak, inputMode })
-          const strengthening = scoring.starsForCorrect({ strength: 3, streak, inputMode })
-          const mastered = scoring.starsForCorrect({ strength: 5, streak, inputMode })
-          expect(mastered).toBeLessThan(strengthening)
-          expect(strengthening).toBeLessThan(weak)
-        }
+        const weak = scoring.starsForCorrect({ strength: 0, streak })
+        const strengthening = scoring.starsForCorrect({ strength: 3, streak })
+        const mastered = scoring.starsForCorrect({ strength: 5, streak })
+        expect(mastered).toBeLessThan(strengthening)
+        expect(strengthening).toBeLessThan(weak)
       }
     })
 
-    test("the keypad adds exactly 5 before the multiplier", () => {
+    test("the keypad bonus is added before the multiplier", () => {
       const scoring = scoringOnDay()
-      expect(
-        scoring.starsForCorrect({ strength: 0, streak: 1, inputMode: INPUT_MODE.KEYPAD }),
-      ).toBe(25)
-      expect(
-        scoring.starsForCorrect({ strength: 0, streak: 6, inputMode: INPUT_MODE.KEYPAD }),
-      ).toBe(50)
-    })
-
-    test("only the keypad earns the honesty bonus", () => {
-      const scoring = scoringOnDay()
-      const tiles = scoring.starsForCorrect({
-        strength: 0,
-        streak: 1,
-        inputMode: INPUT_MODE.TILES,
-      })
-      const unknown = scoring.starsForCorrect({ strength: 0, streak: 1, inputMode: "grid" })
-      expect(unknown).toBe(tiles)
+      const base = STARS.BASE + STARS.TIER_BONUS.weak + STARS.KEYPAD_BONUS
+      expect(scoring.starsForCorrect({ strength: 0, streak: 1 })).toBe(base)
+      expect(scoring.starsForCorrect({ strength: 0, streak: 6 })).toBe(base * 2)
     })
 
     test.each([
-      [0, 1, INPUT_MODE.TILES, 20],
-      [0, 2, INPUT_MODE.TILES, 20],
-      [0, 3, INPUT_MODE.TILES, 30],
-      [0, 5, INPUT_MODE.TILES, 30],
-      [0, 6, INPUT_MODE.TILES, 40],
-      [0, 9, INPUT_MODE.TILES, 40],
-      [0, 10, INPUT_MODE.TILES, 60],
-      [0, 25, INPUT_MODE.TILES, 60],
-      [3, 1, INPUT_MODE.TILES, 15],
-      [3, 3, INPUT_MODE.TILES, 23],
-      [3, 6, INPUT_MODE.TILES, 30],
-      [3, 10, INPUT_MODE.TILES, 45],
-      [5, 1, INPUT_MODE.TILES, 10],
-      [5, 3, INPUT_MODE.TILES, 15],
-      [5, 6, INPUT_MODE.TILES, 20],
-      [5, 12, INPUT_MODE.TILES, 30],
-      [0, 1, INPUT_MODE.KEYPAD, 25],
-      [0, 3, INPUT_MODE.KEYPAD, 38],
-      [0, 6, INPUT_MODE.KEYPAD, 50],
-      [0, 10, INPUT_MODE.KEYPAD, 75],
-      [3, 3, INPUT_MODE.KEYPAD, 30],
-      [3, 6, INPUT_MODE.KEYPAD, 40],
-      [5, 3, INPUT_MODE.KEYPAD, 23],
-      [5, 10, INPUT_MODE.KEYPAD, 45],
-    ])("strength %i, streak %i, %s pays %i", (strength, streak, inputMode, expected) => {
-      expect(scoringOnDay().starsForCorrect({ strength, streak, inputMode })).toBe(expected)
+      [0, 1, 25],
+      [0, 3, 38],
+      [0, 6, 50],
+      [0, 10, 75],
+      [3, 3, 30],
+      [3, 6, 40],
+      [5, 3, 23],
+      [5, 10, 45],
+    ])("strength %i, streak %i pays %i", (strength, streak, expected) => {
+      expect(scoringOnDay().starsForCorrect({ strength, streak })).toBe(expected)
     })
 
     test("rounds rather than truncates", () => {
-      // 15 * 1.5 is 22.5, which truncation would report as 22.
-      expect(
-        scoringOnDay().starsForCorrect({ strength: 3, streak: 3, inputMode: INPUT_MODE.TILES }),
-      ).toBe(23)
+      // 25 * 1.5 is 37.5, which truncation would report as 37.
+      expect(scoringOnDay().starsForCorrect({ strength: 0, streak: 3 })).toBe(38)
     })
 
-    test("is always a non-negative integer across the strength x streak x inputMode matrix", () => {
+    test("is always a non-negative integer across the strength x streak matrix", () => {
       const scoring = scoringOnDay()
       for (let strength = -1; strength <= 6; strength += 1) {
         for (let streak = -1; streak <= 15; streak += 1) {
-          for (const inputMode of [INPUT_MODE.TILES, INPUT_MODE.KEYPAD, "grid"]) {
-            const stars = scoring.starsForCorrect({ strength, streak, inputMode })
-            expect(Number.isInteger(stars)).toBe(true)
-            expect(stars).toBeGreaterThanOrEqual(0)
-          }
+          const stars = scoring.starsForCorrect({ strength, streak })
+          expect(Number.isInteger(stars)).toBe(true)
+          expect(stars).toBeGreaterThanOrEqual(0)
         }
       }
     })
@@ -322,23 +259,19 @@ describe("Scoring", () => {
     test("never returns less than STARS.BASE for a correct answer", () => {
       const scoring = scoringOnDay()
       for (let strength = 0; strength <= 5; strength += 1) {
-        const stars = scoring.starsForCorrect({
-          strength,
-          streak: 0,
-          inputMode: INPUT_MODE.TILES,
-        })
+        const stars = scoring.starsForCorrect({ strength, streak: 0 })
         expect(stars).toBeGreaterThanOrEqual(STARS.BASE)
       }
     })
 
     test("tolerates a missing input object", () => {
       const scoring = scoringOnDay()
-      expect(scoring.starsForCorrect()).toBe(20)
-      expect(scoring.starsForCorrect({})).toBe(20)
+      expect(scoring.starsForCorrect()).toBe(25)
+      expect(scoring.starsForCorrect({})).toBe(25)
     })
 
     test("does not mutate its input", () => {
-      const input = { strength: 0, streak: 3, inputMode: INPUT_MODE.KEYPAD }
+      const input = { strength: 0, streak: 3 }
       const before = clone(input)
       scoringOnDay().starsForCorrect(input)
       expect(input).toEqual(before)

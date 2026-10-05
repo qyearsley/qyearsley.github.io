@@ -3,9 +3,9 @@
  * DOM here, and this is the only module that writes game *content* into the
  * page. It is not the only module that touches `document`: `EventManager.js`
  * binds the listeners, `Keypad.js` builds and owns its own twelve keys, and
- * `game.js` reaches into the document in four narrow places (finding the tapped
- * tile by value, toggling `aria-live` while a scaffold teaches, looking up the
- * `#keypad` container once, and building the one-time save-failure banner). The
+ * `game.js` reaches into the document in a few narrow places (toggling
+ * `aria-live` while a scaffold teaches, looking up the `#keypad` container
+ * once, and building the one-time save-failure banner). The
  * rule is narrower than "nothing else touches `document`": nothing else renders
  * a view model.
  *
@@ -55,8 +55,6 @@
 import { BaseGameUI } from "../../shared/BaseGameUI.js"
 import {
   ALL_TABLES,
-  ANSWER_KEYS,
-  INPUT_MODE,
   KEYPAD,
   MATH,
   OPERAND_MAX,
@@ -285,8 +283,6 @@ const FACT_ORDER = new Map(FACT_IDS.map((id, index) => [id, index]))
  * `check` and the rest belong to `game.js`.
  * @typedef {Object} Challenge
  * @property {string} prompt - e.g. "7 × 6 = ?".
- * @property {"tiles"|"keypad"} entry - Which entry affordance to show.
- * @property {number[]|null} options - Four distinct integers for tiles, else `null`.
  */
 
 /**
@@ -390,7 +386,6 @@ export class GameUI extends BaseGameUI {
       playArea: document.getElementById("play-area"),
       progressButton: document.getElementById("progress-button"),
       questionText: document.getElementById("question-text"),
-      answerTiles: document.getElementById("answer-tiles"),
       answerDisplay: document.getElementById("answer-display"),
       keypad: document.getElementById("keypad"),
       scaffoldArea: document.getElementById("scaffold-area"),
@@ -597,15 +592,8 @@ export class GameUI extends BaseGameUI {
   // ------------------------------------------------------------ Question
 
   /**
-   * Render a question and show exactly one way to answer it.
-   *
-   * Everything is reset unconditionally first -- including *hiding* the tiles
-   * container rather than merely emptying it. An empty but visible
-   * `#answer-tiles` still occupied its `.play-area` row and pushed the keypad
-   * off centre, and stale tiles left in place stayed clickable through a keypad
-   * question. `#answer-display` is hidden the same way: it is the keypad's
-   * readout, and left visible it printed a 3rem "?" on tile questions, where
-   * nothing types into it.
+   * Render a question and show the keypad to answer it. Everything is reset
+   * first, then the readout and keypad are shown.
    * @param {Challenge} challenge - The question to show
    * @returns {void}
    */
@@ -617,107 +605,9 @@ export class GameUI extends BaseGameUI {
     this.hideScaffold()
     this.hideFeedback()
 
-    this.clearTiles()
-    this.setTilesVisible(false)
-    this.setKeypadVisible(false)
     this.setAnswerDisplay(KEYPAD.EMPTY_DISPLAY)
-    this.setAnswerDisplayVisible(false)
-
-    if (challenge.entry === INPUT_MODE.TILES) {
-      this.renderTiles(challenge.options)
-      this.setTilesVisible(true)
-    } else if (challenge.entry === INPUT_MODE.KEYPAD) {
-      this.setAnswerDisplayVisible(true)
-      this.setKeypadVisible(true)
-    } else {
-      // A question with no way to answer it is a bug worth a warning, not a
-      // silently blank screen.
-      console.warn(`renderQuestion: unknown entry mode ${JSON.stringify(challenge.entry)}`)
-    }
-  }
-
-  /**
-   * Build the multiple-choice tiles. Takes only the options: correctness has one
-   * authority, `challenge.check`, so no `data-correct` attribute is ever written
-   * -- the answer key never goes into the page where it can be inspected.
-   *
-   * The class must stay `answer-btn` so the inherited `disableAnswerButtons` /
-   * `enableAnswerButtons` work unmodified.
-   * @param {number[]} options - Answer options, in display order
-   * @returns {void}
-   */
-  renderTiles(options) {
-    const container = this.elements.answerTiles
-    if (!container) return
-    container.innerHTML = ""
-    if (!Array.isArray(options)) return
-
-    options.forEach((option, index) => {
-      const button = document.createElement("button")
-      button.type = "button"
-      button.className = "answer-btn"
-      button.textContent = String(option)
-      button.dataset.answer = String(option)
-      button.dataset.index = String(index)
-      // The keyboard shortcut, written twice for two audiences: `aria-label`
-      // says it out loud, and `data-key` is what the stylesheet prints in the
-      // tile's corner -- only where there is a real pointer, so nothing is drawn
-      // on the iPad, where no shortcut exists. It stays out of `textContent` so
-      // the tile's face is exactly the number.
-      //
-      // A letter, from `ANSWER_KEYS`, because every tile face is a number and a
-      // digit in the corner reads as part of one. A tile past the end of that
-      // list -- `OPTION_COUNT` is 4, but `generateOptions` accepts up to 8 --
-      // gets no key and an unlettered label rather than an invented letter.
-      const key = ANSWER_KEYS[index] ? ANSWER_KEYS[index].toUpperCase() : ""
-      if (key) button.dataset.key = key
-      button.setAttribute("aria-label", key ? `Answer ${key}: ${option}` : `Answer: ${option}`)
-      container.appendChild(button)
-    })
-  }
-
-  /**
-   * Remove every tile, and with them any frozen reveal state. Visibility is a
-   * separate concern -- see `setTilesVisible`.
-   * @returns {void}
-   */
-  clearTiles() {
-    const container = this.elements.answerTiles
-    if (!container) return
-    container.innerHTML = ""
-    container.classList.remove("answer-tiles-frozen")
-  }
-
-  /**
-   * Keep the tiles on screen but inert, so the tile marked `.correct` is still
-   * readable while the scaffold teaches.
-   *
-   * `game.js` calls this on the miss path INSTEAD OF `clearTiles()` +
-   * `setTilesVisible(false)`. Those two ran in the same synchronous turn as the
-   * marking, so `.incorrect`, `.shake`, and the correct-tile highlight were
-   * detached before the browser ever painted them: a wrong tap produced no
-   * acknowledgement at all and never showed which tile was right. The tiles sit
-   * in the `entry` grid area and the scaffold in `extra`, so both fit on screen
-   * at once.
-   * @returns {void}
-   */
-  freezeTiles() {
-    const container = this.elements.answerTiles
-    if (!container) return
-    this.setTilesVisible(true)
-    container.classList.add("answer-tiles-frozen")
-    container.querySelectorAll(".answer-btn").forEach((button) => {
-      button.disabled = true
-    })
-  }
-
-  /**
-   * Show or hide the tiles container.
-   * @param {boolean} visible - Whether tiles are the active affordance
-   * @returns {void}
-   */
-  setTilesVisible(visible) {
-    this.setVisible(this.elements.answerTiles, visible)
+    this.setAnswerDisplayVisible(true)
+    this.setKeypadVisible(true)
   }
 
   /**
@@ -745,9 +635,9 @@ export class GameUI extends BaseGameUI {
   }
 
   /**
-   * Show or hide the keypad readout. Only the keypad types into it, so on a
-   * tiles question it would be a meaningless 3rem "?" taking up a row.
-   * @param {boolean} visible - Whether the keypad is the active affordance
+   * Show or hide the keypad readout. Only the keypad types into it, so it is
+   * hidden whenever the keypad is.
+   * @param {boolean} visible - Whether the readout should show
    * @returns {void}
    */
   setAnswerDisplayVisible(visible) {
@@ -1377,7 +1267,7 @@ export class GameUI extends BaseGameUI {
    * A grey card shows "7 × 8" without the product. Printing the answer on every
    * card from minute zero made the collection a complete answer key two taps
    * from the hub, which undercuts collecting it and contradicts the care taken
-   * to keep the answer out of the tile markup. The product appears once the card
+   * to keep the answer out of the page markup. The product appears once the card
    * is at least colored, i.e. once she has been getting the fact right.
    *
    * The `.card-pip` glyph is the non-colour tier cue: grey and colored cards

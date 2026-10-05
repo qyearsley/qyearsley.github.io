@@ -11,7 +11,6 @@ import {
   TRAIL,
 } from "../js/constants.js"
 import {
-  accuracy,
   cardTier,
   classifySpeed,
   countMastered,
@@ -669,18 +668,6 @@ describe("MasteryModel", () => {
           }
         }
       }
-    })
-  })
-
-  describe("accuracy", () => {
-    test("is 0 for a never-asked fact", () => {
-      expect(accuracy(createRecord())).toBe(0)
-      expect(accuracy(null)).toBe(0)
-    })
-
-    test("is totalCorrect over totalSeen", () => {
-      expect(accuracy({ ...createRecord(), totalSeen: 4, totalCorrect: 3 })).toBe(0.75)
-      expect(accuracy({ ...createRecord(), totalSeen: 2, totalCorrect: 2 })).toBe(1)
     })
   })
 
