@@ -32,10 +32,11 @@ let onChange
 /**
  * @param {string} key - `event.key` value.
  * @param {EventTarget} [target] - Event target; defaults to `document.body`.
+ * @param {Object} [modifiers] - Extra event fields, e.g. `{ metaKey: true }`.
  * @returns {Object} A KeyboardEvent-shaped plain object with a spy on preventDefault.
  */
-function keyEvent(key, target = document.body) {
-  return { key, target, preventDefault: jest.fn() }
+function keyEvent(key, target = document.body, modifiers = {}) {
+  return { key, target, preventDefault: jest.fn(), ...modifiers }
 }
 
 /**
@@ -67,6 +68,7 @@ beforeEach(() => {
 
 afterEach(() => {
   keypad.destroy()
+  delete window.__helpOverlayIsOpen
 })
 
 describe("Keypad", () => {
@@ -429,6 +431,29 @@ describe("Keypad", () => {
       expect(keypad.handleKeyDown(event)).toBe(false)
       expect(keypad.value).toBe("3")
       expect(event.preventDefault).not.toHaveBeenCalled()
+    })
+
+    test.each(["metaKey", "ctrlKey", "altKey"])(
+      "a digit with %s held is left alone",
+      (modifier) => {
+        const event = keyEvent("1", document.body, { [modifier]: true })
+        expect(keypad.handleKeyDown(event)).toBe(false)
+        expect(keypad.value).toBe("")
+        expect(event.preventDefault).not.toHaveBeenCalled()
+        expect(onChange).not.toHaveBeenCalled()
+      },
+    )
+
+    test("keys are left alone while the site help overlay is open", () => {
+      window.__helpOverlayIsOpen = () => true
+      const event = keyEvent("5")
+      expect(keypad.handleKeyDown(event)).toBe(false)
+      expect(keypad.value).toBe("")
+      expect(event.preventDefault).not.toHaveBeenCalled()
+
+      window.__helpOverlayIsOpen = () => false
+      expect(keypad.handleKeyDown(keyEvent("5"))).toBe(true)
+      expect(keypad.value).toBe("5")
     })
 
     test("form controls keep their native keyboard behavior", () => {

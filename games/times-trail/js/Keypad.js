@@ -14,7 +14,7 @@
  * Architecture: the class owns a digit buffer (a string) and reports it two
  * ways -- `value` (raw, `""` when empty) and `display` (`KEYPAD.EMPTY_DISPLAY`
  * when empty). It never reads game state and has no opinion about whether it
- * *should* be usable: `game.js` calls `setEnabled(challenge.entry === "keypad")`
+ * *should* be usable: `game.js` calls `setEnabled(true)`
  * on every question render and `setEnabled(false)` the moment an answer is
  * accepted, which is what stops a hidden or already-answered question from
  * taking a second answer. The buffer transitions are reachable without the DOM
@@ -30,7 +30,7 @@
  * clear press, and that is the hook `game.js` uses to stamp thinking time -- the
  * *first* `onChange` after a question renders is the first interaction. The
  * mastery clock therefore stops at the first keypress, not at the enter tap, so
- * typing two digits costs no more measured time than a single tile tap. An enter
+ * typing two digits costs no more measured time than a single digit. An enter
  * press on an empty buffer is ignored entirely and fires nothing, so tapping the
  * check mark before typing does not start the clock.
  *
@@ -262,7 +262,9 @@ export class Keypad {
   /**
    * Physical-keyboard fallback for accessibility; the taps are the primary path.
    * Bails unless the pad is enabled and the play screen is the active screen with
-   * the settings modal hidden, and leaves form controls alone.
+   * the settings modal hidden, and leaves form controls alone. Also bails when a
+   * modifier is held, so browser and OS shortcuts (Cmd+1 tab switching) still
+   * work, and when the site's `?` help overlay is open.
    *
    * Key mapping: `0`-`9` type a digit, `Backspace` and `Delete` remove one digit
    * (the same thing the `⌫` key does), `Escape` drops the whole entry, and
@@ -274,6 +276,8 @@ export class Keypad {
    */
   handleKeyDown(event) {
     if (!this._enabled) return false
+    if (event.metaKey || event.ctrlKey || event.altKey) return false
+    if (window.__helpOverlayIsOpen?.() === true) return false
     if (!this._isPlayScreenReady()) return false
     if (event.target && PASSTHROUGH_TAGS.has(event.target.tagName)) return false
 
