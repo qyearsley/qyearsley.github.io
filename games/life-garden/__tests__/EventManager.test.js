@@ -279,6 +279,28 @@ describe("EventManager", () => {
       expect(callbacks.onStep).not.toHaveBeenCalled()
     })
 
+    test("after a mouse click on a button, space plays instead of re-firing the button", () => {
+      // Clicking a preset left it focused, so Space was treated as "activate
+      // the focused button" and the preset loaded again.
+      const button = document.getElementById("reset-btn")
+      button.focus()
+      button.dispatchEvent(new MouseEvent("click", { detail: 1, bubbles: true }))
+
+      const event = new KeyboardEvent("keydown", { key: " ", bubbles: true, cancelable: true })
+      ;(document.activeElement || document.body).dispatchEvent(event)
+
+      expect(document.activeElement).not.toBe(button)
+      expect(callbacks.onTogglePlay).toHaveBeenCalled()
+    })
+
+    test("a keyboard activation keeps focus on the button", () => {
+      // Enter or Space on a focused button fires a click with detail 0.
+      const button = document.getElementById("reset-btn")
+      button.focus()
+      button.dispatchEvent(new MouseEvent("click", { detail: 0, bubbles: true }))
+      expect(document.activeElement).toBe(button)
+    })
+
     test("shortcuts are ignored for elements inside a button", () => {
       const inner = document.querySelector(".species-btn span")
       inner.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }))

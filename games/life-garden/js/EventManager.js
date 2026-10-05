@@ -7,6 +7,7 @@ export class EventManager {
     this._setupCanvasEvents()
     this._setupButtons()
     this._setupKeyboard()
+    this._setupMouseBlur()
   }
 
   _setupCanvasEvents() {
@@ -116,6 +117,21 @@ export class EventManager {
       if (btn) {
         this.cb.onSpeciesSelect?.(parseInt(btn.dataset.speciesId, 10))
       }
+    })
+  }
+
+  /**
+   * Drop focus from a button after a mouse click.
+   *
+   * A clicked button keeps focus, and the keyboard handler leaves keys alone
+   * while a button is focused. So click a preset, press Space to play, and the
+   * browser re-clicked the preset instead. A keyboard activation has
+   * `detail === 0`, so Tab to a button and press Space or Enter still leaves
+   * focus where the keyboard user put it.
+   */
+  _setupMouseBlur() {
+    document.addEventListener("click", (e) => {
+      if (e.detail > 0) e.target?.closest?.("button")?.blur()
     })
   }
 
