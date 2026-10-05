@@ -185,8 +185,8 @@ away.
 Read the ranges rather than the averages. On seven of these eight seeds the
 foxes hold the rabbits somewhere between 20 and 52; on the eighth they lose
 control late and the rabbits reach 176, taking the meadow down with them. That
-spread is the simulation working, not a tuning failure, and `Presets.test.js`
-asserts the population-level claim rather than a per-seed one for exactly that
+spread is the simulation working, not a tuning failure, and the `Presets.*.test.js` suites
+assert the population-level claim rather than a per-seed one for exactly that
 reason.
 
 Plants are still alive at generation 600 on every preset on every seed, never
@@ -261,13 +261,12 @@ See [js/README.md](js/README.md) for detailed module architecture documentation.
 ```
 js/
 ├── game.js             # LifeGarden: wires everything together, owns the timer and undo history
-├── constants.js        # SPECIES ids, KIND, GRID sizes, SPEED intervals, PHASE names, DEFAULT_SEED
+├── constants.js        # SPECIES ids, KIND, GRID_SIZE, SPEED intervals, PHASE names, DEFAULT_SEED
 ├── Species.js          # SPECIES_DEFS (the rules) and SpeciesRegistry
 ├── Grid.js             # Both layers and step() -- the whole simulation
 ├── Random.js           # Seeded generator, copied onto every generation
 ├── Presets.js          # PRESETS: named starting arrangements, written as maps
-├── PuzzleData.js       # PUZZLES: one sandbox entry, source of the grid size
-├── GameState.js        # Phase, generation count, saved settings, budget/star bookkeeping
+├── GameState.js        # Phase, generation count, saved settings
 ├── GameUI.js           # Species palette, species card and generation display
 ├── Renderer.js         # Canvas drawing and pixel↔cell coordinate maths
 ├── PopulationChart.js  # The line chart under the grid
@@ -306,13 +305,6 @@ since a saved board would break the moment the species list changed.
 `showGrid` is saved and honoured, but no control sets it, so today it only ever
 holds its default.
 
-### Scaffolding that is not wired up
-
-`GameState` and `PuzzleData` carry a whole puzzle mode — budgets, goals, locked
-cells, goal zones, star thresholds, `unlockAfter` — that nothing in `game.js`
-uses. The single `sandbox` puzzle sets every budget to `Infinity` and every list
-to empty. It is tested, so it works; it is just not reachable from the UI.
-
 ### Recipes
 
 **Change a species' rules.** Edit its entry in `SPECIES_DEFS` in
@@ -336,9 +328,7 @@ the palette and out of the birth loop.
 cell: `.` empty, `g` grass, `b` bee, `r` rabbit, `f` fox. Rows may be short and
 there may be fewer of them than the grid has rows.
 
-**Change the grid size.** `gridWidth` / `gridHeight` on the sandbox entry in
-`js/PuzzleData.js`. `GRID.DEFAULT_WIDTH` and `DEFAULT_HEIGHT` in `constants.js`
-are not what the game reads. Note that the balance is tuned for 20×20; a much
+**Change the grid size.** `GRID_SIZE` in `js/constants.js`. Note that the balance is tuned for 20×20; a much
 bigger board would want retuning.
 
 ### Testing
@@ -349,9 +339,9 @@ npm test                                       # all tests, including this game
 npm test -- --testPathPatterns life-garden     # just this game
 ```
 
-Ten suites. `Grid.test.js` is the one to read first: it pins the rules on small
+15 suites. `Grid.test.js` is the one to read first: it pins the rules on small
 explicit boards, using a generator with the randomness taken out so the certain
-rules can be checked one at a time. `Presets.test.js` goes further and asserts
+rules can be checked one at a time. The `Presets.*.test.js` suites go further and asserts
 the behaviour the presets exist to demonstrate, across 8 seeds, so a rule change
 that flattens the contrast fails the build rather than quietly making the
 presets pointless. `boot.test.js` loads the real `index.html` and runs the real

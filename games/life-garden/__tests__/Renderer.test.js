@@ -74,30 +74,6 @@ describe("Renderer", () => {
     })
   })
 
-  describe("locked cells", () => {
-    test("reports cells that were locked", () => {
-      renderer.setLockedCells([
-        { x: 1, y: 2 },
-        { x: 3, y: 4 },
-      ])
-      expect(renderer.isLocked(1, 2)).toBe(true)
-      expect(renderer.isLocked(3, 4)).toBe(true)
-    })
-
-    test("reports other cells as unlocked", () => {
-      renderer.setLockedCells([{ x: 1, y: 2 }])
-      expect(renderer.isLocked(2, 1)).toBe(false)
-      expect(renderer.isLocked(0, 0)).toBe(false)
-    })
-
-    test("replaces the previous set rather than adding to it", () => {
-      renderer.setLockedCells([{ x: 1, y: 2 }])
-      renderer.setLockedCells([{ x: 5, y: 6 }])
-      expect(renderer.isLocked(1, 2)).toBe(false)
-      expect(renderer.isLocked(5, 6)).toBe(true)
-    })
-  })
-
   describe("_lerpColor", () => {
     test("returns the endpoints at t=0 and t=1", () => {
       expect(renderer._lerpColor("#000000", "#ffffff", 0)).toBe("rgb(0, 0, 0)")

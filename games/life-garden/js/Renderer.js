@@ -17,8 +17,6 @@ export class Renderer {
     this.showGrid = true
     this.hoverCell = null
     this.selectedSpecies = null
-    this.lockedCells = new Set()
-    this.goalZones = []
   }
 
   fitToGrid(gridWidth, gridHeight) {
@@ -38,18 +36,6 @@ export class Renderer {
     return { x: gx, y: gy }
   }
 
-  setLockedCells(cells) {
-    this.lockedCells = new Set(cells.map((c) => `${c.x},${c.y}`))
-  }
-
-  setGoalZones(zones) {
-    this.goalZones = zones
-  }
-
-  isLocked(x, y) {
-    return this.lockedCells.has(`${x},${y}`)
-  }
-
   render(grid) {
     const ctx = this.ctx
     const cs = this.cellSize
@@ -61,20 +47,6 @@ export class Renderer {
     ctx.fillStyle = this._bgColor()
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
 
-    // Goal zone overlays
-    for (const zone of this.goalZones) {
-      ctx.fillStyle = "rgba(255, 215, 0, 0.12)"
-      ctx.fillRect(this.offsetX + zone.x * cs, this.offsetY + zone.y * cs, zone.w * cs, zone.h * cs)
-      ctx.strokeStyle = "rgba(255, 215, 0, 0.4)"
-      ctx.lineWidth = 2
-      ctx.strokeRect(
-        this.offsetX + zone.x * cs,
-        this.offsetY + zone.y * cs,
-        zone.w * cs,
-        zone.h * cs,
-      )
-    }
-
     // Cells: the ground first, then whatever is standing on it. Drawing the
     // animal inset over the plant is what makes "a rabbit in the grass" read as
     // one thing on top of another rather than one replacing the other.
@@ -82,12 +54,6 @@ export class Renderer {
       for (let x = 0; x < grid.width; x++) {
         const px = this.offsetX + x * cs
         const py = this.offsetY + y * cs
-
-        if (this.isLocked(x, y)) {
-          ctx.fillStyle = this._lockedColor()
-          this._fillRoundedRect(ctx, px + 1, py + 1, cs - 2, cs - 2, 3)
-          continue
-        }
 
         const plant = grid.getPlant(x, y)
         if (plant && plant.species !== SPECIES.EMPTY) {
@@ -134,7 +100,7 @@ export class Renderer {
     // grass, which is exactly what the two layers stopped happening.
     if (this.hoverCell && this.selectedSpecies) {
       const def = this.registry.get(this.selectedSpecies)
-      if (def && !this.isLocked(this.hoverCell.x, this.hoverCell.y)) {
+      if (def) {
         const inset = def.kind === KIND.ANIMAL ? this._animalInset(cs) : 1
         const px = this.offsetX + this.hoverCell.x * cs + inset
         const py = this.offsetY + this.hoverCell.y * cs + inset
@@ -397,9 +363,5 @@ export class Renderer {
 
   _gridLineColor() {
     return this._isDark() ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"
-  }
-
-  _lockedColor() {
-    return this._isDark() ? "#4a5568" : "#cbd5e0"
   }
 }

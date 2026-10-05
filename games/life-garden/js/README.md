@@ -29,12 +29,12 @@ root; `game.js` is the only module that knows about all of them.
                                │
    ┌──────────┬────────────┬───┴────┬──────────┬───────────┐
    ▼          ▼            ▼        ▼          ▼           ▼
-Species.js  Random.js  PuzzleData  Presets  GameState  Renderer.js
-   │          │            │                    │
-   └────┬─────┘            │                    │
-        ▼                  │                    │
-     Grid.js               │              storage.js ──► shared/StorageManager.js
-        │                  │
+Species.js  Random.js  Presets  GameState  Renderer.js
+   │          │                    │
+   └────┬─────┘                    │
+        ▼                          │
+     Grid.js                 storage.js ──► shared/StorageManager.js
+        │
         │            PopulationChart.js
         │                  │
         │            GameUI.js ──► shared/BaseGameUI.js
@@ -48,9 +48,9 @@ Species.js  Random.js  PuzzleData  Presets  GameState  Renderer.js
 Two edges are forbidden on purpose:
 
 - **The simulation never imports the UI.** Nothing in `Grid`, `Species`,
-  `Random`, `GameState`, `PuzzleData` or `Presets` touches `document`, `window`,
+  `Random`, `GameState` or `Presets` touches `document`, `window`,
   `localStorage`, a canvas, or a timer.
-- **`Grid` never imports `Presets` or `PuzzleData`.** It takes a width, a height,
+- **`Grid` never imports `Presets`.** It takes a width, a height,
   a registry and a generator. Starting arrangements are applied by `game.js`
   calling `setCell`, so the engine has no notion of a "level".
 
@@ -145,7 +145,7 @@ are not enough.
 
 ### GameState.js
 
-Persisted progress and settings, and the puzzle/budget bookkeeping. **Settings
+Phase, generation count and saved settings. **Settings
 are coerced on load, never merged** — a spread would carry a hand-edited
 `speed: 7` straight into `speed.toUpperCase()` in the simulation loop. `SPEED_NAMES`
 is derived from the `SPEED` constant so a fourth speed cannot be added and
@@ -153,11 +153,13 @@ forgotten here, which would make it selectable but not loadable.
 
 ### storage.js
 
-Extends `shared/StorageManager.js`, version `"2.0"`. Saves **completed puzzles
-and settings only** — no species ids and no grid contents — so a save written
+Extends `shared/StorageManager.js`, version `"2.0"`. Saves **settings
+only** — no species ids and no grid contents — so a save written
 before the species list changed cannot put a removed species back on the board.
 The version is the belt to that braces: species ids were renumbered when flowers
-became a life stage and the fox was added.
+became a life stage and the fox was added. Older saves also hold a
+`completedPuzzles` map; `loadProgress` accepts it and ignores it, and the next
+save drops it.
 
 ### EventManager.js
 
@@ -169,6 +171,11 @@ The keyboard handler bails on a focused control and on modifier chords — witho
 the latter, ⌘R reset the grid on its way to reloading the page and ⌘-Space
 toggled the simulation while the OS opened a search field over it.
 
+A mouse click on a button blurs it (`detail > 0`), so Space after clicking a
+preset plays instead of re-firing the preset. A keyboard activation has
+`detail === 0` and keeps focus, so Tab to a button then Space or Enter still
+activates that button.
+
 ### Presets.js
 
 Seven starting arrangements, written as **character maps rather than coordinate
@@ -176,13 +183,6 @@ lists** — one string per row, one character per cell, so the shape is visible 
 the source. `fromMap` turns them into cells. "Food Chain" and "No Predator" share
 one `FIELD` and differ only in whether the foxes are added, which is the point of
 having both.
-
-### PuzzleData.js
-
-One sandbox puzzle. The budget, goals, locked-cell and star machinery is all
-present and all set to unlimited or empty — scaffolding for challenge modes that
-do not exist yet. `Renderer` and `GameState` both honour it, so it is wired, not
-dead.
 
 ## Three invariants
 
@@ -273,20 +273,21 @@ generations.
 2. `game.js` clears `paintedThisDrag`, converts pixels to a cell, and returns
    whether that layer is taken — which fixes the gesture as place or erase.
 3. Every `mousemove` calls `onCanvasDrag` with that mode.
-4. `game.js` skips locked cells and cells already painted this gesture, then
+4. `game.js` skips cells already painted this gesture, then
    calls `grid.setCell` or `grid.clearCell`.
 5. The renderer redraws and the chart re-records the current generation.
 
 ## Testing
 
-Tests live in the parent `__tests__/` directory — ten suites:
+Tests live in the parent `__tests__/` directory — 15 suites:
 
 - `Grid.test.js` — the automaton, animal turns, arrivals, the two layers
 - `Species.test.js` — the registry views and the species data
-- `GameState.test.js` — settings coercion, budgets, stars
-- `storage.test.js` — save shape and version rejection
-- `Presets.test.js` — the character maps, and the ecology. This is the
-  unusual one: it runs each preset for hundreds of generations and asserts the
+- `GameState.test.js` — settings coercion
+- `storage.test.js` — save shape, version rejection, old-shape saves
+- `Presets.*.test.js` — the character maps (`Presets.data`), and the ecology,
+  split by preset family. This is the
+  unusual part: it runs each preset for hundreds of generations and asserts the
   behaviour the numbers are tuned for — that no board ends dead, that the foxes
   hold the rabbits to a fraction of what they reach alone, that the foxes peak
   _after_ their prey rather than with them, that bees fill a board faster than

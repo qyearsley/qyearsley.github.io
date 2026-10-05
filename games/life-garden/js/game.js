@@ -1,4 +1,4 @@
-import { SPECIES, KIND, PHASE, SPEED } from "./constants.js"
+import { SPECIES, KIND, PHASE, SPEED, GRID_SIZE } from "./constants.js"
 import { SpeciesRegistry } from "./Species.js"
 import { Grid } from "./Grid.js"
 import { GameState } from "./GameState.js"
@@ -7,7 +7,6 @@ import { Renderer } from "./Renderer.js"
 import { EventManager } from "./EventManager.js"
 import { PopulationChart } from "./PopulationChart.js"
 import { LifeGardenStorage } from "./storage.js"
-import { PUZZLES } from "./PuzzleData.js"
 import { PRESETS } from "./Presets.js"
 
 // Max generations to keep in undo history
@@ -115,15 +114,12 @@ class LifeGarden {
     this.ui.setActiveSpeed(this.state.settings.speed)
     if (this.renderer) this.renderer.showGrid = this.state.settings.showGrid
 
-    const puzzle = PUZZLES[0]
-    this.state.startPuzzle(puzzle)
-    this.grid = new Grid(puzzle.gridWidth, puzzle.gridHeight, this.registry)
+    this.state.startOver()
+    this.grid = new Grid(GRID_SIZE, GRID_SIZE, this.registry)
     this.history = []
     this.selectedSpecies = SPECIES.GRASS
 
-    this.renderer.fitToGrid(puzzle.gridWidth, puzzle.gridHeight)
-    this.renderer.setLockedCells(puzzle.lockedCells)
-    this.renderer.setGoalZones([])
+    this.renderer.fitToGrid(GRID_SIZE, GRID_SIZE)
 
     this._updatePalette()
     this._renderPresets()
@@ -151,7 +147,6 @@ class LifeGarden {
   _handleCanvasDrag(px, py, mode) {
     const pos = this.renderer.canvasToGrid(px, py)
     if (!pos) return
-    if (this.renderer.isLocked(pos.x, pos.y)) return
 
     // One touch per cell per gesture, remembering every cell rather than just
     // the last one. `mousedown` and every `mousemove` after it both paint, so a
@@ -264,8 +259,8 @@ class LifeGarden {
 
   _resetGrid() {
     this._stopSimulation()
-    this.state.startPuzzle(PUZZLES[0])
-    this.grid = new Grid(PUZZLES[0].gridWidth, PUZZLES[0].gridHeight, this.registry)
+    this.state.startOver()
+    this.grid = new Grid(GRID_SIZE, GRID_SIZE, this.registry)
     this.history = []
     this.chart?.reset()
     this.chart?.record(this.state.generation, this.grid)
@@ -279,8 +274,8 @@ class LifeGarden {
     const preset = PRESETS[index]
     if (!preset) return
     this._stopSimulation()
-    this.state.startPuzzle(PUZZLES[0])
-    this.grid = new Grid(PUZZLES[0].gridWidth, PUZZLES[0].gridHeight, this.registry)
+    this.state.startOver()
+    this.grid = new Grid(GRID_SIZE, GRID_SIZE, this.registry)
     this.history = []
     for (const cell of preset.cells) {
       this.grid.setCell(cell.x, cell.y, cell.species)

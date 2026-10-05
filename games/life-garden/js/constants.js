@@ -21,13 +21,8 @@ export const KIND = {
   ANIMAL: "animal",
 }
 
-// Grid defaults
-export const GRID = {
-  DEFAULT_WIDTH: 16,
-  DEFAULT_HEIGHT: 16,
-  MIN_SIZE: 4,
-  MAX_SIZE: 64,
-}
+// The board is a fixed square.
+export const GRID_SIZE = 20
 
 // Seed for the simulation's generator. Fixed rather than time-based so that
 // loading a preset twice gives the same run, which is what the preset tests

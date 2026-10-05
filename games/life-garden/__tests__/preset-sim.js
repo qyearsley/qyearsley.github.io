@@ -16,13 +16,13 @@
 
 import { describe, expect, test } from "@jest/globals"
 
-import { SPECIES } from "../js/constants.js"
+import { GRID_SIZE, SPECIES } from "../js/constants.js"
 import { Grid } from "../js/Grid.js"
 import { PRESETS } from "../js/Presets.js"
-import { PUZZLES } from "../js/PuzzleData.js"
 import { SpeciesRegistry } from "../js/Species.js"
 
-export const { gridWidth, gridHeight } = PUZZLES[0]
+export const gridWidth = GRID_SIZE
+export const gridHeight = GRID_SIZE
 
 /**
  * Several seeds, not one.
