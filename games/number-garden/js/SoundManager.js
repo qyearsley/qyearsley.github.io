@@ -69,17 +69,6 @@ export class SoundManager {
   }
 
   /**
-   * Play a click sound for button presses
-   */
-  playClick() {
-    if (!this.enabled || !this.isSupported) return
-    if (!this.init()) return
-
-    const now = this.audioContext.currentTime
-    this.playTone(800, now, 0.05, 0.05)
-  }
-
-  /**
    * Play a tone at the specified frequency
    * @param {number} frequency - Frequency in Hz
    * @param {number} startTime - When to start the tone
@@ -132,19 +121,5 @@ export class SoundManager {
     this.playTone(659.25, now + 0.1, 0.1, 0.15) // E5
     this.playTone(783.99, now + 0.2, 0.1, 0.15) // G5
     this.playTone(1046.5, now + 0.3, 0.2, 0.2) // C6
-  }
-
-  /**
-   * Clean up resources when the sound manager is no longer needed
-   */
-  dispose() {
-    if (this.audioContext) {
-      try {
-        this.audioContext.close()
-      } catch (error) {
-        console.warn("Error closing audio context:", error)
-      }
-      this.audioContext = null
-    }
   }
 }

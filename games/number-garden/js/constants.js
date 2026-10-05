@@ -16,16 +16,9 @@ export const AREAS = {
 }
 
 /**
- * Human-readable area names
+ * Number of areas (one castle piece per area)
  */
-export const AREA_NAMES = {
-  [AREAS.FLOWER_MEADOW]: "Flower Meadow",
-  [AREAS.CRYSTAL_CAVE]: "Crystal Cave",
-  [AREAS.ENCHANTED_FOREST]: "Enchanted Forest",
-  [AREAS.TIME_TEMPLE]: "Time Temple",
-  [AREAS.MEASUREMENT_MARKET]: "Measurement Market",
-  [AREAS.PATTERN_PATH]: "Pattern Path",
-}
+export const AREA_COUNT = Object.keys(AREAS).length
 
 /**
  * Area emoji icons (used in castle pieces display)

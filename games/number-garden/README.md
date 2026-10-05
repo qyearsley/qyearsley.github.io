@@ -54,17 +54,19 @@ js/
 ├── generators/          # Per-topic problem generators
 ├── storage.js           # LocalStorage wrapper for save/load
 ├── rewards.js           # Reward distribution and flower generation (RewardSystem)
-├── ProgressionManager.js # Area unlocking and progression logic
+├── ProgressionManager.js # Per-area visual themes (backgrounds and colors)
 ├── ParticleSystem.js    # Visual effects for celebrations
 ├── ProjectVisuals.js    # SVG generation for project completion
 ├── SoundManager.js      # Web Audio sound effects
 ├── constants.js         # Shared timing and area constants
 └── utils.js             # Shared helpers
 
+data/
+└── areaThemes.js        # Per-area characters, messages, and emoji for problems
+
 styles/
 ├── main.css             # Core layout and components
 ├── common.css           # Shared base styles
-├── garden.css           # Garden visualization
 └── animations.css       # Keyframe animations
 ```
 

@@ -281,13 +281,6 @@ body {
   transition: color 0.6s ease;
 }
 
-.subtitle {
-  font-size: var(--ng-text-xl);
-  color: var(--ng-theme-ink);
-  margin-bottom: var(--ng-space-3xl);
-  transition: color 0.6s ease;
-}
-
 .title-buttons {
   display: flex;
   flex-direction: column;
@@ -543,10 +536,6 @@ body {
   max-width: 280px;
 }
 
-.creature-speech {
-  display: none; /* Hidden by default for cleaner UI */
-}
-
 /* Question Area */
 .question-area {
   background: var(--ng-surface);
@@ -735,10 +724,6 @@ body {
     var(--ng-hint-fill);
   border: 2px solid var(--ng-hint);
   color: var(--ng-on-fill);
-}
-
-.feedback-explanation {
-  font-style: italic;
 }
 
 /* Garden Preview */
@@ -1134,11 +1119,6 @@ select:focus-visible,
     margin-bottom: var(--ng-space-md);
   }
 
-  .subtitle {
-    font-size: var(--ng-text-sm);
-    margin-bottom: var(--ng-space-xl);
-  }
-
   .big-button {
     font-size: var(--ng-text-md);
     padding: var(--ng-space-md) 24px;
@@ -1170,10 +1150,6 @@ select:focus-visible,
   .creature-message {
     font-size: var(--ng-text-xs);
     padding: var(--ng-space-sm) var(--ng-space-md);
-  }
-
-  .creature-speech p {
-    font-size: var(--ng-text-sm);
   }
 
   .question-area {
@@ -1269,92 +1245,6 @@ select:focus-visible,
   .completion-buttons {
     width: 100%;
   }
-}
-
-/* Castle Notification */
-.castle-notification {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%) translateY(-150px);
-  background:
-    linear-gradient(135deg, rgb(255, 255, 255, 0.18) 0%, rgb(255, 255, 255, 0) 100%),
-    var(--theme-ink);
-  color: white;
-  padding: var(--ng-space-xl) var(--ng-space-2xl);
-  border-radius: var(--ng-radius);
-  box-shadow: 0 10px 40px rgb(0, 0, 0, 0.4);
-  z-index: 10001;
-  transition:
-    transform 0.5s ease,
-    opacity 0.5s ease;
-  opacity: 0;
-  max-width: 90%;
-}
-
-.castle-notification.show {
-  transform: translateX(-50%) translateY(0);
-  opacity: 1;
-  animation: notification-bounce 0.5s ease;
-}
-
-@keyframes notification-bounce {
-  0% {
-    transform: translateX(-50%) translateY(-150px);
-  }
-
-  60% {
-    transform: translateX(-50%) translateY(10px);
-  }
-
-  80% {
-    transform: translateX(-50%) translateY(-5px);
-  }
-
-  100% {
-    transform: translateX(-50%) translateY(0);
-  }
-}
-
-.castle-notification-content {
-  display: flex;
-  align-items: center;
-  gap: var(--ng-space-lg);
-}
-
-.castle-notification-icon {
-  font-size: var(--ng-icon-md);
-  animation: notification-spin 1s ease;
-}
-
-@keyframes notification-spin {
-  0% {
-    transform: rotate(0deg) scale(0);
-  }
-
-  50% {
-    transform: rotate(180deg) scale(1.2);
-  }
-
-  100% {
-    transform: rotate(360deg) scale(1);
-  }
-}
-
-.castle-notification-text {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ng-space-xs);
-}
-
-.castle-notification-text strong {
-  font-size: var(--ng-text-md);
-  font-weight: bold;
-}
-
-.castle-notification-text span {
-  font-size: var(--ng-text-base);
-  opacity: 0.9;
 }
 
 /* Level Complete Screen */

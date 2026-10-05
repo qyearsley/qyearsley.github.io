@@ -81,14 +81,6 @@ export class StorageManager extends BaseStorageManager {
   }
 
   /**
-   * Export progress (alias for consistency)
-   * @returns {string|null} JSON string or null
-   */
-  exportProgress() {
-    return this.exportGameState()
-  }
-
-  /**
    * Import progress with validation
    * @param {string} jsonString - JSON string to import
    * @returns {boolean} True if import was successful

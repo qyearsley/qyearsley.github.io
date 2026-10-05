@@ -8,16 +8,15 @@ import { RewardSystem } from "./rewards.js"
 import { ActivityGenerator } from "./activities.js"
 import { SoundManager } from "./SoundManager.js"
 import { ProjectVisuals } from "./ProjectVisuals.js"
-import { TIMING, AREAS, AREA_NAMES, DEFAULTS } from "./constants.js"
+import { TIMING, AREAS, AREA_COUNT, DEFAULTS } from "./constants.js"
 
 /**
  * Main game controller for Number Garden
  * Orchestrates all game systems and handles game flow
  *
- * Security Note: This module uses innerHTML in two places:
- * 1. Setting project SVG from ProjectVisuals (generated from controlled data)
- * 2. Static error message display (hardcoded template)
- * All content is generated from controlled game data, not user input.
+ * Security Note: This module sets innerHTML in two places: the project SVG
+ * from ProjectVisuals, and the static error message. Both are built from
+ * fixed game data, not user input.
  */
 class NumberGarden {
   /**
@@ -151,11 +150,7 @@ class NumberGarden {
     const unlockParam = params.get("unlock")
     if (unlockParam) {
       if (unlockParam === "all") {
-        this.state.unlockArea(AREAS.CRYSTAL_CAVE)
-        this.state.unlockArea(AREAS.ENCHANTED_FOREST)
-        this.state.unlockArea(AREAS.TIME_TEMPLE)
-        this.state.unlockArea(AREAS.MEASUREMENT_MARKET)
-        this.state.unlockArea(AREAS.PATTERN_PATH)
+        Object.values(AREAS).forEach((areaId) => this.state.unlockArea(areaId))
       } else {
         this.state.unlockArea(unlockParam)
       }
@@ -198,7 +193,7 @@ class NumberGarden {
     const projectInfo = this.getProjectInfo()
     this.showScreen("castle-screen")
     this.ui.castle.updateCastleScreen(projectInfo)
-    this.ui.castle.updateCastleProgress(this.state.getCompletedAreasCount(), 6)
+    this.ui.castle.updateCastleProgress(this.state.getCompletedAreasCount(), AREA_COUNT)
     this.ui.castle.displayCastlePieces(this.state.completedAreas)
     this.renderCastle()
   }
@@ -435,15 +430,6 @@ class NumberGarden {
    */
   getProjectInfo() {
     return NumberGarden.PROJECT_CONFIG[this.state.projectType] || NumberGarden.PROJECT_CONFIG.castle
-  }
-
-  /**
-   * Get readable area name
-   * @param {string} areaId - Area identifier
-   * @returns {string} Area name
-   */
-  getAreaName(areaId) {
-    return AREA_NAMES[areaId] || areaId
   }
 }
 

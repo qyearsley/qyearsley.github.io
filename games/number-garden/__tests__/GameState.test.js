@@ -155,16 +155,6 @@ describe("GameState", () => {
     })
   })
 
-  describe("isAreaUnlocked", () => {
-    test("returns true for unlocked areas", () => {
-      expect(gameState.isAreaUnlocked("flower-meadow")).toBe(true)
-    })
-
-    test("returns false for locked areas", () => {
-      expect(gameState.isAreaUnlocked("crystal-cave")).toBe(false)
-    })
-  })
-
   describe("loadProgress", () => {
     test("loads stats from storage", () => {
       mockStorageManager.loadProgress = function () {
@@ -311,9 +301,9 @@ describe("GameState", () => {
 
   describe("unlockArea", () => {
     test("unlocks specified area", () => {
-      expect(gameState.isAreaUnlocked("crystal-cave")).toBe(false)
+      expect(gameState.unlockedAreas.has("crystal-cave")).toBe(false)
       gameState.unlockArea("crystal-cave")
-      expect(gameState.isAreaUnlocked("crystal-cave")).toBe(true)
+      expect(gameState.unlockedAreas.has("crystal-cave")).toBe(true)
     })
   })
 
@@ -366,23 +356,6 @@ describe("GameState", () => {
       gameState.currentArea = "crystal-cave"
       gameState.completeLevel()
       expect(gameState.getCompletedAreasCount()).toBe(2)
-    })
-  })
-
-  describe("isCastleComplete", () => {
-    test("returns false when castle not complete", () => {
-      expect(gameState.isCastleComplete()).toBe(false)
-    })
-
-    test("returns true when all 6 areas completed", () => {
-      gameState.completedAreas.add("flower-meadow")
-      gameState.completedAreas.add("crystal-cave")
-      gameState.completedAreas.add("enchanted-forest")
-      gameState.completedAreas.add("time-temple")
-      gameState.completedAreas.add("measurement-market")
-      gameState.completedAreas.add("pattern-path")
-
-      expect(gameState.isCastleComplete()).toBe(true)
     })
   })
 

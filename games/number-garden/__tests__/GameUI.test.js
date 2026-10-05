@@ -40,7 +40,6 @@ describe("GameUI", () => {
       <div id="castle-progress-text"></div>
       <div id="castle-svg-container"></div>
       <div id="castle-pieces-display"></div>
-      <div id="castle-notification"></div>
       <div id="project-progress-modal"></div>
       <div id="project-modal-title"></div>
       <div id="project-visual"></div>
@@ -367,21 +366,6 @@ describe("GameUI", () => {
       expect(feedbackArea.innerHTML).toContain("Great job!")
       expect(feedbackArea.innerHTML).toContain("✨")
       expect(feedbackArea.classList.contains("hidden")).toBe(false)
-    })
-
-    test("shows correct answer for incorrect responses", () => {
-      gameUI.showFeedback("Try again", "incorrect", { correctAnswer: 42 })
-
-      const feedbackArea = document.getElementById("feedback-area")
-      expect(feedbackArea.innerHTML).toContain("The answer is")
-      expect(feedbackArea.innerHTML).toContain("42")
-    })
-
-    test("shows explanation when provided", () => {
-      gameUI.showFeedback("Correct!", "correct", { explanation: "5 + 5 = 10" })
-
-      const feedbackArea = document.getElementById("feedback-area")
-      expect(feedbackArea.innerHTML).toContain("5 + 5 = 10")
     })
 
     test("uses appropriate icon for each type", () => {

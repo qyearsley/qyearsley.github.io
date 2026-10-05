@@ -295,13 +295,4 @@ export class ProgressionManager {
   getAreaThemes() {
     return this.areaThemes
   }
-
-  /**
-   * Get theme for a specific area
-   * @param {string} areaId - Area identifier
-   * @returns {Object|null} Area theme or null
-   */
-  getTheme(areaId) {
-    return this.areaThemes[areaId] || null
-  }
 }

@@ -1,4 +1,4 @@
-import { AREA_ICONS } from "./constants.js"
+import { AREA_COUNT, AREA_ICONS } from "./constants.js"
 
 export class CastleUI {
   constructor(elements) {
@@ -64,66 +64,6 @@ export class CastleUI {
     }
   }
 
-  showCastleNotification(
-    areaName,
-    totalPieces,
-    projectInfo = { icon: "🏰", pieceName: "Castle Piece" },
-  ) {
-    if (!this.elements.castleNotification) return
-
-    this.elements.castleNotification.innerHTML = `
-      <div class="castle-notification-content">
-        <div class="castle-notification-icon">${projectInfo.icon}</div>
-        <div class="castle-notification-text">
-          <strong>${areaName} Complete!</strong>
-          <span>${projectInfo.pieceName} ${totalPieces}/6 collected!</span>
-        </div>
-      </div>
-    `
-
-    this.elements.castleNotification.classList.add("show")
-
-    setTimeout(() => {
-      this.elements.castleNotification.classList.remove("show")
-    }, 2500)
-  }
-
-  showProjectProgress(projectType, completedCount, isComplete = false) {
-    if (!this.elements.projectProgressModal) return
-
-    const projectVisuals = {
-      castle: ["🧱", "🧱🧱", "🧱🧱🧱", "🏰🧱", "🏰🏰", "🏰✨"],
-      garden: ["🌱", "🌱🌱", "🌻", "🌻🌸", "🌻🌸🌺", "🌻🌸🌺🌷"],
-      robot: ["🔧", "🔧⚙️", "🦾", "🦿🦾", "🤖", "🤖✨"],
-      spaceship: ["🔩", "🔩🔧", "🛸", "🛸⚡", "🚀", "🚀✨"],
-    }
-
-    const projectTitles = {
-      castle: "Building Your Castle!",
-      garden: "Growing Your Garden!",
-      robot: "Building Your Robot!",
-      spaceship: "Building Your Rocket!",
-    }
-
-    const completedTitles = {
-      castle: "Completed Your Castle!",
-      garden: "Grew Your Garden!",
-      robot: "Completed Your Robot!",
-      spaceship: "Completed Your Rocket!",
-    }
-
-    const visual = projectVisuals[projectType]?.[completedCount - 1] || "🎯"
-    const title = (isComplete ? completedTitles : projectTitles)[projectType]
-
-    this.elements.projectModalTitle.textContent = title
-    this.elements.projectVisual.textContent = visual
-    this.elements.projectProgressText.textContent = isComplete
-      ? "🎉 All areas complete! 🎉"
-      : `Progress: ${completedCount}/6 areas complete`
-
-    this.elements.projectProgressModal.classList.remove("hidden")
-  }
-
   hideProjectProgress() {
     if (this.elements.projectProgressModal) {
       this.elements.projectProgressModal.classList.add("hidden")
@@ -168,7 +108,7 @@ export class CastleUI {
           projectIcon.textContent = projectInfo.icon
         }
         if (projectMessage) {
-          projectMessage.textContent = `You earned a new ${projectInfo.pieceName.toLowerCase()}! (${completedAreasCount}/6)`
+          projectMessage.textContent = `You earned a new ${projectInfo.pieceName.toLowerCase()}! (${completedAreasCount}/${AREA_COUNT})`
         }
       } else {
         projectProgressContainer.classList.add("hidden")

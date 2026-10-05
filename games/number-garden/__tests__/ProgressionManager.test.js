@@ -53,21 +53,6 @@ describe("ProgressionManager", () => {
     })
   })
 
-  describe("getTheme", () => {
-    test("returns theme for valid area", () => {
-      const theme = progression.getTheme("flower-meadow")
-
-      expect(theme).toBeDefined()
-      expect(theme.progressionType).toBe("color")
-    })
-
-    test("returns null for invalid area", () => {
-      const theme = progression.getTheme("nonexistent-area")
-
-      expect(theme).toBeNull()
-    })
-  })
-
   describe("theme colors", () => {
     // WCAG relative luminance, then the contrast ratio against white
     // (luminance 1.0). Kept local to the test so a colour tweak that makes
@@ -113,8 +98,8 @@ describe("ProgressionManager", () => {
     })
 
     test("the two light primaries have darker ink variants", () => {
-      const gold = progression.getTheme("time-temple")
-      const orange = progression.getTheme("measurement-market")
+      const gold = progression.getAreaThemes()["time-temple"]
+      const orange = progression.getAreaThemes()["measurement-market"]
 
       expect(gold.inkColor).not.toBe(gold.primaryColor)
       expect(orange.inkColor).not.toBe(orange.primaryColor)
@@ -127,7 +112,7 @@ describe("ProgressionManager", () => {
 
   describe("theme stages", () => {
     test("stages are ordered by percent", () => {
-      const theme = progression.getTheme("flower-meadow")
+      const theme = progression.getAreaThemes()["flower-meadow"]
 
       for (let i = 0; i < theme.stages.length - 1; i++) {
         expect(theme.stages[i].percent).toBeLessThan(theme.stages[i + 1].percent)
@@ -135,7 +120,7 @@ describe("ProgressionManager", () => {
     })
 
     test("all stages have required properties", () => {
-      const theme = progression.getTheme("flower-meadow")
+      const theme = progression.getAreaThemes()["flower-meadow"]
 
       theme.stages.forEach((stage) => {
         expect(stage).toHaveProperty("percent")

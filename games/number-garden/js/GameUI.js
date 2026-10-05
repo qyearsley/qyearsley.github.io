@@ -54,7 +54,6 @@ export class GameUI extends BaseGameUI {
       castleProgressText: document.getElementById("castle-progress-text"),
       castleSvgContainer: document.getElementById("castle-svg-container"),
       castlePiecesDisplay: document.getElementById("castle-pieces-display"),
-      castleNotification: document.getElementById("castle-notification"),
       projectProgressModal: document.getElementById("project-progress-modal"),
       projectModalTitle: document.getElementById("project-modal-title"),
       projectVisual: document.getElementById("project-visual"),
@@ -276,11 +275,8 @@ export class GameUI extends BaseGameUI {
    * Show feedback message with structured display
    * @param {string} message - Feedback message
    * @param {string} type - Feedback type (correct, incorrect, encourage)
-   * @param {Object} options - Additional options
-   * @param {string} options.correctAnswer - The correct answer to show (for incorrect)
-   * @param {string} options.explanation - Optional explanation text
    */
-  showFeedback(message, type, options = {}) {
+  showFeedback(message, type) {
     const feedbackArea = this.elements.feedbackArea
     if (!feedbackArea) return
 
@@ -292,26 +288,12 @@ export class GameUI extends BaseGameUI {
     }
     const icon = icons[type] || "💡"
 
-    // Build structured feedback HTML
-    let feedbackHTML = `
+    feedbackArea.innerHTML = `
       <div class="feedback ${type}">
         <div class="feedback-icon">${icon}</div>
         <h3>${message}</h3>
+      </div>
     `
-
-    // Add correct answer for incorrect responses
-    if (type === "incorrect" && options.correctAnswer) {
-      feedbackHTML += `<p>The answer is: <strong>${options.correctAnswer}</strong></p>`
-    }
-
-    // Add explanation if provided
-    if (options.explanation) {
-      feedbackHTML += `<p class="feedback-explanation">${options.explanation}</p>`
-    }
-
-    feedbackHTML += `</div>`
-
-    feedbackArea.innerHTML = feedbackHTML
     feedbackArea.classList.remove("hidden")
   }
 

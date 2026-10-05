@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach, jest } from "@jest/globals"
+import { describe, test, expect, beforeEach } from "@jest/globals"
 import { CastleUI } from "../js/CastleUI.js"
 import { AREAS, AREA_ICONS } from "../js/constants.js"
 
@@ -13,7 +13,6 @@ describe("CastleUI", () => {
       <div id="castle-progress-text"></div>
       <div id="castle-pieces-display"></div>
       <button id="castle-button"></button>
-      <div id="castle-notification"></div>
       <div id="project-progress-modal" class="hidden"></div>
       <div id="project-modal-title"></div>
       <div id="project-visual"></div>
@@ -31,7 +30,6 @@ describe("CastleUI", () => {
       castleProgressText: document.getElementById("castle-progress-text"),
       castlePiecesDisplay: document.getElementById("castle-pieces-display"),
       castleButton: document.getElementById("castle-button"),
-      castleNotification: document.getElementById("castle-notification"),
       projectProgressModal: document.getElementById("project-progress-modal"),
       projectModalTitle: document.getElementById("project-modal-title"),
       projectVisual: document.getElementById("project-visual"),
@@ -83,28 +81,8 @@ describe("CastleUI", () => {
     expect(elements.castleButton.querySelectorAll(".castle-badge")).toHaveLength(1)
   })
 
-  test("showCastleNotification displays the message, then hides it again after the delay", () => {
-    jest.useFakeTimers()
-
-    castle.showCastleNotification("Flower Meadow", 4)
-
-    expect(elements.castleNotification.innerHTML).toContain("Flower Meadow Complete!")
-    expect(elements.castleNotification.innerHTML).toContain("4/6 collected!")
-    expect(elements.castleNotification.classList.contains("show")).toBe(true)
-
-    jest.advanceTimersByTime(2500)
-
-    expect(elements.castleNotification.classList.contains("show")).toBe(false)
-
-    jest.useRealTimers()
-  })
-
-  test("showProjectProgress fills in the modal and unhides it; hideProjectProgress hides it again", () => {
-    castle.showProjectProgress("garden", 3, false)
-
-    expect(elements.projectModalTitle.textContent).toBe("Growing Your Garden!")
-    expect(elements.projectProgressText.textContent).toBe("Progress: 3/6 areas complete")
-    expect(elements.projectProgressModal.classList.contains("hidden")).toBe(false)
+  test("hideProjectProgress hides the modal", () => {
+    elements.projectProgressModal.classList.remove("hidden")
 
     castle.hideProjectProgress()
 

@@ -195,15 +195,6 @@ export class GameState {
   }
 
   /**
-   * Check if an area is unlocked
-   * @param {string} areaId - Area identifier
-   * @returns {boolean} True if area is unlocked
-   */
-  isAreaUnlocked(areaId) {
-    return this.unlockedAreas.has(areaId)
-  }
-
-  /**
    * Unlock an area (for testing purposes)
    * @param {string} areaId - Area identifier
    */
@@ -246,14 +237,6 @@ export class GameState {
    */
   getCompletedAreasCount() {
     return this.completedAreas.size
-  }
-
-  /**
-   * Check if castle is complete (all 6 areas done)
-   * @returns {boolean} True if all areas completed
-   */
-  isCastleComplete() {
-    return this.completedAreas.size >= 6
   }
 
   /**

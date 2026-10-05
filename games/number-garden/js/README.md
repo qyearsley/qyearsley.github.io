@@ -14,7 +14,7 @@ game.js (NumberGarden class)
 ├── GameState          - Manages game data and progress
 ├── GameUI             - Handles all DOM manipulation
 ├── EventManager       - Coordinates user interactions
-├── ProgressionManager - Controls level difficulty
+├── ProgressionManager - Per-area visual themes
 ├── ActivityGenerator  - Creates math problems (activities.js)
 ├── SoundManager       - Manages audio feedback
 ├── StorageManager     - Handles localStorage persistence (storage.js)
@@ -43,7 +43,7 @@ Central event coordination. Attaches event listeners to DOM elements and routes 
 
 ### ProgressionManager.js
 
-Determines appropriate difficulty for activities based on player progress. Ensures steady learning curve.
+A table of per-area visual themes: background stages, primary and accent colors, and text-safe ink colors. `getAreaThemes()` returns the table. `GameUI` uses it to restyle the screen as a level progresses. It does not choose difficulty.
 
 ### activities.js (ActivityGenerator)
 
@@ -60,8 +60,7 @@ Handles localStorage operations with error handling and version management for s
 ### rewards.js (RewardSystem)
 
 Picks the reward item shown after a correct answer -- each area has its own set
-(flowers, crystals, stars) -- and supplies milestone rewards, encouragement
-messages, and celebration emoji. Star totals themselves live in `GameState`.
+(flowers, crystals, stars). Star totals themselves live in `GameState`.
 
 ### ProjectVisuals.js
 
@@ -171,7 +170,7 @@ Tests are located in the parent `__tests__/` directory. Each major module has co
 - `EventManager.test.js` - Event routing
 - `storage.test.js` - localStorage operations
 - `SoundManager.test.js` - Audio system
-- `ProgressionManager.test.js` - Difficulty scaling
+- `ProgressionManager.test.js` - Per-area visual themes
 - `ParticleSystem.test.js` - Visual effects
 - `ProjectVisuals.test.js` - SVG generation
 - `rewards.test.js` - Reward system

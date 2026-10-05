@@ -214,32 +214,4 @@ describe("SoundManager", () => {
       expect(() => soundManager.playTone(440, 0, 0.5)).not.toThrow()
     })
   })
-
-  describe("dispose", () => {
-    test("closes audio context", () => {
-      soundManager.init()
-
-      soundManager.dispose()
-
-      expect(soundManager.audioContext).toBeNull()
-    })
-
-    test("handles null audio context", () => {
-      soundManager.audioContext = null
-
-      // Should not throw
-      expect(() => soundManager.dispose()).not.toThrow()
-    })
-
-    test("handles close errors gracefully", () => {
-      soundManager.init()
-      soundManager.audioContext.close = () => {
-        throw new Error("Cannot close")
-      }
-
-      // Should not throw
-      expect(() => soundManager.dispose()).not.toThrow()
-      expect(soundManager.audioContext).toBeNull()
-    })
-  })
 })

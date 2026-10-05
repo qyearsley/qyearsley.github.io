@@ -66,16 +66,6 @@ export class RewardSystem {
         { color: "white", emoji: "✨", name: "Sparkles" },
       ],
     }
-
-    // Keep legacy flowerTypes for backward compatibility
-    this.flowerTypes = this.areaRewards["flower-meadow"]
-
-    this.specialRewards = [
-      { emoji: "🦋", name: "Butterfly", unlockAt: 5 },
-      { emoji: "🌈", name: "Rainbow", unlockAt: 10 },
-      { emoji: "⭐", name: "Star", unlockAt: 15 },
-      { emoji: "🎆", name: "Sparkles", unlockAt: 20 },
-    ]
   }
 
   generateFlower(areaId = "flower-meadow") {
@@ -88,35 +78,5 @@ export class RewardSystem {
       ...reward,
       timestamp: Date.now(),
     }
-  }
-
-  getSpecialReward(activityCount) {
-    // Check if player has unlocked any special rewards
-    for (const reward of this.specialRewards) {
-      if (activityCount === reward.unlockAt) {
-        return reward
-      }
-    }
-    return null
-  }
-
-  getEncouragingMessage() {
-    const messages = [
-      "You're doing amazing!",
-      "Keep up the great work!",
-      "What a clever gardener you are!",
-      "The garden is blooming because of you!",
-      "Wonderful job!",
-      "You're a math superstar!",
-      "The creatures are so proud of you!",
-      "Look how beautiful the garden is becoming!",
-    ]
-
-    return messages[Math.floor(Math.random() * messages.length)]
-  }
-
-  getCelebrationEmoji() {
-    const emojis = ["🎉", "🎊", "✨", "🌟", "💫", "🎆", "🎇"]
-    return emojis[Math.floor(Math.random() * emojis.length)]
   }
 }

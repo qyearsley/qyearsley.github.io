@@ -184,26 +184,6 @@ describe("StorageManager", () => {
     })
   })
 
-  describe("exportProgress", () => {
-    test("exports progress as formatted JSON string", () => {
-      const stats = { stars: 10, flowers: 5 }
-      const garden = [{ color: "red", emoji: "🌹" }]
-      storageManager.saveProgress(stats, garden, ["flower-meadow"])
-
-      const exported = storageManager.exportProgress()
-
-      expect(typeof exported).toBe("string")
-      const parsed = JSON.parse(exported)
-      expect(parsed.stats).toEqual(stats)
-      expect(parsed.garden).toEqual(garden)
-    })
-
-    test("returns null when no saved data exists", () => {
-      const exported = storageManager.exportProgress()
-      expect(exported).toBeNull()
-    })
-  })
-
   describe("importProgress", () => {
     test("imports valid progress data", () => {
       const data = {
