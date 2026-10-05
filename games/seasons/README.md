@@ -505,20 +505,20 @@ generator regardless of what the season names, so scope its `FORM_LISTS`.
 
 There is no strings file; copy sits beside the code that shows it.
 
-| What the player reads                                                    | Where                                                                     |
-| ------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
-| Her opening line each season, and the item names                         | `demandText`, `itemName`, `itemPlural`, `rareItemName` in `js/seasons.js` |
-| The one-line verdict after each answer                                   | `_feedbackFor` in `js/game.js`                                            |
-| Result titles, her verdicts, the buttons, the two "are you sure" prompts | `_renderResult` and its neighbours in `js/game.js`                        |
-| Animal names, perk names, perk and cost text                             | `ROSTER` in `js/characters.js`                                            |
-| The count sentence, perk note, trail label                               | `renderHud` and `_describeTrail` in `js/GameUI.js`                        |
-| The question label — "Glowing challenge", and the boss's worth           | `_questionTag` in `js/game.js`                                            |
-| The reinforcement card's equation and its "Ten first" notes              | `explain` in `js/challenges/arithmetic.js`                                |
-| Summary-row labels on the result screen                                  | `renderResult` in `js/GameUI.js`                                          |
-| The jar caption on the result screen — "11 roses into her jar"           | `_renderHaul` in `js/GameUI.js`                                           |
-| The "Your journey" panel and its lifetime-totals sentence                | `renderJourneySoFar` in `js/GameUI.js`                                    |
-| The top-bar season title — "Autumn"                                      | `name` in `js/seasons.js`                                                 |
-| Headings, the intro paragraph, top-bar titles                            | `index.html`                                                              |
+| What the player reads                                                    | Where                                                                                       |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
+| Her opening line each season, and the item names                         | `demandText`, `itemName`, `itemPlural`, `rareItemName`, `rareItemPlural` in `js/seasons.js` |
+| The one-line verdict after each answer                                   | `_feedbackFor` in `js/game.js`                                                              |
+| Result titles, her verdicts, the buttons, the two "are you sure" prompts | `_renderResult` and its neighbours in `js/game.js`                                          |
+| Animal names, perk names, perk and cost text                             | `ROSTER` in `js/characters.js`                                                              |
+| The count sentence, perk note, trail label                               | `renderHud` and `_describeTrail` in `js/GameUI.js`                                          |
+| The question label — "Glowing challenge", and the boss's worth           | `_questionTag` in `js/game.js`                                                              |
+| The reinforcement card's equation and its "Ten first" notes              | `explain` in `js/challenges/arithmetic.js`                                                  |
+| Summary-row labels on the result screen                                  | `renderResult` in `js/GameUI.js`                                                            |
+| The jar caption on the result screen — "11 roses into her jar"           | `_renderHaul` in `js/GameUI.js`                                                             |
+| The "Your journey" panel and its lifetime-totals sentence                | `renderJourneySoFar` in `js/GameUI.js`                                                      |
+| The top-bar season title — "Autumn"                                      | `name` in `js/seasons.js`                                                                   |
+| Headings, the intro paragraph, top-bar titles                            | `index.html`                                                                                |
 
 Two suites pin copy, and both are meant to be updated with it:
 `game.feedback.test.js` holds the exact verdict lines ("+1 rose", "3 everlasting

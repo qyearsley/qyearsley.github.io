@@ -135,7 +135,15 @@ describe("SEASON_LIST", () => {
 
 describe.each(SEASON_LIST.map((season) => [season.id, season]))("%s", (_id, season) => {
   it("has non-empty copy in every text field", () => {
-    for (const field of ["id", "name", "itemName", "itemPlural", "rareItemName", "demandText"]) {
+    for (const field of [
+      "id",
+      "name",
+      "itemName",
+      "itemPlural",
+      "rareItemName",
+      "rareItemPlural",
+      "demandText",
+    ]) {
       expect(typeof season[field]).toBe("string")
       expect(season[field].trim().length).toBeGreaterThan(0)
     }

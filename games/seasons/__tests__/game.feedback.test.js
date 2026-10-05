@@ -5,6 +5,7 @@
 
 import { describe, expect, it, jest } from "@jest/globals"
 import { getCharacter } from "../js/characters.js"
+import { SEASON_LIST } from "../js/seasons.js"
 import { HINT_CHOICES_LEFT, PHASE, PLAY } from "../js/constants.js"
 import { hudCount, one } from "./helpers.js"
 import {
@@ -188,13 +189,16 @@ describe("the verdict under the question", () => {
     expect(byId("feedback").classList.contains("success")).toBe(true)
   })
 
-  // Pluralises the rare item. This used to read "3 Everlasting Rose!" whenever a
-  // glowing space paid out more than one, which is every time.
-  it("a glowing space names the rare item, pluralised", async () => {
-    await bootInto({ position: SPRING.glowingAt[0], items: 4 })
-    tapRight()
-    expect(feedback()).toBe(`3 ${SPRING.rareItemName.toLowerCase()}s!`)
-  })
+  // This used to read "3 Everlasting Rose!" whenever a glowing space paid out
+  // more than one, which is every time. Then it added a bare "s": "golden leafs".
+  it.each(SEASON_LIST.map((season) => [season.id, season]))(
+    "a glowing space names the rare item, pluralized (%s)",
+    async (_id, season) => {
+      await bootInto({ seasonId: season.id, position: season.glowingAt[0], items: 4 })
+      tapRight()
+      expect(feedback()).toBe(`3 ${season.rareItemPlural.toLowerCase()}!`)
+    },
+  )
 
   it("the boss question names what it rescued", async () => {
     await bootInto({

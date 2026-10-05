@@ -90,6 +90,7 @@ const tensTo = (highest) => TENS.filter((table) => table <= highest)
  * @property {string} itemName      - One collectible, singular
  * @property {string} itemPlural    - Collectibles, plural
  * @property {string} rareItemName  - What a glowing space gives, singular
+ * @property {string} rareItemPlural - What a glowing space gives, plural
  * @property {string} demandText    - The snake woman's line at the season start
  * @property {string[]} route       - One obstacle kind per space, in order.
  *                                    Its length is the trail length, and the
@@ -128,6 +129,7 @@ const SEASONS = {
     itemName: "Rose",
     itemPlural: "Roses",
     rareItemName: "Everlasting Rose",
+    rareItemPlural: "Everlasting Roses",
     demandText: "Fifteen roses for my potion, please. The ones that never wilt.",
     route: ["hill", "river", "mountain", "thicket", "boulder", "mountain", "gap", "river"],
     demand: 15,
@@ -155,6 +157,7 @@ const SEASONS = {
     itemName: "Diamond",
     itemPlural: "Diamonds",
     rareItemName: "Blazing Diamond",
+    rareItemPlural: "Blazing Diamonds",
     demandText: "Seventeen diamonds next. My potion needs something that catches light.",
     route: [
       "river",
@@ -190,6 +193,7 @@ const SEASONS = {
     itemName: "Leaf",
     itemPlural: "Leaves",
     rareItemName: "Golden Leaf",
+    rareItemPlural: "Golden Leaves",
     demandText: "Twenty-one leaves, before they all fall. The gold ones are strongest.",
     route: [
       "thicket",
@@ -228,6 +232,7 @@ const SEASONS = {
     itemName: "Icicle",
     itemPlural: "Icicles",
     rareItemName: "Frostfire Icicle",
+    rareItemPlural: "Frostfire Icicles",
     demandText: "Twenty-three icicles and the potion is finished. This is the hard part.",
     route: [
       "gap",

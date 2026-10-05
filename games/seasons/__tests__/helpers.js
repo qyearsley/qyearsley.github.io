@@ -146,6 +146,7 @@ export function madeUpSeason(overrides = {}) {
     itemName: "Pebble",
     itemPlural: "Pebbles",
     rareItemName: "Shining Pebble",
+    rareItemPlural: "Shining Pebbles",
     demandText: "Six pebbles, and be quick about it.",
     spaces: 10,
     glowingAt: [3, 7],

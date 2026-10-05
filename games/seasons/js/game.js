@@ -36,7 +36,7 @@
  *
  * This file exports nothing and calls `start()` at the bottom, so importing it
  * starts the game -- which is why index.html needs no bootstrap call, and why
- * game.test.js drives it black-box through the real markup, re-importing it
+ * the game.*.test.js files drive it black-box through the real markup, re-importing it
  * with a fresh query string per case to get a fresh instance.
  *
  * Error Handling: a corrupt or absent save starts a fresh run rather than
@@ -430,8 +430,7 @@ function _feedbackFor(outcome, season, timedOut) {
     if (outcome.rescued > 0) return `Yes! That is ${outcome.rescued} more for the potion.`
     if (outcome.itemsGained === 0) return "Right!"
     if (outcome.glowing) {
-      // The rare item name needs pluralising like any other noun here.
-      const rare = outcome.itemsGained === 1 ? season.rareItemName : `${season.rareItemName}s`
+      const rare = outcome.itemsGained === 1 ? season.rareItemName : season.rareItemPlural
       return `${outcome.itemsGained} ${rare.toLowerCase()}!`
     }
     return `+${outcome.itemsGained} ${name(outcome.itemsGained)}`
