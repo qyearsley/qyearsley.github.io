@@ -67,6 +67,7 @@ const SEASON_IDS = new Set(SEASON_ORDER)
  * @property {number} hintsLeft
  * @property {number} streak
  * @property {number} bestStreak
+ * @property {number} slips
  * @property {number} questionsAsked
  * @property {number} correctCount
  * @property {Object<string, number>} collected
@@ -193,6 +194,7 @@ function _normalizeRun(raw) {
     streak,
     // A high-water mark can never sit below the value it tracks.
     bestStreak: Math.max(_nonNegativeInt(source.bestStreak), streak),
+    slips: _nonNegativeInt(source.slips),
     questionsAsked,
     // Correct answers can never outnumber the questions they came from.
     correctCount: Math.min(_nonNegativeInt(source.correctCount), questionsAsked),

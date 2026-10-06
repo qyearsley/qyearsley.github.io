@@ -49,12 +49,13 @@ art/placeholder.js          art/index                    ⟷ cycle
   ↑
 GameState.js            characters, constants, Journey, challenges, rng, seasons
 storage.js              shared/StorageManager, characters, constants
+leaderboard.js          shared/StorageManager, characters
   ↑
 GameUI.js               shared/BaseGameUI, art, characters, constants, Journey,
                         obstacles
   ↑
 game.js                 characters, constants, GameState, GameUI, Journey,
-                        seasons, storage
+                        leaderboard, seasons, storage
 ```
 
 Five consequences worth knowing:
@@ -70,7 +71,7 @@ Five consequences worth knowing:
   declaration and `placeholder.js` never calls it at module scope. Making `svg`
   a `const` arrow, or building a drawing at module scope, turns this into a
   `ReferenceError` at load. A second pack is the moment to move `svg` out.
-- **`game.js` does not import "everything".** Seven of the other thirteen
+- **`game.js` does not import "everything".** Eight of the other fourteen
   modules, and deliberately not `rng.js`, `challenges/*`, `obstacles.js`, or
   `art/*` — randomness, question generation, the obstacle vocabulary, and drawing
   are reached through GameState, Journey, and GameUI.

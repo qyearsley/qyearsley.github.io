@@ -114,6 +114,17 @@
                screen reader already reads. This is the picture of it. -->
           <div id="result-haul" class="result-haul" aria-hidden="true"></div>
           <div id="result-summary" class="result-summary"></div>
+          <!-- The top five finished journeys on this device. Shown only at the
+               end of a run; the form only when this run makes the board. -->
+          <section id="leaderboard" class="leaderboard" aria-labelledby="leaderboard-title" hidden>
+            <h3 id="leaderboard-title" class="leaderboard-title">Best journeys</h3>
+            <form id="leaderboard-form" class="leaderboard-form" hidden>
+              <label for="leaderboard-name">You made the board! Your name:</label>
+              <input id="leaderboard-name" type="text" maxlength="12" autocomplete="off" />
+              <button type="submit" class="big-btn">Save</button>
+            </form>
+            <ol id="leaderboard-list" class="leaderboard-list"></ol>
+          </section>
           <div id="result-actions" class="result-actions"></div>
         </section>
       </main>

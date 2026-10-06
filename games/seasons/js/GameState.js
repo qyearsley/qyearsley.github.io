@@ -75,6 +75,8 @@ import { getSeason, nextSeason } from "./seasons.js"
  * @property {number} hintsLeft       - Hints remaining this season
  * @property {number} streak          - Consecutive correct answers
  * @property {number} bestStreak      - Best streak this run
+ * @property {number} slips           - Wrong answers this run, timeouts included;
+ *                                      what the leaderboard ranks
  * @property {number} questionsAsked  - Questions asked this season; also the rng cursor
  * @property {number} correctCount    - Correct answers this season
  * @property {Object|null} question   - The question on screen
@@ -208,6 +210,7 @@ export function createState(seed = 1) {
     hintsLeft: 0,
     streak: 0,
     bestStreak: 0,
+    slips: 0,
     questionsAsked: 0,
     correctCount: 0,
     question: null,
@@ -217,7 +220,7 @@ export function createState(seed = 1) {
 
 /**
  * Begin a season, resetting everything that is per-season and keeping
- * everything that is per-run (`seed`, `bestStreak`, `collected`).
+ * everything that is per-run (`seed`, `bestStreak`, `slips`, `collected`).
  *
  * @param {GameState} state - The current state
  * @param {string} seasonId - The season to start
@@ -341,6 +344,7 @@ export function answer(state, given) {
     questionsAsked: state.questionsAsked + 1,
     correctCount: state.correctCount + (correct ? 1 : 0),
     streak: correct ? state.streak + 1 : 0,
+    slips: state.slips + (correct ? 0 : 1),
   }
   next.bestStreak = Math.max(state.bestStreak, next.streak)
 

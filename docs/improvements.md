@@ -97,3 +97,4 @@ a person to look, on an iPad where it matters:
 - The syllogism checker's Venn diagram: region shading and where the X marks land.
 - Five Readings' tables on a narrow screen.
 - Life Garden: click a preset, then press Space; it should play.
+- Seasons' leaderboard and name field on the end screen (`?phase=end`).

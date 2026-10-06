@@ -56,6 +56,15 @@ import {
   rehydrate,
 } from "./GameState.js"
 import { isGlowingAt, kindAt } from "./Journey.js"
+import {
+  LeaderboardStorage,
+  addEntry,
+  cleanName,
+  hasRun,
+  normalizeBoard,
+  qualifies,
+  todayKey,
+} from "./leaderboard.js"
 import { CHARACTERS, getCharacter } from "./characters.js"
 import { SEASON_LIST, getSeason } from "./seasons.js"
 import { StorageManager, defaultSave, toSavedRun } from "./storage.js"
@@ -66,6 +75,7 @@ const ui = new GameUI()
 // levels exist; see renderJourneySoFar.
 ui.seasonOrder = SEASON_LIST
 const storage = new StorageManager()
+const boardStorage = new LeaderboardStorage()
 
 /**
  * What the debug query string asked for.
@@ -191,6 +201,9 @@ let state = createState(_freshSeed())
 
 /** @type {Object} The persisted wrapper around it. */
 let save = defaultSave()
+
+/** @type {import("./leaderboard.js").Board} The top finished journeys. */
+let board = normalizeBoard(null)
 
 /** @type {boolean} True between an answer landing and the next question. */
 let answering = false
@@ -567,6 +580,7 @@ function _renderResult(season) {
       String(state.collected[id]),
     ])
     rows.push(["Best streak", String(state.bestStreak)])
+    rows.push(["Slips", String(state.slips)])
     ui.renderResult(
       state,
       season,
@@ -576,6 +590,7 @@ function _renderResult(season) {
       rows,
       { finale: true },
     )
+    _renderBoard()
     return
   }
 
@@ -593,6 +608,42 @@ function _renderResult(season) {
     `${season.name} complete`,
     `She counts the ${season.itemPlural.toLowerCase()} into her jar, nods once, and writes something down. That is her being delighted.`,
   )
+}
+
+/**
+ * Draw the leaderboard, asking for a name if this run makes it and is not on it
+ * yet. The seed check is what stops a reload of the finished page asking again.
+ * @private
+ * @param {number} [highlight] - Index of the entry just added, or -1
+ */
+function _renderBoard(highlight = -1) {
+  ui.renderLeaderboard(board.entries, {
+    highlight,
+    askName: !hasRun(board, state.seed) && qualifies(board, state.slips),
+    defaultName: board.lastName,
+    onSubmit: _onSubmitName,
+  })
+}
+
+/**
+ * Put the finished run on the board under the typed name. In debug mode the
+ * board changes on screen but is not written, the same rule as the save.
+ * @private
+ * @param {string} typed - What was in the name field
+ */
+function _onSubmitName(typed) {
+  const name = cleanName(typed)
+  if (!name || state.phase !== PHASE.RUN_COMPLETE) return
+  const result = addEntry(board, {
+    name,
+    slips: state.slips,
+    characterId: state.characterId,
+    date: todayKey(),
+    seed: state.seed,
+  })
+  board = result.board
+  if (!debug.on) boardStorage.save(board)
+  _renderBoard(result.rank)
 }
 
 /**
@@ -779,6 +830,7 @@ function start() {
     // the natural conclusion from a debug session is that saving is broken.
     document.body?.setAttribute("data-debug", debug.phase ?? debug.seasonId ?? "on")
   } else {
+    board = boardStorage.load()
     const loaded = storage.loadRun()
     if (loaded) {
       save = loaded

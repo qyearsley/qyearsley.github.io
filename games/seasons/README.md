@@ -55,6 +55,11 @@ nothing except that she asks one more: Ella's rule, "if you miss the boss questi
 you get a chance to go back and try again," is now the only outcome there is. A
 season that has started cannot be lost.
 
+**Get on the board.** A finished journey is ranked by slips — wrong answers,
+timeouts included — on a top-five board kept on the device. A run that makes it
+asks for a name. Ties go to whoever got there first. The board has its own
+localStorage key, so "Start over" does not erase it.
+
 Seasons get harder in both directions at once — the maths steps up _and_ the clock
 tightens, the demand rises, and more of the trail glows. A whole run is 42
 questions when nothing is missed: 38 trail spaces and four boss questions. It was

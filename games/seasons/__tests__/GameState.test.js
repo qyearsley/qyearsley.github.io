@@ -154,6 +154,7 @@ describe("createState", () => {
       hintsLeft: 0,
       streak: 0,
       bestStreak: 0,
+      slips: 0,
       questionsAsked: 0,
       correctCount: 0,
       question: null,
@@ -281,6 +282,13 @@ describe("correct answers", () => {
     const rebuilt = answerRight(broken).state
     expect(rebuilt.streak).toBe(1)
     expect(rebuilt.bestStreak).toBe(3)
+  })
+
+  it("counts every slip in the run, and carries the count into the next season", () => {
+    const missed = answerWrong(answerWrong(startAs("sloth")).state).state
+    expect(missed.slips).toBe(2)
+    expect(answerRight(missed).state.slips).toBe(2)
+    expect(startSeason(missed, "summer").slips).toBe(2)
   })
 
   it("generates a fresh question after every answer", () => {

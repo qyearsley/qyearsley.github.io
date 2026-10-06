@@ -157,6 +157,10 @@ export class GameUI extends BaseGameUI {
       "result-haul",
       "result-summary",
       "result-actions",
+      "leaderboard",
+      "leaderboard-form",
+      "leaderboard-name",
+      "leaderboard-list",
       "settings-button",
       "setting-timer",
       "close-settings",
@@ -1217,6 +1221,8 @@ export class GameUI extends BaseGameUI {
     this.setText("result-text", text)
     if (finale) this._renderFinale()
     else this._renderHaul(state, season, rows)
+    // Only the end of a run shows the board; game.js draws it after this.
+    if (!finale && this.elements.leaderboard) this.elements.leaderboard.hidden = true
     const summary = this.elements["result-summary"]
     if (summary && (season || rows)) {
       summary.replaceChildren()
@@ -1254,6 +1260,44 @@ export class GameUI extends BaseGameUI {
       // would then pull focus out of an `aria-modal` dialog; `focusHeading` is
       // the other.
       if (!this.settingsOpen) holder.querySelector("button")?.focus()
+    }
+  }
+
+  /**
+   * Draw the leaderboard on the end-of-run screen.
+   *
+   * @param {import("./leaderboard.js").Entry[]} entries - Best first
+   * @param {Object} options
+   * @param {number} [options.highlight] - Index of the entry just added, or -1
+   * @param {boolean} [options.askName] - Show the name form
+   * @param {string} [options.defaultName] - What the name field starts with
+   * @param {(name: string) => void} [options.onSubmit] - Called with the typed name
+   */
+  renderLeaderboard(entries, { highlight = -1, askName = false, defaultName = "", onSubmit } = {}) {
+    const { leaderboard, "leaderboard-form": form, "leaderboard-name": input } = this.elements
+    const list = this.elements["leaderboard-list"]
+    if (!leaderboard || !list) return
+    leaderboard.hidden = false
+    list.replaceChildren()
+    entries.forEach((entry, index) => {
+      const item = document.createElement("li")
+      if (index === highlight) item.className = "is-new"
+      const name = document.createElement("strong")
+      name.textContent = entry.name
+      const slips = entry.slips === 1 ? "1 slip" : `${entry.slips} slips`
+      const detail = [getCharacter(entry.characterId).name, entry.date].filter(Boolean).join(", ")
+      item.append(name, ` — ${slips} (${detail})`)
+      list.append(item)
+    })
+    if (form && input) {
+      form.hidden = !askName
+      input.value = defaultName
+      // A property rather than addEventListener, so re-rendering replaces the
+      // handler instead of stacking a second one.
+      form.onsubmit = (event) => {
+        event.preventDefault()
+        onSubmit?.(input.value)
+      }
     }
   }
 

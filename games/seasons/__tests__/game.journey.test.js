@@ -189,6 +189,7 @@ describe("finishing the whole journey", () => {
     expect(summaryRows()).toEqual([
       ...SEASON_ORDER.map((id, index) => [seasonRowLabel(id), String(PERFECT[index])]),
       ["Best streak", String(PERFECT_STREAK)],
+      ["Slips", "0"],
     ])
 
     // The label format, pinned once and only here. Every other row assertion in
@@ -234,15 +235,16 @@ describe("finishing the whole journey", () => {
         ...EARLIER_SEASONS.map((id, index) => [seasonRowLabel(id), String(PERFECT[index])]),
         [seasonRowLabel(LAST_SEASON.id), String(LAST_FROM_BOSS)],
         ["Best streak", String(SEEDED_STREAK)],
+        ["Slips", "0"],
       ])
     })
 
     // The high-water mark for the whole run, not for winter: one correct boss
     // answer is a streak of 1, and the row still reports the seeded best.
-    it("reports the run's best streak, last", () => {
+    it("reports the run's best streak, before the slips", () => {
       expect(saved().run.streak).toBe(1)
       expect(saved().run.bestStreak).toBe(SEEDED_STREAK)
-      expect(summaryRows().at(-1)).toEqual(["Best streak", String(SEEDED_STREAK)])
+      expect(summaryRows().at(-2)).toEqual(["Best streak", String(SEEDED_STREAK)])
     })
 
     it("offers one way onward, and it is Play again", () => {
@@ -301,6 +303,7 @@ describe("finishing the whole journey", () => {
       [seasonRowLabel(SEASON_ORDER[0]), String(PERFECT[0])],
       [seasonRowLabel(LAST_SEASON.id), String(LAST_FROM_BOSS)],
       ["Best streak", String(SEEDED_STREAK)],
+      ["Slips", "0"],
     ])
     // The seasons in between were never delivered, so they get no row at all.
     for (const id of EARLIER_SEASONS.slice(1)) {

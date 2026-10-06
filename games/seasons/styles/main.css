@@ -1402,6 +1402,58 @@ body.is-glowing-question .question-prompt {
   border-bottom: none;
 }
 
+.leaderboard {
+  max-width: 420px;
+  margin: 0 auto 24px;
+}
+
+.leaderboard[hidden],
+.leaderboard-form[hidden] {
+  display: none;
+}
+
+.leaderboard-title {
+  margin: 0 0 10px;
+  text-align: center;
+}
+
+.leaderboard-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.leaderboard-form label {
+  flex-basis: 100%;
+  text-align: center;
+}
+
+.leaderboard-form input {
+  font: inherit;
+  padding: 10px 12px;
+  border: 1px solid var(--sn-border);
+  border-radius: var(--sn-radius);
+  background: var(--sn-surface);
+  color: inherit;
+  width: 12em;
+}
+
+.leaderboard-list {
+  margin: 0;
+  padding: 0 0 0 2em;
+}
+
+.leaderboard-list li {
+  padding: 6px 0;
+}
+
+.leaderboard-list li.is-new {
+  font-weight: bold;
+}
+
 .result-actions {
   display: flex;
   flex-wrap: wrap;
