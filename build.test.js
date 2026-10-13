@@ -25,6 +25,9 @@ import {
   generatePagesRegistry,
   generateSitemap,
   injectLangMeta,
+  injectPageFooter,
+  sourceUrl,
+  historyUrl,
   injectTranslatedPaths,
   loadTranslations,
   rewriteRelativePaths,
@@ -330,6 +333,63 @@ describe("checkUntranslated", () => {
   test("ignores parenthesized word lists", () => {
     const html = "<body><span>(width, height, depth)</span></body>"
     expect(checkUntranslated(html)).toEqual([])
+  })
+})
+
+describe("sourceUrl and historyUrl", () => {
+  const repo = "https://github.com/qyearsley/qyearsley.github.io"
+
+  test("a single-file page links to its file", () => {
+    expect(sourceUrl("javascript/coin-flipper.html")).toBe(
+      `${repo}/blob/main/javascript/coin-flipper.html`,
+    )
+    expect(historyUrl("javascript/coin-flipper.html")).toBe(
+      `${repo}/commits/main/javascript/coin-flipper.html`,
+    )
+  })
+
+  test("a folder index links to its folder", () => {
+    expect(sourceUrl("javascript/logic-engine/index.html")).toBe(
+      `${repo}/tree/main/javascript/logic-engine/`,
+    )
+    expect(sourceUrl("javascript/index.html")).toBe(`${repo}/tree/main/javascript/`)
+    expect(historyUrl("resume/index.html")).toBe(`${repo}/commits/main/resume/`)
+  })
+})
+
+describe("injectPageFooter", () => {
+  const docHtml = "<body><header></header><main>x</main></body>"
+
+  test("adds Source and History links after main", () => {
+    const result = injectPageFooter(docHtml, "javascript/coin-flipper.html")
+    expect(result).toMatch(/<\/main>\s*<footer class="page-footer">/)
+    expect(result).toContain(">Source</a>")
+    expect(result).toContain(">History</a>")
+    expect(result.match(/page-footer/g)).toHaveLength(1)
+  })
+
+  test("skips pages with no header (games)", () => {
+    const game = "<body><main>x</main></body>"
+    expect(injectPageFooter(game, "games/seasons/index.html")).toBe(game)
+  })
+
+  test("skips the homepage and 404", () => {
+    expect(injectPageFooter(docHtml, "index.html")).toBe(docHtml)
+    expect(injectPageFooter(docHtml, "404.html")).toBe(docHtml)
+  })
+
+  test("a translated page keeps the English source URL and translates the labels", () => {
+    const html = injectPageFooter(docHtml, "javascript/coin-flipper.html")
+    const zh = translateHtml(
+      html,
+      { Source: "源代码", History: "修改历史" },
+      "javascript/coin-flipper.html",
+      new Set(),
+      new Set(),
+    )
+    expect(zh).toContain(">源代码</a>")
+    expect(zh).toContain(">修改历史</a>")
+    expect(zh).toContain("/blob/main/javascript/coin-flipper.html")
   })
 })
 

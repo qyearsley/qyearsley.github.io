@@ -85,12 +85,13 @@ Because the page only exists after a build, `npm run dev` does not serve
 1. **Clean** -- delete `dist/`
 2. **Copy** -- copy all static files to `dist/` (skips config files, dev-only dirs)
 3. **Render resume** -- convert `resume/resume.md` to HTML via `marked`, inject into `resume/template.html`
-4. **Translate** -- for each translatable page, generate a Chinese version at `/zh/` using text-matching against co-located `*.zh.json` files. Both the `/zh/` and the English copy also get `hreflang` links and a language-switch link in the header.
-5. **Page registry** -- write `dist/pages.json`: every tool/game page under `games/`, `javascript/`, and `chinese/` (excluding each section's own index), with its English and (if translated) Chinese title. `shared/discover.js` fetches this for the random-page link in the homepage footer and on the 404 page, and `nav.js` for the `r` keyboard shortcut.
-6. **Inject paths** -- write `window.__translatedPaths` into every HTML file so `nav.js` can persist language preference client-side
-7. **Sitemap** -- generate `dist/sitemap.xml` from all HTML files, excluding `/404.html` and the `/zh/` pages (those appear as `hreflang` alternates)
-8. **Cache-bust** -- append `?v=<buildId>` to every local `<script src>` in `dist/` and to every relative import/export specifier inside `dist/`'s own JS files. See "Cache busting" below.
-9. **Validate** -- check every internal `href` and `src`, and every relative JS import specifier, against the files in `dist/`. A broken link or import fails the build, which is what keeps it off the live site: the deploy workflow uploads `dist/` only after build, test and lint all pass.
+4. **Footer** -- add Source and History links to GitHub after `</main>` on every page with a `<header>`, except the homepage and 404. A folder's `index.html` links to the folder. Runs before translation, so `/zh/` pages get it too, pointing at the English source.
+5. **Translate** -- for each translatable page, generate a Chinese version at `/zh/` using text-matching against co-located `*.zh.json` files. Both the `/zh/` and the English copy also get `hreflang` links and a language-switch link in the header.
+6. **Page registry** -- write `dist/pages.json`: every tool/game page under `games/`, `javascript/`, and `chinese/` (excluding each section's own index), with its English and (if translated) Chinese title. `shared/discover.js` fetches this for the random-page link in the homepage footer and on the 404 page, and `nav.js` for the `r` keyboard shortcut.
+7. **Inject paths** -- write `window.__translatedPaths` into every HTML file so `nav.js` can persist language preference client-side
+8. **Sitemap** -- generate `dist/sitemap.xml` from all HTML files, excluding `/404.html` and the `/zh/` pages (those appear as `hreflang` alternates)
+9. **Cache-bust** -- append `?v=<buildId>` to every local `<script src>` in `dist/` and to every relative import/export specifier inside `dist/`'s own JS files. See "Cache busting" below.
+10. **Validate** -- check every internal `href` and `src`, and every relative JS import specifier, against the files in `dist/`. A broken link or import fails the build, which is what keeps it off the live site: the deploy workflow uploads `dist/` only after build, test and lint all pass.
 
 Why this rather than a site generator, and what would change our mind:
 [`build-system-options.md`](build-system-options.md).

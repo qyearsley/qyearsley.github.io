@@ -98,3 +98,4 @@ a person to look, on an iPad where it matters:
 - Five Readings' tables on a narrow screen.
 - Life Garden: click a preset, then press Space; it should play.
 - Seasons' leaderboard and name field on the end screen (`?phase=end`).
+- The Source and History footer on document pages, in both themes and on a phone.

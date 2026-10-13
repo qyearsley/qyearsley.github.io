@@ -23,7 +23,7 @@ import {
   rmSync,
   writeFileSync,
 } from "node:fs"
-import { dirname, join } from "node:path"
+import { dirname, join, relative } from "node:path"
 import { URL, fileURLToPath } from "node:url"
 import { marked } from "marked"
 
@@ -433,6 +433,42 @@ function injectLangMeta(html, pagePath, targetLang) {
   return result.replace(/<div class="lang-slot">\s*<\/div>/, `<div class="lang-slot">${link}</div>`)
 }
 
+// ── Page footer ─────────────────────────────────────────────────
+
+const REPO_URL = "https://github.com/qyearsley/qyearsley.github.io"
+
+// A page that is the index of its own folder links to the folder, since the
+// folder holds its scripts, styles or section siblings. Any other page links
+// to its one file.
+function sourcePath(pagePath) {
+  return pagePath.endsWith("/index.html") ? pagePath.replace(/index\.html$/, "") : pagePath
+}
+
+function sourceUrl(pagePath) {
+  const kind = pagePath.endsWith("/index.html") ? "tree" : "blob"
+  return `${REPO_URL}/${kind}/main/${sourcePath(pagePath)}`
+}
+
+function historyUrl(pagePath) {
+  return `${REPO_URL}/commits/main/${sourcePath(pagePath)}`
+}
+
+// Adds Source and History links after `</main>` on document pages. Games have
+// no `<header>` and fill the screen, so they get none. The homepage has its own
+// footer, and 404 is served at any URL. Runs before translation, so each /zh/
+// page inherits the footer, links to the English source, and has its labels
+// translated through zh-common.json.
+function injectPageFooter(html, pagePath) {
+  if (pagePath === "index.html" || pagePath === "404.html") return html
+  if (!html.includes("</header>")) return html
+  const footer =
+    `<footer class="page-footer">` +
+    `<a href="${sourceUrl(pagePath)}">Source</a>` +
+    `<a href="${historyUrl(pagePath)}">History</a>` +
+    `</footer>`
+  return html.replace("</main>", `</main>\n      ${footer}`)
+}
+
 // Rewrites relative asset paths (href, src, ES module imports) to absolute
 // paths so that /zh/ pages can resolve them from the original location.
 function rewriteRelativePaths(html, pagePath) {
@@ -835,6 +871,13 @@ function build() {
   console.log("Generating resume from markdown...")
   generateResume()
 
+  console.log("Adding page footers...")
+  for (const file of findHtmlFiles(DIST)) {
+    const html = readFileSync(file, "utf-8")
+    const withFooter = injectPageFooter(html, relative(DIST, file))
+    if (withFooter !== html) writeFileSync(file, withFooter)
+  }
+
   const data = loadTranslations()
   if (!data) {
     console.log("No zh-common.json found. Skipping translations.")
@@ -908,6 +951,9 @@ export {
   translateHtml,
   rewriteRelativePaths,
   injectLangMeta,
+  injectPageFooter,
+  sourceUrl,
+  historyUrl,
   checkUntranslated,
   clean,
   copyTree,

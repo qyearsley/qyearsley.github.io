@@ -80,8 +80,3 @@ A proof of concept landed on 2026-09-26 as `javascript/syllogism.html`. Its
 verdict matches a brute-force check over every statement combination. It has
 not been looked at in a browser yet, and the diagram layout is the least
 certain part.
-
-## View-source links on experiments
-
-A small, quiet link from each experiment to its source on GitHub. One place to
-add it would be `shared/nav.js`, so no page needs its own copy.

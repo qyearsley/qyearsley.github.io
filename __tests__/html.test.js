@@ -99,6 +99,14 @@ describe("language switcher mount point", () => {
     expect(headers.length + slots.length).toBe(1)
   })
 
+  // build.js puts the Source/History footer after `</main>` on every page with
+  // a `<header>`, and finds nothing to replace if `<main>` is missing.
+  test.each(htmlFiles)("%s: a page with a header has exactly one main", (relPath) => {
+    const doc = parse(relPath)
+    if (doc.querySelectorAll("header").length === 0) return
+    expect(doc.querySelectorAll("main")).toHaveLength(1)
+  })
+
   test.each(htmlFiles)("%s: leaves the slot empty for the build to fill", (relPath) => {
     for (const slot of parse(relPath).querySelectorAll(".lang-slot")) {
       expect(slot.textContent.trim()).toBe("")

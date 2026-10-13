@@ -449,6 +449,20 @@ p {
   color: var(--color-text-muted);
 }
 
+/* Source and History links on document pages, added by build.js. */
+.page-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1.5rem;
+  padding: 1rem 3rem 1.5rem;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.875rem;
+}
+
+.page-footer a {
+  color: var(--color-text-muted);
+}
+
 .section h2 {
   font-size: 1.5rem;
   font-weight: 600;
@@ -1158,6 +1172,7 @@ kbd {
   .breadcrumbs,
   .keyboard-help-backdrop,
   .see-also,
+  .page-footer,
   #table-filter,
   #filter-count {
     display: none !important;
