@@ -6,7 +6,7 @@
   "Notes on the unintuitive rules of Hanyu Pinyin spelling conventions": "汉语拼音不直观的拼写规则说明",
   "Hanyu Pinyin uses abbreviations that simplify it for experienced readers but can confuse newcomers. Keep in mind: pinyin spellings don't always match pronunciation.": "汉语拼音使用缩写，方便熟练者但容易让初学者困惑。注意：拼写不一定与发音一致。",
   "In three cases, an abbreviation is made by removing a letter:": "有三种情况通过去掉一个字母来缩写：",
-  "Where no ambiguity arises, a vowel with a diacritic is written without the diacritic, for convenience. The sound [ɛ] (as in English r<b>e</b>d) was originally written ê, but it is replaced everywhere it occurs.": "在不产生歧义时，带变音符号的元音省去符号书写，以求简便。音[ɛ]（如英语r<b>e</b>d中的元音）原本写作ê，但它出现的每一处都被替换掉了。",
+  "Where no ambiguity arises, a vowel with a diacritic is written without the diacritic, for convenience. The sound [ɛ] (as in English r<b>e</b>d) was originally written ê, but it is replaced everywhere it occurs.": "在不产生歧义时，带变音符号的元音省去符号书写，以求简便。音[ɛ]（如英语r<b>e</b>d中的元音）原本写作ê，但现在一律改写为e。",
   "If the initial is j, q, or x, replace ü with u.": "如果声母是j、q或x，把ü改写成u。",
   "In most cases, if there is no initial, the spelling changes to keep syllable boundaries clear when syllables are written together. If there is no initial and there is a ü, replace ü with yu.": "多数情况下，如果没有声母，拼写会作调整，使音节连写时的分界清楚。如果没有声母而又含有ü，把ü改写成yu。",
   "If there is no initial and the vowel is i (with no diphthong), add a y:": "如果没有声母，且元音是i（不构成复元音），前面加y：",

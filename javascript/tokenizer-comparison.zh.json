@@ -3,7 +3,7 @@
   "_description": "训练一个微型字节级BPE分词器，看训练文本如何决定同一句话英语和中文谁需要更多词元",
   "How the training text decides whether English or Chinese needs more tokens": "训练文本如何决定英语和中文谁需要更多词元",
   "Train the tokenizer": "训练分词器",
-  "Trained on a mix of two built-in texts: a few pages of everyday English prose written for this page, and a Chinese translation of it. Both are shown in full below.": "训练数据是两段内置文本的混合：为本页写的几页日常英语文章，以及它的中文译文。下面会展示完整原文。",
+  "Trained on a mix of two built-in texts: a few pages of everyday English prose written for this page, and a Chinese translation of it. Both are shown in full below.": "训练数据是两段内置文本的混合：为本页写的几页日常英语文章，以及它的中文译文。下面会完整展示这两段文本。",
   "Corpus mix:": "语料混合比例：",
   "Merges:": "合并次数：",
   "Show training text": "显示训练文本",

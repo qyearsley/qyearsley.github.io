@@ -19,7 +19,7 @@
   "A <b>rule number</b> (0-255) encodes which patterns produce an \"on\" cell. Since there are 8 possible 3-cell patterns and each can map to on or off, there are 2<sup>8</sup> = 256 possible rules.": "<b>规则编号</b>（0-255）编码哪些模式产生“开”状态的元胞。3个元胞共有8种可能模式，每种都可映射为开或关，所以共有2<sup>8</sup> = 256种可能的规则。",
   "The diagram above shows each rule's 8 cases. The top row is the input pattern (left neighbor, cell, right neighbor), and the bottom cell is the output.": "上方图示展示了每条规则的8种情况。上排是输入模式（左邻居、本元胞、右邻居），下方是输出。",
   "Some notable rules:": "一些著名规则：",
-  "<b>Rule 30</b> — chaotic, used in Mathematica's random number generator": "<b>规则30</b>——混沌，Mathematica的随机数生成器使用它",
+  "<b>Rule 30</b> — chaotic, used in Mathematica's random number generator": "<b>规则30</b>——混沌，用于Mathematica的随机数生成器",
   "<b>Rule 90</b> — produces a Sierpinski triangle": "<b>规则90</b>——生成谢尔宾斯基三角形",
   "<b>Rule 110</b> — proven Turing-complete": "<b>规则110</b>——已证明图灵完备",
   "<b>Rule 184</b> — models traffic flow": "<b>规则184</b>——模拟交通流",

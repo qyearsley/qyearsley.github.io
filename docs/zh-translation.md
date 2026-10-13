@@ -124,6 +124,18 @@ harmless copy. Keys starting with `_` are exempt.
 So there is nothing to remember. Define a shared string once, in
 `zh-common.json`, and the suite holds you to it.
 
+### Second review, 2026-10-13
+
+Five agents proofread every file again, and a sixth read the corpus for
+consistency. They found no fidelity errors of the 2026-09-20 kind. The fixes were
+small: needless 它 in four places, 运作原理 to 工作原理 on `life-garden`, 码位 to
+码点 within `encoding-explorer`, a 404 line that weakened "doesn't exist", and
+the stray space before the resume's `<em>（…）</em>` lists.
+
+Left alone as style calls: 几何级数 against 等比级数, 实测 against 观测 for
+"observed", 清空 for a grid against 清除 for a log, and the maze generator's
+Play and Show Solution, which its script writes in English.
+
 ## Rulings on doubtful renderings
 
 Kept after review. Recorded so they are not re-litigated.
