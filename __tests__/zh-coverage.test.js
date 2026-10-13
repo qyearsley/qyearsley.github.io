@@ -87,9 +87,9 @@ function sourceHtml(page) {
  * a page -- the suite tells you when one is stale.
  */
 const BASELINE = {
-  // The glossary table's English column, pinyin and literal glosses. A
-  // Chinese reader is meant to see the English there.
-  "chinese/ai-terms.html": 14,
+  // The glossary table's English column and pinyin. A Chinese reader is meant
+  // to see them there.
+  "chinese/ai-terms.html": 7,
   "chinese/encoding-explorer.html": 3,
   "chinese/pinyin-abbreviations.html": 16,
   "javascript/truth-tables.html": 1,
