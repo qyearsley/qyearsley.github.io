@@ -2,11 +2,9 @@
   "_title": "拼音声调表 - Quinten Yearsley",
   "_description": "按声调排列的汉语拼音音节示例字",
 
-  "Tone Tables": "声调表",
   "Example characters for each hanyu pinyin syllable by tone": "按声调排列的汉语拼音音节示例字",
   "This table shows example characters for each hanyu pinyin syllable by tone. It shows which characters group together, and which combinations of initial, final, and tone are common or uncommon.": "此表按声调列出每个汉语拼音音节的示例字。从中可以看出哪些字归为一组，以及声母、韵母和声调的哪些组合常见或罕见。",
   "The table is organized by pinyin syllable (rows) and tone (columns). Characters are color-coded by frequency: darker text indicates more common characters. Tone 0 represents the neutral tone (light tone).": "表格按拼音音节（行）和声调（列）排列。字按频率用颜色区分：深色文字表示更常用的字。声调0代表轻声。",
-  "Data Sources": "数据来源",
   "To generate the table, I used the following data from Chih-Hao Tsai:": "我用蔡志浩的以下数据生成此表：",
   "Frequency and Stroke Counts of Chinese Characters": "汉字频率与笔画数",
   "Mandarin Syllable Frequency Counts for Chinese Characters": "汉字普通话音节频率统计",

@@ -2,7 +2,6 @@
   "_title": "马尔可夫链文本生成器 - Quinten Yearsley",
   "_description": "用马尔可夫链从文本模式生成新文本",
 
-  "Markov Chain Text Generator": "马尔可夫链文本生成器",
   "Generate text from learned patterns": "从学到的模式生成文本",
   "Generator": "生成器",
   "Source Text:": "源文本：",

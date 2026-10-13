@@ -17,8 +17,6 @@
   "Sign (1 bit)": "符号位（1位）",
   "Exponent (11 bits)": "指数（11位）",
   "Mantissa (52 bits)": "尾数（52位）",
-  "Click any bit to toggle it": "点击任意一位即可翻转",
-  "Enter a number above": "请在上方输入数字",
   "Enter a number or simple expression": "请输入数字或简单表达式",
   "Could not parse expression": "无法解析表达式",
   "Result is not a number": "结果不是数字"

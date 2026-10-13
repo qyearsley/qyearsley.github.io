@@ -57,5 +57,20 @@
 
   "See also": "另见",
   "Source": "源代码",
-  "History": "修改历史"
+  "History": "修改历史",
+
+  "Buddhist Terms": "佛教术语",
+  "Tone Tables": "声调表",
+  "Data Sources": "数据来源",
+  "How It Works": "工作原理",
+  "Click any example to try it:": "点击示例试试：",
+  "Transliteration Syllabary": "音译音节表",
+  "Enter a number above": "请在上方输入数字",
+  "Click any bit to toggle it": "点击任意一位即可翻转",
+  "Supported Operators": "支持的运算符",
+  "Presets:": "预设：",
+  "Watch a perfect maze carve itself, then solve it": "看完美迷宫自己生成，然后求解",
+  "How it works": "工作原理",
+  "Markov Chain Text Generator": "马尔可夫链文本生成器",
+  "Add": "添加"
 }

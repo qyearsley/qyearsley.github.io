@@ -3,7 +3,6 @@
   "_description": "观察字符串散列到桶中的过程",
 
   "Watch strings hash into buckets and see collisions happen": "观察字符串散列到桶中，看冲突如何发生",
-  "Add": "添加",
   "Add Batch": "批量添加",
   "Clear": "清除",
   "Hash function:": "散列函数：",
