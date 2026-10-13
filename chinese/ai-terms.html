@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Terms in Chinese - Quinten Yearsley</title>
+    <meta
+      name="description"
+      content="A short introduction to neural networks, large language models, attention and agents, with the Chinese words for each."
+    />
+    <meta name="theme-color" content="#2d3748" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script src="/shared/theme.js"></script>
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="container">
+      <header class="header">
+        <h1>AI Terms in Chinese</h1>
+        <p>A few words for talking about large language models, and where to learn more.</p>
+      </header>
+
+      <main id="main-content" class="main-content">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="/">Home</a>
+          <span class="separator" aria-hidden="true">/</span>
+          <a href="/chinese/">Language</a>
+          <span class="separator" aria-hidden="true">/</span>
+          <span class="current" aria-current="page">AI Terms</span>
+        </nav>
+
+        <section class="section">
+          <h2>The ideas</h2>
+          <p>
+            A <strong>neural network</strong> is a very large function with many adjustable numbers,
+            called parameters. Training nudges those numbers, a little at a time, until the network
+            gives the right outputs for its training examples.
+          </p>
+          <p>
+            A <strong>large language model</strong> (LLM) is a neural network trained on a huge
+            amount of text to do one thing: predict the next <strong>token</strong>. A token is a
+            piece of text — a word, part of a word, or often a single Chinese character. Predict a
+            token, add it to the text, and repeat, and you get a whole answer.
+          </p>
+          <p>
+            The key idea inside these models is the <strong>attention mechanism</strong>. For each
+            token, the model works out which other tokens matter to it, and how much. In "the bank
+            of the river", attention is how "bank" gets its meaning from "river". The Transformer
+            architecture, published in 2017, is built around attention, and today's LLMs are
+            Transformers.
+          </p>
+          <p>
+            The text you give a model is the <strong>prompt</strong>. A model can only see a limited
+            amount of text at once, called its <strong>context window</strong>. And because it
+            produces likely text rather than checked facts, it sometimes says things that sound
+            right but are false. This is called <strong>hallucination</strong>.
+          </p>
+          <p>
+            An <strong>agent</strong> is a model that can take actions, such as searching the web or
+            running code. It works in a loop: the model picks a step, a program carries it out, and
+            the result goes back into the context window. Then the model picks the next step, until
+            the task is done. This is the <em>agentic loop</em>.
+          </p>
+        </section>
+
+        <section class="section">
+          <h2>The words</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>English</th>
+                <th>Chinese</th>
+                <th>Literally</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>neural network</td>
+                <td>神经网络 (<em>shénjīng wǎngluò</em>)</td>
+                <td>"nerve network"</td>
+              </tr>
+              <tr>
+                <td>large language model</td>
+                <td>
+                  大语言模型 (<em>dà yǔyán móxíng</em>); usually just 大模型 (<em>dà móxíng</em>)
+                </td>
+                <td>"big language model"; "big model"</td>
+              </tr>
+              <tr>
+                <td>attention mechanism</td>
+                <td>注意力机制 (<em>zhùyìlì jīzhì</em>)</td>
+                <td>"attention mechanism"</td>
+              </tr>
+              <tr>
+                <td>token</td>
+                <td>词元 (<em>cíyuán</em>)</td>
+                <td>"word unit"</td>
+              </tr>
+              <tr>
+                <td>prompt</td>
+                <td>提示词 (<em>tíshìcí</em>)</td>
+                <td>"hint words"</td>
+              </tr>
+              <tr>
+                <td>context window</td>
+                <td>上下文窗口 (<em>shàngxiàwén chuāngkǒu</em>)</td>
+                <td>"above-and-below text window"</td>
+              </tr>
+              <tr>
+                <td>agent</td>
+                <td>智能体 (<em>zhìnéngtǐ</em>)</td>
+                <td>"intelligent body"</td>
+              </tr>
+              <tr>
+                <td>hallucination</td>
+                <td>幻觉 (<em>huànjué</em>)</td>
+                <td>"illusion"</td>
+              </tr>
+            </tbody>
+          </table>
+          <p>
+            These are the mainland forms. Taiwan writes 神經網路 and 大型語言模型, and often says
+            AI代理 or just "AI agent" for an agent. In conversation, many people say "token" and
+            "prompt" in English.
+          </p>
+        </section>
+
+        <section class="section">
+          <h2>Learn more</h2>
+          <ul>
+            <li>
+              <a href="https://www.3blue1brown.com/topics/neural-networks"
+                ><strong>3Blue1Brown: Neural Networks</strong></a
+              >
+              — videos and written lessons in English, from the basics up to attention and LLMs.
+            </li>
+            <li>
+              <a href="https://space.bilibili.com/88461692"
+                ><strong>3Blue1Brown on Bilibili</strong></a
+              >
+              — the official Chinese channel, with Chinese versions of many of the same videos.
+            </li>
+          </ul>
+        </section>
+
+        <aside class="see-also">
+          <h2>See also</h2>
+          <ul>
+            <li><a href="/chinese/buddhist-vocabulary.html">Buddhist Terms</a></li>
+          </ul>
+        </aside>
+      </main>
+    </div>
+    <script src="/shared/nav.js"></script>
+  </body>
+</html>

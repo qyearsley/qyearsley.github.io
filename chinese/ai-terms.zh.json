@@ -1,0 +1,33 @@
+{
+  "_title": "AI常用术语的中文说法 - Quinten Yearsley",
+  "_description": "简单介绍神经网络、大语言模型、注意力机制和智能体，并列出各自的中英文说法。",
+
+  "AI Terms in Chinese": "AI常用术语的中文说法",
+  "A few words for talking about large language models, and where to learn more.": "谈论大模型时常用的几个词，以及去哪里进一步了解。",
+
+  "The ideas": "基本概念",
+  "A <strong>neural network</strong> is a very large function with many adjustable numbers, called parameters. Training nudges those numbers, a little at a time, until the network gives the right outputs for its training examples.": "<strong>神经网络</strong>是一个非常大的函数，里面有许多可以调整的数字，叫作参数。训练就是一点一点地调整这些数字，直到网络对训练样本给出正确的输出。",
+  "A <strong>large language model</strong> (LLM) is a neural network trained on a huge amount of text to do one thing: predict the next <strong>token</strong>. A token is a piece of text — a word, part of a word, or often a single Chinese character. Predict a token, add it to the text, and repeat, and you get a whole answer.": "<strong>大语言模型</strong>（LLM）是用海量文本训练出来的神经网络，只做一件事：预测下一个<strong>词元</strong>（token）。词元是一小段文本——一个词、词的一部分，或者常常是一个汉字。预测出一个词元，把它接到文本后面，再预测下一个，如此反复，就得到一整段回答。",
+  "The key idea inside these models is the <strong>attention mechanism</strong>. For each token, the model works out which other tokens matter to it, and how much. In \"the bank of the river\", attention is how \"bank\" gets its meaning from \"river\". The Transformer architecture, published in 2017, is built around attention, and today's LLMs are Transformers.": "这类模型的核心思想是<strong>注意力机制</strong>。对每个词元，模型都会算出其他哪些词元跟它有关、关系有多大。比如“打了一瓶酱油”里的“打”，要靠注意力从“酱油”那里得知它是“买”的意思。2017年发表的Transformer架构就是围绕注意力机制构建的，今天的大模型都是Transformer。",
+  "The text you give a model is the <strong>prompt</strong>. A model can only see a limited amount of text at once, called its <strong>context window</strong>. And because it produces likely text rather than checked facts, it sometimes says things that sound right but are false. This is called <strong>hallucination</strong>.": "你给模型的文字叫<strong>提示词</strong>。模型一次只能看到有限长度的文本，这个范围叫<strong>上下文窗口</strong>。另外，模型生成的是“像样”的文字，而不是核实过的事实，所以有时会说出听起来对、其实是错的话。这叫<strong>幻觉</strong>。",
+  "An <strong>agent</strong> is a model that can take actions, such as searching the web or running code. It works in a loop: the model picks a step, a program carries it out, and the result goes back into the context window. Then the model picks the next step, until the task is done. This is the <em>agentic loop</em>.": "<strong>智能体</strong>是能采取行动的模型，比如上网搜索或运行代码。它按循环工作：模型选定一步，由程序去执行，结果再放回上下文窗口；然后模型选下一步，直到任务完成。这就是<em>智能体循环</em>。",
+
+  "The words": "术语对照",
+  "English": "英文",
+  "Literally": "字面意思（英文直译）",
+  "神经网络 (<em>shénjīng wǎngluò</em>)": "神经网络（<em>shénjīng wǎngluò</em>）",
+  "注意力机制 (<em>zhùyìlì jīzhì</em>)": "注意力机制（<em>zhùyìlì jīzhì</em>）",
+  "词元 (<em>cíyuán</em>)": "词元（<em>cíyuán</em>）",
+  "提示词 (<em>tíshìcí</em>)": "提示词（<em>tíshìcí</em>）",
+  "上下文窗口 (<em>shàngxiàwén chuāngkǒu</em>)": "上下文窗口（<em>shàngxiàwén chuāngkǒu</em>）",
+  "智能体 (<em>zhìnéngtǐ</em>)": "智能体（<em>zhìnéngtǐ</em>）",
+  "幻觉 (<em>huànjué</em>)": "幻觉（<em>huànjué</em>）",
+  "大语言模型 (<em>dà yǔyán móxíng</em>); usually just 大模型 (<em>dà móxíng</em>)": "大语言模型（<em>dà yǔyán móxíng</em>）；通常简称大模型（<em>dà móxíng</em>）",
+  "These are the mainland forms. Taiwan writes 神經網路 and 大型語言模型, and often says AI代理 or just \"AI agent\" for an agent. In conversation, many people say \"token\" and \"prompt\" in English.": "以上是大陆的说法。台湾写作“神經網路”和“大型語言模型”，智能体常说“AI代理”或直接说“AI agent”。口语里，很多人直接用英文说token和prompt。",
+
+  "Learn more": "进一步了解",
+  "3Blue1Brown: Neural Networks": "3Blue1Brown：神经网络",
+  "— videos and written lessons in English, from the basics up to attention and LLMs.": "——英文视频和图文课程，从基础一直讲到注意力机制和大模型。",
+  "3Blue1Brown on Bilibili": "3Blue1Brown哔哩哔哩官方账号",
+  "— the official Chinese channel, with Chinese versions of many of the same videos.": "——官方中文频道，上面的许多视频都有中文版。"
+}
