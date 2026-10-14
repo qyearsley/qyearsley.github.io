@@ -25,3 +25,10 @@ npm run lint    # Run all linters
 - Follow best practices, use linters, keep things simple.
 - Prefer self-contained HTML files over complex build abstractions.
   (`docs/build-system-options.md` records why, and what would reopen it.)
+- Use American spelling in visible text: math, color, practice, neighbor, gray.
+  Code comments and internal identifiers do not need changing. If the text is a
+  translation key, rename the key in the `*.zh.json` files too.
+- Keep mostly AI-generated pages as small as possible, so that Quinten can read
+  the code. When you brief a subagent, ask for the smallest version that shows
+  the idea: no URL sync, no extra presets, short comments. Compare with
+  `javascript/truth-tables.html` (about 190 lines).
