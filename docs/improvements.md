@@ -28,35 +28,6 @@ last long version of this file is `git show 3ceed17:docs/improvements.md`.
    lacked two of them until 2026-10-05. Move them into `games/shared/` and
    verify with each game's keyboard tests.
 
-3. **Lint scans `.claude/worktrees/`.** `eslint.config.js` ignores only
-   `coverage/`, `node_modules/` and `dist/`, and the `lint:html` and
-   `lint:css` scripts in `package.json` have the same list. The worktrees are
-   ignored only in `.git/info/exclude`, which the linters do not read. On
-   2026-10-19 a bad file in `.claude/worktrees/` was reported by `npx eslint .`.
-   Add `.claude/` to all three. Verify: put a bad file in a worktree, and
-   `npm run lint` stays clean.
-
-4. **The site publishes the Chinese generator scripts.** `copyTree` in
-   `build.js` copies `*.py` and `*.pl`, so `dist/chinese/` gets
-   `make_syllabary.py`, `generate_frequencies.py` and three more.
-   `tonetable/make_tone_table.pl` is an old version that nothing runs. Keep the
-   `.txt` files, because pages link to them. Skip `*.py` and `*.pl` in
-   `copyTree`, and think about deleting the `.pl`. Verify: `ls dist/chinese`
-   after `npm run build`.
-
-5. **Doc drift in the READMEs and `development.md`.** `javascript/README.md`
-   leaves out `integer-explorer`, `maze-generator` and `tokenizer-comparison`.
-   `chinese/README.md` leaves out `ai-terms`. In `docs/development.md`, the
-   Testing section says the other games' orchestrators are untested, but Life
-   Garden's `game.js` has a boot test (77% lines). Its directory tree leaves out
-   `chinese/url-state.js`, and "Two things in style.css" has three bullets.
-   Verify: compare each README with its directory's `index.html` links.
-
-6. **Two dead exports in Seasons.** `packNames()` in
-   `games/seasons/js/art/index.js` has no caller. `challengeTypes()` in
-   `games/seasons/js/challenges/index.js` is called only by its own test.
-   Delete both and verify with `npm test` and `npm run lint`.
-
 ## Deferred
 
 These are known and accepted for now. Do not re-propose them unless something
@@ -79,6 +50,11 @@ changes.
 
 Decided with no change, so these are not re-proposed:
 
+- **The Chinese generator scripts are published on purpose.** `syllabary.html`
+  and `tone-table.html` link to their `.py` generators as source, so skipping
+  `*.py` in `build.js` breaks the link check (2026-10-19).
+- **Seasons keeps `challengeTypes()`.** Only tests call it, but one of them
+  checks that every season names a registered challenge type (2026-10-19).
 - **`homophones.html` keeps its 211 English glosses on the `/zh/` page.** Not
   important (2026-09-24).
 - **`buddhist-vocabulary.html` keeps 義譯 in the English.** The Chinese uses 意译.
@@ -102,6 +78,10 @@ Decided with no change, so these are not re-proposed:
   complete, so rare characters such as 糧 and 纜 pass through (2026-09-25).
 - **Commit `0f300d7` carries the work email address.** Rewriting public history
   would not remove it, because GitHub keeps orphaned commits reachable.
+
+Landed 2026-10-19: lint skips `.claude/` (ESLint ignore, and `.gitignore` for
+Prettier); the two READMEs and `development.md` match the pages and tests;
+Seasons' unused `packNames()` is gone.
 
 Landed 2026-10-05: removed Times Trail's tiles path, Life Garden's puzzle
 scaffolding and dead Number Garden code; fixed the "golden leafs" plural, the

@@ -42,6 +42,7 @@ chinese/
   index.html                Chinese tools section index
   syllabary.html            Individual tools...
   tradsimp.js               Traditional/simplified conversion logic
+  url-state.js              Reads and writes a tool's input in the query string
   syllabary/                Python generators + data files (see chinese/README.md)
 
 colophon/
@@ -181,7 +182,7 @@ Tests use Jest with `--experimental-vm-modules` for ESM support.
 - `javascript/*.test.js`, `chinese/*.test.js` -- tests for experiment and tool logic
 - `games/*/__tests__/` -- tests for game logic and level/preset data
 
-Most game logic is tested through its underlying components (Grid, GameState, TuringMachine, etc.) and the static data they consume. Seasons and Times Trail additionally drive their `game.js` orchestrators black-box, loading the real `index.html` into jsdom and clicking through it; the other games' orchestrators remain untested DOM-and-canvas glue.
+Most game logic is tested through its underlying components (Grid, GameState, TuringMachine, etc.) and the static data they consume. Seasons and Times Trail additionally drive their `game.js` orchestrators black-box, loading the real `index.html` into jsdom and clicking through it. Number Garden and Life Garden have boot tests that do the same for their startup wiring. Turing Tape's `game.js` and Logic Engine's `ui.js` remain untested DOM glue.
 
 Run a specific test file:
 
@@ -195,7 +196,7 @@ Jest's `moduleNameMapper` in `package.json` strips `.js` extensions from relativ
 
 `npm run lint` runs four linters; their notable settings:
 
-- **ESLint** (`eslint.config.js`): `npm run lint:js` runs `eslint .`, so the config's `ignores` block (`coverage/`, `node_modules/`, `dist/`) is the only thing that decides what is skipped -- a new top-level directory is linted without touching `package.json`. The rule groups cover `javascript/`, `games/`, `chinese/`, `shared/`, `__tests__/`, and the two root build files. `no-console` allows `warn`/`error` -- the build script and shared modules use them for surfacing real problems. `jestGlobals` is included in the browser config because `*.test.js` files live alongside source under `shared/`, `javascript/`, and `games/` rather than in a separate test directory.
+- **ESLint** (`eslint.config.js`): `npm run lint:js` runs `eslint .`, so the config's `ignores` block (`coverage/`, `node_modules/`, `dist/`, `.claude/`) is the only thing that decides what is skipped -- a new top-level directory is linted without touching `package.json`. The rule groups cover `javascript/`, `games/`, `chinese/`, `shared/`, `__tests__/`, and the two root build files. `no-console` allows `warn`/`error` -- the build script and shared modules use them for surfacing real problems. `jestGlobals` is included in the browser config because `*.test.js` files live alongside source under `shared/`, `javascript/`, and `games/` rather than in a separate test directory.
 - **Stylelint** (`package.json`): `npm run lint:css` passes `--ignore-pattern` for
   `node_modules/**`, `coverage/**`, and `dist/**`, matching what ESLint and
   HTMLHint skip. Several rules are disabled because the codebase mixes hand-written CSS conventions with design-token patterns that the standard config rejects.
@@ -302,7 +303,7 @@ existing tokens do not cover, add a token rather than a rule -- see
 `--color-on-primary` (text on a primary fill, which is light in dark mode) and
 `--color-badge-*`.
 
-Two things in `style.css` to know about when writing a page:
+Three things in `style.css` to know about when writing a page:
 
 - `.header` is the site's page-header class. Number Garden and Times Trail reuse
   the name for an in-screen HUD and have to reset it.

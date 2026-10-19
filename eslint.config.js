@@ -65,7 +65,7 @@ const sharedRules = {
 
 export default [
   {
-    ignores: ["coverage/", "node_modules/", "dist/"],
+    ignores: ["coverage/", "node_modules/", "dist/", ".claude/"],
   },
   js.configs.recommended,
   prettier,

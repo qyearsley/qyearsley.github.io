@@ -4,3 +4,4 @@ coverage/
 dist/
 docs/blog-ideas.md
 *.log
+.claude/worktrees/

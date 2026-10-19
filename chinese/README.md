@@ -12,6 +12,7 @@ Interactive tools for studying Chinese language and transliteration.
 - **[Encoding Explorer](encoding-explorer.html)** - Explore how Chinese characters are encoded in Unicode
 - **[Buddhist Vocabulary](buddhist-vocabulary.html)** - How Indian Buddhist vocabulary was rendered into Chinese, and why
 - **[One Character, Five Readings](five-readings.html)** - Characters read in Mandarin, Cantonese, Japanese, Korean, and Vietnamese
+- **[AI Terms](ai-terms.html)** - Chinese terms for neural networks, LLMs, and agents
 
 ## Regenerating Pages
 

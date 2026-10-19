@@ -141,14 +141,6 @@ const PACKS = {
 }
 
 /**
- * Every registered pack name. Useful for a future art-style picker.
- * @returns {string[]} The known pack names
- */
-export function packNames() {
-  return Object.keys(PACKS)
-}
-
-/**
  * Look up an art pack by name.
  *
  * @param {unknown} name - A pack name

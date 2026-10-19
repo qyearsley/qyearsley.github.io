@@ -11,8 +11,11 @@ Interactive tools and visualizations built with vanilla JavaScript.
 - **[Life Calculator](life-calculator.html)** - Calculate how long you've lived
 - **[Series Tester](series-tester.html)** - Test convergence of mathematical series
 - **[Floating Point Exposed](floating-point.html)** - See the IEEE 754 bit layout of any number
+- **[Integer Explorer](integer-explorer.html)** - Two's complement bits, ranges, and overflow
 - **[Hash Collision Lab](hash-collision-lab.html)** - Watch strings hash into buckets
+- **[Tokenizer Comparison](tokenizer-comparison.html)** - Train a tiny tokenizer and count tokens in English and Chinese
 - **[Cellular Automata](cellular-automata.html)** - Visualize elementary 1D cellular automata
+- **[Maze Generator](maze-generator.html)** - Watch a perfect maze carve itself, then solve it
 - **[Markov Generator](markov/)** - Text generation using Markov chains
 - **[Logic Engine](logic-engine/)** - Logical inference engine
 

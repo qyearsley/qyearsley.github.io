@@ -40,7 +40,7 @@
  */
 
 import { describe, expect, it, jest } from "@jest/globals"
-import { activePack, getPack, packNames, SVG_NS, svg } from "../js/art/index.js"
+import { activePack, getPack, SVG_NS, svg } from "../js/art/index.js"
 import * as placeholder from "../js/art/placeholder.js"
 import { CHARACTERS } from "../js/characters.js"
 import { ART, SEASON_ORDER } from "../js/constants.js"
@@ -380,11 +380,6 @@ describe("the registry", () => {
     expect(getPack("toString")).toBe(placeholder)
     expect(warn).toHaveBeenCalledTimes(1)
     warn.mockRestore()
-  })
-
-  it("lists placeholder among the pack names", () => {
-    expect(packNames()).toContain("placeholder")
-    expect(packNames()).toEqual(expect.arrayContaining([placeholder.id]))
   })
 
   it("the active pack is the one constants.ART.PACK names", () => {
