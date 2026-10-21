@@ -28,41 +28,17 @@ last long version of this file is `git show 3ceed17:docs/improvements.md`.
    lacked two of them until 2026-10-05. Move them into `games/shared/` and
    verify with each game's keyboard tests.
 
-3. **Fix the two unsafe spots in the tools.** `password-generator.html`'s
-   `randomElement` uses `Math.random`; use `crypto.getRandomValues`.
-   `character-converter.html` writes the converted `?text=` into `innerHTML`
-   unescaped, so a crafted link can run script; use `textContent`. Verify with
-   `?text=<img src=x onerror=alert(1)>`.
+3. **Number Garden unlocks areas by level count.** `completeLevel` unlocks the
+   next area each time the global level rises (`GameState.js:184`), so
+   replaying Flower Meadow three times opens the Forest and skips the Cave.
+   Unlock by finishing the previous area instead.
 
-4. **Fix the Life Calculator's date handling.** `if (date.getTime())` rejects
-   1970-01-01, `new Date("YYYY-MM-DD")` parses as UTC, future dates give
-   negative numbers, and the calls after `window.location.search = …` never
-   run because the page reloads (`life-calculator.html:269-295`).
+4. **Turing Tape's shortcuts die while a select has focus.** After a rule
+   change, Space, Enter and R do nothing until focus leaves the select
+   (`turing-tape/js/game.js`, the keydown guard).
 
-5. **Small layout defects.** The skip link is about 41.6px tall but hidden at
-   `top: -40px`, so a sliver shows top-left (`css/style.css:994`). Prose links
-   such as the homepage About line have no base color and show browser blue.
-   `tokenizer-comparison.html` uses `.controls-row` but never defines it.
-
-6. **Show something on first load.** The best pages (truth tables, floating
-   point, cellular automata) render a result before any input. These do not:
-   Logic Engine (has `?example=`), Series Tester, Hash Collision Lab, Life
-   Garden (empty board; load Food Chain), and Syllogism (abstract A/B/C, not
-   Barbara). The maze takes about 88s at default speed for 20x20; raise it or
-   run several steps per tick.
-
-7. **Game flow fixes.** Number Garden's "Continue →" goes to the hub, the same
-   as "Garden Hub" (`number-garden/js/game.js:70`), and wrong choices are not
-   struck off as in Seasons. Life Garden's R clears the board and its history
-   with no confirm (`EventManager.js:154`). Turing Tape's new rule row
-   preselects every first option, the help omits the S move, and a solve has
-   no "Next puzzle" button.
-
-8. **Say who each kid game is for.** `games/index.html` lists Number Garden,
-   Times Trail and Seasons under "For Younger Players" with no way to choose.
-   Seasons is grade-3 content with no easier setting. Add an age or a
-   difference to each blurb, for example "mixed topics, ages 5-7",
-   "multiplication, type the answer", "a story, grade 3".
+5. **Syllogism's mnemonic paragraph sits between the presets and the form.**
+   It pushes the controls down; it could move below the diagram.
 
 ## Deferred
 
@@ -115,6 +91,15 @@ Decided with no change, so these are not re-proposed:
 - **Commit `0f300d7` carries the work email address.** Rewriting public history
   would not remove it, because GitHub keeps orphaned commits reachable.
 
+Landed 2026-10-21: the password generator uses `crypto`; the converter
+escapes `?text=`; the Life Calculator parses dates as local and rejects future
+ones; Logic Engine, Syllogism, Series Tester, Hash Collision Lab and Life
+Garden open on an example; the maze runs about 7x faster by default; Number
+Garden's Continue goes to the next area and strikes off wrong choices; Life
+Garden's R asks first; Turing Tape's new rule row starts blank and a solve
+offers "Next puzzle"; the games index says who each kid game is for; the skip
+link hides fully and prose links take the theme color.
+
 Landed 2026-10-19: lint skips `.claude/` (ESLint ignore, and `.gitignore` for
 Prettier); the two READMEs and `development.md` match the pages and tests;
 Seasons' unused `packNames()` is gone.
@@ -144,3 +129,8 @@ a person to look, on an iPad where it matters:
 - Life Garden: click a preset, then press Space; it should play.
 - Seasons' leaderboard and name field on the end screen (`?phase=end`).
 - The Source and History footer on document pages, in both themes and on a phone.
+- Prose links in the theme color, especially in the dark theme and the games'
+  green.
+- Turing Tape's blank rule row and "Next puzzle" button; Number Garden's
+  struck-off choices.
+- The maze's new speed range, at both ends of the slider.
