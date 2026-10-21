@@ -218,6 +218,12 @@ body {
   padding: 2rem 1rem;
 }
 
+/* Links in running text. Component links (cards, breadcrumbs, footers) set
+   their own color; without this, prose links were browser blue in both themes. */
+a {
+  color: var(--color-primary);
+}
+
 ::selection {
   background: var(--color-primary);
   color: var(--color-on-primary);
@@ -988,10 +994,11 @@ textarea:focus {
   outline-offset: 2px;
 }
 
-/* Skip link for keyboard navigation */
+/* Skip link for keyboard navigation. Hidden at -100px: the link is taller
+   than 40px (padding plus a 1.6 line height), so -40px left a sliver. */
 .skip-link {
   position: absolute;
-  top: -40px;
+  top: -100px;
   left: 6px;
   background: var(--color-bg-header);
   color: var(--color-header-text);
