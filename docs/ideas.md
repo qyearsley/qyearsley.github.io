@@ -80,3 +80,10 @@ A proof of concept landed on 2026-09-26 as `javascript/syllogism.html`. Its
 verdict matches a brute-force check over every statement combination. It has
 not been looked at in a browser yet, and the diagram layout is the least
 certain part.
+
+## A playful Chinese page
+
+`chinese/` has two interactive tools, three reference tables and four notes,
+but nothing to practice with. A small tone quiz or "guess the reading" page
+could reuse the tone-table data, in the size and style of `truth-tables.html`.
+Noted on 2026-10-21 from a review of page balance.

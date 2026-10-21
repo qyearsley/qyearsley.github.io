@@ -28,6 +28,42 @@ last long version of this file is `git show 3ceed17:docs/improvements.md`.
    lacked two of them until 2026-10-05. Move them into `games/shared/` and
    verify with each game's keyboard tests.
 
+3. **Fix the two unsafe spots in the tools.** `password-generator.html`'s
+   `randomElement` uses `Math.random`; use `crypto.getRandomValues`.
+   `character-converter.html` writes the converted `?text=` into `innerHTML`
+   unescaped, so a crafted link can run script; use `textContent`. Verify with
+   `?text=<img src=x onerror=alert(1)>`.
+
+4. **Fix the Life Calculator's date handling.** `if (date.getTime())` rejects
+   1970-01-01, `new Date("YYYY-MM-DD")` parses as UTC, future dates give
+   negative numbers, and the calls after `window.location.search = …` never
+   run because the page reloads (`life-calculator.html:269-295`).
+
+5. **Small layout defects.** The skip link is about 41.6px tall but hidden at
+   `top: -40px`, so a sliver shows top-left (`css/style.css:994`). Prose links
+   such as the homepage About line have no base color and show browser blue.
+   `tokenizer-comparison.html` uses `.controls-row` but never defines it.
+
+6. **Show something on first load.** The best pages (truth tables, floating
+   point, cellular automata) render a result before any input. These do not:
+   Logic Engine (has `?example=`), Series Tester, Hash Collision Lab, Life
+   Garden (empty board; load Food Chain), and Syllogism (abstract A/B/C, not
+   Barbara). The maze takes about 88s at default speed for 20x20; raise it or
+   run several steps per tick.
+
+7. **Game flow fixes.** Number Garden's "Continue →" goes to the hub, the same
+   as "Garden Hub" (`number-garden/js/game.js:70`), and wrong choices are not
+   struck off as in Seasons. Life Garden's R clears the board and its history
+   with no confirm (`EventManager.js:154`). Turing Tape's new rule row
+   preselects every first option, the help omits the S move, and a solve has
+   no "Next puzzle" button.
+
+8. **Say who each kid game is for.** `games/index.html` lists Number Garden,
+   Times Trail and Seasons under "For Younger Players" with no way to choose.
+   Seasons is grade-3 content with no easier setting. Add an age or a
+   difference to each blurb, for example "mixed topics, ages 5-7",
+   "multiplication, type the answer", "a story, grade 3".
+
 ## Deferred
 
 These are known and accepted for now. Do not re-propose them unless something
