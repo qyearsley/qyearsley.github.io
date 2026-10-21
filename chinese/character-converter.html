@@ -43,14 +43,15 @@
         try {
           const converted = direction === "trad-to-simp" ? simplify(input) : traditionalize(input)
           lastOutput = converted
+          // textContent, not innerHTML: the input can come from a `?text=` link.
           output.innerHTML =
-            '<span class="converted-text">' +
-            converted +
-            "</span>" +
+            '<span class="converted-text"></span>' +
             '<button class="copy-output-btn" id="copy-output" type="button">Copy</button>'
+          output.querySelector(".converted-text").textContent = converted
           document.getElementById("copy-output").addEventListener("click", copyOutput)
         } catch (e) {
-          output.innerHTML = '<span class="error">Error: ' + e + "</span>"
+          output.innerHTML = '<span class="error"></span>'
+          output.querySelector(".error").textContent = "Error: " + e
         }
       }
 

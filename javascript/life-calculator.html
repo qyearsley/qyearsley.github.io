@@ -258,6 +258,23 @@
         container.innerHTML = html
       }
 
+      // Parses "YYYY-MM-DD" as local midnight. new Date("YYYY-MM-DD") would
+      // parse it as UTC midnight, which is the day before in the Americas.
+      // Returns null for an invalid date or one in the future.
+      function parseBirthday(value) {
+        const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value)
+        if (!match) return null
+        const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+        if (date.getMonth() !== Number(match[2]) - 1 || date > new Date()) return null
+        return date
+      }
+
+      function showError(message) {
+        const errorElement = document.getElementById("error")
+        errorElement.textContent = message
+        errorElement.style.display = "block"
+      }
+
       function init() {
         const params = new URLSearchParams(window.location.search)
         const dateInput = params.get("date")
@@ -265,42 +282,35 @@
           return
         }
         document.getElementById("dateinput").value = dateInput
-        const date = new Date(dateInput)
-        if (date.getTime()) {
-          update(date)
-          renderMilestones(date)
-          document.getElementById("output").style.display = "block"
-          setInterval(() => {
-            update(date)
-          }, 1000)
+        const date = parseBirthday(dateInput)
+        if (!date) {
+          showError("Invalid date.")
+          return
         }
+        update(date)
+        renderMilestones(date)
+        document.getElementById("output").style.display = "block"
+        setInterval(() => {
+          update(date)
+        }, 1000)
       }
 
+      // Submitting sets ?date=, which reloads the page; init() then renders it.
       function handleSubmit(event) {
         event.preventDefault()
 
         const dateInput = document.getElementById("dateinput").value
-        const errorElement = document.getElementById("error")
-
         if (!dateInput) {
-          errorElement.textContent = "Please enter a date."
-          errorElement.style.display = "block"
+          showError("Please enter a date.")
           return
         }
-
-        const date = new Date(dateInput)
-        if (date.getTime()) {
-          const params = new URLSearchParams(window.location.search)
-          params.set("date", dateInput)
-          window.location.search = params.toString()
-          update(date)
-          renderMilestones(date)
-          document.getElementById("output").style.display = "block"
-          errorElement.style.display = "none"
-        } else {
-          errorElement.textContent = "Invalid date."
-          errorElement.style.display = "block"
+        if (!parseBirthday(dateInput)) {
+          showError("Invalid date.")
+          return
         }
+        const params = new URLSearchParams(window.location.search)
+        params.set("date", dateInput)
+        window.location.search = params.toString()
       }
 
       function update(birthday) {
