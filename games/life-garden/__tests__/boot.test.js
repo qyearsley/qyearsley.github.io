@@ -135,9 +135,16 @@ describe("the page boots", () => {
     expect(card).toContain("Rabbit") // what it eats
   })
 
+  test("opens on the Food Chain preset, not an empty board", async () => {
+    const game = boot()
+    const { SPECIES } = await import("../js/constants.js")
+    expect(game.grid.countSpecies(SPECIES.FOX)).toBeGreaterThan(0)
+  })
+
   test("the card counts what is on the board", async () => {
     const game = boot()
     const { SPECIES } = await import("../js/constants.js")
+    game._resetGrid()
     game._selectSpecies(SPECIES.GRASS)
     game.grid.setCell(1, 1, SPECIES.GRASS)
     game.grid.setCell(2, 2, SPECIES.GRASS)

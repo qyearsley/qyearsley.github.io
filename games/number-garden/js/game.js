@@ -67,7 +67,11 @@ class NumberGarden {
       onProjectSelect: (projectType) => this.selectProject(projectType),
       onProjectBack: () => this.showScreen("title-screen"),
       onContinueFromProject: () => this.ui.castle.hideProjectProgress(),
-      onContinueFromLevelComplete: () => this.showScreen("garden-hub"),
+      onContinueFromLevelComplete: () => {
+        const next = this.state.nextArea()
+        if (next) this.enterArea(next)
+        else this.showScreen("garden-hub")
+      },
       onReturnToHub: () => this.showScreen("garden-hub"),
     })
 
@@ -357,6 +361,8 @@ class NumberGarden {
    */
   handleWrongAnswer(button) {
     this.ui.shakeButton(button)
+    // Strike off a wrong choice, so the child cannot click the same one again.
+    if (button.classList.contains("answer-button")) button.classList.add("struck")
     this.ui.showFeedback("Try again!", "encourage")
 
     // Play incorrect sound

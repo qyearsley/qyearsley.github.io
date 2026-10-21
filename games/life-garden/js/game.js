@@ -130,6 +130,9 @@ class LifeGarden {
     this.ui.setSimulatingControls(false)
     this.renderer.render(this.grid)
     this._updateSpeciesInfo()
+
+    // Open on a populated board: an empty one gives Play nothing to show.
+    this._loadPreset(PRESETS.findIndex((preset) => preset.name === "Food Chain"))
   }
 
   _selectSpecies(id) {

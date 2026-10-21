@@ -378,6 +378,10 @@
   margin-bottom: 1rem;
 }
 
+.result-msg .ctrl-btn {
+  margin-left: 0.5rem;
+}
+
 .result-msg.success {
   background: var(--tape-ok-bg);
   color: var(--tape-ok-ink);

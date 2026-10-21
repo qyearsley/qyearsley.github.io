@@ -246,6 +246,8 @@
           render()
         })
 
+        // Start with 12 words in 8 buckets, so some must collide.
+        for (const w of wordSets.animals) addEntry(w)
         render()
       })
     </script>

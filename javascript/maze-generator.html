@@ -180,10 +180,15 @@
         }
       }
 
-      function speedDelayMs() {
-        // The slider runs 1 (slow) to 100 (fast); map that to a delay from
-        // 208ms down to 10ms.
-        return 210 - Number(speedInput.value) * 2
+      // The slider runs 1 (slow) to 100 (fast): 5 to 1000 steps a second, on
+      // an exponential scale. Above about 60 a second, several steps share
+      // one frame, since a timer cannot usefully fire faster than that.
+      function stepsPerSecond() {
+        return 5 * Math.pow(200, (Number(speedInput.value) - 1) / 99)
+      }
+
+      function tickDelayMs() {
+        return Math.max(16, 1000 / stepsPerSecond())
       }
 
       // Marks generation finished: stores the completed maze, clears the
@@ -198,18 +203,20 @@
         solveBtn.disabled = false
       }
 
-      function tick() {
+      function tick(steps) {
         if (!gen || mazeResult) return
-        const result = gen.next()
-        if (result.done) {
-          playing = false
-          stopTimer()
-          playBtn.textContent = "Play"
-          finish(result.value)
-        } else {
-          gridSnapshot = result.value.grid
-          stack = result.value.stack
-          current = result.value.current
+        for (let i = 0; i < steps && !mazeResult; i++) {
+          const result = gen.next()
+          if (result.done) {
+            playing = false
+            stopTimer()
+            playBtn.textContent = "Play"
+            finish(result.value)
+          } else {
+            gridSnapshot = result.value.grid
+            stack = result.value.stack
+            current = result.value.current
+          }
         }
         draw()
         updateStatus()
@@ -217,10 +224,11 @@
 
       function scheduleTick() {
         stopTimer()
+        const delay = tickDelayMs()
         timerId = setTimeout(() => {
-          tick()
+          tick(Math.round((stepsPerSecond() * delay) / 1000))
           if (playing && !mazeResult) scheduleTick()
-        }, speedDelayMs())
+        }, delay)
       }
 
       function play() {

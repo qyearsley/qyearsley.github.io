@@ -213,6 +213,17 @@ describe("EventManager", () => {
       return event
     }
 
+    beforeEach(() => {
+      window.confirm = jest.fn(() => true)
+    })
+
+    test("R asks first, and does nothing if the clear is declined", () => {
+      window.confirm = jest.fn(() => false)
+      press("r")
+      expect(window.confirm).toHaveBeenCalled()
+      expect(callbacks.onReset).not.toHaveBeenCalled()
+    })
+
     test.each([
       [" ", "onTogglePlay"],
       ["r", "onReset"],

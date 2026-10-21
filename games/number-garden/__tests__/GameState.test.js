@@ -129,6 +129,21 @@ describe("GameState", () => {
     })
   })
 
+  describe("nextArea", () => {
+    test("is the first unlocked area not yet completed", () => {
+      gameState.unlockedAreas.add("crystal-cave")
+      gameState.completedAreas.add("flower-meadow")
+
+      expect(gameState.nextArea()).toBe("crystal-cave")
+    })
+
+    test("is null when every unlocked area is completed", () => {
+      gameState.completedAreas.add("flower-meadow")
+
+      expect(gameState.nextArea()).toBeNull()
+    })
+  })
+
   describe("getProgressPercent", () => {
     test("returns 0 for no progress", () => {
       expect(gameState.getProgressPercent()).toBe(0)

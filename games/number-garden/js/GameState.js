@@ -195,6 +195,19 @@ export class GameState {
   }
 
   /**
+   * The first unlocked area not yet completed, in map order, or null if every
+   * unlocked area is done. "Continue" on the level-complete screen goes there.
+   * @returns {string|null} Area identifier
+   */
+  nextArea() {
+    return (
+      Object.values(AREAS).find(
+        (area) => this.unlockedAreas.has(area) && !this.completedAreas.has(area),
+      ) ?? null
+    )
+  }
+
+  /**
    * Unlock an area (for testing purposes)
    * @param {string} areaId - Area identifier
    */

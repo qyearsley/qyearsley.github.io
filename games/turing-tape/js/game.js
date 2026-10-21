@@ -302,9 +302,17 @@ function addRuleRow(
   if (!readonly) syncRules()
 }
 
+// A new, editable row starts blank, so the player picks every field rather
+// than inheriting "A, 0, 0, L, A". readRulesFromDOM skips a row until it is full.
 function makeSelect(options, selectedValue = null, readonly = false) {
   const select = document.createElement("select")
   if (readonly) select.disabled = true
+  if (selectedValue === null && !readonly) {
+    const blank = document.createElement("option")
+    blank.value = ""
+    blank.textContent = "\u2013"
+    select.appendChild(blank)
+  }
   for (const opt of options) {
     const option = document.createElement("option")
     option.value = opt
@@ -330,6 +338,7 @@ function readRulesFromDOM() {
     const write = selects[2].value
     const move = selects[3].value
     const nextState = selects[4].value
+    if ([state, read, write, move, nextState].includes("")) continue
     rules.set(`${state},${read}`, { write, move, nextState })
   }
   return rules
@@ -399,6 +408,14 @@ function doReset() {
 function checkWin() {
   if (machine.matchesTape(currentLevel.target) && machine.haltReason === "halt-state") {
     showResult("success", `Solved in ${machine.stepCount} steps!`)
+    const next = levels[levels.indexOf(currentLevel) + 1]
+    if (next) {
+      const nextBtn = document.createElement("button")
+      nextBtn.className = "ctrl-btn"
+      nextBtn.textContent = "Next puzzle \u2192"
+      nextBtn.addEventListener("click", () => loadLevel(next))
+      resultMsg.append(" ", nextBtn)
+    }
     completedLevels.add(currentLevel.id)
     saveProgress()
     buildLevelNav()

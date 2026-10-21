@@ -153,7 +153,9 @@ export class EventManager {
           break
         case "r":
         case "R":
-          this.cb.onReset?.()
+          // A stray R would wipe the board and its history, so ask. The Reset
+          // button is deliberate enough not to.
+          if (window.confirm("Clear the board?")) this.cb.onReset?.()
           break
         case "ArrowRight":
           e.preventDefault()

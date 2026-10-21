@@ -647,6 +647,11 @@ body {
   opacity: 0.5;
 }
 
+.answer-button.struck {
+  opacity: 0.3;
+  text-decoration: line-through;
+}
+
 /* Feedback Area */
 .feedback-area {
   margin-top: var(--ng-space-lg);

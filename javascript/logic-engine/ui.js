@@ -182,15 +182,10 @@ export function initUI() {
     examplesContainer.appendChild(button)
   })
 
-  // Load an example from the URL if present and recognized; otherwise keep
-  // the page's own default (an empty proof) and fall back silently.
+  // Load the example named in the URL, or the first one, so the page never
+  // opens on an empty proof. An unknown name falls back silently.
   const exampleName = new URLSearchParams(window.location.search).get("example")
-  if (exampleName) {
-    const example = findExampleByName(exampleName)
-    if (example) {
-      loadPredefinedExample(example)
-    }
-  }
+  loadPredefinedExample(findExampleByName(exampleName) ?? PREDEFINED_EXAMPLES[0])
 
   // Initial render
   render()

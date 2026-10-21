@@ -53,7 +53,8 @@
       }
 
       // App state, shaped like syllogism.js's DEFAULT_STATE / PRESETS.
-      let state = cloneState(DEFAULT_STATE)
+      // Start on Barbara: a concrete, valid example reads faster than A, B, C.
+      let state = cloneState(PRESETS[0])
 
       function cloneState(s) {
         return {
@@ -412,7 +413,7 @@
               <button class="preset-btn" data-preset="undistributed-middle">
                 Undistributed Middle (invalid)
               </button>
-              <button id="reset-btn" class="btn-tertiary">Reset</button>
+              <button id="reset-btn" class="btn-tertiary">A, B, C</button>
             </div>
             <p class="statement-preview" style="margin-left: 0">
               Barbara and Darii are medieval mnemonic names: their vowels give the three statements'

@@ -577,6 +577,19 @@ describe("GameUI", () => {
       })
     })
 
+    test("keeps a struck-off wrong choice locked", () => {
+      document.getElementById("answer-options").innerHTML = `
+        <button class="answer-button disabled struck"></button>
+        <button class="answer-button disabled"></button>
+      `
+
+      gameUI.enableAnswerButtons()
+
+      const [struck, other] = document.querySelectorAll(".answer-button")
+      expect(struck.classList.contains("disabled")).toBe(true)
+      expect(other.classList.contains("disabled")).toBe(false)
+    })
+
     // There are two entry modes and both have to be released. Typed entry was
     // the half that was missing: `handleKeyboardSubmit` sets `input.disabled`
     // and nothing ever cleared it, so the first wrong answer in "Type Answer"

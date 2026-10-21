@@ -338,7 +338,7 @@ export class GameUI extends BaseGameUI {
    * dead field and a dead button with no way back except leaving the area.
    */
   enableAnswerButtons() {
-    this.elements.answerOptions.querySelectorAll(".answer-button").forEach((btn) => {
+    this.elements.answerOptions.querySelectorAll(".answer-button:not(.struck)").forEach((btn) => {
       btn.classList.remove("disabled")
     })
     this._setTypedEntryEnabled(true)
