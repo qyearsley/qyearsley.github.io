@@ -43,9 +43,7 @@ last long version of this file is `git show 3ceed17:docs/improvements.md`.
 6. **The Coin Flipper loads Chart.js from a CDN with no `integrity` hash**
    (`javascript/coin-flipper.html:15`). It is the only third-party script on
    the site. A changed CDN file would run on this origin. Add an SRI hash
-   for `chart.js@4.4.7`, or vendor the file. Also, the `Chart` comment in
-   `eslint.config.js:44` names `series-tester.html`, which draws its own
-   chart and does not load Chart.js.
+   for `chart.js@4.4.7`, or vendor the file.
 
 ## Deferred
 
