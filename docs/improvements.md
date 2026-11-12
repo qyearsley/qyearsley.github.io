@@ -38,6 +38,12 @@ last long version of this file is `git show 3ceed17:docs/improvements.md`.
    got a 403 from both jsDelivr and the npm registry, so compute the hash
    from a normal terminal.
 
+5. **ESLint is held at 9.** `eslint-plugin-import` 2.32 (the latest on
+   2026-11-12) accepts eslint only up to `^9`, so `npm install` fails with
+   ERESOLVE on eslint 10. The config uses one rule from it,
+   `import/no-unresolved`. Move to eslint 10 when the plugin supports it, or
+   replace the plugin.
+
 ## Deferred
 
 These are known and accepted for now. Do not re-propose them unless something
