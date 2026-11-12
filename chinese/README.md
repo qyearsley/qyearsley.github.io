@@ -37,8 +37,6 @@ python3 make_tone_table.py
 ```
 
 Each script reads the `.txt` data files sitting next to it.
-`chinese/tonetable/make_tone_table.pl` is an older Perl version of the tone
-table generator, kept for reference; use the Python one.
 
 ## Shared Logic
 

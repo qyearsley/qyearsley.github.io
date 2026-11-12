@@ -3,7 +3,6 @@
 
 """
 Generate a HTML tone table from frequency_pinyin_table.txt
-Mimics the behavior of make_tone_table.pl
 """
 
 import re
