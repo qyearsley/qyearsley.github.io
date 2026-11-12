@@ -28,22 +28,15 @@ last long version of this file is `git show 3ceed17:docs/improvements.md`.
    lacked two of them until 2026-10-05. Move them into `games/shared/` and
    verify with each game's keyboard tests.
 
-3. **Number Garden unlocks areas by level count.** `completeLevel` unlocks the
-   next area each time the global level rises (`GameState.js:184`), so
-   replaying Flower Meadow three times opens the Forest and skips the Cave.
-   Unlock by finishing the previous area instead.
-
-4. **Turing Tape's shortcuts die while a select has focus.** After a rule
-   change, Space, Enter and R do nothing until focus leaves the select
-   (`turing-tape/js/game.js`, the keydown guard).
-
-5. **Syllogism's mnemonic paragraph sits between the presets and the form.**
+3. **Syllogism's mnemonic paragraph sits between the presets and the form.**
    It pushes the controls down; it could move below the diagram.
 
-6. **The Coin Flipper loads Chart.js from a CDN with no `integrity` hash**
+4. **The Coin Flipper loads Chart.js from a CDN with no `integrity` hash**
    (`javascript/coin-flipper.html:15`). It is the only third-party script on
    the site. A changed CDN file would run on this origin. Add an SRI hash
-   for `chart.js@4.4.7`, or vendor the file.
+   for `chart.js@4.4.7`, or vendor the file. On 2026-11-12 the agent sandbox
+   got a 403 from both jsDelivr and the npm registry, so compute the hash
+   from a normal terminal.
 
 ## Deferred
 

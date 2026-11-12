@@ -114,18 +114,37 @@ describe("GameState", () => {
       expect(gameState.stats.currentLevelProgress).toBe(0)
     })
 
-    test("unlocks crystal cave at level 2", () => {
-      gameState.stats.currentLevel = 1
+    test("finishing flower meadow unlocks crystal cave", () => {
+      gameState.enterArea("flower-meadow")
       gameState.completeLevel()
 
       expect(gameState.unlockedAreas.has("crystal-cave")).toBe(true)
     })
 
-    test("unlocks enchanted forest at level 3", () => {
-      gameState.stats.currentLevel = 2
+    test("finishing crystal cave unlocks enchanted forest", () => {
+      gameState.unlockArea("crystal-cave")
+      gameState.enterArea("crystal-cave")
       gameState.completeLevel()
 
       expect(gameState.unlockedAreas.has("enchanted-forest")).toBe(true)
+    })
+
+    test("replaying flower meadow unlocks only crystal cave", () => {
+      for (let i = 0; i < 3; i++) {
+        gameState.enterArea("flower-meadow")
+        gameState.completeLevel()
+      }
+
+      expect([...gameState.unlockedAreas]).toEqual(["flower-meadow", "crystal-cave"])
+    })
+
+    test("finishing the last area unlocks nothing new", () => {
+      gameState.unlockArea("pattern-path")
+      gameState.enterArea("pattern-path")
+      const before = gameState.unlockedAreas.size
+      gameState.completeLevel()
+
+      expect(gameState.unlockedAreas.size).toBe(before)
     })
   })
 
@@ -400,25 +419,23 @@ describe("GameState", () => {
       expect(gameState.completedAreas.has("flower-meadow")).toBe(true)
     })
 
-    test("unlocks time-temple at level 4", () => {
-      gameState.stats.currentLevel = 3
+    test.each([
+      ["enchanted-forest", "time-temple"],
+      ["time-temple", "measurement-market"],
+      ["measurement-market", "pattern-path"],
+    ])("finishing %s unlocks %s", (finished, next) => {
+      gameState.unlockArea(finished)
+      gameState.enterArea(finished)
       gameState.completeLevel()
 
-      expect(gameState.unlockedAreas.has("time-temple")).toBe(true)
+      expect(gameState.unlockedAreas.has(next)).toBe(true)
     })
 
-    test("unlocks measurement-market at level 5", () => {
-      gameState.stats.currentLevel = 4
-      gameState.completeLevel()
-
-      expect(gameState.unlockedAreas.has("measurement-market")).toBe(true)
-    })
-
-    test("unlocks pattern-path at level 6", () => {
+    test("finishing a level outside any area unlocks nothing", () => {
       gameState.stats.currentLevel = 5
       gameState.completeLevel()
 
-      expect(gameState.unlockedAreas.has("pattern-path")).toBe(true)
+      expect([...gameState.unlockedAreas]).toEqual(["flower-meadow"])
     })
   })
 

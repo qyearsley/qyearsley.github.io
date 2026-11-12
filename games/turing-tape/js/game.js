@@ -281,7 +281,10 @@ function addRuleRow(
     const td = document.createElement("td")
     td.appendChild(sel)
     tr.appendChild(td)
-    if (!readonly) sel.addEventListener("change", syncRules)
+    if (!readonly) {
+      sel.addEventListener("change", syncRules)
+      blurAfterPointerPick(sel)
+    }
   }
 
   const deleteTd = document.createElement("td")
@@ -300,6 +303,24 @@ function addRuleRow(
 
   ruleBody.appendChild(tr)
   if (!readonly) syncRules()
+}
+
+// A focused select keeps Space, Enter and R for itself (the Move select has an
+// "R" option), so the page shortcuts stop working until focus leaves it. After
+// a mouse or touch pick, give focus back to the page. A keyboard user arrowing
+// through options keeps focus.
+function blurAfterPointerPick(select) {
+  let pickedWithPointer = false
+  select.addEventListener("pointerdown", () => {
+    pickedWithPointer = true
+  })
+  select.addEventListener("keydown", () => {
+    pickedWithPointer = false
+  })
+  select.addEventListener("change", () => {
+    if (pickedWithPointer) select.blur()
+    pickedWithPointer = false
+  })
 }
 
 // A new, editable row starts blank, so the player picks every field rather

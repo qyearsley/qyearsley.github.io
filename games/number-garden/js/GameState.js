@@ -175,22 +175,16 @@ export class GameState {
     this.stats.currentLevel += 1
     this.stats.currentLevelProgress = 0
 
-    // Mark current area as complete (for castle pieces)
-    if (this.currentArea) {
-      this.completedAreas.add(this.currentArea)
-    }
+    if (!this.currentArea) return
 
-    // Unlock next area based on level
-    if (this.stats.currentLevel === 2) {
-      this.unlockedAreas.add(AREAS.CRYSTAL_CAVE)
-    } else if (this.stats.currentLevel === 3) {
-      this.unlockedAreas.add(AREAS.ENCHANTED_FOREST)
-    } else if (this.stats.currentLevel === 4) {
-      this.unlockedAreas.add(AREAS.TIME_TEMPLE)
-    } else if (this.stats.currentLevel === 5) {
-      this.unlockedAreas.add(AREAS.MEASUREMENT_MARKET)
-    } else if (this.stats.currentLevel === 6) {
-      this.unlockedAreas.add(AREAS.PATTERN_PATH)
+    // Mark current area as complete (for castle pieces), and unlock the one
+    // after it in map order. Unlocking by global level count let a replayed
+    // area open areas further along.
+    this.completedAreas.add(this.currentArea)
+    const order = Object.values(AREAS)
+    const index = order.indexOf(this.currentArea)
+    if (index !== -1 && index + 1 < order.length) {
+      this.unlockedAreas.add(order[index + 1])
     }
   }
 
