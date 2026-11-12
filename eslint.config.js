@@ -9,8 +9,6 @@ const browserGlobals = {
   window: "readonly",
   location: "readonly",
   navigator: "readonly",
-  atob: "readonly",
-  btoa: "readonly",
   TextEncoder: "readonly",
   confirm: "readonly",
   alert: "readonly",

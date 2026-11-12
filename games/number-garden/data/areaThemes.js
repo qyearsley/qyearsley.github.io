@@ -10,7 +10,7 @@
  * - Contextual messages for engagement
  * - Visual emoji sets for math representations
  */
-export const AREA_THEMES = {
+const AREA_THEMES = {
   "flower-meadow": {
     creature: "🦄",
     name: "Flower Meadow",

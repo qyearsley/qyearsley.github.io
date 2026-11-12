@@ -122,6 +122,11 @@ Landed 2026-09-24: `traditionalize` now converts the 13 merged pairs by word
 Removed 2026-11-12: `game-translation-plan.md` (closed; the restore note is in
 `translations.md`) and the landed entries in `ideas.md`.
 
+Simplified 2026-11-12: the command lists in `CLAUDE.md` and `README.md` (kept in
+`development.md`), `development.md`'s directory tree, hook rationale and lint
+prose (the `.husky/` comments and config files hold them), the unused `atob` and
+`btoa` ESLint globals, `make_tone_table.pl`, and the `AREA_THEMES` export.
+
 ## Not looked at in a browser
 
 Tests and linters pass, but nothing in the toolchain renders a page. These need
