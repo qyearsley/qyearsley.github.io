@@ -1,7 +1,7 @@
 # Improvements
 
 The maintenance backlog: defects, debt, test gaps and doc drift. Feature ideas
-are in [`ideas.md`](ideas.md), blog ideas in [`blog-ideas.md`](blog-ideas.md).
+are in [`ideas.md`](ideas.md).
 Chinese conventions and rulings are in [`zh-translation.md`](zh-translation.md).
 
 Simplified on 2026-09-24. The detailed history of landed work is in git; the
@@ -83,7 +83,7 @@ Decided with no change, so these are not re-proposed:
   [`translations.md`](translations.md#attribute-values-are-never-translated).
 - **Number Garden, Seasons and Times Trail have no `/zh/` page.** Their text is
   written at runtime. See
-  [`game-translation-plan.md`](game-translation-plan.md).
+  [`translations.md`](translations.md#which-pages-have-a-chinese-version-and-why).
 - **Turing Tape cannot un-complete a level.** Progress in `localStorage` is never
   cleared. It cannot break anything.
 - **`apple-touch-icon` points at `icon.svg`.** iOS ignores it, but that is better
@@ -119,6 +119,9 @@ its bits keep focus when toggled.
 Landed 2026-09-24: `traditionalize` now converts the 13 merged pairs by word
 (系統, 心臟, 複雜, 詞彙, 頭髮, 面對, 儘管, 日曆, 收穫, 讚美, 書籤, 沖水, 颱風).
 
+Removed 2026-11-12: `game-translation-plan.md` (closed; the restore note is in
+`translations.md`) and the landed entries in `ideas.md`.
+
 ## Not looked at in a browser
 
 Tests and linters pass, but nothing in the toolchain renders a page. These need
@@ -139,3 +142,7 @@ a person to look, on an iPad where it matters:
 - Turing Tape's blank rule row and "Next puzzle" button; Number Garden's
   struck-off choices.
 - The maze's new speed range, at both ends of the slider.
+- The tokenizer comparison's mix slider and the integer explorer's bit layout.
+- Five Readings' readings are from memory (the page says so). Check them
+  against Unihan; the least certain are the Cantonese tones for 骨, 立, 音 and
+  北, and Korean 六 and 立.

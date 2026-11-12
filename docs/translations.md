@@ -86,8 +86,8 @@ the English page for the three that have no Chinese version. The index keeps its
 Chinese descriptions, so a Chinese visitor can still read what each game does.
 
 To give a game a Chinese page again, add back its `*.zh.json` and translate the
-gameplay strings too. [`game-translation-plan.md`](game-translation-plan.md)
-records what that costs.
+runtime strings too. That is the real cost: the games write most of their text in
+JavaScript, which the build does not translate.
 
 ## JSON Format
 
