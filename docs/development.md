@@ -6,71 +6,7 @@ Personal website with educational games, JavaScript experiments, and Chinese
 language tools. Served as a static site via GitHub Pages with a build step
 that handles translations, the resume, and validation.
 
-## Directory Structure
-
-```
-index.html                  Homepage
-404.html                    Error page (Game of Life background)
-build.js                    Build script
-build.test.js               Build function tests
-
-__tests__/
-  html.test.js              Structural checks over every source HTML page
-  stylesheets.test.js       Dark-theme wiring across every stylesheet
-  zh-coverage.test.js       Chinese translation coverage ratchet
-
-css/
-  style.css                 Core layout, typography, design tokens (all pages)
-  components.css            Specialized styles for tool pages
-
-games/
-  index.html                Games section index
-  number-garden/            Game (own layout)
-  life-garden/              Game (own layout)
-  turing-tape/              Game (own layout)
-  times-trail/              Game (own layout)
-  seasons/                  Game (own layout)
-  shared/                   BaseGameUI, StorageManager (Number Garden, Life Garden, Times Trail, Seasons)
-
-javascript/
-  index.html                JS experiments section index
-  coin-flipper.html         Individual experiments...
-  logic-engine/index.html
-  truthtable.js             Logic extracted for testing
-
-chinese/
-  index.html                Chinese tools section index
-  syllabary.html            Individual tools...
-  tradsimp.js               Traditional/simplified conversion logic
-  url-state.js              Reads and writes a tool's input in the query string
-  syllabary/                Python generators + data files (see chinese/README.md)
-
-colophon/
-  index.html                How the site is built
-
-contact/
-  index.html                Contact form (see "Contact Form" below)
-
-resume/
-  resume.md                 Resume content (markdown)
-  template.html             Resume-specific template
-  resume.css                Resume styles
-
-shared/
-  nav.js                    Keyboard shortcuts + language persistence
-  theme.js                  Dark/light mode + accent colors
-  table-filter.js           Searchable table filtering
-  contact-form.js           Contact form submission
-  life-background.js        Game of Life animation (404 page)
-  discover.js               Random-page link (homepage footer + 404) and avatar glider
-  __tests__/
-    theme-placement.test.js Where theme.js places its toggle, against a DOM with a hidden .header
-
-zh-common.json              Shared translations (see docs/translations.md)
-*.zh.json                   Per-page translations (co-located with HTML)
-docs/                       Development documentation (not copied to dist/)
-dist/                       Build output (gitignored)
-```
+## Resume Page
 
 The resume page has no source `index.html`. `npm run build` renders `resume.md`
 into `template.html` and writes the result straight to `dist/resume/index.html`.
@@ -145,30 +81,9 @@ npm run format  # Prettier
 
 ## Git Hooks
 
-Two Husky hooks, split by what they do rather than by convenience:
-
-- **`.husky/pre-commit`** runs `lint-staged` (about a second). It formats each
-  staged file with Prettier -- writing, not just checking, so the fixed file is
-  restaged -- and then runs the linter for that file type. Only things that
-  _change_ the commit belong here.
-- **`.husky/pre-push`** runs the full test suite (about five seconds). Pushing to
-  `main` deploys the site, so this is the boundary worth guarding; a broken local
-  commit costs nothing and can be amended. Running once per push also beats
-  running once per commit.
-
-The linting happens locally at all, rather than only in CI, because
-`.github/workflows/deploy.yml` is a single job: build, test, lint, deploy. A lint
-failure there is a failed deploy of the live site rather than a failed check on a
-pull request.
-
-`jest --onlyChanged` is deliberately not used to speed up the pre-push run. Jest
-builds its dependency graph from `import` statements and cannot see
-`readFileSync`, so editing any `.html` file selects zero suites -- even though
-`__tests__/html.test.js` checks every page that way and the game suites load
-their `index.html` the same way. Nearly every commit here touches HTML.
-
-To skip a hook, `git commit --no-verify` or `git push --no-verify`. CI still runs
-everything.
+`.husky/pre-commit` formats and lints the staged files. `.husky/pre-push` runs
+the tests. The comments in those files say why each check sits where it does.
+To skip one, use `--no-verify`. CI still runs everything.
 
 ## Testing
 
@@ -194,17 +109,18 @@ Jest's `moduleNameMapper` in `package.json` strips `.js` extensions from relativ
 
 ## Lint Configuration
 
-`npm run lint` runs four linters; their notable settings:
+Settings are in `eslint.config.js`, `.htmlhintrc` and `package.json`. Notes on
+the non-obvious ones:
 
-- **ESLint** (`eslint.config.js`): `npm run lint:js` runs `eslint .`, so the config's `ignores` block (`coverage/`, `node_modules/`, `dist/`, `.claude/`) is the only thing that decides what is skipped -- a new top-level directory is linted without touching `package.json`. The rule groups cover `javascript/`, `games/`, `chinese/`, `shared/`, `__tests__/`, and the two root build files. `no-console` allows `warn`/`error` -- the build script and shared modules use them for surfacing real problems. `jestGlobals` is included in the browser config because `*.test.js` files live alongside source under `shared/`, `javascript/`, and `games/` rather than in a separate test directory.
-- **Stylelint** (`package.json`): `npm run lint:css` passes `--ignore-pattern` for
-  `node_modules/**`, `coverage/**`, and `dist/**`, matching what ESLint and
-  HTMLHint skip. Several rules are disabled because the codebase mixes hand-written CSS conventions with design-token patterns that the standard config rejects.
-  - `selector-class-pattern` / `selector-id-pattern` / `custom-property-pattern`: allow descriptive names like `.game-list` and `--color-bg-card` instead of forcing strict BEM.
-  - `no-descending-specificity`: silenced because component CSS frequently overrides base styles in a deliberate cascade order.
-  - `color-function-notation: legacy` and `alpha-value-notation: number`: pin to one notation since both are valid CSS and mixing them is noisier than picking either.
-- **HTMLHint** (`.htmlhintrc`): structural checks over every source page, skipping `node_modules/`, `coverage/`, and `dist/`.
-- **Prettier** (`package.json`): `printWidth: 100` and `semi: false`. `eslint-config-prettier` turns off the ESLint rules that would otherwise disagree with it, so formatting has exactly one owner. `npm run lint` checks formatting; `npm run format` fixes it.
+- ESLint's `ignores` block alone decides what is skipped, so a new top-level
+  directory is linted without touching `package.json`.
+- `jestGlobals` is in the browser config because `*.test.js` files live beside
+  the source, not in a separate test directory.
+- Stylelint disables the class, id and custom-property pattern rules (names like
+  `.game-list` and `--color-bg-card`) and `no-descending-specificity` (component
+  CSS overrides base styles on purpose).
+- `eslint-config-prettier` turns off ESLint rules that clash with Prettier, so
+  formatting has one owner.
 
 ## Adding a New Page
 

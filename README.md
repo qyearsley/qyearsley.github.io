@@ -20,17 +20,7 @@ for why, and [docs/improvements.md](docs/improvements.md) for what is left.
 
 ## Development
 
-```bash
-npm install     # Install dependencies
-npm start       # Build + serve locally (http://localhost:8000)
-npm run dev     # Serve source directly (no build step)
-npm test        # Run tests
-npm run lint    # Lint JS, HTML, CSS, and check formatting
-npm run format  # Format with Prettier
-```
-
-A pre-commit hook lints and formats the staged files; a pre-push hook runs the
-tests. See [docs/development.md](docs/development.md#git-hooks).
+Commands and git hooks are in [docs/development.md](docs/development.md#commands).
 
 See [docs/development.md](docs/development.md) for the build pipeline, how to add pages, and how translations work.
 [docs/improvements.md](docs/improvements.md) is the maintenance backlog; the `*-plan.md` files beside it are per-feature design notes.

@@ -10,13 +10,8 @@ For detailed documentation, see:
 
 ## Quick Reference
 
-```bash
-npm run build   # Build site to dist/
-npm start       # Build + serve locally
-npm run dev     # Serve source directly (no build)
-npm test        # Run all tests
-npm run lint    # Run all linters
-```
+Run `npm test` and `npm run lint` before you commit. The other commands are in
+`docs/development.md`.
 
 ## Preferences
 
