@@ -44,7 +44,7 @@
   }
 
   50% {
-    transform: scale(1.2);
+    transform: scale(1.05);
   }
 
   100% {
@@ -76,7 +76,7 @@
   }
 
   50% {
-    transform: scale(1.1);
+    transform: scale(1.05);
   }
 }
 
@@ -123,7 +123,7 @@
   }
 
   100% {
-    transform: translateY(-200px) scale(0.5);
+    transform: translateY(-80px) scale(0.7);
     opacity: 0;
   }
 }
@@ -171,11 +171,11 @@
   }
 
   25% {
-    transform: translateX(-10px);
+    transform: translateX(-4px);
   }
 
   75% {
-    transform: translateX(10px);
+    transform: translateX(4px);
   }
 }
 

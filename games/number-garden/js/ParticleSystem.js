@@ -4,8 +4,8 @@
 export class ParticleSystem {
   constructor() {
     this.emojis = ["✨", "⭐"]
-    this.particleCount = 5
-    this.particleLifetime = 2000
+    this.particleCount = 3
+    this.particleLifetime = 1000
     this.spawnDelay = 80
   }
 
@@ -57,7 +57,7 @@ export class ParticleSystem {
     particle.textContent = this.emojis[Math.floor(Math.random() * this.emojis.length)]
     particle.style.left = x + "px"
     particle.style.top = y + "px"
-    particle.style.setProperty("--tx", (Math.random() - 0.5) * 200 + "px")
+    particle.style.setProperty("--tx", (Math.random() - 0.5) * 100 + "px")
     return particle
   }
 }

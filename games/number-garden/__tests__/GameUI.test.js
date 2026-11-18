@@ -540,9 +540,9 @@ describe("GameUI", () => {
 
       gameUI.shakeButton(button)
 
-      expect(button.style.animation).toBe("shake 0.5s")
+      expect(button.style.animation).toBe("shake 0.3s")
 
-      jest.advanceTimersByTime(500)
+      jest.advanceTimersByTime(300)
 
       expect(button.style.animation).toBe("")
 

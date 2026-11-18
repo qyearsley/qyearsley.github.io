@@ -257,6 +257,10 @@ class NumberGarden {
     this.state.setScreen(screenId)
     this.ui.showScreen(screenId)
 
+    if (screenId === "activity-screen") {
+      this.ui.castle.updateProjectStrip(this.state.completedAreas, this.state.currentArea)
+    }
+
     // Update area locks when showing garden hub
     if (screenId === "garden-hub") {
       this.ui.updateAreaLocks(this.state.unlockedAreas)

@@ -15,7 +15,7 @@ An educational math game for children featuring addition, subtraction, multiplic
 - **Multiple Project Types:** Choose to build a castle 🏰, grow a garden 🌻, create a robot 🤖, or construct a rocket 🚀
 - **Progressive Difficulty:** Questions get harder as you progress through levels
 - **Visual Learning:** Pictures and animations help reinforce concepts
-- **Project Building:** Complete areas to collect project pieces (6 total)
+- **Project Building:** Complete areas to collect project pieces (6 total). A strip above the question shows them as you play.
 - **Save Progress:** Automatically saves your stars, progress, and project choice
 
 ## Settings

@@ -416,7 +416,6 @@ body {
 .project-icon {
   font-size: var(--ng-icon-xl);
   margin-bottom: var(--ng-space-lg);
-  animation: bounce 2s ease-in-out infinite;
 }
 
 .project-option h3 {
@@ -480,7 +479,6 @@ body {
 .area-icon {
   font-size: var(--ng-icon-lg);
   margin-bottom: var(--ng-space-lg);
-  animation: bounce 2s ease-in-out infinite;
 }
 
 .garden-area h3 {
@@ -519,7 +517,6 @@ body {
 
 .creature-image {
   font-size: var(--ng-icon-md);
-  animation: wiggle 2s ease-in-out infinite;
   flex-shrink: 0;
 }
 
@@ -639,7 +636,7 @@ body {
   background: var(--ng-correct-fill);
   border-color: var(--ng-correct);
   color: var(--ng-on-fill);
-  animation: pulse-correct 0.5s ease;
+  animation: pulse-correct 0.3s ease;
 }
 
 .answer-button.disabled {
@@ -679,7 +676,7 @@ body {
 
 .feedback-icon {
   font-size: var(--ng-text-4xl);
-  animation: bounce 0.5s ease;
+  animation: bounce 0.3s ease;
 }
 
 .feedback h3 {
@@ -766,7 +763,7 @@ body {
 .particle {
   position: absolute;
   font-size: var(--ng-text-xl);
-  animation: float-up 2s ease-out forwards;
+  animation: float-up 1s ease-out forwards;
   pointer-events: none;
 }
 
@@ -821,18 +818,6 @@ body {
   justify-content: center;
   border: 2px solid var(--ng-surface);
   box-shadow: 0 2px 8px rgb(0, 0, 0, 0.3);
-  animation: badge-pulse 2s ease-in-out infinite;
-}
-
-@keyframes badge-pulse {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-
-  50% {
-    transform: scale(1.1);
-  }
 }
 
 /* Text Button (for home link) */
@@ -1267,21 +1252,17 @@ select:focus-visible,
   box-shadow: 0 8px 24px rgb(0, 0, 0, 0.2);
   max-width: 600px;
   margin: 0 auto;
-  animation: celebration-bounce 0.6s ease-out;
+  animation: celebration-bounce 0.3s ease-out;
 }
 
 @keyframes celebration-bounce {
   0% {
-    transform: scale(0.8) rotate(-5deg);
+    transform: scale(0.95);
     opacity: 0;
   }
 
-  50% {
-    transform: scale(1.05) rotate(2deg);
-  }
-
   100% {
-    transform: scale(1) rotate(0);
+    transform: scale(1);
     opacity: 1;
   }
 }
@@ -1336,7 +1317,7 @@ select:focus-visible,
     var(--theme-ink);
   border-radius: var(--ng-radius-sm);
   color: white;
-  animation: pop-in 0.5s ease-out;
+  animation: pop-in 0.3s ease-out;
 }
 
 .project-piece-earned {
@@ -1348,20 +1329,18 @@ select:focus-visible,
 
 .project-piece-icon {
   font-size: 4rem;
-  animation: spin-in 0.8s ease-out;
+  animation: spin-in 0.4s ease-out;
 }
 
 @keyframes spin-in {
   0% {
-    transform: rotate(0deg) scale(0);
-  }
-
-  50% {
-    transform: rotate(180deg) scale(1.2);
+    transform: scale(0.5);
+    opacity: 0;
   }
 
   100% {
-    transform: rotate(360deg) scale(1);
+    transform: scale(1);
+    opacity: 1;
   }
 }
 
@@ -1456,4 +1435,34 @@ select:focus-visible,
 
 :root[data-theme="dark"] body {
   --ng-app-bg: color-mix(in srgb, var(--ng-stage-bg, var(--theme-accent)) 26%, #0c0a10);
+}
+
+/* Project strip: the pieces earned so far, always visible while playing */
+.project-strip {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--ng-space-sm);
+  margin: 0 auto var(--ng-space-md);
+  font-size: var(--ng-text-base);
+  color: var(--ng-theme-ink);
+}
+
+.project-strip-piece {
+  font-size: var(--ng-icon-sm);
+  line-height: 1;
+}
+
+.project-strip-piece.locked {
+  opacity: 0.3;
+}
+
+.project-strip-piece.current {
+  opacity: 0.7;
+  border-bottom: 3px solid var(--theme-primary);
+}
+
+.project-strip-count {
+  font-weight: 600;
+  margin-left: var(--ng-space-sm);
 }

@@ -44,6 +44,7 @@ export class GameUI extends BaseGameUI {
       gardenPreview: document.querySelector(".garden-preview"),
       particlesContainer: document.getElementById("particles-container"),
       castleButton: document.getElementById("castle-button"),
+      projectStrip: document.getElementById("project-strip"),
       difficultySelect: document.getElementById("difficulty-select"),
       inputModeSelect: document.getElementById("input-mode-select"),
       visualHintsSelect: document.getElementById("visual-hints-select"),
@@ -302,10 +303,10 @@ export class GameUI extends BaseGameUI {
    * @param {HTMLElement} button - The button element
    */
   shakeButton(button) {
-    button.style.animation = "shake 0.5s"
+    button.style.animation = "shake 0.3s"
     setTimeout(() => {
       button.style.animation = ""
-    }, 500)
+    }, 300)
   }
 
   /**

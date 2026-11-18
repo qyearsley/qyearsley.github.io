@@ -89,6 +89,25 @@ describe("CastleUI", () => {
     expect(elements.projectProgressModal.classList.contains("hidden")).toBe(true)
   })
 
+  test("updateProjectStrip shows earned, current and locked areas with a count", () => {
+    const strip = document.createElement("div")
+    castle = new CastleUI({ ...elements, projectStrip: strip })
+
+    castle.updateProjectStrip(new Set([AREAS.FLOWER_MEADOW]), AREAS.CRYSTAL_CAVE)
+
+    const pieces = strip.querySelectorAll(".project-strip-piece")
+    expect(pieces).toHaveLength(Object.keys(AREA_ICONS).length)
+    expect(pieces[0].className).toBe("project-strip-piece")
+    expect(pieces[1].classList.contains("current")).toBe(true)
+    expect(pieces[2].classList.contains("locked")).toBe(true)
+    expect(strip.querySelector(".project-strip-count").textContent).toBe("1/6")
+    expect(strip.getAttribute("aria-label")).toBe("Project pieces: 1 of 6")
+  })
+
+  test("updateProjectStrip does nothing without a strip element", () => {
+    expect(() => castle.updateProjectStrip(new Set(), null)).not.toThrow()
+  })
+
   test("updateLevelCompleteScreen reads and writes real DOM ids directly, not the injected elements", () => {
     castle.updateLevelCompleteScreen(3, 2, true, "robot", 4)
 

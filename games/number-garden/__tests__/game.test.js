@@ -98,3 +98,15 @@ describe("difficulty setting reaches the real activity generator", () => {
     jest.restoreAllMocks()
   })
 })
+
+describe("project strip on the play screen", () => {
+  test("entering an area shows the six pieces and marks the current one", () => {
+    boot()
+    enterFlowerMeadow()
+
+    const strip = byId("project-strip")
+    expect(strip.querySelectorAll(".project-strip-piece")).toHaveLength(6)
+    expect(strip.querySelector(".project-strip-piece.current")).not.toBeNull()
+    expect(strip.querySelector(".project-strip-count").textContent).toBe("0/6")
+  })
+})

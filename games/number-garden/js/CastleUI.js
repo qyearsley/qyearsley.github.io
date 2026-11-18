@@ -48,6 +48,33 @@ export class CastleUI {
     })
   }
 
+  /**
+   * Draw the small always-visible strip on the play screen: one icon per
+   * area (earned, in progress, or not yet) and a count.
+   */
+  updateProjectStrip(completedAreas, currentArea) {
+    const strip = this.elements.projectStrip
+    if (!strip) return
+
+    strip.innerHTML = ""
+    Object.entries(AREA_ICONS).forEach(([areaId, emoji]) => {
+      const piece = document.createElement("span")
+      piece.className = "project-strip-piece"
+      piece.setAttribute("aria-hidden", "true")
+      piece.textContent = emoji
+      if (!completedAreas.has(areaId)) {
+        piece.classList.add(areaId === currentArea ? "current" : "locked")
+      }
+      strip.appendChild(piece)
+    })
+
+    const count = document.createElement("span")
+    count.className = "project-strip-count"
+    count.textContent = `${completedAreas.size}/${AREA_COUNT}`
+    strip.appendChild(count)
+    strip.setAttribute("aria-label", `Project pieces: ${completedAreas.size} of ${AREA_COUNT}`)
+  }
+
   updateCastleBadge(completedCount) {
     if (!this.elements.castleButton) return
 

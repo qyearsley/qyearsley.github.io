@@ -25,8 +25,8 @@ describe("ParticleSystem", () => {
   describe("initialization", () => {
     test("initializes with default values", () => {
       expect(particleSystem.emojis).toEqual(["✨", "⭐"])
-      expect(particleSystem.particleCount).toBe(5)
-      expect(particleSystem.particleLifetime).toBe(2000)
+      expect(particleSystem.particleCount).toBe(3)
+      expect(particleSystem.particleLifetime).toBe(1000)
       expect(particleSystem.spawnDelay).toBe(80)
     })
   })
@@ -59,10 +59,10 @@ describe("ParticleSystem", () => {
     test("creates correct number of particles", () => {
       particleSystem.createParticles(150, 150, container)
 
-      // Past the last spawn (4 * 80ms) but well inside the 2000ms lifetime.
-      jest.advanceTimersByTime(500)
+      // Past the last spawn (2 * 80ms) but well inside the 1000ms lifetime.
+      jest.advanceTimersByTime(300)
 
-      expect(container.querySelectorAll(".particle").length).toBe(5)
+      expect(container.querySelectorAll(".particle").length).toBe(3)
     })
 
     test("particles are removed after lifetime", () => {
@@ -126,9 +126,9 @@ describe("ParticleSystem", () => {
       stubMatchMedia(false)
       particleSystem.createParticles(150, 150, container)
 
-      jest.advanceTimersByTime(500)
+      jest.advanceTimersByTime(300)
 
-      expect(container.querySelectorAll(".particle").length).toBe(5)
+      expect(container.querySelectorAll(".particle").length).toBe(3)
     })
   })
 })

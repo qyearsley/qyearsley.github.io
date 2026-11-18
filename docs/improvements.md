@@ -23,9 +23,6 @@ last long version of this file is `git show 3ceed17:docs/improvements.md`.
 
 Owner feedback from 2026-11-18, not yet planned:
 
-5. **Seasons rounds are a little long.**
-6. **Number Garden hides progress.** The garden should be visible while
-   playing, not only behind "view project". Some animations are too much.
 7. **Games do not fit all screens.** Also: is UI consistency across games
    worth it?
 8. **Syllabary search by frequency is confusing.** It matches the count in each
@@ -104,6 +101,10 @@ Landed 2026-11-18: Times Trail is simpler. The hub is the list of trails and a t
 Landed 2026-11-18: Life Garden is now a small grass, rabbit and fox model (about 250 lines of JS, down from 2700). Grass alone fills the board, rabbits alone become common, and rabbits with foxes cycle and usually last 500 generations.
 
 Landed 2026-11-18: Turing Tape is simpler. The explanation is one sentence plus a Wikipedia link (a Chinese Wikipedia link on `/zh/`), the three demos and their read-only mode are gone, and runtime text (level names, messages, labels) is Chinese on `/zh/`.
+
+Landed 2026-11-18: Seasons trails are shorter, 6, 6, 7 and 8 spaces. (Was "Seasons rounds are a little long.")
+
+Landed 2026-11-18: Number Garden shows progress while you play: a strip under the level bar lists the six project pieces (earned, current, not yet) with a count. "View project" stays as the detailed view. Celebrations are smaller and shorter: 3 particles for 1s (was 5 for 2s), no idle bouncing, no spinning or tilting.
 
 Landed 2026-10-19: lint skips `.claude/` (ESLint ignore, and `.gitignore` for
 Prettier); the two READMEs and `development.md` match the pages and tests;
