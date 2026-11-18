@@ -12,23 +12,17 @@ last long version of this file is `git show 3ceed17:docs/improvements.md`.
 
 ## Open
 
-1. **Share one keyboard guard between the quiz games.** Times Trail, Seasons
-   and Number Garden each copy the modifier, help-overlay, text-field and
-   Escape-closes-settings checks. The copies drifted: Times Trail's keypad
-   lacked two of them until 2026-10-05. Move them into `games/shared/` and
-   verify with each game's keyboard tests.
-
-2. **Syllogism's mnemonic paragraph sits between the presets and the form.**
+1. **Syllogism's mnemonic paragraph sits between the presets and the form.**
    It pushes the controls down; it could move below the diagram.
 
-3. **The Coin Flipper loads Chart.js from a CDN with no `integrity` hash**
+2. **The Coin Flipper loads Chart.js from a CDN with no `integrity` hash**
    (`javascript/coin-flipper.html:15`). It is the only third-party script on
    the site. A changed CDN file would run on this origin. Add an SRI hash
    for `chart.js@4.4.7`, or vendor the file. On 2026-11-12 the agent sandbox
    got a 403 from both jsDelivr and the npm registry, so compute the hash
    from a normal terminal.
 
-4. **ESLint is held at 9.** `eslint-plugin-import` 2.32 (the latest on
+3. **ESLint is held at 9.** `eslint-plugin-import` 2.32 (the latest on
    2026-11-12) accepts eslint only up to `^9`, so `npm install` fails with
    ERESOLVE on eslint 10. The config uses one rule from it,
    `import/no-unresolved`. Move to eslint 10 when the plugin supports it, or
@@ -56,6 +50,7 @@ changes.
 
 Decided with no change, so these are not re-proposed:
 
+- **Times Trail, Seasons and Number Garden share one keyboard guard** (2026-11-18): `games/shared/keyboardGuard.js`. Times Trail's Escape-closes-settings gained the modifier and help-overlay checks the other two had.
 - **DOM-wiring modules are now tested** (2026-11-18): Turing Tape `game.js` (via `init(doc)`), Logic Engine `ui.js`, and the answer and timer paths of Times Trail and Number Garden. `shared/life-background.js` stays untested on purpose.
 - **The Chinese generator scripts are published on purpose.** `syllabary.html`
   and `tone-table.html` link to their `.py` generators as source, so skipping

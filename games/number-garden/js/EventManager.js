@@ -1,11 +1,5 @@
 import { ANSWER_KEYS } from "./constants.js"
-
-/**
- * Tags whose own keyboard behaviour must never be hijacked. The same set the
- * other games in this repo keep; see times-trail's EventManager. SELECT matters
- * here in particular, because the settings modal is four of them.
- */
-const TEXT_ENTRY_TAGS = new Set(["INPUT", "TEXTAREA", "SELECT"])
+import { keyIsNotForGame, closeSettingsOnEscape } from "../../shared/keyboardGuard.js"
 
 /**
  * Manages event listeners and callbacks for the game
@@ -383,23 +377,14 @@ export class EventManager {
    */
   setupKeyboardShortcuts() {
     document.addEventListener("keydown", (e) => {
-      // Leave browser and OS shortcuts alone
-      if (e.metaKey || e.ctrlKey || e.altKey) {
-        return
-      }
-
       // Escape closes the settings modal. Without it the modal was a keyboard
       // trap: the only way out was to Tab all the way to Done. Handled before
       // the activity-screen gate, because settings opens from the hub too.
-      //
-      // Not while the help overlay is up. It sits on top of the dialog and
-      // `shared/nav.js` does not stop propagation, so one Escape would dismiss
-      // both layers at once.
-      if (e.key === "Escape" && this._settingsOpen() && !window.__helpOverlayIsOpen?.()) {
-        e.preventDefault()
-        if (this.callbacks.onSettingsClose) this.callbacks.onSettingsClose()
-        return
-      }
+      const closed = closeSettingsOnEscape(e, {
+        isOpen: () => this._settingsOpen(),
+        close: () => this.callbacks.onSettingsClose?.(),
+      })
+      if (closed) return
 
       // Only handle if we're on the activity screen
       const activityScreen = document.getElementById("activity-screen")
@@ -407,17 +392,10 @@ export class EventManager {
         return
       }
 
-      // Check if user is typing in a field. SELECT belongs here with the other
-      // two: the settings modal is four of them, and "d" on the Difficulty
-      // select used to click the fourth answer button behind the modal.
-      if (TEXT_ENTRY_TAGS.has(e.target.tagName)) {
-        return
-      }
-
-      // Anything covering the answer buttons swallows the keys that press them
-      // -- the settings modal, and the site-wide help overlay that `?` opens.
-      // `shared/nav.js` publishes `__helpOverlayIsOpen` for exactly this.
-      if (this._settingsOpen() || window.__helpOverlayIsOpen?.()) {
+      // Modifiers, the help overlay, and text fields and selects (the settings
+      // modal is four of them) keep their keys; so does anything else the
+      // modal covers.
+      if (keyIsNotForGame(e) || this._settingsOpen()) {
         return
       }
 

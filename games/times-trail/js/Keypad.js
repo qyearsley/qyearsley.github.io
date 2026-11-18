@@ -46,6 +46,7 @@
  */
 
 import { KEYPAD } from "./constants.js"
+import { keyIsNotForGame } from "../../shared/keyboardGuard.js"
 
 /**
  * Glyph shown on the two non-digit keys. Digits use their own key string.
@@ -82,9 +83,6 @@ const KEY_MODIFIERS = Object.freeze({
   [KEYPAD.BACKSPACE_KEY]: "keypad-key-clear",
   [KEYPAD.ENTER_KEY]: "keypad-key-enter",
 })
-
-/** Elements whose native keyboard behaviour must not be hijacked. */
-const PASSTHROUGH_TAGS = new Set(["INPUT", "TEXTAREA", "SELECT"])
 
 /** Matches a single digit character. */
 const DIGIT = /^[0-9]$/
@@ -276,10 +274,8 @@ export class Keypad {
    */
   handleKeyDown(event) {
     if (!this._enabled) return false
-    if (event.metaKey || event.ctrlKey || event.altKey) return false
-    if (window.__helpOverlayIsOpen?.() === true) return false
+    if (keyIsNotForGame(event)) return false
     if (!this._isPlayScreenReady()) return false
-    if (event.target && PASSTHROUGH_TAGS.has(event.target.tagName)) return false
 
     const key = event.key
     if (DIGIT.test(key)) {

@@ -68,6 +68,7 @@ import {
 import { CHARACTERS, getCharacter } from "./characters.js"
 import { SEASON_LIST, getSeason } from "./seasons.js"
 import { StorageManager, defaultSave, toSavedRun } from "./storage.js"
+import { keyIsNotForGame, closeSettingsOnEscape } from "../../shared/keyboardGuard.js"
 
 const ui = new GameUI()
 // The seasons the finished potion is built from, on the end-of-run screen.
@@ -752,13 +753,6 @@ function _onTimerSetting(timerOn) {
 const FIRST_CHOICE_KEY = "a".codePointAt(0)
 
 /**
- * Tags whose own keyboard behavior must never be hijacked. The same set the
- * other games in this repo keep; see times-trail's EventManager.
- * @private
- */
-const TEXT_ENTRY_TAGS = new Set(["INPUT", "TEXTAREA", "SELECT"])
-
-/**
  * Answer with the letter keys, A to D. Touch is the primary input -- this is the
  * keyboard fallback, and it only fires while the play screen is showing and an
  * answer is not already being processed.
@@ -770,32 +764,18 @@ const TEXT_ENTRY_TAGS = new Set(["INPUT", "TEXTAREA", "SELECT"])
  * @param {KeyboardEvent} event - The keydown
  */
 function _onKeyDown(event) {
-  if (event.metaKey || event.ctrlKey || event.altKey) return
-  // The help overlay is on top of the dialog when both are open, and
-  // `shared/nav.js` does not stop propagation, so without this term one Escape
-  // dismissed both layers -- and restarted the question's full countdown while
-  // the player was still reading the shortcut list.
-  if (event.key === "Escape" && ui.settingsOpen && !window.__helpOverlayIsOpen?.()) {
-    event.preventDefault()
-    _closeSettings()
-    return
-  }
-  // A letter typed into a field is a letter meant for that field. This did not
-  // matter while the shortcut was a digit -- nothing on the play screen takes
-  // typing -- but letters are what people put in text boxes, so the first one
-  // added here would otherwise submit an answer behind the player's back while
-  // she was still typing into it.
-  const target = event.target
-  if (target && TEXT_ENTRY_TAGS.has(target.tagName)) return
+  // Escape closes the dialog (not while the help overlay is up: one Escape
+  // used to dismiss both, and restart the question's countdown).
+  if (closeSettingsOnEscape(event, { isOpen: () => ui.settingsOpen, close: _closeSettings })) return
+  // Modifiers, the help overlay, and text fields keep their keys. A letter typed
+  // into a field is a letter meant for that field.
+  if (keyIsNotForGame(event)) return
   // The dialog covers the answer buttons, so a keypress must not reach them.
-  // The tag check above already catches the checkbox; this catches the Done
-  // button and anything else the dialog grows. The site's own help overlay --
-  // the one `?` opens, from shared/nav.js -- covers them just as thoroughly and
-  // is just as easy to miss: it publishes `__helpOverlayIsOpen` for exactly
-  // this. The reinforcement card is the third such layer, and the only one this
-  // game owns: it covers the choices while she reads the fact she just worked
-  // out, and A-D must not answer the next question from behind it.
-  if (ui.settingsOpen || ui.reinforcementOpen || window.__helpOverlayIsOpen?.()) return
+  // This catches the Done button and anything else the dialog grows. The
+  // reinforcement card is the other layer this game owns: it covers the choices
+  // while she reads the fact she just worked out, and A-D must not answer the
+  // next question from behind it.
+  if (ui.settingsOpen || ui.reinforcementOpen) return
   if (answering) return
   if (!_onPlayScreen()) return
   // Single characters only, so "F5" and "ArrowLeft" never reach the arithmetic.

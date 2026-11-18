@@ -93,7 +93,7 @@ Tests use Jest with `--experimental-vm-modules` for ESM support.
 - `__tests__/html.test.js` -- structural checks across every source HTML page (unclosed script tags, placeholder SRI hashes, etc.)
 - `__tests__/stylesheets.test.js` -- dark-theme wiring across every stylesheet (the `prefers-color-scheme` and `[data-theme="dark"]` blocks described in "Stylesheets" below)
 - `__tests__/zh-coverage.test.js` -- the translation gate: counts English text nodes in each translated page and fails if a page regresses against its recorded baseline
-- `shared/__tests__/` -- tests for `nav.js`, `theme.js`, `table-filter.js`, `contact-form.js`, and `discover.js`; `theme-placement.test.js` covers where `theme.js` places its toggle when a page has more than one `.header`
+- `shared/__tests__/` -- tests for `nav.js`, `theme.js`, `table-filter.js`, `contact-form.js`, and `discover.js`; `games/shared/__tests__/` covers the base classes and `keyboardGuard.js`; `theme-placement.test.js` covers where `theme.js` places its toggle when a page has more than one `.header`
 - `javascript/*.test.js`, `chinese/*.test.js` -- tests for experiment and tool logic
 - `games/*/__tests__/` -- tests for game logic and level/preset data
 

@@ -182,7 +182,8 @@ styles/
 ```
 
 Base classes shared with Number Garden and Life Garden live in `games/shared/`:
-`BaseGameUI.js` and `StorageManager.js`.
+`BaseGameUI.js` and `StorageManager.js`. `keyboardGuard.js` there holds the key
+checks that Times Trail, Seasons and Number Garden share.
 
 ### Testing
 

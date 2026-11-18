@@ -508,6 +508,18 @@ describe("EventManager", () => {
       delete window.__helpOverlayIsOpen
     })
 
+    test.each(["metaKey", "ctrlKey", "altKey"])(
+      "Escape with %s held leaves the modal open",
+      (mod) => {
+        eventManager.setupKeyboardShortcuts()
+        document.getElementById("settings-modal").classList.remove("hidden")
+
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", [mod]: true }))
+
+        expect(callbacks.onSettingsClose).not.toHaveBeenCalled()
+      },
+    )
+
     test("Escape closes the settings modal", () => {
       eventManager.setupKeyboardShortcuts()
       document.getElementById("settings-modal").classList.remove("hidden")

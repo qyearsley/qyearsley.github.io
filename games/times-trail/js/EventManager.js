@@ -42,6 +42,8 @@
  * @property {(table: number, checked: boolean) => void} [onTableToggle]
  */
 
+import { closeSettingsOnEscape } from "../../shared/keyboardGuard.js"
+
 export class EventManager {
   /**
    * @param {Object|null} ui - GameUI instance (or any object with an `elements` map)
@@ -308,11 +310,13 @@ export class EventManager {
    */
   setupSettingsDismiss() {
     document.addEventListener("keydown", (event) => {
-      if (event.key !== "Escape") return
-      const modal = document.getElementById("settings-modal")
-      if (!modal || modal.classList.contains("hidden")) return
-      event.preventDefault()
-      this._invoke("onSettingsClose")
+      closeSettingsOnEscape(event, {
+        isOpen: () => {
+          const modal = document.getElementById("settings-modal")
+          return modal !== null && !modal.classList.contains("hidden")
+        },
+        close: () => this._invoke("onSettingsClose"),
+      })
     })
   }
 }

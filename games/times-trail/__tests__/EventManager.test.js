@@ -311,6 +311,28 @@ describe("EventManager", () => {
       expect(callbacks.onSettingsClose).not.toHaveBeenCalled()
     })
 
+    // Escape with a modifier belongs to the browser or OS.
+    test.each(["metaKey", "ctrlKey", "altKey"])("Escape with %s held does not close it", (mod) => {
+      openSettings()
+      pressKey("Escape", document, { [mod]: true })
+      expect(callbacks.onSettingsClose).not.toHaveBeenCalled()
+    })
+
+    // The help overlay sits on top of the dialog and shared/nav.js does not stop
+    // propagation, so one Escape would otherwise dismiss both layers.
+    test("Escape leaves the dialog alone while the help overlay is open", () => {
+      openSettings()
+      window.__helpOverlayIsOpen = () => true
+      try {
+        pressKey("Escape")
+        expect(callbacks.onSettingsClose).not.toHaveBeenCalled()
+      } finally {
+        delete window.__helpOverlayIsOpen
+      }
+      pressKey("Escape")
+      expect(callbacks.onSettingsClose).toHaveBeenCalledTimes(1)
+    })
+
     test("Escape from inside the dialog closes it", () => {
       // The listener is on `document` rather than the dialog precisely because
       // focus can sit on the <select>, which swallows keys before an element

@@ -621,6 +621,16 @@ describe("the countdown setting", () => {
     expect(isOpen()).toBe(false)
   })
 
+  it.each([["metaKey"], ["ctrlKey"], ["altKey"]])(
+    "leaves the dialog alone when Escape is pressed with %s held",
+    async (modifier) => {
+      await bootIntoSummer()
+      byId("settings-button").click()
+      pressKey("Escape", { [modifier]: true })
+      expect(isOpen()).toBe(true)
+    },
+  )
+
   // The help overlay is drawn on top of the dialog and `shared/nav.js` does not
   // stop propagation, so one Escape used to dismiss both -- and restart the
   // question's full countdown while the shortcut list was still being read.
