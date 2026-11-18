@@ -23,9 +23,6 @@ last long version of this file is `git show 3ceed17:docs/improvements.md`.
 
 Owner feedback from 2026-11-18, not yet planned:
 
-3. **Life Garden is too complicated, and does not show boom and bust.**
-   Grass alone never fills the board (it dies at 4+ neighbors); rabbits alone
-   stay rare; with foxes it settles at ~150 grass and a few animals.
 4. **Turing Tape could be simpler.** Link out (e.g. Wikipedia) instead of
    explaining; some text is not translated.
 5. **Seasons rounds are a little long.**
@@ -105,6 +102,8 @@ Garden's Continue goes to the next area and strikes off wrong choices; Life
 Garden's R asks first; Turing Tape's new rule row starts blank and a solve
 offers "Next puzzle"; the games index says who each kid game is for; the skip
 link hides fully and prose links take the theme color.
+
+Landed 2026-11-18: Life Garden is now a small grass, rabbit and fox model (about 250 lines of JS, down from 2700). Grass alone fills the board, rabbits alone become common, and rabbits with foxes cycle and usually last 500 generations.
 
 Landed 2026-10-19: lint skips `.claude/` (ESLint ignore, and `.gitignore` for
 Prettier); the two READMEs and `development.md` match the pages and tests;

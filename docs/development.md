@@ -97,7 +97,7 @@ Tests use Jest with `--experimental-vm-modules` for ESM support.
 - `javascript/*.test.js`, `chinese/*.test.js` -- tests for experiment and tool logic
 - `games/*/__tests__/` -- tests for game logic and level/preset data
 
-Most game logic is tested through its underlying components (Grid, GameState, TuringMachine, etc.) and the static data they consume. Seasons, Times Trail and Number Garden additionally drive their `game.js` orchestrators black-box, loading the real `index.html` into jsdom, clicking through it and advancing fake timers (`game.answering.test.js` in each). Life Garden has boot tests that do the same for its startup wiring. Turing Tape's `game.js` and Logic Engine's `ui.js` are tested the same way; Turing Tape's takes the document through `init(doc)`, and `ui.js` already looked its elements up inside `initUI()`. `shared/life-background.js` (the 404 page's animation) is untested.
+Most game logic is tested through its underlying components (Garden, GameState, TuringMachine, etc.) and the static data they consume. Seasons, Times Trail and Number Garden additionally drive their `game.js` orchestrators black-box, loading the real `index.html` into jsdom, clicking through it and advancing fake timers (`game.answering.test.js` in each). Life Garden has a boot test that does the same, and seeded simulation tests for its model. Turing Tape's `game.js` and Logic Engine's `ui.js` are tested the same way; Turing Tape's takes the document through `init(doc)`, and `ui.js` already looked its elements up inside `initUI()`. `shared/life-background.js` (the 404 page's animation) is untested.
 
 Run a specific test file:
 
@@ -184,7 +184,7 @@ cross-module call, so `nav.js` and `theme.js` work in either order.
 `theme.js` also dispatches a `themechange` event on `window` when the picker
 changes the theme. Stylesheets re-resolve themselves; anything painted into a
 canvas does not, so a game that draws its own colours needs both `__prefersDark`
-and that event (see `games/life-garden/js/Renderer.js`).
+and that event (see `games/life-garden/js/game.js`).
 
 When adding a cross-module global, prefix it with `__`, expose it as soon as the
 module initializes, and guard every read (`if (window.__foo)`) so load order

@@ -680,7 +680,7 @@ const BARE_IMPORT_RE = /^([ \t]*import\s*)(["'])([^"']+)\2/gm
 // the same way. Instead, any line that -- once leading whitespace is
 // trimmed -- starts with `*` or `//` is skipped entirely: every JSDoc
 // `import("./x.js").Type` type reference in this codebase (see
-// games/life-garden/js/Species.js's consumers, or MasteryModel.js's) lives
+// MasteryModel.js's) lives
 // on a comment line written exactly that way, and none of them span
 // multiple physical lines.
 const DYNAMIC_IMPORT_RE = /(\bimport\(\s*)(["'])([^"']+)\2(\s*\))/g

@@ -4,11 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Life Garden - Quinten Yearsley</title>
-    <meta name="description" content="A cellular automata sandbox with a gardening theme" />
+    <meta
+      name="description"
+      content="Grass, rabbits and foxes on a small board: watch the populations boom and crash"
+    />
     <meta name="theme-color" content="#2d5016" />
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="styles/main.css" />
-    <link rel="stylesheet" href="styles/canvas.css" />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <script src="/shared/theme.js"></script>
@@ -16,190 +18,95 @@
   <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
 
-    <div id="game-screen" class="screen active">
-      <div class="game-layout">
-        <div class="game-top-bar">
-          <a href="/games/" class="icon-btn" title="Back to games" aria-label="Back to games"
-            >&larr;</a
-          >
-          <h1 class="puzzle-title">Life Garden</h1>
-          <div class="top-controls">
-            <button id="play-btn" class="ctrl-btn" title="Space">&#x25b6; Play</button>
-            <button id="pause-btn" class="ctrl-btn hidden" title="Space">&#x23f8; Pause</button>
-            <button id="step-back-btn" class="ctrl-btn" title="&#x2190;">&#x23ee; Back</button>
-            <button id="step-btn" class="ctrl-btn" title="&#x2192;">&#x23ed; Step</button>
-            <button id="reset-btn" class="ctrl-btn" title="R">&#x21ba; Clear</button>
-            <div class="speed-toggle">
-              <button class="speed-btn" data-speed="slow">Slow</button>
-              <button class="speed-btn active" data-speed="normal">Normal</button>
-              <button class="speed-btn" data-speed="fast">Fast</button>
-            </div>
-          </div>
-          <span id="generation-display" class="gen-display">Gen 0</span>
-          <a href="#how-it-works" class="rules-link">How it works &darr;</a>
-          <!-- Filled by build.js on the /zh/ pages; empty and invisible here. -->
-          <div class="lang-slot"></div>
+    <div class="game-layout">
+      <div class="game-top-bar">
+        <a href="/games/" class="icon-btn" title="Back to games" aria-label="Back to games"
+          >&larr;</a
+        >
+        <h1>Life Garden</h1>
+        <div class="top-controls">
+          <button id="play-btn" class="ctrl-btn" title="Space">&#x25b6; Play</button>
+          <button id="pause-btn" class="ctrl-btn hidden" title="Space">&#x23f8; Pause</button>
+          <button id="step-btn" class="ctrl-btn" title="&#x2192;">&#x23ed; Step</button>
+          <button id="reset-btn" class="ctrl-btn" title="R">&#x21ba; Reset</button>
+          <select id="speed" class="ctrl-btn" aria-label="Speed">
+            <option value="300">Slow</option>
+            <option value="120" selected>Normal</option>
+            <option value="40">Fast</option>
+          </select>
         </div>
-        <main id="main-content" class="game-main">
-          <div class="game-sidebar">
-            <div class="sidebar-section">
-              <h3>Species</h3>
-              <div id="species-palette" class="species-palette"></div>
-              <div id="species-info" class="species-info"></div>
-            </div>
-            <div class="sidebar-section">
-              <h3>Presets</h3>
-              <div id="preset-buttons" class="preset-buttons"></div>
-            </div>
-            <div class="sidebar-section shortcuts-section">
-              <h3>Shortcuts</h3>
-              <ul class="shortcuts-list">
-                <li><kbd>Space</kbd> Play / Pause</li>
-                <li><kbd>&#x2192;</kbd> Step forward</li>
-                <li><kbd>&#x2190;</kbd> Step back</li>
-                <li><kbd>R</kbd> Clear grid</li>
-                <li><kbd>1</kbd>&ndash;<kbd>4</kbd> Select species</li>
-                <li>Click to place, drag to paint</li>
-              </ul>
-            </div>
-          </div>
-          <div class="canvas-wrapper">
-            <canvas id="game-canvas" width="640" height="640"></canvas>
-            <figure class="chart-figure">
-              <canvas
-                id="population-chart"
-                width="640"
-                height="120"
-                role="img"
-                aria-label="Population of each species over the last 200 generations"
-              ></canvas>
-              <figcaption id="chart-legend" class="chart-legend"></figcaption>
-            </figure>
-          </div>
-        </main>
-
-        <section id="how-it-works" class="rules">
-          <h2>How it works</h2>
-          <p class="rules-lede">
-            The garden has two layers. Plants grow on the ground and never move. Animals stand on
-            top of them and do nothing but move, eat and breed.
-          </p>
-
-          <div class="rules-columns">
-            <div class="rules-column">
-              <h3>Plants are a cellular automaton</h3>
-              <p>Every generation each plant counts the plants in the 8 cells around it.</p>
-              <ul>
-                <li>
-                  <strong>Grass spreads.</strong> Bare ground with exactly 3 plants beside it grows
-                  grass.
-                </li>
-                <li>
-                  <strong>Grass is crowded out.</strong> A plant with 4 or more neighbors dies. It
-                  never dies of loneliness, which is the one place this parts company with Conway's
-                  Game of Life.
-                </li>
-                <li>
-                  <strong>Grass creeps.</strong> Bare ground beside grass may sprout on its own.
-                  Grass in bloom is four times as likely to seed it, and a bee working the patch
-                  multiplies whatever the chance was by six.
-                </li>
-                <li>
-                  <strong>Flowers are temporary.</strong> Grass that has stood 8 generations comes
-                  into bloom, and 6 generations later the bloom is over and it is plain grass again.
-                </li>
-              </ul>
-            </div>
-
-            <div class="rules-column">
-              <h3>Animals carry one number</h3>
-              <p>Its energy. Every generation, each animal in turn:</p>
-              <ul>
-                <li><strong>Spends 1 energy.</strong> At 0 it dies.</li>
-                <li>
-                  <strong>Runs, if it can see something that eats it.</strong> A frightened animal
-                  does nothing else that generation.
-                </li>
-                <li>
-                  <strong>Steps one cell towards the nearest food it can see</strong>, and eats what
-                  it lands on. If it sees nothing it wanders.
-                </li>
-                <li>
-                  <strong>Digests.</strong> After a meal it will not eat again for a few
-                  generations, which is what stops a herd stripping the board bare.
-                </li>
-                <li>
-                  <strong>Splits in two</strong> once it is full, sharing its energy with the young.
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="rules-table-scroll">
-            <table class="rules-table">
-              <thead>
-                <tr>
-                  <th scope="col">Animal</th>
-                  <th scope="col">Eats</th>
-                  <th scope="col">Sees</th>
-                  <th scope="col">Runs from</th>
-                  <th scope="col">Meal</th>
-                  <th scope="col">Digests</th>
-                  <th scope="col">Splits at</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th scope="row">&#x1f41d; Bee</th>
-                  <td>nectar</td>
-                  <td>5</td>
-                  <td>&mdash;</td>
-                  <td>12</td>
-                  <td>4</td>
-                  <td>26</td>
-                </tr>
-                <tr>
-                  <th scope="row">&#x1f407; Rabbit</th>
-                  <td>grass</td>
-                  <td>4</td>
-                  <td>foxes, at 3</td>
-                  <td>16</td>
-                  <td>9</td>
-                  <td>88</td>
-                </tr>
-                <tr>
-                  <th scope="row">&#x1f98a; Fox</th>
-                  <td>rabbits</td>
-                  <td>4</td>
-                  <td>&mdash;</td>
-                  <td>40</td>
-                  <td>14</td>
-                  <td>80</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <ul class="rules-notes">
-            <li>
-              <strong>Eating sets a plant back one stage.</strong> A grazed bloom drops to plain
-              grass; plain grass is grazed down to bare ground. A meadow in flower feeds animals
-              without being destroyed by them.
-            </li>
-            <li>
-              <strong>A rabbit sees a fox later than the fox sees the rabbit.</strong> Both move one
-              cell a generation, so prey that spotted a hunter as soon as it was spotted could never
-              be caught.
-            </li>
-            <li>
-              <strong>The garden is not the whole world.</strong> Seeds blow in over the fence, and
-              now and then an animal wanders in at the edge &mdash; but only a kind that has lived
-              here before, and only if there is already food for it. A board this small cannot hold
-              a food chain up on its own.
-            </li>
-          </ul>
-        </section>
+        <span class="gen-display"><span>Generation</span> <b id="generation">0</b></span>
+        <a href="#how-it-works" class="rules-link">How it works &darr;</a>
+        <!-- Filled by build.js on the /zh/ pages; empty and invisible here. -->
+        <div class="lang-slot"></div>
       </div>
+
+      <main id="main-content">
+        <div class="chart-box">
+          <canvas
+            id="chart"
+            width="640"
+            height="240"
+            role="img"
+            aria-label="Population of grass, rabbits and foxes over the last 300 generations"
+          ></canvas>
+          <p class="legend">
+            <span class="grass"><i></i><span>Grass</span> <b id="count-grass">0</b></span>
+            <span class="rabbit"><i></i><span>Rabbits</span> <b id="count-rabbit">0</b></span>
+            <span class="fox"><i></i><span>Foxes</span> <b id="count-fox">0</b></span>
+          </p>
+        </div>
+
+        <canvas id="board" width="640" height="640"></canvas>
+
+        <div class="pickers">
+          <div class="row" id="presets">
+            <span class="row-label">Start from</span>
+            <button type="button" data-preset="grass">Grass only</button>
+            <button type="button" data-preset="rabbits">Rabbits</button>
+            <button type="button" data-preset="both" aria-pressed="true">Rabbits and foxes</button>
+          </div>
+          <div class="row" id="tools">
+            <span class="row-label">Paint with</span>
+            <button type="button" data-tool="grass" aria-pressed="true">Grass</button>
+            <button type="button" data-tool="rabbit">Rabbit</button>
+            <button type="button" data-tool="fox">Fox</button>
+            <button type="button" data-tool="erase">Erase</button>
+          </div>
+        </div>
+      </main>
+
+      <section id="how-it-works" class="rules">
+        <h2>How it works</h2>
+        <p>
+          The board is a grid of squares. Each square has grass or bare ground, and may hold one
+          animal. The board wraps around at the edges.
+        </p>
+        <ul>
+          <li>
+            <strong>Grass.</strong> Each step, every bare square has a
+            <span data-rule="regrow">4%</span> chance to grow grass. Nothing else spreads it.
+          </li>
+          <li>
+            <strong>Energy.</strong> Every animal has an energy number. Each step it loses 1 and
+            moves to a neighboring square. At 0 it dies.
+          </li>
+          <li>
+            <strong>Rabbits</strong> move onto grass next to them if there is any, and otherwise to
+            any free square. Eating grass gives <span data-rule="rabbit.eat">6</span> energy. At
+            <span data-rule="rabbit.splitAt">12</span> a rabbit splits in two.
+          </li>
+          <li>
+            <strong>Foxes</strong> do the same with rabbits. Eating a rabbit gives
+            <span data-rule="fox.eat">4</span> energy, and a fox splits at
+            <span data-rule="fox.splitAt">24</span>.
+          </li>
+          <li>
+            <strong>The cycle.</strong> Rabbits boom, foxes follow, the rabbits run out, the foxes
+            starve, and it starts again. Each line on the chart is scaled to its own highest point.
+          </li>
+        </ul>
+      </section>
     </div>
 
     <script src="/shared/nav.js"></script>
@@ -207,10 +114,8 @@
     <script>
       if (window.__registerShortcut) {
         window.__registerShortcut("Space", "Play / pause")
-        window.__registerShortcut("ArrowRight", "Step forward")
-        window.__registerShortcut("ArrowLeft", "Step back")
-        window.__registerShortcut("r", "Reset grid")
-        window.__registerShortcut("1-4", "Select species")
+        window.__registerShortcut("ArrowRight", "Step")
+        window.__registerShortcut("r", "Reset")
       }
     </script>
   </body>

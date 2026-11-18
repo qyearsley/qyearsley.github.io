@@ -10,7 +10,7 @@ Educational web games built with JavaScript.
 
 ## Sandboxes and Puzzles
 
-- **[Life Garden](life-garden/)** - A garden ecosystem: plants follow a cellular automaton, animals move and eat
+- **[Life Garden](life-garden/)** - Grass, rabbits and foxes: a few simple rules that make populations boom and crash
 - **[Turing Tape](turing-tape/)** - Interactive Turing machine simulator
 
 ## Chinese pages

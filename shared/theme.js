@@ -15,8 +15,7 @@
 
   // Resolve "is the page dark right now" the same way CSS does: an explicit
   // choice beats the OS preference. Exposed because canvas and SVG can't read a
-  // media query the way a stylesheet can -- see life-garden's Renderer, which
-  // used to call matchMedia directly and so ignored the toggle entirely.
+  // media query the way a stylesheet can.
   window.__prefersDark = function () {
     const explicit = document.documentElement.dataset.theme
     if (explicit === "dark") return true

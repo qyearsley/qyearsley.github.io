@@ -32,6 +32,8 @@ const browserGlobals = {
   // Life Garden's boot test stubs a 2d context onto the prototype, because
   // jsdom does not implement one and both of its canvases draw through it.
   HTMLCanvasElement: "readonly",
+  // Life Garden removes its page-level listeners through one signal.
+  AbortController: "readonly",
   // jsdom supplies this too, which is how the games' markup-contract test
   // parses five index.html files without a third-party parser.
   DOMParser: "readonly",

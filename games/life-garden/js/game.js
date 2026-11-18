@@ -1,332 +1,154 @@
-import { SPECIES, KIND, PHASE, SPEED, GRID_SIZE } from "./constants.js"
-import { SpeciesRegistry } from "./Species.js"
-import { Grid } from "./Grid.js"
-import { GameState } from "./GameState.js"
-import { GameUI } from "./GameUI.js"
-import { Renderer } from "./Renderer.js"
-import { EventManager } from "./EventManager.js"
-import { PopulationChart } from "./PopulationChart.js"
-import { LifeGardenStorage } from "./storage.js"
-import { PRESETS } from "./Presets.js"
+import { Garden, SIZE } from "./garden.js"
+import { keyIsNotForGame } from "../../shared/keyboardGuard.js"
 
-// Max generations to keep in undo history
-const MAX_HISTORY = 200
+const COLORS = { ground: "#e6dcc3", grass: "#48a05a", rabbit: "#3182ce", fox: "#e8590c" }
+const HISTORY = 300 // generations the chart shows
+const $ = (id) => document.getElementById(id)
 
-class LifeGarden {
+class Game {
   constructor() {
-    this.registry = new SpeciesRegistry()
-    this.storage = new LifeGardenStorage()
-    this.state = new GameState(this.storage)
-    this.ui = new GameUI()
-    this.grid = null
-    this.renderer = null
-    this.chart = null
-    this.selectedSpecies = SPECIES.GRASS
-    this.simulationTimer = null
-    this.history = [] // previous grid states for undo
-    this.paintedThisDrag = new Set() // cell keys, so one drag paints each cell once
+    this.board = $("board")
+    this.chart = $("chart")
+    this.preset = "both"
+    this.tool = "grass"
+    this.timer = null
+    this.painting = false
 
-    this._setupRenderer()
-    this._setupChart()
-    this._setupEvents()
-    this._setupThemeRepaint()
-    this._init()
+    $("play-btn").onclick = () => this.play()
+    $("pause-btn").onclick = () => this.pause()
+    $("step-btn").onclick = () => this.step()
+    $("reset-btn").onclick = () => this.load(this.preset)
+    $("speed").onchange = () => this.timer && (this.pause(), this.play())
+    this.pick("presets", "preset", (preset) => this.load(preset))
+    this.pick("tools", "tool", (tool) => (this.tool = tool))
+
+    this.board.addEventListener("pointerdown", (e) => ((this.painting = true), this.paint(e)))
+    this.board.addEventListener("pointermove", (e) => this.painting && this.paint(e))
+    // Page-level listeners share one signal, so dispose() can remove them (the tests boot many games).
+    const { signal } = (this.abort = new AbortController())
+    window.addEventListener("pointerup", () => (this.painting = false), { signal })
+    document.addEventListener("keydown", (e) => this.onKey(e), { signal })
+    window.addEventListener("themechange", () => this.draw(), { signal })
+
+    this.load(this.preset)
   }
 
-  _setupRenderer() {
-    const canvas = this.ui.elements.canvas
-    if (canvas) {
-      this.renderer = new Renderer(canvas, this.registry)
-    }
+  dispose() {
+    this.abort.abort()
+    this.pause()
   }
 
-  _setupChart() {
-    const canvas = document.getElementById("population-chart")
-    if (!canvas) return
-    this.chart = new PopulationChart(canvas, this.registry, document.getElementById("chart-legend"))
-  }
-
-  /**
-   * Repaint when the page theme changes.
-   *
-   * The stylesheet re-resolves itself, but the canvas holds whatever was last
-   * painted into it. Without this the grid keeps its old background and grid
-   * lines until the next generation, which on a paused board is forever.
-   *
-   * Both sources are covered: `themechange` for the site theme picker
-   * (shared/theme.js), and the media query for a change to the OS preference
-   * while the page is open.
-   */
-  _setupThemeRepaint() {
-    const repaint = () => {
-      if (this.renderer && this.grid) this.renderer.render(this.grid)
-      this.chart?.render()
-    }
-    window.addEventListener("themechange", repaint)
-    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", repaint)
-  }
-
-  _setupEvents() {
-    this.events = new EventManager(this.ui, {
-      onSpeciesSelect: (id) => this._selectSpecies(id),
-      // Which layer decides the gesture is the layer the selected species
-      // would land on, not "is anything here at all". Probing both layers made
-      // the first click of a gesture disagree with the rest of it: clicking
-      // grass onto a cell holding a rabbit deleted the rabbit, while dragging
-      // the same grass in from next door planted it underneath.
-      onCanvasProbe: (px, py) => {
-        // Fires exactly once, at the start of a gesture, which makes it the
-        // place to forget the cells the last gesture covered.
-        this.paintedThisDrag.clear()
-        const pos = this.renderer.canvasToGrid(px, py)
-        return pos ? this._layerTaken(pos.x, pos.y, this.selectedSpecies) : false
-      },
-      onCanvasDrag: (px, py, mode) => this._handleCanvasDrag(px, py, mode),
-      onCanvasHover: (px, py) => this._handleCanvasHover(px, py),
-      onCanvasLeave: () => this._handleCanvasLeave(),
-      onPlay: () => this._startSimulation(),
-      onPause: () => this._pauseSimulation(),
-      onTogglePlay: () => {
-        if (this.state.phase === PHASE.SIMULATING) this._pauseSimulation()
-        else this._startSimulation()
-      },
-      onStep: () => this._stepOnce(),
-      onStepBack: () => this._stepBack(),
-      onReset: () => this._resetGrid(),
-      onPreset: (index) => this._loadPreset(index),
-      onSpeedChange: (speed) => {
-        this.state.settings.speed = speed
-        this.state.saveProgress()
-        if (this.simulationTimer) {
-          this._stopSimulation()
-          this._startSimulation()
-        }
-      },
-    })
-  }
-
-  _init() {
-    // Settings first: the speed decides the simulation interval, and the grid
-    // flag decides how the first frame is drawn. Nothing called this before, so
-    // `storage.js` and half of `GameState` were dead code and the speed you
-    // chose was forgotten the moment you reloaded.
-    this.state.loadProgress()
-    this.ui.setActiveSpeed(this.state.settings.speed)
-    if (this.renderer) this.renderer.showGrid = this.state.settings.showGrid
-
-    this.state.startOver()
-    this.grid = new Grid(GRID_SIZE, GRID_SIZE, this.registry)
-    this.history = []
-    this.selectedSpecies = SPECIES.GRASS
-
-    this.renderer.fitToGrid(GRID_SIZE, GRID_SIZE)
-
-    this._updatePalette()
-    this._renderPresets()
-    this.chart?.reset()
-    this.chart?.record(this.state.generation, this.grid)
-    this.ui.updateGeneration(this.state.generation)
-    this.ui.showScreen("game-screen")
-    this.ui.setSimulatingControls(false)
-    this.renderer.render(this.grid)
-    this._updateSpeciesInfo()
-
-    // Open on a populated board: an empty one gives Play nothing to show.
-    this._loadPreset(PRESETS.findIndex((preset) => preset.name === "Food Chain"))
-  }
-
-  _selectSpecies(id) {
-    // `get` knows every species, including the life stages the palette does not
-    // offer and the rules will not let the player place. Pressing 5 used to
-    // select flowering grass: a 🌸 appeared under the cursor, no palette button
-    // lit up, and nothing could ever be born from it. `placeable()` is the same
-    // list the palette is built from, so the two cannot disagree.
-    if (!this.registry.placeable().some((def) => def.id === id)) return
-    this.selectedSpecies = id
-    this._updatePalette()
-    this._updateSpeciesInfo()
-  }
-
-  _handleCanvasDrag(px, py, mode) {
-    const pos = this.renderer.canvasToGrid(px, py)
-    if (!pos) return
-
-    // One touch per cell per gesture, remembering every cell rather than just
-    // the last one. `mousedown` and every `mousemove` after it both paint, so a
-    // click that drifts a single pixel used to call `clearCell` twice on one
-    // cell -- taking the rabbit and then the grass it was standing in, instead
-    // of just the rabbit. Dragging back over a cell you have already crossed
-    // does the same thing, which is why this is a set.
-    const cell = `${pos.x},${pos.y}`
-    if (this.paintedThisDrag.has(cell)) return
-    this.paintedThisDrag.add(cell)
-
-    // Two layers, so "is this cell taken" depends on what you are holding: a
-    // rabbit can be dropped into grass, and grass can be planted under a
-    // rabbit. Erasing takes the top layer first, so clicking a rabbit in the
-    // grass takes the rabbit.
-    if (mode === "erase") {
-      this.grid.clearCell(pos.x, pos.y)
-    } else if (!this._layerTaken(pos.x, pos.y, this.selectedSpecies)) {
-      this.grid.setCell(pos.x, pos.y, this.selectedSpecies)
-    }
-
-    this.renderer.render(this.grid)
-    this.chart?.record(this.state.generation, this.grid)
-    this._updateSpeciesInfo()
-  }
-
-  /** Whether the layer this species would land on is already occupied. */
-  _layerTaken(x, y, speciesId) {
-    const def = this.registry.get(speciesId)
-    if (def?.kind === KIND.ANIMAL) return this.grid.getAnimal(x, y) !== null
-    return this.grid.getPlant(x, y).species !== SPECIES.EMPTY
-  }
-
-  _handleCanvasHover(px, py) {
-    const pos = this.renderer.canvasToGrid(px, py)
-    this.renderer.hoverCell = pos
-    this.renderer.selectedSpecies = this.selectedSpecies
-    this.renderer.render(this.grid)
-  }
-
-  _handleCanvasLeave() {
-    this.renderer.hoverCell = null
-    this.renderer.render(this.grid)
-  }
-
-  _startSimulation() {
-    // Clear any existing timer to prevent stacking
-    this._stopSimulation()
-    this.state.phase = PHASE.SIMULATING
-    this.ui.setSimulatingControls(true)
-
-    const speedMs = SPEED[this.state.settings.speed.toUpperCase()] || SPEED.NORMAL
-    this.simulationTimer = setInterval(() => this._simulationTick(), speedMs)
-  }
-
-  _pauseSimulation() {
-    this.state.phase = PHASE.PAUSED
-    this._stopSimulation()
-    this.ui.setSimulatingControls(false)
-  }
-
-  _stopSimulation() {
-    if (this.simulationTimer) {
-      clearInterval(this.simulationTimer)
-      this.simulationTimer = null
-    }
-  }
-
-  _stepOnce() {
-    // If running, pause first
-    this._stopSimulation()
-    this.state.phase = PHASE.PAUSED
-    this.ui.setSimulatingControls(false)
-    this._simulationTick()
-  }
-
-  _stepBack() {
-    if (this.history.length === 0) return
-    // If running, pause first
-    this._stopSimulation()
-    this.state.phase = PHASE.PAUSED
-    this.ui.setSimulatingControls(false)
-
-    this.grid = this.history.pop()
-    this.state.generation--
-    this.chart?.truncate(this.state.generation)
-    this.ui.updateGeneration(this.state.generation)
-    this.renderer.render(this.grid)
-    this._updateSpeciesInfo()
-  }
-
-  _simulationTick() {
-    try {
-      this.history.push(this.grid)
-      if (this.history.length > MAX_HISTORY) {
-        this.history.shift()
+  /** Wire a row of buttons so that exactly one has aria-pressed. */
+  pick(rowId, key, onPick) {
+    const buttons = [...$(rowId).querySelectorAll("button")]
+    for (const button of buttons) {
+      button.onclick = () => {
+        for (const other of buttons) other.setAttribute("aria-pressed", other === button)
+        onPick(button.dataset[key])
       }
-
-      this.grid = this.grid.step()
-      this.state.generation++
-      this.chart?.record(this.state.generation, this.grid)
-      this.ui.updateGeneration(this.state.generation)
-      this.renderer.render(this.grid)
-      this._updateSpeciesInfo()
-    } catch (error) {
-      console.error("Simulation error:", error)
-      this._pauseSimulation()
     }
   }
 
-  _resetGrid() {
-    this._stopSimulation()
-    this.state.startOver()
-    this.grid = new Grid(GRID_SIZE, GRID_SIZE, this.registry)
-    this.history = []
-    this.chart?.reset()
-    this.chart?.record(this.state.generation, this.grid)
-    this.ui.updateGeneration(this.state.generation)
-    this.ui.setSimulatingControls(false)
-    this.renderer.render(this.grid)
-    this._updateSpeciesInfo()
+  load(preset) {
+    this.pause()
+    this.preset = preset
+    this.garden = new Garden(preset, Math.floor(Math.random() * 2 ** 32))
+    this.history = [this.garden.counts()]
+    this.draw()
   }
 
-  _loadPreset(index) {
-    const preset = PRESETS[index]
-    if (!preset) return
-    this._stopSimulation()
-    this.state.startOver()
-    this.grid = new Grid(GRID_SIZE, GRID_SIZE, this.registry)
-    this.history = []
-    for (const cell of preset.cells) {
-      this.grid.setCell(cell.x, cell.y, cell.species)
-    }
-    this.chart?.reset()
-    this.chart?.record(this.state.generation, this.grid)
-    this.ui.updateGeneration(this.state.generation)
-    this.ui.setSimulatingControls(false)
-    this.renderer.render(this.grid)
-    this._updateSpeciesInfo()
+  step() {
+    this.garden.step()
+    this.history.push(this.garden.counts())
+    if (this.history.length > HISTORY) this.history.shift()
+    this.draw()
   }
 
-  _renderPresets() {
-    const container = document.getElementById("preset-buttons")
-    if (!container) return
-    container.innerHTML = ""
-    PRESETS.forEach((preset, i) => {
-      const btn = document.createElement("button")
-      btn.className = "preset-btn"
-      btn.textContent = preset.name
-      btn.title = preset.description
-      btn.addEventListener("click", () => this._loadPreset(i))
-      container.appendChild(btn)
+  play() {
+    if (this.timer) return
+    this.timer = setInterval(() => this.step(), Number($("speed").value))
+    $("play-btn").classList.add("hidden")
+    $("pause-btn").classList.remove("hidden")
+  }
+
+  pause() {
+    clearInterval(this.timer)
+    this.timer = null
+    $("play-btn").classList.remove("hidden")
+    $("pause-btn").classList.add("hidden")
+  }
+
+  onKey(e) {
+    if (keyIsNotForGame(e)) return
+    // A focused button handles Space itself.
+    if (e.key === " " && e.target.tagName !== "BUTTON") {
+      e.preventDefault()
+      this.timer ? this.pause() : this.play()
+    } else if (e.key === "ArrowRight") this.step()
+    else if (e.key === "r") this.load(this.preset)
+  }
+
+  paint(e) {
+    const rect = this.board.getBoundingClientRect()
+    const x = Math.floor(((e.clientX - rect.left) / rect.width) * SIZE)
+    const y = Math.floor(((e.clientY - rect.top) / rect.height) * SIZE)
+    if (x < 0 || y < 0 || x >= SIZE || y >= SIZE) return
+    this.garden.paint(y * SIZE + x, this.tool)
+    this.history[this.history.length - 1] = this.garden.counts()
+    this.draw()
+  }
+
+  /** Repaint the board, the counts and the chart. */
+  draw() {
+    const counts = this.garden.counts()
+    $("generation").textContent = this.garden.generation
+    for (const name of Object.keys(counts)) $(`count-${name}`).textContent = counts[name]
+    this.drawBoard()
+    this.drawChart()
+  }
+
+  drawBoard() {
+    const ctx = this.board.getContext("2d")
+    const cell = this.board.width / SIZE
+    ctx.fillStyle = COLORS.ground
+    ctx.fillRect(0, 0, this.board.width, this.board.height)
+    ctx.fillStyle = COLORS.grass
+    this.garden.grass.forEach((grass, i) => {
+      if (grass) ctx.fillRect((i % SIZE) * cell, Math.floor(i / SIZE) * cell, cell, cell)
     })
+    for (const animal of this.garden.animals) {
+      if (!animal) continue
+      ctx.fillStyle = COLORS[animal.kind]
+      ctx.beginPath()
+      const x = (animal.at % SIZE) + 0.5
+      const y = Math.floor(animal.at / SIZE) + 0.5
+      ctx.arc(x * cell, y * cell, cell * 0.4, 0, 2 * Math.PI)
+      ctx.fill()
+    }
   }
 
-  _updatePalette() {
-    this.ui.renderSpeciesPalette(this.registry.placeable(), this.selectedSpecies)
-  }
-
-  /**
-   * Refresh the sidebar card for the selected species.
-   *
-   * The rules used to live in the sidebar as a wall of text that nobody read
-   * while playing. This is the part worth having to hand: what the thing you
-   * are holding eats, how far it sees, and how many of it are on the board
-   * right now.
-   */
-  _updateSpeciesInfo() {
-    const def = this.registry.get(this.selectedSpecies)
-    if (def) this.ui.renderSpeciesInfo(def, this.grid.countSpecies(def.id), this.registry)
+  /** One line per species, each scaled to its own peak so all three stay readable. */
+  drawChart() {
+    const ctx = this.chart.getContext("2d")
+    const { width, height } = this.chart
+    const style = getComputedStyle(document.documentElement)
+    ctx.fillStyle = style.getPropertyValue("--color-bg-card") || "#f8fafc"
+    ctx.fillRect(0, 0, width, height)
+    for (const name of ["grass", "rabbit", "fox"]) {
+      const peak = Math.max(1, ...this.history.map((c) => c[name]))
+      ctx.strokeStyle = COLORS[name]
+      ctx.lineWidth = 2
+      ctx.beginPath()
+      this.history.forEach((c, i) => {
+        const x = (i / (HISTORY - 1)) * width
+        const y = height - 8 - (c[name] / peak) * (height - 16)
+        i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)
+      })
+      ctx.stroke()
+    }
   }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  try {
-    window.game = new LifeGarden()
-  } catch (error) {
-    console.error("Failed to initialize Life Garden:", error)
-  }
+  window.game = new Game()
 })
