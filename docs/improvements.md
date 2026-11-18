@@ -21,6 +21,25 @@ last long version of this file is `git show 3ceed17:docs/improvements.md`.
    `import/no-unresolved`. Move to eslint 10 when the plugin supports it, or
    replace the plugin.
 
+Owner feedback from 2026-11-18, not yet planned:
+
+3. **Life Garden is too complicated, and does not show boom and bust.**
+   Grass alone never fills the board (it dies at 4+ neighbors); rabbits alone
+   stay rare; with foxes it settles at ~150 grass and a few animals.
+4. **Turing Tape could be simpler.** Link out (e.g. Wikipedia) instead of
+   explaining; some text is not translated.
+5. **Seasons rounds are a little long.**
+6. **Times Trail is confusing.** The hub and trail list overlap; on the
+   squares trail most questions are not squares, yet the green bar advances.
+   Fewer questions per round; maybe optional speed scoring.
+7. **Number Garden hides progress.** The garden should be visible while
+   playing, not only behind "view project". Some animations are too much.
+8. **Games do not fit all screens.** Also: is UI consistency across games
+   worth it?
+9. **Syllabary search by frequency is confusing.** It matches the count in each
+   cell's `title`, so `?q=309` just filters to a rhyme row.
+10. **Font sizes differ unexpectedly**, e.g. large text in some form inputs.
+
 ## Deferred
 
 These are known and accepted for now. Do not re-propose them unless something

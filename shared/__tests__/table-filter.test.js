@@ -174,6 +174,37 @@ describe("table-filter.js", () => {
     })
   })
 
+  describe("group filter with nested rowspans", () => {
+    // Like homophones.html: the first-column cell spans the whole group, and
+    // a second-column cell spans a sub-group inside it.
+    beforeEach(() => {
+      setupDOM(`
+        <input id="table-filter">
+        <span id="filter-count"></span>
+        <table class="filterable-table">
+          <thead><tr><th>Simp</th><th>Trad</th><th>Example</th></tr></thead>
+          <tbody>
+            <tr><th rowspan="3">板</th><td rowspan="2">板</td><td>黑板</td></tr>
+            <tr><td>木板</td></tr>
+            <tr><td rowspan="1">闆</td><td>老闆 boss</td></tr>
+            <tr><th rowspan="1">杯</th><td rowspan="1">杯</td><td>杯子</td></tr>
+          </tbody>
+        </table>
+      `)
+    })
+
+    it("keeps the first-column row when a match is in a later sub-group", () => {
+      typeFilter("boss")
+      const rows = document.querySelectorAll("tbody tr")
+      expect(Array.from(rows).map((r) => r.style.display)).toEqual(["", "", "", "none"])
+    })
+
+    it("counts outer groups only", () => {
+      typeFilter("boss")
+      expect(document.getElementById("filter-count").textContent).toBe("1 of 2")
+    })
+  })
+
   describe("missing elements", () => {
     it("does nothing without #table-filter input", () => {
       setupDOM('<table class="filterable-table"><tr><td>Data</td></tr></table>')

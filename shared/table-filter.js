@@ -67,19 +67,20 @@
       return row.closest("thead") === null
     })
 
+    // A group is the run of rows covered by one first-column cell. Inner
+    // rowspans (sub-groups in later columns) stay inside it.
     const groups = []
-    let currentGroup = null
+    let remaining = 0
 
     dataRows.forEach(function (row) {
-      const spanCell = row.querySelector("[rowspan]")
-      if (spanCell) {
-        currentGroup = { rows: [row] }
-        groups.push(currentGroup)
-      } else if (currentGroup) {
-        currentGroup.rows.push(row)
+      if (remaining > 0) {
+        groups[groups.length - 1].rows.push(row)
       } else {
+        const first = row.firstElementChild
+        remaining = (first && parseInt(first.getAttribute("rowspan"), 10)) || 1
         groups.push({ rows: [row] })
       }
+      remaining--
     })
 
     input.addEventListener("input", function () {

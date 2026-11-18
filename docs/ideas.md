@@ -16,3 +16,7 @@ Feature ideas that nobody has committed to yet. Defects and debt go in
 but nothing to practice with. A small tone quiz or "guess the reading" page
 could reuse the tone-table data, in the size and style of `truth-tables.html`.
 Noted on 2026-10-21 from a review of page balance.
+
+## A typing tutor
+
+A fun typing tutor game. Owner idea, 2026-11-18.
