@@ -63,8 +63,8 @@ localStorage key, so "Start over" does not erase it.
 Seasons get harder in both directions at once — the maths steps up _and_ the clock
 tightens, the demand rises, and more of the trail glows. A whole run is 31
 questions when nothing is missed: 27 trail spaces and four boss questions. It was
-42 before the 2026-11-18 trim and 72 before the 2026-09-21 retune, which is why a season now ends close to when it
-feels finished.
+42 before the 2026-11-18 trim and 72 before the 2026-09-21 retune, which is why a
+season now ends close to when it feels finished.
 
 ## Difficulty
 

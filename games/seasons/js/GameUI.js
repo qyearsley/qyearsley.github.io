@@ -713,7 +713,7 @@ export class GameUI extends BaseGameUI {
   /**
    * Draw one slot per item the snake woman asked for: filled with the season's
    * collectible when earned, a faint outline when still owed. Showing the goods
-   * rather than a numeral is what makes "fetch fifteen roses" legible to a
+   * rather than a numeral is what makes "fetch thirteen roses" legible to a
    * child.
    *
    * Every pip uses the plain variant. `item()` also offers a brighter `rare`
@@ -1374,7 +1374,7 @@ export class GameUI extends BaseGameUI {
    *
    * Only for the per-season screen. When the caller passes its own `rows` it is
    * the end-of-run screen, and every per-season counter on `state` belongs to
-   * the last season played -- a jar of twenty-three icicles labelled as the
+   * the last season played -- a jar of twenty icicles labelled as the
    * whole journey would be a lie. There is no lifetime item count to draw
    * instead.
    *

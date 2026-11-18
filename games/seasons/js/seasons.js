@@ -114,12 +114,12 @@ const tensTo = (highest) => TENS.filter((table) => table <= highest)
  *
  * Every trail was shortened on 2026-09-21, from 14/16/18/20 spaces to
  * 8/9/10/11, and again on 2026-11-18 to 6/6/7/8 (owner feedback: "a little
- * shorter"; mountains went 2/2/3/3 to 2/2/2/3). Each demand equals exactly what the trail plus the boss
- * pays. A clean run is now 31 questions; it was 42, and 72 before 2026-09-21. The old lengths existed to
- * give a player room to recover from an item lost to a wrong answer; nothing
- * takes an item any more, so the margin had no job and a child who was not
- * making mistakes spent a third of every season collecting things she did not
- * need.
+ * shorter"; mountains went 2/2/3/3 to 2/2/2/3). Each demand equals exactly what
+ * the trail plus the boss pays. A clean run is now 31 questions; it was 42, and
+ * 72 before 2026-09-21. The old lengths existed to give a player room to
+ * recover from an item lost to a wrong answer; nothing takes an item any more,
+ * so the margin had no job and a child who was not making mistakes spent a
+ * third of every season collecting things she did not need.
  *
  * @type {Object<string, Season>}
  */

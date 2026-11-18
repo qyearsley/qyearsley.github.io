@@ -25,7 +25,7 @@
 
     <div class="game-layout">
       <div class="game-top-bar">
-        <a href="/games/" class="icon-btn" id="back-link">&larr;</a>
+        <a href="/games/" class="icon-btn" id="back-link" aria-label="Back to games">&larr;</a>
         <span class="level-title" id="level-title">Turing Tape</span>
         <!-- Not a live region: Play advances the machine every 400ms for up to
              500 steps, so announcing the counter would drown out the result
@@ -45,7 +45,6 @@
         <!-- Level description -->
         <p id="level-description" class="level-description"></p>
 
-        <!-- Target tape (hidden for demos) -->
         <div id="target-section" class="tape-section">
           <div class="tape-label">Goal</div>
           <div class="tape-scroll">

@@ -334,7 +334,7 @@ describe("TuringMachine", () => {
     })
   })
 
-  describe("demo programs", () => {
+  describe("example programs", () => {
     test("Busy Beaver (3-state) writes 6 ones", () => {
       const rules = makeRules([
         ["A", "_", "1", "R", "B"],

@@ -28,6 +28,13 @@ class Game {
     const { signal } = (this.abort = new AbortController())
     window.addEventListener("pointerup", () => (this.painting = false), { signal })
     document.addEventListener("keydown", (e) => this.onKey(e), { signal })
+    // A mouse click leaves focus on the button, so Space would click it again.
+    // Keyboard activation has detail 0 and keeps focus.
+    document.addEventListener(
+      "click",
+      (e) => e.detail > 0 && e.target.closest?.("button")?.blur(),
+      { signal },
+    )
     window.addEventListener("themechange", () => this.draw(), { signal })
 
     this.load(this.preset)

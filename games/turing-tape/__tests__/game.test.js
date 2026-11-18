@@ -14,9 +14,10 @@ const html = readFileSync(join(here, "../index.html"), "utf8")
 const byId = (id) => document.getElementById(id)
 const steps = () => byId("step-display").textContent
 
-function boot(url = "/games/turing-tape/") {
+function boot(url = "/games/turing-tape/", lang = "en") {
   window.history.replaceState(null, "", url)
   document.documentElement.innerHTML = html.replace(/<!DOCTYPE[^>]*>/i, "")
+  document.documentElement.lang = lang
   init(document)
 }
 
@@ -118,9 +119,7 @@ describe("turing tape page", () => {
   })
 
   test("on the Chinese page, runtime text is Chinese", () => {
-    boot()
-    document.documentElement.lang = "zh"
-    init(document)
+    boot("/games/turing-tape/", "zh")
     expect(byId("level-title").textContent).toBe("写入 1")
     expect(byId("back-link").getAttribute("aria-label")).toBe("返回游戏")
     expect(byId("rule-body").querySelector("select").getAttribute("aria-label")).toBe("当前状态")

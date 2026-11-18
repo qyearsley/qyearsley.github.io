@@ -101,8 +101,10 @@ describe("the model", () => {
   test("a rabbit with no energy left dies, and a lone fox starves", () => {
     const garden = new Garden("grass", 1, { ...RULES, regrow: 0 })
     garden.grass.fill(0)
-    garden.paint(5, "fox")
+    garden.paint(5, "rabbit")
+    garden.paint(500, "fox")
     for (let i = 0; i < RULES.fox.splitAt; i++) garden.step()
+    expect(garden.counts().rabbit).toBe(0)
     expect(garden.counts().fox).toBe(0)
   })
 

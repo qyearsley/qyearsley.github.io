@@ -581,6 +581,10 @@ select:focus-visible {
 /* Touch screens of any width, such as an iPad: the same 44px targets the
    narrow-width block above gives phones. */
 @media (pointer: coarse) {
+  .rule-table select {
+    font-size: 16px; /* 16px or more keeps iOS from zooming on focus */
+  }
+
   .ctrl-btn,
   .small-btn,
   .level-btn {

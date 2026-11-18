@@ -88,11 +88,11 @@ Garden's R asks first; Turing Tape's new rule row starts blank and a solve
 offers "Next puzzle"; the games index says who each kid game is for; the skip
 link hides fully and prose links take the theme color.
 
-Landed 2026-11-18: form controls inherit the page font and size (`style.css`), text fields are 16px everywhere (no iOS zoom), and the 1.1 to 1.5rem input sizes on four tool pages are gone. Games: 44px tap targets on touch screens in Life Garden and Turing Tape, `100vh` fallback before `100dvh` in Seasons. The games share no CSS, only JS, so there was nothing to move onto; their palettes and top bars stay separate.
+Landed 2026-11-18: form controls inherit the page font and size (`style.css`), controls inherit the page font size, 16px by default, so iOS does not zoom (Turing Tape's rule selects are 0.9rem on desktop and 16px on touch), and the 1.1 to 1.5rem input sizes on four tool pages are gone. Games: 44px tap targets on touch screens in Life Garden and Turing Tape, `100vh` fallback before `100dvh` in Seasons. The games share no CSS, only JS, so there was nothing to move onto; their palettes and top bars stay separate.
 
 Landed 2026-11-18: Times Trail is simpler. The hub is the list of trails and a tap starts one; a round asks only that trail's facts; the default round is 10 questions; the play screen has one bar. (Was "Times Trail is confusing.")
 
-Landed 2026-11-18: Life Garden is now a small grass, rabbit and fox model (about 250 lines of JS, down from 2700). Grass alone fills the board, rabbits alone become common, and rabbits with foxes cycle and usually last 500 generations.
+Landed 2026-11-18: Life Garden is now a small grass, rabbit and fox model (about 300 lines of JS, down from 2700). Grass alone fills the board, rabbits alone become common, and rabbits with foxes cycle and usually last 500 generations.
 
 Landed 2026-11-18: Turing Tape is simpler. The explanation is one sentence plus a Wikipedia link (a Chinese Wikipedia link on `/zh/`), the three demos and their read-only mode are gone, and runtime text (level names, messages, labels) is Chinese on `/zh/`.
 

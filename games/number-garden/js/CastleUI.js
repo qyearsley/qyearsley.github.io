@@ -72,6 +72,7 @@ export class CastleUI {
     count.className = "project-strip-count"
     count.textContent = `${completedAreas.size}/${AREA_COUNT}`
     strip.appendChild(count)
+    strip.setAttribute("role", "img")
     strip.setAttribute("aria-label", `Project pieces: ${completedAreas.size} of ${AREA_COUNT}`)
   }
 

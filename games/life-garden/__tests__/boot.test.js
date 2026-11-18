@@ -99,6 +99,17 @@ describe("the page", () => {
     expect(text("generation")).toBe("0")
   })
 
+  test("after a mouse click on a preset, Space plays", () => {
+    boot()
+    const preset = document.querySelector('[data-preset="grass"]')
+    preset.focus()
+    preset.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 1 }))
+    expect(document.activeElement).not.toBe(preset)
+    document.activeElement.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }))
+    jest.advanceTimersByTime(120 * 2)
+    expect(text("generation")).toBe("2")
+  })
+
   test("the link to the rules points at a section that exists", () => {
     boot()
     const link = document.querySelector(".rules-link")

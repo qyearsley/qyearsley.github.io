@@ -51,8 +51,8 @@
   --sn-radius: 14px;
 
   /* One item slot in the demand bar. A variable rather than a literal because
-     the short-viewport rule below shrinks it: winter asks for seventeen, and
-     seventeen slots at the full size cost the play area a row it cannot always
+     the short-viewport rule below shrinks it: winter asks for twenty, and
+     twenty slots at the full size cost the play area a row it cannot always
      spare. */
   --sn-pip: 26px;
 
@@ -1505,6 +1505,7 @@ body.is-glowing-question .question-prompt {
 
 .modal-content {
   width: min(460px, 92vw);
+  max-height: 90vh;
   max-height: 90dvh;
   padding: 24px;
   overflow-y: auto;
@@ -1578,7 +1579,7 @@ body.is-glowing-question .question-prompt {
     padding: 10px 16px;
   }
 
-  /* Seventeen slots at 26px wrap to a third row here and push the keypad off a
+  /* Twenty slots at 26px wrap to a third row here and push the keypad off a
      short iPad. Smaller still beats the old 19px, which read as a dotted line. */
   :root {
     --sn-pip: 22px;
