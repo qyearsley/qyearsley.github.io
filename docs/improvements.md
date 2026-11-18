@@ -21,12 +21,6 @@ last long version of this file is `git show 3ceed17:docs/improvements.md`.
    `import/no-unresolved`. Move to eslint 10 when the plugin supports it, or
    replace the plugin.
 
-Owner feedback from 2026-11-18, not yet planned:
-
-7. **Games do not fit all screens.** Also: is UI consistency across games
-   worth it?
-8. **Font sizes differ unexpectedly**, e.g. large text in some form inputs.
-
 ## Deferred
 
 These are known and accepted for now. Do not re-propose them unless something
@@ -94,6 +88,8 @@ Garden's R asks first; Turing Tape's new rule row starts blank and a solve
 offers "Next puzzle"; the games index says who each kid game is for; the skip
 link hides fully and prose links take the theme color.
 
+Landed 2026-11-18: form controls inherit the page font and size (`style.css`), text fields are 16px everywhere (no iOS zoom), and the 1.1 to 1.5rem input sizes on four tool pages are gone. Games: 44px tap targets on touch screens in Life Garden and Turing Tape, `100vh` fallback before `100dvh` in Seasons. The games share no CSS, only JS, so there was nothing to move onto; their palettes and top bars stay separate.
+
 Landed 2026-11-18: Times Trail is simpler. The hub is the list of trails and a tap starts one; a round asks only that trail's facts; the default round is 10 questions; the play screen has one bar. (Was "Times Trail is confusing.")
 
 Landed 2026-11-18: Life Garden is now a small grass, rabbit and fox model (about 250 lines of JS, down from 2700). Grass alone fills the board, rabbits alone become common, and rabbits with foxes cycle and usually last 500 generations.
@@ -146,6 +142,12 @@ a person to look, on an iPad where it matters:
 - The Source and History footer on document pages, in both themes and on a phone.
 - Prose links in the theme color, especially in the dark theme and the games'
   green.
+- Form fields on the tool pages (floating point, integer explorer, encoding
+  explorer, cellular automata, hash lab): inputs are now 16px, smaller than
+  before. Buttons now inherit 16px where they had the browser's 13px.
+- Life Garden and Turing Tape on an iPad: the larger buttons should still fit
+  their rows. Seasons and Number Garden at 768x1024 and 1024x768 (no scrolling
+  where a round should fit), not checked from CSS.
 - Turing Tape's blank rule row and "Next puzzle" button; Number Garden's
   struck-off choices.
 - The maze's new speed range, at both ends of the slider.
