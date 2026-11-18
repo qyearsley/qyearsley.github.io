@@ -133,7 +133,6 @@ body.logic-engine {
   border: 1px solid var(--color-border);
   border-radius: 0.25rem;
   font-family: monospace;
-  font-size: 0.875rem;
   background: var(--color-bg-input);
   color: var(--color-text);
 }

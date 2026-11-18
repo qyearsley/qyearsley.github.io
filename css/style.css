@@ -658,6 +658,17 @@ p {
   color: var(--color-header-separator);
 }
 
+/* Form controls do not inherit the page font by default: browsers give them
+   their own family and a 13px size. Inherit both, then let the rules below
+   set a size. 1rem (16px) on text fields also keeps iOS from zooming on focus. */
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
 /* Form Elements
    No font-family here. This selector catches every input on the site, and the
    monospace it used to set was meant for the tool pages, where the content is
@@ -668,7 +679,6 @@ textarea {
   border: 1px solid var(--color-border);
   border-radius: 4px;
   padding: 0.5rem;
-  font-size: 0.9rem;
   background: var(--color-bg-input);
   color: var(--color-text);
 }
@@ -794,7 +804,6 @@ td {
   padding: 0.5rem;
   border: 1px solid var(--color-border);
   border-radius: 4px;
-  font-size: 0.9rem;
   background: var(--color-bg-input);
   color: var(--color-text);
   cursor: pointer;
@@ -812,7 +821,6 @@ td {
   border: 1px solid var(--color-border);
   border-radius: 4px;
   font-family: monospace;
-  font-size: 0.9rem;
   resize: vertical;
   background: var(--color-bg-input);
   color: var(--color-text);
