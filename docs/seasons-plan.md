@@ -30,12 +30,13 @@ alignment is what lets each trail be short:
 
 |        | Spaces | Glowing | Trail items | Rescue | Demand | Questions |
 | ------ | ------ | ------- | ----------- | ------ | ------ | --------- |
-| Spring | 8      | 2       | 12          | +3     | 15     | 9         |
-| Summer | 9      | 2       | 13          | +4     | 17     | 10        |
-| Autumn | 10     | 3       | 16          | +5     | 21     | 11        |
-| Winter | 11     | 3       | 17          | +6     | 23     | 12        |
+| Spring | 6      | 2       | 10          | +3     | 13     | 7         |
+| Summer | 6      | 2       | 10          | +4     | 14     | 7         |
+| Autumn | 7      | 2       | 11          | +5     | 16     | 8         |
+| Winter | 8      | 3       | 14          | +6     | 20     | 9         |
 
-A clean run is 42 questions, not the 72 an earlier build asked.
+A clean run is 31 questions, not the 42 it was before 2026-11-18 or the 72 before
+2026-09-21.
 `seasons.test.js` checks that the trail never shortens, the glowing count never
 falls, demand rises strictly season to season, and each rescue stays under its
 own demand.

@@ -317,7 +317,7 @@ describe("demand alignment", () => {
     // the boss; the ceiling is what a child will sit through before the season
     // stops feeling like a season.
     for (const season of SEASON_LIST) {
-      expect(season.spaces + 1).toBeLessThanOrEqual(14)
+      expect(season.spaces + 1).toBeLessThanOrEqual(9)
     }
   })
 })
@@ -488,14 +488,14 @@ describe("nextSeason", () => {
 
 describe("maxItems", () => {
   it("adds one per ordinary space and three per glowing one", () => {
-    // Spring: 8 spaces, 2 of them glowing, so 6 ordinary.
+    // Spring: 6 spaces, 2 of them glowing, so 4 ordinary.
     const spring = getSeason("spring")
-    expect(maxItems(spring)).toBe(6 + 2 * 3)
+    expect(maxItems(spring)).toBe(4 + 2 * 3)
   })
 
   // Deliberate literals, hand-computed from the trail lengths and glowing
-  // counts in seasons.js: spring 6 ordinary + 2 glowing, summer 7 + 2,
-  // autumn 7 + 3, winter 8 + 3.
+  // counts in seasons.js: spring 4 ordinary + 2 glowing, summer 4 + 2,
+  // autumn 5 + 2, winter 5 + 3.
   //
   // Retuning a season is *meant* to fail these. They are the one place a
   // hand-computed number checks maxItems, and the alignment test above is built
@@ -504,10 +504,10 @@ describe("maxItems", () => {
   // body or to itself, so both passed for any implementation at all --
   // including one that returned 0 for everything.
   it.each([
-    ["spring", 12],
-    ["summer", 13],
-    ["autumn", 16],
-    ["winter", 17],
+    ["spring", 10],
+    ["summer", 10],
+    ["autumn", 11],
+    ["winter", 14],
   ])("counts %s at %i items", (id, expected) => {
     expect(maxItems(getSeason(id))).toBe(expected)
   })

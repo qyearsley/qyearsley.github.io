@@ -113,8 +113,9 @@ const tensTo = (highest) => TENS.filter((table) => table <= highest)
  * The four seasons, keyed by id. Play order lives in SEASON_ORDER.
  *
  * Every trail was shortened on 2026-09-21, from 14/16/18/20 spaces to
- * 8/9/10/11, and every demand reset to exactly what the trail plus the boss
- * pays. A clean run is 42 questions where it was 72. The old lengths existed to
+ * 8/9/10/11, and again on 2026-11-18 to 6/6/7/8 (owner feedback: "a little
+ * shorter"; mountains went 2/2/3/3 to 2/2/2/3). Each demand equals exactly what the trail plus the boss
+ * pays. A clean run is now 31 questions; it was 42, and 72 before 2026-09-21. The old lengths existed to
  * give a player room to recover from an item lost to a wrong answer; nothing
  * takes an item any more, so the margin had no job and a child who was not
  * making mistakes spent a third of every season collecting things she did not
@@ -130,9 +131,9 @@ const SEASONS = {
     itemPlural: "Roses",
     rareItemName: "Everlasting Rose",
     rareItemPlural: "Everlasting Roses",
-    demandText: "Fifteen roses for my potion, please. The ones that never wilt.",
-    route: ["hill", "river", "mountain", "thicket", "boulder", "mountain", "gap", "river"],
-    demand: 15,
+    demandText: "Thirteen roses for my potion, please. The ones that never wilt.",
+    route: ["hill", "river", "mountain", "thicket", "mountain", "gap"],
+    demand: 13,
     timerSeconds: null,
     challenge: "arithmetic",
     // One addition fact and one subtraction fact, both inside 18, plus the easy
@@ -158,19 +159,9 @@ const SEASONS = {
     itemPlural: "Diamonds",
     rareItemName: "Blazing Diamond",
     rareItemPlural: "Blazing Diamonds",
-    demandText: "Seventeen diamonds next. My potion needs something that catches light.",
-    route: [
-      "river",
-      "thicket",
-      "boulder",
-      "mountain",
-      "gap",
-      "hill",
-      "river",
-      "mountain",
-      "thicket",
-    ],
-    demand: 17,
+    demandText: "Fourteen diamonds next. My potion needs something that catches light.",
+    route: ["river", "thicket", "mountain", "gap", "mountain", "hill"],
+    demand: 14,
     timerSeconds: 30,
     challenge: "arithmetic",
     // The step up is the whole times table rather than the easy half of it, and
@@ -194,20 +185,9 @@ const SEASONS = {
     itemPlural: "Leaves",
     rareItemName: "Golden Leaf",
     rareItemPlural: "Golden Leaves",
-    demandText: "Twenty-one leaves, before they all fall. The gold ones are strongest.",
-    route: [
-      "thicket",
-      "boulder",
-      "mountain",
-      "gap",
-      "hill",
-      "mountain",
-      "river",
-      "thicket",
-      "mountain",
-      "boulder",
-    ],
-    demand: 21,
+    demandText: "Sixteen leaves, before they all fall. The gold ones are strongest.",
+    route: ["thicket", "boulder", "mountain", "gap", "hill", "mountain", "river"],
+    demand: 16,
     timerSeconds: 28,
     challenge: "arithmetic",
     // Two steps up: the facts lose the easiest two, and place value arrives as
@@ -233,21 +213,9 @@ const SEASONS = {
     itemPlural: "Icicles",
     rareItemName: "Frostfire Icicle",
     rareItemPlural: "Frostfire Icicles",
-    demandText: "Twenty-three icicles and the potion is finished. This is the hard part.",
-    route: [
-      "gap",
-      "hill",
-      "mountain",
-      "river",
-      "thicket",
-      "boulder",
-      "mountain",
-      "gap",
-      "hill",
-      "mountain",
-      "river",
-    ],
-    demand: 23,
+    demandText: "Twenty icicles and the potion is finished. This is the hard part.",
+    route: ["gap", "hill", "mountain", "river", "mountain", "thicket", "mountain", "gap"],
+    demand: 20,
     timerSeconds: 25,
     challenge: "arithmetic",
     // Nearly all hard facts, and the tens run further than autumn's. The 4 table

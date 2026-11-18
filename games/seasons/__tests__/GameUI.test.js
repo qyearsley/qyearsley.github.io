@@ -955,11 +955,11 @@ describe("crossing an obstacle", () => {
     })
 
     it("follows with the camera, just instantly", async () => {
-      const plan = ui.pack.layout(SPRING)
-      ui.renderTrail(SPRING, 5, "sloth")
+      const plan = ui.pack.layout(WINTER)
+      ui.renderTrail(WINTER, 5, "sloth")
       const before = cameraShift()
 
-      await ui.crossObstacle(5, kindAt(SPRING, 5))
+      await ui.crossObstacle(5, kindAt(WINTER, 5))
 
       expect(cameraShift()).toBeLessThan(before)
       expect(plan.stops[6].x + cameraShift()).toBeLessThanOrEqual(plan.viewportWidth)
@@ -1008,10 +1008,10 @@ describe("crossing an obstacle", () => {
     })
 
     it("pans the camera alongside the character and leaves it where it lands", async () => {
-      ui.renderTrail(SPRING, 5, "sloth")
+      ui.renderTrail(WINTER, 5, "sloth")
       const before = cameraShift()
 
-      const crossing = ui.crossObstacle(5, kindAt(SPRING, 5))
+      const crossing = ui.crossObstacle(5, kindAt(WINTER, 5))
 
       const pan = animationOn(trailCamera())
       expect(pan).toBeDefined()
@@ -1202,11 +1202,11 @@ describe("crossing an obstacle", () => {
     })
 
     it("still pans the camera, briefly, and still clamps it", async () => {
-      const plan = ui.pack.layout(SPRING)
-      ui.renderTrail(SPRING, 5, "sloth")
+      const plan = ui.pack.layout(WINTER)
+      ui.renderTrail(WINTER, 5, "sloth")
       const before = cameraShift()
 
-      const crossing = ui.crossObstacle(5, kindAt(SPRING, 5))
+      const crossing = ui.crossObstacle(5, kindAt(WINTER, 5))
 
       const pan = animationOn(trailCamera())
       expect(pan).toBeDefined()

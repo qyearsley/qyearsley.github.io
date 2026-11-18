@@ -61,9 +61,9 @@ asks for a name. Ties go to whoever got there first. The board has its own
 localStorage key, so "Start over" does not erase it.
 
 Seasons get harder in both directions at once — the maths steps up _and_ the clock
-tightens, the demand rises, and more of the trail glows. A whole run is 42
-questions when nothing is missed: 38 trail spaces and four boss questions. It was
-72 before the 2026-09-21 retune, which is why a season now ends close to when it
+tightens, the demand rises, and more of the trail glows. A whole run is 31
+questions when nothing is missed: 27 trail spaces and four boss questions. It was
+42 before the 2026-11-18 trim and 72 before the 2026-09-21 retune, which is why a season now ends close to when it
 feels finished.
 
 ## Difficulty
@@ -101,10 +101,10 @@ rather than of the space; the mountain is the only kind that carries it.
 
 |        | Ordinary spaces                        | Glowing spaces           | Boss         | Timer | Trail | Glowing | Rescue | Demand |
 | ------ | -------------------------------------- | ------------------------ | ------------ | ----- | ----- | ------- | ------ | ------ |
-| Spring | + and − facts 6–18, ×2 ×3 ×4 ×5 ×10    | `40 ÷ 5`                 | `35 ÷ 5`     | none  | 8     | 2       | 3      | 15     |
-| Summer | × facts to 10×10, + and − facts 11–18  | `48 ÷ 6`                 | `72 ÷ 9`     | 30s   | 9     | 2       | 4      | 17     |
-| Autumn | ×2 3 4 6 7 8 9, − facts 11–18, × 10–50 | `54 ÷ 9`                 | `56 ÷ 8`     | 28s   | 10    | 3       | 5      | 21     |
-| Winter | ×4 6 7 8 9, − facts 11–18, × 10–70     | `8 × 7 + 9`, or `63 ÷ 9` | `8 × 9 - 17` | 25s   | 11    | 3       | 6      | 23     |
+| Spring | + and − facts 6–18, ×2 ×3 ×4 ×5 ×10    | `40 ÷ 5`                 | `35 ÷ 5`     | none  | 6     | 2       | 3      | 13     |
+| Summer | × facts to 10×10, + and − facts 11–18  | `48 ÷ 6`                 | `72 ÷ 9`     | 30s   | 6     | 2       | 4      | 14     |
+| Autumn | ×2 3 4 6 7 8 9, − facts 11–18, × 10–50 | `54 ÷ 9`                 | `56 ÷ 8`     | 28s   | 7     | 2       | 5      | 16     |
+| Winter | ×4 6 7 8 9, − facts 11–18, × 10–70     | `8 × 7 + 9`, or `63 ÷ 9` | `8 × 9 - 17` | 25s   | 8     | 3       | 6      | 20     |
 
 **The clock is deliberately loose**, when it runs at all — it is off unless a
 player turns it on; see [Settings](#settings). It was 20/18/16s, and played that
@@ -130,7 +130,7 @@ the snake woman's own question pays the rescue, so:
 demand === (spaces − glowing) + glowing × 3 + rescue
 ```
 
-Spring is 6 + 6 + 3 = 15, and so on. This is the invariant the 2026-09-21 retune
+Spring is 4 + 6 + 3 = 13, and so on. This is the invariant the 2026-09-21 retune
 is built on, and `seasons.test.js` asserts it for every season. Before it, the
 demand was around 60% of a perfect run and you kept walking after you already had
 enough, which is the thing Ella asked to fix. It has two consequences worth
@@ -160,7 +160,7 @@ each is a place where a change that looks harmless is not:
   trail's full width, which is what guarantees no gap opens at either end; the
   arithmetic is on `backdrop` in
   [`js/art/placeholder.js`](js/art/placeholder.js) and `art.test.js` checks it
-  at both ends of winter's eleven-space trail.
+  at both ends of winter's eight-space trail.
 - **The ground has a top edge made of something.** `layout()` returns
   `groundEdges` beside `groundSegments`: a band of grass, fallen leaves or snow
   crust whose underside is the ground line sample for sample, so it follows a
