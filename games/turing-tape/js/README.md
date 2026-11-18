@@ -17,9 +17,9 @@ one rule table and four buttons, so the state that a `GameState` would own is
 five module-level variables and the view models a `GameUI` would take would each
 have one caller. Worth revisiting only if a second puzzle type appears.
 
-`game.js` exports nothing and runs on load, so it is driven through the real
-page rather than constructed. That is also why it has no test file — see
-**Testing**.
+`game.js` exports `init(doc)`, which looks up the page's elements and starts
+the game. `main.js` calls it with the real document; the tests call it with a
+copy of `index.html`.
 
 ## Dependency graph
 
@@ -97,8 +97,8 @@ than `HALT`, which means its halt reason is `no-rule`. Demos never call
 
 The page. Module-level state is five variables — `machine`, `currentLevel`,
 `isDemo`, `playTimer`, and `completedLevels` — plus the DOM references, all
-resolved once at load. Boots inside a `try/catch` that logs rather than leaving a
-half-built page.
+set by `init()`. `init()` builds the page inside a `try/catch` that logs rather
+than leaving a half-built page.
 
 Four responsibilities worth naming:
 
@@ -185,19 +185,17 @@ stored shape either, which is worth knowing before the format changes.
 
 ## Testing
 
-Tests live in the parent `__tests__/` directory. Two suites, covering the two
-modules that can be tested without a page:
+Tests live in the parent `__tests__/` directory. Three suites:
 
 - `TuringMachine.test.js` — stepping, the three halt reasons, tape growth at both
   ends, and the alignment shared by `matchesTape` and `matchMask`
 - `levels.test.js` — the shape of every level and demo, and that each demo halts
   on its own within `DEMO_STEP_BOUND` steps, without hitting the `max-steps` cap
+- `game.test.js` — the page: solving, Play and Pause, demos, keyboard shortcuts
 
-**`game.js` has no test file.** It exports nothing and runs on import, so it can
-only be driven black-box through the real `index.html` — which is what
-`times-trail` does in `game.test.js`, and what this game could do too. The
-site-wide markup-contract test in `games/shared/__tests__/` covers this page's ids;
-nothing covers its behaviour.
+`game.test.js` drives `game.js` through the real `index.html`: it calls
+`init(document)` on a fresh copy of the page, then clicks buttons, picks rules,
+presses keys and advances fake timers.
 
 Run from the repository root:
 

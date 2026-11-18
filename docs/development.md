@@ -97,7 +97,7 @@ Tests use Jest with `--experimental-vm-modules` for ESM support.
 - `javascript/*.test.js`, `chinese/*.test.js` -- tests for experiment and tool logic
 - `games/*/__tests__/` -- tests for game logic and level/preset data
 
-Most game logic is tested through its underlying components (Grid, GameState, TuringMachine, etc.) and the static data they consume. Seasons and Times Trail additionally drive their `game.js` orchestrators black-box, loading the real `index.html` into jsdom and clicking through it. Number Garden and Life Garden have boot tests that do the same for their startup wiring. Turing Tape's `game.js` and Logic Engine's `ui.js` remain untested DOM glue.
+Most game logic is tested through its underlying components (Grid, GameState, TuringMachine, etc.) and the static data they consume. Seasons, Times Trail and Number Garden additionally drive their `game.js` orchestrators black-box, loading the real `index.html` into jsdom, clicking through it and advancing fake timers (`game.answering.test.js` in each). Life Garden has boot tests that do the same for its startup wiring. Turing Tape's `game.js` and Logic Engine's `ui.js` are tested the same way; Turing Tape's takes the document through `init(doc)`, and `ui.js` already looked its elements up inside `initUI()`. `shared/life-background.js` (the 404 page's animation) is untested.
 
 Run a specific test file:
 

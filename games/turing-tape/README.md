@@ -140,14 +140,14 @@ index.zh.json         # Chinese translations of the title, meta description, and
 js/
 ├── TuringMachine.js  # The machine: step, run, reset, matchesTape, matchMask
 ├── levels.js         # The five puzzles and three demos, as data
-└── game.js           # Everything DOM: nav, rendering, the rule table, keys, localStorage
+├── game.js           # Everything DOM: nav, rendering, the rule table, keys, localStorage
+└── main.js           # Calls init() from game.js on the real page
 styles/
 └── main.css          # The whole stylesheet, light and dark
 ```
 
 `TuringMachine.js` and `levels.js` are pure data and logic with no DOM; `game.js`
-is a module with no exports that runs on load, which is why the tests cover the
-first two only. This game does not use the `games/shared/` base classes.
+exports `init(doc)`, which `main.js` calls and the tests call on a copy of the page. This game does not use the `games/shared/` base classes.
 
 ### Testing
 

@@ -8,35 +8,56 @@ let machine = null
 let currentLevel = null
 let isDemo = false
 let playTimer = null
-const completedLevels = loadProgress()
+let completedLevels = new Set()
 
 // --- DOM refs ---
-const $ = (id) => document.getElementById(id)
-const levelNav = $("level-nav")
-const demoNav = $("demo-nav")
-const levelTitle = $("level-title")
-const levelDescription = $("level-description")
-const targetSection = $("target-section")
-const targetTapeEl = $("target-tape")
-const activeTapeEl = $("active-tape")
-const headIndicator = $("head-indicator")
-const stepDisplay = $("step-display")
-const currentStateEl = $("current-state")
-const resultMsg = $("result-msg")
-const ruleBody = $("rule-body")
-const stepBtn = $("step-btn")
-const playBtn = $("play-btn")
-const resetBtn = $("reset-btn")
-const addRuleBtn = $("add-rule-btn")
+// Filled in by init(), so a test can start the game on a document of its own.
+let levelNav, demoNav, levelTitle, levelDescription, targetSection, targetTapeEl, activeTapeEl
+let headIndicator, stepDisplay, currentStateEl, resultMsg, ruleBody
+let stepBtn, playBtn, resetBtn, addRuleBtn
 
-// --- Init ---
-try {
-  buildLevelNav()
-  buildDemoNav()
-  const params = new URLSearchParams(window.location.search)
-  loadLevel(levelFromParam(params.get("level")) || levels[0])
-} catch (error) {
-  console.error("Failed to initialize Turing Tape:", error)
+/**
+ * Look up the page's elements, wire the controls and load the first level.
+ * `main.js` calls this with the real document.
+ * @param {Document} doc
+ */
+export function init(doc = document) {
+  const $ = (id) => doc.getElementById(id)
+  levelNav = $("level-nav")
+  demoNav = $("demo-nav")
+  levelTitle = $("level-title")
+  levelDescription = $("level-description")
+  targetSection = $("target-section")
+  targetTapeEl = $("target-tape")
+  activeTapeEl = $("active-tape")
+  headIndicator = $("head-indicator")
+  stepDisplay = $("step-display")
+  currentStateEl = $("current-state")
+  resultMsg = $("result-msg")
+  ruleBody = $("rule-body")
+  stepBtn = $("step-btn")
+  playBtn = $("play-btn")
+  resetBtn = $("reset-btn")
+  addRuleBtn = $("add-rule-btn")
+
+  stopPlay()
+  completedLevels = loadProgress()
+  try {
+    buildLevelNav()
+    buildDemoNav()
+    const params = new URLSearchParams(window.location.search)
+    loadLevel(levelFromParam(params.get("level")) || levels[0])
+  } catch (error) {
+    console.error("Failed to initialize Turing Tape:", error)
+  }
+
+  stepBtn.addEventListener("click", doStep)
+  playBtn.addEventListener("click", togglePlay)
+  resetBtn.addEventListener("click", doReset)
+  addRuleBtn.addEventListener("click", () => addRuleRow())
+
+  // The same function each time, so a second init() does not stack handlers.
+  doc.addEventListener("keydown", onKeydown)
 }
 
 // --- Level navigation ---
@@ -481,13 +502,8 @@ function saveProgress() {
   }
 }
 
-// --- Event listeners ---
-stepBtn.addEventListener("click", doStep)
-playBtn.addEventListener("click", togglePlay)
-resetBtn.addEventListener("click", doReset)
-addRuleBtn.addEventListener("click", () => addRuleRow())
-
-document.addEventListener("keydown", (e) => {
+// --- Keyboard ---
+function onKeydown(e) {
   // Leave focused controls alone: Space and Enter activate a focused button,
   // and form controls handle these keys themselves. e.target can be the
   // document, which has no closest().
@@ -510,4 +526,4 @@ document.addEventListener("keydown", (e) => {
   } else if (e.key === "r" || e.key === "R") {
     doReset()
   }
-})
+}
