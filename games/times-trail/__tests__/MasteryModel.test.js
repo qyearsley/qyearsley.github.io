@@ -8,7 +8,6 @@ import {
   SELECTION,
   STRENGTH,
   STRENGTH_INTERVALS_MS,
-  TRAIL,
 } from "../js/constants.js"
 import {
   cardTier,
@@ -574,29 +573,29 @@ describe("MasteryModel", () => {
       expect(isMastered(lifted.record, lifted.now)).toBe(true)
     })
 
-    test("a consistently correct but slow player reaches the trail's unlock bar", () => {
+    test("a consistently correct but slow player reaches the strengthening bar", () => {
       // The regression this band arithmetic exists for. Ten seconds is what
       // counting up to a fact honestly costs; every answer here is CORRECT, and
-      // a child who is reliably correct has to be able to move her token.
+      // a child who is reliably correct has to be able to reach "strong".
       // Before: 9000 ms read as "counting", which held strength still, so the
-      // fact sat at 1 forever and no region, gem, or card could ever unlock.
+      // fact sat at 1 forever and no card could ever improve.
       expect(classifySpeed(10000)).toBe("slow")
       const { strengths, record, now } = practise(Array(6).fill(10000))
       expect(strengths).toEqual([1, 2, 3, 3, 3, 3])
-      expect(record.strength).toBeGreaterThanOrEqual(TRAIL.UNLOCK_MIN_STRENGTH)
-      expect(decayedStrength(record, now)).toBeGreaterThanOrEqual(TRAIL.UNLOCK_MIN_STRENGTH)
+      expect(record.strength).toBeGreaterThanOrEqual(STRENGTH.STRENGTHENING)
+      expect(decayedStrength(record, now)).toBeGreaterThanOrEqual(STRENGTH.STRENGTHENING)
       // Still not mastered: slow is progress, not fluency.
       expect(isMastered(record, now)).toBe(false)
       expect(masteryTier(record, now)).toBe("strengthening")
     })
 
-    test("even a full-on counting player reaches the unlock bar", () => {
+    test("even a full-on counting player reaches the strengthening bar", () => {
       // Past SLOW_MS, so the band is "counting" -- the slowest correct answer the
       // game records. It still promotes, one box at a time, up to SLOW_CAP.
       expect(classifySpeed(20000)).toBe("counting")
       const { strengths, record, now } = practise(Array(5).fill(20000))
       expect(strengths).toEqual([1, 2, 3, 3, 3])
-      expect(decayedStrength(record, now)).toBe(TRAIL.UNLOCK_MIN_STRENGTH)
+      expect(decayedStrength(record, now)).toBe(STRENGTH.STRENGTHENING)
       expect(isMastered(record, now)).toBe(false)
     })
   })

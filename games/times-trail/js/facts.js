@@ -2,8 +2,7 @@
  * Fact set for Times Trail
  *
  * Owns the 36-fact multiplication set (2x2 through 9x9), the canonical form of a
- * fact id, and every way of selecting a subset of facts: by table family, by
- * trail, or one at a time. Pure and stateless -- no DOM, no storage, no
+ * fact id, and every way of selecting a subset of facts: by trail, or one at a time. Pure and stateless -- no DOM, no storage, no
  * clock, and the only randomness is the injected `rng` of `randomOrientation`.
  *
  * Architecture: facts are built once at module load into a frozen array whose
@@ -16,8 +15,8 @@
  * Error Handling: two deliberately different styles, because the callers differ.
  * Functions taking operands (`canonicalize`, `factId`, `getFactFor`) throw
  * `RangeError` -- a bad operand is a programming mistake and should be loud.
- * Functions taking an id or a table list (`parseFactId`, `getFact`,
- * `factsForTables`, `factIdsForTrail`, `getTrail`) never throw, because their
+ * Functions taking an id (`parseFactId`, `getFact`,
+ * `factIdsForTrail`, `getTrail`) never throw, because their
  * input can come from persisted settings or a save file: they return `null` or
  * `[]`.
  */
@@ -187,38 +186,6 @@ export function getFact(id) {
  */
 export function getFactFor(x, y) {
   return /** @type {Fact} */ (_FACT_BY_ID.get(factId(x, y)))
-}
-
-/**
- * The facts belonging to a set of enabled tables, read as table FAMILIES: a fact
- * is included when EITHER operand is enabled, so enabling 7 gets you 7x2 through
- * 7x9. That is what "which tables?" means to the person answering it.
- *
- * There is deliberately no ceiling mode. Requiring BOTH operands existed for the
- * difficulty presets, where "2s through 5s" had to exclude 4x8; with the presets
- * gone the two semantics would only be a way for the settings modal and the fact
- * pool to disagree.
- *
- * Never throws: entries of `tables` that are not integers in
- * [OPERAND_MIN, OPERAND_MAX] are ignored, and a non-array, empty, or all-invalid
- * `tables` yields `[]`.
- * @param {number[]} tables - Enabled tables, e.g. `[2, 3, 4, 5]`
- * @returns {Fact[]} A new array in `FACTS` order
- */
-export function factsForTables(tables) {
-  if (!Array.isArray(tables)) return []
-  const enabled = new Set(tables.filter(_isOperand))
-  if (enabled.size === 0) return []
-  return FACTS.filter((fact) => enabled.has(fact.a) || enabled.has(fact.b))
-}
-
-/**
- * Ids of the facts belonging to a set of enabled tables.
- * @param {number[]} tables - Enabled tables
- * @returns {string[]} A new array of canonical ids in `FACTS` order
- */
-export function factIdsForTables(tables) {
-  return factsForTables(tables).map((fact) => fact.id)
 }
 
 /**

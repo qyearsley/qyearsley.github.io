@@ -18,8 +18,7 @@
  * -- and therefore cannot disagree with -- anything the core modules decided.
  *
  * Lifetimes: per-answer feedback (`showFeedback`, `flyStars`) is cleared by the
- * next `renderQuestion`. There is deliberately no gate message: a round asks
- * only its own trail's facts, so the gate opens on its own and needs no sentence.
+ * next `renderQuestion`.
  *
  * The overrides below exist because the base behaviour is wrong for this page
  * rather than merely incomplete:
@@ -49,7 +48,6 @@
 
 import { BaseGameUI } from "../../shared/BaseGameUI.js"
 import {
-  ALL_TABLES,
   KEYPAD,
   OPERAND_MAX,
   OPERAND_MIN,
@@ -129,7 +127,7 @@ const MASTERY_STRENGTH_LABELS = Object.freeze([
 ])
 
 /**
- * The four trail-space states the trail legend explains, in reading order. An
+ * The three trail-space states the trail legend explains, in reading order. An
  * empty `className` is the plain, walkable space.
  * @private
  * @type {readonly {className: string, label: string, token: boolean}[]}
@@ -137,8 +135,7 @@ const MASTERY_STRENGTH_LABELS = Object.freeze([
 const TRAIL_LEGEND_STATES = Object.freeze([
   Object.freeze({ className: "trail-space-current", label: "You are here", token: true }),
   Object.freeze({ className: "", label: "Walked", token: false }),
-  Object.freeze({ className: "trail-space-open", label: "Open", token: false }),
-  Object.freeze({ className: "trail-space-locked", label: "Not open yet", token: false }),
+  Object.freeze({ className: "trail-space-ahead", label: "Ahead", token: false }),
 ])
 
 /**
@@ -177,7 +174,7 @@ const FACT_ORDER = new Map(FACT_IDS.map((id, index) => [id, index]))
 
 /**
  * The one-row trail indicator on the play screen. It shows the WHOLE trail: a
- * themed trail is 16 to 20 spaces, which fits the strip, so the row answers
+ * trail is 20 spaces, which fits the strip, so the row answers
  * "how far through Squares am I" rather than "how far through a fifth of an
  * arbitrary board".
  * @typedef {Object} PlayTrailStripView
@@ -185,8 +182,6 @@ const FACT_ORDER = new Map(FACT_IDS.map((id, index) => [id, index]))
  * @property {string} trailEmoji - Current trail's emoji.
  * @property {number} totalSpaces - How long the trail is.
  * @property {number} space - The token's space index.
- * @property {number} cap - Furthest space the token may occupy.
- * @property {boolean} gated - Whether the token is held at the cap.
  */
 
 /**
@@ -198,12 +193,10 @@ const FACT_ORDER = new Map(FACT_IDS.map((id, index) => [id, index]))
  * @property {string} blurb - One line saying what the pattern is.
  * @property {boolean} current - Whether this is the trail being walked.
  * @property {number} space - The token's space index on this trail.
- * @property {number} totalSpaces - How long this trail is for the active pool.
- * @property {number} cap - Furthest space the token may occupy.
- * @property {number} strong - Active facts at the cap's strength bar.
- * @property {number} total - Active facts in the trail.
- * @property {boolean} complete - Every active fact is strong.
- * @property {boolean} unavailable - No fact of this trail is in the active pool.
+ * @property {number} totalSpaces - How long this trail is.
+ * @property {number} strong - Facts of the trail at "strengthening" or better.
+ * @property {number} total - Facts in the trail.
+ * @property {boolean} complete - The token is on the last space.
  */
 
 /**
@@ -246,15 +239,14 @@ const FACT_ORDER = new Map(FACT_IDS.map((id, index) => [id, index]))
  * @property {number} factsAnswered - Questions answered this session.
  * @property {number} bestStreak - Longest correct run this session.
  * @property {CardView[]} newCards - Cards that improved tier this session.
- * @property {string|null} newRegionName - Newly reached region, or `null`.
+ * @property {string|null} trailFinishedName - Trail finished this session, or `null`.
  * @property {string[]} milestoneLabels - Gem milestones crossed this session.
  * @property {boolean} goalJustMet - Whether today's goal was met this session.
  */
 
 /**
- * The two settings controls the modal renders.
+ * The one settings control the modal renders.
  * @typedef {Object} SettingsData
- * @property {number[]} tables - Tables checked in the picker.
  * @property {number} sessionLength - Questions per session.
  */
 
@@ -396,7 +388,7 @@ export class GameUI extends BaseGameUI {
       summaryCorrect: document.getElementById("summary-correct"),
       summaryStreak: document.getElementById("summary-streak"),
       summaryGoal: document.getElementById("summary-goal"),
-      summaryRegion: document.getElementById("summary-region"),
+      summaryTrail: document.getElementById("summary-trail"),
       summaryMilestones: document.getElementById("summary-milestones"),
       summaryMilestonesGroup: document.getElementById("summary-milestones-group"),
       summaryCards: document.getElementById("summary-cards"),
@@ -419,12 +411,6 @@ export class GameUI extends BaseGameUI {
 
       // Settings modal
       sessionLengthSelect: document.getElementById("session-length-select"),
-      poolSize: document.getElementById("pool-size"),
-      tableToggles: ALL_TABLES.map((table) => ({
-        table,
-        input: document.getElementById(`table-${table}`),
-        label: document.querySelector(`label[for="table-${table}"]`),
-      })),
     }
   }
 
@@ -779,12 +765,10 @@ export class GameUI extends BaseGameUI {
    *
    * The strip draws the whole trail. It used to draw the five spaces of the
    * region the token stood in, which meant the row reset every five answers and
-   * never showed how much was left; a themed trail is 16 to 20 spaces and fits.
+   * never showed how much was left; a trail is 20 spaces and fits.
    *
-   * Three states per space, and they have to look different: walked, open (past
-   * the token but inside the cap) and not open yet. A gate is "not yet"; a lock
-   * is "not here", and on a themed trail there is no "not here" -- every space
-   * opens once enough of the trail's facts are strong.
+   * Two states besides the token's own space, and they have to look different:
+   * walked and ahead.
    * @param {PlayTrailStripView} strip - Strip view model
    * @returns {void}
    */
@@ -796,7 +780,6 @@ export class GameUI extends BaseGameUI {
 
     const total = Math.max(0, Number.isInteger(strip.totalSpaces) ? strip.totalSpaces : 0)
     const current = Number.isInteger(strip.space) ? strip.space : -1
-    const cap = Number.isInteger(strip.cap) ? strip.cap : total - 1
 
     const trailEmoji = document.createElement("span")
     trailEmoji.className = "strip-region"
@@ -818,22 +801,11 @@ export class GameUI extends BaseGameUI {
         token.className = "strip-token"
         token.textContent = TOKEN_EMOJI
         space.appendChild(token)
-      } else if (i > cap) {
-        space.classList.add("strip-space-locked")
       } else if (i > current) {
-        space.classList.add("strip-space-open")
+        space.classList.add("strip-space-ahead")
       }
       container.appendChild(space)
     }
-
-    if (!strip.gated || current >= total - 1) return
-    // A gate is "not yet". It marks the boundary rather than replacing a space,
-    // so the row keeps showing how long the trail actually is.
-    const gate = document.createElement("span")
-    gate.className = "strip-space strip-space-gate"
-    gate.dataset.index = String(total)
-    gate.setAttribute("aria-hidden", "true")
-    container.appendChild(gate)
   }
 
   // ------------------------------------------------------- Trail list (hub)
@@ -843,9 +815,7 @@ export class GameUI extends BaseGameUI {
    * token, and how much of it is strong.
    *
    * Each row is a button that starts a round on that trail, so the list is the
-   * map AND the way in. A row the active tables leave empty is disabled rather
-   * than hidden, so narrowing the tables visibly removes a trail instead of
-   * silently shrinking the list.
+   * map AND the way in.
    * @param {TrailView} view - Trail view model
    * @returns {void}
    */
@@ -879,10 +849,6 @@ export class GameUI extends BaseGameUI {
     row.dataset.trailId = String(trail.id ?? "")
     if (trail.current) row.classList.add("is-current")
     if (trail.complete) row.classList.add("is-complete")
-    if (trail.unavailable) {
-      row.classList.add("is-unavailable")
-      row.disabled = true
-    }
 
     const label = document.createElement("span")
     label.className = "trail-region-label"
@@ -891,7 +857,6 @@ export class GameUI extends BaseGameUI {
 
     const total = Math.max(0, Number.isInteger(trail.totalSpaces) ? trail.totalSpaces : 0)
     const current = Number.isInteger(trail.space) ? trail.space : -1
-    const cap = Number.isInteger(trail.cap) ? trail.cap : total - 1
     const spaces = document.createElement("span")
     spaces.className = "trail-row-spaces"
     spaces.setAttribute("aria-hidden", "true")
@@ -905,10 +870,8 @@ export class GameUI extends BaseGameUI {
         token.className = "trail-token"
         token.textContent = tokenEmoji
         space.appendChild(token)
-      } else if (i > cap) {
-        space.classList.add("trail-space-locked")
       } else if (i > current) {
-        space.classList.add("trail-space-open")
+        space.classList.add("trail-space-ahead")
       }
       spaces.appendChild(space)
     }
@@ -942,8 +905,8 @@ export class GameUI extends BaseGameUI {
    * @returns {string} A short status line
    */
   _trailRowNote(trail) {
-    if (trail.unavailable) return "Not in your tables right now."
-    if (trail.complete) return `Finished, all ${trail.total} strong. Tap to practice again.`
+    if (trail.complete)
+      return `Finished, ${trail.strong} of ${trail.total} strong. Tap to practice again.`
     const action = trail.space > 0 ? "Continue" : "Start"
     return `${action}: ${trail.strong} of ${trail.total} strong.`
   }
@@ -1295,7 +1258,7 @@ export class GameUI extends BaseGameUI {
       summaryCorrect,
       summaryStreak,
       summaryGoal,
-      summaryRegion,
+      summaryTrail,
       summaryMilestones,
       summaryMilestonesGroup,
       summaryCards,
@@ -1315,10 +1278,10 @@ export class GameUI extends BaseGameUI {
       this.setVisible(summaryGoal, met)
     }
 
-    if (summaryRegion) {
-      const name = summary.newRegionName
-      summaryRegion.textContent = name ? `New region reached: ${name}` : ""
-      this.setVisible(summaryRegion, Boolean(name))
+    if (summaryTrail) {
+      const name = summary.trailFinishedName
+      summaryTrail.textContent = name ? `Trail finished: ${name}!` : ""
+      this.setVisible(summaryTrail, Boolean(name))
     }
 
     if (summaryMilestones) {
@@ -1347,39 +1310,16 @@ export class GameUI extends BaseGameUI {
   // --------------------------------------------------------- Settings
 
   /**
-   * Reflect the persisted settings into the modal's two controls, and say how
-   * many facts the chosen tables add up to.
-   *
-   * The pool size is shown because the toggles alone hide the consequence:
-   * ticking 7 adds eight facts, not one, and a player who unticks down to a
-   * three-fact pool should be able to see that before wondering why the same
-   * question keeps coming back.
+   * Reflect the persisted settings into the modal's one control.
    * @param {SettingsData} settingsData - Current settings
-   * @param {number} [factCount] - Size of the resulting fact pool; omitted leaves
-   *   `#pool-size` as it was
    * @returns {void}
    */
-  renderSettings(settingsData, factCount) {
+  renderSettings(settingsData) {
     if (!settingsData) return
-    const { sessionLengthSelect, poolSize, tableToggles } = this.elements
-
-    const enabled = new Set(Array.isArray(settingsData.tables) ? settingsData.tables : [])
-    if (Array.isArray(tableToggles)) {
-      for (const toggle of tableToggles) {
-        const pressed = enabled.has(toggle.table)
-        if (toggle.input) toggle.input.checked = pressed
-        // The label is the visible affordance, so assistive tech reads its
-        // pressed state rather than the visually hidden checkbox's.
-        if (toggle.label) toggle.label.setAttribute("aria-pressed", pressed ? "true" : "false")
-      }
-    }
+    const { sessionLengthSelect } = this.elements
 
     if (sessionLengthSelect && Number.isFinite(settingsData.sessionLength)) {
       sessionLengthSelect.value = String(settingsData.sessionLength)
-    }
-
-    if (poolSize && Number.isFinite(factCount)) {
-      poolSize.textContent = `${factCount} fact${factCount === 1 ? "" : "s"} in play`
     }
   }
 }

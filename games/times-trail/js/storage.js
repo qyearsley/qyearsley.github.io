@@ -42,7 +42,7 @@
  */
 
 import { StorageManager as BaseStorageManager } from "../../shared/StorageManager.js"
-import { DEFAULT_TRAIL_ID, GEM_MILESTONES, STORAGE, TRAILS } from "./constants.js"
+import { DEFAULT_TRAIL_ID, GEM_MILESTONES, STORAGE, TRAIL, TRAILS } from "./constants.js"
 import { normalizeRecord } from "./MasteryModel.js"
 
 /**
@@ -94,9 +94,8 @@ const MILESTONE_IDS = new Set(GEM_MILESTONES.map((milestone) => milestone.id))
  * case, not a reset. Unknown trail ids are dropped on load, so retiring a trail
  * does not leave its position behind for ever.
  *
- * Journey.js is the semantic authority for a position; the pass here is
- * structural, and it deliberately does NOT clamp to a trail's length -- only a
- * `Journey` knows that, because a trail is as long as the active pool makes it.
+ * A position is clamped to the last space, `TRAIL.SPACES - 1`, which is the
+ * same bound `Journey.normalizeTrail` applies.
  *
  * @typedef {Object} Trails
  * @property {string} currentId                - Trail being walked; DEFAULT_TRAIL_ID by default
@@ -218,8 +217,7 @@ function _normalizeTotals(raw) {
 }
 
 /**
- * Coerce untrusted trail positions. Structural only: `Journey.clampToTrail` is
- * the semantic authority for how long a trail is, and game.js runs it.
+ * Coerce untrusted trail positions.
  *
  * A save written before 2026-09-18 carries a single `trail: {space}` for the
  * old 40-space route through eight table regions. There is no honest way to
@@ -238,7 +236,9 @@ function _normalizeTrails(raw) {
   const spaces = {}
   const rawSpaces = _isPlainObject(source.spaces) ? /** @type {Object} */ (source.spaces) : {}
   for (const trailId of Object.keys(rawSpaces)) {
-    if (known.has(trailId)) spaces[trailId] = _nonNegativeInt(rawSpaces[trailId])
+    if (known.has(trailId)) {
+      spaces[trailId] = Math.min(TRAIL.SPACES - 1, _nonNegativeInt(rawSpaces[trailId]))
+    }
   }
   return {
     currentId: known.has(source.currentId) ? source.currentId : DEFAULT_TRAIL_ID,

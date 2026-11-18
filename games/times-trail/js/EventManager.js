@@ -38,7 +38,6 @@
  * @property {() => void} [onSettingsOpen]
  * @property {() => void} [onSettingsClose]
  * @property {(key: string, value: string) => void} [onSettingChange]
- * @property {(table: number, checked: boolean) => void} [onTableToggle]
  */
 
 import { closeSettingsOnEscape } from "../../shared/keyboardGuard.js"
@@ -205,7 +204,7 @@ export class EventManager {
     if (!container) return
     container.addEventListener("click", (event) => {
       const row = event.target.closest("[data-trail-id]")
-      if (!row || row.disabled) return
+      if (!row) return
       this._invoke("onStartTrail", row.dataset.trailId)
     })
   }
@@ -235,11 +234,8 @@ export class EventManager {
   }
 
   /**
-   * Wires the only two kinds of settings control that exist: each `[data-table]`
-   * checkbox to `onTableToggle(table, checked)` and `#session-length-select` to
-   * `onSettingChange("sessionLength", value)`. The visible toggle is a `<label>`
-   * wrapping the checkbox, so a tap on its 68px face produces a normal `change`
-   * event on the input and needs no extra click handling.
+   * Wires the one settings control that exists, `#session-length-select`, to
+   * `onSettingChange("sessionLength", value)`.
    *
    * The select's value is parsed here rather than in `Settings`, because a
    * `<select>` always yields a string and `Settings.validate` compares against
@@ -248,15 +244,6 @@ export class EventManager {
    * @returns {void}
    */
   setupSettingsControls() {
-    const checkboxes = document.querySelectorAll('input[type="checkbox"][data-table]')
-    checkboxes.forEach((checkbox) => {
-      checkbox.addEventListener("change", (event) => {
-        const table = parseInt(event.target.dataset.table, 10)
-        if (Number.isNaN(table)) return
-        this._invoke("onTableToggle", table, event.target.checked)
-      })
-    })
-
     const sessionLengthSelect = this._element("sessionLengthSelect", "session-length-select")
     if (sessionLengthSelect) {
       sessionLengthSelect.addEventListener("change", (event) => {

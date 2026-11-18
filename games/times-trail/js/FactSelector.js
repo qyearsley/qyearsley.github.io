@@ -283,8 +283,9 @@ export class FactSelector {
 
   /**
    * Draw one fact from a bucket, weighted by `selectionWeight`. Consumes exactly
-   * one rng call. Weights are always >= 1, so the total is positive and every member is reachable; the trailing return is the
-   * floating-point guard for a `target` that rounds up to the total.
+   * one rng call. Weights are always >= 1, so the total is positive and every
+   * member is reachable; the trailing return is the floating-point guard for a
+   * `target` that rounds up to the total.
    * @private
    * @param {string[]} bucket - Non-empty list of fact ids
    * @param {unknown} records - factId -> MasteryRecord map

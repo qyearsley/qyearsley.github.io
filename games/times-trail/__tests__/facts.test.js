@@ -7,20 +7,17 @@ import {
   parseFactId,
   getFact,
   getFactFor,
-  factsForTables,
-  factIdsForTables,
   factIdsForTrail,
   getTrail,
   randomOrientation,
 } from "../js/facts.js"
-import {
-  ALL_TABLES,
-  OPERAND_MAX,
-  OPERAND_MIN,
-  TOTAL_FACTS,
-  PATTERN_FREE_IDS,
-  TRAILS,
-} from "../js/constants.js"
+import { OPERAND_MAX, OPERAND_MIN, TOTAL_FACTS, PATTERN_FREE_IDS, TRAILS } from "../js/constants.js"
+
+/** Every operand from OPERAND_MIN to OPERAND_MAX. */
+const ALL_TABLES = Array.from(
+  { length: OPERAND_MAX - OPERAND_MIN + 1 },
+  (_unused, index) => OPERAND_MIN + index,
+)
 
 /** Counts calls so rng-consumption contracts can be asserted. */
 function countingRng(value) {
@@ -286,94 +283,6 @@ describe("facts", () => {
     test("throws RangeError for bad operands", () => {
       expect(() => getFactFor(1, 5)).toThrow(RangeError)
       expect(() => getFactFor(3, 3.5)).toThrow(RangeError)
-    })
-  })
-
-  describe("factsForTables", () => {
-    test("includes a fact when EITHER operand is enabled", () => {
-      const sevens = factsForTables([7])
-      expect(sevens.length).toBe(8)
-      for (const fact of sevens) {
-        expect(fact.a === 7 || fact.b === 7).toBe(true)
-      }
-    })
-
-    test("two tables overlap rather than adding up", () => {
-      // 6 and 7 own eight facts each, and 6x7 belongs to both.
-      expect(factsForTables([6, 7]).length).toBe(15)
-    })
-
-    test("every table gives the whole fact set", () => {
-      expect(factsForTables([...ALL_TABLES]).length).toBe(36)
-    })
-
-    // The old "both" ceiling mode would have given 10 here, excluding 4x8. There
-    // is no ceiling mode any more: tables are families.
-    test("a low range still reaches its high partners", () => {
-      const low = factsForTables([2, 3, 4, 5])
-      expect(low.length).toBe(26)
-      expect(low.map((fact) => fact.id)).toContain("4x8")
-    })
-
-    test("returns [] for an empty or all-invalid table list", () => {
-      expect(factsForTables([])).toEqual([])
-      expect(factsForTables([1, 10, "7"])).toEqual([])
-    })
-
-    test("returns [] for a non-array", () => {
-      expect(factsForTables(null)).toEqual([])
-      expect(factsForTables(undefined)).toEqual([])
-      expect(factsForTables(7)).toEqual([])
-      expect(factsForTables("2,3")).toEqual([])
-    })
-
-    test("ignores invalid entries rather than throwing", () => {
-      expect(() => factsForTables([2, "3", 4.5, null, 99])).not.toThrow()
-      expect(factsForTables([2, "3", 4.5, null, 99]).map((f) => f.id)).toEqual([
-        "2x2",
-        "2x3",
-        "2x4",
-        "2x5",
-        "2x6",
-        "2x7",
-        "2x8",
-        "2x9",
-      ])
-    })
-
-    test("preserves FACTS order", () => {
-      const ids = factsForTables([2, 3]).map((f) => f.id)
-      expect(ids).toEqual(FACT_IDS.filter((id) => ids.includes(id)))
-    })
-
-    test("returns a new array each call, and mutating it leaves FACTS alone", () => {
-      const first = factsForTables([2, 3])
-      const second = factsForTables([2, 3])
-      expect(first).not.toBe(second)
-      expect(first).toEqual(second)
-      const size = first.length
-      first.length = 0
-      expect(factsForTables([2, 3]).length).toBe(size)
-      expect(FACTS.length).toBe(36)
-    })
-
-    test("ignores any extra argument, so a stale mode string cannot change the pool", () => {
-      expect(factsForTables([7], "both")).toEqual(factsForTables([7]))
-      expect(factsForTables([7], "either")).toEqual(factsForTables([7]))
-    })
-  })
-
-  describe("factIdsForTables", () => {
-    test("returns the ids of factsForTables", () => {
-      expect(factIdsForTables([2])).toEqual(
-        FACTS.filter((fact) => fact.a === 2 || fact.b === 2).map((fact) => fact.id),
-      )
-      expect(factIdsForTables([...ALL_TABLES])).toEqual([...FACT_IDS])
-    })
-
-    test("returns [] for junk input", () => {
-      expect(factIdsForTables([])).toEqual([])
-      expect(factIdsForTables(null)).toEqual([])
     })
   })
 

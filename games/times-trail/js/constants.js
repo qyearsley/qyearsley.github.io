@@ -7,9 +7,7 @@
  * Architecture: this module imports nothing. It is the root of the dependency
  * graph, so any value more than one module needs belongs here and nowhere else.
  * Values are plain numbers, strings, and frozen literals -- no functions and no
- * derived state. The one cross-reference (TRAIL.UNLOCK_MIN_STRENGTH reads
- * STRENGTH.STRENGTHENING, declared above it) stays inside this file, so it
- * cannot make importing this module order-dependent.
+ * derived state.
  */
 
 /**
@@ -24,8 +22,8 @@ export const TOTAL_FACTS = 36
 
 /**
  * Leitner box boundaries. A fact's strength is an integer 0-5 and drives
- * everything: when it comes due, what its card art looks like, and whether its
- * region counts it as mastered.
+ * everything: when it comes due, what its card art looks like, and whether it
+ * counts as mastered.
  */
 export const STRENGTH = Object.freeze({
   MIN: 0,
@@ -98,30 +96,6 @@ export const SELECTION = Object.freeze({
   DUE_WEIGHT_BONUS: 2, // multiplier applied to a due fact's weight
 })
 
-/** Every table the game covers, ascending. */
-export const ALL_TABLES = Object.freeze([2, 3, 4, 5, 6, 7, 8, 9])
-
-/**
- * Tables enabled for a brand-new player: all of them.
- *
- * There are no difficulty presets. "Explorer / Adventurer / Master / Custom"
- * used to sit in front of this list, but once every preset shared the same
- * `keypadMinStrength` the only thing a preset changed was which tables were in
- * play -- so it was a table picker wearing a second, vaguer name, with a real
- * table picker hidden behind its fourth option. One row of eight toggles says
- * the same thing without the indirection, and "difficulty" stops being a claim
- * the game cannot keep (a 2s-only pool is not easier per question; it is
- * shorter).
- *
- * Dropping the presets also collapsed the two table semantics into one. Presets
- * meant a CEILING (both operands enabled: "2s through 5s" excluded 4x8), custom
- * meant table FAMILIES (either operand: ticking 7 meant the 7 times table).
- * Toggles read as families -- ticking 7 gets you 7x2 through 7x9 -- which is
- * what "which tables?" means to anyone answering it, so `factsForTables` has one
- * behaviour and no mode argument.
- */
-export const DEFAULT_TABLES = ALL_TABLES
-
 /** Practice mode identifiers. */
 export const MODE_IDS = Object.freeze({
   QUICK_RECALL: "quick-recall",
@@ -153,43 +127,17 @@ export const SESSION = Object.freeze({
 /**
  * The trail the token walks.
  *
- * A trail is as long as twice the number of its own facts that the player is
- * actually practising, so its length is a statement about the work rather than
- * a fixed board: the Squares trail is 16 spaces for someone practising all
- * eight squares and 6 spaces for someone practising three of them. Two spaces
- * per fact rather than one, so a correct answer moves the token about twice as
- * often as a fact gets stronger and walking never feels stalled.
+ * Every trail is the same length, and every correct answer moves the token one
+ * space. Nothing gates it: the fact strength a player has built decides which
+ * fact is asked next (see FactSelector), not whether the token may move.
  *
- * How far the token may stand is one formula:
- *
- *     cap = FREE_SPACES + SPACES_PER_STRONG_FACT * (trail facts that are strong)
- *
- * Strengthening opens ground and answering walks it. FREE_SPACES is what a
- * brand-new player may walk having practised nothing, so the token moves in the
- * first minute of the first session.
- *
- * This replaced eight per-region gates on 2026-09-18, and the arithmetic is the
- * point: with all of a trail's active facts strong the cap is
- * `FREE_SPACES + 2 * n`, which is always past the last space (`2 * n - 1`). A
- * trail can therefore always be finished. The old gates were scoped to regions
- * of one to eight facts and could leave the token frozen -- see
- * `docs/times-trail-plan.md`.
- *
- * UNLOCK_MIN_STRENGTH is deliberately NOT STRENGTH.MASTERED_MIN. "Mastered"
- * means fluent recall, which is the right bar for a foiled card, the mastery
- * map, and the `mastered-*` gem milestones -- but it is the wrong bar for
- * MOVEMENT. A child who is reliably correct on a fact, even while she still
- * counts up to it, should see her token move; pinning the trail to fluency means
- * the game's central reward stays frozen through the weeks when she needs it
- * most. So the cap counts facts at STRENGTH.STRENGTHENING or better, and
- * fluency is what the collection rewards.
+ * SPACES is 20, so a trail takes 19 correct answers: two rounds of 10 if every
+ * answer is right, and a few if some are not. It is fixed rather than
+ * proportional to the fact count, so a trail of 8 facts and one of 10 take about
+ * the same time, and 20 is the longest the play-screen strip has always fitted.
  */
 export const TRAIL = Object.freeze({
-  SPACES_PER_FACT: 2,
-  FREE_SPACES: 3, // walkable before any fact is strong
-  SPACES_PER_STRONG_FACT: 2, // ground each strengthened fact opens
-  UNLOCK_MIN_STRENGTH: STRENGTH.STRENGTHENING, // strength a fact needs to count toward the cap
-  SPACES_PER_CORRECT: 1,
+  SPACES: 20,
 })
 
 /** The trail token. One emoji, no cosmetics to unlock. */

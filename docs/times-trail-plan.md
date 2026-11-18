@@ -64,20 +64,30 @@ Fives, Squares, Nines, and the Tough Ten (`3x4, 3x6, 3x7, 3x8, 4x6, 4x7, 4x8,
 6x7, 6x8, 7x8` -- the ten facts with no shortcut). The sets overlap on purpose
 (2x5 is a double and a five); mastery is tracked per fact and shared, so
 progress on one trail can advance another. The hub is the list of trails;
-tapping a row starts a round on it. A round asks only that trail's facts
-(intersected with the enabled tables), so every correct answer can move the
-token. The play screen has one bar, the trail strip, plus a "Question 3 of 10"
-counter.
+tapping a row starts a round on it. A round asks all of that trail's facts
+and only those, so every correct answer moves the token. The play screen has one
+bar, the trail strip, plus a "Question 3 of 10" counter.
 
-A trail is two spaces long per fact in it. The token moves one space per
-correct answer, and how far it may stand is
-`cap = FREE_SPACES + SPACES_PER_STRONG_FACT * (strong facts in this trail)`.
-Strengthening opens ground and answering walks it, so a trail can't be
-finished by grinding one easy fact, and because `cap` always reaches the last
-space once every fact in the trail is strong, a trail can always be finished.
-This replaced one 40-space board with eight table-named regions (cut
-2026-09-18) whose names promised themed practice that fact selection, which
-ignored the token's position, didn't deliver.
+Every trail is 20 spaces long, so reaching the last space takes 19 correct
+answers: two rounds of 10 if every answer is right, and a few if some are not.
+The length is fixed rather than proportional to the fact count, so the 8-fact
+and 10-fact trails take about as long, and 20 is what the strip has always
+fitted. The token moves one space per correct answer and nothing gates it. The
+hub shows each trail's strong facts ("3 of 8 strong") and the strength model
+still picks which fact comes next, but strength never blocks movement, and the
+round summary says "Trail finished" when the last space is reached.
+
+History, because the same mistake is easy to repeat. The 40-space board with
+eight table-named regions was cut on 2026-09-18: its names promised themed
+practice that fact selection, which ignored the token's position, didn't
+deliver. Its replacement capped the token at
+`FREE_SPACES + SPACES_PER_STRONG_FACT * (strong facts)`, so grinding one easy
+fact could not finish a trail. That cap was removed on 2026-11-18: strong needs
+days of spaced repetition, so a new player stalled after about three correct
+answers, and the token not moving was the original complaint. The same change
+dropped the tables setting. A trail intersected with a narrowed table list could
+shrink to one fact (Squares with only the 7s is just 7x7), asked ten times in a
+round. A trail now always uses all of its own facts.
 
 **Stars** pay more for facts the engine considers weak, with a streak
 multiplier, so easy facts can't be farmed for points. **Gems** come from
@@ -101,14 +111,14 @@ currently planned; see the game's README for what each would have done. The
 mode registry (`js/modes/index.js`) still has just the one entry, so adding a
 mode later doesn't require restructuring.
 
-There are no difficulty presets. Four used to exist (Explorer, Adventurer,
-Master, Custom), retired because once every preset shared the same keypad
-threshold, the only thing a preset changed was which tables were in play -- a
-table picker under a vaguer name. What's left: eight table toggles (all on by
-default; unticking one removes only the facts unique to it, since each fact
-belongs to two table families) and a questions-per-session choice. Spaced
-repetition, not a difficulty knob, is what makes practice easier or harder
-question by question.
+There are no difficulty presets and no table picker. Four presets used to exist
+(Explorer, Adventurer, Master, Custom), retired because once every preset shared
+the same keypad threshold, the only thing a preset changed was which tables were
+in play. Eight table toggles replaced them, and those went on 2026-11-18, once a
+trail began to use all of its own facts and nothing read the list. A `tables`
+value in an old save is ignored on load. What's left is a questions-per-session
+choice. Spaced repetition, not a difficulty knob, is what makes practice easier
+or harder question by question.
 
 <a id="ipad-constraints"></a>
 
@@ -137,8 +147,8 @@ Mirrors `games/number-garden/`, reusing `games/shared/BaseGameUI` and
 `games/shared/StorageManager`. See `js/README.md` for the module-by-module
 breakdown. Core modules: `facts.js` (fact set), `MasteryModel.js`
 (strength/decay/due dates), `FactSelector.js` (picks the next fact),
-`Journey.js` (trail spaces and gating), `Scoring.js` (stars/gems/streaks), and
-`Settings.js` (tables and session length). `GameUI.js` and `EventManager.js`
+`Journey.js` (a trail's facts and the token's steps), `Scoring.js` (stars/gems/streaks), and
+`Settings.js` (session length and sound). `GameUI.js` and `EventManager.js`
 handle the DOM; `game.js` is the untested orchestrator, by repo convention.
 Each mode under `js/modes/` exposes `createChallenge(fact, settings, rng)` --
 a plain object with no DOM -- which is what keeps the challenge logic

@@ -2,12 +2,10 @@ import { describe, test, expect } from "@jest/globals"
 import * as constants from "../js/constants.js"
 import { FACT_IDS, factIdsForTrail } from "../js/facts.js"
 import {
-  ALL_TABLES,
   CARD_TIERS,
   DAILY_GOAL,
   DAY_MS,
   DECAY,
-  DEFAULT_TABLES,
   FLAME_STAGES,
   GEM_MILESTONES,
   KEYPAD,
@@ -117,10 +115,6 @@ describe("STRENGTH", () => {
       // which is still mastered. See MasteryModel's _promote.
       expect(STRENGTH.SLOW_CAP).toBe(STRENGTH.STRENGTHENING)
       expect(STRENGTH.SLOW_CAP).toBeLessThan(STRENGTH.MASTERED_MIN)
-    })
-
-    test("is high enough to open a trail gate, so slow practice still moves", () => {
-      expect(STRENGTH.SLOW_CAP).toBeGreaterThanOrEqual(TRAIL.UNLOCK_MIN_STRENGTH)
     })
   })
 })
@@ -245,35 +239,6 @@ describe("SELECTION", () => {
   })
 })
 
-describe("table settings", () => {
-  describe("DEFAULT_TABLES", () => {
-    test("is a non-empty subset of ALL_TABLES, ascending and unique", () => {
-      expect(DEFAULT_TABLES.length).toBeGreaterThan(0)
-      expect(new Set(DEFAULT_TABLES).size).toBe(DEFAULT_TABLES.length)
-      expect(isStrictlyIncreasing([...DEFAULT_TABLES])).toBe(true)
-      for (const table of DEFAULT_TABLES) {
-        expect(ALL_TABLES).toContain(table)
-      }
-    })
-
-    // The whole point of dropping the difficulty presets: a new player gets the
-    // entire fact set and the toggles are for narrowing it, not for opting in.
-    test("turns every table on", () => {
-      expect([...DEFAULT_TABLES]).toEqual([...ALL_TABLES])
-    })
-  })
-})
-
-describe("ALL_TABLES", () => {
-  describe("coverage", () => {
-    test("is exactly the operand range, ascending", () => {
-      const expected = []
-      for (let table = OPERAND_MIN; table <= OPERAND_MAX; table += 1) expected.push(table)
-      expect([...ALL_TABLES]).toEqual(expected)
-    })
-  })
-})
-
 describe("MODE_LABELS", () => {
   describe("coverage of MODE_IDS", () => {
     test("has one entry per mode id and no extras", () => {
@@ -325,56 +290,17 @@ describe("SESSION", () => {
 })
 
 describe("TRAIL", () => {
-  describe("space arithmetic", () => {
-    // The whole point of the 2026-09-18 redesign. With every active fact of a
-    // trail strong, the cap is FREE_SPACES + SPACES_PER_STRONG_FACT * n and the
-    // last space is SPACES_PER_FACT * n - 1. The first must reach the second for
-    // EVERY trail size, or a trail exists that cannot be finished -- which is
-    // exactly the frozen-token bug the per-region gates had.
-    test("a fully strong trail always reaches its last space, at any size", () => {
-      for (let facts = 1; facts <= TOTAL_FACTS; facts += 1) {
-        const cap = TRAIL.FREE_SPACES + TRAIL.SPACES_PER_STRONG_FACT * facts
-        const lastSpace = TRAIL.SPACES_PER_FACT * facts - 1
-        expect(cap).toBeGreaterThanOrEqual(lastSpace)
-      }
+  describe("SPACES", () => {
+    test("is an integer of at least two, so a trail has a start and an end", () => {
+      expect(Number.isInteger(TRAIL.SPACES)).toBe(true)
+      expect(TRAIL.SPACES).toBeGreaterThanOrEqual(2)
     })
 
-    test("the token can move before anything is strong", () => {
-      expect(TRAIL.FREE_SPACES).toBeGreaterThan(0)
-    })
-
-    test("a trail is at least two spaces per fact, so walking outpaces gating", () => {
-      expect(TRAIL.SPACES_PER_FACT).toBeGreaterThanOrEqual(2)
-    })
-  })
-
-  describe("UNLOCK_MIN_STRENGTH", () => {
-    test("is the strengthening bar, deliberately below MASTERED_MIN", () => {
-      // Movement and fluency are separate bars: a child who is reliably correct
-      // should see her token move while she is still slow, and "mastered" is
-      // reserved for the foiled card and the mastered-* milestones.
-      expect(TRAIL.UNLOCK_MIN_STRENGTH).toBe(STRENGTH.STRENGTHENING)
-      expect(TRAIL.UNLOCK_MIN_STRENGTH).toBeLessThan(STRENGTH.MASTERED_MIN)
-    })
-
-    test("is a reachable strength", () => {
-      expect(Number.isInteger(TRAIL.UNLOCK_MIN_STRENGTH)).toBe(true)
-      expect(TRAIL.UNLOCK_MIN_STRENGTH).toBeGreaterThan(STRENGTH.MIN)
-      expect(TRAIL.UNLOCK_MIN_STRENGTH).toBeLessThanOrEqual(STRENGTH.MAX)
-    })
-  })
-
-  describe("SPACES_PER_CORRECT", () => {
-    test("moves the token at least one space per correct answer", () => {
-      expect(TRAIL.SPACES_PER_CORRECT).toBeGreaterThanOrEqual(1)
-    })
-
-    // A themed trail is meant to be finishable in a session or two rather than
-    // ground out over weeks, which is what a 40-space board asked for.
-    test("the longest session can walk the longest trail", () => {
-      const longestTrail = Math.max(...TRAILS.map((trail) => factIdsForTrail(trail.id).length))
-      const walkable = Math.max(...SESSION.LENGTH_OPTIONS) * TRAIL.SPACES_PER_CORRECT
-      expect(walkable).toBeGreaterThanOrEqual(TRAIL.SPACES_PER_FACT * longestTrail)
+    // A trail is meant to be finishable in a couple of rounds rather than ground
+    // out over weeks. Every correct answer moves one space, and the last space is
+    // SPACES - 1 steps from the first.
+    test("two default rounds of right answers walk a whole trail", () => {
+      expect(TRAIL.SPACES - 1).toBeLessThanOrEqual(SESSION.DEFAULT_LENGTH * 2)
     })
   })
 })
@@ -854,7 +780,6 @@ describe("module surface", () => {
       ["FLAME_STAGES", FLAME_STAGES],
       ["CARD_TIERS", CARD_TIERS],
       ["KEYPAD.KEYS", KEYPAD.KEYS],
-      ["ALL_TABLES", ALL_TABLES],
     ])("%s is frozen", (_name, table) => {
       expect(Object.isFrozen(table)).toBe(true)
     })

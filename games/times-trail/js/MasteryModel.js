@@ -362,9 +362,7 @@ export function masteryTier(record, now) {
 /**
  * Whether the fact currently counts as mastered: fluent recall, which is what
  * the foiled card, `masteredCount`, and the `mastered-*` gem milestones read.
- * Region gates deliberately do NOT read this -- they use the lower
- * `TRAIL.UNLOCK_MIN_STRENGTH` bar, so the token keeps moving while a fact is
- * still slow. See the TRAIL docblock in constants.js.
+ * Trail movement does not read this: the token moves on every correct answer.
  * @param {MasteryRecord} record - The fact's record
  * @param {number} now - Epoch ms
  * @returns {boolean} True when decayed strength is at least STRENGTH.MASTERED_MIN

@@ -12,7 +12,7 @@ arguments and testable without a browser or a fake clock.
 live state is a plain object held by `game.js` (`this.progress`), and every
 transition on it happens in a tested pure module -- `MasteryModel` for records,
 `Scoring` for stars and the daily goal, `Journey` for the token, `Settings` for
-the fact pool. A `GameState` class in the middle would only forward calls, and
+the session length. A `GameState` class in the middle would only forward calls, and
 the save shape it would own already lives in `storage.js` next to the
 normalization that guards it.
 
@@ -68,19 +68,19 @@ black-box through the real `index.html` rather than constructing anything.
 ### constants.js
 
 Every value more than one module needs: operand bounds, strength boundaries and
-intervals, decay and selection tuning, the default tables and session lengths,
-the five themed trails, star and gem tables, flame stages, card tiers, timings, the storage key, and the
-keypad layout. Imports nothing and exports only frozen literals, so importing it
+intervals, decay and selection tuning, the session lengths, the trail length and
+the five themed trails, star and gem tables, flame stages, card tiers, timings,
+the storage key, and the keypad layout. Imports nothing and exports only frozen literals, so importing it
 can never be order-dependent.
 
 ### facts.js
 
 Builds the 36-fact set once at module load and owns the canonical id form
-(`"<min>x<max>"`). Provides lookup, table-family and per-trail filtering, and
+(`"<min>x<max>"`). Provides lookup, per-trail filtering, and
 `randomOrientation`, which decides whether a fact is shown as `3 × 8` or `8 × 3`.
 Functions taking operands throw `RangeError` on bad input, because that is a
-programming mistake; functions taking an id or a table list never throw, because
-that input can come from a save file.
+programming mistake; functions taking an id never throw, because that input can
+come from a save file.
 
 ### MasteryModel.js
 
@@ -97,26 +97,25 @@ Turns the per-fact numbers into an order: a re-ask queue for facts just missed,
 then a 70/30 draw between a weak-or-due bucket and a strong bucket, then a
 weighted pick inside the chosen bucket. It draws from whatever pool it is given;
 `game.js` passes the current trail's facts, so a round never leaves the trail.
-Holds session state (last fact, question
-index, retry queue) and nothing else. The rng-call count per path is documented
+Holds session state (last fact, question index, retry queue) and nothing else. The rng-call count per path is documented
 and fixed, which is what makes the selection testable.
 
 ### Journey.js
 
-One themed trail, bound to one active fact pool. Both are construction
-arguments: the trail is what the token walks and the pool is what gating means,
-so changing either means a new `Journey` rather than a setter.
+One themed trail: the facts it owns and the token's steps. The trail is a
+construction argument, so changing trail means a new `Journey` rather than a
+setter. A trail always uses all of its own facts.
 
-A trail is `SPACES_PER_FACT` spaces long per fact of it that is in the pool, and
-the cap is `FREE_SPACES + SPACES_PER_STRONG_FACT × strongFacts` -- one formula
-in place of the eight per-region gates this replaced. The arithmetic guarantees
-a fully strong trail reaches its last space at any size, which is the
-frozen-token class of bug gone structurally. The cap reads decayed strength and
-can shrink, but the token never moves backwards.
+Every trail is `TRAIL.SPACES` (20) spaces long, and every correct answer moves
+the token one space. Nothing gates it, so a new player moves on the first correct
+answer; the last space finishes the trail. `progress()` reports how many of the
+trail's facts are strong (decayed strength at `STRENGTH.STRENGTHENING` or
+better) for the hub's "N strong" line, but strength does not decide movement. It
+decides which fact `FactSelector` draws next.
 
-`allTrailProgress()` is the module-level helper the hub uses to ask about all
-five at once. `activeFactIds` is also the pool a round draws from, so a round on
-a trail asks only that trail's facts.
+`allTrailProgress()` is the module-level helper the hub and the milestone check
+use to ask about all five at once. `factIds` is also the pool a round draws
+from, so a round on a trail asks only that trail's facts.
 
 ### Scoring.js
 
@@ -127,10 +126,10 @@ penalty, and gems are only ever added. The daily goal counts facts, not minutes.
 
 ### Settings.js
 
-The three persisted settings (`tables`, `sessionLength`, `sound`) and everything
-derived from them: the active fact pool, memoized. Persisted input is
+The two persisted settings (`sessionLength`, `sound`). Persisted input is
 untrusted, so nothing throws -- a rejected update returns `false` and changes
-nothing.
+nothing. A `tables` key from an older save is dropped on load: a trail uses all
+of its own facts, so nothing reads it.
 
 ### storage.js
 
@@ -173,8 +172,8 @@ game. Takes plain view models built from already-decided numbers and contains no
 game rules. Four base-class methods are overridden because the base behaviour is
 wrong for this page: `showFeedback` and `hideFeedback` (the base destroys class
 names and leaves stale text in an `aria-live` region), `showScreen` (the base
-loses focus to `<body>`), and `updateTitleButtons` (the base knows only Continue and Start Fresh,
-and this game has a third save-dependent title button).
+loses focus to `<body>`), and `updateTitleButtons` (the base knows only Continue
+and Start Fresh, and this game has a third save-dependent title button).
 
 ### Keypad.js
 
@@ -224,12 +223,12 @@ reports raw digits needs no special case at the call site.
 
 ```
 startSession(modeId)     (the hub's trail rows call startTrail(id) first)
-   │  resets session state, selector.reset(), rebuilds Journey for the pool
+   │  resets session state, selector.reset(), rebuilds Journey for the trail
    ▼
 _askNextQuestion()
    │
-   ├─► Journey.activeFactIds ─────► FactSelector.selectNext(pool, records)
-   │     (this trail's facts, in the enabled tables)
+   ├─► Journey.factIds ───────────► FactSelector.selectNext(pool, records)
+   │     (all of this trail's facts)
    │                                        │
    │                                        ▼
    │                                    a factId
@@ -270,7 +269,8 @@ _askNextQuestion()
                             storage.saveProgress
                                             │
                                             ▼
-                     20 answers?  ──no──►  _askNextQuestion()
+                     last question?  ──no──►  _askNextQuestion()
+                     (settings.sessionLength, 10 by default)
                             │ yes
                             ▼
                      _finishSession()
@@ -295,8 +295,8 @@ recorded here.
    `MasteryStore` aliases the map it is constructed with rather than copying it,
    so `store.apply()` is immediately visible to whatever gets saved. Nothing ever
    reassigns `this.progress.facts`; "start fresh" rebuilds the progress object and
-   the store together, as a pair. Break the alias and spaced repetition, trail
-   unlocking, and persistence all read an empty map while the screen still looks
+   the store together, as a pair. Break the alias and spaced repetition, the
+   hub's strength counts, and persistence all read an empty map while the screen still looks
    correct.
 2. **Every non-mutating call's return value must be assigned.**
    `Journey.advance`, `Journey.normalizeTrail`, `Scoring.applyAnswer`,
@@ -307,25 +307,26 @@ recorded here.
 
 ## Testing
 
-Tests live in the parent `__tests__/` directory -- 14 suites covering every
+Tests live in the parent `__tests__/` directory -- 15 suites covering every
 module except `modes/shared.js`, which is asserted through the two mode suites:
 
 - `constants.test.js` -- the shared tables and their cross-checks
 - `facts.test.js` -- the fact set, canonicalization, filtering
 - `MasteryModel.test.js` -- strength, decay, due dates, `MasteryStore`
 - `FactSelector.test.js` -- bucket draw, retry queue, rng-call contract
-- `Journey.test.js` -- trail length, the cap formula, pool scoping, and a sweep
-  asserting every (trail, table selection) pair can be finished
+- `Journey.test.js` -- one space per step, every trail walkable to its last
+  space with no strong fact, and the hub's strength counts
 - `Scoring.test.js` -- stars, gems, daily goal, streak calendar
-- `Settings.test.js` -- table toggles, fact pool, session length
+- `Settings.test.js` -- session length, sound, and retired keys
 - `storage.test.js` -- save shape, normalization, load failures
 - `quickRecall.test.js` -- the Quick Recall challenge
 - `modes.test.js` -- the registry and dispatcher
 - `Keypad.test.js` -- buffer transitions, rendering, keyboard fallback
 - `GameUI.test.js` -- rendering, against the real `index.html`
 - `EventManager.test.js` -- event routing, against the real `index.html`
-- `game.test.js` -- the settings path and the session loop's entry points,
-  driven black-box through the real `index.html`
+- `game.test.js` and `game.answering.test.js` -- the settings path, the session
+  loop's entry points, and answering, driven black-box through the real
+  `index.html`
 
 `GameUI.test.js`, `EventManager.test.js`, and `game.test.js` read
 `games/times-trail/index.html` from disk rather than hardcoding markup, so a

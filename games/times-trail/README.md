@@ -32,26 +32,21 @@ that is going.
 - **Five themed trails.** Doubles, Fives, Squares, Nines, and the Tough Ten --
   each themed on a _pattern_ rather than a times table. The hub is the list of
   trails: tap one to start a round on it, and the row says Start or Continue and
-  how many of its facts are strong. A round asks only that trail's facts (the
-  enabled tables still narrow it), so every correct answer moves the token. The
-  sets overlap on purpose: 2×5 is a double and a five, so getting it
-  right advances both, because the mastery record is per fact and shared.
-  Together they cover all 36 facts.
+  how many of its facts are strong. A round asks only that trail's facts, all of
+  them, so every correct answer moves the token. The sets overlap on purpose:
+  2×5 is a double and a five, so getting it right advances both, because the
+  mastery record is per fact and shared. Together they cover all 36 facts.
 
-  A trail is two spaces long per fact of it you are practising, so it is 16
-  spaces for a full pool and shorter for a narrow one. The token moves one space
-  per correct answer, and how far it may stand is one formula:
-
-  ```
-  cap = TRAIL.FREE_SPACES + TRAIL.SPACES_PER_STRONG_FACT × (facts of this trail that are strong)
-  ```
-
-  Strengthening opens ground and answering walks it, so the trail cannot be
-  walked by grinding 2×2. Inside a round the weak-or-due draw and the miss
-  retries still apply, but only over the trail's own facts. A slipping fact from
-  another trail waits until you walk that trail. With every fact of a trail
-  strong the cap always reaches the last space, so a trail can always be
-  finished; `constants.test.js` asserts that at every trail size.
+  Every trail is 20 spaces long, so reaching the last space takes 19 correct
+  answers: two rounds of 10 if every answer is right, and a few if some are not.
+  The token moves one space per correct answer and nothing gates it, so a new
+  player moves on the first right answer. The last space
+  finishes the trail, and the summary at the end of that round says so. Strength
+  does not decide whether the token moves. It decides which fact comes next:
+  inside a round the weak-or-due draw and the miss retries still apply, over the
+  trail's own facts. The hub shows strength as "N strong" (strengthening or
+  better, after decay). A slipping fact from another trail waits until you walk
+  that trail.
 
   This replaced one 40-space board through eight table-named regions on
   2026-09-18. A region there owned the facts whose _larger_ operand was its
@@ -86,16 +81,7 @@ sound arrives.
 ## Settings
 
 Open settings with the ⚙️ button on the hub or on the play screen. There are
-exactly two controls:
-
-- **Which tables?** -- eight toggles, all on by default, with the resulting pool
-  size shown underneath. Tables mean _families_: ticking 7 includes every fact
-  with a 7 in it, `7×2` through `7×9`.
-
-  A consequence worth knowing: because each fact belongs to two families,
-  unticking a low table barely narrows anything. Unticking the 2s removes only
-  `2×2`, since `2×3` is still in the 3 times table. Narrowing works by unticking
-  everything _except_ what you want. The last enabled table cannot be unticked.
+exactly one control:
 
 - **Questions per session** -- 10 (the default), 20, or 30. A save made before
   2026-11-18 keeps the value it stored, usually 20. The daily goal stays at 20
@@ -105,12 +91,11 @@ exactly two controls:
 Close the dialog with **Done** or **Escape**. Opening it mid-round pauses the
 scaffold countdown, and closing it starts that countdown again.
 
-There is deliberately no difficulty control. Four presets used to sit in front of
-the table list, but once every preset shared the same settings the only thing a
-preset changed was which tables were in play -- a table picker under a vaguer
-name, with a real table picker hidden behind its fourth option. Spaced repetition
-is what makes practice easier or harder question by question; the toggles are for
-scoping ("we are on the 7s in class this week").
+There is deliberately no difficulty control and no table picker. A trail is a
+fixed set of facts and always uses all of them, so nothing reads a table list. A
+picker that narrowed the pool left a trail such as Squares with one fact, asked
+ten times in a round. A `tables` value in an old save is ignored on load. Spaced
+repetition is what makes practice easier or harder question by question.
 
 A `sound` value is persisted in the save file but has no control and nothing
 reads it, because there is no audio yet.
@@ -171,9 +156,9 @@ js/
 ├── facts.js             # The 36-fact set and canonicalization
 ├── MasteryModel.js      # Per-fact strength, decay, due dates, MasteryStore
 ├── FactSelector.js      # Which fact is asked next
-├── Journey.js           # One themed trail: its facts, its length, its cap
+├── Journey.js           # One themed trail: its facts and the token's steps
 ├── Scoring.js           # Stars, gems, daily goal, streak calendar
-├── Settings.js          # Table toggles, session length, and the active fact pool
+├── Settings.js          # Session length and sound
 ├── storage.js           # Save shape plus localStorage via games/shared/
 ├── GameUI.js            # All DOM rendering
 ├── Keypad.js            # The in-page numeric keypad

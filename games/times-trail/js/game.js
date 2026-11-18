@@ -9,7 +9,7 @@
  *
  *   1. `startSession(modeId)` resets `this.session`, calls `selector.reset()`
  *      (so a miss from the previous session cannot fire on question 1), rebuilds
- *      `this.journey` for the chosen trail and the current fact pool, and shows
+ *      `this.journey` for the chosen trail, and shows
  *      the play screen. The hub's trail rows call `startTrail(trailId)`, which
  *      sets the current trail and then does this.
  *   2. `_askNextQuestion()` picks a fact (`FactSelector`), captures its strength
@@ -50,9 +50,8 @@
  *     spaced repetition, trail progress, and persistence all read an empty map
  *     while the screen still looks right.
  *   - **Every non-mutating call's return value is assigned.** `Journey.advance`,
- *     `Scoring.applyAnswer`, `Scoring.rollDaily`, `Scoring.checkMilestones`,
- *     and `Journey.clampToTrail` all return new values and
- *     touch nothing. A dropped return reads exactly like working code and
+ *     `Scoring.applyAnswer`, `Scoring.rollDaily`, and `Scoring.checkMilestones`
+ *     all return new values and touch nothing. A dropped return reads exactly like working code and
  *     silently kills the feature. `store.apply()` is the one call that needs no
  *     assignment, because the store writes through the aliased map.
  *
@@ -257,11 +256,10 @@ class TimesTrail {
     this.progress.daily = this.scoring.rollDaily(this.progress.daily)
 
     /**
-     * @type {Journey} The trail being walked, bound to the current fact pool.
-     * Rebuilt whenever either changes -- both are construction arguments.
+     * @type {Journey} The trail being walked. Rebuilt when the trail changes,
+     * because the trail is a construction argument.
      */
     this.journey = this._buildJourney()
-    this._clampCurrentTrail()
 
     /** @type {SessionState} */
     this.session = this._createSession(MODE_IDS.QUICK_RECALL)
@@ -332,12 +330,11 @@ class TimesTrail {
       onSettingsOpen: () => this.openSettings(),
       onSettingsClose: () => this.closeSettings(),
       onSettingChange: (key, value) => this.changeSetting(key, value),
-      onTableToggle: (table, checked) => this.toggleTable(table, checked),
     })
     this.events.initializeEventListeners()
 
     this.ui.updateTitleButtons(loaded !== null)
-    this.ui.renderSettings(this.settings.toJSON(), this.settings.factCount)
+    this.ui.renderSettings(this.settings.toJSON())
     this._refreshHud()
   }
 
@@ -447,18 +444,16 @@ class TimesTrail {
     this.progress = defaultProgress()
     this.store = new MasteryStore(this.progress.facts, this._now)
     // Settings deliberately SURVIVE. The prompt promises the trail, the cards, and
-    // the stars, and says nothing about which tables are in play -- but rebuilding
-    // `Settings` from the fresh defaults silently turned every table back on and
-    // reset the session length. The live instance stays the authority, so the fresh
+    // the stars, and says nothing about the session length -- but rebuilding
+    // `Settings` from the fresh defaults silently reset it. The live instance stays the authority, so the fresh
     // progress object is made to agree with it instead.
     this.progress.settings = this.settings.toJSON()
     this.progress.daily = this.scoring.rollDaily(this.progress.daily)
     this.journey = this._buildJourney()
-    this._clampCurrentTrail()
     this.selector.reset()
     this.session = this._createSession(MODE_IDS.QUICK_RECALL)
 
-    this.ui.renderSettings(this.settings.toJSON(), this.settings.factCount)
+    this.ui.renderSettings(this.settings.toJSON())
     this.ui.updateTitleButtons(false)
     this.showHub()
   }
@@ -539,8 +534,8 @@ class TimesTrail {
    */
   _renderTrailList() {
     const statuses = allTrailProgress({
-      activePool: this.settings.factPool,
       records: this.progress.facts,
+      spaces: this.progress.trails.spaces,
       now: this._now,
     })
     const trails = statuses.map((status) => {
@@ -551,20 +546,11 @@ class TimesTrail {
         emoji: trail.emoji,
         blurb: trail.blurb,
         current: status.trailId === this.journey.trailId,
-        space: Math.min(
-          this.progress.trails.spaces[status.trailId] ?? 0,
-          Math.max(0, status.totalSpaces - 1),
-        ),
+        space: status.space,
         totalSpaces: status.totalSpaces,
-        cap: status.cap,
-        // `strong`, not `mastered`: the cap counts facts at
-        // TRAIL.UNLOCK_MIN_STRENGTH (3) and `mastered` is the 4+ count, so
-        // showing `mastered` against the trail's length would report progress
-        // against a bar the trail does not use.
         strong: status.strong,
         total: status.total,
         complete: status.complete,
-        unavailable: status.unavailable,
       }
     })
 
@@ -620,7 +606,7 @@ class TimesTrail {
    */
   openSettings() {
     this._pauseTimers()
-    this.ui.renderSettings(this.settings.toJSON(), this.settings.factCount)
+    this.ui.renderSettings(this.settings.toJSON())
     this.ui.showSettings()
   }
 
@@ -636,9 +622,7 @@ class TimesTrail {
   }
 
   /**
-   * Apply one setting. Re-rendering the modal is what keeps the fact-count
-   * readout in step with the controls, and the journey is rebuilt because a
-   * trail's facts are scoped to the active fact pool.
+   * Apply one setting.
    *
    * The round counter is redrawn because the session length is allowed to change
    * MID-SESSION. Every read of `settings.sessionLength` is live, so shortening
@@ -657,37 +641,11 @@ class TimesTrail {
    */
   changeSetting(key, value) {
     if (!this.settings.update(key, value)) return
-    this.ui.renderSettings(this.settings.toJSON(), this.settings.factCount)
-    this.journey = this._buildJourney()
-    this._clampCurrentTrail()
+    this.ui.renderSettings(this.settings.toJSON())
     if (key === "sessionLength") {
       const length = this.settings.sessionLength
       this.ui.updateRoundCount(Math.min(this.session.factsAnswered + 1, length), length)
     }
-    this._save()
-  }
-
-  /**
-   * Toggle one table in the settings dialog. An attempt to clear the last table is
-   * rejected by `Settings`, and re-rendering restores the control to the state
-   * that is actually in force.
-   * @param {number} table - Table number, 2-9
-   * @param {boolean} checked - Whether the toggle is now on
-   * @returns {void}
-   */
-  toggleTable(table, checked) {
-    const tables = new Set(this.settings.enabledTables)
-    if (checked) {
-      tables.add(table)
-    } else {
-      tables.delete(table)
-    }
-
-    const applied = this.settings.setTables([...tables])
-    this.ui.renderSettings(this.settings.toJSON(), this.settings.factCount)
-    if (!applied) return
-    this.journey = this._buildJourney()
-    this._clampCurrentTrail()
     this._save()
   }
 
@@ -699,8 +657,7 @@ class TimesTrail {
    * delay is measured from the wrong origin.
    *
    * A round asks only the facts of the trail being walked (see
-   * `_askNextQuestion`). A trail the enabled tables leave empty has nothing to
-   * ask, so the player is sent back to the hub, where its row is disabled.
+   * `_askNextQuestion`).
    * @param {string} modeId - A `MODE_IDS` value; anything unknown falls back to Quick Recall
    * @returns {void}
    */
@@ -711,13 +668,8 @@ class TimesTrail {
     this.session = this._createSession(mode === null ? MODE_IDS.QUICK_RECALL : mode.id)
     this.selector.reset()
     this.journey = this._buildJourney()
-    this._clampCurrentTrail()
     this._isProcessingAnswer = false
 
-    if (this.journey.activeFactIds.length === 0) {
-      this.showHub()
-      return
-    }
     this.ui.updatePlayHud({ sessionStars: 0, sessionStreak: 0 })
     this.ui.showScreen("play-screen")
     this._askNextQuestion()
@@ -739,9 +691,8 @@ class TimesTrail {
   /**
    * Build, render, and arm one question.
    *
-   * The pool is the current trail's facts, intersected with the enabled tables
-   * (`journey.activeFactIds`), so every question is one the token can move on.
-   * Misses re-ask from the same pool.
+   * The pool is all of the current trail's facts (`journey.factIds`). Misses
+   * re-ask from the same pool.
    *
    * Order matters twice over. The strength and card tier are captured BEFORE the
    * answer, because star weighting and the "new card"
@@ -752,7 +703,7 @@ class TimesTrail {
    * @private
    */
   _askNextQuestion() {
-    const factId = this.selector.selectNext(this.journey.activeFactIds, this.progress.facts)
+    const factId = this.selector.selectNext(this.journey.factIds, this.progress.facts)
     const fact = factId === null ? null : getFact(factId)
     if (fact === null) {
       console.error("Times Trail: no fact available to ask; returning to the hub")
@@ -917,11 +868,7 @@ class TimesTrail {
 
     // Assigned back: advance returns a NEW trail. Dropping it leaves the token
     // frozen while every answer still looks scored.
-    const result = this.journey.advance(
-      this._currentTrailPosition(),
-      TRAIL.SPACES_PER_CORRECT,
-      this.progress.facts,
-    )
+    const result = this.journey.advance(this._currentTrailPosition())
     this._setCurrentTrailPosition(result.trail)
 
     if (result.finished) this.session.trailFinishedName = this.journey.trail?.name ?? null
@@ -1000,15 +947,10 @@ class TimesTrail {
       factsCorrect: this.progress.totals.factsCorrect,
       starsTotal: this.progress.totals.starsTotal,
       masteredCount: this.store.masteredCount(),
-      // Trails FINISHED, not trails available. The metric this replaced counted
-      // unlocked regions, and a region holding no fact of the active pool
-      // counted as unlocked -- so the default custom tables [6, 7] handed out
-      // the halfway gem before a single question had been answered. A trail is
-      // complete only when every one of its active facts is strong, which
-      // cannot be true of a trail the player has not practised.
+      // Trails FINISHED, not trails available: the token is on the last space.
       completedTrailCount: allTrailProgress({
-        activePool: this.settings.factPool,
         records: this.progress.facts,
+        spaces: this.progress.trails.spaces,
         now: this._now,
       }).filter((status) => status.complete).length,
       streakDays: this.progress.daily.streakDays,
@@ -1185,7 +1127,7 @@ class TimesTrail {
    * The play screen's one-row trail indicator.
    *
    * It shows the WHOLE trail now, not the five spaces of the region the token
-   * happens to be in. A themed trail is 16 to 20 spaces, which fits the strip,
+   * happens to be in. A trail is 20 spaces, which fits the strip,
    * and showing all of it means the strip answers "how far through Squares am
    * I" rather than "how far through an arbitrary fifth of a 40-space board".
    * @returns {Object} A `PlayTrailStripView`
@@ -1193,15 +1135,11 @@ class TimesTrail {
    */
   _buildStripView() {
     const trail = this.journey.trail
-    const space = this._currentTrailPosition().space
-    const cap = this.journey.lastUnlockedSpace(this.progress.facts)
     return {
       trailName: trail?.name ?? "",
       trailEmoji: trail?.emoji ?? "",
-      totalSpaces: this.journey.totalSpaces,
-      space,
-      cap,
-      gated: space >= cap,
+      totalSpaces: TRAIL.SPACES,
+      space: this._currentTrailPosition().space,
     }
   }
 
@@ -1245,17 +1183,14 @@ class TimesTrail {
   // -------------------------------------------------------------- Plumbing
 
   /**
-   * A `Journey` for the trail being walked, bound to the fact pool currently in
-   * play. Both are construction arguments rather than setters: the trail is what
-   * the token walks and the pool is what gating means, so changing either is a
-   * new journey.
-   * @returns {Journey} A journey for the current trail and settings
+   * A `Journey` for the trail being walked. The trail is a construction argument
+   * rather than a setter, so changing trail is a new journey.
+   * @returns {Journey} A journey for the current trail
    * @private
    */
   _buildJourney() {
     return new Journey({
       trailId: this.progress.trails.currentId,
-      activePool: this.settings.factPool,
       now: this._now,
     })
   }
@@ -1276,19 +1211,6 @@ class TimesTrail {
    */
   _setCurrentTrailPosition(trail) {
     this.progress.trails.spaces[this.journey.trailId] = trail.space
-  }
-
-  /**
-   * Bring the current trail's saved position inside the trail it belongs to.
-   *
-   * Needed on every journey rebuild, not just on load: a trail is as long as
-   * the active pool makes it, so narrowing the tables can leave the token past
-   * the end of a trail it was legitimately at the end of. Only a `Journey`
-   * knows the length, which is why storage does not do this.
-   * @private
-   */
-  _clampCurrentTrail() {
-    this._setCurrentTrailPosition(this.journey.clampToTrail(this._currentTrailPosition()))
   }
 
   /**

@@ -90,7 +90,7 @@ link hides fully and prose links take the theme color.
 
 Landed 2026-11-18: form controls inherit the page font and size (`style.css`), controls inherit the page font size, 16px by default, so iOS does not zoom (Turing Tape's rule selects are 0.9rem on desktop and 16px on touch), and the 1.1 to 1.5rem input sizes on four tool pages are gone. Games: 44px tap targets on touch screens in Life Garden and Turing Tape, `100vh` fallback before `100dvh` in Seasons. The games share no CSS, only JS, so there was nothing to move onto; their palettes and top bars stay separate.
 
-Landed 2026-11-18: Times Trail is simpler. The hub is the list of trails and a tap starts one; a round asks only that trail's facts; the default round is 10 questions; the play screen has one bar. (Was "Times Trail is confusing.")
+Landed 2026-11-18: Times Trail is simpler. The hub is the list of trails and a tap starts one; a round asks all of that trail's facts and ignores the tables setting, which is gone; every correct answer moves the token one space along a 20-space trail, with no strength gate; the default round is 10 questions; the play screen has one bar. (Was "Times Trail is confusing.")
 
 Landed 2026-11-18: Life Garden is now a small grass, rabbit and fox model (about 300 lines of JS, down from 2700). Grass alone fills the board, rabbits alone become common, and rabbits with foxes cycle and usually last 500 generations.
 

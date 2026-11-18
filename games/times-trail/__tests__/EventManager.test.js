@@ -33,7 +33,6 @@ function makeCallbacks() {
     onSettingsOpen: jest.fn(),
     onSettingsClose: jest.fn(),
     onSettingChange: jest.fn(),
-    onTableToggle: jest.fn(),
   }
 }
 
@@ -232,10 +231,9 @@ describe("EventManager", () => {
 
   describe("setupTrailPicker", () => {
     /** Rows are rebuilt on every render, so add them after wiring, as GameUI does. */
-    function addRow(id, disabled = false) {
+    function addRow(id) {
       const row = document.createElement("button")
       row.dataset.trailId = id
-      row.disabled = disabled
       const label = document.createElement("span")
       row.appendChild(label)
       document.getElementById("trail-spaces").appendChild(row)
@@ -247,11 +245,6 @@ describe("EventManager", () => {
       squares.row.click()
       squares.label.click()
       expect(callbacks.onStartTrail.mock.calls).toEqual([["squares"], ["squares"]])
-    })
-
-    test("a disabled row starts nothing", () => {
-      addRow("nines", true).row.click()
-      expect(callbacks.onStartTrail).not.toHaveBeenCalled()
     })
 
     test("a click on the container outside any row starts nothing", () => {
@@ -380,46 +373,6 @@ describe("EventManager", () => {
       // Retired with the difficulty presets.
       expect(document.getElementById("difficulty-select")).toBeNull()
     })
-
-    test("checking a table checkbox invokes onTableToggle with the number and true", () => {
-      const checkbox = document.getElementById("table-7")
-      checkbox.checked = true
-      checkbox.dispatchEvent(new Event("change"))
-      expect(callbacks.onTableToggle).toHaveBeenCalledTimes(1)
-      expect(callbacks.onTableToggle).toHaveBeenCalledWith(7, true)
-    })
-
-    test("unchecking a table checkbox invokes onTableToggle with false", () => {
-      const checkbox = document.getElementById("table-7")
-      checkbox.checked = false
-      checkbox.dispatchEvent(new Event("change"))
-      expect(callbacks.onTableToggle).toHaveBeenCalledWith(7, false)
-    })
-
-    test("clicking the wrapping label produces the same call", () => {
-      const label = document.querySelector('label.table-toggle[for="table-3"]')
-      label.click()
-      expect(callbacks.onTableToggle).toHaveBeenCalledTimes(1)
-      expect(callbacks.onTableToggle).toHaveBeenCalledWith(3, true)
-    })
-
-    test("all eight table checkboxes are wired", () => {
-      for (let table = 2; table <= 9; table += 1) {
-        const checkbox = document.getElementById(`table-${table}`)
-        checkbox.checked = true
-        checkbox.dispatchEvent(new Event("change"))
-      }
-      expect(callbacks.onTableToggle.mock.calls).toEqual([
-        [2, true],
-        [3, true],
-        [4, true],
-        [5, true],
-        [6, true],
-        [7, true],
-        [8, true],
-        [9, true],
-      ])
-    })
   })
 
   describe("missing elements", () => {
@@ -469,9 +422,6 @@ describe("EventManager", () => {
       const select = document.getElementById("session-length-select")
       select.value = "10"
       select.dispatchEvent(new Event("change"))
-      const checkbox = document.getElementById("table-6")
-      checkbox.checked = true
-      checkbox.dispatchEvent(new Event("change"))
       pressKey("Escape")
     }
 

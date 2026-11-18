@@ -16,6 +16,8 @@ import { describe, expect, jest, test, beforeEach } from "@jest/globals"
 import { readFileSync } from "node:fs"
 import { join, dirname } from "node:path"
 import { fileURLToPath } from "node:url"
+import { STORAGE } from "../js/constants.js"
+import { defaultProgress } from "../js/storage.js"
 
 const here = dirname(fileURLToPath(import.meta.url))
 const html = readFileSync(join(here, "../index.html"), "utf8")
@@ -33,11 +35,14 @@ function boot() {
 const byId = (id) => document.getElementById(id)
 const click = (id) => byId(id).click()
 
-/** Tick or untick a table toggle the way a tap does. */
-function toggleTable(table, checked) {
-  const input = byId(`table-${table}`)
-  input.checked = checked
-  input.dispatchEvent(new Event("change", { bubbles: true }))
+/** Boot onto a save written by an earlier build, the way a reload does. */
+function bootWithSave(patch) {
+  localStorage.setItem(
+    STORAGE.KEY,
+    JSON.stringify({ ...defaultProgress(), ...patch, version: STORAGE.VERSION }),
+  )
+  document.documentElement.innerHTML = html.replace(/<!DOCTYPE[^>]*>/i, "")
+  document.dispatchEvent(new Event("DOMContentLoaded"))
 }
 
 describe("game", () => {
@@ -61,14 +66,13 @@ describe("game", () => {
     expect(byId("keypad").querySelectorAll("button").length).toBe(12)
   })
 
-  test("the settings modal opens with every table on and the real pool size", () => {
+  test("the settings modal offers the session length and nothing about tables", () => {
     click("settings-button")
     expect(byId("settings-modal").classList.contains("hidden")).toBe(false)
-    for (const table of [2, 3, 4, 5, 6, 7, 8, 9]) {
-      expect(byId(`table-${table}`).checked).toBe(true)
-    }
     expect(byId("session-length-select").value).toBe("10")
-    expect(byId("pool-size").textContent).toBe("36 facts in play")
+    expect(document.querySelector('#settings-modal input[type="checkbox"]')).toBeNull()
+    expect(byId("pool-size")).toBeNull()
+    expect(byId("table-2")).toBeNull()
   })
 
   test("the retired difficulty controls are gone from the shipped markup", () => {
@@ -76,21 +80,30 @@ describe("game", () => {
     expect(byId("custom-tables-group")).toBeNull()
   })
 
-  test("unticking tables narrows the pool and the readout follows", () => {
-    click("settings-button")
-    for (const table of [2, 3, 4, 5, 8, 9]) toggleTable(table, false)
-    expect(byId("pool-size").textContent).toBe("15 facts in play")
-    toggleTable(6, false)
-    expect(byId("pool-size").textContent).toBe("8 facts in play")
+  // A trail always uses all of its own facts, and the answering tests check the
+  // round. Here the old save only has to load and start a trail.
+  test("a save with narrowed tables loads and starts a trail", () => {
+    bootWithSave({ settings: { tables: [7], sessionLength: 20 } })
+    expect(document.querySelector(".error-container")).toBeNull()
+    expect(console.error).not.toHaveBeenCalled()
+
+    click("progress-button")
+    document.querySelector('[data-trail-id="squares"]').click()
+    expect(byId("progress-text").textContent).toBe("Question 1 of 20")
+    const [, left, right] = byId("question-text").textContent.match(/^(\d+) × (\d+)/)
+    expect(left).toBe(right)
   })
 
-  test("unticking the last table is refused and the toggle springs back", () => {
+  test("saving drops the retired tables setting", () => {
+    bootWithSave({ settings: { tables: [7], sound: "off" } })
     click("settings-button")
-    for (const table of [3, 4, 5, 6, 7, 8, 9]) toggleTable(table, false)
-    expect(byId("pool-size").textContent).toBe("8 facts in play")
-    toggleTable(2, false)
-    expect(byId("table-2").checked).toBe(true)
-    expect(byId("pool-size").textContent).toBe("8 facts in play")
+    const select = byId("session-length-select")
+    select.value = "20"
+    select.dispatchEvent(new Event("change", { bubbles: true }))
+    expect(JSON.parse(localStorage.getItem(STORAGE.KEY)).settings).toEqual({
+      sessionLength: 20,
+      sound: "off",
+    })
   })
 
   test("a new player's round is 10 questions", () => {
@@ -130,34 +143,6 @@ describe("game", () => {
     expect(byId("play-trail-strip").querySelectorAll(".strip-space").length).toBeGreaterThan(0)
   })
 
-  // Narrowing the pool rebuilds the journey, which can move the gating region --
-  // a region with no active facts is skipped outright. Without reseeding, the
-  // selector went on pushing the old region's facts until the next correct
-  // answer, and on a narrowed pool those may not be in the pool at all.
-  test("changing the tables mid-session keeps asking from the new pool", () => {
-    click("start-button")
-    click("play-settings-button")
-    for (const table of [2, 3, 4, 5, 6, 8, 9]) toggleTable(table, false)
-    click("close-settings")
-
-    // Tables [7]: every remaining fact contains a 7, so a question that does not
-    // is a question drawn against the old pool.
-    click("start-button")
-    const [, left, right] = byId("question-text").textContent.match(/^(\d+) × (\d+)/)
-    expect([Number(left), Number(right)]).toContain(7)
-  })
-
-  test("the narrowed pool is what actually gets asked", () => {
-    click("settings-button")
-    for (const table of [2, 3, 4, 5, 6, 8, 9]) toggleTable(table, false)
-    expect(byId("pool-size").textContent).toBe("8 facts in play")
-    click("close-settings")
-
-    click("start-button")
-    const [, left, right] = byId("question-text").textContent.match(/^(\d+) × (\d+)/)
-    expect([Number(left), Number(right)]).toContain(7)
-  })
-
   // Escape is the dialog's second exit and must route through the same
   // closeSettings the Done button does, or the countdown openSettings paused
   // stays paused and the round never advances.
@@ -176,7 +161,6 @@ describe("game", () => {
     const select = byId("session-length-select")
     select.value = "30"
     select.dispatchEvent(new Event("change", { bubbles: true }))
-    toggleTable(2, false)
     click("close-settings")
 
     // Reboot onto fresh markup WITHOUT clearing storage, the way a reload does.
@@ -186,11 +170,6 @@ describe("game", () => {
     click("progress-button")
     click("settings-button")
     expect(byId("session-length-select").value).toBe("30")
-    expect(byId("table-2").checked).toBe(false)
-    // 35, not 28: under table-FAMILY semantics unticking the 2s removes only
-    // 2x2, because 2x3 is still in the 3 times table. Unticking a LOW table
-    // barely narrows anything; narrowing works by unticking everything else.
-    expect(byId("pool-size").textContent).toBe("35 facts in play")
   })
 
   // The hub IS the list of trails: there is no separate picker screen, and no
@@ -246,13 +225,10 @@ describe("game", () => {
     ).toBe(false)
   })
 
-  test("a trail the enabled tables leave empty is disabled on the hub", () => {
-    click("settings-button")
-    // The Tough Ten never contains a 2, 5 or 9, so tables 2, 5 and 9 alone empty it.
-    for (const table of [3, 4, 6, 7, 8]) toggleTable(table, false)
-    click("close-settings")
+  test("no trail is disabled on the hub", () => {
     click("progress-button")
-    expect(document.querySelector('[data-trail-id="tough"]').disabled).toBe(true)
-    expect(document.querySelector('[data-trail-id="doubles"]').disabled).toBe(false)
+    for (const row of document.querySelectorAll("#hub-screen [data-trail-id]")) {
+      expect(row.disabled).toBe(false)
+    }
   })
 })

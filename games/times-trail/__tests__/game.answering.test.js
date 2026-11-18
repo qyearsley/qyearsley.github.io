@@ -10,7 +10,8 @@ import { describe, expect, jest, test, beforeEach, afterEach } from "@jest/globa
 import { readFileSync } from "node:fs"
 import { join, dirname } from "node:path"
 import { fileURLToPath } from "node:url"
-import { TIMING } from "../js/constants.js"
+import { STORAGE, TIMING } from "../js/constants.js"
+import { defaultProgress } from "../js/storage.js"
 
 const here = dirname(fileURLToPath(import.meta.url))
 const html = readFileSync(join(here, "../index.html"), "utf8")
@@ -33,6 +34,30 @@ function boot() {
   localStorage.clear()
   document.documentElement.innerHTML = html.replace(/<!DOCTYPE[^>]*>/i, "")
   document.dispatchEvent(new Event("DOMContentLoaded"))
+}
+
+/** Reboot onto a save written earlier, the way a reload does, and open a trail. */
+function bootWithSave(patch, trailId) {
+  localStorage.setItem(
+    STORAGE.KEY,
+    JSON.stringify({ ...defaultProgress(), ...patch, version: STORAGE.VERSION }),
+  )
+  document.documentElement.innerHTML = html.replace(/<!DOCTYPE[^>]*>/i, "")
+  document.dispatchEvent(new Event("DOMContentLoaded"))
+  click("progress-button")
+  document.querySelector(`[data-trail-id="${trailId}"]`).click()
+}
+
+/** The token's space as saved, which is updated by the answer itself. */
+function savedSpace(trailId) {
+  const saved = JSON.parse(localStorage.getItem(STORAGE.KEY))
+  return saved.trails.spaces[trailId] ?? 0
+}
+
+/** The token's space on the play screen's trail strip, as of the last question drawn. */
+function tokenSpace() {
+  const spaces = Array.from(byId("play-trail-strip").querySelectorAll(".strip-space"))
+  return spaces.findIndex((space) => space.classList.contains("strip-space-current"))
 }
 
 function tapKey(key) {
@@ -176,42 +201,94 @@ describe("times trail answering", () => {
     expect(progress()).toBe("Question 1 of 10")
   })
 
-  // The point of the trail rework: every question is on the trail being walked,
-  // so every correct answer can move the token. Misses come back from the same
-  // trail, because the retry queue only holds facts that were asked.
-  test("a round on Squares asks only squares, retries included", () => {
+  // The point of the trail rework: every question is on the trail being walked.
+  // Misses come back from the same trail, and the retry is the missed fact itself:
+  // a fact missed as question m returns as question m + 4 or m + 5 (3 or 4 others
+  // in between). The misses are far enough apart not to share a slot.
+  test("a round on Squares asks only squares, and the retries are the missed facts", () => {
     jest.spyOn(window, "confirm").mockReturnValue(true)
     click("back-button")
     document.querySelector('[data-trail-id="squares"]').click()
 
+    const missAt = [0, 3]
+    const asked = []
     for (let i = 0; i < 10; i++) {
       const [left, right] = questionFact()
       expect(left).toBe(right)
-      if (i === 1 || i === 4) {
+      asked.push(left)
+      if (missAt.includes(i)) {
         answerWrongly()
         jest.advanceTimersByTime(TIMING.WRONG_FEEDBACK_MS)
         click("scaffold-continue")
       } else {
-        submit(rightAnswer())
-        jest.advanceTimersByTime(TIMING.CORRECT_FEEDBACK_MS)
+        answerCorrectly()
       }
+    }
+    for (const miss of missAt) {
+      expect([asked[miss + 4], asked[miss + 5]]).toContain(asked[miss])
     }
   })
 
-  test("every correct answer on a trail moves the token", () => {
+  // Walk a whole round, misses included: the token moves one space for every
+  // correct answer and holds still for every miss. Nothing caps it.
+  test("every answer across a round moves the token one space if right, none if wrong", () => {
     jest.spyOn(window, "confirm").mockReturnValue(true)
     click("back-button")
     document.querySelector('[data-trail-id="squares"]').click()
 
-    const spaceOf = () => {
-      const spaces = Array.from(byId("play-trail-strip").querySelectorAll(".strip-space"))
-      return spaces.findIndex((space) => space.classList.contains("strip-space-current"))
+    expect(savedSpace("squares")).toBe(0)
+    let expected = 0
+    for (let i = 0; i < 10; i++) {
+      if (i === 2 || i === 6) {
+        answerWrongly()
+        expect(savedSpace("squares")).toBe(expected)
+        jest.advanceTimersByTime(TIMING.WRONG_FEEDBACK_MS)
+        click("scaffold-continue")
+      } else {
+        submit(rightAnswer())
+        expected += 1
+        expect(savedSpace("squares")).toBe(expected)
+        jest.advanceTimersByTime(i === 9 ? TIMING.SUMMARY_DELAY_MS : TIMING.CORRECT_FEEDBACK_MS)
+      }
+      // The strip catches up when the next question is drawn.
+      if (i < 9 && i !== 2 && i !== 6) expect(tokenSpace()).toBe(expected)
     }
-    const start = spaceOf()
-    answerCorrectly()
-    expect(spaceOf()).toBe(start + 1)
-    answerCorrectly()
-    expect(spaceOf()).toBe(start + 2)
+    expect(expected).toBe(8)
+  })
+
+  // A save that narrowed the tables to the 7s used to leave Squares with one fact
+  // (7x7), asked ten times over. A trail now ignores the tables.
+  test("a save with narrowed tables still asks a trail's every fact", () => {
+    bootWithSave({ settings: { tables: [7] } }, "squares")
+    const asked = new Set()
+    for (let i = 0; i < 10; i++) {
+      const [left, right] = questionFact()
+      expect(left).toBe(right)
+      asked.add(left)
+      answerCorrectly()
+    }
+    expect(asked.size).toBeGreaterThan(2)
+  })
+
+  test("finishing a trail is announced on the summary", () => {
+    bootWithSave({ trails: { currentId: "squares", spaces: { squares: 18 } } }, "squares")
+    expect(tokenSpace()).toBe(18)
+    for (let i = 0; i < 10; i++) {
+      submit(rightAnswer())
+      jest.advanceTimersByTime(i === 9 ? TIMING.SUMMARY_DELAY_MS : TIMING.CORRECT_FEEDBACK_MS)
+    }
+    expect(activeScreen()).toBe("summary-screen")
+    expect(byId("summary-trail").classList.contains("hidden")).toBe(false)
+    expect(byId("summary-trail").textContent).toBe("Trail finished: Squares!")
+
+    // The token stays on the last space, and playing again does not announce it twice.
+    click("play-again-button")
+    expect(tokenSpace()).toBe(19)
+    for (let i = 0; i < 10; i++) {
+      submit(rightAnswer())
+      jest.advanceTimersByTime(i === 9 ? TIMING.SUMMARY_DELAY_MS : TIMING.CORRECT_FEEDBACK_MS)
+    }
+    expect(byId("summary-trail").classList.contains("hidden")).toBe(true)
   })
 
   test("a round on the default trail asks only facts with a 2", () => {

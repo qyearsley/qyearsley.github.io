@@ -34,7 +34,6 @@
   --tt-incorrect: #b05a3c;
   --tt-star: #f0b429;
   --tt-gem: #4a9bd1;
-  --tt-locked: #b8b8b0;
   --tt-strength-0: #e4ded1;
   --tt-strength-1: #d3e0c8;
   --tt-strength-2: #b6d2a6;
@@ -114,8 +113,7 @@ body {
 .secondary-button,
 .nav-button,
 .icon-button,
-.text-button,
-.table-toggle {
+.text-button {
   min-width: var(--tt-tap-size);
   min-height: var(--tt-tap-size);
   border: none;
@@ -136,8 +134,7 @@ body {
 .title-buttons,
 .hub-nav,
 .summary-buttons,
-.header .stats,
-.table-toggles {
+.header .stats {
   display: flex;
   gap: var(--tt-tap-gap);
   align-items: center;
@@ -272,7 +269,7 @@ body {
   white-space: nowrap;
 }
 
-/* `flex-shrink` is 1, not 0: a full Tough trail is 20 spaces plus the name, and
+/* `flex-shrink` is 1, not 0: a trail is 20 spaces plus the name, and
    a row of unshrinkable 24px circles overflowed the play screen on an iPad in
    portrait. `min-width` keeps them from collapsing to slivers. */
 .strip-space {
@@ -293,24 +290,10 @@ body {
   border-color: var(--tt-primary-dark);
 }
 
-/* The same three states as the trail screen, so the strip and the picker read
-   alike: walked is filled, open is hollow, not-open-yet is dashed and grey. */
-.strip-space-open {
+/* The same states as the trail screen, so the strip and the picker read
+   alike: walked is filled, ahead is hollow. */
+.strip-space-ahead {
   background-color: transparent;
-}
-
-.strip-space-locked {
-  background-color: var(--tt-locked);
-  border-style: dashed;
-  opacity: 0.6;
-}
-
-/* A gate is "not yet", not "not here": square rather than round, so the
-   difference from a plain space survives a colour-blind reading. */
-.strip-space-gate {
-  background-color: var(--tt-surface);
-  border: 3px dashed var(--tt-incorrect);
-  border-radius: 4px;
 }
 
 .strip-token {
@@ -391,8 +374,7 @@ body {
 /* Hover is an enhancement only -- gated so a touch device never inherits a
    sticky hover state, and every control below has an unconditional :active. */
 @media (hover: hover) and (pointer: fine) {
-  .keypad-key:hover,
-  .table-toggle:hover {
+  .keypad-key:hover {
     background-color: var(--tt-surface-alt);
     border-color: var(--tt-primary);
   }
@@ -411,8 +393,7 @@ body {
 .secondary-button:active,
 .nav-button:active,
 .icon-button:active,
-.text-button:active,
-.table-toggle:active {
+.text-button:active {
   transform: scale(0.95);
   background-color: var(--tt-primary-dark);
   color: #fff;
@@ -691,11 +672,6 @@ body {
   background-color: var(--tt-accent);
 }
 
-.trail-region-row.is-unavailable {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
 .trail-region-label {
   grid-area: label;
   font-size: 1rem;
@@ -722,9 +698,8 @@ body {
   color: var(--tt-ink-faint);
 }
 
-/* `auto-fit` rather than a fixed count: a trail is 16 to 20 spaces for a full
-   pool and as few as 2 for a narrow one, and the row has to hold either without
-   the spaces stretching into bars. */
+/* `auto-fit` rather than a fixed count, so the row holds the trail's 20 spaces
+   without them stretching into bars. */
 .trail-row-spaces {
   grid-area: spaces;
   display: grid;
@@ -752,16 +727,10 @@ body {
   background-color: var(--tt-accent);
 }
 
-/* Ahead of the token but inside the cap: ground she may walk today. Hollow
-   rather than filled, so "walked" and "open" differ in more than hue. */
-.trail-space-open {
+/* Ahead of the token. Hollow rather than filled, so "walked" and "ahead"
+   differ in more than hue. */
+.trail-space-ahead {
   background-color: transparent;
-}
-
-.trail-space-locked {
-  background-color: var(--tt-locked);
-  border-style: dashed;
-  opacity: 0.6;
 }
 
 .trail-token {
@@ -969,7 +938,7 @@ body {
 }
 
 .summary-goal,
-.summary-region {
+.summary-trail {
   font-size: 1.125rem;
   font-weight: 600;
   color: var(--tt-primary);
@@ -1074,47 +1043,6 @@ body {
   cursor: pointer;
 }
 
-.setting-description {
-  margin-top: 6px;
-  font-size: 0.9rem;
-  color: var(--tt-ink-muted);
-}
-
-.table-toggles {
-  flex-wrap: wrap;
-  justify-content: center;
-  border: none;
-}
-
-.table-toggles legend {
-  font-size: 1.125rem;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-
-/* A 20px native checkbox is the smallest thing on an iPad screen. The real
-   control stays a .visually-hidden checkbox inside a 68px label. */
-.table-toggle {
-  position: relative;
-  background-color: var(--tt-surface-alt);
-  color: var(--tt-ink);
-  border: 2px solid var(--tt-border);
-}
-
-.table-toggle[aria-pressed="true"],
-.table-toggle:has(input:checked) {
-  background-color: var(--tt-primary);
-  border-color: var(--tt-primary-dark);
-  color: #fff;
-}
-
-.table-toggle-face {
-  font-size: 1.75rem;
-  font-weight: 700;
-  line-height: 1;
-  pointer-events: none;
-}
-
 /* ==================== Utility ==================== */
 .hidden {
   display: none !important;
@@ -1151,13 +1079,6 @@ a:focus-visible,
 button:focus-visible,
 input:focus-visible,
 select:focus-visible {
-  outline: 3px solid var(--tt-accent);
-  outline-offset: 2px;
-}
-
-/* The table toggle's real control is visually hidden, so its focus ring has
-   to be drawn on the label the player can see. */
-.table-toggle:has(input:focus-visible) {
   outline: 3px solid var(--tt-accent);
   outline-offset: 2px;
 }

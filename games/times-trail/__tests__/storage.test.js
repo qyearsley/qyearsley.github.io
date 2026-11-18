@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeEach, afterEach, jest } from "@jest/globals"
 import { StorageManager as BaseStorageManager } from "../../shared/StorageManager.js"
-import { DEFAULT_TRAIL_ID, GEM_MILESTONES, STORAGE } from "../js/constants.js"
+import { DEFAULT_TRAIL_ID, GEM_MILESTONES, STORAGE, TRAIL } from "../js/constants.js"
 // storage.js must never import Scoring; the test must, because the duplicated
 // Daily literal is the whole risk. This is the only cross-check of the two.
 import { Scoring } from "../js/Scoring.js"
@@ -268,14 +268,17 @@ describe("save state shape", () => {
       expect(state.totals.starsTotal).toBe(4)
     })
 
-    // Only the lower bound and the integer shape. The upper bound depends on
-    // how long the trail is, which depends on the active pool -- so it belongs
-    // to `Journey.clampToTrail`, and game.js runs it on every rebuild.
-    test("coerces each trail position to a non-negative integer", () => {
+    test("coerces each trail position to an integer within the trail", () => {
       const { spaces } = normalizeProgress({
-        trails: { spaces: { doubles: -5, fives: "x", squares: 3.7, nines: 11 } },
+        trails: { spaces: { doubles: -5, fives: "x", squares: 3.7, nines: 11, tough: 500 } },
       }).trails
-      expect(spaces).toEqual({ doubles: 0, fives: 0, squares: 3, nines: 11 })
+      expect(spaces).toEqual({
+        doubles: 0,
+        fives: 0,
+        squares: 3,
+        nines: 11,
+        tough: TRAIL.SPACES - 1,
+      })
     })
 
     test("drops a position for a trail that no longer exists", () => {
