@@ -577,3 +577,23 @@ select:focus-visible {
     display: none;
   }
 }
+
+/* Touch screens of any width, such as an iPad: the same 44px targets the
+   narrow-width block above gives phones. */
+@media (pointer: coarse) {
+  .ctrl-btn,
+  .small-btn,
+  .level-btn {
+    min-height: 44px;
+  }
+
+  .icon-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .delete-rule-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}

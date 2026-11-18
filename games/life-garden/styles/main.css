@@ -143,3 +143,18 @@ a:focus-visible {
   outline: 2px solid #48a05a;
   outline-offset: 2px;
 }
+
+/* Touch screens: the buttons above are about 30px tall. */
+@media (pointer: coarse) {
+  .icon-btn,
+  .ctrl-btn,
+  .pickers button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* 16px keeps iOS from zooming the page when the menu opens. */
+  select.ctrl-btn {
+    font-size: 1rem;
+  }
+}
