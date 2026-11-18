@@ -532,23 +532,6 @@ select:focus-visible {
   padding: 0.75rem 1rem;
 }
 
-.info-section h2 {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--tape-ink-muted);
-  margin: 0 0 0.5rem;
-}
-
-.info-section ul {
-  margin: 0.5rem 0;
-  padding-left: 1.25rem;
-}
-
-.info-section li {
-  margin-bottom: 0.3rem;
-  line-height: 1.4;
-}
-
 /* Narrow screens.
    The controls get a 44px floor here rather than everywhere, because this is
    where a finger rather than a pointer is the likely input. */

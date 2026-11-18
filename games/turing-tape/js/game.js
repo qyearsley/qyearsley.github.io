@@ -1,20 +1,22 @@
 import { TuringMachine } from "./TuringMachine.js"
-import { levels, demos, levelFromParam } from "./levels.js"
+import { levels, levelFromParam } from "./levels.js"
+import { strings } from "./strings.js"
 
 const STORAGE_KEY = "turingTape"
 const PLAY_INTERVAL_MS = 400
 
 let machine = null
 let currentLevel = null
-let isDemo = false
 let playTimer = null
 let completedLevels = new Set()
+let playLabelText = "Play" // the page's own (translated) label
 
 // --- DOM refs ---
 // Filled in by init(), so a test can start the game on a document of its own.
-let levelNav, demoNav, levelTitle, levelDescription, targetSection, targetTapeEl, activeTapeEl
-let headIndicator, stepDisplay, currentStateEl, resultMsg, ruleBody
-let stepBtn, playBtn, resetBtn, addRuleBtn
+let levelNav, levelTitle, levelDescription, targetTapeEl, activeTapeEl
+let headIndicator, stepCountEl, currentStateEl, resultMsg, ruleBody
+let stepBtn, playBtn, playLabel, playIcon, resetBtn, addRuleBtn
+let S, localized
 
 /**
  * Look up the page's elements, wire the controls and load the first level.
@@ -24,27 +26,29 @@ let stepBtn, playBtn, resetBtn, addRuleBtn
 export function init(doc = document) {
   const $ = (id) => doc.getElementById(id)
   levelNav = $("level-nav")
-  demoNav = $("demo-nav")
   levelTitle = $("level-title")
   levelDescription = $("level-description")
-  targetSection = $("target-section")
   targetTapeEl = $("target-tape")
   activeTapeEl = $("active-tape")
   headIndicator = $("head-indicator")
-  stepDisplay = $("step-display")
+  stepCountEl = $("step-count")
   currentStateEl = $("current-state")
   resultMsg = $("result-msg")
   ruleBody = $("rule-body")
   stepBtn = $("step-btn")
   playBtn = $("play-btn")
+  playLabel = $("play-label")
+  playIcon = $("play-icon")
   resetBtn = $("reset-btn")
   addRuleBtn = $("add-rule-btn")
+  ;({ s: S, text: localized } = strings(doc))
+  $("back-link").setAttribute("aria-label", S.back)
+  playLabelText = playLabel.textContent
 
   stopPlay()
   completedLevels = loadProgress()
   try {
     buildLevelNav()
-    buildDemoNav()
     const params = new URLSearchParams(window.location.search)
     loadLevel(levelFromParam(params.get("level")) || levels[0])
   } catch (error) {
@@ -66,9 +70,7 @@ function buildLevelNav() {
   for (const level of levels) {
     const btn = document.createElement("button")
     btn.className = "level-btn"
-    btn.textContent = level.name
-    // Highlighting matches on this, not on the label. Two entries can share a
-    // name -- a demo of a level, say -- and both would light up.
+    btn.textContent = localized(level).name
     btn.dataset.navId = level.id
     if (completedLevels.has(level.id)) {
       btn.classList.add("completed")
@@ -76,7 +78,7 @@ function buildLevelNav() {
       btn.append(
         Object.assign(document.createElement("span"), {
           className: "visually-hidden",
-          textContent: " (solved)",
+          textContent: S.solved,
         }),
       )
     }
@@ -85,94 +87,37 @@ function buildLevelNav() {
   }
 }
 
-function buildDemoNav() {
-  demoNav.innerHTML = ""
-  for (const demo of demos) {
-    const btn = document.createElement("button")
-    btn.className = "level-btn"
-    btn.textContent = demo.name
-    btn.dataset.navId = demo.id
-    btn.addEventListener("click", () => loadDemo(demo))
-    demoNav.appendChild(btn)
-  }
-}
-
 function updateNavHighlight(id) {
-  for (const nav of [levelNav, demoNav]) {
-    for (const btn of nav.children) {
-      btn.classList.toggle("active", btn.dataset.navId === String(id))
-    }
+  for (const btn of levelNav.children) {
+    btn.classList.toggle("active", btn.dataset.navId === String(id))
   }
 }
 
 function loadLevel(level) {
   stopPlay()
-  isDemo = false
   currentLevel = level
   const rules = new Map()
   machine = new TuringMachine([...level.tape], rules, "A", level.headStart)
 
-  levelTitle.textContent = level.name
-  levelDescription.textContent = level.description
+  const { name, description } = localized(level)
+  levelTitle.textContent = name
+  levelDescription.textContent = description
   updateNavHighlight(level.id)
   syncUrlToLevel(level)
 
-  // Show target tape for puzzles
-  targetSection.classList.remove("hidden")
   renderTargetTape()
-
-  // Editable rule table
-  addRuleBtn.classList.remove("hidden")
-  buildRuleTable(null)
+  buildRuleTable()
   hideResult()
   updateDisplay()
 }
 
 // Keeps `?level=` in sync with the puzzle on screen, so it can be shared
-// with a link. Demos aren't addressable this way (see loadDemo), so the
-// param is cleared there rather than left pointing at a level that isn't
-// actually showing.
+// with a link.
 function syncUrlToLevel(level) {
-  const index = levels.indexOf(level)
   const params = new URLSearchParams(window.location.search)
-  if (index === -1) {
-    params.delete("level")
-  } else {
-    params.set("level", String(index + 1))
-  }
-  const query = params.toString()
-  const newUrl = window.location.pathname + (query ? `?${query}` : "") + window.location.hash
+  params.set("level", String(levels.indexOf(level) + 1))
+  const newUrl = `${window.location.pathname}?${params}${window.location.hash}`
   window.history.replaceState(null, "", newUrl)
-}
-
-function loadDemo(demo) {
-  stopPlay()
-  isDemo = true
-  currentLevel = demo
-  const rules = parseRules(demo.rules)
-  machine = new TuringMachine([...demo.tape], rules, "A", demo.headStart)
-
-  levelTitle.textContent = demo.name
-  levelDescription.textContent = demo.description
-  updateNavHighlight(demo.id)
-  syncUrlToLevel(demo)
-
-  // Hide target tape for demos
-  targetSection.classList.add("hidden")
-
-  // Read-only rule table
-  addRuleBtn.classList.add("hidden")
-  buildRuleTable(demo.rules)
-  hideResult()
-  updateDisplay()
-}
-
-function parseRules(ruleArray) {
-  const rules = new Map()
-  for (const [state, read, write, move, nextState] of ruleArray) {
-    rules.set(`${state},${read}`, { write, move, nextState })
-  }
-  return rules
 }
 
 // --- Tape rendering ---
@@ -239,20 +184,14 @@ function updateDisplay() {
   }
 
   currentStateEl.textContent = state
-  stepDisplay.textContent = `Steps: ${stepCount}`
+  stepCountEl.textContent = stepCount
 
   // Disable step/play when halted
   stepBtn.disabled = halted
   playBtn.disabled = halted
 
-  // If halted, show match/mismatch on tape cells (puzzles) or just a done message (demos)
-  if (halted) {
-    if (isDemo) {
-      showResult("success", `Halted after ${stepCount} steps. State: ${state}`)
-    } else {
-      highlightMatches()
-    }
-  }
+  // On halt, show which cells match the goal.
+  if (halted) highlightMatches()
 }
 
 function highlightMatches() {
@@ -266,64 +205,47 @@ function highlightMatches() {
 }
 
 // --- Rule table ---
-function buildRuleTable(prefilled) {
+function buildRuleTable() {
   ruleBody.innerHTML = ""
-  if (prefilled) {
-    for (const [state, read, write, move, nextState] of prefilled) {
-      addRuleRow(state, read, write, move, nextState, true)
-    }
-  } else {
-    addRuleRow()
-  }
+  addRuleRow()
 }
 
-function addRuleRow(
-  stateVal = null,
-  readVal = null,
-  writeVal = null,
-  moveVal = null,
-  nextVal = null,
-  readonly = false,
-) {
+function addRuleRow() {
   const tr = document.createElement("tr")
 
-  const stateSelect = makeSelect(currentLevel.states, stateVal, readonly)
-  const readSelect = makeSelect(currentLevel.symbols, readVal, readonly)
-  const writeSelect = makeSelect(currentLevel.symbols, writeVal, readonly)
-  const moveSelect = makeSelect(["L", "R", "S"], moveVal, readonly)
-  const nextStateSelect = makeSelect(currentLevel.states, nextVal, readonly)
+  const stateSelect = makeSelect(currentLevel.states)
+  const readSelect = makeSelect(currentLevel.symbols)
+  const writeSelect = makeSelect(currentLevel.symbols)
+  const moveSelect = makeSelect(["L", "R", "S"])
+  const nextStateSelect = makeSelect(currentLevel.states)
 
-  const labels = ["Current state", "Read symbol", "Write symbol", "Move direction", "Next state"]
   const selects = [stateSelect, readSelect, writeSelect, moveSelect, nextStateSelect]
 
   for (let i = 0; i < selects.length; i++) {
     const sel = selects[i]
-    sel.setAttribute("aria-label", labels[i])
+    sel.setAttribute("aria-label", S.fields[i])
     const td = document.createElement("td")
     td.appendChild(sel)
     tr.appendChild(td)
-    if (!readonly) {
-      sel.addEventListener("change", syncRules)
-      blurAfterPointerPick(sel)
-    }
+    sel.addEventListener("change", syncRules)
+    blurAfterPointerPick(sel)
   }
 
   const deleteTd = document.createElement("td")
-  if (!readonly) {
-    const deleteBtn = document.createElement("button")
-    deleteBtn.className = "delete-rule-btn"
-    deleteBtn.textContent = "\u00d7"
-    deleteBtn.title = "Remove rule"
-    deleteBtn.addEventListener("click", () => {
-      tr.remove()
-      syncRules()
-    })
-    deleteTd.appendChild(deleteBtn)
-  }
+  const deleteBtn = document.createElement("button")
+  deleteBtn.className = "delete-rule-btn"
+  deleteBtn.textContent = "\u00d7"
+  deleteBtn.title = S.removeRule
+  deleteBtn.setAttribute("aria-label", S.removeRule)
+  deleteBtn.addEventListener("click", () => {
+    tr.remove()
+    syncRules()
+  })
+  deleteTd.appendChild(deleteBtn)
   tr.appendChild(deleteTd)
 
   ruleBody.appendChild(tr)
-  if (!readonly) syncRules()
+  syncRules()
 }
 
 // A focused select keeps Space, Enter and R for itself (the Move select has an
@@ -344,22 +266,18 @@ function blurAfterPointerPick(select) {
   })
 }
 
-// A new, editable row starts blank, so the player picks every field rather
-// than inheriting "A, 0, 0, L, A". readRulesFromDOM skips a row until it is full.
-function makeSelect(options, selectedValue = null, readonly = false) {
+// A new row starts blank, so the player picks every field rather than
+// inheriting "A, 0, 0, L, A". readRulesFromDOM skips a row until it is full.
+function makeSelect(options) {
   const select = document.createElement("select")
-  if (readonly) select.disabled = true
-  if (selectedValue === null && !readonly) {
-    const blank = document.createElement("option")
-    blank.value = ""
-    blank.textContent = "\u2013"
-    select.appendChild(blank)
-  }
+  const blank = document.createElement("option")
+  blank.value = ""
+  blank.textContent = "\u2013"
+  select.appendChild(blank)
   for (const opt of options) {
     const option = document.createElement("option")
     option.value = opt
     option.textContent = opt
-    if (opt === selectedValue) option.selected = true
     select.appendChild(option)
   }
   return select
@@ -407,7 +325,7 @@ function doStep() {
 
     if (machine.halted) {
       stopPlay()
-      if (!isDemo) checkWin()
+      checkWin()
     }
   } catch (error) {
     console.error("Step error:", error)
@@ -424,7 +342,8 @@ function togglePlay() {
   // with the button stuck reading "Pause". Reachable via the Enter shortcut
   // even though the button itself is disabled.
   if (machine.halted) return
-  playBtn.innerHTML = '<span class="btn-icon">&#x23f8;</span> Pause <kbd>Enter</kbd>'
+  playIcon.innerHTML = "&#x23f8;"
+  playLabel.textContent = S.pause
   playTimer = setInterval(doStep, PLAY_INTERVAL_MS)
 }
 
@@ -433,13 +352,14 @@ function stopPlay() {
     clearInterval(playTimer)
     playTimer = null
   }
-  playBtn.innerHTML = '<span class="btn-icon">&#x25b6;</span> Play <kbd>Enter</kbd>'
+  playIcon.innerHTML = "&#x25b6;"
+  playLabel.textContent = playLabelText
 }
 
 function doReset() {
   stopPlay()
   machine.reset()
-  if (!isDemo) syncRules()
+  syncRules()
   hideResult()
   for (const row of ruleBody.children) {
     row.classList.remove("active-rule")
@@ -449,12 +369,12 @@ function doReset() {
 
 function checkWin() {
   if (machine.matchesTape(currentLevel.target) && machine.haltReason === "halt-state") {
-    showResult("success", `Solved in ${machine.stepCount} steps!`)
+    showResult("success", S.solvedIn(machine.stepCount))
     const next = levels[levels.indexOf(currentLevel) + 1]
     if (next) {
       const nextBtn = document.createElement("button")
       nextBtn.className = "ctrl-btn"
-      nextBtn.textContent = "Next puzzle \u2192"
+      nextBtn.textContent = S.next
       nextBtn.addEventListener("click", () => loadLevel(next))
       resultMsg.append(" ", nextBtn)
     }
@@ -463,14 +383,11 @@ function checkWin() {
     buildLevelNav()
     updateNavHighlight(currentLevel.id)
   } else if (machine.haltReason === "max-steps") {
-    showResult("error", `Ran for ${machine.stepCount} steps without halting. Try different rules.`)
+    showResult("error", S.noHalt(machine.stepCount))
   } else if (machine.haltReason === "no-rule") {
-    showResult(
-      "error",
-      `No rule for state ${machine.state} reading "${machine.tape[machine.head]}". Add one, or fix an existing rule.`,
-    )
+    showResult("error", S.noRule(machine.state, machine.tape[machine.head]))
   } else {
-    showResult("error", "Tape doesn't match the goal. Reset and try again.")
+    showResult("error", S.mismatch)
   }
 }
 

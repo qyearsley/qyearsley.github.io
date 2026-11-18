@@ -55,7 +55,6 @@ describe("turing tape page", () => {
     expect(console.error).not.toHaveBeenCalled()
     expect(byId("level-title").textContent).toBe("Write One")
     expect(byId("level-nav").children.length).toBe(5)
-    expect(byId("demo-nav").children.length).toBe(3)
     expect(byId("rule-body").querySelectorAll("tr").length).toBe(1)
     expect(steps()).toBe("Steps: 0")
   })
@@ -118,13 +117,17 @@ describe("turing tape page", () => {
     expect(byId("rule-body").querySelectorAll("tr").length).toBe(1)
   })
 
-  test("a demo has read-only rules and no target, and runs to a halt", () => {
-    byId("demo-nav").children[0].click()
-    expect(byId("target-section").classList.contains("hidden")).toBe(true)
-    expect(byId("add-rule-btn").classList.contains("hidden")).toBe(true)
-    expect(byId("rule-body").querySelector("select").disabled).toBe(true)
-    for (let i = 0; i < 50 && !byId("step-btn").disabled; i++) byId("step-btn").click()
-    expect(byId("result-msg").textContent).toMatch(/^Halted after \d+ steps/)
+  test("on the Chinese page, runtime text is Chinese", () => {
+    boot()
+    document.documentElement.lang = "zh"
+    init(document)
+    expect(byId("level-title").textContent).toBe("写入 1")
+    expect(byId("back-link").getAttribute("aria-label")).toBe("返回游戏")
+    expect(byId("rule-body").querySelector("select").getAttribute("aria-label")).toBe("当前状态")
+    fillRule(["A", "_", "1", "S", "HALT"])
+    byId("step-btn").click()
+    expect(byId("result-msg").textContent).toContain("用 1 步解决")
+    expect(byId("level-nav").textContent).toContain("（已解决）")
   })
 
   test("Space steps, Enter plays, R resets", () => {

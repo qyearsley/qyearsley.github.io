@@ -25,14 +25,12 @@
 
     <div class="game-layout">
       <div class="game-top-bar">
-        <a href="/games/" class="icon-btn" title="Back to games" aria-label="Back to games"
-          >&larr;</a
-        >
+        <a href="/games/" class="icon-btn" id="back-link">&larr;</a>
         <span class="level-title" id="level-title">Turing Tape</span>
         <!-- Not a live region: Play advances the machine every 400ms for up to
              500 steps, so announcing the counter would drown out the result
              message. Same reasoning for #current-state below. -->
-        <span class="step-display" id="step-display">Steps: 0</span>
+        <span class="step-display" id="step-display">Steps: <span id="step-count">0</span></span>
         <!-- Filled by build.js on the /zh/ pages; empty and invisible here. -->
         <div class="lang-slot"></div>
       </div>
@@ -40,13 +38,8 @@
       <main id="main-content" class="game-main">
         <!-- Level selector -->
         <div class="section-group">
-          <h2 class="section-heading">Puzzles</h2>
-          <nav id="level-nav" class="level-nav" aria-label="Level selector"></nav>
-        </div>
-
-        <div id="demos-section" class="section-group">
-          <h2 class="section-heading">Demos</h2>
-          <nav id="demo-nav" class="level-nav" aria-label="Demo selector"></nav>
+          <h2 class="section-heading" id="puzzles-heading">Puzzles</h2>
+          <nav id="level-nav" class="level-nav" aria-labelledby="puzzles-heading"></nav>
         </div>
 
         <!-- Level description -->
@@ -75,13 +68,14 @@
         <div class="controls-bar">
           <div class="status-line">State: <strong id="current-state">A</strong></div>
           <div class="controls">
-            <button id="step-btn" class="ctrl-btn" title="Space">
+            <button id="step-btn" class="ctrl-btn">
               <span class="btn-icon">&#x23ed;</span> Step <kbd>Space</kbd>
             </button>
-            <button id="play-btn" class="ctrl-btn" title="Enter">
-              <span class="btn-icon">&#x25b6;</span> Play <kbd>Enter</kbd>
+            <button id="play-btn" class="ctrl-btn">
+              <span class="btn-icon" id="play-icon">&#x25b6;</span>
+              <span id="play-label">Play</span> <kbd>Enter</kbd>
             </button>
-            <button id="reset-btn" class="ctrl-btn" title="R">
+            <button id="reset-btn" class="ctrl-btn">
               <span class="btn-icon">&#x21ba;</span> Reset <kbd>R</kbd>
             </button>
           </div>
@@ -98,7 +92,7 @@
         <div class="rule-section">
           <div class="rule-header">
             <h2>Rules</h2>
-            <button id="add-rule-btn" class="small-btn" title="Add rule">+ Add Rule</button>
+            <button id="add-rule-btn" class="small-btn">+ Add Rule</button>
           </div>
           <div class="rule-table-scroll">
             <table id="rule-table" class="rule-table">
@@ -117,27 +111,11 @@
           </div>
         </div>
 
-        <!-- How it works -->
-        <section class="info-section">
-          <h2>How it works</h2>
-          <ul>
-            <li>
-              The machine reads the symbol under the <strong>head</strong> (highlighted cell).
-            </li>
-            <li>
-              It looks for a rule matching the current <strong>state</strong> and the symbol read.
-            </li>
-            <li>
-              The rule says what to <strong>write</strong>, which way to <strong>move</strong> (L,
-              R, or S to stay), and what <strong>state</strong> to go to next.
-            </li>
-            <li>
-              The machine halts when it enters the <strong>HALT</strong> state or has no matching
-              rule.
-            </li>
-            <li>You win when the tape matches the <strong>Goal</strong> after halting.</li>
-          </ul>
-        </section>
+        <p class="info-section">
+          A <a href="https://en.wikipedia.org/wiki/Turing_machine">Turing machine</a> follows rules
+          to read and write symbols on a tape. Add rules so the tape matches the Goal, then press
+          Step or Play.
+        </p>
       </main>
     </div>
 

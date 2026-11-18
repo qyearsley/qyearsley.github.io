@@ -1,10 +1,9 @@
 export const levels = [
   {
     id: "write-one",
+    zh: { name: "写入 1", description: "纸带上只有一个空白格。写入 1 并停机。" },
     name: "Write One",
-    description:
-      "The tape has a single blank cell. Write a 1 and halt. " +
-      "This introduces the basics: each rule says what to write, which way to move, and what state to go to next.",
+    description: "The tape has a single blank cell. Write a 1 and halt.",
     tape: ["_"],
     target: ["1"],
     headStart: 0,
@@ -13,6 +12,10 @@ export const levels = [
   },
   {
     id: "flip-it",
+    zh: {
+      name: "翻转",
+      description: "翻转每一位：0 变 1，1 变 0。纸带以空白结尾，用它来判断何时停止。",
+    },
     name: "Flip It",
     description:
       "Flip every bit: turn 0s into 1s and 1s into 0s. " +
@@ -25,6 +28,10 @@ export const levels = [
   },
   {
     id: "move-right",
+    zh: {
+      name: "右移",
+      description: "把 1 向右移动一格。需要两个状态：一个用来擦掉 1，另一个用来在新位置写入 1。",
+    },
     name: "Move Right",
     description:
       "Move the 1 one cell to the right. " +
@@ -37,6 +44,7 @@ export const levels = [
   },
   {
     id: "fill",
+    zh: { name: "填充", description: "把每个空白格都填成 1。纸带以 1 结尾，用它来判断何时停止。" },
     name: "Fill",
     description:
       "Fill every blank cell with 1. " +
@@ -49,6 +57,10 @@ export const levels = [
   },
   {
     id: "binary-increment",
+    zh: {
+      name: "二进制加一",
+      description: "把二进制数加 1：101（5）应变成 110（6）。提示：先扫到末尾，再从右向左进位。",
+    },
     name: "Binary +1",
     description:
       "Increment a binary number by 1. The number 101 (5) should become 110 (6). " +
@@ -58,94 +70,6 @@ export const levels = [
     headStart: 0,
     states: ["A", "B", "HALT"],
     symbols: ["0", "1", "_"],
-  },
-]
-
-/**
- * Demo programs: pre-filled rule sets to step through.
- * These illustrate interesting Turing machine behavior.
- * Rules are read-only -- the user watches, not edits.
- */
-export const demos = [
-  {
-    id: "demo-busy-beaver-3",
-    name: "Busy Beaver (3-state)",
-    description:
-      "The 3-state busy beaver writes the maximum number of 1s (six) " +
-      "before halting, using only 3 states. It runs for 13 steps. " +
-      "This is a famous result in computability theory -- " +
-      "finding busy beavers for larger state counts is an open problem.",
-    tape: ["_", "_", "_", "_", "_", "_", "_", "_", "_"],
-    headStart: 4,
-    states: ["A", "B", "C", "HALT"],
-    symbols: ["0", "1", "_"],
-    rules: [
-      ["A", "_", "1", "R", "B"],
-      ["A", "1", "1", "L", "C"],
-      ["B", "_", "1", "L", "A"],
-      ["B", "1", "1", "R", "B"],
-      ["C", "_", "1", "L", "B"],
-      ["C", "1", "1", "S", "HALT"],
-    ],
-  },
-  {
-    id: "demo-unary-add",
-    name: "Unary Addition",
-    description:
-      "Adds two unary numbers separated by a 0. " +
-      "For example, 111+0+11 (3+2) becomes 11111 (5). " +
-      "It erases the separator and shifts the second number left.",
-    tape: ["1", "1", "1", "0", "1", "1", "_"],
-    headStart: 0,
-    states: ["A", "B", "C", "HALT"],
-    symbols: ["0", "1", "_"],
-    rules: [
-      ["A", "1", "1", "R", "A"],
-      ["A", "0", "1", "R", "B"],
-      ["B", "1", "1", "R", "B"],
-      ["B", "_", "_", "L", "C"],
-      ["C", "1", "_", "S", "HALT"],
-    ],
-  },
-  {
-    id: "demo-palindrome",
-    name: "Palindrome Check",
-    description:
-      "Checks if a binary string is a palindrome by comparing the first and last " +
-      "characters, erasing them, and repeating. Halts in state Y (yes) or N (no). " +
-      "Try it on 1001 (palindrome) -- watch it bounce back and forth.",
-    tape: ["1", "0", "0", "1", "_"],
-    headStart: 0,
-    states: ["A", "B", "C", "D", "E", "F", "Y", "N"],
-    symbols: ["0", "1", "_"],
-    // A: read first char. If 1, erase and go right looking for matching 1 at end (state B).
-    // If 0, erase and go right looking for matching 0 at end (state C).
-    // If blank, all matched -- accept (Y).
-    rules: [
-      ["A", "1", "_", "R", "B"],
-      ["A", "0", "_", "R", "C"],
-      ["A", "_", "_", "S", "Y"],
-      // B: scan right to end, check last char is 1
-      ["B", "1", "1", "R", "B"],
-      ["B", "0", "0", "R", "B"],
-      ["B", "_", "_", "L", "D"],
-      // D from B: check rightmost is 1
-      ["D", "1", "_", "L", "E"],
-      ["D", "0", "0", "S", "N"],
-      ["D", "_", "_", "S", "Y"],
-      // C: scan right to end, check last char is 0
-      ["C", "1", "1", "R", "C"],
-      ["C", "0", "0", "R", "C"],
-      ["C", "_", "_", "L", "F"],
-      // F from C: check rightmost is 0
-      ["F", "0", "_", "L", "E"],
-      ["F", "1", "1", "S", "N"],
-      ["F", "_", "_", "S", "Y"],
-      // E: scan back left to start, then restart
-      ["E", "1", "1", "L", "E"],
-      ["E", "0", "0", "L", "E"],
-      ["E", "_", "_", "R", "A"],
-    ],
   },
 ]
 

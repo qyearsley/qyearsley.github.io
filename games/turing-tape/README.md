@@ -2,8 +2,7 @@
 
 A Turing machine you program by filling in a table of rules. Five small puzzles
 each give you a starting tape and a goal tape; you add rules until the machine
-turns one into the other and halts. Three read-only demos run famous machines so
-you can watch them work.
+turns one into the other and halts. The page links to Wikipedia for the theory.
 
 It is for anyone meeting the idea of a Turing machine for the first time --
 older children, or an adult curious about where "computation" bottoms out. No
@@ -54,14 +53,8 @@ Three details of this implementation, all in
 - Solved level ids go into a `Set` saved to `localStorage` under `turingTape`,
   and a solved level gets a green ✓ in the nav (`.level-btn.completed`). There
   is no in-page way to clear this.
-- **Demos** hide the goal, disable every dropdown, hide **+ Add Rule** and the
-  row delete buttons, and report `Halted after N steps. State: X` instead of
-  checking a win.
-
-The five puzzles are Write One, Flip It, Move Right, Fill, and Binary +1
-(`101` → `110`). The demos are the 3-state busy beaver, unary addition, and a
-palindrome checker that ends in state `Y` or `N`. Worked solutions for all eight
-live in [`__tests__/TuringMachine.test.js`](__tests__/TuringMachine.test.js).
+  The five puzzles are Write One, Flip It, Move Right, Fill, and Binary +1
+  (`101` → `110`). Worked solutions for all five live in [`__tests__/TuringMachine.test.js`](__tests__/TuringMachine.test.js).
 
 ## Keyboard
 
@@ -79,10 +72,17 @@ or textarea, so Space and Enter still activate whatever is focused.
 
 Append to `levels` in [`js/levels.js`](js/levels.js). Every field is required by
 [`__tests__/levels.test.js`](__tests__/levels.test.js): `id` (unique), `name`,
-`description`, `tape`, `target`, `headStart` (a valid index into `tape`),
+`description`, `zh` (`{ name, description }` in Chinese), `tape`, `target`, `headStart` (a valid index into `tape`),
 `states` (must include `HALT`), and `symbols` (must include `_`). Every symbol
 in `tape` and `target` must appear in `symbols`. Nothing else needs editing --
 the nav, the dropdowns, and the goal tape are all built from the entry.
+
+### Change the text the page writes
+
+`js/strings.js` holds every string `game.js` writes, in English and Chinese.
+The build translates only static HTML, so `strings()` picks the set from
+`<html lang>`. Labels that sit in `index.html` are translated by
+`index.zh.json` as usual.
 
 One thing the tests do not enforce: the start state is hardcoded to `"A"` in
 `loadLevel()`, so `states` must include `"A"` or the level halts on its first
@@ -95,19 +95,6 @@ states you gave it.
 Because blanks are trimmed before comparing, a goal that differs from the
 starting tape only in _position_ is not really enforced. Design goals around
 which symbols are present, or pad them so the content differs.
-
-### Add a demo
-
-Append to `demos` in the same file. Same fields minus `target`, plus `rules` as
-an array of `[state, read, write, move, nextState]` tuples --
-`parseRules()` in [`js/game.js`](js/game.js) turns those into the `Map`. The
-tests require every rule to name a declared state and symbol, a move of
-`L`/`R`/`S`, and the demo to halt on its own -- within 100 steps, and not by
-hitting the `MAX_STEPS` cap.
-
-Demos also start in state `A`, hardcoded in `loadDemo()`. They do not need a
-`HALT` state: the palindrome demo ends by having no rule for `Y` or `N`, which
-halts with reason `no-rule` and leaves the answer visible in the state readout.
 
 ### Change the speed or the step ceiling
 
@@ -135,11 +122,12 @@ and `.result-msg.success` / `.error`.
 See [js/README.md](js/README.md) for detailed module architecture documentation.
 
 ```
-index.html            # The whole page: nav, tapes, controls, rule table, "How it works"
+index.html            # The whole page: nav, tapes, controls, rule table, a short intro and a Wikipedia link
 index.zh.json         # Chinese translations of the title, meta description, and page text
 js/
 ├── TuringMachine.js  # The machine: step, run, reset, matchesTape, matchMask
-├── levels.js         # The five puzzles and three demos, as data
+├── levels.js         # The five puzzles, as data, with Chinese names and descriptions
+├── strings.js        # Runtime text in English and Chinese, chosen by <html lang>
 ├── game.js           # Everything DOM: nav, rendering, the rule table, keys, localStorage
 └── main.js           # Calls init() from game.js on the real page
 styles/
@@ -160,8 +148,8 @@ npm test -- --testPathPatterns turing-tape      # just this game
 ```
 
 Two suites, 52 tests: `TuringMachine.test.js` (stepping, tape growth, halting,
-both match functions, plus a solution for every level and demo) and
-`levels.test.js` (the shape of the level and demo data, plus `levelFromParam`
+both match functions, plus a solution for every level) and
+`levels.test.js` (the shape of the level data, plus `levelFromParam`
 below).
 
 ## URL parameters
@@ -172,17 +160,13 @@ between them. There is no lock or progress gate on any level, so this is a
 plain deep link rather than a bypass of one. A missing, non-numeric, or
 out-of-range value falls back to the first level silently.
 
-Demos aren't addressable this way -- loading one clears `?level=` rather than
-pointing it at a level that isn't actually on screen. Parsing lives in
-`levelFromParam()` in [`js/levels.js`](js/levels.js).
+Parsing lives in `levelFromParam()` in [`js/levels.js`](js/levels.js).
 
 ## Known gaps
 
 - Because blanks are trimmed before comparing, **Move Right** can be "solved"
   without moving anything: one rule that writes `1` and halts leaves
   `["1", "_"]`, which trims to the same content as the goal `["_", "1"]`.
-- The "How it works" list in `index.html` says you win when the tape matches the
-  goal after halting, without mentioning that only a HALT-state halt counts.
 - Dark mode is a plain `prefers-color-scheme` block, so this game's colours
   follow the OS and ignore the site's theme toggle. The page chrome around it
   does follow the toggle.
@@ -206,8 +190,7 @@ colour is currently the only signal for them.
 
 - All dynamic content is created with `createElement` and written with
   `textContent`. `innerHTML` is used only to empty containers (`= ""`) and for
-  the two static Play/Pause button labels, neither of which interpolates
-  anything.
+  the two static Play/Pause icons, neither of which interpolates anything.
 - The only input is clicks, dropdown choices from fixed lists, and three keys.
   No text field exists on the page.
 - Progress is a list of solved level ids in `localStorage` under `turingTape`,

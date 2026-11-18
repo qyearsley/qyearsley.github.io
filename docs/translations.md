@@ -71,7 +71,7 @@ follows the switcher.
 
 |     | Game          | Chinese page | Why                                               |
 | --- | ------------- | ------------ | ------------------------------------------------- |
-| 1   | Turing Tape   | Yes          | Fixed labels, factual copy, 761 lines of JS       |
+| 1   | Turing Tape   | Yes          | Fixed labels; runtime text in `js/strings.js`     |
 | 2   | Life Garden   | Yes          | Chrome carries most of the text                   |
 | 3   | Number Garden | No           | 3.7k lines of JS, and one English-speaking player |
 | 4   | Seasons       | No           | Almost all text is written at runtime             |

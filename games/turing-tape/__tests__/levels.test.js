@@ -1,20 +1,5 @@
 import { describe, test, expect } from "@jest/globals"
-import { levels, demos, levelFromParam } from "../js/levels.js"
-import { TuringMachine } from "../js/TuringMachine.js"
-
-// Step bound for the demo halting test. Every demo halts in under 20 steps, so
-// 100 is generous. Keep it well below TuringMachine's MAX_STEPS (500): at that
-// cap the machine sets halted = true itself, so a bound of 500 or more would
-// let a demo that never halts pass the test.
-const DEMO_STEP_BOUND = 100
-
-function rulesFromArray(ruleArray) {
-  const map = new Map()
-  for (const [state, read, write, move, nextState] of ruleArray) {
-    map.set(`${state},${read}`, { write, move, nextState })
-  }
-  return map
-}
+import { levels, levelFromParam } from "../js/levels.js"
 
 describe("levels", () => {
   test("each level has the required fields with correct types", () => {
@@ -59,48 +44,11 @@ describe("levels", () => {
   })
 })
 
-describe("demos", () => {
-  test("each demo has the required fields with correct types", () => {
-    for (const demo of demos) {
-      expect(typeof demo.id).toBe("string")
-      expect(typeof demo.name).toBe("string")
-      expect(typeof demo.description).toBe("string")
-      expect(Array.isArray(demo.tape)).toBe(true)
-      expect(typeof demo.headStart).toBe("number")
-      expect(Array.isArray(demo.states)).toBe(true)
-      expect(Array.isArray(demo.symbols)).toBe(true)
-      expect(Array.isArray(demo.rules)).toBe(true)
-      expect(demo.rules.length).toBeGreaterThan(0)
-    }
-  })
-
-  test("demo rules reference only declared states and symbols", () => {
-    for (const demo of demos) {
-      const states = new Set(demo.states)
-      const symbols = new Set(demo.symbols)
-      const moves = new Set(["L", "R", "S"])
-      for (const [state, read, write, move, nextState] of demo.rules) {
-        expect(states.has(state)).toBe(true)
-        expect(symbols.has(read)).toBe(true)
-        expect(symbols.has(write)).toBe(true)
-        expect(moves.has(move)).toBe(true)
-        expect(states.has(nextState)).toBe(true)
-      }
-    }
-  })
-
-  test("each demo halts", () => {
-    for (const demo of demos) {
-      const tm = new TuringMachine([...demo.tape], rulesFromArray(demo.rules), "A", demo.headStart)
-      let steps = 0
-      while (!tm.halted && steps < DEMO_STEP_BOUND) {
-        tm.step()
-        steps++
-      }
-      expect(tm.halted).toBe(true)
-      // The demo must reach HALT or run out of rules on its own. Halting by
-      // hitting the 500-step cap would mean it never terminates.
-      expect(tm.haltReason).not.toBe("max-steps")
+describe("level translations", () => {
+  test("each level has a Chinese name and description", () => {
+    for (const level of levels) {
+      expect(level.zh.name.length).toBeGreaterThan(0)
+      expect(level.zh.description.length).toBeGreaterThan(0)
     }
   })
 })

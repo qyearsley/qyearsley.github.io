@@ -2,12 +2,12 @@
 
 ## Overview
 
-Turing Tape is the smallest game on the site: three modules, no classes beyond
+Turing Tape is the smallest game on the site: four modules, no classes beyond
 one, and no shared base classes. The split is machine, data, page.
 
 `TuringMachine.js` is the simulator and the only place tape semantics live. It
-has no DOM, no timers and no storage. `levels.js` is plain data — five puzzles
-and three read-only demos. `game.js` is everything else: DOM references, the
+has no DOM, no timers and no storage. `levels.js` is plain data — five puzzles.
+`strings.js` holds the text `game.js` writes, in English and Chinese. `game.js` is everything else: DOM references, the
 rule table, the play timer, persistence, and the keyboard.
 
 **There is no `GameState.js`, `GameUI.js` or `EventManager.js`**, and nothing
@@ -39,8 +39,8 @@ Arrows point from importer to import. There are only two edges.
 One edge is forbidden on purpose: **`TuringMachine` never imports `levels`.** It
 takes a tape, a rule `Map`, a start state and a head position, and knows nothing
 about puzzles, goals or progress. A level's `target` is passed _in_ to
-`matchesTape` and `matchMask` rather than held by the machine, which is what lets
-the demos run with no target at all.
+`matchesTape` and `matchMask` rather than held by the machine, which keeps the machine
+free of puzzle data.
 
 ## Key modules
 
@@ -81,36 +81,24 @@ the colours cannot.
 
 ### levels.js
 
-Two exported arrays. `levels` holds the five puzzles, each with a starting `tape`,
-a `target`, the `states` and `symbols` its dropdowns offer, and a description.
-`demos` holds three read-only programs with their `rules` pre-filled as
-`[state, read, write, move, nextState]` tuples — the 3-state busy beaver, unary
-addition, and a palindrome checker.
-
+One exported array. `levels` holds the five puzzles, each with a starting `tape`,
+a `target`, the `states` and `symbols` its dropdowns offer, a description, and `zh`, the same name and description in Chinese.
 `states` and `symbols` are what populate the rule-table dropdowns, so a level
-cannot offer a state its puzzle does not need. The palindrome demo is the one
-that exercises this: it declares eight states, and halts in `Y` or `N` rather
-than `HALT`, which means its halt reason is `no-rule`. Demos never call
-`checkWin`, so that is reported as a plain "Halted after N steps" either way.
+cannot offer a state its puzzle does not need.
 
 ### game.js
 
-The page. Module-level state is five variables — `machine`, `currentLevel`,
-`isDemo`, `playTimer`, and `completedLevels` — plus the DOM references, all
+The page. Module-level state is four variables — `machine`, `currentLevel`,
+`playTimer`, and `completedLevels` — plus the DOM references, all
 set by `init()`. `init()` builds the page inside a `try/catch` that logs rather
 than leaving a half-built page.
 
-Four responsibilities worth naming:
+Three responsibilities worth naming:
 
 - **The rule table is the source of truth for rules.** `syncRules` reads every
   row out of the DOM and replaces `machine.rules` wholesale, on every dropdown
   change and every row add or delete. There is no rule model behind it. Editing a
   rule mid-run therefore takes effect on the next step, which is intended.
-- **Read-only demos are enforced at build time**, not checked later. `addRuleRow`
-  takes a `readonly` flag that disables each `<select>`, attaches no `change`
-  listener, and omits the delete button. `addRuleBtn` is hidden too.
-- **Nav highlighting matches on `dataset.navId`, not the label.** Two entries can
-  share a name — a demo of a level, say — and matching on text would light both.
 - **The head is nudged into view, not centred.** `scrollHeadIntoView` scrolls only
   when the head cell is outside the strip, because centring makes the whole tape
   jitter as the head moves back and forth. It measures `offsetLeft` against
@@ -120,11 +108,9 @@ Four responsibilities worth naming:
 ## Data flow
 
 ```
-loadLevel(level)                         loadDemo(demo)
-   │  rules = empty Map                     │  rules = parseRules(demo.rules)
-   │  show target, editable table           │  hide target, read-only table
-   └──────────────────┬─────────────────────┘
-                      ▼
+loadLevel(level)
+   │  rules = empty Map, editable table
+   ▼
           new TuringMachine(tape, rules, "A", headStart)
                       │
       ┌───────────────┴───────────────┐
@@ -141,8 +127,7 @@ loadLevel(level)                         loadDemo(demo)
                                         halted?  ──no──► (Play re-fires in 400ms)
                                               │ yes
                                               ├─ stopPlay()
-                                              └─ isDemo ? "Halted after N steps"
-                                                        : checkWin()
+                                              └─ checkWin()
                                                              │
                                     matchesTape && haltReason === "halt-state"
                                           ┌──────────┴──────────┐
@@ -189,9 +174,8 @@ Tests live in the parent `__tests__/` directory. Three suites:
 
 - `TuringMachine.test.js` — stepping, the three halt reasons, tape growth at both
   ends, and the alignment shared by `matchesTape` and `matchMask`
-- `levels.test.js` — the shape of every level and demo, and that each demo halts
-  on its own within `DEMO_STEP_BOUND` steps, without hitting the `max-steps` cap
-- `game.test.js` — the page: solving, Play and Pause, demos, keyboard shortcuts
+- `levels.test.js` — the shape of every level, including its Chinese text
+- `game.test.js` — the page: solving, Play and Pause, the Chinese page, keyboard shortcuts
 
 `game.test.js` drives `game.js` through the real `index.html`: it calls
 `init(document)` on a fresh copy of the page, then clicks buttons, picks rules,

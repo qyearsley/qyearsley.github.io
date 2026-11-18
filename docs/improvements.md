@@ -23,8 +23,6 @@ last long version of this file is `git show 3ceed17:docs/improvements.md`.
 
 Owner feedback from 2026-11-18, not yet planned:
 
-4. **Turing Tape could be simpler.** Link out (e.g. Wikipedia) instead of
-   explaining; some text is not translated.
 5. **Seasons rounds are a little long.**
 6. **Number Garden hides progress.** The garden should be visible while
    playing, not only behind "view project". Some animations are too much.
@@ -47,7 +45,8 @@ changes.
   HTML only, so text that JavaScript writes stays English: about 113 strings in
   `javascript/` (53 in `logic-engine`), plus the `shared/nav.js` shortcuts dialog
   and the `shared/theme.js` popover on every `/zh/` page. `life-garden`'s
-  `第 0 代` and `turing-tape`'s `步数：0` revert to English on the first step.
+  `第 0 代` reverts to English on the first step. Turing Tape reads its
+  runtime text from `js/strings.js` by `<html lang>`, so it stays Chinese.
 - **The coverage test cannot see inside `<script>` blocks.**
   `__tests__/zh-coverage.test.js` strips them, so a script-block key that
   matches the wrong `>…<` passes silently. Build and grep to check.
@@ -104,6 +103,8 @@ Landed 2026-11-18: Times Trail is simpler. The hub is the list of trails and a t
 
 Landed 2026-11-18: Life Garden is now a small grass, rabbit and fox model (about 250 lines of JS, down from 2700). Grass alone fills the board, rabbits alone become common, and rabbits with foxes cycle and usually last 500 generations.
 
+Landed 2026-11-18: Turing Tape is simpler. The explanation is one sentence plus a Wikipedia link (a Chinese Wikipedia link on `/zh/`), the three demos and their read-only mode are gone, and runtime text (level names, messages, labels) is Chinese on `/zh/`.
+
 Landed 2026-10-19: lint skips `.claude/` (ESLint ignore, and `.gitignore` for
 Prettier); the two READMEs and `development.md` match the pages and tests;
 Seasons' unused `packNames()` is gone.
@@ -135,6 +136,7 @@ a person to look, on an iPad where it matters:
 - Number Garden's dark theme, in all six areas.
 - Seasons' weather and idle motion.
 - The language switcher on the Turing Tape and Life Garden top bars.
+- Turing Tape on `/zh/`: the Chinese level text, messages and Pause label.
 - The `/zh/` pages, especially the dense `chinese/` tables.
 - The syllogism checker's Venn diagram: region shading and where the X marks land.
 - Five Readings' tables on a narrow screen.
