@@ -56,8 +56,9 @@ def read_data_file(filename):
                 char_to_numbered_pinyin[char] = pinyin
                 char_to_frequency[char] = freq
 
-                # Create HTML span with tooltip
-                html = f'<span title="{pinyin}; {freq}" class="{"frequent" if freq > FREQUENT_THRESHOLD else "infrequent"}">{char}</span>'
+                # Create HTML span with tooltip. The page's filter searches
+                # data-search (pinyin only), so the count in the tooltip is not matched.
+                html = f'<span title="{pinyin}; {freq}" data-search="{pinyin}" class="{"frequent" if freq > FREQUENT_THRESHOLD else "infrequent"}">{char}</span>'
 
                 # Keep the character with highest frequency for each toneless pinyin
                 if (

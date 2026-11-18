@@ -228,4 +228,56 @@ describe("table-filter.js", () => {
       expect(visibleDataRows().length).toBe(1)
     })
   })
+
+  describe("data-search and cell highlighting", () => {
+    beforeEach(() => {
+      setupDOM(`
+        <input id="table-filter">
+        <span id="filter-count"></span>
+        <table class="filterable-table" data-highlight-cells>
+          <tr><th></th><th>b</th><th>p</th></tr>
+          <tr><th>a</th>
+            <td><span title="ba1; 309" data-search="ba1">八</span></td>
+            <td><span title="pa4; 12" data-search="pa4">怕</span></td></tr>
+          <tr><th>o</th>
+            <td><span title="bo1; 7" data-search="bo1">波</span></td>
+            <td></td></tr>
+        </table>
+      `)
+    })
+
+    const matched = () =>
+      Array.from(document.querySelectorAll("td.filter-match")).map((c) => c.textContent)
+
+    it("does not match the count in the title", () => {
+      typeFilter("309")
+      expect(visibleDataRows().length).toBe(0)
+    })
+
+    it("still matches pinyin and characters", () => {
+      typeFilter("pa4")
+      expect(matched()).toEqual(["怕"])
+      typeFilter("波")
+      expect(matched()).toEqual(["波"])
+    })
+
+    it("highlights only the matching cells and hides other rows", () => {
+      typeFilter("ba")
+      expect(matched()).toEqual(["八"])
+      expect(visibleDataRows().length).toBe(1)
+      expect(document.querySelector("table").classList.contains("filtering")).toBe(true)
+    })
+
+    it("highlights the whole row when the row header matches", () => {
+      typeFilter("o")
+      expect(matched()).toContain("波")
+    })
+
+    it("clears highlights when the filter is emptied", () => {
+      typeFilter("ba")
+      typeFilter("")
+      expect(matched()).toEqual([])
+      expect(document.querySelector("table").classList.contains("filtering")).toBe(false)
+    })
+  })
 })

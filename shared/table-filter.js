@@ -37,9 +37,13 @@
       return !allTh
     })
 
+    const highlight = table.hasAttribute("data-highlight-cells")
+
     input.addEventListener("input", function () {
       const query = input.value.trim().toLowerCase()
       let visible = 0
+
+      if (highlight) highlightCells(table, rows, query)
 
       rows.forEach(function (row) {
         if (!query) {
@@ -110,15 +114,37 @@
     })
   }
 
-  function rowMatches(row, query) {
-    const text = row.textContent.toLowerCase()
-    if (text.indexOf(query) !== -1) return true
+  // Opt-in (data-highlight-cells on the table): marks the cells that match so
+  // the user can see which one made a row appear, and dims the rest.
+  function highlightCells(table, rows, query) {
+    table.classList.toggle("filtering", query !== "")
+    rows.forEach(function (row) {
+      // A match on the row's own <th> (the rhyme) highlights the whole row.
+      const th = row.querySelector("th")
+      const rowHit = query !== "" && th !== null && elementMatches(th, query)
+      Array.from(row.querySelectorAll("td")).forEach(function (cell) {
+        const hit = rowHit || (query !== "" && elementMatches(cell, query))
+        cell.classList.toggle("filter-match", hit)
+      })
+    })
+  }
 
-    const titled = row.querySelectorAll("[title]")
+  function rowMatches(row, query) {
+    return elementMatches(row, query)
+  }
+
+  // Matches the text, plus each title. An element with data-search is matched
+  // on that value instead of its title, so a title can show extra hover info
+  // (such as a count) without being searchable.
+  function elementMatches(el, query) {
+    if (el.textContent.toLowerCase().indexOf(query) !== -1) return true
+
+    const titled = el.querySelectorAll("[title]")
     for (let i = 0; i < titled.length; i++) {
-      if (titled[i].getAttribute("title").toLowerCase().indexOf(query) !== -1) {
-        return true
-      }
+      const search = titled[i].hasAttribute("data-search")
+        ? titled[i].getAttribute("data-search")
+        : titled[i].getAttribute("title")
+      if (search.toLowerCase().indexOf(query) !== -1) return true
     }
 
     return false

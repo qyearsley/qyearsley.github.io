@@ -25,9 +25,7 @@ Owner feedback from 2026-11-18, not yet planned:
 
 7. **Games do not fit all screens.** Also: is UI consistency across games
    worth it?
-8. **Syllabary search by frequency is confusing.** It matches the count in each
-   cell's `title`, so `?q=309` just filters to a rhyme row.
-9. **Font sizes differ unexpectedly**, e.g. large text in some form inputs.
+8. **Font sizes differ unexpectedly**, e.g. large text in some form inputs.
 
 ## Deferred
 
@@ -105,6 +103,8 @@ Landed 2026-11-18: Turing Tape is simpler. The explanation is one sentence plus 
 Landed 2026-11-18: Seasons trails are shorter, 6, 6, 7 and 8 spaces. (Was "Seasons rounds are a little long.")
 
 Landed 2026-11-18: Number Garden shows progress while you play: a strip under the level bar lists the six project pieces (earned, current, not yet) with a count. "View project" stays as the detailed view. Celebrations are smaller and shorter: 3 particles for 1s (was 5 for 2s), no idle bouncing, no spinning or tilting.
+
+Landed 2026-11-18: Syllabary search no longer matches frequency counts (cells carry `data-search` with the pinyin only; the hover title still shows the count). Matching cells are outlined and the rest dimmed.
 
 Landed 2026-10-19: lint skips `.claude/` (ESLint ignore, and `.gitignore` for
 Prettier); the two READMEs and `development.md` match the pages and tests;
