@@ -22,6 +22,11 @@ const byId = (id) => document.getElementById(id)
 const click = (id) => byId(id).click()
 const activeScreen = () => document.querySelector(".screen.active").id
 const progress = () => byId("progress-text").textContent
+const questionFact = () =>
+  byId("question-text")
+    .textContent.match(/^(\d+) × (\d+)/)
+    .slice(1)
+    .map(Number)
 const feedback = () => byId("feedback-area").textContent
 
 function boot() {
@@ -55,14 +60,6 @@ function answerWrongly() {
   submit(rightAnswer() + 1)
 }
 
-function setSessionLength(value) {
-  click("settings-button")
-  const select = byId("session-length-select")
-  select.value = value
-  select.dispatchEvent(new Event("change", { bubbles: true }))
-  click("close-settings")
-}
-
 describe("times trail answering", () => {
   beforeEach(() => {
     jest.useFakeTimers()
@@ -81,7 +78,7 @@ describe("times trail answering", () => {
     submit(rightAnswer())
     expect(feedback()).toContain("=")
     expect(byId("feedback-area").classList.contains("correct")).toBe(true)
-    expect(progress()).toBe("1/20")
+    expect(progress()).toBe("Question 1 of 10")
     expect(Number(byId("play-star-count").textContent)).toBeGreaterThan(0)
     expect(byId("play-streak").textContent).toBe("Streak 1")
     expect(JSON.parse(localStorage.getItem("timesTrailProgress")).totals.factsCorrect).toBe(1)
@@ -92,6 +89,11 @@ describe("times trail answering", () => {
     expect(document.querySelector(".keypad-key").disabled).toBe(false)
     expect(byId("answer-display").textContent).toBe("?")
     expect(byId("question-text").textContent).toMatch(/^\d+ × \d+ = \?$/)
+  })
+
+  test("the counter moves to the next question after an answer", () => {
+    answerCorrectly()
+    expect(progress()).toBe("Question 2 of 10")
   })
 
   test("a wrong answer shows the right one, breaks the streak, then teaches it", () => {
@@ -160,10 +162,6 @@ describe("times trail answering", () => {
   })
 
   test("a full session ends on the summary, and Play Again starts a new one", () => {
-    // Back to the hub to change the length, then start again.
-    click("back-button")
-    setSessionLength("10")
-    click("start-button")
     for (let i = 0; i < 10; i++) {
       submit(rightAnswer())
       jest.advanceTimersByTime(i === 9 ? TIMING.SUMMARY_DELAY_MS : TIMING.CORRECT_FEEDBACK_MS)
@@ -175,6 +173,51 @@ describe("times trail answering", () => {
 
     click("play-again-button")
     expect(activeScreen()).toBe("play-screen")
-    expect(progress()).toBe("0/10")
+    expect(progress()).toBe("Question 1 of 10")
+  })
+
+  // The point of the trail rework: every question is on the trail being walked,
+  // so every correct answer can move the token. Misses come back from the same
+  // trail, because the retry queue only holds facts that were asked.
+  test("a round on Squares asks only squares, retries included", () => {
+    jest.spyOn(window, "confirm").mockReturnValue(true)
+    click("back-button")
+    document.querySelector('[data-trail-id="squares"]').click()
+
+    for (let i = 0; i < 10; i++) {
+      const [left, right] = questionFact()
+      expect(left).toBe(right)
+      if (i === 1 || i === 4) {
+        answerWrongly()
+        jest.advanceTimersByTime(TIMING.WRONG_FEEDBACK_MS)
+        click("scaffold-continue")
+      } else {
+        submit(rightAnswer())
+        jest.advanceTimersByTime(TIMING.CORRECT_FEEDBACK_MS)
+      }
+    }
+  })
+
+  test("every correct answer on a trail moves the token", () => {
+    jest.spyOn(window, "confirm").mockReturnValue(true)
+    click("back-button")
+    document.querySelector('[data-trail-id="squares"]').click()
+
+    const spaceOf = () => {
+      const spaces = Array.from(byId("play-trail-strip").querySelectorAll(".strip-space"))
+      return spaces.findIndex((space) => space.classList.contains("strip-space-current"))
+    }
+    const start = spaceOf()
+    answerCorrectly()
+    expect(spaceOf()).toBe(start + 1)
+    answerCorrectly()
+    expect(spaceOf()).toBe(start + 2)
+  })
+
+  test("a round on the default trail asks only facts with a 2", () => {
+    for (let i = 0; i < 9; i++) {
+      expect(questionFact()).toContain(2)
+      answerCorrectly()
+    }
   })
 })

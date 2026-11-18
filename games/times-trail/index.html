@@ -62,9 +62,9 @@
             id="progress-button"
             type="button"
             class="secondary-button hidden"
-            aria-label="See your trail, cards, and fact map"
+            aria-label="Pick a trail, or see your cards and fact map"
           >
-            Progress
+            Trails
           </button>
           <button
             id="start-fresh-button"
@@ -103,21 +103,11 @@
             </button>
           </div>
         </div>
-        <h2 id="hub-heading" tabindex="-1">Your progress</h2>
-        <p class="hub-region" id="hub-trail-name"></p>
-        <div class="mode-choices">
-          <button
-            id="mode-quick-recall"
-            type="button"
-            class="mode-button"
-            data-mode="quick-recall"
-            aria-label="Start practicing"
-          >
-            ⚡ Practice
-          </button>
-        </div>
+        <h2 id="hub-heading" tabindex="-1">Pick a trail</h2>
+        <p class="hub-hint">Tap a trail to practice it. Every question is from that trail.</p>
+        <div id="trail-spaces" class="trail-spaces"></div>
+        <div id="trail-legend" class="trail-legend"></div>
         <div class="hub-nav">
-          <button id="trail-button" type="button" class="secondary-button">Trail</button>
           <button id="map-button" type="button" class="secondary-button">Fact Map</button>
           <button id="collection-button" type="button" class="secondary-button">Cards</button>
         </div>
@@ -146,20 +136,7 @@
             </button>
           </div>
         </div>
-        <div class="progress-container">
-          <div class="progress-bar-bg">
-            <div
-              id="progress-bar"
-              class="progress-bar"
-              role="progressbar"
-              aria-valuenow="0"
-              aria-valuemin="0"
-              aria-valuemax="20"
-              aria-label="Session progress"
-            ></div>
-          </div>
-          <div id="progress-text" class="progress-text">0/20</div>
-        </div>
+        <div id="progress-text" class="progress-text" aria-live="off"></div>
         <div id="play-trail-strip" class="play-trail-strip" aria-label="Trail position"></div>
         <div id="play-area" class="play-area">
           <p id="question-text" class="question" role="status" aria-live="polite"></p>
@@ -191,7 +168,7 @@
         <div class="summary-buttons">
           <button id="play-again-button" type="button" class="big-button">Play Again</button>
           <button id="summary-hub-button" type="button" class="secondary-button">
-            Back to Hub
+            Back to Trails
           </button>
         </div>
         <div class="summary-tallies">
@@ -212,24 +189,7 @@
         </div>
       </div>
 
-      <!-- 5. Trail Screen -->
-      <div id="trail-screen" class="screen">
-        <div class="header">
-          <button
-            id="trail-back-button"
-            type="button"
-            class="nav-button"
-            aria-label="Return to hub"
-          >
-            ← Back
-          </button>
-          <h2 id="trail-heading" tabindex="-1">The Trail</h2>
-        </div>
-        <div id="trail-spaces" class="trail-spaces"></div>
-        <div id="trail-legend" class="trail-legend"></div>
-      </div>
-
-      <!-- 6. Fact Map Screen -->
+      <!-- 5. Fact Map Screen -->
       <div id="map-screen" class="screen">
         <div class="header">
           <button id="map-back-button" type="button" class="nav-button" aria-label="Return to hub">
@@ -246,7 +206,7 @@
         <div id="mastery-legend" class="mastery-legend"></div>
       </div>
 
-      <!-- 7. Collection Screen -->
+      <!-- 6. Collection Screen -->
       <div id="collection-screen" class="screen">
         <div class="header">
           <button
@@ -264,7 +224,7 @@
         <div id="collection-legend" class="collection-legend"></div>
       </div>
 
-      <!-- 8. Settings Modal -->
+      <!-- 7. Settings Modal -->
       <div
         id="settings-modal"
         class="modal hidden"

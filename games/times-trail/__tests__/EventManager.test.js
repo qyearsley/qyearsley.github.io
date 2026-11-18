@@ -24,9 +24,8 @@ function makeCallbacks() {
     onShowProgress: jest.fn(),
     onHome: jest.fn(),
     onBack: jest.fn(),
-    onModeSelect: jest.fn(),
     onScaffoldContinue: jest.fn(),
-    onShowTrail: jest.fn(),
+    onStartTrail: jest.fn(),
     onShowMap: jest.fn(),
     onShowCollection: jest.fn(),
     onPlayAgain: jest.fn(),
@@ -49,10 +48,8 @@ function makeMockUI() {
       homeButton: byId("home-button"),
       backButton: byId("back-button"),
       scaffoldContinue: byId("scaffold-continue"),
-      trailButton: byId("trail-button"),
       mapButton: byId("map-button"),
       collectionButton: byId("collection-button"),
-      trailBackButton: byId("trail-back-button"),
       mapBackButton: byId("map-back-button"),
       collectionBackButton: byId("collection-back-button"),
       playAgainButton: byId("play-again-button"),
@@ -130,9 +127,9 @@ describe("EventManager", () => {
         "setupProgressButton",
         "setupHomeButton",
         "setupBackButton",
-        "setupModeButtons",
         "setupScaffoldContinue",
         "setupNavButtons",
+        "setupTrailPicker",
         "setupSummaryButtons",
         "setupSettingsButtons",
         "setupSettingsControls",
@@ -193,14 +190,6 @@ describe("EventManager", () => {
     })
   })
 
-  describe("setupModeButtons", () => {
-    test("#mode-quick-recall invokes onModeSelect with its data-mode", () => {
-      clickId("mode-quick-recall")
-      expect(callbacks.onModeSelect).toHaveBeenCalledTimes(1)
-      expect(callbacks.onModeSelect).toHaveBeenCalledWith("quick-recall")
-    })
-  })
-
   describe("setupScaffoldContinue", () => {
     test("#scaffold-continue invokes onScaffoldContinue once", () => {
       clickId("scaffold-continue")
@@ -209,11 +198,6 @@ describe("EventManager", () => {
   })
 
   describe("setupNavButtons", () => {
-    test("#trail-button invokes onShowTrail once", () => {
-      clickId("trail-button")
-      expect(callbacks.onShowTrail).toHaveBeenCalledTimes(1)
-    })
-
     test("#map-button invokes onShowMap once", () => {
       clickId("map-button")
       expect(callbacks.onShowMap).toHaveBeenCalledTimes(1)
@@ -222,11 +206,6 @@ describe("EventManager", () => {
     test("#collection-button invokes onShowCollection once", () => {
       clickId("collection-button")
       expect(callbacks.onShowCollection).toHaveBeenCalledTimes(1)
-    })
-
-    test("#trail-back-button invokes onBack with trail-screen", () => {
-      clickId("trail-back-button")
-      expect(callbacks.onBack).toHaveBeenCalledWith("trail-screen")
     })
 
     test("#map-back-button invokes onBack with map-screen", () => {
@@ -239,17 +218,45 @@ describe("EventManager", () => {
       expect(callbacks.onBack).toHaveBeenCalledWith("collection-screen")
     })
 
-    test("the four back buttons pass four distinguishable ids", () => {
+    test("the three back buttons pass three distinguishable ids", () => {
       clickId("back-button")
-      clickId("trail-back-button")
       clickId("map-back-button")
       clickId("collection-back-button")
       expect(callbacks.onBack.mock.calls).toEqual([
         ["play-screen"],
-        ["trail-screen"],
         ["map-screen"],
         ["collection-screen"],
       ])
+    })
+  })
+
+  describe("setupTrailPicker", () => {
+    /** Rows are rebuilt on every render, so add them after wiring, as GameUI does. */
+    function addRow(id, disabled = false) {
+      const row = document.createElement("button")
+      row.dataset.trailId = id
+      row.disabled = disabled
+      const label = document.createElement("span")
+      row.appendChild(label)
+      document.getElementById("trail-spaces").appendChild(row)
+      return { row, label }
+    }
+
+    test("clicking a trail row, or anything inside it, invokes onStartTrail with its id", () => {
+      const squares = addRow("squares")
+      squares.row.click()
+      squares.label.click()
+      expect(callbacks.onStartTrail.mock.calls).toEqual([["squares"], ["squares"]])
+    })
+
+    test("a disabled row starts nothing", () => {
+      addRow("nines", true).row.click()
+      expect(callbacks.onStartTrail).not.toHaveBeenCalled()
+    })
+
+    test("a click on the container outside any row starts nothing", () => {
+      document.getElementById("trail-spaces").click()
+      expect(callbacks.onStartTrail).not.toHaveBeenCalled()
     })
   })
 
@@ -444,12 +451,9 @@ describe("EventManager", () => {
       "progress-button",
       "home-button",
       "back-button",
-      "mode-quick-recall",
       "scaffold-continue",
-      "trail-button",
       "map-button",
       "collection-button",
-      "trail-back-button",
       "map-back-button",
       "collection-back-button",
       "play-again-button",

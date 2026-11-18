@@ -26,16 +26,13 @@ Owner feedback from 2026-11-18, not yet planned:
 4. **Turing Tape could be simpler.** Link out (e.g. Wikipedia) instead of
    explaining; some text is not translated.
 5. **Seasons rounds are a little long.**
-6. **Times Trail is confusing.** The hub and trail list overlap; on the
-   squares trail most questions are not squares, yet the green bar advances.
-   Fewer questions per round; maybe optional speed scoring.
-7. **Number Garden hides progress.** The garden should be visible while
+6. **Number Garden hides progress.** The garden should be visible while
    playing, not only behind "view project". Some animations are too much.
-8. **Games do not fit all screens.** Also: is UI consistency across games
+7. **Games do not fit all screens.** Also: is UI consistency across games
    worth it?
-9. **Syllabary search by frequency is confusing.** It matches the count in each
+8. **Syllabary search by frequency is confusing.** It matches the count in each
    cell's `title`, so `?q=309` just filters to a rhyme row.
-10. **Font sizes differ unexpectedly**, e.g. large text in some form inputs.
+9. **Font sizes differ unexpectedly**, e.g. large text in some form inputs.
 
 ## Deferred
 
@@ -103,6 +100,8 @@ Garden's R asks first; Turing Tape's new rule row starts blank and a solve
 offers "Next puzzle"; the games index says who each kid game is for; the skip
 link hides fully and prose links take the theme color.
 
+Landed 2026-11-18: Times Trail is simpler. The hub is the list of trails and a tap starts one; a round asks only that trail's facts; the default round is 10 questions; the play screen has one bar. (Was "Times Trail is confusing.")
+
 Landed 2026-11-18: Life Garden is now a small grass, rabbit and fox model (about 250 lines of JS, down from 2700). Grass alone fills the board, rabbits alone become common, and rabbits with foxes cycle and usually last 500 generations.
 
 Landed 2026-10-19: lint skips `.claude/` (ESLint ignore, and `.gitignore` for
@@ -132,7 +131,7 @@ prose (the `.husky/` comments and config files hold them), the unused `atob` and
 Tests and linters pass, but nothing in the toolchain renders a page. These need
 a person to look, on an iPad where it matters:
 
-- Times Trail's trail picker layout.
+- Times Trail's hub (the trail list) and the play screen's round counter.
 - Number Garden's dark theme, in all six areas.
 - Seasons' weather and idle motion.
 - The language switcher on the Turing Tape and Life Garden top bars.

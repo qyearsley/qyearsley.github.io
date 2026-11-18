@@ -9,8 +9,9 @@
  *
  *   1. `startSession(modeId)` resets `this.session`, calls `selector.reset()`
  *      (so a miss from the previous session cannot fire on question 1), rebuilds
- *      `this.journey` for the chosen trail and the current fact pool, points
- *      selection at the facts that trail still needs, and shows the play screen.
+ *      `this.journey` for the chosen trail and the current fact pool, and shows
+ *      the play screen. The hub's trail rows call `startTrail(trailId)`, which
+ *      sets the current trail and then does this.
  *   2. `_askNextQuestion()` picks a fact (`FactSelector`), captures its strength
  *      and card tier BEFORE the answer, builds a `Challenge` through
  *      `modes/index.js`, renders it, and arms the response clock last -- after
@@ -177,7 +178,7 @@ class TimesTrail {
    * a different action.
    * @private
    */
-  static HUB_RETURN_SCREENS = Object.freeze(["trail-screen", "map-screen", "collection-screen"])
+  static HUB_RETURN_SCREENS = Object.freeze(["map-screen", "collection-screen"])
 
   /**
    * Text of the "start fresh" confirmation. Kept as configuration so the one
@@ -322,16 +323,8 @@ class TimesTrail {
       onShowProgress: () => this.showHub(),
       onHome: () => this.showTitle(),
       onBack: (sourceScreenId) => this.goBack(sourceScreenId),
-      onModeSelect: (modeId) => this.startSession(modeId),
       onScaffoldContinue: () => this._resolveScaffold(),
-      onShowTrail: () => this.showTrail(),
-      // Redrawn, not just recorded: the picker is the screen she is looking at,
-      // and the row she tapped has to become the current one under her finger.
-      onChooseTrail: (trailId) => {
-        this.chooseTrail(trailId)
-        this.showTrail()
-        this._refreshHud()
-      },
+      onStartTrail: (trailId) => this.startTrail(trailId),
       onShowMap: () => this.showMap(),
       onShowCollection: () => this.showCollection(),
       onPlayAgain: () => this.startSession(this.session.modeId),
@@ -483,18 +476,20 @@ class TimesTrail {
   }
 
   /**
-   * Show the hub and refresh its lifetime HUD.
+   * Show the hub: the list of trails, plus the lifetime HUD. Tapping a trail row
+   * starts a round on it.
    * @returns {void}
    */
   showHub() {
     this._refreshHud()
+    this._renderTrailList()
     this.ui.showScreen("hub-screen")
   }
 
   /**
    * Route a back button by the screen it is leaving, rather than by inspecting
    * which screen happens to be active. The play screen's back button abandons a
-   * session; the three list screens' buttons just return to the hub.
+   * session; the two list screens' buttons just return to the hub.
    *
    * Abandoning is confirmed, because the button that does it is a 68px target in
    * the top-left corner of an iPad, right where a hand rests.
@@ -537,15 +532,12 @@ class TimesTrail {
   }
 
   /**
-   * Draw the trail picker and show it.
-   *
-   * Every trail, not just the one being walked: the screen is both the map of
-   * where the token is and the place a trail is chosen, which is what makes
-   * picking "Squares" a real choice rather than a label on a route the player
-   * never selected.
+   * Draw every trail into the hub, not just the one being walked. The current
+   * one is highlighted, and each row says whether tapping it starts or continues.
    * @returns {void}
+   * @private
    */
-  showTrail() {
+  _renderTrailList() {
     const statuses = allTrailProgress({
       activePool: this.settings.factPool,
       records: this.progress.facts,
@@ -577,7 +569,6 @@ class TimesTrail {
     })
 
     this.ui.renderTrail({ trails, tokenEmoji: TOKEN_EMOJI })
-    this.ui.showScreen("trail-screen")
   }
 
   /**
@@ -646,18 +637,17 @@ class TimesTrail {
 
   /**
    * Apply one setting. Re-rendering the modal is what keeps the fact-count
-   * readout in step with the controls, and the journey is rebuilt because region
-   * gating is scoped to the active fact pool.
+   * readout in step with the controls, and the journey is rebuilt because a
+   * trail's facts are scoped to the active fact pool.
    *
-   * The progress bar is redrawn because the session length is allowed to change
+   * The round counter is redrawn because the session length is allowed to change
    * MID-SESSION. Every read of `settings.sessionLength` is live, so shortening
-   * the round already took effect immediately in the logic -- but the bar is only
-   * written on answer and on session start, so it went on claiming "7/20" until
-   * the next question and read as a setting that had not applied.
+   * the round already took effect immediately in the logic -- but the counter is
+   * only written when a question is asked, so it went on claiming "Question 7 of
+   * 20" until the next question and read as a setting that had not applied.
    *
-   * `current` is clamped to the new length: dropping to 10 after 15 answers would
-   * otherwise paint a 150%-wide bar and set `aria-valuenow` above `aria-valuemax`.
-   * The round then ends on the next answer via `_advanceAfterAnswer`, which is
+   * The question number is clamped to the new length: dropping to 10 after 15
+   * answers would otherwise read "Question 16 of 10". The round then ends on the next answer via `_advanceAfterAnswer`, which is
    * deliberate -- finishing it here would show the summary underneath the open
    * `aria-modal` settings dialog, the exact failure `_pauseTimers` exists to
    * prevent.
@@ -672,14 +662,13 @@ class TimesTrail {
     this._clampCurrentTrail()
     if (key === "sessionLength") {
       const length = this.settings.sessionLength
-      this.ui.updateProgressBar(Math.min(this.session.factsAnswered, length), length)
+      this.ui.updateRoundCount(Math.min(this.session.factsAnswered + 1, length), length)
     }
-    this._refreshGatePriority()
     this._save()
   }
 
   /**
-   * Toggle one table in the picker. An attempt to clear the last table is
+   * Toggle one table in the settings dialog. An attempt to clear the last table is
    * rejected by `Settings`, and re-rendering restores the control to the state
    * that is actually in force.
    * @param {number} table - Table number, 2-9
@@ -699,7 +688,6 @@ class TimesTrail {
     if (!applied) return
     this.journey = this._buildJourney()
     this._clampCurrentTrail()
-    this._refreshGatePriority()
     this._save()
   }
 
@@ -710,9 +698,9 @@ class TimesTrail {
    * missed at the end of the last session fires immediately and every retry
    * delay is measured from the wrong origin.
    *
-   * The gate priority is seeded here rather than left to the first scored answer,
-   * so question 1 of a session is already weighted toward the facts the chosen
-   * trail is waiting on.
+   * A round asks only the facts of the trail being walked (see
+   * `_askNextQuestion`). A trail the enabled tables leave empty has nothing to
+   * ask, so the player is sent back to the hub, where its row is disabled.
    * @param {string} modeId - A `MODE_IDS` value; anything unknown falls back to Quick Recall
    * @returns {void}
    */
@@ -724,17 +712,36 @@ class TimesTrail {
     this.selector.reset()
     this.journey = this._buildJourney()
     this._clampCurrentTrail()
-    this._refreshGatePriority()
     this._isProcessingAnswer = false
 
+    if (this.journey.activeFactIds.length === 0) {
+      this.showHub()
+      return
+    }
     this.ui.updatePlayHud({ sessionStars: 0, sessionStreak: 0 })
-    this.ui.updateProgressBar(0, this.settings.sessionLength)
     this.ui.showScreen("play-screen")
     this._askNextQuestion()
   }
 
   /**
+   * Start a round on one trail: make it the current trail, then begin.
+   * Unknown ids fall back to the default trail rather than throwing, since the
+   * id comes from a DOM attribute.
+   * @param {string} trailId - The trail to walk
+   * @returns {void}
+   */
+  startTrail(trailId) {
+    this.progress.trails.currentId = normalizeTrailId(trailId)
+    this._save()
+    this.startSession(MODE_IDS.QUICK_RECALL)
+  }
+
+  /**
    * Build, render, and arm one question.
+   *
+   * The pool is the current trail's facts, intersected with the enabled tables
+   * (`journey.activeFactIds`), so every question is one the token can move on.
+   * Misses re-ask from the same pool.
    *
    * Order matters twice over. The strength and card tier are captured BEFORE the
    * answer, because star weighting and the "new card"
@@ -745,7 +752,7 @@ class TimesTrail {
    * @private
    */
   _askNextQuestion() {
-    const factId = this.selector.selectNext(this.settings.factPool, this.progress.facts)
+    const factId = this.selector.selectNext(this.journey.activeFactIds, this.progress.facts)
     const fact = factId === null ? null : getFact(factId)
     if (fact === null) {
       console.error("Times Trail: no fact available to ask; returning to the hub")
@@ -771,6 +778,8 @@ class TimesTrail {
     this.keypad.clear()
     this.ui.setAnswerDisplay(KEYPAD.EMPTY_DISPLAY)
     this.ui.renderPlayTrailStrip(this._buildStripView())
+    const length = this.settings.sessionLength
+    this.ui.updateRoundCount(Math.min(this.session.factsAnswered + 1, length), length)
 
     this._isProcessingAnswer = false
     // After `keypad.clear()`, whose own onChange would otherwise leave a stamp.
@@ -858,7 +867,6 @@ class TimesTrail {
     this.progress.totals.factsCorrect += correct ? 1 : 0
 
     this._checkMilestones()
-    this.ui.updateProgressBar(this.session.factsAnswered, this.settings.sessionLength)
     this._save()
 
     if (correct) {
@@ -917,7 +925,6 @@ class TimesTrail {
     this._setCurrentTrailPosition(result.trail)
 
     if (result.finished) this.session.trailFinishedName = this.journey.trail?.name ?? null
-    this._refreshGatePriority()
 
     this._notePossibleNewCard(factId)
   }
@@ -938,39 +945,6 @@ class TimesTrail {
    */
   _markAnswerDisplay(challenge) {
     this.ui.markAnswerDisplayCorrect(challenge.answer)
-  }
-
-  /**
-   * Point selection at the facts the chosen trail is still waiting on.
-   *
-   * This is how the theme becomes real. Selection is WEIGHTED toward the trail's
-   * facts, not restricted to them: restricting would make "Squares" mean nothing
-   * but squares for a whole session, which is the opposite of what spaced
-   * repetition wants, and would let a fact the player is losing go unasked
-   * because it belongs to another trail.
-   *
-   * It also replaces the gate MESSAGE, which was the wrong tool. The sentence
-   * tried to explain a stopped trail in words -- and the honest version of those
-   * words named facts the game then did not ask, because selection ignored the
-   * token's position entirely. Naming facts the player never sees reads as an
-   * instruction she cannot follow. Biasing the draw makes the explanation
-   * unnecessary, because the trail opens on its own.
-   *
-   * Only the facts still short of the bar: one already strong enough opens no
-   * more ground. When every one of them is strong the trail is complete, the
-   * priority set empties, and selection goes back to pure spaced repetition.
-   *
-   * Recomputed after a scored answer, after any change to the fact pool, and on
-   * a trail change. `setPriorityFacts` replaces the set, so there is nothing to
-   * invalidate.
-   * @returns {void}
-   * @private
-   */
-  _refreshGatePriority() {
-    const pending = this.journey.activeFactIds.filter(
-      (factId) => this.store.strengthOf(factId) < TRAIL.UNLOCK_MIN_STRENGTH,
-    )
-    this.selector.setPriorityFacts(pending)
   }
 
   /**
@@ -1204,17 +1178,7 @@ class TimesTrail {
       gemsTotal: this.progress.totals.gemsTotal,
       streakDays: this.progress.daily.streakDays,
       flame: this.scoring.flameStage(this.progress.daily),
-      trailName: this._currentTrailName(),
     })
-  }
-
-  /**
-   * The name of the trail being walked.
-   * @returns {string} The trail name, or "" if the id is somehow unknown
-   * @private
-   */
-  _currentTrailName() {
-    return this.journey.trail?.name ?? ""
   }
 
   /**
@@ -1325,21 +1289,6 @@ class TimesTrail {
    */
   _clampCurrentTrail() {
     this._setCurrentTrailPosition(this.journey.clampToTrail(this._currentTrailPosition()))
-  }
-
-  /**
-   * Switch to another trail. Unknown ids fall back to the default rather than
-   * throwing, since this can come from a save file or a stale DOM handler.
-   * @param {string} trailId - The trail to walk
-   * @returns {void}
-   */
-  chooseTrail(trailId) {
-    this.progress.trails.currentId = normalizeTrailId(trailId)
-    this.journey = this._buildJourney()
-    this._clampCurrentTrail()
-    this.selector.reset()
-    this._refreshGatePriority()
-    this._save()
   }
 
   /**

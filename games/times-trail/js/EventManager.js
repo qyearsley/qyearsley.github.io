@@ -29,9 +29,8 @@
  * @property {() => void} [onStartFresh]
  * @property {() => void} [onHome]
  * @property {(sourceScreenId: string) => void} [onBack]
- * @property {(modeId: string) => void} [onModeSelect]
  * @property {() => void} [onScaffoldContinue]
- * @property {() => void} [onShowTrail]
+ * @property {(trailId: string) => void} [onStartTrail]
  * @property {() => void} [onShowMap]
  * @property {() => void} [onShowCollection]
  * @property {() => void} [onPlayAgain]
@@ -69,7 +68,6 @@ export class EventManager {
     this.setupProgressButton()
     this.setupHomeButton()
     this.setupBackButton()
-    this.setupModeButtons()
     this.setupScaffoldContinue()
     this.setupNavButtons()
     this.setupTrailPicker()
@@ -174,53 +172,31 @@ export class EventManager {
     this._wireBackButton("backButton", "back-button", "play-screen")
   }
 
-  /**
-   * Wires each `.mode-button` to `onModeSelect(dataset.mode)`. The mode buttons
-   * are static markup with no writer -- there is one today -- so a single
-   * listener each is enough, and a nested element inside a button still resolves
-   * via `currentTarget`.
-   *
-   * @returns {void}
-   */
-  setupModeButtons() {
-    const buttons = document.querySelectorAll(".mode-button")
-    buttons.forEach((button) => {
-      button.addEventListener("click", (event) => {
-        const modeId = event.currentTarget.dataset.mode
-        if (!modeId) return
-        this._invoke("onModeSelect", modeId)
-      })
-    })
-  }
-
   /** Wires `#scaffold-continue` ("Got it") to `onScaffoldContinue`. @returns {void} */
   setupScaffoldContinue() {
     this._wireClick("scaffoldContinue", "scaffold-continue", "onScaffoldContinue")
   }
 
   /**
-   * Wires the three hub nav buttons to their show callbacks and the three list
+   * Wires the two hub nav buttons to their show callbacks and the two list
    * screens' back buttons to `onBack`, each carrying its own screen id.
    *
    * @returns {void}
    */
   setupNavButtons() {
-    this._wireClick("trailButton", "trail-button", "onShowTrail")
     this._wireClick("mapButton", "map-button", "onShowMap")
     this._wireClick("collectionButton", "collection-button", "onShowCollection")
-    this._wireBackButton("trailBackButton", "trail-back-button", "trail-screen")
     this._wireBackButton("mapBackButton", "map-back-button", "map-screen")
     this._wireBackButton("collectionBackButton", "collection-back-button", "collection-screen")
   }
 
   /**
-   * Wires the trail picker.
+   * Wires the trail list on the hub: a click on a row starts that trail.
    *
    * Delegated to `#trail-spaces` rather than bound per row, because the rows are
-   * rebuilt on every `renderTrail` -- once per visit to the screen, and again
-   * after every choice. Per-row listeners would have to be rebound each time,
-   * and the one that got missed would be a trail that silently could not be
-   * picked.
+   * rebuilt on every `renderTrail`. Per-row listeners would have to be rebound
+   * each time, and the one that got missed would be a trail that silently could
+   * not be started.
    *
    * @returns {void}
    */
@@ -230,7 +206,7 @@ export class EventManager {
     container.addEventListener("click", (event) => {
       const row = event.target.closest("[data-trail-id]")
       if (!row || row.disabled) return
-      this._invoke("onChooseTrail", row.dataset.trailId)
+      this._invoke("onStartTrail", row.dataset.trailId)
     })
   }
 

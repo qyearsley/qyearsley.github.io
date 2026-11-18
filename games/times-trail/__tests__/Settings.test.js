@@ -52,7 +52,7 @@ describe("Settings", () => {
     test("matches the three documented defaults exactly", () => {
       expect(Settings.defaults()).toEqual({
         tables: [2, 3, 4, 5, 6, 7, 8, 9],
-        sessionLength: 20,
+        sessionLength: 10,
         sound: "on",
       })
     })

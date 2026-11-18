@@ -82,10 +82,7 @@ const CONTRACT_IDS = [
   "star-count",
   "gem-count",
   "flame-display",
-  "hub-trail-name",
   "settings-button",
-  "mode-quick-recall",
-  "trail-button",
   "map-button",
   "collection-button",
   "play-screen",
@@ -94,7 +91,6 @@ const CONTRACT_IDS = [
   "play-star-count",
   "play-streak",
   "play-settings-button",
-  "progress-bar",
   "progress-text",
   "play-trail-strip",
   "play-area",
@@ -120,9 +116,6 @@ const CONTRACT_IDS = [
   "summary-region",
   "summary-milestones",
   "summary-cards",
-  "trail-screen",
-  "trail-heading",
-  "trail-back-button",
   "trail-spaces",
   "trail-legend",
   "map-screen",
@@ -326,15 +319,13 @@ describe("GameUI", () => {
       gemsTotal: 7,
       streakDays: 3,
       flame: { index: 2, id: "flame", emoji: "🔥", dimmed: false },
-      trailName: "Squares",
     }
 
-    test("writes lifetime stars, gems, the flame, and the trail name", () => {
+    test("writes lifetime stars, gems, and the flame", () => {
       ui.updateHud(hud)
       expect(document.getElementById("star-count").textContent).toBe("1234")
       expect(document.getElementById("gem-count").textContent).toBe("7")
       expect(document.getElementById("flame-display").textContent).toBe("🔥")
-      expect(document.getElementById("hub-trail-name").textContent).toBe("Squares")
     })
 
     test("puts the day count in the flame's label, since it has no element", () => {
@@ -376,46 +367,17 @@ describe("GameUI", () => {
     })
   })
 
-  describe("updateProgressBar", () => {
-    test("writes the width, the text, and aria-valuenow/max", () => {
-      ui.updateProgressBar(5, 20)
-      const bar = document.getElementById("progress-bar")
-      expect(bar.style.width).toBe("25%")
-      expect(document.getElementById("progress-text").textContent).toBe("5/20")
-      expect(bar.getAttribute("aria-valuenow")).toBe("5")
-      expect(bar.getAttribute("aria-valuemax")).toBe("20")
-      expect(bar.getAttribute("aria-valuemin")).toBe("0")
+  describe("updateRoundCount", () => {
+    test("writes the question number and the round length as text", () => {
+      ui.updateRoundCount(3, 10)
+      expect(document.getElementById("progress-text").textContent).toBe("Question 3 of 10")
+      ui.updateRoundCount(10, 10)
+      expect(document.getElementById("progress-text").textContent).toBe("Question 10 of 10")
     })
 
-    test("aria-valuenow actually changes across calls", () => {
-      const bar = document.getElementById("progress-bar")
-      expect(bar.getAttribute("aria-valuenow")).toBe("0")
-      ui.updateProgressBar(5, 20)
-      expect(bar.getAttribute("aria-valuenow")).toBe("5")
-      ui.updateProgressBar(20, 20)
-      expect(bar.getAttribute("aria-valuenow")).toBe("20")
-      expect(bar.style.width).toBe("100%")
-    })
-
-    test("falls back to the default session length when total is omitted", () => {
-      // game.js always passes settings.sessionLength, so this default is a floor
-      // rather than a value a real session uses.
-      ui.updateProgressBar(3)
-      const bar = document.getElementById("progress-bar")
-      expect(bar.getAttribute("aria-valuemax")).toBe(String(SESSION.DEFAULT_LENGTH))
-      expect(document.getElementById("progress-text").textContent).toBe(
-        `3/${SESSION.DEFAULT_LENGTH}`,
-      )
-    })
-
-    test("tracks a non-default session length", () => {
-      for (const total of SESSION.LENGTH_OPTIONS) {
-        ui.updateProgressBar(total, total)
-        const bar = document.getElementById("progress-bar")
-        expect(bar.getAttribute("aria-valuemax")).toBe(String(total))
-        expect(bar.getAttribute("aria-valuenow")).toBe(String(total))
-        expect(bar.style.width).toBe("100%")
-      }
+    // One bar on the play screen: the trail strip. The round only has a counter.
+    test("the play screen has no second progress bar", () => {
+      expect(document.querySelector('#play-screen [role="progressbar"]')).toBeNull()
     })
   })
 
@@ -501,7 +463,6 @@ describe("GameUI", () => {
       "hub-screen",
       "play-screen",
       "summary-screen",
-      "trail-screen",
       "map-screen",
       "collection-screen",
       "title-screen",
@@ -515,12 +476,12 @@ describe("GameUI", () => {
     })
 
     test("moves focus off the button that was just tapped", () => {
-      const button = document.getElementById("trail-button")
+      const button = document.getElementById("map-button")
       button.focus()
       expect(document.activeElement).toBe(button)
-      ui.showScreen("trail-screen")
+      ui.showScreen("map-screen")
       expect(document.activeElement).not.toBe(button)
-      expect(document.activeElement).toBe(document.getElementById("trail-heading"))
+      expect(document.activeElement).toBe(document.getElementById("map-heading"))
     })
 
     test("a screen with no heading does not throw", () => {
@@ -904,14 +865,11 @@ describe("GameUI", () => {
       expect(rows.map((row) => row.dataset.trailId)).toEqual(TRAILS.map((trail) => trail.id))
     })
 
-    test("marks the current trail, and says so to a screen reader", () => {
+    test("marks the current trail", () => {
       ui.renderTrail(trailView())
       const current = Array.from(document.querySelectorAll("#trail-spaces .is-current"))
       expect(current).toHaveLength(1)
       expect(current[0].dataset.trailId).toBe("squares")
-      expect(current[0].getAttribute("aria-pressed")).toBe("true")
-      const others = document.querySelectorAll('#trail-spaces [aria-pressed="false"]')
-      expect(others).toHaveLength(TRAILS.length - 1)
     })
 
     test("puts one token in each trail that has been walked", () => {
@@ -950,15 +908,21 @@ describe("GameUI", () => {
       ui.renderTrail(trailView())
       const doubles = document.querySelector('[data-trail-id="doubles"]')
       expect(doubles.classList.contains("is-complete")).toBe(true)
-      expect(doubles.querySelector(".trail-row-note").textContent).toBe("Finished — all 8 strong.")
+      expect(doubles.querySelector(".trail-row-note").textContent).toBe(
+        "Finished, all 8 strong. Tap to practice again.",
+      )
     })
 
-    test("an unfinished trail counts what is strong", () => {
-      const squares = document.querySelector
+    test("a trail with the token past the start says Continue and counts what is strong", () => {
       ui.renderTrail(trailView())
-      expect(squares.call(document, '[data-trail-id="squares"] .trail-row-note').textContent).toBe(
-        "3 of 8 strong.",
-      )
+      const note = document.querySelector('[data-trail-id="squares"] .trail-row-note')
+      expect(note.textContent).toBe("Continue: 3 of 8 strong.")
+    })
+
+    test("a trail not yet walked says Start", () => {
+      ui.renderTrail(trailView())
+      const note = document.querySelector('[data-trail-id="fives"] .trail-row-note')
+      expect(note.textContent).toBe("Start: 0 of 8 strong.")
     })
 
     // Sixteen individually announced spaces would bury the one sentence that
@@ -968,7 +932,7 @@ describe("GameUI", () => {
       const squares = document.querySelector('[data-trail-id="squares"]')
       expect(squares.querySelector(".trail-row-spaces").getAttribute("aria-hidden")).toBe("true")
       expect(squares.getAttribute("aria-label")).toBe(
-        "Squares. 3 of 8 strong. A number times itself.",
+        "Squares. Continue: 3 of 8 strong. A number times itself.",
       )
     })
 
@@ -1461,9 +1425,9 @@ describe("GameUI", () => {
       const bare = new GameUI()
       const warn = jest.spyOn(console, "warn").mockImplementation(() => {})
       expect(() => {
-        bare.updateHud({ starsTotal: 1, gemsTotal: 1, streakDays: 1, flame: null, trailName: "x" })
+        bare.updateHud({ starsTotal: 1, gemsTotal: 1, streakDays: 1, flame: null })
         bare.updatePlayHud({ sessionStars: 1, sessionStreak: 1 })
-        bare.updateProgressBar(1, 20)
+        bare.updateRoundCount(1, 20)
         bare.flyStars(10)
         bare.showScreen("hub-screen")
         bare.renderQuestion(keypadChallenge())

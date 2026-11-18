@@ -20,3 +20,10 @@ Noted on 2026-10-21 from a review of page balance.
 ## A typing tutor
 
 A fun typing tutor game. Owner idea, 2026-11-18.
+
+## Times Trail: optional speed scoring
+
+An opt-in mode that scores how fast a correct answer is, for a player who wants
+a challenge. The game already measures thinking time per answer but never shows
+it. Keep it off by default and keep it out of the mastery model, so a slow
+answer never costs progress. Owner idea, 2026-11-18.

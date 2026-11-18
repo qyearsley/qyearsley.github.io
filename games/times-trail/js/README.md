@@ -95,7 +95,9 @@ the invariants below.
 
 Turns the per-fact numbers into an order: a re-ask queue for facts just missed,
 then a 70/30 draw between a weak-or-due bucket and a strong bucket, then a
-weighted pick inside the chosen bucket. Holds session state (last fact, question
+weighted pick inside the chosen bucket. It draws from whatever pool it is given;
+`game.js` passes the current trail's facts, so a round never leaves the trail.
+Holds session state (last fact, question
 index, retry queue) and nothing else. The rng-call count per path is documented
 and fixed, which is what makes the selection testable.
 
@@ -112,8 +114,9 @@ a fully strong trail reaches its last space at any size, which is the
 frozen-token class of bug gone structurally. The cap reads decayed strength and
 can shrink, but the token never moves backwards.
 
-`allTrailProgress()` is the module-level helper the hub picker uses to ask about
-all five at once.
+`allTrailProgress()` is the module-level helper the hub uses to ask about all
+five at once. `activeFactIds` is also the pool a round draws from, so a round on
+a trail asks only that trail's facts.
 
 ### Scoring.js
 
@@ -167,11 +170,10 @@ actually show up.
 
 Extends `games/shared/BaseGameUI.js` and holds every DOM read and write in the
 game. Takes plain view models built from already-decided numbers and contains no
-game rules. Five base-class methods are overridden because the base behaviour is
+game rules. Four base-class methods are overridden because the base behaviour is
 wrong for this page: `showFeedback` and `hideFeedback` (the base destroys class
 names and leaves stale text in an `aria-live` region), `showScreen` (the base
-loses focus to `<body>`), `updateProgressBar` (the base leaves `aria-valuenow`
-frozen), and `updateTitleButtons` (the base knows only Continue and Start Fresh,
+loses focus to `<body>`), and `updateTitleButtons` (the base knows only Continue and Start Fresh,
 and this game has a third save-dependent title button).
 
 ### Keypad.js
@@ -221,12 +223,13 @@ reports raw digits needs no special case at the call site.
 ### The question loop
 
 ```
-startSession(modeId)
+startSession(modeId)     (the hub's trail rows call startTrail(id) first)
    │  resets session state, selector.reset(), rebuilds Journey for the pool
    ▼
 _askNextQuestion()
    │
-   ├─► Settings.factPool ─────────► FactSelector.selectNext(pool, records)
+   ├─► Journey.activeFactIds ─────► FactSelector.selectNext(pool, records)
+   │     (this trail's facts, in the enabled tables)
    │                                        │
    │                                        ▼
    │                                    a factId

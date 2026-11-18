@@ -67,7 +67,7 @@ describe("game", () => {
     for (const table of [2, 3, 4, 5, 6, 7, 8, 9]) {
       expect(byId(`table-${table}`).checked).toBe(true)
     }
-    expect(byId("session-length-select").value).toBe("20")
+    expect(byId("session-length-select").value).toBe("10")
     expect(byId("pool-size").textContent).toBe("36 facts in play")
   })
 
@@ -93,37 +93,41 @@ describe("game", () => {
     expect(byId("pool-size").textContent).toBe("8 facts in play")
   })
 
-  test("the session length setting reaches the progress bar", () => {
+  test("a new player's round is 10 questions", () => {
+    click("start-button")
+    expect(byId("progress-text").textContent).toBe("Question 1 of 10")
+  })
+
+  test("the session length setting reaches the round counter", () => {
     click("settings-button")
     const select = byId("session-length-select")
-    select.value = "10"
+    select.value = "20"
     select.dispatchEvent(new Event("change", { bubbles: true }))
     click("close-settings")
 
     click("start-button")
-    expect(byId("progress-bar").getAttribute("aria-valuemax")).toBe("10")
-    expect(byId("progress-text").textContent).toBe("0/10")
+    expect(byId("progress-text").textContent).toBe("Question 1 of 20")
   })
 
-  // Every read of settings.sessionLength was already live, but the bar is only
-  // written on answer and on session start, so mid-session it went on claiming
-  // "/20" until the next question and read as a setting that had not applied.
-  test("changing the session length mid-session redraws the bar at once", () => {
+  // Every read of settings.sessionLength was already live, but the counter is
+  // only written when a question is asked, so mid-session it went on claiming
+  // "of 10" until the next question and read as a setting that had not applied.
+  test("changing the session length mid-session redraws the counter at once", () => {
     click("start-button")
-    expect(byId("progress-text").textContent).toBe("0/20")
+    expect(byId("progress-text").textContent).toBe("Question 1 of 10")
 
     click("play-settings-button")
     const select = byId("session-length-select")
     select.value = "30"
     select.dispatchEvent(new Event("change", { bubbles: true }))
 
-    expect(byId("progress-text").textContent).toBe("0/30")
-    expect(byId("progress-bar").getAttribute("aria-valuemax")).toBe("30")
+    expect(byId("progress-text").textContent).toBe("Question 1 of 30")
   })
 
-  test("the gate message is gone -- the trail explains itself by what it asks", () => {
+  test("the play screen has one bar: the trail strip", () => {
     click("start-button")
-    expect(byId("gate-message")).toBeNull()
+    expect(byId("progress-bar")).toBeNull()
+    expect(byId("play-trail-strip").querySelectorAll(".strip-space").length).toBeGreaterThan(0)
   })
 
   // Narrowing the pool rebuilds the journey, which can move the gating region --
@@ -189,40 +193,66 @@ describe("game", () => {
     expect(byId("pool-size").textContent).toBe("35 facts in play")
   })
 
-  // Regression: chooseTrail() used to call a save method the class does not
-  // have, which threw after the trail was already switched -- so the picker
-  // never redrew to show the new current row, and the two calls after it in
-  // the same handler (showTrail(), _refreshHud()) never ran either.
-  test("choosing a non-current trail redraws the picker and is saved", () => {
-    click("trail-button")
-    expect(byId("trail-screen").classList.contains("active")).toBe(true)
+  // The hub IS the list of trails: there is no separate picker screen, and no
+  // "Practice" button between the player and the questions.
+  test("the hub lists every trail, and the old picker screen is gone", () => {
+    click("progress-button")
+    expect(byId("hub-screen").classList.contains("active")).toBe(true)
+    const rows = Array.from(document.querySelectorAll("#hub-screen [data-trail-id]"))
+    expect(rows.map((row) => row.dataset.trailId)).toEqual([
+      "doubles",
+      "fives",
+      "squares",
+      "nines",
+      "tough",
+    ])
+    expect(byId("trail-screen")).toBeNull()
+    expect(byId("trail-button")).toBeNull()
+    expect(byId("mode-quick-recall")).toBeNull()
+  })
 
-    const doublesRow = document.querySelector('[data-trail-id="doubles"]')
-    expect(doublesRow.classList.contains("is-current")).toBe(true)
+  test("a new player's hub says Start on the first trail, with nothing walked yet", () => {
+    click("progress-button")
+    const note = document.querySelector('[data-trail-id="doubles"] .trail-row-note')
+    expect(note.textContent).toBe("Start: 0 of 8 strong.")
+    expect(
+      document.querySelector('[data-trail-id="doubles"]').classList.contains("is-current"),
+    ).toBe(true)
+  })
 
+  // Regression: a trail change used to call a save method the class does not
+  // have, which threw after the trail was already switched.
+  test("tapping a trail starts a round on it and remembers the choice", () => {
+    click("progress-button")
     const fivesRow = document.querySelector('[data-trail-id="fives"]')
     expect(fivesRow.disabled).toBe(false)
-    expect(fivesRow.classList.contains("is-current")).toBe(false)
 
     fivesRow.click()
     expect(console.error).not.toHaveBeenCalled()
-
-    // The handler redraws the same screen in place, with fives now current.
-    expect(byId("trail-screen").classList.contains("active")).toBe(true)
-    expect(
-      document.querySelector('[data-trail-id="doubles"]').classList.contains("is-current"),
-    ).toBe(false)
-    const redrawnFives = document.querySelector('[data-trail-id="fives"]')
-    expect(redrawnFives.classList.contains("is-current")).toBe(true)
-    expect(redrawnFives.getAttribute("aria-pressed")).toBe("true")
+    expect(byId("play-screen").classList.contains("active")).toBe(true)
+    expect(byId("play-trail-strip").textContent).toContain("Fives")
+    expect(byId("progress-text").textContent).toBe("Question 1 of 10")
 
     // Reboot onto fresh markup WITHOUT clearing storage, the way a reload does.
     document.documentElement.innerHTML = html.replace(/<!DOCTYPE[^>]*>/i, "")
     document.dispatchEvent(new Event("DOMContentLoaded"))
 
-    click("trail-button")
+    click("progress-button")
     expect(document.querySelector('[data-trail-id="fives"]').classList.contains("is-current")).toBe(
       true,
     )
+    expect(
+      document.querySelector('[data-trail-id="doubles"]').classList.contains("is-current"),
+    ).toBe(false)
+  })
+
+  test("a trail the enabled tables leave empty is disabled on the hub", () => {
+    click("settings-button")
+    // The Tough Ten never contains a 2, 5 or 9, so tables 2, 5 and 9 alone empty it.
+    for (const table of [3, 4, 6, 7, 8]) toggleTable(table, false)
+    click("close-settings")
+    click("progress-button")
+    expect(document.querySelector('[data-trail-id="tough"]').disabled).toBe(true)
+    expect(document.querySelector('[data-trail-id="doubles"]').disabled).toBe(false)
   })
 })

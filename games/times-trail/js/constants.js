@@ -90,21 +90,12 @@ export const DECAY = Object.freeze({
 /**
  * How FactSelector picks the next fact: a weighted draw from a weak/due
  * bucket most of the time, plus the delay before a missed fact is re-asked.
- *
- * GATE_WEIGHT_BONUS is what ties selection to the trail. Without it selection
- * ignored the token's position completely, so the two facts a gate was waiting
- * on might not come up for twenty questions and the trail stopped for no visible
- * reason. It is a multiplier inside the existing weighted draw, not a separate
- * bucket: it costs no extra rng call, it compounds with the weak/due weighting
- * rather than overriding it, and it excludes nothing -- so interleaving survives
- * and a gate cannot hijack a session.
  */
 export const SELECTION = Object.freeze({
   WEAK_RATIO: 0.7, // P(draw from the weak/due bucket)
   RETRY_DELAY_MIN: 3, // a missed fact returns after 3..4 OTHER questions
   RETRY_DELAY_MAX: 4,
   DUE_WEIGHT_BONUS: 2, // multiplier applied to a due fact's weight
-  GATE_WEIGHT_BONUS: 3, // multiplier applied to a fact the next gate waits on
 })
 
 /** Every table the game covers, ascending. */
@@ -142,22 +133,21 @@ export const MODE_LABELS = Object.freeze({
 })
 
 /**
- * Session shape. The length is a setting, so `#progress-bar`'s aria-valuemax is
- * written from `Settings.sessionLength` on every session start and DEFAULT_LENGTH
- * is only the value in the markup.
+ * Session shape. The length is a setting; DEFAULT_LENGTH is what a new player
+ * gets. It is the shortest option: a round is one trail's facts, so ten
+ * questions is a short, finishable round.
  *
  * LENGTH_OPTIONS is short on purpose: a free-entry number is a knob a child can
- * set to 200. Three lengths cover "I have two minutes", the default, and "let me
- * keep going".
+ * set to 200. Three lengths cover the default, "a bit more", and "let me keep
+ * going".
  *
  * DAILY_GOAL.FACTS is deliberately NOT derived from this. The goal is a day's
- * worth of practice; if it tracked the session length, picking the 10-question
- * session would halve the goal and every day would still be "done" in one
- * session, which is the opposite of what a goal is for.
+ * worth of practice; if it tracked the session length, the default session
+ * alone would always meet it, which is the opposite of what a goal is for.
  */
 export const SESSION = Object.freeze({
   LENGTH_OPTIONS: Object.freeze([10, 20, 30]),
-  DEFAULT_LENGTH: 20,
+  DEFAULT_LENGTH: 10,
 })
 
 /**

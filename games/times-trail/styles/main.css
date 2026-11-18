@@ -110,7 +110,6 @@ body {
    (back arrow, gear, "Home") used to be the three smallest targets on
    screen and are tapped on every screen. */
 .keypad-key,
-.mode-button,
 .big-button,
 .secondary-button,
 .nav-button,
@@ -136,7 +135,6 @@ body {
 /* Every container of tap targets keeps them 16px apart. */
 .title-buttons,
 .hub-nav,
-.mode-choices,
 .summary-buttons,
 .header .stats,
 .table-toggles {
@@ -176,7 +174,7 @@ body {
    belongs HERE, on the elements that actually scroll -- setting it only on
    html/body does nothing for an inner scroll container, so a rubber-band drag
    inside the trail or collection still bounced the whole page on iOS. */
-#trail-screen.active,
+#hub-screen.active,
 #map-screen.active,
 #collection-screen.active,
 #summary-screen.active {
@@ -239,33 +237,10 @@ body {
   font-size: 1.5rem;
 }
 
-/* ==================== Progress Bar ==================== */
-.progress-container {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+/* ==================== Round Counter ==================== */
+.progress-text {
   flex-shrink: 0;
   margin-bottom: 10px;
-}
-
-.progress-bar-bg {
-  flex: 1;
-  height: 20px;
-  background-color: var(--tt-surface-alt);
-  border: 2px solid var(--tt-border);
-  border-radius: 999px;
-  overflow: hidden;
-}
-
-.progress-bar {
-  height: 100%;
-  width: 0%;
-  background-color: var(--tt-primary);
-  transition: width 0.4s ease;
-}
-
-.progress-text {
-  min-width: 64px;
   font-size: 1rem;
   line-height: 1.2;
   font-weight: 700;
@@ -404,19 +379,6 @@ body {
   color: var(--tt-primary);
 }
 
-.mode-button {
-  flex: 1;
-  flex-direction: column;
-  gap: 8px;
-  min-height: 112px;
-  padding: 16px;
-  font-size: 1.5rem;
-  background-color: var(--tt-surface-alt);
-  color: var(--tt-ink);
-  border: 2px solid var(--tt-border);
-  text-align: center;
-}
-
 /* Disabled controls (BaseGameUI.disableButton / disableAnswerButtons). */
 .big-button:disabled,
 .secondary-button:disabled,
@@ -430,7 +392,6 @@ body {
    sticky hover state, and every control below has an unconditional :active. */
 @media (hover: hover) and (pointer: fine) {
   .keypad-key:hover,
-  .mode-button:hover,
   .table-toggle:hover {
     background-color: var(--tt-surface-alt);
     border-color: var(--tt-primary);
@@ -446,7 +407,6 @@ body {
 }
 
 .keypad-key:active,
-.mode-button:active,
 .big-button:active,
 .secondary-button:active,
 .nav-button:active,
@@ -469,17 +429,10 @@ body {
   text-align: center;
 }
 
-.hub-region {
+.hub-hint {
   font-size: 1.125rem;
   color: var(--tt-ink-muted);
   text-align: center;
-}
-
-.mode-choices {
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: stretch;
-  margin: 12px 0;
 }
 
 .hub-nav {
@@ -697,14 +650,13 @@ body {
   opacity: 0;
 }
 
-/* ==================== Trail Screen ==================== */
+/* ==================== Trail List (the hub) ==================== */
 .header h2 {
   font-size: 1.75rem;
   color: var(--tt-primary);
 }
 
-/* The trail picker: one row per themed trail. The rows are buttons, because
-   choosing a trail is the decision this screen exists to offer. */
+/* One row per themed trail. Each row is a button that starts a round on it. */
 .trail-spaces {
   display: grid;
   gap: 12px;

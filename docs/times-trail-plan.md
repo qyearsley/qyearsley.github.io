@@ -63,7 +63,11 @@ the layout.
 Fives, Squares, Nines, and the Tough Ten (`3x4, 3x6, 3x7, 3x8, 4x6, 4x7, 4x8,
 6x7, 6x8, 7x8` -- the ten facts with no shortcut). The sets overlap on purpose
 (2x5 is a double and a five); mastery is tracked per fact and shared, so
-progress on one trail can advance another.
+progress on one trail can advance another. The hub is the list of trails;
+tapping a row starts a round on it. A round asks only that trail's facts
+(intersected with the enabled tables), so every correct answer can move the
+token. The play screen has one bar, the trail strip, plus a "Question 3 of 10"
+counter.
 
 A trail is two spaces long per fact in it. The token moves one space per
 correct answer, and how far it may stand is
@@ -85,7 +89,7 @@ fact strengthens. "Collect all 36" is the completion goal. An 8x8 mastery grid
 (rows and columns 2-9) is the at-a-glance progress view.
 
 **Daily goal** is 20 facts a day, with a lenient streak: one missed day dims
-it, two or more resets it. **Sessions** are 10, 20 (default), or 30 questions,
+it, two or more resets it. **Sessions** are 10 (default), 20, or 30 questions,
 ending with a summary of that session's stars, gems, and any new cards or
 milestones.
 

@@ -18,11 +18,8 @@
  * -- and therefore cannot disagree with -- anything the core modules decided.
  *
  * Lifetimes: per-answer feedback (`showFeedback`, `flyStars`) is cleared by the
- * next `renderQuestion`. There is deliberately no gate message: explaining a
- * stopped trail in words meant naming facts the game then did not ask, because
- * selection ignores the token's position. `FactSelector.setPriorityFacts` biases
- * the draw toward those facts instead, so the gate opens on its own and needs no
- * sentence.
+ * next `renderQuestion`. There is deliberately no gate message: a round asks
+ * only its own trail's facts, so the gate opens on its own and needs no sentence.
  *
  * The overrides below exist because the base behaviour is wrong for this page
  * rather than merely incomplete:
@@ -33,8 +30,6 @@
  *   - `showScreen`: the base only toggles `.active`, so the button that was just
  *     tapped ends up inside a `display: none` screen and focus falls to `<body>`
  *     with nothing announced. This focuses the new screen's heading.
- *   - `updateProgressBar`: the base writes width and text only, leaving
- *     `aria-valuenow` frozen at its markup value for the whole session.
  *   - `updateTitleButtons`: the base knows only about Continue and Start Fresh,
  *     and this game has a third save-dependent title button.
  *
@@ -56,10 +51,8 @@ import { BaseGameUI } from "../../shared/BaseGameUI.js"
 import {
   ALL_TABLES,
   KEYPAD,
-  MATH,
   OPERAND_MAX,
   OPERAND_MIN,
-  SESSION,
   STRENGTH,
   TIMING,
   TOKEN_EMOJI,
@@ -173,7 +166,6 @@ const FACT_ORDER = new Map(FACT_IDS.map((id, index) => [id, index]))
  * @property {number} gemsTotal - LIFETIME gems. Written to `#gem-count`.
  * @property {number} streakDays - Daily-goal streak in DAYS, not answers.
  * @property {{index: number, id: string, emoji: string, dimmed: boolean}} flame - Flame stage.
- * @property {string} trailName - Name of the trail being walked.
  */
 
 /**
@@ -198,7 +190,7 @@ const FACT_ORDER = new Map(FACT_IDS.map((id, index) => [id, index]))
  */
 
 /**
- * One trail as the picker draws it.
+ * One trail as the hub draws it.
  * @typedef {Object} TrailCardView
  * @property {string} id - Trail id.
  * @property {string} name - Trail name.
@@ -215,7 +207,7 @@ const FACT_ORDER = new Map(FACT_IDS.map((id, index) => [id, index]))
  */
 
 /**
- * Every trail, as the picker draws them.
+ * Every trail, as the hub draws them.
  * @typedef {Object} TrailView
  * @property {TrailCardView[]} trails - Trails in hub order.
  * @property {string} tokenEmoji - Always `TOKEN_EMOJI`; no cosmetics in Phase 1.
@@ -368,9 +360,8 @@ export class GameUI extends BaseGameUI {
       starCount: document.getElementById("star-count"),
       gemCount: document.getElementById("gem-count"),
       flameDisplay: document.getElementById("flame-display"),
-      hubTrailName: document.getElementById("hub-trail-name"),
-      modeQuickRecall: document.getElementById("mode-quick-recall"),
-      trailButton: document.getElementById("trail-button"),
+      trailSpaces: document.getElementById("trail-spaces"),
+      trailLegend: document.getElementById("trail-legend"),
       mapButton: document.getElementById("map-button"),
       collectionButton: document.getElementById("collection-button"),
 
@@ -380,7 +371,6 @@ export class GameUI extends BaseGameUI {
       playStarCount: document.getElementById("play-star-count"),
       playStreak: document.getElementById("play-streak"),
       playSettingsButton: document.getElementById("play-settings-button"),
-      progressBar: document.getElementById("progress-bar"),
       progressText: document.getElementById("progress-text"),
       playTrailStrip: document.getElementById("play-trail-strip"),
       playArea: document.getElementById("play-area"),
@@ -411,13 +401,6 @@ export class GameUI extends BaseGameUI {
       summaryMilestonesGroup: document.getElementById("summary-milestones-group"),
       summaryCards: document.getElementById("summary-cards"),
       summaryCardsGroup: document.getElementById("summary-cards-group"),
-
-      // Trail screen
-      trailScreen: document.getElementById("trail-screen"),
-      trailHeading: document.getElementById("trail-heading"),
-      trailBackButton: document.getElementById("trail-back-button"),
-      trailSpaces: document.getElementById("trail-spaces"),
-      trailLegend: document.getElementById("trail-legend"),
 
       // Fact map screen
       mapScreen: document.getElementById("map-screen"),
@@ -455,7 +438,7 @@ export class GameUI extends BaseGameUI {
    */
   updateHud(hud) {
     if (!hud) return
-    const { starCount, gemCount, flameDisplay, hubTrailName } = this.elements
+    const { starCount, gemCount, flameDisplay } = this.elements
 
     if (starCount) starCount.textContent = String(hud.starsTotal)
     if (gemCount) gemCount.textContent = String(hud.gemsTotal)
@@ -472,8 +455,6 @@ export class GameUI extends BaseGameUI {
       )
       flameDisplay.style.opacity = flame && flame.dimmed ? DIMMED_FLAME_OPACITY : "1"
     }
-
-    if (hubTrailName) hubTrailName.textContent = hud.trailName ? String(hud.trailName) : ""
   }
 
   /**
@@ -490,23 +471,16 @@ export class GameUI extends BaseGameUI {
   }
 
   /**
-   * OVERRIDES `BaseGameUI.updateProgressBar`, which writes only the width and
-   * the text and so leaves `aria-valuenow` frozen at its markup value -- a
-   * screen reader would report 0/20 for the entire session.
-   *
-   * `total` defaults to `SESSION.DEFAULT_LENGTH` only as a floor; the session
-   * length is a setting, so `game.js` passes `settings.sessionLength` and this
-   * default is never what a real session uses.
-   * @param {number} current - Questions answered so far
-   * @param {number} [total] - Questions in the session
+   * Write the round counter on the play screen: "Question 3 of 10". It is text
+   * only. The one bar on the play screen is the trail strip, so the player never
+   * has to guess which of two bars is the one that moves the token.
+   * @param {number} question - 1-based number of the question on screen
+   * @param {number} total - Questions in the round
    * @returns {void}
    */
-  updateProgressBar(current, total = SESSION.DEFAULT_LENGTH) {
-    super.updateProgressBar(current, total, MATH.PERCENT_MULTIPLIER)
-    const bar = this.elements.progressBar
-    if (!bar) return
-    bar.setAttribute("aria-valuenow", String(current))
-    bar.setAttribute("aria-valuemax", String(total))
+  updateRoundCount(question, total) {
+    const { progressText } = this.elements
+    if (progressText) progressText.textContent = `Question ${question} of ${total}`
   }
 
   /**
@@ -862,17 +836,16 @@ export class GameUI extends BaseGameUI {
     container.appendChild(gate)
   }
 
-  // ------------------------------------------------------- Trail screen
+  // ------------------------------------------------------- Trail list (hub)
 
   /**
-   * Draw the five themed trails as a picker: one row each, with its spaces, its
+   * Draw the five themed trails as the hub: one row each, with its spaces, its
    * token, and how much of it is strong.
    *
-   * The screen is the map AND the chooser. Each row is a button, because
-   * choosing "Squares" is the meaningful decision this screen exists to offer;
-   * a row the active tables leave empty is disabled rather than hidden, so
-   * narrowing the tables visibly removes a trail instead of silently shrinking
-   * the list.
+   * Each row is a button that starts a round on that trail, so the list is the
+   * map AND the way in. A row the active tables leave empty is disabled rather
+   * than hidden, so narrowing the tables visibly removes a trail instead of
+   * silently shrinking the list.
    * @param {TrailView} view - Trail view model
    * @returns {void}
    */
@@ -893,7 +866,7 @@ export class GameUI extends BaseGameUI {
   }
 
   /**
-   * One trail's row in the picker.
+   * One trail's row in the hub.
    * @private
    * @param {TrailCardView} trail - One trail's view model
    * @param {string} tokenEmoji - The token glyph
@@ -910,9 +883,6 @@ export class GameUI extends BaseGameUI {
       row.classList.add("is-unavailable")
       row.disabled = true
     }
-    // The pressed state, not just a colour: a screen reader has to be able to
-    // tell which of five buttons is the one currently being walked.
-    row.setAttribute("aria-pressed", trail.current ? "true" : "false")
 
     const label = document.createElement("span")
     label.className = "trail-region-label"
@@ -973,8 +943,9 @@ export class GameUI extends BaseGameUI {
    */
   _trailRowNote(trail) {
     if (trail.unavailable) return "Not in your tables right now."
-    if (trail.complete) return `Finished — all ${trail.total} strong.`
-    return `${trail.strong} of ${trail.total} strong.`
+    if (trail.complete) return `Finished, all ${trail.total} strong. Tap to practice again.`
+    const action = trail.space > 0 ? "Continue" : "Start"
+    return `${action}: ${trail.strong} of ${trail.total} strong.`
   }
 
   /**

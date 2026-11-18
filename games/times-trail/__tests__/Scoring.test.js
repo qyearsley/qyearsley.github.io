@@ -626,14 +626,10 @@ describe("Scoring", () => {
     })
 
     // The goal is deliberately NOT derived from the session length now that the
-    // length is a setting. If it tracked the setting, picking the 10-question
-    // session would halve the goal and every day would still be "done" in one
-    // session -- which is the opposite of what a goal is for. So: the default
-    // session meets it exactly, the long one overshoots, and the short one takes
-    // two. In every case it fires at most once.
-    test("the default session meets the goal exactly", () => {
-      expect(SESSION.DEFAULT_LENGTH).toBe(DAILY_GOAL.FACTS)
-    })
+    // length is a setting. If it tracked the setting, the default session would
+    // always meet it -- which is the opposite of what a goal is for. So: the
+    // default and short sessions take two, and the long one overshoots. In every
+    // case it fires at most once.
 
     test("no session length fires the goal more than once", () => {
       for (const length of SESSION.LENGTH_OPTIONS) {

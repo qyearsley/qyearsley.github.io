@@ -13,8 +13,8 @@ that is going.
 - **36 facts, not 78.** Operands 2 through 9 only, canonicalized so `7×8` and
   `8×7` share one record. Both orientations are still shown at random. 1s and
   10s are excluded -- they are rules, not recall.
-- **One thing to do.** Play goes straight into `7 × 6 = ?`; there is no mode
-  menu to get through first.
+- **One thing to do.** Play goes straight into `7 × 6 = ?` on the current trail;
+  there is no mode menu to get through first.
 - **Typed answers only.** Every answer is typed on the on-screen keypad. Multiple
   choice was cut because a one-in-four guess muddies the mastery data, and
   because the input then changed under the player mid-session.
@@ -30,8 +30,11 @@ that is going.
   to the first tap or keypress, not to submit. A correct-but-slow answer is
   capped below mastered, because counting up is not recall.
 - **Five themed trails.** Doubles, Fives, Squares, Nines, and the Tough Ten --
-  each themed on a _pattern_ rather than a times table. You pick one from the
-  hub. The sets overlap on purpose: 2×5 is a double and a five, so getting it
+  each themed on a _pattern_ rather than a times table. The hub is the list of
+  trails: tap one to start a round on it, and the row says Start or Continue and
+  how many of its facts are strong. A round asks only that trail's facts (the
+  enabled tables still narrow it), so every correct answer moves the token. The
+  sets overlap on purpose: 2×5 is a double and a five, so getting it
   right advances both, because the mastery record is per fact and shared.
   Together they cover all 36 facts.
 
@@ -44,9 +47,9 @@ that is going.
   ```
 
   Strengthening opens ground and answering walks it, so the trail cannot be
-  walked by grinding 2×2. Selection weights the trail's unfinished facts up by
-  `SELECTION.GATE_WEIGHT_BONUS` -- weighted, not restricted, so a fact from
-  another trail that is slipping still gets asked. With every fact of a trail
+  walked by grinding 2×2. Inside a round the weak-or-due draw and the miss
+  retries still apply, but only over the trail's own facts. A slipping fact from
+  another trail waits until you walk that trail. With every fact of a trail
   strong the cap always reaches the last space, so a trail can always be
   finished; `constants.test.js` asserts that at every trail size.
 
@@ -67,8 +70,9 @@ that is going.
   outlined diagonal is the squares.
 - **Daily goal.** 20 facts a day, with a lenient streak: one missed day dims the
   flame but keeps the streak, two or more resets it.
-- **Sessions end.** 20 questions, then a summary with the session's stars, gems,
-  best streak, any new cards, and any milestone crossed.
+- **Sessions end.** 10 questions by default, counted as "Question 3 of 10" text
+  (the one bar on the play screen is the trail strip), then a summary with the
+  session's stars, gems, best streak, any new cards, and any milestone crossed.
 
 Progress saves automatically after every answer.
 
@@ -93,8 +97,9 @@ exactly two controls:
   `2×2`, since `2×3` is still in the 3 times table. Narrowing works by unticking
   everything _except_ what you want. The last enabled table cannot be unticked.
 
-- **Questions per session** -- 10, 20 (the default), or 30. The daily goal stays
-  at 20 facts regardless, so the short session takes two to meet it; a goal that
+- **Questions per session** -- 10 (the default), 20, or 30. A save made before
+  2026-11-18 keeps the value it stored, usually 20. The daily goal stays at 20
+  facts regardless, so the default session takes two to meet it; a goal that
   shrank with the setting would not be a goal.
 
 Close the dialog with **Done** or **Escape**. Opening it mid-round pauses the

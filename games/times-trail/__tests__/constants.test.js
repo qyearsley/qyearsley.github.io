@@ -315,10 +315,11 @@ describe("SESSION", () => {
       expect(SESSION.LENGTH_OPTIONS).toContain(SESSION.DEFAULT_LENGTH)
     })
 
-    // Not every option: the point of the 10-question session is that it is
-    // shorter than a day's practice, so the goal takes two of them.
-    test("the default session is enough to meet the daily goal", () => {
-      expect(SESSION.DEFAULT_LENGTH).toBeGreaterThanOrEqual(DAILY_GOAL.FACTS)
+    // The default round is shorter than a day's practice, so the goal takes two
+    // of them -- and never more than that, or it would stop feeling reachable.
+    test("two default sessions meet the daily goal, one does not", () => {
+      expect(SESSION.DEFAULT_LENGTH).toBeLessThan(DAILY_GOAL.FACTS)
+      expect(SESSION.DEFAULT_LENGTH * 2).toBeGreaterThanOrEqual(DAILY_GOAL.FACTS)
     })
   })
 })
