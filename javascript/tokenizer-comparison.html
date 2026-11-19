@@ -78,7 +78,8 @@
         const chips = tokenizeForDisplay(text, merges)
         for (const chip of chips) {
           const span = document.createElement("span")
-          span.className = `tc-chip tc-chip-color-${chip.id % CHIP_COLORS}`
+          span.className = "tc-chip"
+          span.style.background = `var(--tc-chip-${chip.id % CHIP_COLORS})`
           if (!chip.isText) span.classList.add("tc-chip-bytes")
           span.textContent = chip.label
           span.title = `token id ${chip.id} -- bytes: ${chip.bytes
@@ -160,6 +161,19 @@
       })
     </script>
     <style>
+      :root {
+        --tc-chip-0: #3182ce;
+        --tc-chip-1: #805ad5;
+        --tc-chip-2: #d69e2e;
+        --tc-chip-3: #38a169;
+        --tc-chip-4: #dd6b20;
+        --tc-chip-5: #e53e3e;
+        --tc-chip-6: #319795;
+        --tc-chip-7: #d53f8c;
+        --tc-chip-8: #6b46c1;
+        --tc-chip-9: #718096;
+      }
+
       .tc-corpus-note {
         font-size: 0.85rem;
         color: var(--color-text-muted);
@@ -264,99 +278,33 @@
         color: var(--color-text-muted);
       }
 
-      .tc-chip-color-0 {
-        background: #3182ce;
-      }
-      .tc-chip-color-1 {
-        background: #805ad5;
-      }
-      .tc-chip-color-2 {
-        background: #d69e2e;
-      }
-      .tc-chip-color-3 {
-        background: #38a169;
-      }
-      .tc-chip-color-4 {
-        background: #dd6b20;
-      }
-      .tc-chip-color-5 {
-        background: #e53e3e;
-      }
-      .tc-chip-color-6 {
-        background: #319795;
-      }
-      .tc-chip-color-7 {
-        background: #d53f8c;
-      }
-      .tc-chip-color-8 {
-        background: #6b46c1;
-      }
-      .tc-chip-color-9 {
-        background: #718096;
-      }
-
+      /* Dark colors: set once per theme, keep the two blocks in step. */
       @media (prefers-color-scheme: dark) {
-        :root:not([data-theme="light"]) .tc-chip-color-0 {
-          background: #2b6cb0;
-        }
-        :root:not([data-theme="light"]) .tc-chip-color-1 {
-          background: #6b46c1;
-        }
-        :root:not([data-theme="light"]) .tc-chip-color-2 {
-          background: #b7791f;
-        }
-        :root:not([data-theme="light"]) .tc-chip-color-3 {
-          background: #2f855a;
-        }
-        :root:not([data-theme="light"]) .tc-chip-color-4 {
-          background: #c05621;
-        }
-        :root:not([data-theme="light"]) .tc-chip-color-5 {
-          background: #c53030;
-        }
-        :root:not([data-theme="light"]) .tc-chip-color-6 {
-          background: #2c7a7b;
-        }
-        :root:not([data-theme="light"]) .tc-chip-color-7 {
-          background: #b83280;
-        }
-        :root:not([data-theme="light"]) .tc-chip-color-8 {
-          background: #553c9a;
-        }
-        :root:not([data-theme="light"]) .tc-chip-color-9 {
-          background: #4a5568;
+        :root:not([data-theme="light"]) {
+          --tc-chip-0: #2b6cb0;
+          --tc-chip-1: #6b46c1;
+          --tc-chip-2: #b7791f;
+          --tc-chip-3: #2f855a;
+          --tc-chip-4: #c05621;
+          --tc-chip-5: #c53030;
+          --tc-chip-6: #2c7a7b;
+          --tc-chip-7: #b83280;
+          --tc-chip-8: #553c9a;
+          --tc-chip-9: #4a5568;
         }
       }
 
-      [data-theme="dark"] .tc-chip-color-0 {
-        background: #2b6cb0;
-      }
-      [data-theme="dark"] .tc-chip-color-1 {
-        background: #6b46c1;
-      }
-      [data-theme="dark"] .tc-chip-color-2 {
-        background: #b7791f;
-      }
-      [data-theme="dark"] .tc-chip-color-3 {
-        background: #2f855a;
-      }
-      [data-theme="dark"] .tc-chip-color-4 {
-        background: #c05621;
-      }
-      [data-theme="dark"] .tc-chip-color-5 {
-        background: #c53030;
-      }
-      [data-theme="dark"] .tc-chip-color-6 {
-        background: #2c7a7b;
-      }
-      [data-theme="dark"] .tc-chip-color-7 {
-        background: #b83280;
-      }
-      [data-theme="dark"] .tc-chip-color-8 {
-        background: #553c9a;
-      }
-      [data-theme="dark"] .tc-chip-color-9 {
-        background: #4a5568;
+      [data-theme="dark"] {
+        --tc-chip-0: #2b6cb0;
+        --tc-chip-1: #6b46c1;
+        --tc-chip-2: #b7791f;
+        --tc-chip-3: #2f855a;
+        --tc-chip-4: #c05621;
+        --tc-chip-5: #c53030;
+        --tc-chip-6: #2c7a7b;
+        --tc-chip-7: #b83280;
+        --tc-chip-8: #553c9a;
+        --tc-chip-9: #4a5568;
       }
     </style>
     <script src="/shared/theme.js"></script>

@@ -260,6 +260,13 @@
       })
     </script>
     <style>
+      :root {
+        --enc-utf8: #3182ce;
+        --enc-utf16: #805ad5;
+        --enc-gb2312: #d69e2e;
+        --enc-payload: var(--color-primary);
+      }
+
       .explorer-input {
         width: 100%;
         padding: 0.75rem 1rem;
@@ -361,13 +368,13 @@
       }
 
       .byte-box.utf8 {
-        background: #3182ce;
+        background: var(--enc-utf8);
       }
       .byte-box.utf16 {
-        background: #805ad5;
+        background: var(--enc-utf16);
       }
       .byte-box.gb2312 {
-        background: #d69e2e;
+        background: var(--enc-gb2312);
       }
 
       .na {
@@ -393,7 +400,7 @@
         color: var(--color-text-muted);
       }
       .bit-payload {
-        color: var(--color-primary);
+        color: var(--enc-payload);
         font-weight: 600;
       }
 
@@ -406,32 +413,21 @@
         margin-top: 0;
       }
 
+      /* Dark colors: set once per theme, keep the two blocks in step. */
       @media (prefers-color-scheme: dark) {
-        :root:not([data-theme="light"]) .byte-box.utf8 {
-          background: #2b6cb0;
-        }
-        :root:not([data-theme="light"]) .byte-box.utf16 {
-          background: #6b46c1;
-        }
-        :root:not([data-theme="light"]) .byte-box.gb2312 {
-          background: #b7791f;
-        }
-        :root:not([data-theme="light"]) .bit-payload {
-          color: #63b3ed;
+        :root:not([data-theme="light"]) {
+          --enc-utf8: #2b6cb0;
+          --enc-utf16: #6b46c1;
+          --enc-gb2312: #b7791f;
+          --enc-payload: #63b3ed;
         }
       }
 
-      [data-theme="dark"] .byte-box.utf8 {
-        background: #2b6cb0;
-      }
-      [data-theme="dark"] .byte-box.utf16 {
-        background: #6b46c1;
-      }
-      [data-theme="dark"] .byte-box.gb2312 {
-        background: #b7791f;
-      }
-      [data-theme="dark"] .bit-payload {
-        color: #63b3ed;
+      [data-theme="dark"] {
+        --enc-utf8: #2b6cb0;
+        --enc-utf16: #6b46c1;
+        --enc-gb2312: #b7791f;
+        --enc-payload: #63b3ed;
       }
     </style>
     <script src="/shared/theme.js"></script>

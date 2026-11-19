@@ -252,6 +252,13 @@
       })
     </script>
     <style>
+      :root {
+        --hl-collision-bg: #fed7d7;
+        --hl-collision-text: #9b2c2c;
+        --hl-collision-item: #e53e3e;
+        --hl-hash: #805ad5;
+      }
+
       .lab-input-row {
         display: flex;
         gap: 0.5rem;
@@ -361,8 +368,8 @@
       }
 
       .bucket.collision .bucket-label {
-        background: #fed7d7;
-        color: #9b2c2c;
+        background: var(--hl-collision-bg);
+        color: var(--hl-collision-text);
       }
 
       .bucket-label {
@@ -405,7 +412,7 @@
       }
 
       .bucket.collision .bucket-item {
-        background: #e53e3e;
+        background: var(--hl-collision-item);
       }
 
       .bucket-empty {
@@ -480,7 +487,7 @@
       }
 
       .re-hash {
-        color: #805ad5;
+        color: var(--hl-hash);
       }
 
       .re-bucket {
@@ -488,29 +495,21 @@
         font-weight: 600;
       }
 
-      /* Dark mode — only component-specific color overrides */
+      /* Dark colors: set once per theme, keep the two blocks in step. */
       @media (prefers-color-scheme: dark) {
-        :root:not([data-theme="light"]) .bucket.collision .bucket-label {
-          background: #742a2a;
-          color: #feb2b2;
-        }
-        :root:not([data-theme="light"]) .bucket.collision .bucket-item {
-          background: #c53030;
-        }
-        :root:not([data-theme="light"]) .re-hash {
-          color: #b794f4;
+        :root:not([data-theme="light"]) {
+          --hl-collision-bg: #742a2a;
+          --hl-collision-text: #feb2b2;
+          --hl-collision-item: #c53030;
+          --hl-hash: #b794f4;
         }
       }
 
-      [data-theme="dark"] .bucket.collision .bucket-label {
-        background: #742a2a;
-        color: #feb2b2;
-      }
-      [data-theme="dark"] .bucket.collision .bucket-item {
-        background: #c53030;
-      }
-      [data-theme="dark"] .re-hash {
-        color: #b794f4;
+      [data-theme="dark"] {
+        --hl-collision-bg: #742a2a;
+        --hl-collision-text: #feb2b2;
+        --hl-collision-item: #c53030;
+        --hl-hash: #b794f4;
       }
     </style>
     <script src="/shared/theme.js"></script>
