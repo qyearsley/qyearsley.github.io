@@ -12,19 +12,7 @@ last long version of this file is `git show 3ceed17:docs/improvements.md`.
 
 ## Open
 
-1. **Syllogism's mnemonic paragraph sits between the presets and the form.**
-   It pushes the controls down; it could move below the diagram.
-
-2. **Tool pages restate shared input and button CSS.** `.float-input`,
-   `.int-input` and `.lab-input` copy `.form-input` (`style.css`); `.lab-btn`
-   copies `.btn-primary` and `.btn-tertiary`; `floating-point.html` redefines
-   `.example-btn`. About 120 lines over five pages. Padding and borders would
-   shift slightly, so check the pages in a browser when you do it.
-
-3. **Times Trail FactSelector tests read `_retryQueue`.** About 20 tests
-   asserted through `peekRetryQueue()`, which was test-only and is gone. A
-   `retryQueue(selector)` helper in the test reads the private field instead.
-   Rewrite them around behavior if that matters.
+Nothing open. Add new items here.
 
 ## Deferred
 
@@ -92,6 +80,13 @@ Decided with no change, so these are not re-proposed:
   complete, so rare characters such as 糧 and 纜 pass through (2026-09-25).
 - **Commit `0f300d7` carries the work email address.** Rewriting public history
   would not remove it, because GitHub keeps orphaned commits reachable.
+
+Landed 2026-11-19: the Syllogism preset-name note moved under How It Works;
+the number, encoding and hash tool pages share `.tool-input`, `.placeholder` and
+`.result-card` from `components.css` (their look is unchanged; `.lab-btn` stays
+page-local because no shared button matches it); the FactSelector tests check
+what is served instead of reading the private retry queue, and one of them
+now pins the queue's sort, which only matters when two retries are due at once.
 
 Landed 2026-11-19: ESLint 10, with `eslint-plugin-import-x` in place of
 `eslint-plugin-import` (which accepts only eslint 9). The flaky Times Trail
@@ -192,6 +187,8 @@ a person to look, on an iPad where it matters:
 - Turing Tape's blank rule row and "Next puzzle" button; Number Garden's
   struck-off choices.
 - The maze's new speed range, at both ends of the slider.
+- The tool-page inputs after the move to `.tool-input` (floating point,
+  integer explorer, hash lab, encoding explorer): they should look as before.
 - The theme picker popover, now styled from `style.css`, on a tool page, a
   `/zh/` page and each game; and the character converter's direction buttons,
   which now have the preset-button hover.
