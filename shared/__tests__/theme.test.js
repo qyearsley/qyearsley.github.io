@@ -35,21 +35,14 @@ describe("theme.js", () => {
       expect(swatches.length).toBe(4) // blue, green, amber, purple
     })
 
-    it("injects theme styles", () => {
-      const styles = document.querySelectorAll("style")
-      const themeStyle = Array.from(styles).find((s) => s.textContent.includes(".theme-toggle"))
-      expect(themeStyle).not.toBeUndefined()
-    })
-
     it("reserves room for itself in a game top bar", () => {
-      // The toggle is fixed at the top right, which is where the game pages put
-      // their own right-hand control -- Seasons' restart button sat directly
-      // underneath it, and the two screen-stack games end their HUD row with a
-      // settings gear. jsdom does no layout, so this can only check the rule is
-      // still shipped; the number is worked out in theme.js.
+      // The toggle is fixed at the top right, where the game pages put their
+      // own right-hand control. This rule is injected, not in style.css, so it
+      // lands after each game's stylesheet. jsdom does no layout, so this only
+      // checks the rule is still shipped.
       const styles = Array.from(document.querySelectorAll("style"))
-      const themeStyle = styles.find((s) => s.textContent.includes(".theme-toggle"))
-      expect(themeStyle.textContent).toContain(".game-top-bar")
+      const themeStyle = styles.find((s) => s.textContent.includes(".game-top-bar"))
+      expect(themeStyle).not.toBeUndefined()
       expect(themeStyle.textContent).toMatch(
         /\.game-top-bar,\s*\.screen > \.header\s*\{[^}]*padding-right/,
       )

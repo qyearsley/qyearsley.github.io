@@ -4,14 +4,7 @@
  * Extends style.css with buttons, data tables, logic engine, and status messages.
  *
  * No dark-mode block. Everything here draws from the `--color-*` tokens in
- * style.css, which already resolve for both the OS preference and an explicit
- * choice from the theme picker. There used to be one, written as a bare
- * `@media (prefers-color-scheme: dark)`: most of it restated the light rules
- * once the variables resolved, and the handful of literal colours it did carry
- * were invisible to the picker -- white table-header text stayed white while
- * --color-primary went light, and the proof-step badges kept a pale tint under
- * light text. Those became --color-on-primary, --color-table-corner-*, and
- * --color-badge-* rather than a second copy of the rules.
+ * style.css, which resolve for both the OS preference and the theme picker.
  */
 
 /* ========================================

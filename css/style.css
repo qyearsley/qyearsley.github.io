@@ -647,10 +647,9 @@ textarea {
 }
 
 /* Form Elements
-   No font-family here. This selector catches every input on the site, and the
-   monospace it used to set was meant for the tool pages, where the content is
-   an expression or a code point. The opt-in .form-input / .form-textarea
-   classes below still carry it. */
+   No font-family here. This selector catches every input on the site. The
+   opt-in .form-input / .form-textarea classes below set the monospace for tool
+   pages, where the content is an expression or a code point. */
 input,
 textarea {
   border: 1px solid var(--color-border);
@@ -1151,6 +1150,170 @@ kbd {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Theme picker
+   shared/theme.js builds the toggle and popover. Swatch colors are fixed
+   rather than --color-primary, so each swatch shows its own accent in any
+   theme. */
+.theme-toggle {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 9999;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-container);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.6;
+  transition:
+    opacity 0.2s,
+    box-shadow 0.2s;
+  padding: 0;
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus {
+  opacity: 1;
+}
+
+.theme-toggle:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.theme-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
+.theme-popover {
+  position: fixed;
+  z-index: 9999;
+  background: var(--color-bg-container);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 4px 16px rgb(0, 0, 0, 0.15);
+  min-width: 180px;
+  opacity: 0;
+  transform: scale(0.95) translateY(-4px);
+  transition:
+    opacity 0.15s,
+    transform 0.15s;
+  pointer-events: none;
+}
+
+.theme-popover.open {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  pointer-events: auto;
+}
+
+.theme-popover fieldset {
+  border: none;
+  padding: 0;
+  margin: 0 0 0.75rem;
+}
+
+.theme-popover fieldset:last-child {
+  margin-bottom: 0;
+}
+
+.theme-popover legend {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.theme-options {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.theme-option {
+  flex: 1;
+  padding: 0.375rem 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+
+.theme-option:hover {
+  background: var(--color-bg-card);
+}
+
+.theme-option.active {
+  border-color: var(--color-primary);
+  background: var(--color-bg-card);
+  font-weight: 600;
+}
+
+.theme-option:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+.accent-options {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.accent-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    transform 0.15s;
+  padding: 0;
+}
+
+.accent-swatch:hover {
+  transform: scale(1.15);
+}
+
+.accent-swatch.active {
+  border-color: var(--color-text);
+  border-width: 3px;
+}
+
+.accent-swatch:focus {
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
+}
+
+.accent-blue {
+  background: #3182ce;
+}
+
+.accent-green {
+  background: #16a34a;
+}
+
+.accent-amber {
+  background: #d97706;
+}
+
+.accent-purple {
+  background: #7c3aed;
 }
 
 /* Print

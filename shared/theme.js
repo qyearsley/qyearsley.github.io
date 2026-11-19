@@ -25,122 +25,16 @@
 
   // Part 2: UI injection after DOM is ready
   document.addEventListener("DOMContentLoaded", function () {
-    // Inject styles
+    // The popover styles live in css/style.css. This one rule stays here so it
+    // lands after each game's own stylesheet; in style.css a game's
+    // `.game-top-bar { padding }` would override it.
+    //
+    // The toggle is fixed at the top right, where a game's top bar puts its own
+    // right-hand control. 60px clears the 36px button plus both margins.
+    // `.screen > .header` is the same case in Number Garden and Times Trail,
+    // whose HUD ends in a settings gear.
     const style = document.createElement("style")
-    style.textContent = [
-      ".theme-toggle {",
-      "  position: fixed;",
-      "  top: 1rem;",
-      "  right: 1rem;",
-      "  z-index: 9999;",
-      "  width: 36px;",
-      "  height: 36px;",
-      "  border-radius: 50%;",
-      "  border: 1px solid var(--color-border);",
-      "  background: var(--color-bg-container);",
-      "  color: var(--color-text-muted);",
-      "  cursor: pointer;",
-      "  display: flex;",
-      "  align-items: center;",
-      "  justify-content: center;",
-      "  opacity: 0.6;",
-      "  transition: opacity 0.2s, box-shadow 0.2s;",
-      "  padding: 0;",
-      "}",
-      ".theme-toggle:hover, .theme-toggle:focus { opacity: 1; }",
-      ".theme-toggle:focus { outline: 2px solid var(--color-primary); outline-offset: 2px; }",
-      ".theme-toggle svg { width: 18px; height: 18px; }",
-      "",
-      // The toggle is fixed at the top right, which is exactly where a game's
-      // top bar puts its own right-hand control -- Seasons' restart button sat
-      // underneath it. Reserving the room here rather than in each game's
-      // stylesheet keeps it in one place, and puts it on the element that
-      // causes the overlap. 60px clears the 36px button plus both margins.
-      //
-      // `.screen > .header` is the same problem in the two screen-stack games
-      // (Number Garden, Times Trail): their right-hand HUD ends in a settings
-      // gear that the fixed toggle would otherwise cover.
-      ".game-top-bar, .screen > .header { padding-right: 60px; }",
-      "",
-      ".theme-popover {",
-      "  position: fixed;",
-      "  z-index: 9999;",
-      "  background: var(--color-bg-container);",
-      "  border: 1px solid var(--color-border);",
-      "  border-radius: 8px;",
-      "  padding: 1rem;",
-      "  box-shadow: 0 4px 16px rgb(0, 0, 0, 0.15);",
-      "  min-width: 180px;",
-      "  opacity: 0;",
-      "  transform: scale(0.95) translateY(-4px);",
-      "  transition: opacity 0.15s, transform 0.15s;",
-      "  pointer-events: none;",
-      "}",
-      ".theme-popover.open {",
-      "  opacity: 1;",
-      "  transform: scale(1) translateY(0);",
-      "  pointer-events: auto;",
-      "}",
-      "",
-      ".theme-popover fieldset {",
-      "  border: none;",
-      "  padding: 0;",
-      "  margin: 0 0 0.75rem;",
-      "}",
-      ".theme-popover fieldset:last-child { margin-bottom: 0; }",
-      ".theme-popover legend {",
-      "  font-size: 0.75rem;",
-      "  font-weight: 600;",
-      "  text-transform: uppercase;",
-      "  letter-spacing: 0.05em;",
-      "  color: var(--color-text-muted);",
-      "  margin-bottom: 0.5rem;",
-      "}",
-      "",
-      ".theme-options {",
-      "  display: flex;",
-      "  gap: 0.25rem;",
-      "}",
-      ".theme-option {",
-      "  flex: 1;",
-      "  padding: 0.375rem 0.5rem;",
-      "  border: 1px solid var(--color-border);",
-      "  border-radius: 4px;",
-      "  background: transparent;",
-      "  color: var(--color-text);",
-      "  font-size: 0.8rem;",
-      "  cursor: pointer;",
-      "  transition: background 0.15s, border-color 0.15s;",
-      "}",
-      ".theme-option:hover { background: var(--color-bg-card); }",
-      ".theme-option.active {",
-      "  border-color: var(--color-primary);",
-      "  background: var(--color-bg-card);",
-      "  font-weight: 600;",
-      "}",
-      ".theme-option:focus { outline: 2px solid var(--color-primary); outline-offset: 1px; }",
-      "",
-      ".accent-options {",
-      "  display: flex;",
-      "  gap: 0.5rem;",
-      "}",
-      ".accent-swatch {",
-      "  width: 24px;",
-      "  height: 24px;",
-      "  border-radius: 50%;",
-      "  border: 2px solid var(--color-border);",
-      "  cursor: pointer;",
-      "  transition: border-color 0.15s, transform 0.15s;",
-      "  padding: 0;",
-      "}",
-      ".accent-swatch:hover { transform: scale(1.15); }",
-      ".accent-swatch.active { border-color: var(--color-text); border-width: 3px; }",
-      ".accent-swatch:focus { outline: 2px solid var(--color-text); outline-offset: 2px; }",
-      ".accent-blue { background: #3182ce; }",
-      ".accent-green { background: #16a34a; }",
-      ".accent-amber { background: #d97706; }",
-      ".accent-purple { background: #7c3aed; }",
-    ].join("\n")
+    style.textContent = ".game-top-bar, .screen > .header { padding-right: 60px; }"
     document.head.appendChild(style)
 
     // SVG icons
@@ -168,13 +62,9 @@
       '<path d="M12 2a10 10 0 0 1 0 20" fill="currentColor"/>' +
       "</svg>"
 
-    // Current state
-    //
-    // Guarded the same way Part 1 is. Chrome throws on `localStorage` itself
-    // when the site's cookies are blocked, and the first unguarded read here
-    // was `btn.innerHTML = getIcon()` -- early enough that the throw took the
-    // whole handler with it, so the toggle never got appended and
-    // window.__themeToggle was never set. The `t` shortcut went with it.
+    // Current state. Guarded like Part 1: Chrome throws on `localStorage`
+    // itself when cookies are blocked, and an unguarded read here would stop
+    // the toggle and window.__themeToggle from being set up.
     function readStored(key) {
       try {
         return localStorage.getItem(key)
@@ -271,10 +161,8 @@
 
     // Place button in header controls if available, else fall back to body.
     //
-    // Only a page-level header counts. Number Garden and Times Trail reuse the
-    // `.header` class for a HUD row inside each of their stacked `.screen`
-    // panels, and all but one of those are `display: none` -- so the first
-    // match was a hidden element and the toggle vanished with it. Those two
+    // Only a page-level header counts. Number Garden and Times Trail reuse
+    // `.header` for a HUD row inside each hidden `.screen` panel, so those two
     // games get the fixed top-right button instead.
     const header = Array.from(document.querySelectorAll(".header")).find(function (el) {
       return !el.closest(".screen")
