@@ -21,6 +21,46 @@ last long version of this file is `git show 3ceed17:docs/improvements.md`.
    `import/no-unresolved`. Move to eslint 10 when the plugin supports it, or
    replace the plugin.
 
+3. **Theme bugs found in the 2026-11-18 audit.** `homophones.html:72` and
+   `tone-table.html:66` style dark mode from `prefers-color-scheme` only, so a
+   site set to light on a dark OS shows mixed colors (not checked in a
+   browser). `life-calculator.html:48,96` uses `--color-accent`, which no
+   stylesheet defines.
+
+4. **Dead code found in the 2026-11-18 audit.** Each item below is used only by
+   its own definition or by tests:
+   - CSS: `.logic-engine-*`, `.logic-card`, `.operator-details`, `.info-card`,
+     `.flex-1` (`components.css`), `.external-links`, `--shadow-hover`
+     (`style.css`).
+   - `nav.js:294`: the `Escape` branch does nothing. The `t` shortcut has two
+     paths (`nav.js:370` and `theme.js:398`).
+   - `StorageManager` `hasGameState`, `exportGameState` and `importGameState`.
+     Number Garden `importProgress`.
+   - Seasons: `Journey.progress()`, `GameState.remainingDemand()` and
+     `countingItems()`, the `costText` field, which is `""` for every
+     character, and the `.haul-item` reduced-motion block, which the global
+     rule already covers.
+   - Times Trail: the `modes/` registry with one mode, `MODE_IDS` and
+     `MODE_LABELS`, and the `sound` setting, which has no UI.
+
+5. **Duplication found in the 2026-11-18 audit.**
+   - Number Garden `ProgressionManager.js`: 30 pasted SVG data URLs (about
+     -200 lines with a helper).
+   - Number Garden `EventManager.js`: 13 identical click handlers (Times Trail
+     uses a table).
+   - Number Garden `common.css`: repeats 14 selectors that `main.css`
+     overrides.
+   - The `?q=` script is pasted into `tone-table.html`, `homophones.html` and
+     `syllabary.html`.
+   - The bit-grid CSS is in both `floating-point.html` and
+     `integer-explorer.html`. Five tool pages write their dark colors twice.
+
+6. **Comments are about half of the big game files.** This applies to Seasons
+   `placeholder.js`, `GameUI.js`, `game.js` and `arithmetic.js`, and to Times
+   Trail `game.js` and `GameUI.js`. Much of the text is history or `§`
+   references to a spec that is not in the repo. `games/seasons/README.md`
+   (740 lines) has wrong module and suite counts.
+
 ## Deferred
 
 These are known and accepted for now. Do not re-propose them unless something
