@@ -15,27 +15,13 @@ last long version of this file is `git show 3ceed17:docs/improvements.md`.
 1. **Syllogism's mnemonic paragraph sits between the presets and the form.**
    It pushes the controls down; it could move below the diagram.
 
-2. **ESLint is held at 9.** `eslint-plugin-import` 2.32 (the latest on
-   2026-11-12) accepts eslint only up to `^9`, so `npm install` fails with
-   ERESOLVE on eslint 10. The config uses one rule from it,
-   `import/no-unresolved`. Move to eslint 10 when the plugin supports it, or
-   replace the plugin.
-
-3. **The Times Trail "Squares" test is flaky.** `game.answering.test.js`, "a
-   round on Squares asks only squares", uses `Math.random`. It failed 6 of 40
-   runs before the 2026-11-18 simplification pass, so it is not new.
-
-4. **Tool pages restate shared input and button CSS.** `.float-input`,
+2. **Tool pages restate shared input and button CSS.** `.float-input`,
    `.int-input` and `.lab-input` copy `.form-input` (`style.css`); `.lab-btn`
    copies `.btn-primary` and `.btn-tertiary`; `floating-point.html` redefines
    `.example-btn`. About 120 lines over five pages. Padding and borders would
    shift slightly, so check the pages in a browser when you do it.
 
-5. **Seasons README is 591 lines.** Its difficulty table was not checked
-   against `seasons.js`. The `_choices` loop in `arithmetic.js` no longer has
-   its hang guard for answers above 2^53; no season can produce one.
-
-6. **Times Trail FactSelector tests read `_retryQueue`.** About 20 tests
+3. **Times Trail FactSelector tests read `_retryQueue`.** About 20 tests
    asserted through `peekRetryQueue()`, which was test-only and is gone. A
    `retryQueue(selector)` helper in the test reads the private field instead.
    Rewrite them around behavior if that matters.
@@ -104,6 +90,12 @@ Decided with no change, so these are not re-proposed:
   complete, so rare characters such as 糧 and 纜 pass through (2026-09-25).
 - **Commit `0f300d7` carries the work email address.** Rewriting public history
   would not remove it, because GitHub keeps orphaned commits reachable.
+
+Landed 2026-11-19: ESLint 10, with `eslint-plugin-import-x` in place of
+`eslint-plugin-import` (which accepts only eslint 9). The flaky Times Trail
+Squares test is fixed: its second miss could land on the first missed fact,
+which rightly moves that fact's retry later (0 of 100 runs fail; was 5 of 40).
+The Seasons README's difficulty table matches `seasons.js`.
 
 Landed 2026-11-19 (readability audit): Truth Tables applied `and` and `or`
 last and left to right, so `a or b and c` meant `(a or b) and c`; it now uses
