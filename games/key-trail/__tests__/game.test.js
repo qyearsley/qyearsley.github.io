@@ -66,10 +66,10 @@ describe("key trail page", () => {
     expect(byId("line").children[0].classList.contains("current")).toBe(true)
   })
 
-  test("finishing three clean lines earns three stars, saved for next time", () => {
+  test("finishing two clean lines earns three stars, saved for next time", () => {
     byId("lesson-list").querySelector("button").click()
     typeLine()
-    typeLine()
+    expect(visible("play")).toBe(true)
     typeLine()
     jest.advanceTimersByTime(600)
     expect(visible("done")).toBe(true)
@@ -80,10 +80,26 @@ describe("key trail page", () => {
 
   test("Enter on the done screen starts the next lesson", () => {
     byId("lesson-list").querySelector("button").click()
-    for (let i = 0; i < 3; i++) typeLine(i === 0)
+    for (let i = 0; i < 2; i++) typeLine(i === 0)
     jest.advanceTimersByTime(600)
     key("Enter")
     expect(byId("play-title").textContent).toBe("Lesson 2: d k")
+  })
+
+  test("Backspace changes nothing and says why", () => {
+    byId("lesson-list").querySelector("button").click()
+    key("Backspace")
+    expect(byId("line").children[0].classList.contains("current")).toBe(true)
+    expect(byId("hint").textContent).toMatch(/No need to erase/)
+  })
+
+  test("the picked walker and its goal are shown and saved", () => {
+    byId("walkers").children[2].click() // bee
+    expect(byId("walker").textContent).toBe("\u{1F41D}")
+    expect(byId("home").textContent).toBe("\u{1F33C}")
+    boot()
+    expect(byId("walker").textContent).toBe("\u{1F41D}")
+    expect(byId("walkers").children[2].getAttribute("aria-pressed")).toBe("true")
   })
 
   test("Escape goes back to the menu", () => {
@@ -114,6 +130,25 @@ describe("key trail page", () => {
     }
     jest.advanceTimersByTime(61000)
     expect(byId("done-big").textContent).toBe(`${Math.round(typed / 5)} words per minute`)
+  })
+
+  test("the speed run shows live words per minute after five seconds", () => {
+    byId("speed-btn").click()
+    typeLine()
+    jest.advanceTimersByTime(4000)
+    expect(byId("play-progress").textContent).not.toMatch(/wpm/)
+    jest.advanceTimersByTime(2000)
+    expect(byId("play-progress").textContent).toMatch(/^0:5\d, \d+ wpm$/)
+  })
+
+  test("Escape in the speed run shows the score so far, but not as a best", () => {
+    byId("speed-btn").click()
+    typeLine()
+    jest.advanceTimersByTime(10000)
+    key("Escape")
+    expect(byId("done-title").textContent).toBe("Stopped early")
+    expect(byId("done-big").textContent).toMatch(/^[1-9]\d* words per minute$/)
+    expect(JSON.parse(localStorage.getItem("key-trail")).best).toBe(0)
   })
 
   test("the speed run ends after a minute with a best score", () => {

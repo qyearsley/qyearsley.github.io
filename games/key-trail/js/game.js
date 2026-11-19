@@ -7,13 +7,23 @@ import { keyIsNotForGame } from "../../shared/keyboardGuard.js"
 import { FINGERS, FINGER_OF, LESSONS, ROWS, SENTENCES, keysUpTo } from "./lessons.js"
 import { Run, practiceLine, stars, updateErrors, wpm } from "./engine.js"
 
-const LINES_PER_LESSON = 3
+const LINES_PER_LESSON = 2
 const SPEED_MS = 60000
+
+/** Who walks the trail, and where to. The player picks one on the menu. */
+const WALKERS = [
+  ["turtle", "\u{1F422}", "house", "\u{1F3E0}"],
+  ["rabbit", "\u{1F407}", "carrot", "\u{1F955}"],
+  ["bee", "\u{1F41D}", "flower", "\u{1F33C}"],
+  ["dog", "\u{1F415}", "bone", "\u{1F9B4}"],
+  ["mouse", "\u{1F401}", "cheese", "\u{1F9C0}"],
+  ["monkey", "\u{1F412}", "banana", "\u{1F34C}"],
+]
 
 const storage = new StorageManager("key-trail", "1")
 
 let doc, $
-let save // { stars: {lessonIndex: 1-3}, errors: {key: count}, best: wpm }
+let save // { stars: {lessonIndex: 1-3}, errors: {key: count}, best: wpm, walker: index }
 let mode // "lesson" or "speed"; null means not accepting typing (menu, done, or the pause after a finished line)
 let lesson // index into LESSONS
 let lines, lineIndex, run, firstKeyAt, timer, pending
@@ -23,8 +33,9 @@ let totals // { chars, missed } over the finished lines
 export function init(d = document) {
   doc = d
   $ = (id) => doc.getElementById(id)
-  save = { stars: {}, errors: {}, best: 0, ...storage.loadGameState() }
+  save = { stars: {}, errors: {}, best: 0, walker: 0, ...storage.loadGameState() }
   buildKeyboard()
+  buildWalkers()
   $("speed-btn").addEventListener("click", startSpeed)
   $("again-btn").addEventListener("click", () => (lesson >= 0 ? startLesson(lesson) : startSpeed()))
   $("next-btn").addEventListener("click", () => startLesson(lesson + 1))
@@ -134,12 +145,17 @@ function draw() {
 
 function onKey(event) {
   if (keyIsNotForGame(event)) return
-  if (event.key === "Escape") return showMenu()
+  if (event.key === "Escape") return mode === "speed" && firstKeyAt ? endSpeed(true) : showMenu()
   if (mode === null) {
     if (event.key === "Enter" && !$("done").classList.contains("hidden")) {
       event.preventDefault()
       $(lesson >= 0 && lesson < LESSONS.length - 1 ? "next-btn" : "again-btn").click()
     }
+    return
+  }
+  if (event.key === "Backspace") {
+    event.preventDefault()
+    $("hint").textContent = "No need to erase. Just type the right key."
     return
   }
   if (event.key.length !== 1) return
@@ -197,22 +213,37 @@ function finishLesson() {
   $("next-btn").classList.toggle("hidden", lesson >= LESSONS.length - 1)
 }
 
+/** Words per minute so far. Only characters typed right count, so mashing keys does not help. */
+function speedScore(ms) {
+  const right = totals.chars + run.pos - totals.missed - run.missed.size
+  return wpm(Math.max(right, 0), ms)
+}
+
 function tick() {
-  const left = SPEED_MS - (Date.now() - firstKeyAt)
-  if (left > 0) {
-    const s = Math.ceil(left / 1000)
-    $("play-progress").textContent = `0:${String(s).padStart(2, "0")}`
+  const elapsed = Date.now() - firstKeyAt
+  if (elapsed < SPEED_MS) {
+    const s = Math.ceil((SPEED_MS - elapsed) / 1000)
+    // The first few seconds give wild numbers, so wait before showing a speed.
+    const speed = elapsed >= 5000 ? `, ${speedScore(elapsed)} wpm` : ""
+    $("play-progress").textContent = `0:${String(s).padStart(2, "0")}${speed}`
     return
   }
+  endSpeed(false)
+}
+
+/** End the speed run. Stopping early shows the speed so far, but it cannot set a best. */
+function endSpeed(early) {
   clearInterval(timer)
   mode = null
-  // Only count characters typed right, so mashing keys does not raise the score.
-  const right = totals.chars + run.pos - totals.missed - run.missed.size
-  const score = wpm(Math.max(right, 0), SPEED_MS)
-  const record = score > save.best
+  const score = speedScore(early ? Date.now() - firstKeyAt : SPEED_MS)
+  const record = !early && score > save.best
   if (record) save.best = score
   storage.saveGameState(save)
-  showDone(record ? "New best!" : "Time!", `${score} words per minute`, `Best: ${save.best}`)
+  const title = early ? "Stopped early" : record ? "New best!" : "Time!"
+  const detail = early
+    ? `Only a full minute can set a best. Best: ${save.best}`
+    : `Best: ${save.best}`
+  showDone(title, `${score} words per minute`, detail)
   $("next-btn").classList.add("hidden")
 }
 
@@ -221,6 +252,29 @@ function showDone(title, big, detail) {
   $("done-big").textContent = big
   $("done-detail").textContent = detail
   show("done")
+}
+
+function buildWalkers() {
+  WALKERS.forEach(([name, walker, goalName], i) => {
+    const button = doc.createElement("button")
+    button.className = "walker-btn"
+    button.textContent = walker
+    button.setAttribute("aria-label", `${name} walks to the ${goalName}`)
+    button.addEventListener("click", () => {
+      save.walker = i
+      storage.saveGameState(save)
+      setWalker()
+    })
+    $("walkers").append(button)
+  })
+  setWalker()
+}
+
+function setWalker() {
+  const [, walker, , goal] = WALKERS[save.walker] || WALKERS[0]
+  $("walker").textContent = walker
+  $("home").textContent = goal
+  ;[...$("walkers").children].forEach((b, i) => b.setAttribute("aria-pressed", i === save.walker))
 }
 
 function buildKeyboard() {

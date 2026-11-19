@@ -13,8 +13,10 @@ It needs a physical keyboard. There is no on-screen typing mode.
 - **Lessons add two keys at a time, from the home row out.** `f j` first, then
   `d k`, `s l`, `a ;`, `g h`, and then out to the top and bottom rows. Lessons
   are all open; the stars show which ones are done.
-- **A trail, not a timer.** Each right key moves the turtle one step toward the
-  house. A wrong key shakes it but never moves it back and never costs points.
+- **A trail, not a timer.** Each right key moves an animal one step toward its
+  goal (turtle to house, bee to flower); the player picks the animal. A wrong
+  key shakes it but never moves it back and never costs points. So there is
+  nothing to erase: Backspace only shows a hint that says so.
   Falling-letter games were considered and set aside: time pressure is hard on
   beginners.
 - **Text uses only taught keys.** A lesson with fewer than 8 usable words
@@ -26,7 +28,9 @@ It needs a physical keyboard. There is no on-screen typing mode.
   cleanly in a later line earns one back. Practice text favors words with those
   keys, capped so one bad key does not take over.
 - **Speed run for adults.** One minute of sentences, scored in words per minute
-  from the correct characters only, with a saved best.
+  from the correct characters only, with a saved best. The speed shows live
+  after five seconds. Esc stops early and shows the speed so far, which cannot
+  set a best.
 
 ## Not done yet
 

@@ -76,6 +76,25 @@ body {
   color: #d69e2e;
 }
 
+.walker-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.walker-btn {
+  padding: 0.2rem 0.4rem;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  background: none;
+  font-size: 1.6rem;
+  cursor: pointer;
+}
+
+.walker-btn[aria-pressed="true"] {
+  border-color: var(--color-primary);
+}
+
 .speed-row {
   display: flex;
   align-items: center;
@@ -135,8 +154,7 @@ body {
   font-family: monospace;
   font-size: clamp(1.4rem, 4.5vw, 2.2rem);
   letter-spacing: 0.05em;
-  white-space: pre-wrap;
-  word-break: break-all;
+  white-space: pre-wrap; /* lines wrap at the spaces between words */
 }
 
 .line span {
@@ -165,11 +183,13 @@ body {
   color: var(--color-text-secondary);
 }
 
+/* Only as wide as the keys, so the space bar centers under them. */
 .keyboard {
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
-  margin-top: 1rem;
+  width: fit-content;
+  margin: 1rem auto 0;
   font-family: monospace;
 }
 

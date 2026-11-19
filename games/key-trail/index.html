@@ -6,7 +6,7 @@
     <title>Key Trail - Quinten Yearsley</title>
     <meta
       name="description"
-      content="Learn to touch type one pair of keys at a time: each right key moves the turtle one step home"
+      content="Learn to touch type one pair of keys at a time: each right key moves your animal one step along the trail"
     />
     <meta name="theme-color" content="#2d3748" />
     <link rel="stylesheet" href="/css/style.css" />
@@ -30,11 +30,12 @@
       <main id="main-content">
         <section id="menu">
           <p>
-            Type the letters to walk the turtle home. Rest your fingers on the home row:
+            Type the letters to walk your animal along the trail. Rest your fingers on the home row:
             <kbd>a s d f</kbd> for the left hand and <kbd>j k l ;</kbd> for the right. Each lesson
             adds two keys.
           </p>
           <p class="touch-note">Key Trail needs a keyboard.</p>
+          <p class="walker-row">Pick a walker: <span id="walkers"></span></p>
           <ol id="lesson-list" class="lesson-list"></ol>
           <p class="speed-row">
             <button id="speed-btn" class="ctrl-btn">Speed run: one minute</button>
@@ -50,7 +51,7 @@
           </div>
           <div class="trail" aria-hidden="true">
             <span id="walker" class="walker">&#x1F422;</span>
-            <span class="home">&#x1F3E0;</span>
+            <span id="home" class="home">&#x1F3E0;</span>
           </div>
           <div id="line" class="line"></div>
           <p id="hint" class="hint" aria-live="polite"></p>
