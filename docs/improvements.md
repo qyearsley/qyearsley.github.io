@@ -84,6 +84,8 @@ Decided with no change, so these are not re-proposed:
 - **`apple-touch-icon` points at `icon.svg`.** iOS ignores it, but that is better
   than adding binary files to the repo.
 - **Life Garden's mouse drag cannot get stuck.** `mouseleave` ends the drag.
+- **Seasons' `_choices` loop has no hang guard for answers above 2^53.** No
+  season can produce one.
 - **`generateMathOptions` can loop forever if `maxRange` is tiny.** The only
   caller passes 40 or more.
 - **`tradsimp.js` keeps its top-1000 character map.** It is not meant to be
