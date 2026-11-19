@@ -11,8 +11,6 @@ import {
   KEYPAD,
   MATH,
   MINUTE_MS,
-  MODE_IDS,
-  MODE_LABELS,
   OPERAND_MAX,
   OPERAND_MIN,
   TRAILS,
@@ -235,31 +233,6 @@ describe("SELECTION", () => {
   describe("DUE_WEIGHT_BONUS", () => {
     test("is a multiplier above 1, so a due fact really is favored", () => {
       expect(SELECTION.DUE_WEIGHT_BONUS).toBeGreaterThan(1)
-    })
-  })
-})
-
-describe("MODE_LABELS", () => {
-  describe("coverage of MODE_IDS", () => {
-    test("has one entry per mode id and no extras", () => {
-      expect(Object.keys(MODE_LABELS).sort()).toEqual(Object.values(MODE_IDS).sort())
-    })
-
-    test("every label is a non-empty string", () => {
-      for (const label of Object.values(MODE_LABELS)) {
-        expect(typeof label).toBe("string")
-        expect(label.length).toBeGreaterThan(0)
-      }
-    })
-  })
-
-  describe("MODE_IDS", () => {
-    test("values are distinct kebab-case ids", () => {
-      const ids = Object.values(MODE_IDS)
-      expect(new Set(ids).size).toBe(ids.length)
-      for (const id of ids) {
-        expect(id).toMatch(KEBAB_ID)
-      }
     })
   })
 })

@@ -96,16 +96,6 @@ export const SELECTION = Object.freeze({
   DUE_WEIGHT_BONUS: 2, // multiplier applied to a due fact's weight
 })
 
-/** Practice mode identifiers. */
-export const MODE_IDS = Object.freeze({
-  QUICK_RECALL: "quick-recall",
-})
-
-/** Human-readable mode names. One entry per MODE_IDS value. */
-export const MODE_LABELS = Object.freeze({
-  [MODE_IDS.QUICK_RECALL]: "Quick Recall",
-})
-
 /**
  * Session shape. The length is a setting; DEFAULT_LENGTH is what a new player
  * gets. It is the shortest option: a round is one trail's facts, so ten

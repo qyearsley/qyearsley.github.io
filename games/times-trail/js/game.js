@@ -7,14 +7,14 @@
  *
  * Architecture: the session loop, in order.
  *
- *   1. `startSession(modeId)` resets `this.session`, calls `selector.reset()`
+ *   1. `startSession()` resets `this.session`, calls `selector.reset()`
  *      (so a miss from the previous session cannot fire on question 1), rebuilds
  *      `this.journey` for the chosen trail, and shows
  *      the play screen. The hub's trail rows call `startTrail(trailId)`, which
  *      sets the current trail and then does this.
  *   2. `_askNextQuestion()` picks a fact (`FactSelector`), captures its strength
  *      and card tier BEFORE the answer, builds a `Challenge` through
- *      `modes/index.js`, renders it, and arms the response clock last -- after
+ *      `modes/quickRecall.js`, renders it, and arms the response clock last -- after
  *      the DOM is written, so the player is not charged for the render.
  *   3. The first keypad digit stamps `session.firstInteractionAt` exactly once.
  *      That stamp, not the submit, is the end of the measured thinking time --
@@ -82,7 +82,6 @@
 import {
   CARD_TIERS,
   KEYPAD,
-  MODE_IDS,
   OPERAND_MAX,
   OPERAND_MIN,
   RESPONSE_TIME,
@@ -100,7 +99,7 @@ import { StorageManager, defaultProgress } from "./storage.js"
 import { Keypad } from "./Keypad.js"
 import { GameUI } from "./GameUI.js"
 import { EventManager } from "./EventManager.js"
-import { createChallenge, getMode } from "./modes/index.js"
+import { createChallenge } from "./modes/quickRecall.js"
 
 /**
  * Card tier id -> position in `CARD_TIERS`, so "did this fact's card improve?"
@@ -120,7 +119,7 @@ const LIVE_REGION_IDS = Object.freeze(["question-text", "feedback-area"])
 
 /**
  * The multiplication sign, U+00D7 -- the real glyph, not the letter `x`, matching
- * the prompts the modes build.
+ * the prompts `quickRecall.js` builds.
  * @private
  * @type {string}
  */
@@ -152,7 +151,6 @@ const SAVE_FAILED_TEXT =
  * Live session state, reset at the start of every session.
  *
  * @typedef {Object} SessionState
- * @property {string} modeId              - `MODE_IDS` value being played
  * @property {number} factsAnswered       - Questions answered this session
  * @property {number} factsCorrect        - Of those, correct
  * @property {number} streak              - Current run of correct answers
@@ -222,7 +220,7 @@ class TimesTrail {
     /** @type {() => number} Injected clock; the only source of "now" here. @private */
     this._now = typeof now === "function" ? now : () => Date.now()
 
-    /** @type {() => number} Injected randomness, handed to the modes. @private */
+    /** @type {() => number} Injected randomness, handed to `createChallenge`. @private */
     this._rng = typeof rng === "function" ? rng : Math.random
 
     /** @type {StorageManager} */
@@ -262,7 +260,7 @@ class TimesTrail {
     this.journey = this._buildJourney()
 
     /** @type {SessionState} */
-    this.session = this._createSession(MODE_IDS.QUICK_RECALL)
+    this.session = this._createSession()
 
     /** @type {boolean} The ONE double-submit guard, covering every entry path. @private */
     this._isProcessingAnswer = false
@@ -313,10 +311,10 @@ class TimesTrail {
 
     /** @type {EventManager} */
     this.events = new EventManager(this.ui, {
-      // Play and Keep Going both go straight into a session. There is one mode,
+      // Play and Keep Going both go straight into a session. There is one question type,
       // so a hub visit before practice was a screen that asked nothing.
-      onStart: () => this.startSession(MODE_IDS.QUICK_RECALL),
-      onContinue: () => this.startSession(MODE_IDS.QUICK_RECALL),
+      onStart: () => this.startSession(),
+      onContinue: () => this.startSession(),
       onStartFresh: () => this.startFresh(),
       onShowProgress: () => this.showHub(),
       onHome: () => this.showTitle(),
@@ -325,7 +323,7 @@ class TimesTrail {
       onStartTrail: (trailId) => this.startTrail(trailId),
       onShowMap: () => this.showMap(),
       onShowCollection: () => this.showCollection(),
-      onPlayAgain: () => this.startSession(this.session.modeId),
+      onPlayAgain: () => this.startSession(),
       onSummaryHub: () => this.showHub(),
       onSettingsOpen: () => this.openSettings(),
       onSettingsClose: () => this.closeSettings(),
@@ -451,7 +449,7 @@ class TimesTrail {
     this.progress.daily = this.scoring.rollDaily(this.progress.daily)
     this.journey = this._buildJourney()
     this.selector.reset()
-    this.session = this._createSession(MODE_IDS.QUICK_RECALL)
+    this.session = this._createSession()
 
     this.ui.renderSettings(this.settings.toJSON())
     this.ui.updateTitleButtons(false)
@@ -658,14 +656,12 @@ class TimesTrail {
    *
    * A round asks only the facts of the trail being walked (see
    * `_askNextQuestion`).
-   * @param {string} modeId - A `MODE_IDS` value; anything unknown falls back to Quick Recall
    * @returns {void}
    */
-  startSession(modeId) {
-    const mode = getMode(modeId)
+  startSession() {
     this._clearPendingTimers()
     this._setLiveRegions("polite")
-    this.session = this._createSession(mode === null ? MODE_IDS.QUICK_RECALL : mode.id)
+    this.session = this._createSession()
     this.selector.reset()
     this.journey = this._buildJourney()
     this._isProcessingAnswer = false
@@ -685,7 +681,7 @@ class TimesTrail {
   startTrail(trailId) {
     this.progress.trails.currentId = normalizeTrailId(trailId)
     this._save()
-    this.startSession(MODE_IDS.QUICK_RECALL)
+    this.startSession()
   }
 
   /**
@@ -712,12 +708,7 @@ class TimesTrail {
     }
 
     const strengthAtAsk = this.store.strengthOf(factId)
-    const challenge = createChallenge(
-      this.session.modeId,
-      fact,
-      { strength: strengthAtAsk },
-      this._rng,
-    )
+    const challenge = createChallenge(fact, this._rng)
 
     this.session.strengthAtAsk = strengthAtAsk
     this.session.tierAtAsk = this.store.cardTierOf(factId)
@@ -1215,13 +1206,11 @@ class TimesTrail {
 
   /**
    * A fresh session state.
-   * @param {string} modeId - The mode being played
    * @returns {SessionState} A new session object
    * @private
    */
-  _createSession(modeId) {
+  _createSession() {
     return {
-      modeId,
       factsAnswered: 0,
       factsCorrect: 0,
       streak: 0,
