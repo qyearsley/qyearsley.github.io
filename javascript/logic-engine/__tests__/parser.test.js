@@ -212,6 +212,37 @@ describe("Parser", () => {
     expect(ast.right.operator).toBe("->")
   })
 
+  describe("full precedence order", () => {
+    // Lowest to highest binding
+    const ops = ["<->", "->", "xnor", "xor", "nor", "|", "nand", "&"]
+    const parse = (text) => new Parser(tokenize(text)).parse()
+
+    test("each operator binds looser than every operator after it", () => {
+      for (let i = 0; i < ops.length; i++) {
+        for (let j = i + 1; j < ops.length; j++) {
+          const loose = parse(`P ${ops[i]} Q ${ops[j]} R`)
+          expect([loose.operator, loose.right.operator]).toEqual([ops[i], ops[j]])
+          const tight = parse(`P ${ops[j]} Q ${ops[i]} R`)
+          expect([tight.operator, tight.left.operator]).toEqual([ops[i], ops[j]])
+        }
+      }
+    })
+
+    test("every operator is left-associative except ->", () => {
+      for (const op of ops) {
+        const ast = parse(`P ${op} Q ${op} R`)
+        expect(ast.operator).toBe(op)
+        if (op === "->") {
+          expect(ast.left.type).toBe("ATOM")
+          expect(ast.right.operator).toBe("->")
+        } else {
+          expect(ast.left.operator).toBe(op)
+          expect(ast.right.type).toBe("ATOM")
+        }
+      }
+    })
+  })
+
   test("handles complex nested expressions", () => {
     const ast = new Parser(tokenize("~(P & Q) | R")).parse()
     expect(ast.type).toBe("BINARY")

@@ -260,22 +260,27 @@ export function tokenize(input) {
 }
 
 /**
+ * Binary operators from lowest to highest precedence. NOT and primaries bind
+ * tighter than all of these. Every level is left-associative except "->".
+ */
+const PRECEDENCE_LEVELS = [
+  { token: "IFF", operator: "<->" },
+  { token: "IMPLIES", operator: "->", rightAssociative: true },
+  { token: "XNOR", operator: "xnor" },
+  { token: "XOR", operator: "xor" },
+  { token: "NOR", operator: "nor" },
+  { token: "OR", operator: "|" },
+  { token: "NAND", operator: "nand" },
+  { token: "AND", operator: "&" },
+]
+
+/**
  * Recursive Descent Parser
  *
  * Parses a stream of tokens into an Abstract Syntax Tree (AST) using
- * recursive descent with operator precedence climbing.
- *
- * The grammar (in order of precedence from lowest to highest):
- *   iff     ::= implies ('IFF' implies)*             // P <-> Q <-> R  (left-associative)
- *   implies ::= xnor ('->' implies)?                 // P -> Q -> R = P -> (Q -> R)  (right-associative!)
- *   xnor    ::= xor ('XNOR' xor)*                    // P xnor Q xnor R  (left-associative)
- *   xor     ::= nor ('XOR' nor)*                     // P xor Q xor R  (left-associative)
- *   nor     ::= or ('NOR' or)*                       // P nor Q nor R  (left-associative)
- *   or      ::= nand ('|' nand)*                     // P | Q | R  (left-associative)
- *   nand    ::= and ('NAND' and)*                    // P nand Q nand R  (left-associative)
- *   and     ::= not ('&' not)*                       // P & Q & R  (left-associative)
- *   not     ::= 'NOT' not | primary                  // ~~P works recursively
- *   primary ::= 'ATOM' | '(' iff ')'                 // P or (P & Q)
+ * recursive descent with operator precedence climbing: one method per grammar
+ * rule, each calling the rule one level tighter. The binary levels share one
+ * method, parseLevel, driven by PRECEDENCE_LEVELS.
  *
  * Examples:
  *   "P & Q | R"   => OR(AND(P, Q), R)      - AND binds tighter than OR
@@ -329,7 +334,7 @@ export class Parser {
    * @throws {ParseError} If there are syntax errors
    */
   parse() {
-    const node = this.parseIff()
+    const node = this.parseLevel(0)
     if (this.current().type !== "EOF") {
       throw new ParseError(`Unexpected token '${this.current().value}' after expression`, this.pos)
     }
@@ -337,179 +342,34 @@ export class Parser {
   }
 
   /**
-   * Parses IFF (biconditional) expressions - lowest precedence operator
+   * Parses the binary operators from PRECEDENCE_LEVELS[level] upward.
    *
-   * Algorithm: Left-associative iteration (using while loop)
-   * Grammar: iff ::= implies ('IFF' implies)*
+   * This is precedence climbing: each level parses its operands by calling the
+   * next tighter level, so tighter operators end up deeper in the tree.
+   * "P | Q & R" works like this:
+   * 1. The "|" level parses its left operand by calling the "&" level, which
+   *    returns P (no "&" follows).
+   * 2. It sees "|" and parses the right operand the same way. The "&" level
+   *    consumes "Q & R" whole, so the "|" gets (Q & R) as its right side.
    *
-   * Why lowest precedence?
-   * "P & Q <-> R | S" should parse as "(P & Q) <-> (R | S)", not "P & (Q <-> R) | S"
+   * A left-associative level loops: "P | Q | R" becomes ((P | Q) | R).
+   * A right-associative level (only ->) parses its right side at its own level
+   * instead: "P -> Q -> R" becomes (P -> (Q -> R)).
    *
-   * Example parse of "P <-> Q <-> R":
-   * 1. left = parseImplies() → get P
-   * 2. See IFF, consume it
-   * 3. right = parseImplies() → get Q
-   * 4. left = (P <-> Q)
-   * 5. See IFF again, consume it
-   * 6. right = parseImplies() → get R
-   * 7. left = ((P <-> Q) <-> R)  ← Left-associative!
-   *
+   * @param {number} level - Index into PRECEDENCE_LEVELS
    * @returns {ASTNode}
    */
-  parseIff() {
-    let left = this.parseImplies()
-    while (this.current().type === "IFF") {
-      this.consume()
-      const right = this.parseImplies()
-      left = { type: "BINARY", operator: "<->", left, right }
+  parseLevel(level) {
+    if (level === PRECEDENCE_LEVELS.length) {
+      return this.parseNot()
     }
-    return left
-  }
-
-  /**
-   * Parses IMPLIES (implication) expressions
-   *
-   * Algorithm: Right-associative recursion (using if + recursive call)
-   * Grammar: implies ::= or ('->' implies)?
-   *
-   * Why right-associative?
-   * In logic, "P → Q → R" means "P → (Q → R)", not "(P → Q) → R"
-   * Natural language: "If it rains then if streets are wet then it's slippery"
-   * = "If it rains, then (if streets are wet, then it's slippery)"
-   *
-   * Example parse of "P -> Q -> R":
-   * 1. left = parseOr() → get P
-   * 2. See IMPLIES, consume it
-   * 3. right = parseImplies() [RECURSIVE CALL] →
-   *    3a. left = parseOr() → get Q
-   *    3b. See IMPLIES, consume it
-   *    3c. right = parseImplies() →
-   *        3c1. left = parseOr() → get R
-   *        3c2. No IMPLIES, return R
-   *    3d. return (Q -> R)
-   * 4. return (P -> (Q -> R))  ← Right-associative!
-   *
-   * Why if instead of while?
-   * The recursive call handles the rest of the chain, so we only need one if check.
-   * Using while here would make it left-associative (wrong for implications).
-   *
-   * @returns {ASTNode}
-   */
-  parseImplies() {
-    let left = this.parseXnor()
-    if (this.current().type === "IMPLIES") {
+    const { token, operator, rightAssociative } = PRECEDENCE_LEVELS[level]
+    let left = this.parseLevel(level + 1)
+    while (this.current().type === token) {
       this.consume()
-      // Recursion makes it right-associative (unlike the while loops in other methods)
-      const right = this.parseImplies()
-      left = { type: "BINARY", operator: "->", left, right }
-    }
-    return left
-  }
-
-  /**
-   * Parses XNOR (exclusive nor / equivalence) expressions
-   * @returns {ASTNode}
-   */
-  parseXnor() {
-    let left = this.parseXor()
-    while (this.current().type === "XNOR") {
-      this.consume()
-      const right = this.parseXor()
-      left = { type: "BINARY", operator: "xnor", left, right }
-    }
-    return left
-  }
-
-  /**
-   * Parses XOR (exclusive or) expressions
-   * @returns {ASTNode}
-   */
-  parseXor() {
-    let left = this.parseNor()
-    while (this.current().type === "XOR") {
-      this.consume()
-      const right = this.parseNor()
-      left = { type: "BINARY", operator: "xor", left, right }
-    }
-    return left
-  }
-
-  /**
-   * Parses NOR (not or) expressions
-   * @returns {ASTNode}
-   */
-  parseNor() {
-    let left = this.parseOr()
-    while (this.current().type === "NOR") {
-      this.consume()
-      const right = this.parseOr()
-      left = { type: "BINARY", operator: "nor", left, right }
-    }
-    return left
-  }
-
-  /**
-   * Parses OR (disjunction) expressions
-   *
-   * Algorithm: Left-associative iteration
-   * Grammar: or ::= nand ('|' nand)*
-   *
-   * Example parse of "P | Q | R":
-   * 1. left = parseNand() → get P
-   * 2. See OR, consume it, right = parseNand() → get Q, left = (P | Q)
-   * 3. See OR, consume it, right = parseNand() → get R, left = ((P | Q) | R)
-   *
-   * Why higher precedence than NOR/XOR/XNOR/IMPLIES?
-   * "P -> Q | R" should parse as "P -> (Q | R)", so OR binds tighter than IMPLIES
-   *
-   * @returns {ASTNode}
-   */
-  parseOr() {
-    let left = this.parseNand()
-    while (this.current().type === "OR") {
-      this.consume()
-      const right = this.parseNand()
-      left = { type: "BINARY", operator: "|", left, right }
-    }
-    return left
-  }
-
-  /**
-   * Parses NAND (not and) expressions
-   * @returns {ASTNode}
-   */
-  parseNand() {
-    let left = this.parseAnd()
-    while (this.current().type === "NAND") {
-      this.consume()
-      const right = this.parseAnd()
-      left = { type: "BINARY", operator: "nand", left, right }
-    }
-    return left
-  }
-
-  /**
-   * Parses AND (conjunction) expressions
-   *
-   * Algorithm: Left-associative iteration
-   * Grammar: and ::= not ('&' not)*
-   *
-   * Why higher precedence than OR?
-   * Standard convention: "P | Q & R" means "P | (Q & R)", not "(P | Q) & R"
-   * This matches mathematical convention (like * before +)
-   *
-   * Example: "P & Q | R" parses as "(P & Q) | R" because:
-   * - parseOr calls parseAnd which consumes "P & Q" entirely
-   * - then parseOr sees "|" and makes the OR the top-level operator
-   *
-   * @returns {ASTNode}
-   */
-  parseAnd() {
-    let left = this.parseNot()
-    while (this.current().type === "AND") {
-      this.consume()
-      const right = this.parseNot()
-      left = { type: "BINARY", operator: "&", left, right }
+      const right = this.parseLevel(rightAssociative ? level : level + 1)
+      left = { type: "BINARY", operator, left, right }
+      if (rightAssociative) break
     }
     return left
   }
@@ -548,20 +408,20 @@ export class Parser {
    * Parses primary expressions (atoms and parenthesized expressions)
    *
    * Algorithm: Base case for recursion - handles the highest-precedence constructs
-   * Grammar: primary ::= 'ATOM' | '(' iff ')'
+   * Grammar: primary ::= 'ATOM' | '(' expression ')'
    *
    * This is where the recursion bottoms out. When we hit an atom or opening paren,
    * we've reached the "leaf" level of the expression tree.
    *
-   * Why parentheses reset to parseIff()?
+   * Why parentheses reset to parseLevel(0)?
    * Parentheses override precedence. Inside them, we start over with the lowest
    * precedence level, allowing any expression.
    *
    * Example: "~(P & Q | R)"
    * 1. parseNot sees NOT, calls parseNot recursively
    * 2. Inner parseNot calls parsePrimary
-   * 3. parsePrimary sees "(", calls parseIff() to parse what's inside
-   * 4. parseIff → parseImplies → parseOr → parseAnd handles "P & Q | R" completely
+   * 3. parsePrimary sees "(", calls parseLevel(0) to parse what's inside
+   * 4. parseLevel(0) climbs through every level and handles "P & Q | R" completely
    * 5. parsePrimary consumes ")", returns the full sub-tree
    * 6. parseNot wraps it: NOT((P & Q) | R)
    *
@@ -570,7 +430,7 @@ export class Parser {
   parsePrimary() {
     // Handle parenthesized expressions
     if (this.match("LPAREN")) {
-      const node = this.parseIff() // Start over at lowest precedence
+      const node = this.parseLevel(0) // Start over at lowest precedence
       if (!this.match("RPAREN")) {
         throw new ParseError("Expected closing parenthesis ')'", this.pos)
       }
