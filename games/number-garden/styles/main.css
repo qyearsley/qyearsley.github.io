@@ -8,7 +8,7 @@
 :root {
   /* ---- Per-area theme hooks ----
      Set at runtime by GameUI.updateVisualProgression from
-     ProgressionManager.areaThemes, so each garden area recolours itself.
+     AREA_THEMES in ProgressionManager.js, so each garden area recolours itself.
      `primary` and `accent` are DECORATIVE (gradients, fills, borders); `ink` is
      the text-safe variant of `primary`. They differ because two areas
      (time-temple gold, measurement-market orange) have identity colours that
@@ -168,6 +168,8 @@ body {
 /* Screen Management */
 .screen {
   display: none !important;
+  width: 100%;
+  height: 100%;
   padding: var(--ng-space-xl);
   position: absolute;
   inset: 0;
@@ -305,6 +307,20 @@ body {
   font-family: inherit;
 }
 
+.big-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgb(0, 0, 0, 0.15);
+}
+
+.big-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.big-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 @media (hover: hover) and (pointer: fine) {
   .big-button:hover {
     transform: translateY(-3px) scale(1.05);
@@ -329,6 +345,10 @@ body {
   font-weight: bold;
 }
 
+.secondary-button:hover {
+  transform: translateY(-1px);
+}
+
 @media (hover: hover) and (pointer: fine) {
   .secondary-button:hover {
     background: var(--theme-ink);
@@ -341,7 +361,17 @@ body {
   transform: translateY(-1px);
 }
 
+/* The three chrome controls -- "← Home", the gear, "← Back" -- are tapped on
+   nearly every screen by players as young as five, and were the smallest
+   targets in the game at roughly 22 to 30px. 44px is the accessibility floor;
+   Times Trail hit the same problem and settled on 68px, which is the right
+   number for a game played only on an iPad. */
 .nav-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
   font-size: var(--ng-text-md);
   color: var(--ng-theme-ink);
   background: var(--ng-surface);
@@ -352,6 +382,10 @@ body {
   transition: all 0.3s ease;
   font-family: inherit;
   font-weight: bold;
+}
+
+.nav-button:hover {
+  background: var(--ng-hover-wash);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -774,6 +808,8 @@ body {
 
 /* Icon Buttons */
 .icon-button {
+  min-width: 44px;
+  min-height: 44px;
   font-size: var(--ng-text-xl);
   background: var(--ng-surface);
   border: 2px solid var(--theme-primary);
@@ -787,6 +823,10 @@ body {
   align-items: center;
   justify-content: center;
   position: relative;
+}
+
+.icon-button:hover {
+  transform: scale(1.1);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -822,6 +862,13 @@ body {
 
 /* Text Button (for home link) */
 .text-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  text-decoration: underline;
+  opacity: 0.8;
   background: none;
   border: none;
   color: var(--ng-theme-ink);
@@ -832,6 +879,10 @@ body {
   margin-top: var(--ng-space-xs);
   transition: all 0.2s ease;
   font-family: inherit;
+}
+
+.text-button:hover {
+  opacity: 1;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -891,6 +942,9 @@ select:focus-visible,
 .modal {
   position: fixed;
   inset: 0;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(4px);
   background: rgb(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
@@ -899,20 +953,19 @@ select:focus-visible,
   padding: var(--ng-space-xl);
 }
 
-.modal.hidden {
-  display: none !important;
-}
-
 .modal-content {
   background: var(--ng-surface);
   padding: var(--ng-space-2xl);
   border-radius: var(--ng-radius);
   max-width: 500px;
   width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
   box-shadow: 0 20px 60px rgb(0, 0, 0, 0.4);
 }
 
 .modal-content h2 {
+  margin-top: 0;
   font-size: var(--ng-text-2xl);
   color: var(--ng-theme-ink);
   margin-bottom: var(--ng-space-xl);
@@ -940,12 +993,21 @@ select:focus-visible,
   font-family: inherit;
   background: var(--ng-surface);
   cursor: pointer;
+  color: inherit;
+  transition: border-color 0.2s ease;
+}
+
+.setting-select:focus {
+  outline: none;
+  border-color: var(--theme-accent);
 }
 
 .setting-description {
   font-size: var(--ng-text-sm);
   color: var(--ng-ink-muted);
   margin-top: var(--ng-space-xs);
+  margin-bottom: 0;
+  opacity: 0.7;
   font-style: italic;
 }
 
@@ -1356,6 +1418,54 @@ select:focus-visible,
   gap: 1rem;
   max-width: 400px;
   margin: 2rem auto 0;
+}
+
+/* ==================== Breadcrumbs ==================== */
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.breadcrumbs a {
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.breadcrumbs .separator {
+  opacity: 0.5;
+}
+
+.breadcrumbs .current {
+  font-weight: 600;
+}
+
+/* ==================== Error Messages ==================== */
+.error-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--ng-error-bg, #fee);
+  border: 2px solid var(--ng-error, #c33);
+  color: var(--ng-ink, #2e2836);
+  padding: 2rem;
+  border-radius: 8px;
+  max-width: 500px;
+  text-align: center;
+  font-family: system-ui, sans-serif;
+}
+
+.error-container h2 {
+  color: var(--ng-error, #c33);
+  margin-top: 0;
+}
+
+.error-details {
+  font-size: 0.9em;
+  color: var(--ng-ink-muted);
 }
 
 /* ==================== Dark theme ====================

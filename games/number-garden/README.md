@@ -66,7 +66,6 @@ data/
 
 styles/
 ├── main.css             # Core layout and components
-├── common.css           # Shared base styles
 └── animations.css       # Keyframe animations
 ```
 
