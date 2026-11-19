@@ -89,34 +89,32 @@ describe("EventManager", () => {
   })
 
   describe("button event listeners", () => {
-    test("start button triggers onStart callback", () => {
-      eventManager.setupStartButton()
-      document.getElementById("start-button").click()
-      expect(callbacks.onStart).toHaveBeenCalledTimes(1)
+    test.each([
+      ["start-button", "onStart"],
+      ["continue-button", "onContinue"],
+      ["start-fresh-button", "onStartFresh"],
+      ["back-button", "onBack"],
+      ["home-button", "onHome"],
+      ["settings-button", "onSettingsOpen"],
+      ["activity-settings-button", "onSettingsOpen"],
+      ["close-settings", "onSettingsClose"],
+      ["castle-button", "onCastleView"],
+      ["activity-castle-button", "onCastleView"],
+      ["castle-back-button", "onCastleBack"],
+      ["project-back-button", "onProjectBack"],
+      ["continue-from-project", "onContinueFromProject"],
+      ["continue-playing-button", "onContinueFromLevelComplete"],
+      ["return-to-hub-button", "onReturnToHub"],
+    ])("clicking #%s calls %s once", (id, callbackName) => {
+      eventManager.initializeEventListeners()
+      document.getElementById(id).click()
+      expect(callbacks[callbackName]).toHaveBeenCalledTimes(1)
     })
 
-    test("continue button triggers onContinue callback", () => {
-      eventManager.setupContinueButton()
-      document.getElementById("continue-button").click()
-      expect(callbacks.onContinue).toHaveBeenCalledTimes(1)
-    })
-
-    test("start fresh button triggers onStartFresh callback", () => {
-      eventManager.setupStartFreshButton()
-      document.getElementById("start-fresh-button").click()
-      expect(callbacks.onStartFresh).toHaveBeenCalledTimes(1)
-    })
-
-    test("back button triggers onBack callback", () => {
-      eventManager.setupBackButton()
-      document.getElementById("back-button").click()
-      expect(callbacks.onBack).toHaveBeenCalledTimes(1)
-    })
-
-    test("home button triggers onHome callback", () => {
-      eventManager.setupHomeButton()
-      document.getElementById("home-button").click()
-      expect(callbacks.onHome).toHaveBeenCalledTimes(1)
+    test("a click on a button whose callback is missing does not throw", () => {
+      delete callbacks.onStart
+      eventManager.initializeEventListeners()
+      expect(() => document.getElementById("start-button").click()).not.toThrow()
     })
   })
 
@@ -204,109 +202,25 @@ describe("EventManager", () => {
     })
   })
 
-  describe("settings listeners", () => {
-    test("settings button triggers onSettingsOpen", () => {
-      eventManager.setupSettingsButton()
-      document.getElementById("settings-button").click()
-      expect(callbacks.onSettingsOpen).toHaveBeenCalledTimes(1)
-    })
-
-    test("activity settings button triggers onSettingsOpen", () => {
-      eventManager.setupActivitySettingsButton()
-      document.getElementById("activity-settings-button").click()
-      expect(callbacks.onSettingsOpen).toHaveBeenCalledTimes(1)
-    })
-
-    test("close settings button triggers onSettingsClose", () => {
-      eventManager.setupCloseSettingsButton()
-      document.getElementById("close-settings").click()
-      expect(callbacks.onSettingsClose).toHaveBeenCalledTimes(1)
-    })
-
-    test("difficulty select triggers onSettingChange", () => {
-      eventManager.setupSettingsSelects()
-      const select = document.getElementById("difficulty-select")
-      select.innerHTML = '<option value="explorer">Explorer</option>'
-      select.value = "explorer"
+  describe("settings selects and project options", () => {
+    test.each([
+      ["difficulty-select", "difficulty", "explorer"],
+      ["input-mode-select", "inputMode", "keyboard"],
+      ["visual-hints-select", "visualHints", "off"],
+      ["sound-effects-select", "soundEffects", "off"],
+    ])("#%s change calls onSettingChange(%s, value)", (id, setting, value) => {
+      eventManager.initializeEventListeners()
+      const select = document.getElementById(id)
+      select.innerHTML = `<option value="${value}">x</option>`
+      select.value = value
       select.dispatchEvent(new Event("change"))
-      expect(callbacks.onSettingChange).toHaveBeenCalledWith("difficulty", "explorer")
-    })
-
-    test("input mode select triggers onSettingChange", () => {
-      eventManager.setupSettingsSelects()
-      const select = document.getElementById("input-mode-select")
-      select.innerHTML = '<option value="keyboard">Keyboard</option>'
-      select.value = "keyboard"
-      select.dispatchEvent(new Event("change"))
-      expect(callbacks.onSettingChange).toHaveBeenCalledWith("inputMode", "keyboard")
-    })
-
-    test("visual hints select triggers onSettingChange", () => {
-      eventManager.setupSettingsSelects()
-      const select = document.getElementById("visual-hints-select")
-      select.innerHTML = '<option value="off">Off</option>'
-      select.value = "off"
-      select.dispatchEvent(new Event("change"))
-      expect(callbacks.onSettingChange).toHaveBeenCalledWith("visualHints", "off")
-    })
-
-    test("sound effects select triggers onSettingChange", () => {
-      eventManager.setupSettingsSelects()
-      const select = document.getElementById("sound-effects-select")
-      select.innerHTML = '<option value="off">Off</option>'
-      select.value = "off"
-      select.dispatchEvent(new Event("change"))
-      expect(callbacks.onSettingChange).toHaveBeenCalledWith("soundEffects", "off")
-    })
-  })
-
-  describe("castle and project listeners", () => {
-    test("castle button triggers onCastleView", () => {
-      eventManager.setupCastleButton()
-      document.getElementById("castle-button").click()
-      expect(callbacks.onCastleView).toHaveBeenCalledTimes(1)
-    })
-
-    test("activity castle button triggers onCastleView", () => {
-      eventManager.setupActivityCastleButton()
-      document.getElementById("activity-castle-button").click()
-      expect(callbacks.onCastleView).toHaveBeenCalledTimes(1)
-    })
-
-    test("castle back button triggers onCastleBack", () => {
-      eventManager.setupCastleBackButton()
-      document.getElementById("castle-back-button").click()
-      expect(callbacks.onCastleBack).toHaveBeenCalledTimes(1)
+      expect(callbacks.onSettingChange).toHaveBeenCalledWith(setting, value)
     })
 
     test("project option triggers onProjectSelect", () => {
-      eventManager.setupProjectOptions()
+      eventManager.initializeEventListeners()
       document.querySelector(".project-option").click()
       expect(callbacks.onProjectSelect).toHaveBeenCalledWith("castle")
-    })
-
-    test("project back button triggers onProjectBack", () => {
-      eventManager.setupProjectBackButton()
-      document.getElementById("project-back-button").click()
-      expect(callbacks.onProjectBack).toHaveBeenCalledTimes(1)
-    })
-
-    test("continue from project button triggers callback", () => {
-      eventManager.setupContinueFromProjectButton()
-      document.getElementById("continue-from-project").click()
-      expect(callbacks.onContinueFromProject).toHaveBeenCalledTimes(1)
-    })
-
-    test("continue from level complete button triggers callback", () => {
-      eventManager.setupContinueFromLevelCompleteButton()
-      document.getElementById("continue-playing-button").click()
-      expect(callbacks.onContinueFromLevelComplete).toHaveBeenCalledTimes(1)
-    })
-
-    test("return to hub button triggers callback", () => {
-      eventManager.setupReturnToHubButton()
-      document.getElementById("return-to-hub-button").click()
-      expect(callbacks.onReturnToHub).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -610,57 +524,14 @@ describe("EventManager", () => {
     })
   })
 
-  describe("initializeEventListeners", () => {
-    test("sets up all event listeners", () => {
-      // Spy on all setup methods
-      const setupMethods = [
-        "setupStartButton",
-        "setupContinueButton",
-        "setupStartFreshButton",
-        "setupBackButton",
-        "setupHomeButton",
-        "setupGardenAreas",
-        "setupAnswerButtons",
-        "setupSettingsButton",
-        "setupActivitySettingsButton",
-        "setupCloseSettingsButton",
-        "setupSettingsSelects",
-        "setupCastleButton",
-        "setupActivityCastleButton",
-        "setupCastleBackButton",
-        "setupKeyboardInput",
-        "setupKeyboardShortcuts",
-        "setupProjectOptions",
-        "setupProjectBackButton",
-        "setupContinueFromProjectButton",
-        "setupContinueFromLevelCompleteButton",
-        "setupReturnToHubButton",
-      ]
-
-      setupMethods.forEach((method) => {
-        jest.spyOn(eventManager, method).mockImplementation()
-      })
-
-      eventManager.initializeEventListeners()
-
-      setupMethods.forEach((method) => {
-        expect(eventManager[method]).toHaveBeenCalled()
-      })
-    })
-  })
-
   describe("missing elements", () => {
-    test("handles missing buttons gracefully", () => {
+    test("handles a page with no buttons", () => {
       document.body.innerHTML = ""
-      mockUI.elements = {}
+      mockUI.elements = { gardenAreas: [], answerOptions: null }
 
       const em = new EventManager(mockUI, callbacks)
 
-      expect(() => {
-        em.setupStartButton()
-        em.setupContinueButton()
-        em.setupSettingsButton()
-      }).not.toThrow()
+      expect(() => em.initializeEventListeners()).not.toThrow()
     })
   })
 })

@@ -1,6 +1,33 @@
 import { ANSWER_KEYS } from "./constants.js"
 import { keyIsNotForGame, closeSettingsOnEscape } from "../../shared/keyboardGuard.js"
 
+// [element id, callback name]: each button calls its callback, if there is one.
+const CLICK_BUTTONS = [
+  ["start-button", "onStart"],
+  ["continue-button", "onContinue"],
+  ["start-fresh-button", "onStartFresh"],
+  ["back-button", "onBack"],
+  ["home-button", "onHome"],
+  ["settings-button", "onSettingsOpen"],
+  ["activity-settings-button", "onSettingsOpen"],
+  ["close-settings", "onSettingsClose"],
+  ["castle-button", "onCastleView"],
+  ["activity-castle-button", "onCastleView"],
+  ["castle-back-button", "onCastleBack"],
+  ["project-back-button", "onProjectBack"],
+  ["continue-from-project", "onContinueFromProject"],
+  ["continue-playing-button", "onContinueFromLevelComplete"],
+  ["return-to-hub-button", "onReturnToHub"],
+]
+
+// [element id, setting name]: each select calls onSettingChange(setting, value).
+const SETTING_SELECTS = [
+  ["difficulty-select", "difficulty"],
+  ["input-mode-select", "inputMode"],
+  ["visual-hints-select", "visualHints"],
+  ["sound-effects-select", "soundEffects"],
+]
+
 /**
  * Manages event listeners and callbacks for the game
  */
@@ -19,97 +46,19 @@ export class EventManager {
    * Initialize all event listeners
    */
   initializeEventListeners() {
-    this.setupStartButton()
-    this.setupContinueButton()
-    this.setupStartFreshButton()
-    this.setupBackButton()
-    this.setupHomeButton()
+    CLICK_BUTTONS.forEach(([id, callbackName]) => {
+      document.getElementById(id)?.addEventListener("click", () => this.callbacks[callbackName]?.())
+    })
+    SETTING_SELECTS.forEach(([id, setting]) => {
+      document.getElementById(id)?.addEventListener("change", (e) => {
+        this.callbacks.onSettingChange?.(setting, e.target.value)
+      })
+    })
     this.setupGardenAreas()
     this.setupAnswerButtons()
-    this.setupSettingsButton()
-    this.setupActivitySettingsButton()
-    this.setupCloseSettingsButton()
-    this.setupSettingsSelects()
-    this.setupCastleButton()
-    this.setupActivityCastleButton()
-    this.setupCastleBackButton()
     this.setupKeyboardInput()
     this.setupKeyboardShortcuts()
     this.setupProjectOptions()
-    this.setupProjectBackButton()
-    this.setupContinueFromProjectButton()
-    this.setupContinueFromLevelCompleteButton()
-    this.setupReturnToHubButton()
-  }
-
-  /**
-   * Setup start button listener
-   */
-  setupStartButton() {
-    const startButton = this.ui.elements.startButton
-    if (startButton) {
-      startButton.addEventListener("click", () => {
-        if (this.callbacks.onStart) {
-          this.callbacks.onStart()
-        }
-      })
-    }
-  }
-
-  /**
-   * Setup continue button listener
-   */
-  setupContinueButton() {
-    const continueButton = this.ui.elements.continueButton
-    if (continueButton) {
-      continueButton.addEventListener("click", () => {
-        if (this.callbacks.onContinue) {
-          this.callbacks.onContinue()
-        }
-      })
-    }
-  }
-
-  /**
-   * Setup start fresh button listener
-   */
-  setupStartFreshButton() {
-    const startFreshButton = this.ui.elements.startFreshButton
-    if (startFreshButton) {
-      startFreshButton.addEventListener("click", () => {
-        if (this.callbacks.onStartFresh) {
-          this.callbacks.onStartFresh()
-        }
-      })
-    }
-  }
-
-  /**
-   * Setup back button listener
-   */
-  setupBackButton() {
-    const backButton = this.ui.elements.backButton
-    if (backButton) {
-      backButton.addEventListener("click", () => {
-        if (this.callbacks.onBack) {
-          this.callbacks.onBack()
-        }
-      })
-    }
-  }
-
-  /**
-   * Setup home button listener
-   */
-  setupHomeButton() {
-    const homeButton = document.getElementById("home-button")
-    if (homeButton) {
-      homeButton.addEventListener("click", () => {
-        if (this.callbacks.onHome) {
-          this.callbacks.onHome()
-        }
-      })
-    }
   }
 
   /**
@@ -169,127 +118,6 @@ export class EventManager {
           if (this.callbacks.onAnswerSelected) {
             this.callbacks.onAnswerSelected(parsedAnswer, isCorrect, e.target)
           }
-        }
-      })
-    }
-  }
-
-  /**
-   * Setup settings button listener
-   */
-  setupSettingsButton() {
-    const settingsButton = this.ui.elements.settingsButton
-    if (settingsButton) {
-      settingsButton.addEventListener("click", () => {
-        if (this.callbacks.onSettingsOpen) {
-          this.callbacks.onSettingsOpen()
-        }
-      })
-    }
-  }
-
-  /**
-   * Setup activity settings button listener
-   */
-  setupActivitySettingsButton() {
-    const activitySettingsButton = document.getElementById("activity-settings-button")
-    if (activitySettingsButton) {
-      activitySettingsButton.addEventListener("click", () => {
-        if (this.callbacks.onSettingsOpen) {
-          this.callbacks.onSettingsOpen()
-        }
-      })
-    }
-  }
-
-  /**
-   * Setup close settings button listener
-   */
-  setupCloseSettingsButton() {
-    const closeButton = this.ui.elements.closeSettings
-    if (closeButton) {
-      closeButton.addEventListener("click", () => {
-        if (this.callbacks.onSettingsClose) {
-          this.callbacks.onSettingsClose()
-        }
-      })
-    }
-  }
-
-  /**
-   * Setup settings select listeners
-   */
-  setupSettingsSelects() {
-    if (this.ui.elements.difficultySelect) {
-      this.ui.elements.difficultySelect.addEventListener("change", (e) => {
-        if (this.callbacks.onSettingChange) {
-          this.callbacks.onSettingChange("difficulty", e.target.value)
-        }
-      })
-    }
-
-    if (this.ui.elements.inputModeSelect) {
-      this.ui.elements.inputModeSelect.addEventListener("change", (e) => {
-        if (this.callbacks.onSettingChange) {
-          this.callbacks.onSettingChange("inputMode", e.target.value)
-        }
-      })
-    }
-
-    if (this.ui.elements.visualHintsSelect) {
-      this.ui.elements.visualHintsSelect.addEventListener("change", (e) => {
-        if (this.callbacks.onSettingChange) {
-          this.callbacks.onSettingChange("visualHints", e.target.value)
-        }
-      })
-    }
-
-    if (this.ui.elements.soundEffectsSelect) {
-      this.ui.elements.soundEffectsSelect.addEventListener("change", (e) => {
-        if (this.callbacks.onSettingChange) {
-          this.callbacks.onSettingChange("soundEffects", e.target.value)
-        }
-      })
-    }
-  }
-
-  /**
-   * Setup castle button listener
-   */
-  setupCastleButton() {
-    const castleButton = this.ui.elements.castleButton
-    if (castleButton) {
-      castleButton.addEventListener("click", () => {
-        if (this.callbacks.onCastleView) {
-          this.callbacks.onCastleView()
-        }
-      })
-    }
-  }
-
-  /**
-   * Setup activity castle button listener
-   */
-  setupActivityCastleButton() {
-    const activityCastleButton = document.getElementById("activity-castle-button")
-    if (activityCastleButton) {
-      activityCastleButton.addEventListener("click", () => {
-        if (this.callbacks.onCastleView) {
-          this.callbacks.onCastleView()
-        }
-      })
-    }
-  }
-
-  /**
-   * Setup castle back button listener
-   */
-  setupCastleBackButton() {
-    const castleBackButton = this.ui.elements.castleBackButton
-    if (castleBackButton) {
-      castleBackButton.addEventListener("click", () => {
-        if (this.callbacks.onCastleBack) {
-          this.callbacks.onCastleBack()
         }
       })
     }
@@ -444,61 +272,5 @@ export class EventManager {
         }
       })
     })
-  }
-
-  /**
-   * Setup project back button listener
-   */
-  setupProjectBackButton() {
-    const projectBackButton = document.getElementById("project-back-button")
-    if (projectBackButton) {
-      projectBackButton.addEventListener("click", () => {
-        if (this.callbacks.onProjectBack) {
-          this.callbacks.onProjectBack()
-        }
-      })
-    }
-  }
-
-  /**
-   * Setup continue from project modal button listener
-   */
-  setupContinueFromProjectButton() {
-    const continueFromProject = document.getElementById("continue-from-project")
-    if (continueFromProject) {
-      continueFromProject.addEventListener("click", () => {
-        if (this.callbacks.onContinueFromProject) {
-          this.callbacks.onContinueFromProject()
-        }
-      })
-    }
-  }
-
-  /**
-   * Setup continue from level complete button listener
-   */
-  setupContinueFromLevelCompleteButton() {
-    const continuePlayingButton = document.getElementById("continue-playing-button")
-    if (continuePlayingButton) {
-      continuePlayingButton.addEventListener("click", () => {
-        if (this.callbacks.onContinueFromLevelComplete) {
-          this.callbacks.onContinueFromLevelComplete()
-        }
-      })
-    }
-  }
-
-  /**
-   * Setup return to hub button listener
-   */
-  setupReturnToHubButton() {
-    const returnToHubButton = document.getElementById("return-to-hub-button")
-    if (returnToHubButton) {
-      returnToHubButton.addEventListener("click", () => {
-        if (this.callbacks.onReturnToHub) {
-          this.callbacks.onReturnToHub()
-        }
-      })
-    }
   }
 }
