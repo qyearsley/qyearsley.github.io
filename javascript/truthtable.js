@@ -27,19 +27,21 @@ const UNARY_OPERATORS = {
 }
 
 /**
- * Operator precedence levels.
- * Higher precedence means the operator binds more tightly and is evaluated first.
- * Used during parsing to determine evaluation order.
+ * Operator precedence: higher binds tighter. Same order as the Logic Engine
+ * parser, so `a or b and c` is `a or (b and c)`.
  */
 const PRECEDENCE = {
-  and: 1,
-  or: 1,
-  nand: 2,
+  eq: 1,
   implies: 2,
-  eq: 2,
-  xor: 2,
-  not: 3,
+  xor: 3,
+  or: 4,
+  nand: 5,
+  and: 6,
+  not: 7,
 }
+
+/** `a implies b implies c` is `a implies (b implies c)`. */
+const RIGHT_ASSOCIATIVE = new Set(["implies"])
 /**
  * Base class for boolean expressions.
  * Subclasses represent constants, variables, and operations.
@@ -150,6 +152,13 @@ function shuntingYard(tokens) {
 
   return output
 }
+/** Whether operator `top` on the stack is applied before binary `token`. */
+function shouldPopBefore(token, top) {
+  if (RIGHT_ASSOCIATIVE.has(token)) {
+    return PRECEDENCE[top] > PRECEDENCE[token]
+  }
+  return PRECEDENCE[top] >= PRECEDENCE[token]
+}
 /**
  * Process one token in the shunting yard algorithm.
  */
@@ -163,7 +172,7 @@ function processToken(token, output, stack) {
     while (
       stack.length > 0 &&
       stack[stack.length - 1] !== "(" &&
-      PRECEDENCE[token] <= PRECEDENCE[stack[stack.length - 1]]
+      shouldPopBefore(token, stack[stack.length - 1])
     ) {
       const op = stack.pop()
       if (typeof op === "string") {

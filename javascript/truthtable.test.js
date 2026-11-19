@@ -95,6 +95,18 @@ describe("parseInfix", () => {
     expect(tt.parseInfix("not (true and false)").eval()).toEqual(true)
   })
 
+  test("precedence", () => {
+    // Each line fails if the operators are applied left to right.
+    expect(tt.parseInfix("true or false and false").eval()).toEqual(true)
+    expect(tt.parseInfix("false implies false and false").eval()).toEqual(true)
+    expect(tt.parseInfix("false eq false and false").eval()).toEqual(true)
+    expect(tt.parseInfix("true xor true or true").eval()).toEqual(false)
+  })
+
+  test("implies is right-associative", () => {
+    expect(tt.parseInfix("false implies true implies false").eval()).toEqual(true)
+  })
+
   test("parentheses", () => {
     expect(tt.parseInfix("((true))").eval()).toEqual(true)
     expect(tt.parseInfix("(true and false)").eval()).toEqual(false)
