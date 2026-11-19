@@ -42,7 +42,6 @@ const browserGlobals = {
 // Globals exposed by specific page scripts (not browser built-ins)
 const pageScriptGlobals = {
   Chart: "readonly", // Chart.js, loaded via CDN in coin-flipper.html
-  TruthTable: "readonly", // declared in javascript/truthtable.js, used in truth-tables.html
 }
 
 const jestGlobals = {
