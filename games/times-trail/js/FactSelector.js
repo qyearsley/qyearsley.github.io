@@ -198,9 +198,8 @@ export class FactSelector {
   }
 
   /**
-   * Take the first serveable retry entry, if any. Scans ascending by dueIndex
-   * and stops at the first entry that is not due yet (the queue is sorted, so
-   * nothing after it can be due either).
+   * Take the first serveable retry entry, if any. The queue is sorted by
+   * dueIndex, so when several entries are due the earliest-due one is served.
    *
    * Two entries are skipped rather than served: one whose fact is `lastFactId`,
    * which stays queued so it fires next question instead of repeating

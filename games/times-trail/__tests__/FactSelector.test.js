@@ -9,11 +9,6 @@ const NOW = 1700000000000
 /** The injected clock every test uses. */
 const fixedNow = () => NOW
 
-/** The selector's pending re-ask entries, read from its private queue. */
-function retryQueue(selector) {
-  return selector._retryQueue.map(({ factId, dueIndex }) => ({ factId, dueIndex }))
-}
-
 /**
  * An rng that returns `values` in order and throws once exhausted, so an
  * unexpected extra call fails loudly instead of quietly reusing a value. The
@@ -90,6 +85,21 @@ const TRACE_RECORDS = recordsFrom({
   "5x6": { strength: 5 },
   "8x9": { strength: 5 },
 })
+
+/**
+ * For retry tests: 6x7, 2x3 and 3x4 are new (weak), the rest strong. An rng
+ * value of 0.9 picks the strong bucket, so normal selection never serves a
+ * missed fact and every weak fact served must come from the retry queue.
+ */
+const MISS_POOL = ["6x7", "2x3", "3x4", "4x5", "5x6", "8x9"]
+const MISS_RECORDS = recordsFrom({
+  "4x5": { strength: 5 },
+  "5x6": { strength: 5 },
+  "8x9": { strength: 5 },
+})
+
+/** `count` normal selections from the strong bucket: 0.9 for the bucket, 0 for the pick. */
+const strongPicks = (count) => Array.from({ length: count }, () => [0.9, 0]).flat()
 
 /** A pool with two weak facts and two strong ones, in a known order. */
 const MIXED_POOL = ["6x7", "2x3", "3x4", "4x5"]
@@ -356,18 +366,6 @@ describe("FactSelector", () => {
       expect(delayFor(1)).toBe(SELECTION.RETRY_DELAY_MAX)
     })
 
-    test("queues dueIndex = questionIndex + delay, counting the missed question", () => {
-      const rng = scriptedRng([0.1, 0, 0])
-      const selector = new FactSelector({ rng, now: fixedNow })
-
-      const served = selector.selectNext(TRACE_POOL, TRACE_RECORDS)
-      expect(served).toBe("6x7")
-      expect(selector.questionIndex).toBe(1)
-
-      expect(selector.recordMiss(served)).toBe(3)
-      expect(retryQueue(selector)).toEqual([{ factId: "6x7", dueIndex: 4 }])
-    })
-
     test("consumes exactly one rng call", () => {
       const rng = scriptedRng([0, 0.9])
       const selector = new FactSelector({ rng, now: fixedNow })
@@ -378,24 +376,32 @@ describe("FactSelector", () => {
       expect(rng.calls).toBe(2)
     })
 
-    test("a second miss on the same fact updates the entry instead of duplicating it", () => {
-      const selector = new FactSelector({ rng: scriptedRng([0, 0.9]), now: fixedNow })
+    test("a second miss on the same fact moves its retry instead of queuing it twice", () => {
+      const rng = scriptedRng([0, 0.9, ...strongPicks(5)])
+      const selector = new FactSelector({ rng, now: fixedNow })
 
       expect(selector.recordMiss("6x7")).toBe(3)
-      expect(selector.recordMiss("6x7")).toBe(4)
-      expect(retryQueue(selector)).toEqual([{ factId: "6x7", dueIndex: 4 }])
+      expect(selector.recordMiss("6x7")).toBe(4) // due at index 4, not 3
+      const served = Array.from({ length: 6 }, () => selector.selectNext(MISS_POOL, MISS_RECORDS))
+
+      expect(served.indexOf("6x7")).toBe(4)
+      expect(served.lastIndexOf("6x7")).toBe(4)
     })
 
-    test("keeps the queue sorted ascending by dueIndex when misses arrive out of order", () => {
-      const selector = new FactSelector({ rng: scriptedRng([0.9, 0]), now: fixedNow })
+    test("when two retries are due at once, the earlier-due one fires first", () => {
+      // 2x3 is due at index 3 but was just served at index 2, so it waits, and
+      // at index 4 both retries are due. 6x7 was missed first, so insertion
+      // order alone would serve it first.
+      const weakPick2x3 = [0.1, 0.5]
+      const rng = scriptedRng([0.9, 0, ...strongPicks(2), ...weakPick2x3, ...strongPicks(1)])
+      const selector = new FactSelector({ rng, now: fixedNow })
 
-      selector.recordMiss("6x7") // delay 4 -> dueIndex 4
-      selector.recordMiss("2x3") // delay 3 -> dueIndex 3
+      selector.recordMiss("6x7") // delay 4 -> due at index 4
+      selector.recordMiss("2x3") // delay 3 -> due at index 3
+      const served = Array.from({ length: 6 }, () => selector.selectNext(MISS_POOL, MISS_RECORDS))
 
-      expect(retryQueue(selector)).toEqual([
-        { factId: "2x3", dueIndex: 3 },
-        { factId: "6x7", dueIndex: 4 },
-      ])
+      expect(served[2]).toBe("2x3")
+      expect(served.slice(4)).toEqual(["2x3", "6x7"])
     })
   })
 
@@ -414,7 +420,6 @@ describe("FactSelector", () => {
 
       expect(selector.recordMiss("6x7")).toBe(3)
       expect(rng.calls).toBe(3)
-      expect(retryQueue(selector)).toEqual([{ factId: "6x7", dueIndex: 4 }])
 
       for (const expectedCalls of [5, 7, 9]) {
         expect(selector.selectNext(TRACE_POOL, TRACE_RECORDS)).not.toBe("6x7")
@@ -425,7 +430,6 @@ describe("FactSelector", () => {
       expect(selector.selectNext(TRACE_POOL, TRACE_RECORDS)).toBe("6x7")
       expect(rng.calls).toBe(9)
       expect(selector.questionIndex).toBe(5)
-      expect(retryQueue(selector)).toEqual([])
     })
 
     test("missed as question 1 with delay 4, re-asked as question 6, 4 in between", () => {
@@ -434,7 +438,6 @@ describe("FactSelector", () => {
 
       expect(selector.selectNext(TRACE_POOL, TRACE_RECORDS)).toBe("6x7")
       expect(selector.recordMiss("6x7")).toBe(4)
-      expect(retryQueue(selector)).toEqual([{ factId: "6x7", dueIndex: 5 }])
 
       for (const expectedCalls of [5, 7, 9, 11]) {
         expect(selector.selectNext(TRACE_POOL, TRACE_RECORDS)).not.toBe("6x7")
@@ -445,7 +448,6 @@ describe("FactSelector", () => {
       expect(selector.selectNext(TRACE_POOL, TRACE_RECORDS)).toBe("6x7")
       expect(rng.calls).toBe(11)
       expect(selector.questionIndex).toBe(6)
-      expect(retryQueue(selector)).toEqual([])
     })
 
     test("a queued fact that is the last-served fact is deferred one question", () => {
@@ -461,27 +463,20 @@ describe("FactSelector", () => {
       expect(selector.selectNext(TRACE_POOL, TRACE_RECORDS)).not.toBe("6x7") // q3
       expect(selector.selectNext(TRACE_POOL, TRACE_RECORDS)).toBe("6x7") // q4, normal
       expect(selector.lastFactId).toBe("6x7")
-      expect(retryQueue(selector)).toEqual([{ factId: "6x7", dueIndex: 4 }])
 
       // q5: due, but it would repeat, so normal selection runs and the entry stays.
       const deferred = selector.selectNext(TRACE_POOL, TRACE_RECORDS)
       expect(deferred).not.toBe("6x7")
       expect(rng.calls).toBe(11)
-      expect(retryQueue(selector)).toEqual([{ factId: "6x7", dueIndex: 4 }])
 
       // q6: the entry is now overdue and fires, free of charge.
       expect(selector.selectNext(TRACE_POOL, TRACE_RECORDS)).toBe("6x7")
       expect(rng.calls).toBe(11)
-      expect(retryQueue(selector)).toEqual([])
     })
 
     test("ties fire in insertion order, and an overdue entry still fires", () => {
-      const pool = ["6x7", "2x3", "3x4", "4x5", "5x6", "8x9"]
-      const records = recordsFrom({
-        "4x5": { strength: 5 },
-        "5x6": { strength: 5 },
-        "8x9": { strength: 5 },
-      })
+      const pool = MISS_POOL
+      const records = MISS_RECORDS
       // All three misses are recorded at questionIndex 0, so all three share
       // dueIndex 3. The first fires at q4 (on time), the second at q5, the third
       // at q6 -- overdue by 2 and still served rather than skipped.
@@ -491,11 +486,6 @@ describe("FactSelector", () => {
       selector.recordMiss("6x7")
       selector.recordMiss("2x3")
       selector.recordMiss("3x4")
-      expect(retryQueue(selector)).toEqual([
-        { factId: "6x7", dueIndex: 3 },
-        { factId: "2x3", dueIndex: 3 },
-        { factId: "3x4", dueIndex: 3 },
-      ])
 
       for (let index = 0; index < 3; index += 1) {
         expect(["4x5", "5x6", "8x9"]).toContain(selector.selectNext(pool, records))
@@ -507,10 +497,9 @@ describe("FactSelector", () => {
       expect(selector.selectNext(pool, records)).toBe("2x3")
       expect(selector.selectNext(pool, records)).toBe("3x4")
       expect(rng.calls).toBe(9)
-      expect(retryQueue(selector)).toEqual([])
     })
 
-    test("a queued fact that has left the pool is dropped and normal selection runs", () => {
+    test("a queued fact that has left the pool is skipped and normal selection runs", () => {
       const pool = ["2x3", "3x4", "4x5"]
       const rng = scriptedRng([0, 0.1, 0, 0.1, 0, 0.1, 0, 0.1, 0])
       const selector = new FactSelector({ rng, now: fixedNow })
@@ -520,30 +509,26 @@ describe("FactSelector", () => {
         expect(pool).toContain(selector.selectNext(pool, {}))
       }
       expect(selector.questionIndex).toBe(3)
-      expect(retryQueue(selector)).toEqual([{ factId: "6x7", dueIndex: 3 }])
 
       const callsBefore = rng.calls
       expect(pool).toContain(selector.selectNext(pool, {}))
       expect(rng.calls - callsBefore).toBe(2)
-      expect(retryQueue(selector)).toEqual([])
     })
   })
 
   describe("reset", () => {
-    test("clears the question counter, the last fact, and the queue", () => {
+    test("clears the question counter and the last fact", () => {
       const rng = scriptedRng([0.1, 0, 0, 0.1, 0])
       const selector = new FactSelector({ rng, now: fixedNow })
 
       expect(selector.selectNext(TRACE_POOL, TRACE_RECORDS)).toBe("6x7")
       selector.recordMiss("6x7")
       expect(selector.questionIndex).toBe(1)
-      expect(retryQueue(selector)).toHaveLength(1)
 
       selector.reset()
 
       expect(selector.questionIndex).toBe(0)
       expect(selector.lastFactId).toBeNull()
-      expect(retryQueue(selector)).toEqual([])
       // With no last-fact memory the previously-served fact may come straight back.
       expect(selector.selectNext(TRACE_POOL, TRACE_RECORDS)).toBe("6x7")
     })
@@ -565,7 +550,6 @@ describe("FactSelector", () => {
         expect(rng.calls - callsBefore).toBe(2)
       }
       expect(selector.questionIndex).toBe(4)
-      expect(retryQueue(selector)).toEqual([])
     })
   })
 })
