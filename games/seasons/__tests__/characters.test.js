@@ -67,8 +67,6 @@ describe("the roster", () => {
       expect(typeof character[field]).toBe("string")
       expect(character[field].trim().length).toBeGreaterThan(0)
     }
-    // costText is allowed to be empty -- a free perk says nothing about cost.
-    expect(typeof character.costText).toBe("string")
   })
 
   it.each(ROSTER_IDS)("%s has an effects object with every default key", (id) => {
@@ -212,15 +210,6 @@ describe("balance", () => {
     for (const character of CHARACTERS) {
       const changed = EFFECT_KEYS.filter((key) => character.effects[key] !== DEFAULT_EFFECTS[key])
       expect([character.id, changed.length]).toEqual([character.id, 1])
-    }
-  })
-
-  it("charges nobody a cost", () => {
-    // Every perk is free now. The costs were priced against an item penalty
-    // that no longer exists, so a card claiming one would be describing a rule
-    // the game does not have.
-    for (const character of CHARACTERS) {
-      expect([character.id, character.costText]).toEqual([character.id, ""])
     }
   })
 

@@ -33,7 +33,6 @@ import { DEFAULT_EFFECTS } from "./constants.js"
  * @property {string} perkName    - Short name of the perk, shown on the card
  * @property {string} perkText    - What the perk does, in a sentence a third
  *                                  grader can read
- * @property {string} costText    - What it costs, same audience. Empty if free.
  * @property {Object} effects     - Overrides merged over DEFAULT_EFFECTS
  */
 
@@ -59,7 +58,6 @@ const ROSTER = [
     name: "Banana Slug",
     perkName: "Slow and Steady",
     perkText: "No countdown, ever. You can take as long as you like.",
-    costText: "",
     effects: { noTimer: true },
   },
   {
@@ -67,7 +65,6 @@ const ROSTER = [
     name: "Sloth",
     perkName: "Takes His Time",
     perkText: "You get 10 extra seconds on every timed question.",
-    costText: "",
     effects: { extraSeconds: 10 },
   },
   {
@@ -75,7 +72,6 @@ const ROSTER = [
     name: "Phoenix",
     perkName: "Rising Again",
     perkText: "The first time you slip each season, two wrong answers disappear.",
-    costText: "",
     effects: { hintsPerSeason: 1 },
   },
   {
@@ -83,7 +79,6 @@ const ROSTER = [
     name: "Porcupine",
     perkName: "Bounce Back",
     perkText: "Get one wrong and you go straight on, with no extra question.",
-    costText: "",
     effects: { skipsExtra: true },
   },
 ]

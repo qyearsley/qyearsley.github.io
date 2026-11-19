@@ -248,13 +248,6 @@ export class GameUI extends BaseGameUI {
       perkText.textContent = entry.perkText
       card.append(perkText)
 
-      if (entry.costText) {
-        const cost = document.createElement("span")
-        cost.className = "character-cost"
-        cost.textContent = entry.costText
-        card.append(cost)
-      }
-
       card.addEventListener("click", () => onChoose(entry.id))
       grid.append(card)
     }
@@ -690,9 +683,8 @@ export class GameUI extends BaseGameUI {
     // the fragments announce as disconnected words, and the count -- the whole
     // state of the game -- changes silently if it is in no live region at all.
     const noun = season.demand === 1 ? season.itemName : season.itemPlural
-    // Computed here rather than imported from GameState.remainingDemand: this
-    // file deliberately does not import the rulebook, and one subtraction is a
-    // cheaper duplication than an exception to that rule.
+    // This file deliberately does not import the rulebook, so it does the
+    // subtraction itself.
     const short = Math.max(0, season.demand - state.items)
     this.setText(
       "item-count",

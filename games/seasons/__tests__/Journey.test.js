@@ -26,7 +26,6 @@ import {
   isAtBoss,
   isGlowingAt,
   normalizePosition,
-  progress,
   spaceAt,
 } from "../js/Journey.js"
 import { PLAY } from "../js/constants.js"
@@ -217,7 +216,7 @@ describe("isAtBoss", () => {
   it("is false for a missing season, which is not started rather than finished", () => {
     // Deliberately different from the zero-length case above: a season that
     // really has no spaces is over, but a season that is not there at all has
-    // not begun. `progress` agrees, so the two can never contradict each other.
+    // not begun.
     for (const season of [null, undefined]) {
       expect(isAtBoss(season, 0)).toBe(false)
     }
@@ -273,61 +272,10 @@ describe("isGlowingAt", () => {
   })
 })
 
-describe("progress", () => {
-  it.each(SEASONS)("%s is 0 at the start and 1 at the boss", (_name, season) => {
-    expect(progress(season, 0)).toBe(0)
-    expect(progress(season, season.spaces)).toBe(1)
-  })
-
-  it.each(SEASONS)("%s never leaves [0, 1], however junk the position", (_name, season) => {
-    for (const position of [-100, -1, 0, 1, season.spaces, season.spaces + 50, NaN, Infinity]) {
-      const value = progress(season, position)
-      expect(Number.isFinite(value)).toBe(true)
-      expect(value).toBeGreaterThanOrEqual(0)
-      expect(value).toBeLessThanOrEqual(1)
-    }
-  })
-
-  it.each(SEASONS)("%s increases strictly with each space walked", (_name, season) => {
-    let previous = -1
-    for (let position = 0; position <= season.spaces; position += 1) {
-      const value = progress(season, position)
-      expect(value).toBeGreaterThan(previous)
-      previous = value
-    }
-    expect(previous).toBe(1)
-  })
-
-  it.each(SEASONS)("%s divides the trail into even steps", (_name, season) => {
-    expect(progress(season, 1)).toBeCloseTo(1 / season.spaces, 10)
-    const middle = Math.floor(season.spaces / 2)
-    expect(progress(season, middle)).toBeCloseTo(middle / season.spaces, 10)
-  })
-
-  it("is 1 for a zero-length season, which is already finished", () => {
-    expect(progress(EMPTY_SEASON, 0)).toBe(1)
-    expect(progress(EMPTY_SEASON, 5)).toBe(1)
-  })
-
-  it("is 0 for a null season, which is not started rather than finished", () => {
-    // A missing season must not read as a completed one: a caller sizing a
-    // progress bar off this would otherwise show a journey nobody has begun as
-    // over. isAtBoss agrees, so the two can never contradict each other.
-    expect(progress(null, 0)).toBe(0)
-    expect(isAtBoss(null, 0)).toBe(false)
-  })
-})
-
 describe("cross-function invariants over the real seasons", () => {
   it.each(SEASONS)("%s: spaceAt is null exactly when isAtBoss is true", (_name, season) => {
     for (let position = 0; position <= season.spaces + 2; position += 1) {
       expect(spaceAt(season, position) === null).toBe(isAtBoss(season, position))
-    }
-  })
-
-  it.each(SEASONS)("%s: progress reaches 1 exactly at the boss", (_name, season) => {
-    for (let position = 0; position <= season.spaces + 2; position += 1) {
-      expect(progress(season, position) === 1).toBe(isAtBoss(season, position))
     }
   })
 

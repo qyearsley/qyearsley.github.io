@@ -479,17 +479,16 @@ export function character(characterId, onTrail = false) {
  */
 export function idle(subjectId) {
   switch (subjectId) {
-    // The two that read as breathing: a slug is one muscle, and a sloth is
-    // asleep. Both get the slow scale rather than any travel.
+    // A slug is one muscle and a sloth is asleep. The porcupine shares the slow
+    // scale rather than any travel.
     case "banana-slug":
     case "sloth":
+    case "porcupine":
       return "breathe"
     // The only one that is not standing on the ground so much as hovering over
     // it, and the one whose tail plumes make vertical travel legible.
     case "phoenix":
       return "bob"
-    case "porcupine":
-      return "breathe"
     // She is a column of coils with a hat on top, so she sways rather than
     // rises -- a bob would read as the whole tower hopping.
     case "villain":

@@ -330,12 +330,6 @@ select:focus-visible {
   color: var(--sn-ink);
 }
 
-.character-cost {
-  font-size: 0.85rem;
-  line-height: 1.4;
-  color: var(--sn-ink-muted);
-}
-
 /* ==================== The journey so far ====================
    Under the character cards, so choosing an animal stays the first thing on the
    screen. Everything here is read off the save: which seasons are open, and the
@@ -1364,15 +1358,6 @@ body.is-glowing-question .question-prompt {
   to {
     opacity: 1;
     transform: none;
-  }
-}
-
-/* The global reduced-motion rule collapses the duration but not the delay, so
-   without this the items would still appear one at a time, just instantly --
-   which is the staggered effect it was meant to switch off. */
-@media (prefers-reduced-motion: reduce) {
-  .haul-item {
-    animation-delay: 0ms !important;
   }
 }
 

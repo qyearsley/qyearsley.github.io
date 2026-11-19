@@ -467,25 +467,3 @@ export function rehydrate(savedRun) {
   const settled = { ...restored, phase }
   return { ...settled, question: _makeQuestion(settled) }
 }
-
-/**
- * Items that currently count toward the demand.
- *
- * @param {GameState} state - The current state
- * @returns {number} Items banked this season
- */
-export function countingItems(state) {
-  return Math.max(0, state?.items ?? 0)
-}
-
-/**
- * Items still owed to the snake woman.
- *
- * @param {GameState} state - The current state
- * @returns {number} Items short of the demand, or 0 when it is met
- */
-export function remainingDemand(state) {
-  const season = getSeason(state?.seasonId)
-  if (!season) return 0
-  return Math.max(0, season.demand - countingItems(state))
-}

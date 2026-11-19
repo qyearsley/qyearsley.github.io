@@ -27,11 +27,9 @@ import {
   advance,
   answer,
   chooseCharacter,
-  countingItems,
   createState,
   questionSeconds,
   rehydrate,
-  remainingDemand,
   startSeason,
 } from "../js/GameState.js"
 import { getSeason, maxItems } from "../js/seasons.js"
@@ -562,7 +560,6 @@ describe("reaching the boss", () => {
     const boss = playToBoss(startAs("sloth"))
     expect(boss.items).toBe(maxItems(SPRING))
     expect(boss.items).toBe(SPRING.demand - SPRING.boss.rescue)
-    expect(remainingDemand(boss)).toBe(SPRING.boss.rescue)
     expect(boss.correctCount).toBe(SPRING.spaces)
   })
 })
@@ -935,44 +932,11 @@ describe("rehydrate", () => {
   })
 })
 
-describe("countingItems", () => {
-  it("counts the items banked this season", () => {
-    expect(countingItems({ items: 7 })).toBe(7)
-    expect(countingItems({ items: 0 })).toBe(0)
-  })
-
-  it("never goes negative and tolerates a missing state", () => {
-    expect(countingItems({ items: -5 })).toBe(0)
-    expect(countingItems({})).toBe(0)
-    expect(countingItems(null)).toBe(0)
-    expect(countingItems(undefined)).toBe(0)
-  })
-})
-
-describe("remainingDemand", () => {
-  it("reports what is still owed", () => {
-    expect(remainingDemand({ seasonId: "spring", items: 0 })).toBe(SPRING.demand)
-    expect(remainingDemand({ seasonId: "spring", items: 4 })).toBe(SPRING.demand - 4)
-  })
-
-  it("is zero once the demand is met or beaten", () => {
-    expect(remainingDemand({ seasonId: "spring", items: SPRING.demand })).toBe(0)
-    expect(remainingDemand({ seasonId: "spring", items: SPRING.demand + 5 })).toBe(0)
-  })
-
-  it("is zero when there is no season", () => {
-    expect(remainingDemand({ seasonId: null, items: 0 })).toBe(0)
-    expect(remainingDemand({ seasonId: "monsoon", items: 0 })).toBe(0)
-    expect(remainingDemand(null)).toBe(0)
-  })
-})
-
 describe("a full playthrough", () => {
   it("clears spring by answering every question correctly", () => {
     const { state } = answerRight(playToBoss(startAs("sloth")))
     expect(state.phase).toBe(PHASE.SEASON_WON)
     expect(state.items).toBe(SPRING.demand)
-    expect(remainingDemand(state)).toBe(0)
     expect(state.collected.spring).toBe(state.items)
     expect(state.correctCount).toBe(SPRING.spaces + 1)
   })

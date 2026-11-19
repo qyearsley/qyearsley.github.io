@@ -130,27 +130,3 @@ export function kindAt(season, position) {
 export function isGlowingAt(season, position) {
   return spaceAt(season, position)?.glowing === true
 }
-
-/**
- * How far along the trail the player is, as a fraction.
- *
- * Nothing in `js/` calls this any more: the trail used to reveal a walked path
- * by dash offset, and now the art pack's `layout` gives absolute stop positions
- * instead. Kept because "how far through the season am I" is the obvious thing
- * a progress indicator or a summary screen would want, and it is one line.
- *
- * A missing season reads as 0, not 1. "No season" is not started, not
- * finished -- returning 1 would tell a caller drawing a completion bar that a
- * journey nobody has begun is over. A season that really has zero spaces is a
- * different case and does return 1.
- *
- * @param {import("./seasons.js").Season|null} season - The season being played
- * @param {number} position - Current position
- * @returns {number} 0 at the start, 1 at the boss
- */
-export function progress(season, position) {
-  if (!season) return 0
-  const end = bossPosition(season)
-  if (end === 0) return 1
-  return normalizePosition(season, position) / end
-}

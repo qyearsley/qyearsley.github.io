@@ -334,19 +334,6 @@ describe("renderCharacterCards", () => {
     })
   })
 
-  it("shows the cost line only for a character that has one", () => {
-    ui.renderCharacterCards(() => {})
-    for (const entry of CHARACTERS) {
-      const card = document.querySelector(`[data-character-id="${entry.id}"]`)
-      const cost = card.querySelector(".character-cost")
-      if (entry.costText) {
-        expect(cost.textContent).toBe(entry.costText)
-      } else {
-        expect(cost).toBeNull()
-      }
-    }
-  })
-
   it("marks nothing pressed -- the cards are actions, not toggles", () => {
     // Choosing a card starts the season immediately, so there is no persistent
     // selected state for aria-pressed to describe. It used to be set from

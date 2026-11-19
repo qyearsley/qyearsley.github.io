@@ -549,23 +549,12 @@ function _choices(answer, kind, parts, rng) {
   take(under(fallback), wanted)
 
   let pad = answer + wanted
-  let step = 1
   while (distractors.length < wanted) {
     if (!seen.has(pad) && Number.isInteger(pad) && pad >= 1) {
       seen.add(pad)
       distractors.push(pad)
     }
-    // Above 2^53 the gap between representable numbers exceeds the step, so
-    // `pad + step` can equal `pad` and this loop would never end. Grow the step
-    // until it moves. Unreachable from any real form -- no season's `max` is
-    // remotely this large -- but a hang is not an acceptable failure mode.
-    const next = pad + step
-    if (next === pad) {
-      step *= 2
-      pad = pad * 2 || 1
-    } else {
-      pad = next
-    }
+    pad += 1
   }
   return rng.shuffle([answer, ...distractors])
 }
