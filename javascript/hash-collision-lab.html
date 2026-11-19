@@ -267,20 +267,10 @@
 
       .lab-input {
         flex: 1;
+        width: auto;
+        margin-bottom: 0;
         padding: 0.6rem 0.75rem;
-        /* Monospace to match the hash digests it produces. Stated here rather
-           than inherited: style.css no longer sets it on every input. */
-        font-family: monospace;
-        border: 2px solid var(--color-border-dark);
         border-radius: 6px;
-        background: var(--color-bg-input);
-        color: var(--color-text);
-      }
-
-      .lab-input:focus {
-        outline: none;
-        border-color: var(--color-primary);
-        box-shadow: 0 0 0 3px rgb(49, 130, 206, 0.2);
       }
 
       .lab-btn {
@@ -536,7 +526,7 @@
             <input
               id="input"
               type="text"
-              class="lab-input"
+              class="tool-input lab-input"
               placeholder="Type a string and press Enter"
               autocomplete="off"
             />

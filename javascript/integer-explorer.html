@@ -66,7 +66,7 @@
           : ""
 
         return `
-          <div class="int-result">
+          <div class="result-card">
             <div class="value-display">${state.value}</div>
             ${overflowHtml}
 
@@ -199,21 +199,8 @@
         --bit-value-zero-text: #2a4365;
       }
 
-      .int-input {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        font-family: "SF Mono", Menlo, Consolas, monospace;
-        border: 2px solid var(--color-border-dark);
-        border-radius: 8px;
-        background: var(--color-bg-input);
-        color: var(--color-text);
+      .tool-input {
         margin-bottom: 0.75rem;
-      }
-
-      .int-input:focus {
-        outline: none;
-        border-color: var(--color-primary);
-        box-shadow: 0 0 0 3px rgb(49, 130, 206, 0.2);
       }
 
       .controls-row {
@@ -233,21 +220,6 @@
         flex-wrap: wrap;
         gap: 0.5rem;
         margin-bottom: 1rem;
-      }
-
-      .placeholder {
-        text-align: center;
-        padding: 2rem;
-        font-style: italic;
-        color: var(--color-text-muted);
-      }
-
-      /* Result */
-      .int-result {
-        border: 1px solid var(--color-border);
-        border-radius: 8px;
-        padding: 1.25rem;
-        background: var(--color-bg-card);
       }
 
       .overflow-note {
@@ -319,7 +291,7 @@
           <input
             id="input"
             type="text"
-            class="int-input"
+            class="tool-input"
             value="42"
             autocomplete="off"
             placeholder="42, -1, 0xFF, 0b1010"

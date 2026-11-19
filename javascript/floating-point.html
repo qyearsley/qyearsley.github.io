@@ -89,7 +89,7 @@
         }
 
         return `
-          <div class="float-result">
+          <div class="result-card">
             <div class="value-display">${Object.is(value, -0) ? "-0" : value}</div>
             ${formulaHtml}
 
@@ -250,23 +250,6 @@
         --bit-mant-zero-text: #2a4365;
       }
 
-      .float-input {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        font-family: "SF Mono", Menlo, Consolas, monospace;
-        border: 2px solid var(--color-border-dark);
-        border-radius: 8px;
-        background: var(--color-bg-input);
-        color: var(--color-text);
-        margin-bottom: 0.5rem;
-      }
-
-      .float-input:focus {
-        outline: none;
-        border-color: var(--color-primary);
-        box-shadow: 0 0 0 3px rgb(49, 130, 206, 0.2);
-      }
-
       .examples-row {
         display: flex;
         flex-wrap: wrap;
@@ -289,21 +272,6 @@
 
       .example-btn:hover {
         border-color: var(--color-text-muted);
-      }
-
-      .placeholder {
-        text-align: center;
-        padding: 2rem;
-        font-style: italic;
-        color: var(--color-text-muted);
-      }
-
-      /* Result */
-      .float-result {
-        border: 1px solid var(--color-border);
-        border-radius: 8px;
-        padding: 1.25rem;
-        background: var(--color-bg-card);
       }
 
       .special-value {
@@ -376,7 +344,7 @@
 
         <section class="section">
           <label for="input"><strong>Enter a number or expression:</strong></label>
-          <input id="input" type="text" class="float-input" value="0.1 + 0.2" autocomplete="off" />
+          <input id="input" type="text" class="tool-input" value="0.1 + 0.2" autocomplete="off" />
 
           <div class="examples-row">
             <button class="example-btn" data-text="0.1 + 0.2">0.1 + 0.2</button>

@@ -268,21 +268,8 @@
       }
 
       .explorer-input {
-        width: 100%;
-        padding: 0.75rem 1rem;
         font-size: 1.5rem;
         font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
-        border: 2px solid var(--color-border-dark);
-        border-radius: 8px;
-        background: var(--color-bg-input);
-        color: var(--color-text);
-        margin-bottom: 0.5rem;
-      }
-
-      .explorer-input:focus {
-        outline: none;
-        border-color: var(--color-primary);
-        box-shadow: 0 0 0 3px rgb(49, 130, 206, 0.2);
       }
 
       .examples-row {
@@ -295,13 +282,6 @@
       .example-btn {
         font-size: 1rem;
         font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
-      }
-
-      .placeholder {
-        color: var(--color-text-muted);
-        text-align: center;
-        padding: 2rem;
-        font-style: italic;
       }
 
       .char-result {
@@ -451,7 +431,13 @@
 
         <section class="section">
           <label for="input"><strong>Type or paste characters:</strong></label>
-          <input id="input" type="text" class="explorer-input" value="中" autocomplete="off" />
+          <input
+            id="input"
+            type="text"
+            class="tool-input explorer-input"
+            value="中"
+            autocomplete="off"
+          />
 
           <div class="examples-row">
             <button class="example-btn" data-text="A">A</button>
