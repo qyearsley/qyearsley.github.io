@@ -27,7 +27,7 @@ import { describe, expect, it } from "@jest/globals"
 const GAMES_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "..")
 
 /** Every game directory, which is also every row of the tables below. */
-const GAMES = ["life-garden", "number-garden", "seasons", "times-trail", "turing-tape"]
+const GAMES = ["key-trail", "life-garden", "number-garden", "seasons", "times-trail", "turing-tape"]
 
 /**
  * A game's index.html, parsed into a detached document.

@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, jest, test } from "@jest/globa
 import { readFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
+import "../../../shared/nav.js" // the site shortcuts, which must not see typed letters
 import { init } from "../js/game.js"
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -11,7 +12,10 @@ const byId = (id) => document.getElementById(id)
 const visible = (id) => !byId(id).classList.contains("hidden")
 
 function key(k) {
-  document.dispatchEvent(new KeyboardEvent("keydown", { key: k, bubbles: true, cancelable: true }))
+  // On body, as in a browser: nav.js reads event.target.matches, which document lacks.
+  document.body.dispatchEvent(
+    new KeyboardEvent("keydown", { key: k, bubbles: true, cancelable: true }),
+  )
 }
 
 /** The text of the line on screen. */
@@ -86,6 +90,30 @@ describe("key trail page", () => {
     byId("lesson-list").querySelector("button").click()
     key("Escape")
     expect(visible("menu")).toBe(true)
+  })
+
+  test("typing t in a lesson does not cycle the site theme", () => {
+    window.__themeToggle = jest.fn()
+    key("t") // positive control: on the menu, t is the site shortcut
+    expect(window.__themeToggle).toHaveBeenCalledTimes(1)
+    byId("lesson-list").querySelectorAll("button")[7].click() // lesson 8 teaches t
+    key("t")
+    key("?")
+    expect(window.__themeToggle).toHaveBeenCalledTimes(1)
+    expect(document.querySelector(".keyboard-help-backdrop")).toBeNull()
+    delete window.__themeToggle
+  })
+
+  test("the speed run counts only the characters typed", () => {
+    byId("speed-btn").click()
+    // All ten sentences, so a free character per sentence would show as +2.
+    let typed = 0
+    for (let i = 0; i < 10; i++) {
+      typed += lineText().length
+      typeLine()
+    }
+    jest.advanceTimersByTime(61000)
+    expect(byId("done-big").textContent).toBe(`${Math.round(typed / 5)} words per minute`)
   })
 
   test("the speed run ends after a minute with a best score", () => {

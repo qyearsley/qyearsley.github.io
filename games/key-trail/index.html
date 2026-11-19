@@ -72,5 +72,11 @@
 
     <script type="module" src="js/main.js"></script>
     <script src="/shared/nav.js"></script>
+    <script>
+      if (window.__registerShortcut) {
+        window.__registerShortcut("Enter", "Next lesson")
+        window.__registerShortcut("Escape", "Stop and go back to the lessons")
+      }
+    </script>
   </body>
 </html>

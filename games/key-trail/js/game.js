@@ -29,8 +29,10 @@ export function init(d = document) {
   $("again-btn").addEventListener("click", () => (lesson >= 0 ? startLesson(lesson) : startSpeed()))
   $("next-btn").addEventListener("click", () => startLesson(lesson + 1))
   $("menu-btn").addEventListener("click", showMenu)
-  doc.removeEventListener("keydown", onKey) // init can run again on the same document
-  doc.addEventListener("keydown", onKey)
+  // Capture phase, so a typed letter reaches the game before shared/nav.js,
+  // whose site shortcuts (t cycles the theme, ? opens help) would also fire.
+  doc.removeEventListener("keydown", onKey, true) // init can run again on the same document
+  doc.addEventListener("keydown", onKey, true)
   showMenu()
 }
 
@@ -143,6 +145,7 @@ function onKey(event) {
   if (event.key.length !== 1) return
   // Space would scroll the page, and ' or / open quick find in Firefox.
   event.preventDefault()
+  event.stopPropagation() // while playing, every key is typing, not a shortcut
   if (firstKeyAt === null) {
     firstKeyAt = Date.now()
     if (mode === "speed") timer = setInterval(tick, 250)
@@ -175,7 +178,6 @@ function finishLine() {
     mode = null
     pending = setTimeout(finishLesson, 500) // let the walker reach the house first
   } else {
-    if (mode === "speed") totals.chars += 1 // the space between sentences
     startLine()
   }
   storage.saveGameState(save)
