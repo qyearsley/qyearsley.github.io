@@ -94,7 +94,7 @@ describe("game", () => {
     expect(left).toBe(right)
   })
 
-  test("saving drops the retired tables setting", () => {
+  test("saving drops the retired tables and sound settings", () => {
     bootWithSave({ settings: { tables: [7], sound: "off" } })
     click("settings-button")
     const select = byId("session-length-select")
@@ -102,7 +102,6 @@ describe("game", () => {
     select.dispatchEvent(new Event("change", { bubbles: true }))
     expect(JSON.parse(localStorage.getItem(STORAGE.KEY)).settings).toEqual({
       sessionLength: 20,
-      sound: "off",
     })
   })
 

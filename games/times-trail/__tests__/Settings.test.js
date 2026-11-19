@@ -1,5 +1,5 @@
 /**
- * Tests for Settings -- the session length and the sound switch.
+ * Tests for Settings -- the session length.
  *
  * The constructor's input is treated as hostile throughout, because it comes
  * straight out of `localStorage`: session lengths that were never offered, and
@@ -25,12 +25,13 @@ const RETIRED_KEYS = [
   "inputMode",
   "scaffolds",
   "reducedMotion",
+  "sound",
 ]
 
 describe("Settings", () => {
   describe("defaults", () => {
-    test("matches the two documented defaults exactly", () => {
-      expect(Settings.defaults()).toEqual({ sessionLength: SESSION.DEFAULT_LENGTH, sound: "on" })
+    test("matches the documented defaults exactly", () => {
+      expect(Settings.defaults()).toEqual({ sessionLength: SESSION.DEFAULT_LENGTH })
     })
 
     test("returns a fresh object each call", () => {
@@ -52,16 +53,13 @@ describe("Settings", () => {
       }
     })
 
-    test("reads both keys off a well-formed save", () => {
-      expect(new Settings({ sessionLength: 30, sound: "off" }).toJSON()).toEqual({
-        sessionLength: 30,
-        sound: "off",
-      })
+    test("reads the session length off a well-formed save", () => {
+      expect(new Settings({ sessionLength: 30 }).toJSON()).toEqual({ sessionLength: 30 })
     })
 
     test("ignores unknown keys", () => {
-      const settings = new Settings({ sound: "off", nope: 1, theme: "dark" })
-      expect(settings.toJSON()).toEqual({ sessionLength: SESSION.DEFAULT_LENGTH, sound: "off" })
+      const settings = new Settings({ nope: 1, theme: "dark" })
+      expect(settings.toJSON()).toEqual({ sessionLength: SESSION.DEFAULT_LENGTH })
     })
 
     test("an unoffered session length falls back to the default", () => {
@@ -76,15 +74,10 @@ describe("Settings", () => {
       }
     })
 
-    test("one bad key does not discard the good ones", () => {
-      const settings = new Settings({ sessionLength: 20, sound: "quiet" })
-      expect(settings.toJSON()).toEqual({ sessionLength: 20, sound: "on" })
-    })
-
     test("never mutates the raw object it was given", () => {
-      const raw = { sessionLength: 30, sound: "off", tables: [9, 2] }
+      const raw = { sessionLength: 30, tables: [9, 2] }
       new Settings(raw)
-      expect(raw).toEqual({ sessionLength: 30, sound: "off", tables: [9, 2] })
+      expect(raw).toEqual({ sessionLength: 30, tables: [9, 2] })
     })
   })
 
@@ -96,15 +89,13 @@ describe("Settings", () => {
       for (const key of RETIRED_KEYS) raw[key] = raw[key] ?? "x"
       expect(() => new Settings(raw)).not.toThrow()
       const json = new Settings(raw).toJSON()
-      expect(json).toEqual({ sessionLength: 20, sound: "off" })
+      expect(json).toEqual({ sessionLength: 20 })
     })
   })
 
   describe("isValidKey", () => {
-    test("accepts the two real keys", () => {
-      for (const key of ["sessionLength", "sound"]) {
-        expect(Settings.isValidKey(key)).toBe(true)
-      }
+    test("accepts the real key", () => {
+      expect(Settings.isValidKey("sessionLength")).toBe(true)
     })
 
     test("rejects every retired key", () => {
@@ -114,7 +105,7 @@ describe("Settings", () => {
     })
 
     test("rejects unknown and non-string keys", () => {
-      for (const key of ["", "Sound", "nope", null, undefined, 0, [], {}]) {
+      for (const key of ["", "SessionLength", "nope", null, undefined, 0, [], {}]) {
         expect(Settings.isValidKey(key)).toBe(false)
       }
     })
@@ -136,14 +127,6 @@ describe("Settings", () => {
       }
     })
 
-    test("sound accepts on and off only", () => {
-      expect(Settings.validate("sound", "on")).toBe(true)
-      expect(Settings.validate("sound", "off")).toBe(true)
-      for (const value of ["loud", "ON", "", true, false, 0, null, undefined]) {
-        expect(Settings.validate("sound", value)).toBe(false)
-      }
-    })
-
     test("any other key is invalid whatever the value", () => {
       for (const key of [...RETIRED_KEYS, "nope"]) {
         expect(Settings.validate(key, "on")).toBe(false)
@@ -160,20 +143,6 @@ describe("Settings", () => {
   })
 
   describe("update", () => {
-    test("sets sound and reflects it in toJSON", () => {
-      const settings = new Settings()
-      expect(settings.update("sound", "off")).toBe(true)
-      expect(settings.toJSON().sound).toBe("off")
-      expect(settings.update("sound", "on")).toBe(true)
-      expect(settings.toJSON().sound).toBe("on")
-    })
-
-    test("rejects an invalid sound and changes nothing", () => {
-      const settings = new Settings()
-      expect(settings.update("sound", "loud")).toBe(false)
-      expect(settings.toJSON().sound).toBe("on")
-    })
-
     test("rejects every retired and unknown key", () => {
       const settings = new Settings()
       const before = settings.toJSON()
@@ -210,31 +179,24 @@ describe("Settings", () => {
         expect(settings.sessionLength).toBe(20)
       }
     })
-
-    test("leaves sound alone", () => {
-      const settings = new Settings({ sound: "off" })
-      settings.setSessionLength(30)
-      expect(settings.toJSON().sound).toBe("off")
-    })
   })
 
   describe("toJSON", () => {
-    test("has exactly the two documented keys", () => {
-      const json = new Settings({ sessionLength: 30, sound: "off" }).toJSON()
-      expect(Object.keys(json).sort()).toEqual(["sessionLength", "sound"])
+    test("has exactly the documented key", () => {
+      const json = new Settings({ sessionLength: 30 }).toJSON()
+      expect(Object.keys(json)).toEqual(["sessionLength"])
     })
 
     test("is a copy: mutating it does not reach the instance", () => {
       const settings = new Settings()
       const json = settings.toJSON()
       json.sessionLength = 30
-      json.sound = "off"
       expect(settings.toJSON()).toEqual(Settings.defaults())
     })
 
     test("round-trips through the constructor and JSON.stringify", () => {
       for (const sessionLength of SESSION.LENGTH_OPTIONS) {
-        const original = new Settings({ sessionLength, sound: "off" })
+        const original = new Settings({ sessionLength })
         const json = JSON.parse(JSON.stringify(original.toJSON()))
         expect(new Settings(json).toJSON()).toEqual(original.toJSON())
       }
