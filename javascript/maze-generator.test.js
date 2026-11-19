@@ -6,6 +6,44 @@ const SIZES = [
   [5, 8],
 ]
 
+/** Runs the generator to completion and returns the finished maze. */
+function generateMazeInstant(width, height, seed) {
+  const gen = mg.generateMaze(width, height, mg.createRng(seed))
+  let result = gen.next()
+  while (!result.done) result = gen.next()
+  return result.value
+}
+
+/** Cells reachable from the top-left cell through open walls. */
+function countReachableCells(grid, width, height) {
+  const seen = new Set(["0,0"])
+  const queue = [{ x: 0, y: 0 }]
+  while (queue.length > 0) {
+    const { x, y } = queue.shift()
+    for (const dir of mg.DIRECTIONS) {
+      const nx = x + dir.dx
+      const ny = y + dir.dy
+      if (grid[y][x][dir.name] || nx < 0 || ny < 0 || nx >= width || ny >= height) continue
+      if (seen.has(`${nx},${ny}`)) continue
+      seen.add(`${nx},${ny}`)
+      queue.push({ x: nx, y: ny })
+    }
+  }
+  return seen.size
+}
+
+/** Open passages, counting each cell's east and south walls so none is counted twice. */
+function countPassages(grid, width, height) {
+  let count = 0
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      if (!grid[y][x].E && x < width - 1) count += 1
+      if (!grid[y][x].S && y < height - 1) count += 1
+    }
+  }
+  return count
+}
+
 describe("createRng", () => {
   test("a digit string is the same seed as its number, so ?seed= links reload the same maze", () => {
     const fromNumber = mg.createRng(12345)
@@ -55,17 +93,17 @@ describe("createRng", () => {
 
 describe("generateMazeInstant: perfect maze invariants", () => {
   test.each(SIZES)("every cell is reachable (%p x %p)", (width, height) => {
-    const { grid } = mg.generateMazeInstant(width, height, 1)
-    expect(mg.countReachableCells(grid, width, height)).toBe(width * height)
+    const { grid } = generateMazeInstant(width, height, 1)
+    expect(countReachableCells(grid, width, height)).toBe(width * height)
   })
 
   test.each(SIZES)("exactly cells - 1 passages (%p x %p)", (width, height) => {
-    const { grid } = mg.generateMazeInstant(width, height, 1)
-    expect(mg.countPassages(grid, width, height)).toBe(width * height - 1)
+    const { grid } = generateMazeInstant(width, height, 1)
+    expect(countPassages(grid, width, height)).toBe(width * height - 1)
   })
 
   test.each(SIZES)("walls are symmetric between neighbors (%p x %p)", (width, height) => {
-    const { grid } = mg.generateMazeInstant(width, height, 2)
+    const { grid } = generateMazeInstant(width, height, 2)
     for (let y = 0; y < height; y += 1) {
       for (let x = 0; x < width; x += 1) {
         const cell = grid[y][x]
@@ -76,7 +114,7 @@ describe("generateMazeInstant: perfect maze invariants", () => {
   })
 
   test.each(SIZES)("every cell is visited (%p x %p)", (width, height) => {
-    const { grid } = mg.generateMazeInstant(width, height, 3)
+    const { grid } = generateMazeInstant(width, height, 3)
     for (const row of grid) {
       for (const cell of row) {
         expect(cell.visited).toBe(true)
@@ -87,21 +125,21 @@ describe("generateMazeInstant: perfect maze invariants", () => {
 
 describe("generateMazeInstant: determinism", () => {
   test("the same seed gives the same maze", () => {
-    const a = mg.generateMazeInstant(10, 10, 12345)
-    const b = mg.generateMazeInstant(10, 10, 12345)
+    const a = generateMazeInstant(10, 10, 12345)
+    const b = generateMazeInstant(10, 10, 12345)
     expect(a).toEqual(b)
   })
 
   test("different seeds give different mazes", () => {
-    const a = mg.generateMazeInstant(10, 10, 1)
-    const b = mg.generateMazeInstant(10, 10, 2)
+    const a = generateMazeInstant(10, 10, 1)
+    const b = generateMazeInstant(10, 10, 2)
     expect(a).not.toEqual(b)
   })
 
   test("a 1x1 maze is a single visited cell with no passages", () => {
-    const { grid } = mg.generateMazeInstant(1, 1, 1)
-    expect(mg.countReachableCells(grid, 1, 1)).toBe(1)
-    expect(mg.countPassages(grid, 1, 1)).toBe(0)
+    const { grid } = generateMazeInstant(1, 1, 1)
+    expect(countReachableCells(grid, 1, 1)).toBe(1)
+    expect(countPassages(grid, 1, 1)).toBe(0)
   })
 })
 
@@ -119,7 +157,7 @@ describe("generateMaze: step sequence", () => {
       stepCount += 1
     }
 
-    const instant = mg.generateMazeInstant(width, height, seed)
+    const instant = generateMazeInstant(width, height, seed)
     expect(result.value).toEqual(instant)
     // A carve or a backtrack happens every step, so a maze with more than one
     // cell takes more than one step to finish.
@@ -158,7 +196,7 @@ describe("solveMaze", () => {
   test.each(SIZES)(
     "the path starts at the top-left and ends at the bottom-right (%p x %p)",
     (width, height) => {
-      const { grid } = mg.generateMazeInstant(width, height, 4)
+      const { grid } = generateMazeInstant(width, height, 4)
       const path = mg.solveMaze(grid, width, height)
       expect(path[0]).toEqual({ x: 0, y: 0 })
       expect(path[path.length - 1]).toEqual({ x: width - 1, y: height - 1 })
@@ -168,7 +206,7 @@ describe("solveMaze", () => {
   test.each(SIZES)(
     "the path is connected: each step moves to an adjacent cell through an open wall (%p x %p)",
     (width, height) => {
-      const { grid } = mg.generateMazeInstant(width, height, 5)
+      const { grid } = generateMazeInstant(width, height, 5)
       const path = mg.solveMaze(grid, width, height)
       for (let i = 1; i < path.length; i += 1) {
         const prev = path[i - 1]
@@ -185,14 +223,14 @@ describe("solveMaze", () => {
   )
 
   test("the path visits no cell twice", () => {
-    const { grid } = mg.generateMazeInstant(10, 10, 6)
+    const { grid } = generateMazeInstant(10, 10, 6)
     const path = mg.solveMaze(grid, 10, 10)
     const seen = new Set(path.map((c) => `${c.x},${c.y}`))
     expect(seen.size).toBe(path.length)
   })
 
   test("a single-cell maze solves to a one-cell path", () => {
-    const { grid } = mg.generateMazeInstant(1, 1, 7)
+    const { grid } = generateMazeInstant(1, 1, 7)
     const path = mg.solveMaze(grid, 1, 1)
     expect(path).toEqual([{ x: 0, y: 0 }])
   })
@@ -203,14 +241,14 @@ describe("countPassages / countReachableCells on a hand-built grid", () => {
     const grid = mg.makeGrid(2, 1)
     grid[0][0].E = false
     grid[0][1].W = false
-    expect(mg.countReachableCells(grid, 2, 1)).toBe(2)
-    expect(mg.countPassages(grid, 2, 1)).toBe(1)
+    expect(countReachableCells(grid, 2, 1)).toBe(2)
+    expect(countPassages(grid, 2, 1)).toBe(1)
   })
 
   test("a 2x1 grid with all walls up is not fully connected", () => {
     const grid = mg.makeGrid(2, 1)
-    expect(mg.countReachableCells(grid, 2, 1)).toBe(1)
-    expect(mg.countPassages(grid, 2, 1)).toBe(0)
+    expect(countReachableCells(grid, 2, 1)).toBe(1)
+    expect(countPassages(grid, 2, 1)).toBe(0)
   })
 })
 

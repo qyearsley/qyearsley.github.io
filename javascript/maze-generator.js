@@ -10,9 +10,9 @@
  * which hands back the start cell before anything is carved, each `next()`
  * call performs exactly one carve or one backtrack pop and yields a snapshot
  * of the grid, the current cell, and the backtracking stack. That is what
- * lets the page animate carving one step at a time and lets
- * `generateMazeInstant` and the tests drain the same sequence to completion
- * in one call -- there is only one code path for "how the maze is built."
+ * lets the page animate carving one step at a time, or drain the sequence to
+ * completion in one call for "Instant" mode -- there is only one code path
+ * for "how the maze is built."
  *
  * Randomness goes through `createRng`, a small seeded PRNG (mulberry32), so a
  * seed reproduces the exact same maze -- for tests, and for a `?seed=` link.
@@ -184,9 +184,8 @@ function passableNeighbors(grid, x, y, width, height) {
  * - `current` -- the cell generation is standing on, or `null` once finished
  *
  * When the generator is exhausted, its `{ done: true, value }` carries the
- * finished maze as `{ width, height, grid }` -- the same shape
- * `generateMazeInstant` returns, so both paths produce an identical result
- * for a given seed.
+ * finished maze as `{ width, height, grid }`. A given seed always
+ * produces the same maze.
  *
  * @param {number} width
  * @param {number} height
@@ -222,23 +221,6 @@ function* generateMaze(width, height, rng) {
   }
 
   return { width, height, grid }
-}
-
-/**
- * Runs `generateMaze` to completion in one call, for "Instant" mode and for
- * tests that only care about the finished maze.
- *
- * @param {number} width
- * @param {number} height
- * @param {number|string} [seed]
- * @returns {{width: number, height: number, grid: Array<Array<object>>}}
- */
-function generateMazeInstant(width, height, seed) {
-  const rng = createRng(seed)
-  const gen = generateMaze(width, height, rng)
-  let result = gen.next()
-  while (!result.done) result = gen.next()
-  return result.value
 }
 
 /**
@@ -285,63 +267,4 @@ function solveMaze(grid, width, height) {
   return path
 }
 
-/**
- * The number of cells reachable from the top-left cell, following passages
- * only. Equal to `width * height` exactly when the maze is fully connected.
- *
- * @param {Array<Array<object>>} grid
- * @param {number} width
- * @param {number} height
- * @returns {number}
- */
-function countReachableCells(grid, width, height) {
-  const key = (x, y) => `${x},${y}`
-  const visited = new Set([key(0, 0)])
-  const queue = [{ x: 0, y: 0 }]
-  while (queue.length > 0) {
-    const cur = queue.shift()
-    for (const next of passableNeighbors(grid, cur.x, cur.y, width, height)) {
-      const k = key(next.x, next.y)
-      if (visited.has(k)) continue
-      visited.add(k)
-      queue.push(next)
-    }
-  }
-  return visited.size
-}
-
-/**
- * The number of open passages in the maze. Counting only the east and south
- * wall of every cell (rather than all four) avoids counting the same
- * passage twice from both sides. A perfect maze -- a spanning tree over
- * `width * height` cells -- has exactly `width * height - 1` of these.
- *
- * @param {Array<Array<object>>} grid
- * @param {number} width
- * @param {number} height
- * @returns {number}
- */
-function countPassages(grid, width, height) {
-  let count = 0
-  for (let y = 0; y < height; y += 1) {
-    for (let x = 0; x < width; x += 1) {
-      const cell = grid[y][x]
-      if (!cell.E && x < width - 1) count += 1
-      if (!cell.S && y < height - 1) count += 1
-    }
-  }
-  return count
-}
-
-export {
-  SIZE_PRESETS,
-  DIRECTIONS,
-  createRng,
-  makeGrid,
-  cloneGrid,
-  generateMaze,
-  generateMazeInstant,
-  solveMaze,
-  countReachableCells,
-  countPassages,
-}
+export { SIZE_PRESETS, DIRECTIONS, createRng, makeGrid, cloneGrid, generateMaze, solveMaze }
