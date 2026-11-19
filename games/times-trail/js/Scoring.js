@@ -11,9 +11,8 @@
  *    thing that needs practising. Every answer is typed, so each one also earns
  *    the flat keypad bonus (5) before the streak multiplier applies.
  *
- * 2. **Nothing is ever subtracted.** `starsForWrong()` returns `0`, not a
- *    penalty, and gems are milestone trophies that are only ever added (§ 0,
- *    decision 5 -- they are never spent). Losing visible progress is where
+ * 2. **Nothing is ever subtracted.** A wrong answer earns no stars but costs
+ *    none, and gems are milestone trophies that are only ever added. Losing visible progress is where
  *    kids quit, so no path through this module can lower a total. The streak
  *    multiplier is the only thing a miss costs, and that lives in the caller's
  *    session streak, not in a stored balance.
@@ -253,15 +252,6 @@ export class Scoring {
     const tier = this.tierForStrength(strength)
     const base = STARS.BASE + STARS.TIER_BONUS[tier] + STARS.KEYPAD_BONUS
     return Math.max(0, Math.round(base * this.streakMultiplier(streak)))
-  }
-
-  /**
-   * Stars for a wrong answer. Always `0` -- no currency is ever subtracted in
-   * this game, so a miss costs the streak multiplier and nothing else.
-   * @returns {number} 0
-   */
-  starsForWrong() {
-    return 0
   }
 
   /**

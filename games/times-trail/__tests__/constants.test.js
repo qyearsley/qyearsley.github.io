@@ -9,7 +9,6 @@ import {
   FLAME_STAGES,
   GEM_MILESTONES,
   KEYPAD,
-  MATH,
   MINUTE_MS,
   OPERAND_MAX,
   OPERAND_MIN,
@@ -431,17 +430,6 @@ describe("STARS", () => {
       expect(isNonDecreasing(multipliers)).toBe(true)
     })
 
-    test("the last multiplier is MAX_MULTIPLIER", () => {
-      const last = STARS.STREAK_MULTIPLIERS[STARS.STREAK_MULTIPLIERS.length - 1]
-      expect(last.multiplier).toBe(STARS.MAX_MULTIPLIER)
-    })
-
-    test("no tier exceeds MAX_MULTIPLIER", () => {
-      for (const tier of STARS.STREAK_MULTIPLIERS) {
-        expect(tier.multiplier).toBeLessThanOrEqual(STARS.MAX_MULTIPLIER)
-      }
-    })
-
     test("the top tier is reachable inside a single session", () => {
       const last = STARS.STREAK_MULTIPLIERS[STARS.STREAK_MULTIPLIERS.length - 1]
       expect(last.minStreak).toBeLessThanOrEqual(Math.min(...SESSION.LENGTH_OPTIONS))
@@ -708,14 +696,6 @@ describe("KEYPAD", () => {
     test("is a non-empty placeholder that cannot be mistaken for a digit", () => {
       expect(KEYPAD.EMPTY_DISPLAY.length).toBeGreaterThan(0)
       expect(KEYPAD.EMPTY_DISPLAY).not.toMatch(/[0-9]/)
-    })
-  })
-})
-
-describe("MATH", () => {
-  describe("PERCENT_MULTIPLIER", () => {
-    test("is 100", () => {
-      expect(MATH.PERCENT_MULTIPLIER).toBe(100)
     })
   })
 })

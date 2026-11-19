@@ -86,7 +86,6 @@ import {
   OPERAND_MIN,
   RESPONSE_TIME,
   TIMING,
-  TOKEN_EMOJI,
   TRAIL,
 } from "./constants.js"
 import { FACTS, getFact, getFactFor, getTrail } from "./facts.js"
@@ -552,7 +551,7 @@ class TimesTrail {
       }
     })
 
-    this.ui.renderTrail({ trails, tokenEmoji: TOKEN_EMOJI })
+    this.ui.renderTrail({ trails })
   }
 
   /**

@@ -337,7 +337,6 @@ describe("Keypad", () => {
   describe("setEnabled", () => {
     test("disables every key and makes taps inert", () => {
       keypad.setEnabled(false)
-      expect(keypad.isEnabled).toBe(false)
       for (const button of container.querySelectorAll(".keypad-key")) {
         expect(button.disabled).toBe(true)
         expect(button.classList.contains("disabled")).toBe(true)
@@ -362,7 +361,6 @@ describe("Keypad", () => {
     test("re-enabling restores the keys and the taps", () => {
       keypad.setEnabled(false)
       keypad.setEnabled(true)
-      expect(keypad.isEnabled).toBe(true)
       for (const button of container.querySelectorAll(".keypad-key")) {
         expect(button.disabled).toBe(false)
         expect(button.classList.contains("disabled")).toBe(false)

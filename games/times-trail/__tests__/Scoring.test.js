@@ -138,10 +138,11 @@ describe("Scoring", () => {
       expect(scoringOnDay().streakMultiplier(undefined)).toBe(1)
     })
 
-    test("never exceeds STARS.MAX_MULTIPLIER", () => {
+    test("never exceeds the top tier of STARS.STREAK_MULTIPLIERS", () => {
       const scoring = scoringOnDay()
+      const max = Math.max(...STARS.STREAK_MULTIPLIERS.map((tier) => tier.multiplier))
       for (let streak = 0; streak <= 60; streak += 1) {
-        expect(scoring.streakMultiplier(streak)).toBeLessThanOrEqual(STARS.MAX_MULTIPLIER)
+        expect(scoring.streakMultiplier(streak)).toBeLessThanOrEqual(max)
       }
     })
 
@@ -275,27 +276,6 @@ describe("Scoring", () => {
       const before = clone(input)
       scoringOnDay().starsForCorrect(input)
       expect(input).toEqual(before)
-    })
-  })
-
-  describe("starsForWrong", () => {
-    test("returns 0", () => {
-      expect(scoringOnDay().starsForWrong()).toBe(0)
-    })
-
-    test("a wrong answer never reduces a running total", () => {
-      const scoring = scoringOnDay()
-      let total = 120
-      for (let i = 0; i < 5; i += 1) {
-        const next = total + scoring.starsForWrong()
-        expect(next).toBeGreaterThanOrEqual(total)
-        total = next
-      }
-      expect(total).toBe(120)
-    })
-
-    test("is never negative", () => {
-      expect(scoringOnDay().starsForWrong()).toBeGreaterThanOrEqual(0)
     })
   })
 

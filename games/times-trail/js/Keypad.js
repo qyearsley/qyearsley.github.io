@@ -166,15 +166,6 @@ export class Keypad {
   }
 
   /**
-   * Whether presses are currently accepted.
-   *
-   * @returns {boolean} True when the pad is live.
-   */
-  get isEnabled() {
-    return this._enabled
-  }
-
-  /**
    * Builds the key grid, replacing whatever was in the container. Idempotent --
    * calling it twice yields the same twelve keys, not twenty-four. The 3x4
    * layout is CSS (`grid-template-columns: repeat(3, 1fr)`), not markup.

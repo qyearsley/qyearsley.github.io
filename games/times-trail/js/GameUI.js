@@ -203,7 +203,6 @@ const FACT_ORDER = new Map(FACT_IDS.map((id, index) => [id, index]))
  * Every trail, as the hub draws them.
  * @typedef {Object} TrailView
  * @property {TrailCardView[]} trails - Trails in hub order.
- * @property {string} tokenEmoji - Always `TOKEN_EMOJI`; no cosmetics in Phase 1.
  */
 
 /**

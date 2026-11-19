@@ -909,24 +909,4 @@ describe("MasteryStore", () => {
       expect(store.masteredCount()).toBe(1)
     })
   })
-
-  describe("dueIds", () => {
-    test("returns only the due subset, preserving input order", () => {
-      const store = new MasteryStore(
-        {
-          "2x2": recordAt(5, { dueAt: NOW + DAY_MS }),
-          "2x3": recordAt(2, { dueAt: NOW }),
-          "3x3": recordAt(4, { dueAt: NOW - 1 }),
-        },
-        fixedNow,
-      )
-      expect(store.dueIds(["3x3", "2x2", "2x3", "9x9"])).toEqual(["3x3", "2x3", "9x9"])
-    })
-
-    test("returns an empty array for non-array input", () => {
-      const store = new MasteryStore({}, fixedNow)
-      expect(store.dueIds(null)).toEqual([])
-      expect(store.dueIds("6x7")).toEqual([])
-    })
-  })
 })

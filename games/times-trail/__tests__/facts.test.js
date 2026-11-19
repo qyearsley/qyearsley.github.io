@@ -4,7 +4,6 @@ import {
   FACT_IDS,
   canonicalize,
   factId,
-  parseFactId,
   getFact,
   getFactFor,
   factIdsForTrail,
@@ -177,69 +176,6 @@ describe("facts", () => {
     test("throws RangeError for bad operands", () => {
       expect(() => factId(1, 5)).toThrow(RangeError)
       expect(() => factId(10, 3)).toThrow(RangeError)
-    })
-  })
-
-  describe("parseFactId", () => {
-    test("parses a canonical id", () => {
-      expect(parseFactId("7x8")).toEqual({ a: 7, b: 8 })
-      expect(parseFactId("2x2")).toEqual({ a: 2, b: 2 })
-      expect(parseFactId("9x9")).toEqual({ a: 9, b: 9 })
-    })
-
-    test("rejects a non-canonical order", () => {
-      expect(parseFactId("8x7")).toBeNull()
-      expect(parseFactId("9x2")).toBeNull()
-    })
-
-    test("rejects out-of-range operands", () => {
-      expect(parseFactId("1x5")).toBeNull()
-      expect(parseFactId("10x3")).toBeNull()
-      expect(parseFactId("10x2")).toBeNull()
-      expect(parseFactId("0x0")).toBeNull()
-      expect(parseFactId("2x10")).toBeNull()
-    })
-
-    test("rejects wrong separators and casing", () => {
-      expect(parseFactId("7X8")).toBeNull()
-      expect(parseFactId("7*8")).toBeNull()
-      expect(parseFactId("7-8")).toBeNull()
-      expect(parseFactId("78")).toBeNull()
-    })
-
-    test("rejects malformed strings", () => {
-      expect(parseFactId("")).toBeNull()
-      expect(parseFactId("7x")).toBeNull()
-      expect(parseFactId("x8")).toBeNull()
-      expect(parseFactId("axb")).toBeNull()
-      expect(parseFactId("7x8x9")).toBeNull()
-      expect(parseFactId(" 7x8")).toBeNull()
-      expect(parseFactId("7x8 ")).toBeNull()
-      expect(parseFactId("07x8")).toBeNull()
-    })
-
-    test("rejects non-strings without throwing", () => {
-      expect(parseFactId(null)).toBeNull()
-      expect(parseFactId(undefined)).toBeNull()
-      expect(parseFactId(78)).toBeNull()
-      expect(parseFactId({})).toBeNull()
-      expect(parseFactId([])).toBeNull()
-      expect(parseFactId(["7x8"])).toBeNull()
-    })
-
-    test("never throws for any of the rejected inputs", () => {
-      const bad = ["", "7x", "axb", "1x5", "10x3", "7X8", null, undefined, 78, {}, NaN]
-      for (const input of bad) {
-        expect(() => parseFactId(input)).not.toThrow()
-      }
-    })
-
-    test("round-trips every id in FACT_IDS", () => {
-      for (const id of FACT_IDS) {
-        const parsed = parseFactId(id)
-        expect(parsed).not.toBeNull()
-        expect(factId(parsed.a, parsed.b)).toBe(id)
-      }
     })
   })
 

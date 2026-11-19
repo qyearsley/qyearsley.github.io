@@ -247,7 +247,6 @@ export const STARS = Object.freeze({
     Object.freeze({ minStreak: 6, multiplier: 2 }),
     Object.freeze({ minStreak: 10, multiplier: 3 }),
   ]),
-  MAX_MULTIPLIER: 3,
 })
 
 /**
@@ -408,6 +407,3 @@ export const KEYPAD = Object.freeze({
   ENTER_KEY: "enter",
   EMPTY_DISPLAY: "?",
 })
-
-/** Small arithmetic helpers that would otherwise be bare magic numbers. */
-export const MATH = Object.freeze({ PERCENT_MULTIPLIER: 100 })

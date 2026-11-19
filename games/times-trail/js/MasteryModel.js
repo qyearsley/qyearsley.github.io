@@ -541,15 +541,4 @@ export class MasteryStore {
   masteredCount() {
     return countMastered(this.records, this._now())
   }
-
-  /**
-   * Filter fact ids down to the ones due for practice, preserving input order.
-   * @param {string[]} factIds - Candidate fact ids
-   * @returns {string[]} The due subset; [] for non-array input
-   */
-  dueIds(factIds) {
-    if (!Array.isArray(factIds)) return []
-    const now = this._now()
-    return factIds.filter((factId) => isDue(this.get(factId), now))
-  }
 }

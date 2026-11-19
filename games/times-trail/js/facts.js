@@ -15,8 +15,7 @@
  * Error Handling: two deliberately different styles, because the callers differ.
  * Functions taking operands (`canonicalize`, `factId`, `getFactFor`) throw
  * `RangeError` -- a bad operand is a programming mistake and should be loud.
- * Functions taking an id (`parseFactId`, `getFact`,
- * `factIdsForTrail`, `getTrail`) never throw, because their
+ * Functions taking an id (`getFact`, `factIdsForTrail`, `getTrail`) never throw, because their
  * input can come from persisted settings or a save file: they return `null` or
  * `[]`.
  */
@@ -55,7 +54,6 @@ import { OPERAND_MIN, OPERAND_MAX, PATTERN_FREE_IDS, TRAILS } from "./constants.
  * @private
  * @type {RegExp}
  */
-const _FACT_ID_PATTERN = /^([2-9])x([2-9])$/
 
 /**
  * True when `value` is an integer within the fact set's operand bounds.
@@ -142,29 +140,6 @@ export function canonicalize(x, y) {
 export function factId(x, y) {
   const { a, b } = canonicalize(x, y)
   return `${a}x${b}`
-}
-
-/**
- * Parse a canonical fact id back into operands. Never throws -- ids can come
- * from a save file or a URL, so every rejection is a `null` return.
- *
- * Accepts only the exact canonical form: a single digit 2-9, a lowercase "x",
- * and a single digit 2-9, with the left digit less than or equal to the right.
- * Everything else is `null`, with no trimming, no case folding, and no numeric
- * coercion. So: `"7x8"` parses; `"8x7"` (non-canonical order), `"1x5"` and
- * `"10x3"` (out of range), `"7X8"` (uppercase), `"7*8"`, `"7x"`, `"axb"`, `""`,
- * `" 7x8 "`, `null`, `undefined` and any non-string all return `null`.
- * @param {unknown} id - Candidate fact id
- * @returns {Operands|null} `{a, b}` when `id` is a canonical fact id, else `null`
- */
-export function parseFactId(id) {
-  if (typeof id !== "string") return null
-  const match = _FACT_ID_PATTERN.exec(id)
-  if (!match) return null
-  const a = Number(match[1])
-  const b = Number(match[2])
-  if (a > b) return null
-  return { a, b }
 }
 
 /**
