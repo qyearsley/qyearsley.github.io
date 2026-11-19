@@ -44,8 +44,9 @@ Each script reads the `.txt` data files sitting next to it.
 `character-converter.html`. It has unit tests in `tradsimp.test.js`, run by
 `npm test` from the repository root.
 
-`url-state.js` holds pure helpers (`resolveTextParam`, `resolveEnumParam`) for
-reading a query parameter with a silent fallback. Tests live in
+`url-state.js` holds helpers (`resolveTextParam`, `resolveEnumParam`) for
+reading a query parameter with a silent fallback, plus `syncTableFilterParam`,
+which keeps the table filter box in `?q=`. Tests live in
 `url-state.test.js`.
 
 ## URL parameters

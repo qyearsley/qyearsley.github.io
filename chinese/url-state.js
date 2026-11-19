@@ -32,3 +32,34 @@ export function resolveTextParam(rawValue, fallback) {
 export function resolveEnumParam(rawValue, validValues, fallback) {
   return rawValue !== null && validValues.includes(rawValue) ? rawValue : fallback
 }
+
+/**
+ * Keeps the `#table-filter` box's text in the `?q=` query param. Call it once
+ * the DOM is ready. shared/table-filter.js owns the filtering itself (it
+ * listens for the box's "input" event); this only reads and writes the box.
+ */
+export function syncTableFilterParam() {
+  const input = document.getElementById("table-filter")
+  if (!input) return
+
+  const initial = resolveTextParam(new URLSearchParams(window.location.search).get("q"), "")
+  if (initial) {
+    input.value = initial
+    input.dispatchEvent(new Event("input"))
+  }
+
+  input.addEventListener("input", () => {
+    const params = new URLSearchParams(window.location.search)
+    if (input.value) {
+      params.set("q", input.value)
+    } else {
+      params.delete("q")
+    }
+    const query = params.toString()
+    window.history.replaceState(
+      null,
+      "",
+      window.location.pathname + (query ? `?${query}` : "") + window.location.hash,
+    )
+  })
+}
