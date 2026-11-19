@@ -19,7 +19,7 @@
 
 "use strict"
 
-import { tokenize, Parser, areEqual, isNegation, isSimple } from "./parser.js"
+import { areEqual, isNegation, isSimple } from "./parser.js"
 import { formatAST } from "./formatter.js"
 
 /**
@@ -472,34 +472,12 @@ function detectContradiction(parsed, addConclusion) {
  * 2. Check new conclusion against other new conclusions (prevent duplicates in this batch)
  * 3. Result: no redundant work in future inference runs
  *
- * Why async?
- * Currently returns immediately, but marked async for future enhancement:
- * - Could pause/resume for very large proof spaces
- * - Could delegate to Web Worker for parallelization
- * - API remains compatible
- *
  * @param {ProofStep[]} currentSteps - All existing proof steps (premises + previous derivations)
- * @returns {Promise<DerivedConclusion[]>} Array of new derived conclusions (max 3)
+ * @returns {DerivedConclusion[]} Array of new derived conclusions (max 3)
  */
-export async function inferNextSteps(currentSteps) {
-  // Phase 0: Build parsed steps array from cached ASTs
-  // This is now O(1) per step since ASTs are pre-parsed and cached
-  const parsed = []
-  for (const step of currentSteps) {
-    if (step.ast) {
-      parsed.push({ id: step.id, ast: step.ast, raw: step.expression })
-    } else {
-      // Fallback for steps without cached AST (shouldn't happen in normal flow)
-      console.warn(`Step ${step.id} missing cached AST, parsing on demand`)
-      try {
-        const tokens = tokenize(step.expression)
-        const ast = new Parser(tokens).parse()
-        parsed.push({ id: step.id, ast, raw: step.expression })
-      } catch (e) {
-        console.warn(`Failed to parse step ${step.id}: ${step.expression}`, e)
-      }
-    }
-  }
+export function inferNextSteps(currentSteps) {
+  // Every step carries the AST that was parsed when it was added
+  const parsed = currentSteps.map((step) => ({ id: step.id, ast: step.ast, raw: step.expression }))
 
   const newConclusions = []
 

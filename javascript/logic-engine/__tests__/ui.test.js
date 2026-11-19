@@ -89,19 +89,16 @@ describe("logic engine page", () => {
     expect(new URLSearchParams(window.location.search).has("example")).toBe(false)
   })
 
-  test("Run Inference needs a premise", async () => {
+  test("Run Inference needs a premise", () => {
     byId("clear-all").click()
     byId("run-inference").click()
     expect(message()).toContain("Add at least one premise")
   })
 
-  test("Run Inference adds the derived steps and says so", async () => {
+  test("Run Inference adds the derived steps and says so", () => {
     byId("clear-all").click()
     addPremises("p -> q, p")
     byId("run-inference").click()
-    // The button disables itself while the inference runs, then renders again.
-    expect(byId("run-inference").disabled).toBe(true)
-    await new Promise((resolve) => setTimeout(resolve, 0))
     expect(byId("run-inference").disabled).toBe(false)
     expect(stepTexts()).toContain("q")
     expect(message()).toContain("New conclusions derived")
@@ -110,11 +107,10 @@ describe("logic engine page", () => {
     )
   })
 
-  test("Run Inference with nothing new says so", async () => {
+  test("Run Inference with nothing new says so", () => {
     byId("clear-all").click()
     addPremises("p")
     byId("run-inference").click()
-    await new Promise((resolve) => setTimeout(resolve, 0))
     expect(message()).toContain("No new conclusions found")
   })
 

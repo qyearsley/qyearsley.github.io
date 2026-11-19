@@ -131,7 +131,7 @@ export function initUI() {
   })
 
   // Run inference
-  inferButton.addEventListener("click", async () => {
+  inferButton.addEventListener("click", () => {
     if (state.steps.length === 0) {
       setError("Add at least one premise before running inference")
       render()
@@ -142,7 +142,7 @@ export function initUI() {
     render()
 
     try {
-      const conclusions = await inferNextSteps(state.steps)
+      const conclusions = inferNextSteps(state.steps)
 
       if (conclusions.length === 0) {
         setStatus("IDLE")
