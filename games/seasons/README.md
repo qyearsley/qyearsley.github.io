@@ -170,11 +170,10 @@ slip by a whole ten (a dropped carry). Small answers get plain near misses,
 `± 1` to `± 3`. Two thresholds, `SLIP_FROM` (20) and `BIG_ANSWER` (100), exist
 because otherwise "6 ÷ 2" offered 13 and 1 beside the answer 3.
 
-**How many distractors sit below the answer is drawn at random.** Filling the
-list in order of temptingness always gave one below and two above, so the answer
-was the second-smallest button in every question and tapping it won without
-arithmetic. `rng.shuffle` hid this, because it moves a choice on screen but not
-how the values sort.
+**How many distractors sit below the answer is drawn at random.** Otherwise the
+answer always has the same rank among the sorted values, and a player can tap the
+second-smallest button without doing the arithmetic. Shuffling the buttons on
+screen does not change that rank.
 
 [`js/challenges/arithmetic.js`](js/challenges/arithmetic.js) carries the
 reasoning. The "distractors" tests in `arithmetic.test.js` hold it, including a
@@ -365,23 +364,22 @@ prompt and recomputing it. It also checks that no generator exceeds its form's
 A pack exports ten required names: `palette`; the drawings `character`, `item`,
 `obstacle`, `villain`, and `backdrop`; and the trail's geometry and motion,
 `layout`, `traversal`, `reducedTraversal`, and `standing`. An eleventh, `idle`,
-is optional: it says how a drawing moves while standing still. Signatures and return shapes are in
-[`js/README.md`](js/README.md#art--art);
+is optional: it says how a drawing moves while standing still. Signatures and
+return shapes are in [`js/README.md`](js/README.md#art--art);
 [`js/art/placeholder.js`](js/art/placeholder.js) is the reference.
 
-There is one pack and no registry. To replace it, write a new file in
-[`js/art/`](js/art/) that exports the same names, and change the one import in
-[`js/GameUI.js`](js/GameUI.js). The new file builds its elements with `svg` from
-[`js/art/svg.js`](js/art/svg.js). Nothing else moves.
+To replace it, write a new file in [`js/art/`](js/art/) that exports the same
+names and builds its elements with `svg` from [`js/art/svg.js`](js/art/svg.js),
+then change the one import in [`js/GameUI.js`](js/GameUI.js).
 
-The "fulfils the art-pack contract" block in `art.test.js` is written against the contract, not the placeholder's shapes, so pointing its
-`pack` constant at the new module is the whole test plan. It checks distinct
-drawings for every character, season and obstacle, and `--season-*` palette keys
-that match across seasons. `layout` is checked for internal consistency, not
-against the placeholder's numbers. Three values carry meaning and are pinned: the
-trail must be wider than the viewport, a route with a `gap` must break the ground
-into more than one segment, and every backdrop layer's `span` must cover the
-visible window at both ends of the longest trail.
+The "fulfils the art-pack contract" block in `art.test.js` tests the contract,
+not the placeholder's shapes, so pointing its `pack` constant at the new module
+is the whole test plan. It checks distinct drawings for every character, season
+and obstacle, and `--season-*` palette keys that match across seasons. `layout`
+is checked for internal consistency. Three values are pinned: the trail must be
+wider than the viewport, a route with a `gap` must break the ground into more
+than one segment, and every backdrop layer's `span` must cover the visible window
+at both ends of the longest trail.
 
 ### Add a new kind of challenge
 
@@ -528,24 +526,17 @@ Built for a shared iPad: 64px tap targets, iOS web-app meta tags, and suppressed
 double-tap zoom, tap highlight, and text selection. Switching away from the tab,
 or opening the settings dialog, stops the countdown, and coming back restarts it
 rather than resuming. Follows the OS dark-mode preference unless the site theme
-toggle overrides it. `manifest.json` sets `"display": "standalone"`. The
-`apple-touch-icon` points at `icon.svg`, which iOS ignores (it takes only PNG),
-so Add to Home Screen falls back to a page snapshot. The link stays to match
-Times Trail; `games/shared/__tests__/markup-contract.test.js` holds all three
-installable games to the same set. For a real icon, drop a 180×180 PNG beside
-`icon.svg` and change that one `href`, at the cost of this repo's no-binary-assets
-convention.
+toggle overrides it. The `apple-touch-icon` points at `icon.svg`, which iOS
+ignores, so Add to Home Screen uses a page snapshot (a PNG would fix it, at the
+cost of the repo's no-binary-assets rule).
 
 ## Security and privacy
 
-Every node is built with `createElement` or `createElementNS` and every string
-written with `textContent`; `innerHTML` is not used anywhere in this game, and
-the shared `BaseGameUI` offers no way to write markup. Progress is saved in
-`localStorage` under `seasonsProgress`, never leaves the device, and is erased
-by the restart button after a confirmation. Saved data is treated as untrusted:
-every field is coerced back into range on load and unknown keys are dropped. No
-personal information, no cookies, no tracking, no external requests beyond the
-site's own stylesheet and scripts.
+`innerHTML` is not used anywhere in this game; strings go in with `textContent`.
+Progress is saved in `localStorage` under `seasonsProgress`, never leaves the
+device, and is erased by the restart button after a confirmation. Saved data is
+treated as untrusted: every field is coerced back into range on load and unknown
+keys are dropped. No cookies, tracking or external requests.
 
 ## Known gaps
 
@@ -580,7 +571,5 @@ Ella's, not mine:
   season today, so `attempt` is always 0. It stays in the question key because a
   picker would need it.
 
-These, the planned NPC and trading phase, and the polish that was deferred
-rather than missed, are written up in
-[`docs/seasons-plan.md`](../../docs/seasons-plan.md). This file documents what
-the game does; that one is allowed to speculate.
+The design reasoning (short seasons, no losing, the roster, tuning, art) is in
+[`docs/seasons-plan.md`](../../docs/seasons-plan.md).
