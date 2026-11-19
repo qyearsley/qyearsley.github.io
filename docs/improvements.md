@@ -21,45 +21,17 @@ last long version of this file is `git show 3ceed17:docs/improvements.md`.
    `import/no-unresolved`. Move to eslint 10 when the plugin supports it, or
    replace the plugin.
 
-3. **Theme bugs found in the 2026-11-18 audit.** `homophones.html:72` and
-   `tone-table.html:66` style dark mode from `prefers-color-scheme` only, so a
-   site set to light on a dark OS shows mixed colors (not checked in a
-   browser). `life-calculator.html:48,96` uses `--color-accent`, which no
-   stylesheet defines.
+3. **The Times Trail "Squares" test is flaky.** `game.answering.test.js`, "a
+   round on Squares asks only squares", uses `Math.random`. It failed 6 of 40
+   runs before the 2026-11-18 simplification pass, so it is not new.
 
-4. **Dead code found in the 2026-11-18 audit.** Each item below is used only by
-   its own definition or by tests:
-   - CSS: `.logic-engine-*`, `.logic-card`, `.operator-details`, `.info-card`,
-     `.flex-1` (`components.css`), `.external-links`, `--shadow-hover`
-     (`style.css`).
-   - `nav.js:294`: the `Escape` branch does nothing. The `t` shortcut has two
-     paths (`nav.js:370` and `theme.js:398`).
-   - `StorageManager` `hasGameState`, `exportGameState` and `importGameState`.
-     Number Garden `importProgress`.
-   - Seasons: `Journey.progress()`, `GameState.remainingDemand()` and
-     `countingItems()`, the `costText` field, which is `""` for every
-     character, and the `.haul-item` reduced-motion block, which the global
-     rule already covers.
-   - Times Trail: the `modes/` registry with one mode, `MODE_IDS` and
-     `MODE_LABELS`, and the `sound` setting, which has no UI.
+4. **Times Trail `game.js` and `GameUI.js` are still about 46% comments.** The
+   2026-11-18 pass cut the history and `§` references only. Test files still
+   cite `§ 17` and `§ 22`.
 
-5. **Duplication found in the 2026-11-18 audit.**
-   - Number Garden `ProgressionManager.js`: 30 pasted SVG data URLs (about
-     -200 lines with a helper).
-   - Number Garden `EventManager.js`: 13 identical click handlers (Times Trail
-     uses a table).
-   - Number Garden `common.css`: repeats 14 selectors that `main.css`
-     overrides.
-   - The `?q=` script is pasted into `tone-table.html`, `homophones.html` and
-     `syllabary.html`.
-   - The bit-grid CSS is in both `floating-point.html` and
-     `integer-explorer.html`. Five tool pages write their dark colors twice.
-
-6. **Comments are about half of the big game files.** This applies to Seasons
-   `placeholder.js`, `GameUI.js`, `game.js` and `arithmetic.js`, and to Times
-   Trail `game.js` and `GameUI.js`. Much of the text is history or `§`
-   references to a spec that is not in the repo. `games/seasons/README.md`
-   (740 lines) has wrong module and suite counts.
+5. **Seasons README is 591 lines.** Its difficulty table was not checked
+   against `seasons.js`. The `_choices` loop in `arithmetic.js` no longer has
+   its hang guard for answers above 2^53; no season can produce one.
 
 ## Deferred
 
@@ -127,6 +99,16 @@ Garden's Continue goes to the next area and strikes off wrong choices; Life
 Garden's R asks first; Turing Tape's new rule row starts blank and a solve
 offers "Next puzzle"; the games index says who each kid game is for; the skip
 link hides fully and prose links take the theme color.
+
+Landed 2026-11-18 (simplification audit): about 3,100 fewer lines. Unused
+CSS in `components.css` and `style.css`; the dead theme globals and the second
+`t` shortcut path; `StorageManager` export and import; the Seasons dead code and
+history comments; Times Trail's one-mode registry and `sound` setting; Number
+Garden's pasted SVG themes, 16 setup methods and `common.css`; the `?q=` script,
+bit-grid CSS, doubled dark colors and `.controls-row` on the tool pages.
+Homophones and Tone Table dark colors now honor the site toggle, and Life
+Calculator uses `--color-primary`. Not checked in a browser: dark mode on the
+tool pages and Chinese tables, Number Garden buttons and modals.
 
 Landed 2026-11-18: form controls inherit the page font and size (`style.css`), controls inherit the page font size, 16px by default, so iOS does not zoom (Turing Tape's rule selects are 0.9rem on desktop and 16px on touch), and the 1.1 to 1.5rem input sizes on four tool pages are gone. Games: 44px tap targets on touch screens in Life Garden and Turing Tape, `100vh` fallback before `100dvh` in Seasons. The games share no CSS, only JS, so there was nothing to move onto; their palettes and top bars stay separate.
 
