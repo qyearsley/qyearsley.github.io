@@ -23,3 +23,18 @@ An opt-in mode that scores how fast a correct answer is, for a player who wants
 a challenge. The game already measures thinking time per answer but never shows
 it. Keep it off by default and keep it out of the mastery model, so a slow
 answer never costs progress. Owner idea, 2026-11-18.
+
+## Traditional Chinese
+
+A Traditional version of the `/zh/` pages. Two options, not decided:
+
+- Keep the files in Simplified, and convert to Traditional in the browser for a
+  visitor who picks 繁體. Needs a Simplified-to-Traditional converter (the hard,
+  one-to-many direction), likely OpenCC.
+- Write the files in Traditional, and convert to Simplified in the browser with
+  `chinese/tradsimp.js`. Simplified readers see a flash of Traditional, and
+  the pages keep mainland words.
+
+Either way, the URLs stay the same, passages about a glyph (homophones) need a
+skip marker, and text written at runtime needs its own conversion. Owner idea,
+2026-11-19.
