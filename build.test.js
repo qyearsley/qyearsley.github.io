@@ -21,7 +21,7 @@ import {
   discoverTranslatablePages,
   discoverToolPages,
   findDuplicateKeys,
-  findHtmlFiles,
+  findFiles,
   generatePagesRegistry,
   generateSitemap,
   injectLangMeta,
@@ -732,7 +732,7 @@ describe("copyTree", () => {
   })
 })
 
-describe("findHtmlFiles", () => {
+describe("findFiles", () => {
   let tmp
 
   beforeEach(() => {
@@ -748,7 +748,7 @@ describe("findHtmlFiles", () => {
     writeFile(tmp, "a/b.html", "")
     writeFile(tmp, "a/c/d.html", "")
 
-    const files = findHtmlFiles(tmp)
+    const files = findFiles(tmp, ".html")
       .map((f) => f.slice(tmp.length).replace(/\\/g, "/"))
       .sort()
 
@@ -761,14 +761,21 @@ describe("findHtmlFiles", () => {
     writeFile(tmp, "data.json", "")
     writeFile(tmp, "README.md", "")
 
-    const files = findHtmlFiles(tmp)
+    const files = findFiles(tmp, ".html")
 
     expect(files).toHaveLength(1)
     expect(files[0]).toMatch(/page\.html$/)
   })
 
   test("returns empty array for an empty directory", () => {
-    expect(findHtmlFiles(tmp)).toEqual([])
+    expect(findFiles(tmp, ".html")).toEqual([])
+  })
+
+  test("filters by the extension it is given", () => {
+    writeFile(tmp, "a/app.js", "")
+    writeFile(tmp, "page.html", "")
+
+    expect(findFiles(tmp, ".js")).toHaveLength(1)
   })
 })
 
@@ -783,8 +790,8 @@ describe("loadTranslations", () => {
     rmSync(tmp, { recursive: true, force: true })
   })
 
-  test("returns null when zh-common.json is absent", () => {
-    expect(loadTranslations(tmp)).toBeNull()
+  test("throws when zh-common.json is absent", () => {
+    expect(() => loadTranslations(tmp)).toThrow(/ENOENT/)
   })
 
   test("loads zh-common.json into common", () => {

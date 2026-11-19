@@ -2,15 +2,9 @@
 //
 // Build script for qyearsley.github.io
 //
-// Pipeline:
-//   1. Copy static files to dist/ (skip dev-only files)
-//   2. Render resume from markdown
-//   3. Generate Chinese (/zh/) translations via text-matching
-//   4. Write dist/pages.json (tool/game page registry for shared/discover.js)
-//   5. Inject translated-paths data for client-side language persistence
-//   6. Generate sitemap.xml
-//   7. Cache-bust local script URLs and JS import specifiers
-//   8. Validate internal links (and JS import specifiers)
+// Copies the site to dist/, renders the resume, adds /zh/ translations, then
+// versions script URLs and validates links.
+// See docs/development.md, Build Pipeline.
 //
 
 import { createHash } from "node:crypto"
@@ -165,7 +159,6 @@ function parseTranslationFile(path, label) {
 
 function loadTranslations(rootDir = ROOT) {
   const commonPath = join(rootDir, "zh-common.json")
-  if (!existsSync(commonPath)) return null
   const common = parseTranslationFile(commonPath, "zh-common.json")
 
   const pages = {}
@@ -296,9 +289,7 @@ function translateContent(html, translations, pagePath, commonKeys, matchedCommo
 
 // A key in zh-common.json that matched no page at all. Per-page translation
 // cannot warn about these -- a common key legitimately misses most pages -- so
-// the check runs once, over the whole build. Five keys had gone stale this way
-// after the homepage was reworded, leaving half of zh/index.html in English
-// with the build reporting nothing.
+// the check runs once, over the whole build.
 function reportStaleCommonKeys(commonKeys, matchedCommon) {
   const stale = [...commonKeys].filter((key) => !matchedCommon.has(key)).sort()
   for (const key of stale) {
@@ -398,8 +389,8 @@ function generatePagesRegistry(distDir = DIST, rootDir = ROOT) {
 // a `<header>` and the switcher goes at the end of it. A game is a full-screen
 // app with no `<header>` at all, so it marks a spot with an empty
 // `<div class="lang-slot">` -- in its own top bar, or after the breadcrumbs on
-// its title screen. Before the slot existed, no game page got a switcher: the
-// `</header>` replacement simply found nothing and failed silently.
+// its title screen. Without a slot, a game page gets no switcher: the
+// `</header>` replacement finds nothing.
 //
 // The slot is emptied and refilled rather than appended to, so the source's
 // placeholder content (there is none, but a future editor might add some)
@@ -506,12 +497,12 @@ function translateHtml(html, translations, pagePath, commonKeys, matchedCommon) 
 
 // ── Sitemap and link validation ─────────────────────────────────
 
-function findHtmlFiles(dir) {
+function findFiles(dir, ext) {
   const files = []
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     if (entry.isDirectory()) {
-      files.push(...findHtmlFiles(join(dir, entry.name)))
-    } else if (entry.name.endsWith(".html")) {
+      files.push(...findFiles(join(dir, entry.name), ext))
+    } else if (entry.name.endsWith(ext)) {
       files.push(join(dir, entry.name))
     }
   }
@@ -520,17 +511,8 @@ function findHtmlFiles(dir) {
 
 function generateSitemap(distDir = DIST) {
   const baseUrl = "https://qyearsley.github.io"
-  const htmlFiles = findHtmlFiles(distDir)
-  const zhPaths = new Set()
-  for (const page of TRANSLATABLE_PAGES) {
-    zhPaths.add("/zh/" + page)
-    if (page.endsWith("/index.html")) {
-      zhPaths.add("/zh/" + page.replace(/index\.html$/, ""))
-    }
-    if (page === "index.html") {
-      zhPaths.add("/zh/")
-    }
-  }
+  const htmlFiles = findFiles(distDir, ".html")
+  const zhPaths = new Set([...TRANSLATED_URLS].map((url) => "/zh" + url))
 
   const urls = []
   for (const file of htmlFiles) {
@@ -601,25 +583,13 @@ function resolveLink(href, fromPath) {
 // unchanged sources produces the same id (so a no-op rebuild doesn't churn
 // every URL), and the build gains no dependency on git.
 
-function findJsFiles(dir) {
-  const files = []
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (entry.isDirectory()) {
-      files.push(...findJsFiles(join(dir, entry.name)))
-    } else if (entry.name.endsWith(".js")) {
-      files.push(join(dir, entry.name))
-    }
-  }
-  return files
-}
-
 // Hashes every JS file that made it into dist/ -- path and content, so a
 // rename changes the id even if no file's contents did. Sorted first: file
 // order from readdirSync is not guaranteed, and an id that depended on it
 // wouldn't be deterministic.
 function computeBuildId(distDir = DIST) {
   const hash = createHash("sha256")
-  for (const file of findJsFiles(distDir).sort()) {
+  for (const file of findFiles(distDir, ".js").sort()) {
     hash.update(file.slice(distDir.length))
     hash.update(readFileSync(file))
   }
@@ -642,9 +612,8 @@ function versionSpecifier(spec, buildId) {
 
 // Appends `?v=<buildId>` to every local `<script src="...js">` in an HTML
 // page -- module or classic, since GitHub Pages' caching doesn't care which.
-// A `src` that already carries a query string (Number Garden's
-// hand-maintained `?v=7`, before this build took over versioning it) has
-// that query replaced rather than appended to, so there's exactly one `v`.
+// A `src` that already carries a query string has that query replaced rather
+// than appended to, so there is exactly one `v`.
 function addCacheBustToHtml(html, buildId) {
   return html.replace(
     /(<script\b[^>]*\ssrc=")([^"]+\.js)(?:\?[^"]*)?(")/g,
@@ -745,7 +714,7 @@ function findRelativeImportSpecifiers(source) {
 // that actually changed.
 function applyCacheBusting(distDir, buildId) {
   let htmlCount = 0
-  for (const file of findHtmlFiles(distDir)) {
+  for (const file of findFiles(distDir, ".html")) {
     const html = readFileSync(file, "utf-8")
     const versioned = addCacheBustToHtml(html, buildId)
     if (versioned !== html) {
@@ -755,7 +724,7 @@ function applyCacheBusting(distDir, buildId) {
   }
 
   let jsCount = 0
-  for (const file of findJsFiles(distDir)) {
+  for (const file of findFiles(distDir, ".js")) {
     const source = readFileSync(file, "utf-8")
     const versioned = rewriteJsImports(source, buildId)
     if (versioned !== source) {
@@ -768,7 +737,7 @@ function applyCacheBusting(distDir, buildId) {
 }
 
 function validateLinks(distDir = DIST) {
-  const htmlFiles = findHtmlFiles(distDir)
+  const htmlFiles = findFiles(distDir, ".html")
   const existingPaths = new Set()
 
   for (const file of htmlFiles) {
@@ -808,7 +777,7 @@ function validateLinks(distDir = DIST) {
   // than an HTML page's href/src. `?v=` queries are already on these files
   // by the time this runs (see build()); resolveLink strips them via
   // URL.pathname the same way it strips one from an HTML link.
-  for (const file of findJsFiles(distDir)) {
+  for (const file of findFiles(distDir, ".js")) {
     const source = readFileSync(file, "utf-8")
     const fromPath = file.slice(distDir.length).replace(/\\/g, "/")
     for (const spec of findRelativeImportSpecifiers(source)) {
@@ -839,7 +808,7 @@ function injectTranslatedPaths(distDir = DIST) {
   // and whitespace variations.
   const navScriptRegex = /<script\b[^>]*\bsrc="\/shared\/nav\.js"[^>]*><\/script>/
   let injected = 0
-  for (const file of findHtmlFiles(distDir)) {
+  for (const file of findFiles(distDir, ".html")) {
     let html = readFileSync(file, "utf-8")
     const match = html.match(navScriptRegex)
     if (match) {
@@ -872,28 +841,20 @@ function build() {
   generateResume()
 
   console.log("Adding page footers...")
-  for (const file of findHtmlFiles(DIST)) {
+  for (const file of findFiles(DIST, ".html")) {
     const html = readFileSync(file, "utf-8")
     const withFooter = injectPageFooter(html, relative(DIST, file))
     if (withFooter !== html) writeFileSync(file, withFooter)
   }
 
   const data = loadTranslations()
-  if (!data) {
-    console.log("No zh-common.json found. Skipping translations.")
-    console.log("Done.")
-    return
-  }
-
   const common = data.common
   const commonKeys = new Set(Object.keys(common).filter((k) => !k.startsWith("_")))
   const matchedCommon = new Set()
 
   console.log("Generating translations...")
   for (const page of TRANSLATABLE_PAGES) {
-    const pageOnly = data.pages[page]
-
-    const translations = pageOnly ? { ...common, ...pageOnly } : { ...common }
+    const translations = { ...common, ...data.pages[page] }
 
     const srcPath = join(DIST, page)
     if (!existsSync(srcPath)) {
@@ -957,7 +918,7 @@ export {
   checkUntranslated,
   clean,
   copyTree,
-  findHtmlFiles,
+  findFiles,
   loadTranslations,
   discoverTranslatablePages,
   discoverToolPages,
@@ -965,7 +926,6 @@ export {
   generateSitemap,
   validateLinks,
   injectTranslatedPaths,
-  findJsFiles,
   computeBuildId,
   addCacheBustToHtml,
   rewriteJsImports,

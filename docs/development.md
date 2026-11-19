@@ -55,8 +55,8 @@ It then appends `?v=<buildId>` to:
 The same id everywhere matters: a module fetched under two different URLs is
 instantiated twice by the browser (two `StorageManager` copies, two sets of
 state), so every reference to a given file has to produce the identical URL.
-Number Garden's `js/game.js?v=7` used to be hand-maintained and only covered
-the entry file; the build now owns versioning for every script and import.
+Do not write `?v=` by hand in source. The build sets it on every script and
+import, and replaces any query that is already there.
 
 This only versions script URLs and JS imports -- it can't do anything about
 the HTML page itself being served stale, since GitHub Pages doesn't let this
