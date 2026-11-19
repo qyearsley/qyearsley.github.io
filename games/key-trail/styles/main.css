@@ -1,0 +1,271 @@
+/* Key Trail. Colors come from the site tokens in /css/style.css, so the theme picker works.
+   The finger colors are translucent, so they read on light and dark backgrounds alike. */
+
+body {
+  padding: 0;
+}
+
+.game-layout {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.game-top-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.game-top-bar h1 {
+  font-size: 1.2rem;
+}
+
+.icon-btn,
+.ctrl-btn,
+.lesson-btn {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--color-border-dark);
+  border-radius: 6px;
+  background: var(--color-bg-card);
+  color: var(--color-text);
+  font-size: 0.95rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Shown only on touch screens, where a keyboard is less likely. */
+.touch-note {
+  display: none;
+  color: var(--color-error-text);
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .touch-note {
+    display: block;
+  }
+}
+
+.lesson-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
+  gap: 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.lesson-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 0.2rem;
+}
+
+.lesson-btn b {
+  font-family: monospace;
+  font-size: 1.3rem;
+}
+
+.lesson-btn span {
+  color: #d69e2e;
+}
+
+.speed-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.play-info {
+  display: flex;
+  gap: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.esc-note {
+  margin-left: auto;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.trail {
+  position: relative;
+  height: 3rem;
+  margin: 1rem 0;
+  border-bottom: 4px dotted var(--color-border-dark);
+  font-size: 2rem;
+}
+
+.walker {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  transform: scaleX(-1); /* face the house */
+  transition: left 0.15s ease-out;
+}
+
+.home {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}
+
+.shake {
+  animation: shake 0.25s;
+}
+
+@keyframes shake {
+  25% {
+    translate: -4px 0;
+  }
+
+  75% {
+    translate: 4px 0;
+  }
+}
+
+.line {
+  font-family: monospace;
+  font-size: clamp(1.4rem, 4.5vw, 2.2rem);
+  letter-spacing: 0.05em;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.line span {
+  border-radius: 3px;
+}
+
+.line .typed {
+  color: var(--color-success);
+}
+
+.line .typed.missed {
+  color: var(--color-error);
+}
+
+.line .current {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.line .space.current {
+  background: var(--color-text-tertiary);
+}
+
+.hint {
+  min-height: 1.5em;
+  color: var(--color-text-secondary);
+}
+
+.keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-top: 1rem;
+  font-family: monospace;
+}
+
+.key-row {
+  display: flex;
+  gap: 0.3rem;
+}
+
+/* Stagger the rows the way a real keyboard does. */
+.key-row:nth-child(2) {
+  margin-left: 1.2rem;
+}
+
+.key-row:nth-child(3) {
+  margin-left: 2.4rem;
+}
+
+.key-row:nth-child(4) {
+  justify-content: center;
+}
+
+.key {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: clamp(1.8rem, 7vw, 3rem);
+  aspect-ratio: 1;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  transition: opacity 0.2s;
+}
+
+.space-key {
+  width: 50%;
+  aspect-ratio: auto;
+  height: 2.4rem;
+  font-size: 0.85rem;
+}
+
+/* The little ridges on f and j that let fingers find home without looking. */
+.bump {
+  text-decoration: underline;
+  text-underline-offset: 0.3em;
+}
+
+.f0,
+.f7 {
+  background: rgb(235, 92, 92, 0.3);
+}
+
+.f1,
+.f6 {
+  background: rgb(244, 155, 37, 0.3);
+}
+
+.f2,
+.f5 {
+  background: rgb(64, 191, 64, 0.3);
+}
+
+.f3,
+.f4 {
+  background: rgb(71, 153, 235, 0.3);
+}
+
+.thumb {
+  background: rgb(153, 102, 204, 0.25);
+}
+
+.key.locked {
+  opacity: 0.3;
+}
+
+.key.next {
+  border-color: var(--color-primary);
+  opacity: 1;
+  scale: 1.1;
+}
+
+.key.hit {
+  border-color: var(--color-success);
+}
+
+.key.miss {
+  border-color: var(--color-error);
+}
+
+.done-big {
+  font-size: 2.5rem;
+  color: #d69e2e;
+}
+
+.done-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}

@@ -48,7 +48,7 @@ generates no `/zh/` page, injects no `hreflang` tags, lists no sitemap
 alternate, and leaves the language switcher out. `.lang-slot:empty` in
 `css/style.css` collapses the empty switcher slot, so the page shows no gap.
 
-Every tool and writing page has a Chinese version. Only two of the five games
+Every tool and writing page has a Chinese version. Only two of the six games
 do, and the reason is the pipeline itself.
 
 **The build translates static HTML. A game writes most of its text at runtime.**
@@ -81,8 +81,8 @@ Seasons and Times Trail are the case the counts hide. Both scored zero English
 text nodes while their gameplay stayed entirely English, so both looked finished
 and were not.
 
-The Chinese games index at `/zh/games/` still lists all five games. It links to
-the English page for the three that have no Chinese version. The index keeps its
+The Chinese games index at `/zh/games/` still lists all six games. It links to
+the English page for the four that have no Chinese version. The index keeps its
 Chinese descriptions, so a Chinese visitor can still read what each game does.
 
 To give a game a Chinese page again, add back its `*.zh.json` and translate the

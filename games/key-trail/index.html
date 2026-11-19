@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Key Trail - Quinten Yearsley</title>
+    <meta
+      name="description"
+      content="Learn to touch type one pair of keys at a time: each right key moves the turtle one step home"
+    />
+    <meta name="theme-color" content="#2d3748" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="styles/main.css" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script src="/shared/theme.js"></script>
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <div class="game-layout">
+      <div class="game-top-bar">
+        <a href="/games/" class="icon-btn" title="Back to games" aria-label="Back to games"
+          >&larr;</a
+        >
+        <h1>Key Trail</h1>
+        <div class="lang-slot"></div>
+      </div>
+
+      <main id="main-content">
+        <section id="menu">
+          <p>
+            Type the letters to walk the turtle home. Rest your fingers on the home row:
+            <kbd>a s d f</kbd> for the left hand and <kbd>j k l ;</kbd> for the right. Each lesson
+            adds two keys.
+          </p>
+          <p class="touch-note">Key Trail needs a keyboard.</p>
+          <ol id="lesson-list" class="lesson-list"></ol>
+          <p class="speed-row">
+            <button id="speed-btn" class="ctrl-btn">Speed run: one minute</button>
+            <span id="best"></span>
+          </p>
+        </section>
+
+        <section id="play" class="hidden">
+          <div class="play-info">
+            <span id="play-title"></span>
+            <span id="play-progress"></span>
+            <span class="esc-note"><kbd>Esc</kbd> to stop</span>
+          </div>
+          <div class="trail" aria-hidden="true">
+            <span id="walker" class="walker">&#x1F422;</span>
+            <span class="home">&#x1F3E0;</span>
+          </div>
+          <div id="line" class="line"></div>
+          <p id="hint" class="hint" aria-live="polite"></p>
+          <div id="keyboard" class="keyboard" aria-hidden="true"></div>
+        </section>
+
+        <section id="done" class="hidden">
+          <h2 id="done-title"></h2>
+          <p id="done-big" class="done-big"></p>
+          <p id="done-detail"></p>
+          <p class="done-buttons">
+            <button id="next-btn" class="ctrl-btn">Next lesson <kbd>Enter</kbd></button>
+            <button id="again-btn" class="ctrl-btn">Again</button>
+            <button id="menu-btn" class="ctrl-btn">Lessons <kbd>Esc</kbd></button>
+          </p>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+    <script src="/shared/nav.js"></script>
+  </body>
+</html>

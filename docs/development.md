@@ -97,7 +97,7 @@ Tests use Jest with `--experimental-vm-modules` for ESM support.
 - `javascript/*.test.js`, `chinese/*.test.js` -- tests for experiment and tool logic
 - `games/*/__tests__/` -- tests for game logic and level/preset data
 
-Most game logic is tested through its underlying components (Garden, GameState, TuringMachine, etc.) and the static data they consume. Seasons, Times Trail and Number Garden additionally drive their `game.js` orchestrators black-box, loading the real `index.html` into jsdom, clicking through it and advancing fake timers (`game.answering.test.js` in each). Life Garden has a boot test that does the same, and seeded simulation tests for its model. Turing Tape's `game.js` and Logic Engine's `ui.js` are tested the same way; Turing Tape's takes the document through `init(doc)`, and `ui.js` already looked its elements up inside `initUI()`. `shared/life-background.js` (the 404 page's animation) is untested.
+Most game logic is tested through its underlying components (Garden, GameState, TuringMachine, etc.) and the static data they consume. Seasons, Times Trail and Number Garden additionally drive their `game.js` orchestrators black-box, loading the real `index.html` into jsdom, clicking through it and advancing fake timers (`game.answering.test.js` in each). Life Garden has a boot test that does the same, and seeded simulation tests for its model. Turing Tape's and Key Trail's `game.js` and Logic Engine's `ui.js` are tested the same way; Turing Tape's takes the document through `init(doc)`, and `ui.js` already looked its elements up inside `initUI()`. `shared/life-background.js` (the 404 page's animation) is untested.
 
 Run a specific test file:
 
@@ -134,7 +134,7 @@ the non-obvious ones:
 
 Step 3 is optional, and a game should think twice about it. The pipeline
 translates static HTML only, so a page that writes its text at runtime gets a
-Chinese shell around English content. Three of the five games have no `*.zh.json`
+Chinese shell around English content. Four of the six games have no `*.zh.json`
 for that reason. See
 [`translations.md`](translations.md#which-pages-have-a-chinese-version-and-why).
 
