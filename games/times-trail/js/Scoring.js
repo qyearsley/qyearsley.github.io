@@ -20,7 +20,7 @@
  * 3. **The daily goal counts facts, not minutes.** `factsToday >= 20` and
  *    nothing else. A time-based goal is satisfiable by leaving a tab open,
  *    which rewards the opposite of practice, so there is no seconds arm
- *    anywhere in this file (§ 3.15).
+ *    anywhere in this file.
  *
  * 4. **The streak calendar is lenient but not free.** Exactly one missed day
  *    is forgiven: the streak survives and the flame shows one stage dimmer.
@@ -49,7 +49,7 @@ import { DAILY_GOAL, DAY_MS, FLAME_STAGES, GEM_MILESTONES, STARS, STRENGTH } fro
 
 /**
  * @typedef {Object} MilestoneMetrics
- * @property {number} sessionsCompleted   - Sessions finished all-time (no Phase 1 milestone uses it)
+ * @property {number} sessionsCompleted   - Sessions finished all-time (no milestone uses it)
  * @property {number} factsCorrect        - Correct answers all-time
  * @property {number} starsTotal          - Stars earned all-time
  * @property {number} masteredCount       - Facts currently mastered

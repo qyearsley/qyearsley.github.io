@@ -81,9 +81,8 @@ const CARD_TIER_RANK = new Map([
 ])
 
 /**
- * Non-colour tier indicator for a fact card, keyed by tier. Grey and colored
- * cards used to differ by background colour alone, which fails WCAG 1.4.1 the
- * same way the fact map's colours would without its pips.
+ * Non-colour tier indicator for a fact card, keyed by tier, so tiers do not
+ * differ by background colour alone (WCAG 1.4.1).
  * @private
  * @type {Readonly<Object<string, string>>}
  */
@@ -252,7 +251,7 @@ const FACT_ORDER = new Map(FACT_IDS.map((id, index) => [id, index]))
 /**
  * The post-miss teaching array. Deliberately NOT tied to the challenge's `left`
  * and `right`: the scaffold is built from `min`/`max` of the fact's operands, so
- * a question shown as `9 × 2` teaches a two-row array. See `modes/shared.js`.
+ * a question shown as `9 × 2` teaches a two-row array. See `buildScaffold` in `quickRecall.js`.
  * @typedef {Object} Scaffold
  * @property {number} rows - The smaller operand, so the array is never nine rows tall.
  * @property {number} cols - The larger operand.
@@ -531,7 +530,7 @@ export class GameUI extends BaseGameUI {
    * focus on the button that was just tapped -- now inside a `display: none`
    * screen -- so focus collapses to `<body>` and the screen change is completely
    * silent to a screen reader. Every screen heading carries `tabindex="-1"`
-   * (§ 15) so it can take focus without joining the tab order.
+   * so it can take focus without joining the tab order.
    * @param {string} screenId - Screen element id
    * @returns {void}
    */
@@ -607,12 +606,8 @@ export class GameUI extends BaseGameUI {
    * Mark the typed answer as correct: leave her digits on screen and paint them
    * green for the feedback beat.
    *
-   * A correct keypad answer used to produce nothing at all -- no element marked
-   * `.correct`, and the readout already reset to "?" -- so the 42 she typed
-   * simply vanished. Because every strength-3+ fact routes to the keypad, that
-   * was the dominant path exactly as she improved. The state is cleared by the
-   * next `setAnswerDisplay`, which the next keypress and the next
-   * `renderQuestion` both go through.
+   * The state is cleared by the next `setAnswerDisplay`, which the next
+   * keypress and the next `renderQuestion` both go through.
    * @param {string|number} [text] - Answer to show; defaults to whatever the readout already holds
    * @returns {void}
    */
@@ -762,9 +757,7 @@ export class GameUI extends BaseGameUI {
    * visible where she is actually looking, which is the play screen, not the
    * trail screen she visits between sessions.
    *
-   * The strip draws the whole trail. It used to draw the five spaces of the
-   * region the token stood in, which meant the row reset every five answers and
-   * never showed how much was left; a trail is 20 spaces and fits.
+   * The strip draws the whole trail (20 spaces), so it shows how much is left.
    *
    * Two states besides the token's own space, and they have to look different:
    * walked and ahead.

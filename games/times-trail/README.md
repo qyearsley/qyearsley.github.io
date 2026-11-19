@@ -75,8 +75,7 @@ Progress saves automatically after every answer.
 
 Card Match, Card Duel, Product Grid, Story Problems, Lightning Round, and Mixed
 Practice are designed but not built -- see `docs/times-trail-plan.md`. There is no
-sound yet either: `#start-button` is the intended iOS audio-unlock gesture when
-sound arrives.
+sound either.
 
 ## Settings
 
@@ -94,11 +93,8 @@ scaffold countdown, and closing it starts that countdown again.
 There is deliberately no difficulty control and no table picker. A trail is a
 fixed set of facts and always uses all of them, so nothing reads a table list. A
 picker that narrowed the pool left a trail such as Squares with one fact, asked
-ten times in a round. A `tables` value in an old save is ignored on load. Spaced
+ten times in a round. A `tables` or `sound` value in an old save is ignored on load. Spaced
 repetition is what makes practice easier or harder question by question.
-
-A `sound` value is persisted in the save file but has no control and nothing
-reads it, because there is no audio yet.
 
 Answer entry, whether misses show a scaffold, and reduced motion are
 deliberately not settings: the first two would corrupt the mastery data or the
@@ -158,14 +154,13 @@ js/
 ├── FactSelector.js      # Which fact is asked next
 ├── Journey.js           # One themed trail: its facts and the token's steps
 ├── Scoring.js           # Stars, gems, daily goal, streak calendar
-├── Settings.js          # Session length and sound
+├── Settings.js          # Session length
 ├── storage.js           # Save shape plus localStorage via games/shared/
 ├── GameUI.js            # All DOM rendering
 ├── Keypad.js            # The in-page numeric keypad
 ├── EventManager.js      # DOM listeners to callbacks
 └── modes/
-    ├── index.js         # Mode registry and dispatcher
-    └── quickRecall.js   # "7 × 6 = ?"
+    └── quickRecall.js   # "7 × 6 = ?" and its post-miss scaffold
 
 styles/
 └── main.css             # The whole stylesheet, light and dark
@@ -185,10 +180,9 @@ npm test                                        # all tests, including this game
 npm test -- --testPathPatterns times-trail      # just this game
 ```
 
-Every module has its own test file except `js/modes/shared.js`, whose one export
-is asserted through the modes that return it. `js/game.js` exports nothing, so
+Every module has its own test file. `js/game.js` exports nothing, so
 `game.test.js` drives it black-box through the real `index.html` instead of
-constructing anything. That makes 15 suites in `__tests__/`.
+constructing anything. That makes 14 suites in `__tests__/`.
 
 There are no debug or unlock query parameters; the game reads nothing from the
 URL.

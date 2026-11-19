@@ -210,7 +210,7 @@ export const DEFAULT_TRAIL_ID = TRAILS[0].id
  * The pattern-free facts: what is left after the doubling (x2), x5, x9-trick and
  * square shortcuts are taken away, so they have to be recalled rather than
  * derived. Ten of them, not twelve -- the name says what the list is, not how
- * long it happens to be. Boss stops (Phase 2) draw only from this pool.
+ * long it happens to be.
  *
  * That definition derives the list exactly -- drop every canonical fact
  * containing a 2, 5 or 9, then drop the squares, and these ten remain.

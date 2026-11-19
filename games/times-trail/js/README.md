@@ -34,10 +34,7 @@ root; `game.js` is the only module that knows about all of them.
       ├──────────┼──► storage.js ──► games/shared/StorageManager.js
       ├──────────┴──► Settings.js
       │
-      ├──► modes/quickRecall.js
-      │         │
-      │         ├──► modes/shared.js  (the one scaffold builder; imports nothing)
-      │         └──► modes/index.js   (registry and dispatcher)
+      ├──► modes/quickRecall.js  (challenge and scaffold builder)
       │
       └──► GameUI.js ──► games/shared/BaseGameUI.js
 
@@ -50,9 +47,9 @@ Two edges are forbidden on purpose:
 - **Core logic never imports the UI.** Nothing in `facts`, `MasteryModel`,
   `FactSelector`, `Journey`, `Scoring`, `Settings`, `storage`, or
   `modes/` touches `document`, `window`, `localStorage`, or a timer.
-- **`GameUI` never imports a mode.** It imports only `BaseGameUI`,
+- **`GameUI` never imports `quickRecall.js`.** It imports only `BaseGameUI`,
   `constants.js`, and `facts.js`, so it cannot recompute -- and therefore cannot
-  disagree with -- anything a mode or a core module decided. `GameUI` is handed
+  disagree with -- anything a core module decided. `GameUI` is handed
   already-decided numbers and renders them.
 
 ## Key Modules
@@ -126,10 +123,10 @@ penalty, and gems are only ever added. The daily goal counts facts, not minutes.
 
 ### Settings.js
 
-The two persisted settings (`sessionLength`, `sound`). Persisted input is
+The one persisted setting (`sessionLength`). Persisted input is
 untrusted, so nothing throws -- a rejected update returns `false` and changes
 nothing. A `tables` key from an older save is dropped on load: a trail uses all
-of its own facts, so nothing reads it.
+of its own facts, so nothing reads it. A `sound` key is dropped the same way.
 
 ### storage.js
 
@@ -139,31 +136,13 @@ shape can be tested on its own and `game.js` can normalize an in-memory state
 without a round trip. Every field is coerced rather than trusted and unknown keys
 are dropped, which is how fields cut from the design disappear on load.
 
-### modes/index.js
-
-The registry that maps a mode id to the function behind it, so `game.js` can ask
-for a challenge without importing a mode or branching on which one is active.
-Adds nothing to a challenge and validates nothing -- the mode's own module is the
-only authority on what it returns. An unknown mode id throws rather than falling
-back.
-
 ### modes/quickRecall.js
 
-`createChallenge(fact, settings, rng)` for the default mode: a prompt string, the
-post-miss scaffold, and a `check` closure. No DOM at all.
-
-### modes/shared.js
-
-`buildScaffold(a, b)`, the post-miss teaching array every mode returns. Rows are
-always `min(a, b)` regardless of how the question was displayed, so the same fact
-always teaches the same picture. Built from the displayed orientation instead,
-`9 × 2` produced a nine-row array, the sentence "9 rows of 2 makes 18", and a
-5450 ms wait instead of 2300 ms -- the worse explanation and the longer sit,
-half the time at random. Imports nothing, so it sits beside `constants.js` at the
-root of the graph and cannot create a cycle between modes. It has no test file of
-its own: `quickRecall.test.js` and `modes.test.js` each assert the scaffold
-contract through the mode that produced it, which is where a regression would
-actually show up.
+`createChallenge(fact, rng)`: a prompt string, the post-miss scaffold, and a
+`check` closure. No DOM at all. `buildScaffold(a, b)` makes the teaching array
+with rows always `min(a, b)`, however the question was displayed, so the same
+fact always teaches the same picture and `9 × 2` does not cost a nine-row array
+and a longer wait.
 
 ### GameUI.js
 
@@ -196,33 +175,30 @@ two never collide because each bails in exactly the state the other acts in.
 
 ## Challenge contract
 
-Every mode returns the same nine keys, so `game.js` has no mode-specific branch
-in its answer path:
+`createChallenge` returns these seven keys:
 
-| key        | meaning                                                   |
-| ---------- | --------------------------------------------------------- |
-| `modeId`   | The `MODE_IDS` value of the mode that built it            |
-| `factId`   | Canonical fact id, e.g. `"6x7"`                           |
-| `left`     | Left operand as displayed                                 |
-| `right`    | Right operand as displayed                                |
-| `answer`   | `left * right`                                            |
-| `prompt`   | The question, ready to render                             |
-| `visual`   | Mode-specific render data, discriminated by `visual.kind` |
-| `check`    | `(input) => boolean` -- the one correctness authority     |
-| `scaffold` | The post-miss teaching array                              |
+| key        | meaning                                               |
+| ---------- | ----------------------------------------------------- |
+| `factId`   | Canonical fact id, e.g. `"6x7"`                       |
+| `left`     | Left operand as displayed                             |
+| `right`    | Right operand as displayed                            |
+| `answer`   | `left * right`                                        |
+| `prompt`   | The question, ready to render                         |
+| `check`    | `(input) => boolean` -- the one correctness authority |
+| `scaffold` | The post-miss teaching array                          |
 
 `game.js` decides correctness with `check`. It never compares an input to
 `answer` itself -- entry paths can deliver different types and only `check`
 knows the difference. `Keypad` submits a `Number`; `check` also accepts a digit
-string, so a mode or a future entry path that
-reports raw digits needs no special case at the call site.
+string, so a future entry path that reports raw digits needs no special case
+at the call site.
 
 ## Data Flow
 
 ### The question loop
 
 ```
-startSession(modeId)     (the hub's trail rows call startTrail(id) first)
+startSession()            (the hub's trail rows call startTrail(id) first)
    │  resets session state, selector.reset(), rebuilds Journey for the trail
    ▼
 _askNextQuestion()
@@ -235,7 +211,7 @@ _askNextQuestion()
    │                                        │
    ├─► MasteryStore.strengthOf(factId) ─────┤  captured BEFORE the answer
    │                                        ▼
-   ├─► modes/index.createChallenge(modeId, fact, {strength}, rng)
+   ├─► quickRecall.createChallenge(fact, rng)
    │                                        │
    │                                        ▼
    │                                   a Challenge
@@ -307,8 +283,8 @@ recorded here.
 
 ## Testing
 
-Tests live in the parent `__tests__/` directory -- 15 suites covering every
-module except `modes/shared.js`, which is asserted through the two mode suites:
+Tests live in the parent `__tests__/` directory -- 14 suites covering every
+module:
 
 - `constants.test.js` -- the shared tables and their cross-checks
 - `facts.test.js` -- the fact set, canonicalization, filtering
@@ -317,10 +293,9 @@ module except `modes/shared.js`, which is asserted through the two mode suites:
 - `Journey.test.js` -- one space per step, every trail walkable to its last
   space with no strong fact, and the hub's strength counts
 - `Scoring.test.js` -- stars, gems, daily goal, streak calendar
-- `Settings.test.js` -- session length, sound, and retired keys
+- `Settings.test.js` -- session length and retired keys
 - `storage.test.js` -- save shape, normalization, load failures
 - `quickRecall.test.js` -- the Quick Recall challenge
-- `modes.test.js` -- the registry and dispatcher
 - `Keypad.test.js` -- buffer transitions, rendering, keyboard fallback
 - `GameUI.test.js` -- rendering, against the real `index.html`
 - `EventManager.test.js` -- event routing, against the real `index.html`

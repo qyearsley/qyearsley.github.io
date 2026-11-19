@@ -17,9 +17,8 @@
  *      `modes/quickRecall.js`, renders it, and arms the response clock last -- after
  *      the DOM is written, so the player is not charged for the render.
  *   3. The first keypad digit stamps `session.firstInteractionAt` exactly once.
- *      That stamp, not the submit, is the end of the measured thinking time --
- *      charging the player for the motor time of typing made mastery
- *      unreachable on the keypad path.
+ *      That stamp, not the submit, is the end of the measured thinking time, so
+ *      the player is not charged for the motor time of typing.
  *   4. The entry path converges on `_handleAnswer(input)`, which holds the
  *      single double-submit guard, asks `challenge.check(input)` (the sole
  *      authority on correctness), and then updates records, stars, the trail,
@@ -37,8 +36,7 @@
  * those are three sequential phases of one answer. It is held as a
  * `{run, delayMs}` descriptor beside its timer id, so `_pauseTimers()` can put the
  * countdown down and `_resumeTimers()` can pick it back up while the settings
- * modal is open. Leaving it running behind the modal ended a session underneath an
- * `aria-modal` dialog. The scaffold's skip-count animation is the one concurrent
+ * modal is open, so a session cannot end underneath the `aria-modal` dialog. The scaffold's skip-count animation is the one concurrent
  * timer and pauses the same way.
  *
  * Two invariants a reader will otherwise trip over:
@@ -310,8 +308,7 @@ class TimesTrail {
 
     /** @type {EventManager} */
     this.events = new EventManager(this.ui, {
-      // Play and Keep Going both go straight into a session. There is one question type,
-      // so a hub visit before practice was a screen that asked nothing.
+      // Play and Keep Going both go straight into a session.
       onStart: () => this.startSession(),
       onContinue: () => this.startSession(),
       onStartFresh: () => this.startFresh(),
@@ -869,13 +866,9 @@ class TimesTrail {
   /**
    * Paint her typed answer green and leave it on screen, for presentation only.
    *
-   * Without this the readout was reset to "?" in the same turn as the answer, so
-   * the 42 she typed vanished at the moment she was told it was right.
-   *
-   * Ordering matters and is safe from both ends: `Keypad` no longer empties its
-   * buffer on submit, and `GameUI` drops the `.correct` state on the next
-   * `setAnswerDisplay`, which only the next keypress and the next `renderQuestion`
-   * reach.
+   * Safe from both ends: `Keypad` does not empty its buffer on submit, and
+   * `GameUI` drops the `.correct` state on the next `setAnswerDisplay`, which
+   * only the next keypress and the next `renderQuestion` reach.
    * @param {Object} challenge - The live challenge
    * @returns {void}
    * @private

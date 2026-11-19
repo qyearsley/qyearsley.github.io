@@ -38,8 +38,7 @@
  * calls `clear()` from the next question render, so a correct answer can be
  * painted green where she typed it instead of vanishing into a "?" the instant
  * she is told she was right. Note that `clear()` fires `onChange`; `game.js`
- * calls it during render and resets its own first-interaction stamp afterwards
- * (see the render order in the spec's § 18).
+ * calls it during render and resets its own first-interaction stamp afterwards.
  *
  * Security Note: builds its DOM with `document.createElement` and `textContent`
  * only -- no `innerHTML`, so nothing typed can be interpreted as markup.
