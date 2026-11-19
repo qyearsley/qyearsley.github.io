@@ -25,13 +25,20 @@ last long version of this file is `git show 3ceed17:docs/improvements.md`.
    round on Squares asks only squares", uses `Math.random`. It failed 6 of 40
    runs before the 2026-11-18 simplification pass, so it is not new.
 
-4. **Times Trail `game.js` and `GameUI.js` are still about 46% comments.** The
-   2026-11-18 pass cut the history and `§` references only. Test files still
-   cite `§ 17` and `§ 22`.
+4. **Tool pages restate shared input and button CSS.** `.float-input`,
+   `.int-input` and `.lab-input` copy `.form-input` (`style.css`); `.lab-btn`
+   copies `.btn-primary` and `.btn-tertiary`; `floating-point.html` redefines
+   `.example-btn`. About 120 lines over five pages. Padding and borders would
+   shift slightly, so check the pages in a browser when you do it.
 
 5. **Seasons README is 591 lines.** Its difficulty table was not checked
    against `seasons.js`. The `_choices` loop in `arithmetic.js` no longer has
    its hang guard for answers above 2^53; no season can produce one.
+
+6. **Times Trail FactSelector tests read `_retryQueue`.** About 20 tests
+   asserted through `peekRetryQueue()`, which was test-only and is gone. A
+   `retryQueue(selector)` helper in the test reads the private field instead.
+   Rewrite them around behavior if that matters.
 
 ## Deferred
 
@@ -48,6 +55,10 @@ changes.
   and the `shared/theme.js` popover on every `/zh/` page. `life-garden`'s
   `第 0 代` reverts to English on the first step. Turing Tape reads its
   runtime text from `js/strings.js` by `<html lang>`, so it stays Chinese.
+- **Tokenizer Comparison keeps its own UTF-8 code** (2026-11-19).
+  `TextEncoder` and `TextDecoder` could replace about 120 lines in
+  `tokenizer-comparison.js`, but `bytesToText` is used by the page, not only by
+  tests. Owner: keep for now.
 - **The coverage test cannot see inside `<script>` blocks.**
   `__tests__/zh-coverage.test.js` strips them, so a script-block key that
   matches the wrong `>…<` passes silently. Build and grep to check.
@@ -55,6 +66,9 @@ changes.
 ## Settled
 
 Decided with no change, so these are not re-proposed:
+
+- **The maze keeps its seed and `?seed=` URL sync, and the Coin Flipper keeps
+  its weighted and d6 modes** (2026-11-19). Both were proposed as cuts.
 
 - **Chart.js has an SRI hash** (2026-11-18): `integrity="sha384-..."` on the
   Coin Flipper's `chart.js@4.4.7` script. The owner computed the hash in a normal
@@ -90,6 +104,17 @@ Decided with no change, so these are not re-proposed:
   complete, so rare characters such as 糧 and 纜 pass through (2026-09-25).
 - **Commit `0f300d7` carries the work email address.** Rewriting public history
   would not remove it, because GitHub keeps orphaned commits reachable.
+
+Landed 2026-11-19 (readability audit): Truth Tables applied `and` and `or`
+last and left to right, so `a or b and c` meant `(a or b) and c`; it now uses
+the Logic Engine's order, with `implies` right-associative. The Logic Engine
+parser uses one precedence table, and `inferNextSteps` is synchronous.
+`BaseGameUI` lost seven methods every game overrode; `isPlainObject` and
+`nonNegativeInt` live in `games/shared/validate.js`; Seasons has no art-pack
+registry. History comments are cut across the games (including Times Trail's
+headers and the test files' `§` references), `build.js` and the CSS. The
+theme picker CSS is in `style.css`. The character converter's direction
+buttons use `.preset-btn`.
 
 Landed 2026-10-21: the password generator uses `crypto`; the converter
 escapes `?text=`; the Life Calculator parses dates as local and rejects future
@@ -173,6 +198,9 @@ a person to look, on an iPad where it matters:
 - Turing Tape's blank rule row and "Next puzzle" button; Number Garden's
   struck-off choices.
 - The maze's new speed range, at both ends of the slider.
+- The theme picker popover, now styled from `style.css`, on a tool page, a
+  `/zh/` page and each game; and the character converter's direction buttons,
+  which now have the preset-button hover.
 - The tokenizer comparison's mix slider and the integer explorer's bit layout.
 - Five Readings' readings are from memory (the page says so). Check them
   against Unihan; the least certain are the Cantonese tones for 骨, 立, 音 and
