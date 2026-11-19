@@ -14,9 +14,17 @@
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <style type="text/css">
+      :root {
+        --tt-text: #000;
+        --tt-freq1: #000;
+        --tt-freq2: #222;
+        --tt-freq3: #444;
+        --tt-freq4: #666;
+        --tt-freq5: #888;
+      }
       #tonetable {
         border-collapse: collapse;
-        color: #000;
+        color: var(--tt-text);
         max-width: 100%;
         table-layout: fixed;
       }
@@ -48,53 +56,57 @@
         background-color: #fcc;
       }
       #tonetable .freq1 {
-        color: #000;
+        color: var(--tt-freq1);
       }
       #tonetable .freq2 {
-        color: #222;
+        color: var(--tt-freq2);
       }
       #tonetable .freq3 {
-        color: #444;
+        color: var(--tt-freq3);
       }
       #tonetable .freq4 {
-        color: #666;
+        color: var(--tt-freq4);
       }
       #tonetable .freq5 {
-        color: #888;
+        color: var(--tt-freq5);
       }
 
+      /* Dark colors: the OS preference unless the site toggle says light, or the
+         toggle says dark. Keep the two blocks in step. */
       @media (prefers-color-scheme: dark) {
-        #tonetable {
-          color: #e0e0e0;
+        :root:not([data-theme="light"]) {
+          --tt-text: #e0e0e0;
+          --tt-freq1: #fff;
+          --tt-freq2: #ddd;
+          --tt-freq3: #bbb;
+          --tt-freq4: #999;
+          --tt-freq5: #777;
         }
 
-        #tonetable .freq1 {
-          color: #fff;
-        }
-
-        #tonetable .freq2 {
-          color: #ddd;
-        }
-
-        #tonetable .freq3 {
-          color: #bbb;
-        }
-
-        #tonetable .freq4 {
-          color: #999;
-        }
-
-        #tonetable .freq5 {
-          color: #777;
-        }
-
-        a {
+        :where(:root:not([data-theme="light"])) a {
           color: #5ba3ff;
         }
 
-        a:visited {
+        :where(:root:not([data-theme="light"])) a:visited {
           color: #b19cd9;
         }
+      }
+
+      [data-theme="dark"] {
+        --tt-text: #e0e0e0;
+        --tt-freq1: #fff;
+        --tt-freq2: #ddd;
+        --tt-freq3: #bbb;
+        --tt-freq4: #999;
+        --tt-freq5: #777;
+      }
+
+      :where([data-theme="dark"]) a {
+        color: #5ba3ff;
+      }
+
+      :where([data-theme="dark"]) a:visited {
+        color: #b19cd9;
       }
     </style>
     <script src="/shared/theme.js"></script>
