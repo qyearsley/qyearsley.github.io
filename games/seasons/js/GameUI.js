@@ -6,36 +6,27 @@
  * whether a season is won, or what question comes next.
  *
  * - It must not import GameState. Reading a state is fine, advancing one is
- *   not, and the absent import is what keeps that from happening by accident.
- *   (GameState and seasons.js appear in JSDoc types below; a type is a comment,
- *   not an import.)
- * - Nothing here uses `innerHTML`. Every node is built with `createElement` or
- *   the art pack's `createElementNS` helper, and every string is written with
- *   `textContent`. `BaseGameUI` no longer offers a way to write markup at all.
+ *   not, and the absent import keeps that from happening by accident. (GameState
+ *   and seasons.js appear in JSDoc types; a type is a comment, not an import.)
+ * - Nothing here uses `innerHTML`. Nodes are built with `createElement` or the
+ *   art pack's `createElementNS` helper, and strings are written with
+ *   `textContent`.
  * - No drawing decision lives here. Characters, items, obstacles, the backdrop,
- *   the snake woman, the trail's geometry, the motion of each crossing, and the
- *   palette all come from the active art pack, so this file works unchanged when
- *   the art is replaced.
+ *   the snake woman, the trail's geometry, each crossing's motion and the
+ *   palette all come from the active art pack.
  * - The trail is wider than the screen and scrolls by panning a camera group,
  *   because a `viewBox` cannot be animated and a transform can. The backdrop is
- *   several more such groups, each panned by the same offset scaled by the
- *   parallax factor its own layer reported, which is the only thing this file
- *   knows about depth -- how many layers there are, what is in them and how
- *   fast each moves are all the pack's. Both the geometry and the crossing
- *   animations come from the art pack, so a pack could hand back a spiral, or
- *   swap sprite frames where this one arcs a transform, and nothing here
- *   changes. No SVG geometry is measured, so the class works under jsdom
- *   without a test-only branch.
+ *   several more groups, each panned by the same offset scaled by its layer's
+ *   parallax factor, which is all this file knows about depth. No SVG geometry
+ *   is measured, so the class works under jsdom without a test-only branch.
  * - The countdown lives here rather than in GameState, because a clock is not a
- *   rule. `startTimer` owns the interval and `stopTimer` is safe to call at any
- *   time, including when no timer is running. Whether a clock runs at all is a
- *   player preference, and game.js decides that at the call site: this class is
- *   simply handed `null` seconds and hides the bar.
+ *   rule. `stopTimer` is safe to call at any time. Whether a clock runs at all
+ *   is a player preference that game.js decides; this class is handed `null`
+ *   seconds and hides the bar.
  *
  * Error Handling: every method returns quietly when the element it needs is
- * absent, matching `BaseGameUI`'s style. A missing node means the markup and
- * this file have drifted, which should degrade the screen rather than stop the
- * game mid-season.
+ * absent, matching `BaseGameUI`. A missing node means the markup and this file
+ * have drifted, which should degrade the screen rather than stop the game.
  */
 
 import { BaseGameUI } from "../../shared/BaseGameUI.js"
@@ -95,11 +86,9 @@ const BURST_MARKS = 12
 /**
  * Code point of "A", so the nth answer button can be named A, B, C, D.
  *
- * Letters, not digits. Every answer in this game is a number, so a small "3" in
- * the corner of a button reading "34" is one glance away from being read as part
- * of the answer. A letter is a *name* for the choice and cannot be mistaken for
- * one. Derived from the index rather than listed, so the run of letters follows
- * `PLAY.CHOICE_COUNT` if it ever changes. `game.js` reverses this arithmetic to
+ * Letters, not digits: a small "3" in the corner of a button reading "34" is
+ * one glance from being read as part of the answer. Derived from the index so
+ * the letters follow `PLAY.CHOICE_COUNT`. `game.js` reverses this arithmetic to
  * turn a keypress back into an index.
  * @private
  */
@@ -114,11 +103,9 @@ export class GameUI extends BaseGameUI {
     /** @type {number} Milliseconds left on the current question. */
     this._timeLeftMs = 0
     /**
-     * Seasons in play order, for the finished potion on the end-of-run screen:
-     * one collectible per season, in the order they were played. Assigned once
-     * by game.js rather than imported, for the reason given on
-     * `renderJourneySoFar`. Empty means the flask is simply drawn empty rather
-     * than this file inventing a season list of its own.
+     * Seasons in play order, for the finished potion on the end-of-run screen.
+     * Assigned once by game.js rather than imported, for the reason given on
+     * `renderJourneySoFar`. Empty means the flask is drawn empty.
      * @type {Array<{id: string, name: string}>}
      */
     this.seasonOrder = []
@@ -211,9 +198,8 @@ export class GameUI extends BaseGameUI {
    * Draw the character-select screen.
    *
    * The cards carry no `aria-pressed`: choosing one starts the season
-   * immediately, so there is no persistent selected state for it to describe,
-   * and a default character would make the first card announce itself as
-   * already pressed. They are plain action buttons.
+   * immediately, so there is no persistent selected state for it to describe.
+   * They are plain action buttons.
    *
    * @param {function(string): void} onChoose - Called with a character id
    */
@@ -257,14 +243,9 @@ export class GameUI extends BaseGameUI {
    * Draw the "journey so far" panel under the character cards: which of the
    * four seasons are open, and the counters that carry across runs.
    *
-   * Both halves already existed in the save and neither reached the screen, so
-   * nothing told a player there were four seasons at all, or that the question
-   * counts were cumulative rather than per-run.
-   *
-   * The season list is passed in rather than imported. `GameUI` sits above
+   * The season list is passed in rather than imported: `GameUI` sits above
    * `seasons.js` in the dependency order and does not otherwise know about the
-   * levels; keeping it that way means the panel stays a view of whatever it is
-   * handed.
+   * levels, so the panel stays a view of whatever it is handed.
    *
    * @param {Object|null} save - The save state, or null before one is loaded
    * @param {Array<{id: string, name: string}>} seasons - Seasons, in play order
@@ -326,10 +307,8 @@ export class GameUI extends BaseGameUI {
     const host = this.elements.trail
     if (!host || !season) return
 
-    // Built once per season+character, then only moved. The camera pan and the
-    // traversal animation both need elements that persist while their transforms
-    // change; rebuilding the scene every question would make the character
-    // teleport and the landscape jump.
+    // Built once per season+character, then only moved: the pan and traversal
+    // animations need elements that persist, or the character would teleport.
     const key = `${season.id}:${characterId}`
     if (this._trailKey === key && this._trail?.canvas.isConnected) {
       this._placeToken(position, { animate: false })
@@ -341,20 +320,15 @@ export class GameUI extends BaseGameUI {
 
     const canvas = svg("svg", { viewBox: plan.viewBox, class: "trail-svg", role: "img" })
 
-    // The backdrop is not one group but several, each with its own parallax
-    // factor, and each therefore needing its own transform -- so they are
-    // siblings of the camera rather than children of it. What is drawn in them,
-    // how many there are and how fast each moves are all the pack's business;
-    // this loop only mounts what it is given, in the order it is given, back to
-    // front.
+    // The backdrop is several groups, each with its own parallax factor and so its
+    // own transform, which makes them siblings of the camera rather than children.
+    // This loop only mounts what the pack gives it, back to front.
     const backdrop = this.pack.backdrop(season.id, plan.width)
     const layers = []
     for (const plane of backdrop.layers ?? []) {
       const group = svg("g", {
-        // `is-still` is the stylesheet's cue not to promote a layer that never
-        // moves onto its own compositor layer. Derived from the factor the pack
-        // reported rather than from the layer's name, so nothing here has to
-        // know that "sky" is the fixed one.
+        // `is-still` tells the stylesheet not to promote a layer that never moves.
+        // It comes from the reported factor, not the layer's name.
         class: `trail-layer${plane.factor === 0 ? " is-still" : ""}`,
         "data-layer": plane.name,
       })
@@ -363,11 +337,9 @@ export class GameUI extends BaseGameUI {
       layers.push({ group, factor: plane.factor })
     }
 
-    // Everything that moves with the ground inside the camera group; panning it
-    // is what scrolls the trail. `viewBox` would be the obvious thing to move
-    // instead, but it is not animatable, and a transform is. The camera is the
-    // last layer and its factor is 1 by definition: it *is* the ground, and the
-    // parallax factors above are all measured against it.
+    // Everything that moves with the ground sits inside the camera group, and
+    // panning it scrolls the trail (`viewBox` is not animatable). Its factor is 1
+    // by definition: it is the ground, and the layers above are measured against it.
     const camera = svg("g", { class: "trail-camera" })
     canvas.append(camera)
     layers.push({ group: camera, factor: 1 })
@@ -375,10 +347,9 @@ export class GameUI extends BaseGameUI {
     for (const d of plan.groundSegments) {
       camera.append(svg("path", { d, class: "trail-ground" }))
     }
-    // The band of material along the top of the ground, over the earth and
-    // under everything standing on it. One path per ground segment, from the
-    // same list of samples, so it follows the river basins down and stops at
-    // the lip of every gap.
+    // The band along the top of the ground, over the earth and under everything on
+    // it. One path per segment, from the same samples, so it follows the basins
+    // and stops at every gap.
     for (const d of plan.groundEdges ?? []) {
       camera.append(svg("path", { d, class: "trail-ground-edge" }))
     }
@@ -392,8 +363,7 @@ export class GameUI extends BaseGameUI {
         transform: `translate(${spot.x} ${spot.y})`,
       })
       if (space.glowing) {
-        // Ella's "light where it's pretty and glowing" -- now behind a mountain
-        // rather than a dot, so it haloes the thing being climbed.
+        // The glow sits behind a mountain, so it haloes the thing being climbed.
         group.append(svg("circle", { ...plan.glow, class: "obstacle-glow" }))
       }
       group.append(this.pack.obstacle(space.kind, season.id).element)
@@ -424,17 +394,14 @@ export class GameUI extends BaseGameUI {
   /**
    * Put a drawing inside a group that idles, if the pack says it should.
    *
-   * `idle` is the one optional export in the art contract, so a pack that does
-   * not have it -- or does not want this subject to move -- gets the drawing
-   * back untouched and the trail behaves exactly as it did before.
+   * `idle` is the one optional export in the art contract, so a pack without it
+   * gets the drawing back untouched.
    *
-   * The extra group is load-bearing. This one owns the walk (`.trail-token`'s
-   * transform) and the drawing inside already carries the pack's `scale`, so
-   * the idle needs an element of its own: a CSS transform replaces an element's
-   * transform attribute rather than composing with it, and animating either of
-   * the other two would throw away the position or the size.
+   * The extra group is load-bearing. `.trail-token` owns the walk and the
+   * drawing inside carries the pack's `scale`, and a CSS transform replaces a
+   * transform attribute rather than composing with it, so the idle needs an
+   * element of its own.
    *
-   * @private
    * @param {string} subjectId - A character id, or "villain"
    * @param {SVGElement} art - The drawing to wrap
    * @returns {SVGElement} The wrapper, or `art` itself when nothing idles
@@ -460,12 +427,9 @@ export class GameUI extends BaseGameUI {
     if (!t) return
     const index = Math.max(0, Math.min(position, t.plan.stops.length - 1))
     const stop = t.plan.stops[index]
-    // Clear any finished crossing first. Every traversal is played with
-    // `fill: "forwards"`, and a filling animation outranks inline style in the
-    // cascade -- so writing `style.transform` here was silently ignored and the
-    // character stayed wherever it last walked to. That stranded the animal
-    // beside the snake woman when a season was retried, since the reuse branch
-    // of `renderTrail` calls this and nothing else.
+    // Clear any finished crossing first. Traversals play with `fill: "forwards"`,
+    // which outranks inline style, so without this the character would stay where
+    // it last walked (stranded beside the snake woman on a retry).
     this._cancelAnimations()
     t.token.style.transform = this.pack.standing(stop)
     this._panCamera(stop, { animate })
@@ -475,9 +439,8 @@ export class GameUI extends BaseGameUI {
   /**
    * Drop any animations still applying to the token or the camera.
    *
-   * Separate from `skipTraversal`, which *finishes* a running crossing on
-   * purpose. This throws the results away, so an inline transform can take
-   * effect again.
+   * Separate from `skipTraversal`, which finishes a running crossing on purpose.
+   * This throws the results away, so an inline transform can take effect again.
    * @private
    */
   _cancelAnimations() {
@@ -494,15 +457,11 @@ export class GameUI extends BaseGameUI {
    * Scroll the trail so the character sits comfortably in view, clamped so the
    * camera never runs off either end of the landscape.
    *
-   * One offset, applied to every layer scaled by that layer's parallax factor.
-   * The ground's layer has a factor of 1 and so moves by the whole offset; a
-   * ridge on the horizon at 0.25 moves by a quarter of it and therefore appears
-   * to be four times further away. The clamp is applied to the offset *before*
-   * the factors, which is what keeps this safe: every layer is asked for a
-   * window no further along than `factor * furthest + viewportWidth`, and the
-   * pack promises a `span` at least that wide -- see `BackdropLayer`.
+   * One offset, applied to every layer scaled by its parallax factor: the ground
+   * has 1, and a horizon ridge at 0.25 moves a quarter as far, so it looks four
+   * times further away. The clamp comes before the factors, which keeps every
+   * layer's window within the `span` the pack promises (see `BackdropLayer`).
    *
-   * @private
    * @param {{x: number, y: number}} stop - Where the character is
    * @param {{animate: boolean}} options - Whether to pan or jump
    * @returns {Array<Animation>} The pans that were started, which may be empty
@@ -524,14 +483,13 @@ export class GameUI extends BaseGameUI {
         layer.group.style.transform = target
         continue
       }
-      // A layer that is already where it is going gets no animation at all.
-      // That is every crossing for a fixed sky, and starting a no-op animation
-      // on it would promote it to its own compositor layer for nothing.
+      // A layer already where it is going gets no animation; a no-op
+      // one would still get its own compositor layer.
       if (current === target) continue
       const pan = layer.group.animate([{ transform: current || target }, { transform: target }], {
-        // Under reduced motion the pan matches the pack's plain slide rather
-        // than the leisurely drift: a long eased pan of the whole landscape is
-        // a large moving field, which is the thing the preference is about.
+        // Under reduced motion the pan matches the pack's plain
+        // slide; a long eased pan of the whole landscape is what the
+        // preference is about.
         duration: reduced ? CAMERA_REDUCED_MS : CAMERA_MS,
         easing: reduced ? "linear" : "ease-in-out",
         fill: "forwards",
@@ -545,21 +503,15 @@ export class GameUI extends BaseGameUI {
   /**
    * Animate the character across the obstacle it is standing in front of.
    *
-   * The motion comes from the art pack, so a sprite pack could swap frames
-   * where this one arcs a transform, and nothing here needs to know. Returns a
-   * promise so the caller can wait before asking the next question, and
-   * `skipTraversal` can cut it short if the player is faster than the animation.
+   * The motion comes from the art pack. Returns a promise so the caller can wait
+   * before the next question, and `skipTraversal` can cut it short.
    *
-   * Three paths, and they are three different conditions rather than one:
+   * Three paths, for three different conditions:
    *
-   * - No Web Animations API at all -- jsdom, and nothing else in practice --
-   *   places the character instantly. There is nothing else it could do.
+   * - No Web Animations API (jsdom) places the character instantly.
    * - `prefers-reduced-motion` asks the pack for its reduced crossing, a plain
-   *   slide. This used to be folded in with the case above and placed the
-   *   character instantly too, which meant the trail's main piece of feedback
-   *   simply did not happen for anyone with the system setting on. A pack with
-   *   no reduced crossing to offer falls back to the instant placement, which
-   *   is no worse than what it did before.
+   *   slide, so the trail's main feedback still happens. A pack with none falls
+   *   back to instant placement.
    * - Otherwise the full crossing, arc and squash and all.
    *
    * @param {number} from - The stop being left
@@ -581,12 +533,10 @@ export class GameUI extends BaseGameUI {
       return Promise.resolve()
     }
 
-    // Everything from here on is wrapped, and the wrap is load-bearing rather
-    // than decorative. The caller holds its "an answer is being processed" flag
-    // until this promise settles, so a throw escaping this method would leave
-    // that flag stuck on and the game would accept no further answers until the
-    // page was reloaded. A pack handing back keyframes a browser rejects is
-    // exactly the kind of thing a future sprite pack could do.
+    // Everything from here on is wrapped, and the wrap is load-bearing. The caller
+    // holds its "answer being processed" flag until this promise settles, so an
+    // escaping throw would stick it on and the game would accept no more answers.
+    // A pack could hand back keyframes a browser rejects.
     let move
     try {
       const { keyframes, options } = motion.call(this.pack, kind, start, finish)
@@ -613,9 +563,8 @@ export class GameUI extends BaseGameUI {
    * Cut a crossing short and land the character. Safe to call when nothing is
    * animating, which is what lets a tap anywhere skip it.
    *
-   * Every pan is finished, not just the ground's: with the backdrop split into
-   * parallax layers a skip that only landed the character would leave four
-   * ridges still drifting behind a stationary animal.
+   * Every pan is finished, not just the ground's, or a skip would leave the
+   * ridges drifting behind a stationary animal.
    */
   skipTraversal() {
     if (!this._crossing) return
@@ -666,22 +615,18 @@ export class GameUI extends BaseGameUI {
     if (!season) return
     this.setText("season-name", season.name)
     this.setText("demand-line", season.demandText)
-    // Drawn once, not once per answer. `villain()` takes no arguments and so
-    // returns the same picture every time, but it is by far the biggest thing
-    // the pack builds -- the coiled tail alone is hundreds of ellipses -- and
-    // renderHud runs on every answer. Rebuilding it each time cost more than
-    // the rest of the game put together. The check is against the live DOM
-    // rather than a flag on `this`, so a fresh page with a fresh GameUI draws
-    // it again.
+    // Drawn once, not once per answer: `villain()` returns the same picture every
+    // time and is the biggest thing the pack builds, and renderHud runs on every
+    // answer. The check is against the live DOM, not a flag on `this`, so a fresh
+    // GameUI draws it again.
     const portrait = this.elements["villain-portrait"]
     if (portrait && !portrait.firstElementChild) {
       this._mount(portrait, this.pack.villain(), "villain-svg")
     }
     this.renderItemTrack(state, season)
 
-    // One sentence in one node, in a live region. Split across several elements
-    // the fragments announce as disconnected words, and the count -- the whole
-    // state of the game -- changes silently if it is in no live region at all.
+    // One sentence in one node, in a live region. Split across elements the
+    // fragments announce as disconnected words, and the count would change silently.
     const noun = season.demand === 1 ? season.itemName : season.itemPlural
     // This file deliberately does not import the rulebook, so it does the
     // subtraction itself.
@@ -708,13 +653,11 @@ export class GameUI extends BaseGameUI {
    * rather than a numeral is what makes "fetch thirteen roses" legible to a
    * child.
    *
-   * Every pip uses the plain variant. `item()` also offers a brighter `rare`
-   * one, but which items came from glowing spaces is not tracked -- the state
-   * holds a count, not a list -- so there is nothing to key it off yet.
+   * Every pip uses the plain variant: `item()` has a brighter `rare` one, but the
+   * state holds a count, not which items came from glowing spaces.
    *
-   * The container carries `aria-hidden` in the markup: the count beside it
-   * already says the same thing in a live region, and one announcement per slot
-   * would bury it.
+   * The container is `aria-hidden` in the markup: the count beside it already
+   * says the same thing in a live region.
    *
    * @param {Object} state - The current GameState
    * @param {import("./seasons.js").Season} season - The season being played
@@ -725,22 +668,17 @@ export class GameUI extends BaseGameUI {
     track.replaceChildren()
 
     const earned = Math.max(0, state.items)
-    // Slots never exceed the demand in a real run -- the trail plus the boss
-    // pays exactly that -- but `items` comes off a save file that storage only
-    // clamps to non-negative, so a hand-edited `items: 5000000` must not build
-    // five million spans on this render and every one after it.
+    // Slots never exceed the demand in a real run, but `items` comes off a save
+    // that storage only clamps to non-negative, so a hand-edited huge value must
+    // not build millions of spans on every render.
     const slots = Math.min(MAX_ITEM_PIPS, Math.max(season.demand, earned))
 
-    // Which pips are new since the last render, so only those pop in. The row
-    // is rebuilt from scratch every time, so without this an animation on
-    // `.is-earned` would replay across the whole row on every answer -- which
-    // is why this was deferred once as needing a state change.
-    //
-    // It does not need one. What is new is a fact about the previous *render*,
-    // not about the game, so this file can remember it: the count it last drew,
-    // and which season it drew it for. Nothing pops on the first draw of a
-    // season, which is what stops a reloaded save firing seven at once, and
-    // nothing pops when the count goes down.
+    // Which pips are new since the last render, so only those pop in (the row is
+    // rebuilt every time, which would replay an animation on every pip). What is
+    // new is a fact about the previous render, so this file remembers the count it
+    // last drew and for which season. Nothing pops on a season's first draw, so a
+    // reloaded save does not fire seven at once, and nothing pops when the count
+    // goes down.
     const drawn = this._pipsDrawn
     const newFrom = drawn && drawn.seasonId === season.id ? drawn.earned : earned
     this._pipsDrawn = { seasonId: season.id, earned }
@@ -772,9 +710,8 @@ export class GameUI extends BaseGameUI {
     if (!question || !choices) return
 
     this.setText("question-prompt", question.prompt)
-    // The caller supplies the label rather than this file deriving it. Player
-    // copy lives in game.js, and the boss label has to say how many tries are
-    // left and what the question is worth -- neither of which the UI knows.
+    // The caller supplies the label: player copy lives in game.js, and
+    // the boss label needs the tries left and the question's worth.
     this.setText("question-tag", tag)
     this.setVisible("question-tag", tag !== "")
     document.body.classList.toggle("is-glowing-question", lit)
@@ -786,17 +723,14 @@ export class GameUI extends BaseGameUI {
       button.className = "choice"
       button.textContent = String(value)
       button.dataset.value = String(value)
-      // The A-D keyboard shortcut, in two forms. `aria-label` makes it audible;
-      // `data-key` is what the stylesheet prints in the corner of the button,
-      // and only on a device with a real pointer -- see `.choice::before`. On
-      // the iPad the shortcut does not exist, so nothing is drawn there at all.
+      // The A-D shortcut, in two forms: `aria-label` makes it audible, and
+      // `data-key` is printed in the corner only on a device with a real pointer
+      // (see `.choice::before`).
       const key = String.fromCodePoint(FIRST_CHOICE_KEY + index)
       button.dataset.key = key
       button.setAttribute("aria-label", `Answer ${key}: ${value}`)
-      // A struck-out choice must not answer again. The `answering` guard in
-      // game.js is released the instant a wrong answer is rejected -- that is
-      // the point of the retry, the buttons stay live -- so it is no longer the
-      // thing that stops a second tap on the button just eliminated.
+      // A struck-out choice must not answer again. The `answering` guard in game.js
+      // is released as soon as a wrong answer is rejected, so it no longer stops it.
       button.addEventListener("click", () => {
         if (button.classList.contains("is-out")) return
         onAnswer(value, button)
@@ -809,14 +743,11 @@ export class GameUI extends BaseGameUI {
   /**
    * Move focus onto the first live answer choice.
    *
-   * The one caller that needs this is `_askQuestion` in game.js, and only right
-   * after the reinforcement card closes: its "Got it" button was focused, the
-   * card is now `display: none`, and a keyboard or screen-reader user has
-   * nowhere left to land -- see `showReinforcement`. The ordinary
-   * question-to-question turnover does not call this: moving focus with no user
-   * action behind it would interrupt a screen reader mid-sentence, which is why
-   * `render` in game.js only refocuses the heading on arrival, never between
-   * questions.
+   * Used by `_askQuestion` in game.js, right after the reinforcement card
+   * closes: its "Got it" button had focus and the card is now `display: none`,
+   * so a keyboard user has nowhere to land. Ordinary question-to-question
+   * turnover does not call it, since moving focus unprompted would interrupt a
+   * screen reader mid-sentence.
    *
    * @returns {void}
    */
@@ -828,17 +759,14 @@ export class GameUI extends BaseGameUI {
   /**
    * Reject a wrong answer without resolving the question.
    *
-   * The counterpart to `flashAnswer` under the retry rule, and deliberately not
-   * a flash: there is nothing to wait out. The pressed button is struck off,
-   * every other button stays live, and the player tries again immediately. The
-   * correct answer is **not** marked, which is the whole point -- Ella's rule is
-   * that the student finds it rather than being shown it.
+   * The counterpart to `flashAnswer` under the retry rule, and not a flash:
+   * there is nothing to wait out. The pressed button is struck off, every other
+   * stays live, and the player tries again at once. The correct answer is not
+   * marked: the student finds it rather than being shown it.
    *
-   * The pressed button is struck off *before* the hint is computed, not after.
-   * `hintTargets` looks at which buttons are still live to decide how many more
-   * to take, and the one just pressed is the player's own elimination -- get the
-   * order backwards and a hint can end up taking both of the other wrong choices
-   * instead of one, leaving nothing standing but the answer.
+   * The pressed button is struck off before the hint is computed. `hintTargets`
+   * looks at which buttons are still live, and the wrong order could take both
+   * other wrong choices, leaving only the answer.
    *
    * @param {HTMLButtonElement|null} pressed - The button pressed, null on timeout
    * @param {string} message - The line to show under the question
@@ -876,10 +804,9 @@ export class GameUI extends BaseGameUI {
    * Which wrong choices the hint should remove.
    *
    * Leaves HINT_CHOICES_LEFT buttons standing, counting the ones already struck
-   * off, and never the answer. Computed here rather than in GameState because
-   * it depends on what is on screen: the player has usually eliminated one
-   * herself by pressing it, and removing a full two more on top of that would
-   * leave the answer alone and unmissable.
+   * off, and never the answer. Computed here rather than in GameState because it
+   * depends on what is on screen: the player has usually eliminated one already,
+   * and two more on top would leave the answer alone and unmissable.
    *
    * @param {number} correctValue - The answer, which is never removed
    * @returns {number[]} Values to strike off
@@ -901,11 +828,10 @@ export class GameUI extends BaseGameUI {
   /**
    * Flash the result of an answer on the buttons, then lock them.
    *
-   * For an answer that resolved the question. Since 2026-09-21 that means a
-   * right answer: a wrong one leaves the question up and goes to `rejectAnswer`
-   * instead. The `outcome.correct` branches below are kept because a timeout on
-   * the *last* allowed try would come through here, and because this method's
-   * job is to draw the outcome it is handed rather than to assume one.
+   * For an answer that resolved the question, normally a right one (a wrong one
+   * goes to `rejectAnswer`). The `outcome.correct` branches stay because a
+   * timeout on the last allowed try comes through here, and this method draws
+   * the outcome it is handed.
    *
    * @param {import("./GameState.js").Outcome} outcome - What happened
    * @param {HTMLButtonElement|null} pressed - The button pressed, null on timeout
@@ -916,11 +842,9 @@ export class GameUI extends BaseGameUI {
     const choices = this.elements.choices
     if (choices) {
       for (const button of choices.querySelectorAll("button")) {
-        // `aria-disabled` rather than `disabled`. Disabling the element that
-        // currently has focus drops focus to <body> in every browser, so a
-        // keyboard user had to tab in from the top of the document before
-        // every single question. The `answering` guard in game.js is what
-        // actually rejects a second answer; this only says so.
+        // `aria-disabled` rather than `disabled`: disabling the focused element drops
+        // focus to <body>. The `answering` guard in game.js rejects a second answer;
+        // this only says so.
         button.setAttribute("aria-disabled", "true")
         button.classList.add("is-locked")
         if (Number(button.dataset.value) === correctValue) {
@@ -948,15 +872,13 @@ export class GameUI extends BaseGameUI {
    * Show the reinforcement card: the fact she just worked out, in full, with a
    * picture of it.
    *
-   * This is the one screen in the game that waits for the player rather than a
-   * timer. It appears after a missed question is finally answered right, and it
-   * is the only teaching the loop does now that a wrong answer no longer states
-   * the answer. Rushing it on a timeout would defeat the point, so the only way
-   * past is the button.
+   * The one screen that waits for the player rather than a timer. It appears
+   * after a missed question is finally answered right, and is the only teaching
+   * the loop does, since a wrong answer does not state the answer. So the only
+   * way past is the button.
    *
-   * The card draws whichever model kinds it knows and shows the equation alone
-   * for anything else, so a challenge module can describe a new kind of picture
-   * without this file being the thing that blocks it.
+   * It draws the model kinds it knows and shows the equation alone otherwise, so
+   * a challenge module can describe a new picture without this file blocking it.
    *
    * @param {{equation: string, model: Object|null, }} explanation - From the
    *   challenge module's `explain`
@@ -977,8 +899,8 @@ export class GameUI extends BaseGameUI {
     card.classList.remove("hidden")
     const done = this.elements["reinforce-done"]
     if (done instanceof HTMLElement) {
-      // Replaced rather than added to: the card is reused for every fact, so a
-      // listener per appearance would fire once per question missed this run.
+      // Replaced, not added: the card is reused, so a listener per
+      // appearance would fire once per miss.
       done.onclick = () => {
         card.classList.add("hidden")
         done.onclick = null
@@ -1166,9 +1088,9 @@ export class GameUI extends BaseGameUI {
   /**
    * Put the settings controls in step with the saved preferences.
    *
-   * One control so far. Called on load and after every change, so the checkbox
-   * reflects the save rather than the save reflecting the checkbox -- which is
-   * what makes a rejected or coerced value visible instead of silent.
+   * Called on load and after every change, so the checkbox reflects the save
+   * rather than the other way round, which makes a rejected or coerced value
+   * visible.
    *
    * @param {import("./storage.js").Settings} settings - The saved preferences
    */
@@ -1182,10 +1104,10 @@ export class GameUI extends BaseGameUI {
    * keypress reach the answer buttons underneath it, and before starting a
    * clock on a question the dialog is covering.
    *
-   * Looked up live rather than read off `this.elements`, unlike everything else
-   * in this class. `showSettings` and `hideSettings` are the base class's and
-   * they look the dialog up the same way, so a cached node could describe a
-   * page this instance no longer owns while the real dialog is open.
+   * Looked up live rather than read off `this.elements`, as `showSettings` and
+   * `hideSettings` in the base class do, so a cached node cannot describe a
+   * page this instance no longer owns.
+   *
    * @returns {boolean} True while the dialog is open
    */
   get settingsOpen() {
@@ -1247,10 +1169,8 @@ export class GameUI extends BaseGameUI {
         button.addEventListener("click", action.onClick)
         holder.append(button)
       }
-      // Not while the settings dialog is open. A flash timeout can resolve a
-      // season behind it, and this button is the second of the two things that
-      // would then pull focus out of an `aria-modal` dialog; `focusHeading` is
-      // the other.
+      // Not while the settings dialog is open: a flash timeout can resolve a season
+      // behind it, and this and `focusHeading` would pull focus out of the dialog.
       if (!this.settingsOpen) holder.querySelector("button")?.focus()
     }
   }
@@ -1296,20 +1216,12 @@ export class GameUI extends BaseGameUI {
   /**
    * Draw the finished potion: the last thing the game shows.
    *
-   * The end-of-run screen used to be a title, a paragraph and a table of four
-   * numbers -- the flattest screen in the game, at the one moment that has been
-   * earned. Every other result screen draws the haul going into the jar, and
-   * this one could not, because every per-season counter belongs to the last
-   * season played.
+   * The thing the whole run was for: one rare collectible from each season,
+   * suspended in the finished flask, and the snake woman beside it, pleased,
+   * drawn large rather than at the HUD's 62px. It needs no per-season counts,
+   * because every per-season counter belongs to the last season played. The
+   * flask is CSS and the collectibles are the pack's, as with the jar.
    *
-   * What it draws instead is the thing the whole run was for: one rare
-   * collectible from each season, suspended in the finished flask, and the
-   * snake woman beside it with the one expression the game has never shown --
-   * her actually pleased, drawn large rather than at the 62px the HUD portrait
-   * gets. It needs no per-season counts, it is the only screen where all four
-   * seasons appear at once, and it comes free from art the pack already has.
-   * The flask is CSS and the collectibles are the pack's, the same split as the
-   * jar -- so a new art pack changes what is in it without owning the glass.
    * @private
    */
   _renderFinale() {
@@ -1357,21 +1269,16 @@ export class GameUI extends BaseGameUI {
    * Draw the season's haul going into the snake woman's jar, with the animal
    * that fetched it jumping beside it.
    *
-   * After a season of gathering roses the payoff used to be five rows of
-   * numbers. The collectibles are already drawn by the art pack for the HUD, so
-   * showing the pile she actually delivered costs nothing new to draw, and the
-   * burst and the jump are CSS on art that already exists -- which is what gets
-   * `prefers-reduced-motion` for free, the same bargain the weather and the
-   * item pips already take.
+   * The collectibles are already drawn by the art pack for the HUD, so the pile
+   * she delivered costs nothing new to draw. The burst and the jump are CSS, so
+   * `prefers-reduced-motion` covers them for free.
    *
    * Only for the per-season screen. When the caller passes its own `rows` it is
-   * the end-of-run screen, and every per-season counter on `state` belongs to
-   * the last season played -- a jar of twenty icicles labelled as the
-   * whole journey would be a lie. There is no lifetime item count to draw
-   * instead.
+   * the end-of-run screen, and a jar of twenty icicles labelled as the whole
+   * journey would be a lie; there is no lifetime item count to draw.
    *
-   * The jar is CSS; the items are the art pack's. That split is deliberate, so
-   * a replacement art pack changes what is in the jar without owning the jar.
+   * The jar is CSS and the items are the pack's, so a replacement pack changes
+   * what is in the jar without owning the jar.
    *
    * @private
    * @param {Object} state - The finished GameState
@@ -1395,15 +1302,13 @@ export class GameUI extends BaseGameUI {
 
     const contents = document.createElement("div")
     contents.className = "haul-contents"
-    // Same ceiling as the HUD track, and for the same reason: `items` comes off
-    // a save file that storage only clamps to non-negative.
+    // Same ceiling as the HUD track, for the same reason.
     const drawn = Math.min(MAX_ITEM_PIPS, delivered)
     for (let i = 0; i < drawn; i += 1) {
       const slot = document.createElement("span")
       slot.className = "haul-item"
-      // Read by the stylesheet as the stagger, so they drop in one after
-      // another instead of all at once. No JS animation: the reduced-motion
-      // rule then covers this for free.
+      // Read by the stylesheet as the stagger. No JS animation, so the
+      // reduced-motion rule covers it.
       slot.style.setProperty("--haul-index", String(i))
       this._mount(slot, this.pack.item(season.id, false), "item-svg")
       contents.append(slot)
@@ -1424,11 +1329,10 @@ export class GameUI extends BaseGameUI {
    * The burst behind the jar: a ring of the season's collectible thrown
    * outward.
    *
-   * Placed by arithmetic rather than at random, for the reason the whole art
-   * pack is -- nothing in this game calls `Math.random`, so the same season
-   * bursts the same way every time and a rebuild cannot make it flicker. Each
-   * mark carries its own angle and delay as custom properties and the
-   * stylesheet does the moving.
+   * Placed by arithmetic, not `Math.random`, so the same season bursts the same
+   * way every time. Each mark carries its angle and delay as custom properties
+   * and the stylesheet does the moving.
+   *
    * @private
    * @param {import("./seasons.js").Season} season - The season just finished
    * @returns {HTMLElement} The burst
@@ -1440,8 +1344,7 @@ export class GameUI extends BaseGameUI {
       const mark = document.createElement("span")
       mark.className = "burst-mark"
       mark.style.setProperty("--burst-angle", `${(i * 360) / BURST_MARKS}deg`)
-      // Coprime with the count, so the delays cycle through the ring rather
-      // than landing in a block on one side of it.
+      // Coprime with the count, so the delays cycle through the ring instead of landing in a block.
       mark.style.setProperty("--burst-delay", `${((i * 7) % BURST_MARKS) * 40}ms`)
       this._mount(mark, this.pack.item(season.id, i % 3 === 0), "item-svg")
       burst.append(mark)
@@ -1452,9 +1355,9 @@ export class GameUI extends BaseGameUI {
   /**
    * The animal that walked the trail, jumping.
    *
-   * The pack's standing pose, moved by the stylesheet. A jump is a transform,
-   * so this needs no new drawing and no new export -- which also means a
-   * replacement pack gets the celebration without knowing it exists.
+   * The pack's standing pose, moved by the stylesheet. A jump is a transform, so
+   * this needs no new drawing or export.
+   *
    * @private
    * @param {Object} state - The finished GameState
    * @returns {HTMLElement} The character
@@ -1470,11 +1373,10 @@ export class GameUI extends BaseGameUI {
    * Write the verdict under the question.
    *
    * OVERRIDES `BaseGameUI.showFeedback`, which writes to a hard-coded
-   * `#feedback-area`. Seasons' element is `#feedback`, so the inherited version
-   * finds nothing and silently drops every message. The base also hides by
-   * setting `opacity: 0`, which is the wrong way to hide an `aria-live` region
-   * -- a fully transparent element is still announced -- so `hideFeedback`
-   * clears the text instead.
+   * `#feedback-area`; Seasons' element is `#feedback`, so the inherited version
+   * would drop every message. The base also hides with `opacity: 0`, but a fully
+   * transparent `aria-live` region is still announced, so `hideFeedback` clears
+   * the text instead.
    *
    * @param {string} message - The line to show
    * @param {string} [type] - "success", "error", or "info"; becomes a class
@@ -1501,11 +1403,9 @@ export class GameUI extends BaseGameUI {
    * somewhere meaningful after a screen change.
    *
    * Never while the settings dialog is open. The answer flash keeps running
-   * behind it, so an answer that ended the season redraws the screen from under
-   * the dialog, and taking focus there would strand a keyboard user outside an
-   * `aria-modal` element. Nothing is needed on the other side:
-   * `BaseGameUI.hideSettings` puts focus back on the gear, which is present on
-   * whatever screen is now showing.
+   * behind it, so an answer that ends the season redraws the screen under the
+   * dialog, and taking focus would strand a keyboard user outside the
+   * `aria-modal` element. `BaseGameUI.hideSettings` puts focus back on the gear.
    *
    * @param {string} screenId - The screen that was just shown
    */
