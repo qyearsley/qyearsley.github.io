@@ -1,7 +1,7 @@
 import { GameState } from "./GameState.js"
 import { GameUI } from "./GameUI.js"
 import { ParticleSystem } from "./ParticleSystem.js"
-import { ProgressionManager } from "./ProgressionManager.js"
+import { AREA_THEMES } from "./ProgressionManager.js"
 import { EventManager } from "./EventManager.js"
 import { StorageManager } from "./storage.js"
 import { RewardSystem } from "./rewards.js"
@@ -44,7 +44,6 @@ class NumberGarden {
     this.activityGenerator = activityGenerator || new ActivityGenerator(this.state)
     this.ui = new GameUI()
     this.particles = new ParticleSystem()
-    this.progression = new ProgressionManager()
     this.sounds = new SoundManager()
 
     // Update sound manager based on settings
@@ -391,7 +390,7 @@ class NumberGarden {
     this.ui.updateProgressBar(this.state.stats.currentLevelProgress, DEFAULTS.QUESTIONS_PER_LEVEL)
     this.ui.updateVisualProgression(
       this.state.currentArea,
-      this.progression.getAreaThemes(),
+      AREA_THEMES,
       this.state.getProgressPercent(),
     )
     this.ui.renderGarden(this.state.garden)
@@ -417,7 +416,7 @@ class NumberGarden {
     this.ui.updateStats(this.state.stats)
     this.ui.updateVisualProgression(
       this.state.currentArea,
-      this.progression.getAreaThemes(),
+      AREA_THEMES,
       this.state.getProgressPercent(),
     )
     this.ui.renderGarden(this.state.garden)

@@ -41,9 +41,9 @@ Extends `BaseGameUI` (in `games/shared/`). Responsible for all DOM manipulation 
 
 Central event coordination. Attaches event listeners to DOM elements and routes them to appropriate callbacks (defined in game.js). Prevents event handler sprawl.
 
-### ProgressionManager.js
+### ProgressionManager.js (AREA_THEMES)
 
-A table of per-area visual themes: background stages, primary and accent colors, and text-safe ink colors. `getAreaThemes()` returns the table. `GameUI` uses it to restyle the screen as a level progresses. It does not choose difficulty.
+`AREA_THEMES` is a table of per-area visual themes: background stages, primary and accent colors, and text-safe ink colors. `GameUI` uses it to restyle the screen as a level progresses. It does not choose difficulty.
 
 ### activities.js (ActivityGenerator)
 

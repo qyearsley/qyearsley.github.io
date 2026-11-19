@@ -1,22 +1,15 @@
-import { ProgressionManager } from "../js/ProgressionManager.js"
+import { AREA_THEMES } from "../js/ProgressionManager.js"
 
-describe("ProgressionManager", () => {
-  let progression
-
-  beforeEach(() => {
-    progression = new ProgressionManager()
-  })
-
+describe("AREA_THEMES", () => {
   describe("initialization", () => {
     test("initializes with area themes", () => {
-      expect(progression.areaThemes).toBeDefined()
-      expect(progression.areaThemes["flower-meadow"]).toBeDefined()
-      expect(progression.areaThemes["crystal-cave"]).toBeDefined()
-      expect(progression.areaThemes["enchanted-forest"]).toBeDefined()
+      expect(AREA_THEMES["flower-meadow"]).toBeDefined()
+      expect(AREA_THEMES["crystal-cave"]).toBeDefined()
+      expect(AREA_THEMES["enchanted-forest"]).toBeDefined()
     })
 
     test("flower-meadow theme has correct stages", () => {
-      const theme = progression.areaThemes["flower-meadow"]
+      const theme = AREA_THEMES["flower-meadow"]
 
       expect(theme.progressionType).toBe("color")
       expect(theme.stages).toHaveLength(5)
@@ -26,7 +19,7 @@ describe("ProgressionManager", () => {
     })
 
     test("crystal-cave theme has correct stages", () => {
-      const theme = progression.areaThemes["crystal-cave"]
+      const theme = AREA_THEMES["crystal-cave"]
 
       expect(theme.progressionType).toBe("glow")
       expect(theme.stages).toHaveLength(5)
@@ -34,22 +27,12 @@ describe("ProgressionManager", () => {
     })
 
     test("enchanted-forest theme has correct stages", () => {
-      const theme = progression.areaThemes["enchanted-forest"]
+      const theme = AREA_THEMES["enchanted-forest"]
 
       expect(theme.progressionType).toBe("depth")
       expect(theme.stages).toHaveLength(5)
       expect(theme.decorations).toContain("🌿")
       expect(theme.decorations).toContain("🍄")
-    })
-  })
-
-  describe("getAreaThemes", () => {
-    test("returns all area themes", () => {
-      const themes = progression.getAreaThemes()
-
-      expect(themes).toBe(progression.areaThemes)
-      expect(Object.keys(themes)).toContain("flower-meadow")
-      expect(Object.keys(themes)).toContain("crystal-cave")
     })
   })
 
@@ -74,7 +57,7 @@ describe("ProgressionManager", () => {
     })
 
     test("every area theme defines primary, accent, and ink colors", () => {
-      const themes = Object.values(progression.getAreaThemes())
+      const themes = Object.values(AREA_THEMES)
       expect(themes).toHaveLength(6)
 
       themes.forEach((theme) => {
@@ -89,7 +72,7 @@ describe("ProgressionManager", () => {
     // deliberately not held to this bar.
     test("every inkColor clears 4.5:1 against white", () => {
       // Collect failures so the message names the offending area and its ratio.
-      const tooLight = Object.entries(progression.getAreaThemes())
+      const tooLight = Object.entries(AREA_THEMES)
         .map(([areaId, theme]) => [areaId, contrastOnWhite(theme.inkColor)])
         .filter(([, ratio]) => ratio < 4.5)
         .map(([areaId, ratio]) => `${areaId}: ${ratio.toFixed(2)}:1`)
@@ -98,8 +81,8 @@ describe("ProgressionManager", () => {
     })
 
     test("the two light primaries have darker ink variants", () => {
-      const gold = progression.getAreaThemes()["time-temple"]
-      const orange = progression.getAreaThemes()["measurement-market"]
+      const gold = AREA_THEMES["time-temple"]
+      const orange = AREA_THEMES["measurement-market"]
 
       expect(gold.inkColor).not.toBe(gold.primaryColor)
       expect(orange.inkColor).not.toBe(orange.primaryColor)
@@ -112,7 +95,7 @@ describe("ProgressionManager", () => {
 
   describe("theme stages", () => {
     test("stages are ordered by percent", () => {
-      const theme = progression.getAreaThemes()["flower-meadow"]
+      const theme = AREA_THEMES["flower-meadow"]
 
       for (let i = 0; i < theme.stages.length - 1; i++) {
         expect(theme.stages[i].percent).toBeLessThan(theme.stages[i + 1].percent)
@@ -120,7 +103,7 @@ describe("ProgressionManager", () => {
     })
 
     test("all stages have required properties", () => {
-      const theme = progression.getAreaThemes()["flower-meadow"]
+      const theme = AREA_THEMES["flower-meadow"]
 
       theme.stages.forEach((stage) => {
         expect(stage).toHaveProperty("percent")
