@@ -341,7 +341,7 @@ pack's `item()` drawing when earned, a dashed outline when still owed.
 
 ## Testing
 
-`__tests__/` holds 14 Jest suites for 14 modules. The mapping is not
+`__tests__/` holds 16 Jest suites for 15 modules. The mapping is not
 one-to-one: `art.test.js` covers both files in `art/`, `obstacles.js` is checked
 through the suites that consume it, and `constants.js` has no suite of its own —
 it is data with no behaviour, and every other suite reads it. Three of them guard
