@@ -204,19 +204,22 @@ describe("times trail answering", () => {
   // The point of the trail rework: every question is on the trail being walked.
   // Misses come back from the same trail, and the retry is the missed fact itself:
   // a fact missed as question m returns as question m + 4 or m + 5 (3 or 4 others
-  // in between). The misses are far enough apart not to share a slot.
+  // in between). The second miss is on a different fact from the first, because
+  // missing the same fact again rightly moves its retry later.
   test("a round on Squares asks only squares, and the retries are the missed facts", () => {
     jest.spyOn(window, "confirm").mockReturnValue(true)
     click("back-button")
     document.querySelector('[data-trail-id="squares"]').click()
 
-    const missAt = [0, 3]
+    const missAt = []
     const asked = []
     for (let i = 0; i < 10; i++) {
       const [left, right] = questionFact()
       expect(left).toBe(right)
       asked.push(left)
-      if (missAt.includes(i)) {
+      const secondMiss = missAt.length === 1 && i >= 3 && left !== asked[0]
+      if (i === 0 || secondMiss) {
+        missAt.push(i)
         answerWrongly()
         jest.advanceTimersByTime(TIMING.WRONG_FEEDBACK_MS)
         click("scaffold-continue")
@@ -224,6 +227,7 @@ describe("times trail answering", () => {
         answerCorrectly()
       }
     }
+    expect(missAt).toHaveLength(2)
     for (const miss of missAt) {
       expect([asked[miss + 4], asked[miss + 5]]).toContain(asked[miss])
     }
