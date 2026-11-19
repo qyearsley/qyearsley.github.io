@@ -191,6 +191,14 @@
       })
     </script>
     <style>
+      :root {
+        --bit-sign: #e53e3e;
+        --bit-sign-zero: #38a169;
+        --bit-value: #3182ce;
+        --bit-value-zero: #90cdf4;
+        --bit-value-zero-text: #2a4365;
+      }
+
       .int-input {
         width: 100%;
         padding: 0.75rem 1rem;
@@ -231,16 +239,11 @@
         margin-bottom: 1rem;
       }
 
-      .placeholder,
-      .error-msg {
+      .placeholder {
         text-align: center;
         padding: 2rem;
         font-style: italic;
         color: var(--color-text-muted);
-      }
-
-      .error-msg {
-        color: var(--color-error);
       }
 
       /* Result */
@@ -251,156 +254,49 @@
         background: var(--color-bg-card);
       }
 
-      .value-display {
-        font-size: 1.8rem;
-        font-family: "SF Mono", Menlo, Consolas, monospace;
-        font-weight: 600;
-        margin-bottom: 0.25rem;
-      }
-
-      .formula {
-        font-family: "SF Mono", Menlo, Consolas, monospace;
-        font-size: 0.95rem;
-        color: var(--color-text-tertiary);
-        margin-bottom: 1rem;
-      }
-
       .overflow-note {
         color: var(--color-error);
         font-style: italic;
       }
 
       /* Bit layout */
-      .bit-layout {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-        margin-bottom: 1rem;
-      }
-
-      .bit-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.2rem;
-      }
-
-      .bit-label {
-        font-size: 0.8rem;
-        font-weight: 600;
-        color: var(--color-text-tertiary);
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-      }
-
-      .bit-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1px;
-      }
-
-      .bit {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 1.15rem;
-        height: 1.5rem;
-        font-family: "SF Mono", Menlo, Consolas, monospace;
-        font-size: 0.75rem;
-        font-weight: 600;
-        border-radius: 2px;
-        color: #fff;
-        cursor: pointer;
-        transition:
-          transform 0.1s,
-          filter 0.1s;
-        user-select: none;
-      }
-
       .bit.byte-boundary {
         margin-right: 0.3rem;
       }
 
-      .bit:hover {
-        transform: scale(1.2);
-        filter: brightness(1.2);
-        z-index: 1;
-      }
-
-      .bit:focus-visible {
-        outline: 2px solid var(--color-primary);
-        outline-offset: 1px;
-      }
-
-      .bit-hint {
-        font-size: 0.8rem;
-        color: var(--color-text-muted);
-        margin-top: 0.5rem;
-        font-style: italic;
-      }
-
-      .bit.sign {
-        background: #e53e3e;
-      }
-
-      .bit.sign.zero {
-        background: #38a169;
-      }
-
       .bit.value {
-        background: #3182ce;
+        background: var(--bit-value);
       }
 
       .bit.value.zero {
-        background: #90cdf4;
-        color: #2a4365;
+        background: var(--bit-value-zero);
+        color: var(--bit-value-zero-text);
       }
 
-      .bit-value {
-        font-size: 0.8rem;
-        color: var(--color-text-muted);
-      }
-
-      .hex-display,
       .range-display {
         font-family: "SF Mono", Menlo, Consolas, monospace;
         font-size: 0.85rem;
         color: var(--color-text-tertiary);
-      }
-
-      .range-display {
         margin-top: 0.25rem;
       }
 
-      /* Dark mode — only bit-specific color overrides remain;
-         everything else is handled by CSS variables. */
+      /* Dark colors: set once per theme, keep the two blocks in step. */
       @media (prefers-color-scheme: dark) {
-        :root:not([data-theme="light"]) .bit.sign {
-          background: #c53030;
-        }
-        :root:not([data-theme="light"]) .bit.sign.zero {
-          background: #276749;
-        }
-        :root:not([data-theme="light"]) .bit.value {
-          background: #2b6cb0;
-        }
-        :root:not([data-theme="light"]) .bit.value.zero {
-          background: #2a4365;
-          color: #90cdf4;
+        :root:not([data-theme="light"]) {
+          --bit-sign: #c53030;
+          --bit-sign-zero: #276749;
+          --bit-value: #2b6cb0;
+          --bit-value-zero: #2a4365;
+          --bit-value-zero-text: #90cdf4;
         }
       }
 
-      [data-theme="dark"] .bit.sign {
-        background: #c53030;
-      }
-      [data-theme="dark"] .bit.sign.zero {
-        background: #276749;
-      }
-      [data-theme="dark"] .bit.value {
-        background: #2b6cb0;
-      }
-      [data-theme="dark"] .bit.value.zero {
-        background: #2a4365;
-        color: #90cdf4;
+      [data-theme="dark"] {
+        --bit-sign: #c53030;
+        --bit-sign-zero: #276749;
+        --bit-value: #2b6cb0;
+        --bit-value-zero: #2a4365;
+        --bit-value-zero-text: #90cdf4;
       }
     </style>
     <script src="/shared/theme.js"></script>

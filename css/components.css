@@ -557,3 +557,111 @@
   background: var(--color-primary) !important;
   color: var(--color-on-primary) !important;
 }
+
+/* Tool pages: bit grids
+   Shared by floating-point.html and integer-explorer.html. Each page sets
+   --bit-sign, --bit-sign-zero, and its own bit colors, once for light and once
+   for dark. */
+.error-msg {
+  text-align: center;
+  padding: 2rem;
+  font-style: italic;
+  color: var(--color-error);
+}
+
+.value-display {
+  font-size: 1.8rem;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.formula {
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.95rem;
+  color: var(--color-text-tertiary);
+  margin-bottom: 1rem;
+}
+
+.hex-display {
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+  color: var(--color-text-tertiary);
+}
+
+.bit-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.bit-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.bit-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Scoped: encoding-explorer.html has its own .bit-row. */
+.bit-layout .bit-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+}
+
+.bit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.15rem;
+  height: 1.5rem;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 2px;
+  color: #fff;
+  cursor: pointer;
+  transition:
+    transform 0.1s,
+    filter 0.1s;
+  user-select: none;
+}
+
+.bit:hover {
+  transform: scale(1.2);
+  filter: brightness(1.2);
+  z-index: 1;
+}
+
+.bit:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+.bit.sign {
+  background: var(--bit-sign);
+}
+
+.bit.sign.zero {
+  background: var(--bit-sign-zero);
+}
+
+.bit-hint {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+.bit-value {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}

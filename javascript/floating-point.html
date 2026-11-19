@@ -240,6 +240,16 @@
       })
     </script>
     <style>
+      :root {
+        --bit-sign: #e53e3e;
+        --bit-sign-zero: #38a169;
+        --bit-exp: #805ad5;
+        --bit-exp-zero: #b794f4;
+        --bit-mant: #3182ce;
+        --bit-mant-zero: #90cdf4;
+        --bit-mant-zero-text: #2a4365;
+      }
+
       .float-input {
         width: 100%;
         padding: 0.75rem 1rem;
@@ -269,7 +279,6 @@
         border: 1px solid var(--color-border-dark);
         border-radius: 4px;
         background: var(--color-bg-card);
-        cursor: pointer;
         font-size: 0.9rem;
         font-family: "SF Mono", Menlo, Consolas, monospace;
         color: var(--color-text-secondary);
@@ -279,20 +288,14 @@
       }
 
       .example-btn:hover {
-        background: var(--color-bg-code);
         border-color: var(--color-text-muted);
       }
 
-      .placeholder,
-      .error-msg {
+      .placeholder {
         text-align: center;
         padding: 2rem;
         font-style: italic;
         color: var(--color-text-muted);
-      }
-
-      .error-msg {
-        color: var(--color-error);
       }
 
       /* Result */
@@ -303,164 +306,53 @@
         background: var(--color-bg-card);
       }
 
-      .value-display {
-        font-size: 1.8rem;
-        font-family: "SF Mono", Menlo, Consolas, monospace;
-        font-weight: 600;
-        margin-bottom: 0.25rem;
-      }
-
-      .formula {
-        font-family: "SF Mono", Menlo, Consolas, monospace;
-        font-size: 0.95rem;
-        color: var(--color-text-tertiary);
-        margin-bottom: 1rem;
-      }
-
       .special-value {
         font-style: italic;
       }
 
       /* Bit layout */
-      .bit-layout {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-        margin-bottom: 1rem;
-      }
-
-      .bit-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.2rem;
-      }
-
-      .bit-label {
-        font-size: 0.8rem;
-        font-weight: 600;
-        color: var(--color-text-tertiary);
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-      }
-
-      .bit-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1px;
-      }
-
       .mantissa-row {
         max-width: 100%;
       }
 
-      .bit {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 1.15rem;
-        height: 1.5rem;
-        font-family: "SF Mono", Menlo, Consolas, monospace;
-        font-size: 0.75rem;
-        font-weight: 600;
-        border-radius: 2px;
-        color: #fff;
-        cursor: pointer;
-        transition:
-          transform 0.1s,
-          filter 0.1s;
-        user-select: none;
-      }
-
-      .bit:hover {
-        transform: scale(1.2);
-        filter: brightness(1.2);
-        z-index: 1;
-      }
-
-      .bit:focus-visible {
-        outline: 2px solid var(--color-primary);
-        outline-offset: 1px;
-      }
-
-      .bit-hint {
-        font-size: 0.8rem;
-        color: var(--color-text-muted);
-        margin-top: 0.5rem;
-        font-style: italic;
-      }
-
-      .bit.sign {
-        background: #e53e3e;
-      }
-
-      .bit.sign.zero {
-        background: #38a169;
-      }
-
       .bit.exp {
-        background: #805ad5;
+        background: var(--bit-exp);
       }
 
       .bit.exp.zero {
-        background: #b794f4;
+        background: var(--bit-exp-zero);
       }
 
       .bit.mant {
-        background: #3182ce;
+        background: var(--bit-mant);
       }
 
       .bit.mant.zero {
-        background: #90cdf4;
-        color: #2a4365;
+        background: var(--bit-mant-zero);
+        color: var(--bit-mant-zero-text);
       }
 
-      .bit-value {
-        font-size: 0.8rem;
-        color: var(--color-text-muted);
-      }
-
-      .hex-display {
-        font-family: "SF Mono", Menlo, Consolas, monospace;
-        font-size: 0.85rem;
-        color: var(--color-text-tertiary);
-      }
-
-      /* Dark mode — only bit-specific color overrides remain;
-         everything else is handled by CSS variables. */
+      /* Dark colors: set once per theme, keep the two blocks in step. */
       @media (prefers-color-scheme: dark) {
-        :root:not([data-theme="light"]) .bit.sign {
-          background: #c53030;
-        }
-        :root:not([data-theme="light"]) .bit.sign.zero {
-          background: #276749;
-        }
-        :root:not([data-theme="light"]) .bit.exp.zero {
-          background: #6b46c1;
-        }
-        :root:not([data-theme="light"]) .bit.mant {
-          background: #2b6cb0;
-        }
-        :root:not([data-theme="light"]) .bit.mant.zero {
-          background: #2a4365;
-          color: #90cdf4;
+        :root:not([data-theme="light"]) {
+          --bit-sign: #c53030;
+          --bit-sign-zero: #276749;
+          --bit-exp: #805ad5;
+          --bit-exp-zero: #6b46c1;
+          --bit-mant: #2b6cb0;
+          --bit-mant-zero: #2a4365;
+          --bit-mant-zero-text: #90cdf4;
         }
       }
 
-      [data-theme="dark"] .bit.sign {
-        background: #c53030;
-      }
-      [data-theme="dark"] .bit.sign.zero {
-        background: #276749;
-      }
-      [data-theme="dark"] .bit.exp.zero {
-        background: #6b46c1;
-      }
-      [data-theme="dark"] .bit.mant {
-        background: #2b6cb0;
-      }
-      [data-theme="dark"] .bit.mant.zero {
-        background: #2a4365;
-        color: #90cdf4;
+      [data-theme="dark"] {
+        --bit-sign: #c53030;
+        --bit-sign-zero: #276749;
+        --bit-exp: #805ad5;
+        --bit-exp-zero: #6b46c1;
+        --bit-mant: #2b6cb0;
+        --bit-mant-zero: #2a4365;
+        --bit-mant-zero-text: #90cdf4;
       }
     </style>
     <script src="/shared/theme.js"></script>
