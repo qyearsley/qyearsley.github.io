@@ -362,31 +362,26 @@ prompt and recomputing it. It also checks that no generator exceeds its form's
 
 ### Replace the art
 
-A pack exports twelve required names: `id` and `name`; `palette`; the drawings
-`character`, `item`, `obstacle`, `villain`, and `backdrop`; and the trail's
-geometry and motion, `layout`, `traversal`, `reducedTraversal`, and `standing`.
-A thirteenth, `idle`, is optional: it says how a drawing moves while standing
-still. Signatures and return shapes are in
-[`js/README.md`](js/README.md#art--art) and on
-[`js/art/index.js`](js/art/index.js);
+A pack exports ten required names: `palette`; the drawings `character`, `item`,
+`obstacle`, `villain`, and `backdrop`; and the trail's geometry and motion,
+`layout`, `traversal`, `reducedTraversal`, and `standing`. An eleventh, `idle`,
+is optional: it says how a drawing moves while standing still. Signatures and return shapes are in
+[`js/README.md`](js/README.md#art--art);
 [`js/art/placeholder.js`](js/art/placeholder.js) is the reference.
 
-1. A new file in [`js/art/`](js/art/).
-2. Two lines in [`js/art/index.js`](js/art/index.js): the `import`, and an entry
-   in `PACKS`.
-3. One string: `ART.PACK` in [`js/constants.js`](js/constants.js).
+There is one pack and no registry. To replace it, write a new file in
+[`js/art/`](js/art/) that exports the same names, and change the one import in
+[`js/GameUI.js`](js/GameUI.js). The new file builds its elements with `svg` from
+[`js/art/svg.js`](js/art/svg.js). Nothing else moves.
 
-Nothing else moves. The "fulfils the art-pack contract" block in `art.test.js` is
-written against the contract, not the placeholder's shapes, so pointing its
+The "fulfils the art-pack contract" block in `art.test.js` is written against the contract, not the placeholder's shapes, so pointing its
 `pack` constant at the new module is the whole test plan. It checks distinct
 drawings for every character, season and obstacle, and `--season-*` palette keys
 that match across seasons. `layout` is checked for internal consistency, not
 against the placeholder's numbers. Three values carry meaning and are pinned: the
 trail must be wider than the viewport, a route with a `gap` must break the ground
 into more than one segment, and every backdrop layer's `span` must cover the
-visible window at both ends of the longest trail. A second pack is the moment to
-move the `svg` helper out of the
-[registry cycle](js/README.md#dependency-direction).
+visible window at both ends of the longest trail.
 
 ### Add a new kind of challenge
 

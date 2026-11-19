@@ -8,12 +8,11 @@
  * - It must not import GameState. Reading a state is fine, advancing one is
  *   not, and the absent import keeps that from happening by accident. (GameState
  *   and seasons.js appear in JSDoc types; a type is a comment, not an import.)
- * - Nothing here uses `innerHTML`. Nodes are built with `createElement` or the
- *   art pack's `createElementNS` helper, and strings are written with
- *   `textContent`.
+ * - Nodes are built with `createElement` or the `svg` helper, and strings are
+ *   written with `textContent`, never `innerHTML`.
  * - No drawing decision lives here. Characters, items, obstacles, the backdrop,
  *   the snake woman, the trail's geometry, each crossing's motion and the
- *   palette all come from the active art pack.
+ *   palette all come from the art pack (art/placeholder.js).
  * - The trail is wider than the screen and scrolls by panning a camera group,
  *   because a `viewBox` cannot be animated and a transform can. The backdrop is
  *   several more groups, each panned by the same offset scaled by its layer's
@@ -30,7 +29,8 @@
  */
 
 import { BaseGameUI } from "../../shared/BaseGameUI.js"
-import { activePack, svg } from "./art/index.js"
+import * as pack from "./art/placeholder.js"
+import { svg } from "./art/svg.js"
 import { CHARACTERS, getCharacter } from "./characters.js"
 import { HINT_CHOICES_LEFT, PLAY } from "./constants.js"
 import { buildTrail } from "./Journey.js"
@@ -97,7 +97,7 @@ const FIRST_CHOICE_KEY = "A".codePointAt(0)
 export class GameUI extends BaseGameUI {
   constructor() {
     super()
-    this.pack = activePack()
+    this.pack = pack
     /** @type {number|null} Interval id for the countdown, null when stopped. */
     this._timerId = null
     /** @type {number} Milliseconds left on the current question. */
@@ -161,7 +161,7 @@ export class GameUI extends BaseGameUI {
    * Drop an art-pack drawing into a container, replacing whatever was there.
    * @private
    * @param {HTMLElement|null} container - Where to put it
-   * @param {import("./art/index.js").Drawing} drawing - From the art pack
+   * @param {import("./art/placeholder.js").Drawing} drawing - From the art pack
    * @param {string} [className] - Class for the `<svg>` wrapper
    * @returns {SVGElement|null} The wrapper, or null if there was no container
    */

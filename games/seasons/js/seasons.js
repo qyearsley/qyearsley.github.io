@@ -19,12 +19,9 @@
  *   vertical maths is not something this format can fairly ask.
  * - **Addition and subtraction are recall, not calculation.** Every add and sub
  *   form in this file stays inside 18, which is the addition-facts table and its
- *   inverses -- `8 + 7`, `15 - 9`. They used to run to `max: 100`, which meant
- *   even spring could ask `47 + 45`, and from summer on the `borrow` flag made
- *   two-digit regrouping a third of every ordinary space. That is column work in
- *   your head against a clock, and it was the hardest thing in the game by a
- *   distance. It is gone. `min` is what keeps the easy end honest: without a
- *   floor, "inside 18" would offer `2 + 3` just as often as `9 + 8`.
+ *   inverses -- `8 + 7`, `15 - 9`. Anything larger, like `47 + 45`, is column
+ *   work in your head against a clock. `min` keeps the easy end honest: without
+ *   a floor, "inside 18" would offer `2 + 3` just as often as `9 + 8`.
  * - Escalation therefore lives entirely in multiplication and division: one
  *   fact, then the whole table, then a fact scaled by ten, then two chained
  *   operations. `div` caps at `upTo: 10` (a quotient of 12 on the 9 table is
@@ -38,14 +35,12 @@
  *   and winter's does -- by then plain division within 100 has run out of room,
  *   so its climax is the two-step instead.
  *
- * Reachability: `maxItems` below is what a finished trail collects, and since
- * 2026-09-21 every demand is exactly that plus the boss's rescue --
- * `seasons.test.js` holds the equality. That is the point of the retune: the
- * snake woman's question is the one that fills the jar, so there is no stretch
- * of trail left to walk after the demand is already met. It only works because
- * no character collects a different amount from a glowing space any more, and
- * because a wrong answer costs questions rather than items, so a finished trail
- * always pays the same total.
+ * Reachability: every demand is exactly what a finished trail collects plus the
+ * boss's rescue -- `seasons.test.js` holds the equality. The snake woman's
+ * question is the one that fills the jar, so no trail is left to walk after the
+ * demand is met. It works because no character collects a different amount from
+ * a glowing space, and a wrong answer costs questions rather than items, so a
+ * finished trail always pays the same total.
  *
  * Error Handling: `getSeason` returns null for an unknown id. Unlike a
  * character, there is no sensible fallback season -- playing spring when the
@@ -60,9 +55,8 @@ import { isHardKind } from "./obstacles.js"
  *
  * This is grade 3's 3.NBT.A.3 -- "multiply one-digit whole numbers by multiples
  * of 10 in the range 10-90" -- and it needs no new form kind, because `mul`
- * already means "one operand from `tables`, the other 2..upTo". It is the job
- * autumn's old `4 × 17` was doing illegitimately: large answers, place-value
- * practice, and not one column of written arithmetic.
+ * already means "one operand from `tables`, the other 2..upTo". It gives large
+ * answers and place-value practice with no column of written arithmetic.
  *
  * A season takes a slice of this with `tensTo`, because how far the range runs
  * is its own difficulty dial -- see below.
@@ -112,14 +106,9 @@ const tensTo = (highest) => TENS.filter((table) => table <= highest)
 /**
  * The four seasons, keyed by id. Play order lives in SEASON_ORDER.
  *
- * Every trail was shortened on 2026-09-21, from 14/16/18/20 spaces to
- * 8/9/10/11, and again on 2026-11-18 to 6/6/7/8 (owner feedback: "a little
- * shorter"; mountains went 2/2/3/3 to 2/2/2/3). Each demand equals exactly what
- * the trail plus the boss pays. A clean run is now 31 questions; it was 42, and
- * 72 before 2026-09-21. The old lengths existed to give a player room to
- * recover from an item lost to a wrong answer; nothing takes an item any more,
- * so the margin had no job and a child who was not making mistakes spent a
- * third of every season collecting things she did not need.
+ * Trails are 6/6/7/8 spaces. Each demand equals exactly what the trail plus the
+ * boss pays, so a clean run is 31 questions. Nothing takes an item, so a trail
+ * needs no spare length for recovering from a loss.
  *
  * @type {Object<string, Season>}
  */
@@ -245,10 +234,8 @@ const SEASONS = {
   },
 }
 
-// `spaces` and `glowingAt` are derived rather than authored. They used to be
-// written by hand alongside the trail length, which meant three numbers had to
-// agree and nothing checked that they did. Now the route is the only thing to
-// edit, and these are computed from it once at load.
+// `spaces` and `glowingAt` are derived from the route once at load, so the
+// route is the only thing to edit.
 for (const season of Object.values(SEASONS)) {
   season.spaces = season.route.length
   season.glowingAt = season.route.flatMap((kind, index) => (isHardKind(kind) ? [index] : []))

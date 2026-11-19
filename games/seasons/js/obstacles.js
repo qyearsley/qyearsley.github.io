@@ -8,11 +8,9 @@
  * pack owns what each looks like and how crossing it is animated, so a new pack
  * can redraw the whole world without touching this file.
  *
- * `hard` lives on the kind rather than on the space. Earlier versions carried a
- * separate `glowingAt` list of indices, which meant the trail's difficulty and
- * the trail's scenery were tuned in two places and could disagree. Now the
- * mountain simply *is* the hard obstacle, which is also how a nine-year-old
- * reads a picture of a mountain. Tuning how many hard spaces a season has means
+ * `hard` lives on the kind rather than on the space, so the trail's difficulty
+ * and its scenery cannot disagree. The mountain simply *is* the hard obstacle,
+ * which is also how a nine-year-old reads a picture of a mountain. Tuning how many hard spaces a season has means
  * placing that many mountains in its route.
  *
  * `verb` is what the trail's accessible label reads after "to": "a hill to

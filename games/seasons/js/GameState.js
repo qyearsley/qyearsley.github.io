@@ -18,8 +18,7 @@
  *   `answer(state, null)`, which is simply a wrong answer -- there is no
  *   separate timeout path to keep in sync.
  *
- * **The retry rule**, which replaced every wrong-answer penalty on 2026-09-21
- * and is most of what this file now does. A wrong answer takes nothing away. It
+ * **The retry rule** is most of what this file does. A wrong answer takes nothing away. It
  * keeps you on the same space, facing the same question, until you find the
  * answer yourself; then one more question at that space before the item is
  * paid. Three fields carry it, and all three reset when the character moves:
@@ -444,10 +443,8 @@ export function advance(state) {
  *
  * A reload during a retry gives back a *different* question, because
  * `questionsAsked` has moved on since the one that was missed. `retrying` still
- * loads, so the extra question and the untimed retry both survive; what is lost
- * is the particular fact she was stuck on. Persisting the question to fix that
- * would mean trusting a save file to describe a question, which is the one
- * thing this design has always refused to do.
+ * loads, so the extra question and the untimed retry both survive. Persisting
+ * the question would mean trusting a save file to describe a question.
  *
  * @param {Object} savedRun - A run from storage.normalizeSave
  * @returns {GameState} A live state, ready to render

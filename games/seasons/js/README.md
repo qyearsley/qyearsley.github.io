@@ -31,7 +31,7 @@ wording is correct.
 ## Dependency direction
 
 Almost everything flows one way. No module imports anything below it in this
-list, with one documented exception inside `art/`.
+list.
 
 ```
 constants.js            imports nothing
@@ -44,8 +44,8 @@ seasons.js              constants, obstacles
 challenges/arithmetic.js    constants
 challenges/index.js         challenges/arithmetic
 Journey.js                  obstacles, seasons
-art/index.js                constants, art/placeholder   ⟷ cycle
-art/placeholder.js          art/index                    ⟷ cycle
+art/svg.js                  imports nothing
+art/placeholder.js          art/svg
   ↑
 GameState.js            characters, constants, Journey, challenges, rng, seasons
 storage.js              shared/StorageManager, characters, constants
@@ -58,19 +58,13 @@ game.js                 characters, constants, GameState, GameUI, Journey,
                         leaderboard, seasons, storage
 ```
 
-Five consequences worth knowing:
+Four consequences worth knowing:
 
 - **`obstacles.js` imports nothing.** It is the vocabulary of what stands on a
   trail, and it sits at the bottom on purpose: `seasons.js` asks it which kinds
   are `hard` to derive `glowingAt`, `Journey.js` asks it to turn a route entry
   into a `Space`, and `GameUI.js` asks it for a display name. None of them
   decides what a kind means.
-- **`art/index.js` and `art/placeholder.js` import each other.** The only cycle
-  in the game: the registry needs the pack for `PACKS`, the pack needs the
-  registry's `svg` helper. It works only because `svg` is a hoisted function
-  declaration and `placeholder.js` never calls it at module scope. Making `svg`
-  a `const` arrow, or building a drawing at module scope, turns this into a
-  `ReferenceError` at load. A second pack is the moment to move `svg` out.
 - **`game.js` does not import "everything".** Eight of the other fourteen
   modules, and deliberately not `rng.js`, `challenges/*`, `obstacles.js`, or
   `art/*` — randomness, question generation, the obstacle vocabulary, and drawing
@@ -135,10 +129,9 @@ the fields it derives from. `GameState.rehydrate` regenerates it on load.
 
 ### Art — `art/`
 
-A pack exports twelve required names plus one optional one, and
+A pack exports ten required names plus one optional one, and
 `art/placeholder.js` is the reference implementation of every one.
 
-- `id`, `name` — identity, for the registry and any future art-style picker.
 - `palette(seasonId)` → CSS custom properties, `--season-*` only; the game's
   chrome (`--sn-*`) is hard-coded in `styles/main.css` and out of a pack's reach.
 - `character(id, onTrail)`, `item(seasonId, rare)`, `obstacle(kind, seasonId)`,
@@ -153,7 +146,7 @@ A pack exports twelve required names plus one optional one, and
   head, and a subtractive flag means nothing to a pack backed by images, where a
   pose is a different frame. A character with one pose ignores the flag.
 - `backdrop(seasonId, width)` → `{layers, viewBox}`, **not** a `Drawing`. Each
-  layer carries an `element`, a `span`, and a `parallax` factor saying how fast
+  layer carries an `element`, a `span`, and a `factor` saying how fast
   it pans relative to the ground: the sky is pinned at 0, the ridges drift, and
   the ground the character walks on is 1. That is what gives the trail depth —
   the whole backdrop used to sit inside the camera group, so distant hills panned

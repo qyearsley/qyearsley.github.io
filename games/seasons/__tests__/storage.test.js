@@ -877,27 +877,6 @@ describe("StorageManager", () => {
     })
   })
 
-  describe("clearRun", () => {
-    it("removes the key and returns true", () => {
-      manager.saveRun(defaultSave())
-      expect(localStorage.getItem(STORAGE.KEY)).not.toBeNull()
-      expect(manager.clearRun()).toBe(true)
-      expect(localStorage.getItem(STORAGE.KEY)).toBeNull()
-      expect(manager.loadRun()).toBeNull()
-    })
-
-    it("returns true when nothing was stored", () => {
-      expect(manager.clearRun()).toBe(true)
-    })
-
-    it("removes the stored key", () => {
-      manager.saveRun(defaultSave())
-      expect(localStorage.getItem(STORAGE.KEY)).not.toBeNull()
-      manager.clearRun()
-      expect(localStorage.getItem(STORAGE.KEY)).toBeNull()
-    })
-  })
-
   describe("delegation to the base class", () => {
     it("writes under the same key the base class reads", () => {
       // storage.js never calls localStorage itself; if it did, a plain base

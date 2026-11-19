@@ -1,26 +1,49 @@
 /**
- * Seasons placeholder art pack: flat vector shapes drawn in code. It is the
- * reference implementation of the contract in art/index.js. See ../README.md
- * for how to replace it with another pack.
+ * Seasons art: flat vector shapes drawn in code. No other module knows what
+ * anything in this game looks like. GameUI asks for `character("phoenix")` and
+ * gets back an SVG element. See ../README.md for the exports and what each
+ * returns.
  *
  * No gradients. They need document-unique `<defs>` ids, and one drawing is
  * rendered many times on a page (one `character()` per card, one `item()` per
  * HUD slot). Flat fills with layered opacity avoid that.
  *
- * `svg` is imported from art/index.js, which imports this file back. That cycle
- * is safe only while nothing here calls `svg` at module scope.
- *
  * Every function tolerates an unknown id and returns a neutral shape rather
  * than throwing, so a typo shows up as a grey blob instead of an empty page.
  */
 
-import { svg } from "./index.js"
+import { svg } from "./svg.js"
 
 /**
- * The pack's identity, for the registry.
+ * A drawing to hand to GameUI: an SVG element plus the viewBox it was drawn
+ * for, so the caller can size it without knowing the coordinate system.
+ *
+ * @typedef {Object} Drawing
+ * @property {SVGElement} element - A `<g>` holding the artwork
+ * @property {string} viewBox     - The viewBox the artwork assumes
  */
-export const id = "placeholder"
-export const name = "Placeholder shapes"
+
+/**
+ * One plane of a backdrop, and how fast it pans.
+ *
+ * `factor` is the fraction of the ground's own scroll this layer takes: 0 is
+ * nailed to the screen, 1 moves exactly with the trail. It must not exceed 1 --
+ * a layer faster than the ground overtakes the character, which the eye reads
+ * as the background sliding backwards.
+ *
+ * `span` is how wide the layer's artwork actually is, in trail units, and it is
+ * the layer's promise that no gap can open at either end. GameUI clamps the
+ * camera to `[0, width - viewportWidth]`, so the furthest into a layer it will
+ * ever look is `factor * (width - viewportWidth) + viewportWidth`, and `span`
+ * has to be at least that. Generating every layer at the trail's full width
+ * satisfies it for any factor at or below 1.
+ *
+ * @typedef {Object} BackdropLayer
+ * @property {SVGElement} element - A `<g>` holding this plane's artwork
+ * @property {string} name        - What the plane is, e.g. "sky"; for debugging
+ * @property {number} factor      - Its share of the camera's scroll, 0 to 1
+ * @property {number} span        - How wide its artwork is, in trail units
+ */
 
 /**
  * The coordinate system every character and item drawing assumes.

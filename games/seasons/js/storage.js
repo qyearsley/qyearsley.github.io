@@ -3,36 +3,29 @@
  *
  * The game-specific layer over games/shared/StorageManager.js, which owns every
  * localStorage call, the version stamp, and the version-mismatch-clears-the-key
- * policy. Nothing here touches localStorage directly. The base is aliased on
- * import as `BaseStorageManager` so the subclass can keep the plain name; game
- * code imports *this* class, never the base.
+ * policy. Nothing here touches localStorage directly. Game code imports this
+ * `StorageManager`, never the base (aliased `BaseStorageManager` here).
  *
- * - `defaultSave` and `normalizeSave` are exported pure functions -- no
- *   storage, no clock, no mutation of their input -- so the shape can be tested
- *   on its own and game.js can normalize an in-memory value without a round
- *   trip through the browser.
- * - The saved run deliberately omits `question`. A question is a pure function
- *   of the seed, the season, the attempt, and `questionsAsked` (see GameState),
- *   so persisting it would store a value that could contradict the fields it
- *   derives from. `GameState.rehydrate` regenerates it on load instead.
- * - `position` is only *structurally* normalized here (a non-negative integer).
- *   The semantic bound needs the season, which is Journey's business, so
- *   `Journey.normalizePosition` is the authority and `GameState.rehydrate`
- *   applies it on load. Importing Journey here would be legal -- there is no
- *   cycle -- but it would put a rule in the persistence layer.
+ * - `defaultSave` and `normalizeSave` are pure: no storage, no clock, no
+ *   mutation of their input.
+ * - The saved run omits `question`. It is a pure function of the seed, season,
+ *   attempt and `questionsAsked`, so saving it could contradict those fields.
+ *   `GameState.rehydrate` regenerates it on load.
+ * - `position` is only structurally normalized here (a non-negative integer).
+ *   The semantic bound needs the season, so `Journey.normalizePosition` applies
+ *   it in `GameState.rehydrate`. The persistence layer holds no rules.
  *
- * Error Handling: follows the base class's contract exactly.
- * - `saveRun` and `clearRun` return a boolean and never throw.
+ * Error handling follows the base class:
+ * - `saveRun` returns a boolean and never throws.
  * - `loadRun` returns null when nothing is stored, the JSON is corrupt, or the
  *   version has moved on (the base clears the key in that case).
- * - `defaultSave` and `normalizeSave` never throw for any input. Saved data
- *   comes off a real device -- a half-written save, a hand-edited one, or one
- *   from an old build -- so every field is coerced back into range rather than
- *   rejected, and unknown keys are dropped rather than copied through. A child
- *   mid-journey should never be shown an error because a byte moved.
+ * - `defaultSave` and `normalizeSave` never throw. A save can be half-written,
+ *   hand-edited or from an old build, so every field is coerced into range and
+ *   unknown keys are dropped.
  */
 
 import { StorageManager as BaseStorageManager } from "../../shared/StorageManager.js"
+import { isPlainObject, nonNegativeInt } from "../../shared/validate.js"
 import { CHARACTER_IDS, DEFAULT_CHARACTER } from "./characters.js"
 import { PHASE, SEASON_ORDER, STORAGE } from "./constants.js"
 
@@ -100,28 +93,6 @@ const SEASON_IDS = new Set(SEASON_ORDER)
  */
 
 /**
- * Whether a value can be read as a keyed object. Arrays are rejected: a
- * persisted array where a map was expected is corruption, not data.
- * @private
- * @param {unknown} value - Value to test
- * @returns {boolean} True for a non-null, non-array object
- */
-function _isPlainObject(value) {
-  return value !== null && typeof value === "object" && !Array.isArray(value)
-}
-
-/**
- * Read an untrusted counter as a non-negative integer, defaulting to 0.
- * @private
- * @param {unknown} value - Value from a persisted payload
- * @returns {number} A non-negative integer
- */
-function _nonNegativeInt(value) {
-  if (!Number.isFinite(value)) return 0
-  return Math.max(0, Math.floor(/** @type {number} */ (value)))
-}
-
-/**
  * Coerce the per-season delivery record: known season ids only, non-negative
  * counts. A season id that has since been renamed drops out rather than
  * lingering in the summary.
@@ -132,10 +103,10 @@ function _nonNegativeInt(value) {
 function _normalizeCollected(raw) {
   /** @type {Object<string, number>} */
   const collected = {}
-  if (!_isPlainObject(raw)) return collected
+  if (!isPlainObject(raw)) return collected
   for (const key of Object.keys(/** @type {Object} */ (raw))) {
     if (SEASON_IDS.has(key)) {
-      collected[key] = _nonNegativeInt(/** @type {Object} */ (raw)[key])
+      collected[key] = nonNegativeInt(/** @type {Object} */ (raw)[key])
     }
   }
   return collected
@@ -176,28 +147,28 @@ function _normalizeUnlocked(raw) {
  * @returns {SavedRun} A new, valid run
  */
 function _normalizeRun(raw) {
-  const source = _isPlainObject(raw) ? /** @type {Object} */ (raw) : {}
-  const questionsAsked = _nonNegativeInt(source.questionsAsked)
-  const streak = _nonNegativeInt(source.streak)
+  const source = isPlainObject(raw) ? /** @type {Object} */ (raw) : {}
+  const questionsAsked = nonNegativeInt(source.questionsAsked)
+  const streak = nonNegativeInt(source.streak)
   return {
     phase: PHASE_VALUES.has(source.phase) ? source.phase : PHASE.CHARACTER_SELECT,
     characterId: CHARACTER_IDS.has(source.characterId) ? source.characterId : DEFAULT_CHARACTER.id,
     seasonId: SEASON_IDS.has(source.seasonId) ? source.seasonId : null,
-    seed: _nonNegativeInt(source.seed) || 1,
-    attempt: _nonNegativeInt(source.attempt),
-    position: _nonNegativeInt(source.position),
-    items: _nonNegativeInt(source.items),
+    seed: nonNegativeInt(source.seed) || 1,
+    attempt: nonNegativeInt(source.attempt),
+    position: nonNegativeInt(source.position),
+    items: nonNegativeInt(source.items),
     retrying: source.retrying === true,
-    owed: Math.min(1, _nonNegativeInt(source.owed)),
-    extrasDone: Math.min(1, _nonNegativeInt(source.extrasDone)),
-    hintsLeft: _nonNegativeInt(source.hintsLeft),
+    owed: Math.min(1, nonNegativeInt(source.owed)),
+    extrasDone: Math.min(1, nonNegativeInt(source.extrasDone)),
+    hintsLeft: nonNegativeInt(source.hintsLeft),
     streak,
     // A high-water mark can never sit below the value it tracks.
-    bestStreak: Math.max(_nonNegativeInt(source.bestStreak), streak),
-    slips: _nonNegativeInt(source.slips),
+    bestStreak: Math.max(nonNegativeInt(source.bestStreak), streak),
+    slips: nonNegativeInt(source.slips),
     questionsAsked,
     // Correct answers can never outnumber the questions they came from.
-    correctCount: Math.min(_nonNegativeInt(source.correctCount), questionsAsked),
+    correctCount: Math.min(nonNegativeInt(source.correctCount), questionsAsked),
     collected: _normalizeCollected(source.collected),
   }
 }
@@ -209,28 +180,21 @@ function _normalizeRun(raw) {
  * @returns {Object} A new, valid totals object
  */
 function _normalizeTotals(raw) {
-  const source = _isPlainObject(raw) ? /** @type {Object} */ (raw) : {}
-  const questionsAnswered = _nonNegativeInt(source.questionsAnswered)
+  const source = isPlainObject(raw) ? /** @type {Object} */ (raw) : {}
+  const questionsAnswered = nonNegativeInt(source.questionsAnswered)
   return {
-    runsCompleted: _nonNegativeInt(source.runsCompleted),
-    seasonsCleared: _nonNegativeInt(source.seasonsCleared),
+    runsCompleted: nonNegativeInt(source.runsCompleted),
+    seasonsCleared: nonNegativeInt(source.seasonsCleared),
     questionsAnswered,
-    questionsCorrect: Math.min(_nonNegativeInt(source.questionsCorrect), questionsAnswered),
+    questionsCorrect: Math.min(nonNegativeInt(source.questionsCorrect), questionsAnswered),
   }
 }
 
 /**
  * Coerce untrusted preferences.
  *
- * `timer` defaults to **false** and only a literal `true` turns it on. It used
- * to default the other way, because the game was timed before the switch
- * existed and a save from then has no `timer` key at all. The default flipped
- * on 2026-09-18: a countdown read as intimidating on the first real play, and
- * an opt-in race is the better starting point for a game a child picks up
- * alone. The cost of the flip is exactly that case -- a save written before the
- * key existed now loads untimed, which is a change to the game it was written
- * by, and the deliberate choice. A save that ticked the box keeps it, because
- * it carries a literal `true`.
+ * `timer` defaults to false and only a literal `true` turns it on, so a save
+ * with no `timer` key loads untimed.
  *
  * A truthy `1` or `"yes"` from a hand-edited save is not an answer either way,
  * so it leaves the default.
@@ -239,7 +203,7 @@ function _normalizeTotals(raw) {
  * @returns {Settings} A new, valid settings object
  */
 function _normalizeSettings(raw) {
-  const source = _isPlainObject(raw) ? /** @type {Object} */ (raw) : {}
+  const source = isPlainObject(raw) ? /** @type {Object} */ (raw) : {}
   return { timer: source.timer === true }
 }
 
@@ -276,7 +240,7 @@ export function defaultSave() {
  * @returns {SaveState} A new, valid save
  */
 export function normalizeSave(raw) {
-  if (!_isPlainObject(raw)) return defaultSave()
+  if (!isPlainObject(raw)) return defaultSave()
   const source = /** @type {Object} */ (raw)
 
   /** @type {SaveState} */
@@ -335,18 +299,10 @@ export class StorageManager extends BaseStorageManager {
     if (!data) return null
     // A payload without a run is not a Seasons save; normalizing it would
     // invent a pristine run and quietly discard whatever was really there.
-    if (!_isPlainObject(data.run)) {
+    if (!isPlainObject(data.run)) {
       this._logError("loadRun", "Invalid data structure: missing required field (run)")
       return null
     }
     return normalizeSave(data)
-  }
-
-  /**
-   * Erase the save.
-   * @returns {boolean} True if the clear succeeded
-   */
-  clearRun() {
-    return this.clearGameState()
   }
 }

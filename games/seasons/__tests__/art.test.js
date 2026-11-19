@@ -1,21 +1,20 @@
 /**
- * Tests for the Seasons art layer: the `svg` helper and the registry in
- * art/index.js, plus the placeholder pack that implements the pack contract.
+ * Tests for the Seasons art layer: the `svg` helper in art/svg.js, plus the
+ * placeholder pack that implements the pack contract.
  *
  * Two things are being protected here, and they are quite different.
  *
- * The first is the security property the whole game rests on. art/index.js says
- * "innerHTML is deliberately not used anywhere in this game, so there is no path
- * by which content could become markup". `svg` is the single choke point for
- * that claim, so the string-child case is tested with an actual `<script>`
+ * The first is the security property the whole game rests on. The game never
+ * uses `innerHTML`, so there is no path by which content could become markup.
+ * `svg` is the single choke point
+ * for that claim, so the string-child case is tested with an actual `<script>`
  * payload rather than a benign string: a text node is the only acceptable
  * result, and the assertions check both the escaped serialization and that no
  * element was created.
  *
  * The second is the pack contract. A replacement art pack is meant to be one new
- * file plus one string in constants.ART.PACK, which only works if "implements
- * the contract" is checkable -- and a sprite pack is planned, so this block is
- * the thing standing between that pack and shipping half-implemented. It walks
+ * file, which only works if "implements the contract" is checkable. This block
+ * is the thing standing between a new pack and shipping half-implemented. It walks
  * every character id in characters.js, every season id in SEASON_ORDER and every
  * obstacle kind in obstacles.js, and asserts a real drawing comes back for each
  * -- an SVG element with something in it, a viewBox the caller can actually size
@@ -40,10 +39,10 @@
  */
 
 import { describe, expect, it, jest } from "@jest/globals"
-import { activePack, getPack, SVG_NS, svg } from "../js/art/index.js"
 import * as placeholder from "../js/art/placeholder.js"
+import { SVG_NS, svg } from "../js/art/svg.js"
 import { CHARACTERS } from "../js/characters.js"
-import { ART, SEASON_ORDER } from "../js/constants.js"
+import { SEASON_ORDER } from "../js/constants.js"
 import { isObstacleKind, OBSTACLE_KINDS } from "../js/obstacles.js"
 import { getSeason, SEASON_LIST } from "../js/seasons.js"
 
@@ -323,7 +322,7 @@ describe("svg", () => {
     expect(text.childElementCount).toBe(0)
   })
 
-  // The security-relevant case. art/index.js claims there is no path by which
+  // The security-relevant case. The game claims there is no path by which
   // content becomes markup; `svg` is the only place a string enters the DOM, so
   // this is where that claim is either true or not.
   it("cannot be used to inject markup through a string child", () => {
@@ -356,45 +355,6 @@ describe("svg", () => {
   })
 })
 
-describe("the registry", () => {
-  it("returns the placeholder pack by name, without warning", () => {
-    const warn = jest.spyOn(console, "warn").mockImplementation(() => {})
-    expect(getPack("placeholder")).toBe(placeholder)
-    expect(warn).not.toHaveBeenCalled()
-    warn.mockRestore()
-  })
-
-  it.each([["nope"], [""], [null], [undefined], [42], [{}]])(
-    "falls back to placeholder and warns for the unknown name %p",
-    (name) => {
-      const warn = jest.spyOn(console, "warn").mockImplementation(() => {})
-      expect(getPack(name)).toBe(placeholder)
-      expect(warn).toHaveBeenCalledTimes(1)
-      expect(String(warn.mock.calls[0][0])).toContain("unknown art pack")
-      warn.mockRestore()
-    },
-  )
-
-  it("does not fall back for an inherited Object property", () => {
-    const warn = jest.spyOn(console, "warn").mockImplementation(() => {})
-    expect(getPack("toString")).toBe(placeholder)
-    expect(warn).toHaveBeenCalledTimes(1)
-    warn.mockRestore()
-  })
-
-  it("the active pack is the one constants.ART.PACK names", () => {
-    const warn = jest.spyOn(console, "warn").mockImplementation(() => {})
-    // Named module, not `getPack(ART.PACK)` -- activePack's whole body is
-    // `return getPack(ART.PACK)`, so that comparison could not fail.
-    expect(activePack()).toBe(placeholder)
-    expect(ART.PACK).toBe("placeholder")
-    expect(activePack().id).toBe(ART.PACK)
-    // A configured pack that does not exist would be a silent downgrade.
-    expect(warn).not.toHaveBeenCalled()
-    warn.mockRestore()
-  })
-})
-
 // This block is the reason this file exists. It is written against the pack
 // contract rather than against the placeholder pack's specific shapes, so it can
 // be pointed at a replacement pack unchanged.
@@ -402,8 +362,6 @@ describe("the placeholder pack fulfils the art-pack contract", () => {
   const pack = placeholder
 
   it.each([
-    ["id", "string"],
-    ["name", "string"],
     ["palette", "function"],
     ["character", "function"],
     ["item", "function"],
@@ -416,7 +374,6 @@ describe("the placeholder pack fulfils the art-pack contract", () => {
     ["backdrop", "function"],
   ])("exports %s as a %s", (name, type) => {
     expect(typeof pack[name]).toBe(type)
-    if (type === "string") expect(pack[name].length).toBeGreaterThan(0)
   })
 
   // `trailPath` was the one-viewBox curve the trail used to be drawn along.

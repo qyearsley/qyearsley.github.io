@@ -14,8 +14,7 @@
  *   season's demand is exactly what a finished trail pays plus the boss's
  *   rescue, so an animal who collected a different amount from a mountain could
  *   not reach it. The roster trades on time, hints and patience instead.
- * - Each perk is free. The costs went with the wrong-answer penalty they were
- *   priced against: there is no longer an item to charge one in.
+ * - Each perk is free: nothing takes an item, so there is nothing to charge in.
  *
  * Error Handling: `getCharacter` returns the first character rather than null
  * for an unknown id, so a corrupted save selects a playable animal instead of
@@ -39,9 +38,8 @@ import { DEFAULT_EFFECTS } from "./constants.js"
 /**
  * The animals, in display order.
  *
- * Rebuilt on 2026-09-21, when the wrong-answer penalty was removed and three of
- * the four perks stopped doing anything. Each animal now owns exactly one field
- * of DEFAULT_EFFECTS, which is what `characters.test.js` holds them to.
+ * Each animal owns exactly one field of DEFAULT_EFFECTS, which is what
+ * `characters.test.js` holds them to.
  *
  * Two of them -- the Slug and the Sloth -- only matter when the countdown is
  * switched on, and it is off by default. That is a known soft spot rather than

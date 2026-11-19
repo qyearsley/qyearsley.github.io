@@ -814,9 +814,8 @@ body.is-glowing-question .question-prompt {
   margin: 18px auto 0;
 }
 
-/* Bordered in the primary green, not the hairline border colour: at 1.45:1
-   against the page the old border was below the 3:1 that a control boundary
-   needs, and the buttons read as faint tinted rectangles. */
+/* Bordered in the primary green, not the hairline border colour: a control
+   boundary needs 3:1 against the page, and the hairline is 1.45:1. */
 .choice {
   min-height: var(--sn-tap);
   border: 2px solid var(--sn-primary);
@@ -839,9 +838,8 @@ body.is-glowing-question .question-prompt {
    stays exactly the number, which is what the tests and the screen reader read.
 
    A letter, not a digit: the answers are numbers, so a digit in the corner read
-   as part of one. `left` is a pixel wider than it was for that reason -- "A"
-   has far less side bearing than "1", so the same value put it visibly closer
-   to the edge. `line-height: 1` pins the glyph box to its own font size rather
+   as part of one. `left` is a pixel wider for that reason -- "A" has far less
+   side bearing than "1", so the same value put it visibly closer to the edge. `line-height: 1` pins the glyph box to its own font size rather
    than inheriting the 1.6rem answer's leading. */
 @media (hover: hover) and (pointer: fine) {
   .choice {
@@ -864,10 +862,9 @@ body.is-glowing-question .question-prompt {
   }
 }
 
-/* Hover only. Focus is handled by the game-wide `:focus-visible` ring: this
-   rule used to carry `:focus-visible` too, setting the border to the colour it
-   already had and then `outline: none` on top -- which left keyboard focus
-   completely invisible on the four controls the game is played with. */
+/* Hover only. Focus is handled by the game-wide `:focus-visible` ring; adding
+   `:focus-visible` here with `outline: none` would hide keyboard focus on the
+   controls the game is played with. */
 .choice:hover:not(.is-locked) {
   border-color: var(--sn-primary);
 }
@@ -899,9 +896,8 @@ body.is-glowing-question .question-prompt {
 }
 
 /* A glyph as well as a hue. Red/green alone fails for the ~1 boy in 12 with a
-   colour vision deficiency, and the shake that used to carry the difference is
-   switched off under prefers-reduced-motion -- which left hue as the only
-   signal for exactly the users least able to use it. */
+   colour vision deficiency, and the shake is switched off under
+   prefers-reduced-motion, which would leave hue as the only signal. */
 .choice.is-correct::after,
 .choice.is-wrong::after {
   margin-left: 0.4em;
@@ -937,9 +933,8 @@ body.is-glowing-question .question-prompt {
 
 /*
  * Shown after a missed question is finally answered right. The one screen in
- * the game with no clock on it: a wrong answer no longer states the answer, so
- * this is where the fact actually gets taught, and hurrying it would leave the
- * loop teaching nothing at all.
+ * the game with no clock on it: a wrong answer does not state the answer, so
+ * this is where the fact gets taught, and hurrying it would teach nothing.
  */
 .reinforce-card {
   position: fixed;
@@ -1565,7 +1560,7 @@ body.is-glowing-question .question-prompt {
   }
 
   /* Twenty slots at 26px wrap to a third row here and push the keypad off a
-     short iPad. Smaller still beats the old 19px, which read as a dotted line. */
+     short iPad. 22px fits; 19px read as a dotted line. */
   :root {
     --sn-pip: 22px;
   }

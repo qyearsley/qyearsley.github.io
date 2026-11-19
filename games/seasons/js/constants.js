@@ -2,12 +2,8 @@
  * Seasons constants -- every shared value in the game. This module imports
  * nothing, so it can be read by any other module without a cycle.
  *
- * This is the tuning surface. It used to carry two switches, `RULES.WRONG_ANSWER`
- * and `RULES.BOSS_FAILURE`, holding three options each for design questions Ella
- * had not settled. She settled them on 2026-09-21, both in the same direction: a
- * wrong answer costs no items at all. You keep the question until you get it
- * right, then you answer one more before moving on. The switches and every option
- * behind them are gone; `docs/seasons-plan.md` records what they were.
+ * This is the tuning surface. A wrong answer costs no items: you keep the
+ * question until you get it right, then answer one more before moving on.
  *
  * Season difficulty lives in seasons.js, not here, because it is content rather
  * than mechanism.
@@ -20,11 +16,8 @@
  * shared StorageManager does on a version mismatch. Bump it whenever the save
  * shape changes incompatibly.
  *
- * Bumped to "2.0" on 2026-09-21. The retry rule dropped four run fields and the
- * retune shortened every trail, so a save from 1.0 carries a position and an
- * item count that belong to a season that no longer exists at that length.
- * Coercing it would land a player somewhere arbitrary; clearing it starts her
- * at spring, which is at least a place the game means.
+ * Clearing is deliberate: coercing an incompatible save would land a player
+ * somewhere arbitrary, while clearing starts her at spring.
  */
 export const STORAGE = {
   KEY: "seasonsProgress",
@@ -53,10 +46,10 @@ export const PLAY = {
   /** Items awarded by an ordinary space. */
   ITEMS_PER_SPACE: 1,
   /**
-   * Items awarded by a glowing space. The same for every character since
-   * 2026-09-21: a season's demand is now exactly what a finished trail pays
-   * plus the boss's rescue, and a character who collected a different amount
-   * from a mountain could not hit that number. See seasons.js.
+   * Items awarded by a glowing space. The same for every character: a season's
+   * demand is exactly what a finished trail pays plus the boss's rescue, and a
+   * character who collected a different amount from a mountain could not hit
+   * that number. See seasons.js.
    */
   ITEMS_PER_GLOWING_SPACE: 3,
 }
@@ -76,10 +69,7 @@ export const HINT_CHOICES_LEFT = 2
  * each character's `effects` over this object, so a character only states what
  * it changes.
  *
- * One field per animal, which is not a coincidence: with no penalty left to
- * scale, the roster was rebuilt around the four things a perk can still touch.
- * `penaltyScale`, `forgivenessPerSeason`, `comebackBonus` and `glowingItems` all
- * went with the wrong-answer rules.
+ * Each animal owns exactly one field here, the four things a perk can touch.
  */
 export const DEFAULT_EFFECTS = {
   /** Seconds added to a timed question. Ignored when the season has no timer. */
@@ -90,15 +80,6 @@ export const DEFAULT_EFFECTS = {
   hintsPerSeason: 0,
   /** Whether a mistake skips the extra question and goes straight on. */
   skipsExtra: false,
-}
-
-/**
- * Which art pack draws the game. See art/index.js -- the pack is the only place
- * that knows what a banana slug looks like, so swapping hand-drawn vectors or a
- * sprite pack in later is this one string plus one new file.
- */
-export const ART = {
-  PACK: "placeholder",
 }
 
 /**
