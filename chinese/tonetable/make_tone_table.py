@@ -52,6 +52,8 @@ def join_initial_final(initial, final):
 
     if initial in ["j", "q", "x"]:
         if final.startswith("u"):
+            # j/q/x never take a real u final, and "v" becomes "u" below. The "X"
+            # keeps a u final from colliding with the converted v final (jv -> ju).
             final = "X" + final[1:]
         final = final.replace("v", "u")
 
@@ -184,7 +186,7 @@ def print_row(syllable, syllables, html_lines):
 
     for tone in range(5):  # 0-4
         if not syllables[syllable][tone]:
-            html_lines.append(f"\t<td class='tone{tone}' class='empty'></td>")
+            html_lines.append(f"\t<td class='tone{tone} empty'></td>")
         else:
             html_lines.append(f"\t<td class='tone{tone}'>")
             for freq in range(6):  # 0-5
@@ -199,6 +201,7 @@ def print_row(syllable, syllables, html_lines):
 def main():
     """Main function."""
     input_file = "frequency_pinyin_table.txt"
+    # Only the <table>, not the page: paste it into chinese/tone-table.html.
     output_file = "tone_table.html"
 
     print(f"Reading data from {input_file}...")
