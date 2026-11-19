@@ -389,14 +389,8 @@
       applyTheme(next)
     }
 
-    // Expose for nav.js keyboard shortcut
+    // nav.js owns the `t` shortcut and lists it in the help overlay; it only
+    // needs this global to exist.
     window.__themeToggle = cycleTheme
-    window.__themePopoverClose = closePopover
-    window.__themePopoverIsOpen = isOpen
-
-    // Register keyboard shortcut if nav.js loaded first
-    if (window.__registerShortcut) {
-      window.__registerShortcut("t", "Cycle theme (light/dark/system)", cycleTheme)
-    }
   })
 })()

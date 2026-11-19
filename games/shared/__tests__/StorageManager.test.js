@@ -77,45 +77,4 @@ describe("StorageManager", () => {
       expect(localStorage.getItem("test-game")).toBeNull()
     })
   })
-
-  describe("hasGameState", () => {
-    it("returns false when no data", () => {
-      expect(sm.hasGameState()).toBe(false)
-    })
-
-    it("returns true when data exists", () => {
-      localStorage.setItem("test-game", "{}")
-      expect(sm.hasGameState()).toBe(true)
-    })
-  })
-
-  describe("exportGameState", () => {
-    it("returns null when no data", () => {
-      expect(sm.exportGameState()).toBeNull()
-    })
-
-    it("returns formatted JSON string", () => {
-      localStorage.setItem("test-game", JSON.stringify({ score: 5, version: "1.0" }))
-      const exported = sm.exportGameState()
-      expect(typeof exported).toBe("string")
-      expect(JSON.parse(exported).score).toBe(5)
-    })
-  })
-
-  describe("importGameState", () => {
-    it("imports valid data", () => {
-      const json = JSON.stringify({ score: 99, version: "1.0" })
-      expect(sm.importGameState(json)).toBe(true)
-      expect(localStorage.getItem("test-game")).toBe(json)
-    })
-
-    it("rejects version mismatch", () => {
-      const json = JSON.stringify({ score: 99, version: "2.0" })
-      expect(sm.importGameState(json)).toBe(false)
-    })
-
-    it("rejects invalid JSON", () => {
-      expect(sm.importGameState("not json")).toBe(false)
-    })
-  })
 })

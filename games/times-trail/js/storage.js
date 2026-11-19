@@ -24,8 +24,7 @@
  * - The base class writes `version` and `lastPlayed` on every save. This file
  *   never sets them; `normalizeProgress` only carries them through when the
  *   input already had them, and never invents them.
- * - `exportGameState` / `importGameState` are inherited unchanged. There are
- *   deliberately no `exportProgress` / `importProgress` wrappers.
+ * - There are deliberately no `exportProgress` / `importProgress` wrappers.
  *
  * Error Handling: follows the base class's contract exactly.
  * - `saveProgress` and `clearProgress` return a boolean: true on success, false

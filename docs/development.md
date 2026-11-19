@@ -176,8 +176,6 @@ cross-module call, so `nav.js` and `theme.js` work in either order.
 | `__registerShortcut(key, description, handler)` | `nav.js`                             | `theme.js` | Register/override a keyboard shortcut shown in the help overlay                  |
 | `__helpOverlayIsOpen()`                         | `nav.js`                             | tests      | Whether the shortcuts overlay is currently open                                  |
 | `__themeToggle()`                               | `theme.js`                           | `nav.js`   | Cycle light/dark/system; also gates the "t" shortcut's visibility                |
-| `__themePopoverIsOpen()`                        | `theme.js`                           | `nav.js`   | Whether the theme popover is open (so `Escape` closes it first)                  |
-| `__themePopoverClose()`                         | `theme.js`                           | tests      | Close the theme popover                                                          |
 | `__prefersDark()`                               | `theme.js`                           | games      | Whether dark applies right now, honouring an explicit choice over the OS         |
 | `__discover`                                    | `discover.js`                        | tests      | `{ randomPick, pageLink, lifeStep }` -- the random-page link's pure logic        |
 

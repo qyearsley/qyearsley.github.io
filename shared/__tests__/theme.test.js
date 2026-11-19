@@ -9,8 +9,7 @@ describe("theme.js", () => {
     localStorage.clear()
     delete document.documentElement.dataset.theme
     delete document.documentElement.dataset.accent
-    // Close popover if open
-    if (window.__themePopoverClose) window.__themePopoverClose()
+    document.querySelector(".theme-popover.open")?.classList.remove("open")
   })
 
   describe("UI creation", () => {
@@ -117,12 +116,6 @@ describe("theme.js", () => {
       const popover = document.querySelector(".theme-popover")
       popover.dispatchEvent(new MouseEvent("click", { bubbles: true }))
       expect(document.querySelector(".theme-popover.open")).not.toBeNull()
-    })
-
-    it("exposes __themePopoverIsOpen", () => {
-      expect(window.__themePopoverIsOpen()).toBe(false)
-      document.querySelector(".theme-toggle").click()
-      expect(window.__themePopoverIsOpen()).toBe(true)
     })
   })
 

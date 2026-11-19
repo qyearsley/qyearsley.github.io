@@ -441,12 +441,9 @@ describe("StorageManager", () => {
     })
 
     test("defines no bespoke exportProgress or importProgress", () => {
-      // The base class's exportGameState / importGameState are inherited
-      // unchanged; a divergent wrapper here would silently drift from them.
+      // A bespoke wrapper here would drift from the base class's load/save.
       expect(manager.exportProgress).toBeUndefined()
       expect(manager.importProgress).toBeUndefined()
-      expect(typeof manager.exportGameState).toBe("function")
-      expect(typeof manager.importGameState).toBe("function")
     })
   })
 
@@ -641,11 +638,11 @@ describe("StorageManager", () => {
       expect(manager.clearProgress()).toBe(true)
     })
 
-    test("leaves hasGameState false", () => {
+    test("removes the stored key", () => {
       manager.saveProgress(defaultProgress())
-      expect(manager.hasGameState()).toBe(true)
+      expect(localStorage.getItem(STORAGE.KEY)).not.toBeNull()
       manager.clearProgress()
-      expect(manager.hasGameState()).toBe(false)
+      expect(localStorage.getItem(STORAGE.KEY)).toBeNull()
     })
   })
 })

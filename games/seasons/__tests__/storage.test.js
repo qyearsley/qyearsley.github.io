@@ -763,7 +763,7 @@ describe("StorageManager", () => {
   describe("loadRun", () => {
     it("returns null when nothing is stored", () => {
       expect(manager.loadRun()).toBeNull()
-      expect(manager.hasGameState()).toBe(false)
+      expect(localStorage.getItem(STORAGE.KEY)).toBeNull()
     })
 
     it("round-trips a fully populated save, preserving every field", () => {
@@ -890,11 +890,11 @@ describe("StorageManager", () => {
       expect(manager.clearRun()).toBe(true)
     })
 
-    it("leaves hasGameState false", () => {
+    it("removes the stored key", () => {
       manager.saveRun(defaultSave())
-      expect(manager.hasGameState()).toBe(true)
+      expect(localStorage.getItem(STORAGE.KEY)).not.toBeNull()
       manager.clearRun()
-      expect(manager.hasGameState()).toBe(false)
+      expect(localStorage.getItem(STORAGE.KEY)).toBeNull()
     })
   })
 
@@ -914,8 +914,6 @@ describe("StorageManager", () => {
     })
 
     it("defines no bespoke import or export wrapper", () => {
-      expect(typeof manager.exportGameState).toBe("function")
-      expect(typeof manager.importGameState).toBe("function")
       expect(manager.exportRun).toBeUndefined()
       expect(manager.importRun).toBeUndefined()
     })

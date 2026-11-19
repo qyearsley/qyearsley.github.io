@@ -291,9 +291,6 @@
           hideHelp()
           return
         }
-        if (window.__themePopoverIsOpen && window.__themePopoverIsOpen()) {
-          return
-        }
         return
     }
 

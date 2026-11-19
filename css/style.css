@@ -62,7 +62,6 @@
   --color-badge-success-bg: #dcfce7;
   --color-badge-success-text: #14532d;
   --shadow-container: 0 2px 8px rgb(0, 0, 0, 0.1);
-  --shadow-hover: 0 4px 12px rgb(0, 0, 0, 0.08);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -107,7 +106,6 @@
     --color-header-separator: #718096;
     --color-header-border: #4a5568;
     --shadow-container: 0 2px 8px rgb(0, 0, 0, 0.4);
-    --shadow-hover: 0 4px 12px rgb(0, 0, 0, 0.3);
   }
 }
 
@@ -152,7 +150,6 @@
   --color-header-separator: #718096;
   --color-header-border: #4a5568;
   --shadow-container: 0 2px 8px rgb(0, 0, 0, 0.4);
-  --shadow-hover: 0 4px 12px rgb(0, 0, 0, 0.3);
 }
 
 /* Accent color overrides */
@@ -520,32 +517,12 @@ p {
    screen reader already announces the destination from the href and does not
    need to hear "north east arrow" on every one. Browsers without support for
    that syntax announce the glyph, which is the old behaviour. */
-.internal-links a[href^="http"]::after,
-.external-links a[href^="http"]::after {
+.internal-links a[href^="http"]::after {
   content: " \2197" / "";
   display: inline-block;
   font-size: 0.85em;
   color: var(--color-text-muted);
   text-decoration: none;
-}
-
-/* External Links */
-.external-links {
-  list-style: none;
-}
-
-.external-links li {
-  margin-bottom: 0.5rem;
-}
-
-.external-links a {
-  color: var(--color-primary);
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.external-links a:hover {
-  text-decoration: underline;
 }
 
 /* "See also" cross-links at the end of a tool page's <main>. Quiet on
