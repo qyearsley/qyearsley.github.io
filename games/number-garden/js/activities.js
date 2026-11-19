@@ -28,14 +28,13 @@ export class ActivityGenerator {
   }
 
   /**
-   * Generate an activity based on area and activity number
+   * Generate an activity for an area
    * Each area focuses on a specific math concept
    *
-   * @param {number} activityNumber - Activity sequence number (unused but kept for compatibility)
    * @param {string} areaId - Area identifier
    * @returns {Object} Activity object
    */
-  generateActivity(activityNumber, areaId = AREAS.FLOWER_MEADOW) {
+  generateActivity(areaId = AREAS.FLOWER_MEADOW) {
     // Route to appropriate generator based on area
     // Each area teaches a specific math skill
     switch (areaId) {

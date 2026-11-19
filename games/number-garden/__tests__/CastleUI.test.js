@@ -109,10 +109,10 @@ describe("CastleUI", () => {
   })
 
   test("updateLevelCompleteScreen reads and writes real DOM ids directly, not the injected elements", () => {
-    castle.updateLevelCompleteScreen(3, 2, true, "robot", 4)
+    castle.updateLevelCompleteScreen(3, true, "robot", 4)
 
     expect(document.getElementById("level-stars-earned").textContent).toBe("3 stars earned!")
-    expect(document.getElementById("level-flowers-earned").textContent).toBe("2 flowers collected!")
+    expect(document.getElementById("level-flowers-earned").textContent).toBe("3 flowers collected!")
     expect(
       document.getElementById("level-project-progress-container").classList.contains("hidden"),
     ).toBe(false)

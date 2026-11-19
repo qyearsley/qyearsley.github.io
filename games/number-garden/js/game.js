@@ -284,10 +284,7 @@ class NumberGarden {
    */
   generateActivity() {
     this.events.resetAnswerProcessing()
-    const activity = this.activityGenerator.generateActivity(
-      this.state.stats.activitiesCompleted,
-      this.state.currentArea,
-    )
+    const activity = this.activityGenerator.generateActivity(this.state.currentArea)
     this.state.setActivity(activity)
     this.ui.displayActivity(
       activity,
@@ -425,7 +422,6 @@ class NumberGarden {
     // Show level-complete screen with celebration
     this.showScreen("level-complete-screen")
     this.ui.castle.updateLevelCompleteScreen(
-      questionsCompleted,
       questionsCompleted,
       wasAreaJustCompleted,
       this.state.projectType,

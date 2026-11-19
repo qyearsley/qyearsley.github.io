@@ -1,4 +1,4 @@
-import { MATH, DEFAULTS, ANSWER_KEYS } from "./constants.js"
+import { DEFAULTS, ANSWER_KEYS } from "./constants.js"
 import { BaseGameUI } from "../../shared/BaseGameUI.js"
 import { CastleUI } from "./CastleUI.js"
 
@@ -94,7 +94,7 @@ export class GameUI extends BaseGameUI {
    * @param {number} [total] - Total required (defaults to a full level)
    */
   updateProgressBar(current, total = DEFAULTS.QUESTIONS_PER_LEVEL) {
-    super.updateProgressBar(current, total, MATH.PERCENT_MULTIPLIER)
+    super.updateProgressBar(current, total)
     const bar = this.elements.progressBar
     if (!bar) return
     bar.setAttribute("aria-valuenow", String(current))

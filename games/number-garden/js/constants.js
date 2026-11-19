@@ -58,11 +58,3 @@ export const DEFAULTS = {
  * Buttons past the end of this list get no shortcut.
  */
 export const ANSWER_KEYS = ["a", "b", "c", "d"]
-
-/**
- * Mathematical constants
- */
-export const MATH = {
-  /** Percentage multiplier */
-  PERCENT_MULTIPLIER: 100,
-}

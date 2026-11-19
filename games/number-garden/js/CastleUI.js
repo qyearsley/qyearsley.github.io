@@ -99,20 +99,19 @@ export class CastleUI {
   }
 
   updateLevelCompleteScreen(
-    starsEarned,
-    flowersEarned,
+    questionsCompleted,
     wasAreaCompleted,
     projectType,
     completedAreasCount,
   ) {
     const starsText = document.getElementById("level-stars-earned")
     if (starsText) {
-      starsText.textContent = `${starsEarned} stars earned!`
+      starsText.textContent = `${questionsCompleted} stars earned!`
     }
 
     const flowersText = document.getElementById("level-flowers-earned")
     if (flowersText) {
-      flowersText.textContent = `${flowersEarned} flowers collected!`
+      flowersText.textContent = `${questionsCompleted} flowers collected!`
     }
 
     const projectProgressContainer = document.getElementById("level-project-progress-container")

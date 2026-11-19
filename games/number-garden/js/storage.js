@@ -79,32 +79,4 @@ export class StorageManager extends BaseStorageManager {
   clearProgress() {
     return this.clearGameState()
   }
-
-  /**
-   * Import progress with validation
-   * @param {string} jsonString - JSON string to import
-   * @returns {boolean} True if import was successful
-   */
-  importProgress(jsonString) {
-    try {
-      const data = JSON.parse(jsonString)
-
-      // Validate that we have the required fields (stats and garden)
-      if (!data.stats || !data.garden) {
-        this._logError("importProgress", "Missing required fields: stats and/or garden")
-        return false
-      }
-
-      // If no version specified, add current version
-      if (!data.version) {
-        data.version = this.version
-      }
-
-      // Save the data (which will add lastPlayed timestamp)
-      return this.saveGameState(data)
-    } catch (error) {
-      this._logError("importProgress", "Failed to parse or save imported data", error)
-      return false
-    }
-  }
 }

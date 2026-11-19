@@ -672,13 +672,12 @@ describe("GameUI", () => {
   })
 
   describe("updateProgressBar", () => {
-    test("updates progress bar with MATH.PERCENT_MULTIPLIER", () => {
+    test("updates progress bar as a percentage of the total", () => {
       gameUI.updateProgressBar(5, 10)
 
       const progressBar = document.getElementById("progress-bar")
       const progressText = document.getElementById("progress-text")
 
-      // Should use MATH.PERCENT_MULTIPLIER (100) by default
       expect(progressBar.style.width).toBe("50%")
       expect(progressText.textContent).toBe("5/10")
     })

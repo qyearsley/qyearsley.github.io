@@ -15,7 +15,7 @@ describe("ActivityGenerator", () => {
 
   describe("generateActivity", () => {
     test("generates activities with correct structure", () => {
-      const activity = generator.generateActivity(0, "flower-meadow")
+      const activity = generator.generateActivity("flower-meadow")
       expect(activity).toBeDefined()
       expect(activity.type).toMatch(/addition|subtraction|multiplication/)
       expect(activity.question).toBeDefined()
@@ -24,27 +24,27 @@ describe("ActivityGenerator", () => {
 
     test("generates appropriate difficulty based on settings", () => {
       // Default is adventurer (medium difficulty)
-      const activity = generator.generateActivity(15)
+      const activity = generator.generateActivity()
       expect(activity).toBeDefined()
       expect(activity.correctAnswer).toBeLessThanOrEqual(30)
     })
 
     test("includes visual elements", () => {
-      const activity = generator.generateActivity(0)
+      const activity = generator.generateActivity()
       expect(activity.visual).toBeDefined()
       expect(Array.isArray(activity.visual)).toBe(true)
       expect(activity.visual.length).toBeGreaterThan(0)
     })
 
     test("includes 4 answer options", () => {
-      const activity = generator.generateActivity(0)
+      const activity = generator.generateActivity()
       expect(activity.options).toBeDefined()
       expect(activity.options.length).toBe(4)
       expect(activity.options).toContain(activity.correctAnswer)
     })
 
     test("includes creature message", () => {
-      const activity = generator.generateActivity(0)
+      const activity = generator.generateActivity()
       expect(activity.creatureMessage).toBeDefined()
       expect(typeof activity.creatureMessage).toBe("string")
     })
@@ -199,7 +199,7 @@ describe("ActivityGenerator", () => {
 
   describe("area-specific visuals", () => {
     test("flower-meadow uses flower emojis", () => {
-      const activity = generator.generateActivity(0, "flower-meadow")
+      const activity = generator.generateActivity("flower-meadow")
       const hasFlowerEmoji = activity.visual.some((item) => {
         const emoji = typeof item === "string" ? item : item.emoji
         return ["🌹", "🌺", "🌸", "🌼", "🌻", "🌷", "💐", "🏵️", "🥀", "🌾"].includes(emoji)
@@ -208,7 +208,7 @@ describe("ActivityGenerator", () => {
     })
 
     test("crystal-cave uses crystal emojis", () => {
-      const activity = generator.generateActivity(0, "crystal-cave")
+      const activity = generator.generateActivity("crystal-cave")
       const hasCrystalEmoji = activity.visual.some((item) => {
         const emoji = typeof item === "string" ? item : item.emoji
         return ["💎", "💠", "🔷", "🔹", "💙", "💜", "🔮", "⚗️", "✨", "⭐"].includes(emoji)
@@ -217,7 +217,7 @@ describe("ActivityGenerator", () => {
     })
 
     test("enchanted-forest uses nature emojis", () => {
-      const activity = generator.generateActivity(0, "enchanted-forest")
+      const activity = generator.generateActivity("enchanted-forest")
       const hasNatureEmoji = activity.visual.some((item) => {
         const emoji = typeof item === "string" ? item : item.emoji
         return ["🌲", "🌳", "🌴", "🎄", "🌿", "🍄", "🍃", "🌾", "🌱", "🪵"].includes(emoji)
@@ -226,32 +226,32 @@ describe("ActivityGenerator", () => {
     })
 
     test("uses correct creature for each area", () => {
-      const meadowActivity = generator.generateActivity(0, "flower-meadow")
+      const meadowActivity = generator.generateActivity("flower-meadow")
       expect(meadowActivity.creature).toBe("🦄")
 
-      const caveActivity = generator.generateActivity(0, "crystal-cave")
+      const caveActivity = generator.generateActivity("crystal-cave")
       expect(caveActivity.creature).toBe("🔮")
 
-      const forestActivity = generator.generateActivity(0, "enchanted-forest")
+      const forestActivity = generator.generateActivity("enchanted-forest")
       expect(forestActivity.creature).toBe("🧚")
     })
   })
 
   describe("area-specific problem types", () => {
     test("flower-meadow generates addition problems", () => {
-      const activity = generator.generateActivity(0, "flower-meadow")
+      const activity = generator.generateActivity("flower-meadow")
       expect(activity.type).toBe("addition")
       expect(activity.question).toContain("+")
     })
 
     test("crystal-cave generates subtraction problems", () => {
-      const activity = generator.generateActivity(0, "crystal-cave")
+      const activity = generator.generateActivity("crystal-cave")
       expect(activity.type).toBe("subtraction")
       expect(activity.question).toContain("-")
     })
 
     test("enchanted-forest generates multiplication problems", () => {
-      const activity = generator.generateActivity(0, "enchanted-forest")
+      const activity = generator.generateActivity("enchanted-forest")
       expect(activity.type).toBe("multiplication")
       expect(activity.question).toContain("×")
     })
@@ -264,7 +264,7 @@ describe("ActivityGenerator", () => {
 
       // Test addition - max numbers are 10, so max sum is 20
       for (let i = 0; i < 10; i++) {
-        const activity = generator.generateActivity(i, "flower-meadow")
+        const activity = generator.generateActivity("flower-meadow")
         expect(activity.correctAnswer).toBeLessThanOrEqual(20)
       }
     })
@@ -275,7 +275,7 @@ describe("ActivityGenerator", () => {
 
       // Test addition - max numbers are 15, so max sum is 30
       for (let i = 0; i < 10; i++) {
-        const activity = generator.generateActivity(i, "flower-meadow")
+        const activity = generator.generateActivity("flower-meadow")
         expect(activity.correctAnswer).toBeLessThanOrEqual(30)
       }
     })
@@ -286,7 +286,7 @@ describe("ActivityGenerator", () => {
 
       // Test addition - max numbers are 20, so max sum is 40
       for (let i = 0; i < 10; i++) {
-        const activity = generator.generateActivity(i, "flower-meadow")
+        const activity = generator.generateActivity("flower-meadow")
         expect(activity.correctAnswer).toBeLessThanOrEqual(40)
       }
     })
