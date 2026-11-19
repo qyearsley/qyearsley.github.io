@@ -46,11 +46,9 @@
   --tt-radius: 16px;
   --tt-shadow: 0 4px 12px rgb(0, 0, 0, 0.12);
 
-  /* No webfont: this page loads none, and the "Quicksand" that used to lead
-     this list only ever rendered for a player who had visited Number Garden
-     first and had it in cache -- so the game's typography depended on their
-     browsing order. Adding the font link instead would put a blocking request
-     on the critical path of a game meant to be added to a home screen. */
+  /* No webfont: it would put a blocking request on the critical path of a game
+     meant to be added to a home screen, and a font that only renders when cached
+     from another page makes the typography depend on browsing order. */
   --tt-font: -apple-system, "BlinkMacSystemFont", "Segoe UI", "Roboto", sans-serif;
 }
 
@@ -105,9 +103,8 @@ body {
   user-select: none;
 }
 
-/* Every interactive class gets the same 68px floor. The header controls
-   (back arrow, gear, "Home") used to be the three smallest targets on
-   screen and are tapped on every screen. */
+/* Every interactive class gets the same 68px floor, including the header
+   controls (back arrow, gear, "Home"), which are tapped on every screen. */
 .keypad-key,
 .big-button,
 .secondary-button,
@@ -362,7 +359,7 @@ body {
   color: var(--tt-primary);
 }
 
-/* Disabled controls (BaseGameUI.disableButton / disableAnswerButtons). */
+/* Disabled controls. */
 .big-button:disabled,
 .secondary-button:disabled,
 .keypad-key:disabled,
@@ -592,8 +589,7 @@ body {
 }
 
 /* Only the two outcome types get a colour of their own. `info` and
-   `encourage` inherit --tt-ink from the body, so they need no rule -- and the
-   rules they used to have were dead, since nothing produced those types. */
+   `encourage` inherit --tt-ink from the body, so they need no rule. */
 .feedback-area.correct {
   color: var(--tt-correct);
 }
@@ -606,9 +602,8 @@ body {
    The reward rises and fades where it appears instead of flying into
    #play-star-count: the counter lives in the header, outside .play-area's
    positioning context, and sits in a different place in portrait than in
-   landscape, so the old fixed translate(120px, -180px) landed nowhere near it
-   in either orientation. A vertical rise reads as "you earned this" without
-   claiming a destination it cannot hit. translateX(-50%) is part of the start
+   landscape, so no fixed translate lands on it. A vertical rise reads as "you
+   earned this" without claiming a destination it cannot hit. translateX(-50%) is part of the start
    state so `left: 50%` actually centres the text. */
 .star-fly {
   position: absolute;
@@ -1062,11 +1057,9 @@ body {
 
 /* ==================== Focus Styles (Accessibility) ====================
    The site sheet rings every `:focus`, which on an iPad means a blue box left
-   around whichever button was last tapped, and at `button:focus` (0,1,1) it also
-   outranked the bare `:focus-visible` rule that used to be here -- so the
-   accent ring below was never the one drawn on a button. Both halves are
-   replaced: the always-on ring is dropped, and the keyboard-only one is
-   redrawn at matching specificity. */
+   around whichever button was last tapped, and at `button:focus` (0,1,1) it
+   outranks a bare `:focus-visible` rule. So the always-on ring is dropped here,
+   and the keyboard-only accent ring below is declared at matching specificity. */
 a:focus,
 button:focus,
 input:focus,
@@ -1151,10 +1144,8 @@ select:focus-visible {
 
 /* ==================== Responsive: Landscape ==================== */
 @media (orientation: landscape) {
-  /* Normal play is a single centred column, same shape as portrait. It used to
-     be two columns with the entry bottom-right "under the right thumb", which
-     cost every question a keypad pushed off to the right and a "Yes!" rendered
-     in the column opposite the one being looked at. */
+  /* Normal play is a single centred column, same shape as portrait, so the
+     keypad and the "Yes!" stay in the column being looked at. */
   .play-area {
     grid-template:
       "question" auto

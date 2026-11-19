@@ -24,25 +24,16 @@
  * - The base class writes `version` and `lastPlayed` on every save. This file
  *   never sets them; `normalizeProgress` only carries them through when the
  *   input already had them, and never invents them.
- * - There are deliberately no `exportProgress` / `importProgress` wrappers.
  *
- * Error Handling: follows the base class's contract exactly.
- * - `saveProgress` and `clearProgress` return a boolean: true on success, false
- *   when localStorage refuses (quota, private browsing). They never throw.
- * - `loadProgress` returns null on any failure -- nothing stored, corrupt JSON,
- *   a version mismatch (the base clears the key), or a payload missing `facts`
- *   or `totals`.
- * - Every failure is logged through the base class's `_logError`, which is the
- *   only console path in this layer.
- * - `defaultProgress` and `normalizeProgress` never throw for any input. The
- *   persisted data comes off a real device and can be any shape, so every field
- *   is coerced rather than trusted, and unknown keys are dropped rather than
- *   copied through.
+ * Nothing here throws. Persisted data can be any shape, so
+ * `normalizeProgress` coerces every field and drops unknown keys; the save and
+ * load methods follow the base class's contract (see their docs).
  */
 
 import { StorageManager as BaseStorageManager } from "../../shared/StorageManager.js"
 import { DEFAULT_TRAIL_ID, GEM_MILESTONES, STORAGE, TRAIL, TRAILS } from "./constants.js"
 import { normalizeRecord } from "./MasteryModel.js"
+import { isPlainObject, nonNegativeInt } from "../../shared/validate.js"
 
 /**
  * A canonical fact id: both operands 2-9, smaller operand first. The "x" is
@@ -131,28 +122,6 @@ const MILESTONE_IDS = new Set(GEM_MILESTONES.map((milestone) => milestone.id))
  */
 
 /**
- * Whether a value can be read as a keyed object. Arrays are rejected: a
- * persisted array where a map was expected is corruption, not data.
- * @private
- * @param {unknown} value - Value to test
- * @returns {boolean} True for a non-null, non-array object
- */
-function _isPlainObject(value) {
-  return value !== null && typeof value === "object" && !Array.isArray(value)
-}
-
-/**
- * Read an untrusted counter as a non-negative integer, defaulting to 0.
- * @private
- * @param {unknown} value - Value from a persisted payload
- * @returns {number} A non-negative integer
- */
-function _nonNegativeInt(value) {
-  if (!Number.isFinite(value)) return 0
-  return Math.max(0, Math.floor(/** @type {number} */ (value)))
-}
-
-/**
  * Read an untrusted date field as a "YYYY-MM-DD" key, else null.
  * @private
  * @param {unknown} value - Value from a persisted payload
@@ -186,7 +155,7 @@ function _isCanonicalFactId(key) {
 function _normalizeFacts(raw) {
   /** @type {Object<string, MasteryRecord>} */
   const facts = {}
-  if (!_isPlainObject(raw)) return facts
+  if (!isPlainObject(raw)) return facts
   for (const key of Object.keys(/** @type {Object} */ (raw))) {
     if (_isCanonicalFactId(key)) {
       facts[key] = normalizeRecord(/** @type {Object} */ (raw)[key])
@@ -203,15 +172,15 @@ function _normalizeFacts(raw) {
  * @returns {Totals} A new, valid Totals
  */
 function _normalizeTotals(raw) {
-  const source = _isPlainObject(raw) ? /** @type {Object} */ (raw) : {}
-  const factsAnswered = _nonNegativeInt(source.factsAnswered)
+  const source = isPlainObject(raw) ? /** @type {Object} */ (raw) : {}
+  const factsAnswered = nonNegativeInt(source.factsAnswered)
   return {
-    starsTotal: _nonNegativeInt(source.starsTotal),
-    gemsTotal: _nonNegativeInt(source.gemsTotal),
+    starsTotal: nonNegativeInt(source.starsTotal),
+    gemsTotal: nonNegativeInt(source.gemsTotal),
     factsAnswered,
     // Correct answers can never outnumber the questions they came from.
-    factsCorrect: Math.min(_nonNegativeInt(source.factsCorrect), factsAnswered),
-    sessionsCompleted: _nonNegativeInt(source.sessionsCompleted),
+    factsCorrect: Math.min(nonNegativeInt(source.factsCorrect), factsAnswered),
+    sessionsCompleted: nonNegativeInt(source.sessionsCompleted),
   }
 }
 
@@ -229,14 +198,14 @@ function _normalizeTotals(raw) {
  * @returns {Trails} A new, valid Trails
  */
 function _normalizeTrails(raw) {
-  const source = _isPlainObject(raw) ? /** @type {Object} */ (raw) : {}
+  const source = isPlainObject(raw) ? /** @type {Object} */ (raw) : {}
   const known = new Set(TRAILS.map((trail) => trail.id))
   /** @type {Object<string, number>} */
   const spaces = {}
-  const rawSpaces = _isPlainObject(source.spaces) ? /** @type {Object} */ (source.spaces) : {}
+  const rawSpaces = isPlainObject(source.spaces) ? /** @type {Object} */ (source.spaces) : {}
   for (const trailId of Object.keys(rawSpaces)) {
     if (known.has(trailId)) {
-      spaces[trailId] = Math.min(TRAIL.SPACES - 1, _nonNegativeInt(rawSpaces[trailId]))
+      spaces[trailId] = Math.min(TRAIL.SPACES - 1, nonNegativeInt(rawSpaces[trailId]))
     }
   }
   return {
@@ -254,16 +223,16 @@ function _normalizeTrails(raw) {
  * @returns {Daily} A new, valid Daily
  */
 function _normalizeDaily(raw) {
-  const source = _isPlainObject(raw) ? /** @type {Object} */ (raw) : {}
-  const streakDays = _nonNegativeInt(source.streakDays)
+  const source = isPlainObject(raw) ? /** @type {Object} */ (raw) : {}
+  const streakDays = nonNegativeInt(source.streakDays)
   return {
     todayDate: _dateKey(source.todayDate),
-    factsToday: _nonNegativeInt(source.factsToday),
+    factsToday: nonNegativeInt(source.factsToday),
     goalMetToday: source.goalMetToday === true,
     lastGoalDate: _dateKey(source.lastGoalDate),
     streakDays,
     // A high-water mark can never sit below the value it is tracking.
-    bestStreakDays: Math.max(_nonNegativeInt(source.bestStreakDays), streakDays),
+    bestStreakDays: Math.max(nonNegativeInt(source.bestStreakDays), streakDays),
     flameDimmed: source.flameDimmed === true,
   }
 }
@@ -339,7 +308,7 @@ export function defaultProgress() {
  * @returns {SaveState} A new, valid save state
  */
 export function normalizeProgress(raw) {
-  if (!_isPlainObject(raw)) return defaultProgress()
+  if (!isPlainObject(raw)) return defaultProgress()
   const source = /** @type {Object} */ (raw)
 
   /** @type {SaveState} */
@@ -350,7 +319,7 @@ export function normalizeProgress(raw) {
     daily: _normalizeDaily(source.daily),
     // Structural only: Settings drops unknown keys itself, so a legacy
     // `inputMode` survives here and dies there.
-    settings: _isPlainObject(source.settings) ? source.settings : {},
+    settings: isPlainObject(source.settings) ? source.settings : {},
     awardedMilestoneIds: _normalizeMilestoneIds(source.awardedMilestoneIds),
   }
 
@@ -393,7 +362,7 @@ export class StorageManager extends BaseStorageManager {
 
     // A payload without these two is not a Times Trail save; normalizing it
     // would invent a pristine trail and quietly discard whatever was there.
-    if (!_isPlainObject(data.facts) || !_isPlainObject(data.totals)) {
+    if (!isPlainObject(data.facts) || !isPlainObject(data.totals)) {
       this._logError(
         "loadProgress",
         "Invalid data structure: missing required fields (facts and/or totals)",

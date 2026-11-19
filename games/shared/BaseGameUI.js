@@ -4,18 +4,6 @@
  *
  * This class centralizes common DOM manipulation patterns to reduce
  * code duplication and ensure consistent UI behavior across games.
- *
- * Security note: nothing in this class writes markup. `setHTML` used to, and
- * the note here used to say the games relied on it being safe because the
- * content was game data rather than user input. That argument was never needed:
- * no game called it. It is gone, so `textContent` is the only way a string
- * reaches the page from here.
- *
- * The settings dialog is shown and hidden by `showSettings` / `hideSettings`,
- * which toggle the `hidden` class. There used to be a second pair, `showModal`
- * and `hideModal`, toggling a `show` class instead -- no game called those
- * either, and no stylesheet defined `.modal.show`, so the first caller would
- * have got a dialog that never appeared. Also gone.
  */
 export class BaseGameUI {
   constructor() {
@@ -200,81 +188,16 @@ export class BaseGameUI {
   }
 
   /**
-   * Disable a button
-   * @param {HTMLElement} button - Button element
-   */
-  disableButton(button) {
-    if (button) {
-      button.disabled = true
-      button.classList.add("disabled")
-    }
-  }
-
-  /**
-   * Enable a button
-   * @param {HTMLElement} button - Button element
-   */
-  enableButton(button) {
-    if (button) {
-      button.disabled = false
-      button.classList.remove("disabled")
-    }
-  }
-
-  /**
-   * Disable all answer buttons
-   * Assumes buttons with class 'answer-btn'
-   */
-  disableAnswerButtons() {
-    const buttons = document.querySelectorAll(".answer-btn")
-    buttons.forEach((btn) => this.disableButton(btn))
-  }
-
-  /**
-   * Enable all answer buttons
-   * Assumes buttons with class 'answer-btn'
-   */
-  enableAnswerButtons() {
-    const buttons = document.querySelectorAll(".answer-btn")
-    buttons.forEach((btn) => this.enableButton(btn))
-  }
-
-  /**
-   * Show feedback message
-   * @param {string} message - Feedback message
-   * @param {string} type - Feedback type ('correct', 'incorrect', 'encourage')
-   */
-  showFeedback(message, type = "info") {
-    const feedbackArea = document.getElementById("feedback-area")
-    if (feedbackArea) {
-      feedbackArea.textContent = message
-      feedbackArea.className = `feedback ${type}`
-      feedbackArea.style.opacity = "1"
-    }
-  }
-
-  /**
-   * Hide feedback message
-   */
-  hideFeedback() {
-    const feedbackArea = document.getElementById("feedback-area")
-    if (feedbackArea) {
-      feedbackArea.style.opacity = "0"
-    }
-  }
-
-  /**
    * Update progress bar
    * @param {number} current - Current progress value
    * @param {number} total - Total progress value
-   * @param {number} percentMultiplier - Multiplier for percentage (default 100)
    */
-  updateProgressBar(current, total, percentMultiplier = 100) {
+  updateProgressBar(current, total) {
     const progressBar = document.getElementById("progress-bar")
     const progressText = document.getElementById("progress-text")
 
     if (progressBar) {
-      const percent = (current / total) * percentMultiplier
+      const percent = (current / total) * 100
       progressBar.style.width = `${percent}%`
     }
 
@@ -304,16 +227,6 @@ export class BaseGameUI {
   markButtonCorrect(button) {
     if (button) {
       button.classList.add("correct")
-    }
-  }
-
-  /**
-   * Mark button as incorrect (visual feedback)
-   * @param {HTMLElement} button - Button element
-   */
-  markButtonIncorrect(button) {
-    if (button) {
-      button.classList.add("incorrect")
     }
   }
 

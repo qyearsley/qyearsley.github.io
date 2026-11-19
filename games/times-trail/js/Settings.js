@@ -13,8 +13,8 @@
  *    facts, and a narrowed pool could only make a trail repeat one question. The
  *    spaced-repetition draw is what makes practice easier or harder.
  *
- * 3. **Retired keys are dropped on load.** `sound`, `tables`, `difficulty` and
- *    the like in an old save are ignored; the rest of the save is untouched.
+ * 3. **Unknown keys are dropped on load.** Anything else in a saved settings
+ *    object is ignored; the rest of the save is untouched.
  *
  * Pure: no `document`, `window`, `localStorage`, timer or clock. Persisted input
  * is untrusted, so nothing here throws: an unknown key or an unoffered session

@@ -222,8 +222,8 @@
   overscroll-behavior-x: contain;
 }
 
-/* The head arrow used to hang below .tape-section on a negative offset. Inside
-   a scroll container that would be clipped, so its room is reserved instead. */
+/* The head arrow sits below .tape-section. A negative offset would be clipped
+   inside a scroll container, so its room is reserved here instead. */
 .tape-scroll.with-head {
   padding-bottom: 0.65rem;
 }

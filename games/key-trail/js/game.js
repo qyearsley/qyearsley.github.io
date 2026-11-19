@@ -14,7 +14,7 @@ const storage = new StorageManager("key-trail", "1")
 
 let doc, $
 let save // { stars: {lessonIndex: 1-3}, errors: {key: count}, best: wpm }
-let mode // null on the menu and done screens, else "lesson" or "speed"
+let mode // "lesson" or "speed"; null means not accepting typing (menu, done, or the pause after a finished line)
 let lesson // index into LESSONS
 let lines, lineIndex, run, firstKeyAt, timer, pending
 const keyEls = {} // key -> its element on the on-screen keyboard

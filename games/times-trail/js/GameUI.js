@@ -1,49 +1,12 @@
 /**
- * Rendering layer for Times Trail. Every view model in the game is turned into
- * DOM here, and this is the only module that writes game *content* into the
- * page. It is not the only module that touches `document`: `EventManager.js`
- * binds the listeners, `Keypad.js` builds and owns its own twelve keys, and
- * `game.js` reaches into the document in a few narrow places (toggling
- * `aria-live` while a scaffold teaches, looking up the `#keypad` container
- * once, and building the one-time save-failure banner). The
- * rule is narrower than "nothing else touches `document`": nothing else renders
- * a view model.
+ * Rendering layer for Times Trail. This is the only module that renders a view
+ * model into the page; `game.js` computes, then hands this class plain view
+ * models (the `@typedef`s below) built from already-decided numbers and strings.
  *
- * Architecture: `GameUI` extends the shared `BaseGameUI` and contains no game
- * rules whatsoever. `game.js` computes, then hands this class plain view models
- * (the `@typedef`s below) built from already-decided numbers and strings. That
- * is why this file imports only `BaseGameUI`, `constants.js`, and `facts.js`:
- * the dependency graph forbids the UI layer from reaching into `Journey.js`,
- * `Scoring.js`, `MasteryModel.js`, or any `modes/` module, so it cannot recompute
- * -- and therefore cannot disagree with -- anything the core modules decided.
- *
- * Lifetimes: per-answer feedback (`showFeedback`, `flyStars`) is cleared by the
- * next `renderQuestion`.
- *
- * The overrides below exist because the base behaviour is wrong for this page
- * rather than merely incomplete:
- *   - `showFeedback` / `hideFeedback`: the base assigns `className`, which
- *     destroys `.feedback-area` and `.hidden`, and hides by setting inline
- *     opacity, which leaves stale text in the layout and in the `aria-live`
- *     region forever. These use `classList` only.
- *   - `showScreen`: the base only toggles `.active`, so the button that was just
- *     tapped ends up inside a `display: none` screen and focus falls to `<body>`
- *     with nothing announced. This focuses the new screen's heading.
- *   - `updateTitleButtons`: the base knows only about Continue and Start Fresh,
- *     and this game has a third save-dependent title button.
- *
- * Error Handling: every method looks its target element up defensively and
- * returns without throwing when it is absent, matching `BaseGameUI`'s style.
- * Constructing a `GameUI` against an empty `document.body` is safe, and so is
- * calling every render method afterwards -- a missing element is never fatal.
- *
- * Security Note: this class uses `innerHTML` only to clear a container
- * (`= ""`). Every piece of dynamic content is created with
- * `document.createElement` and written with `textContent`, and all of it comes
- * from controlled game data -- frozen constant tables, the 36-fact set, and
- * numbers computed by the game's own pure modules -- never from user input.
- * There is no code path by which anything a player types can be interpreted as
- * markup.
+ * It imports only `BaseGameUI`, `constants.js`, and `facts.js`, so it cannot
+ * recompute, and therefore cannot disagree with, anything `Journey.js`,
+ * `Scoring.js`, `MasteryModel.js`, or `modes/` decided. Every method tolerates a
+ * missing element and returns without throwing.
  */
 
 import { BaseGameUI } from "../../shared/BaseGameUI.js"
@@ -468,7 +431,7 @@ export class GameUI extends BaseGameUI {
   }
 
   /**
-   * OVERRIDES `BaseGameUI.updateTitleButtons`, which toggles only Continue and
+   * Overrides `BaseGameUI.updateTitleButtons`, which toggles only Continue and
    * Start Fresh.
    *
    * `#progress-button` is the title screen's route to the hub, and it exists
@@ -526,7 +489,7 @@ export class GameUI extends BaseGameUI {
   // ------------------------------------------------------------- Screens
 
   /**
-   * OVERRIDES `BaseGameUI.showScreen`, which only toggles `.active`. That leaves
+   * Overrides `BaseGameUI.showScreen`, which only toggles `.active`. That leaves
    * focus on the button that was just tapped -- now inside a `display: none`
    * screen -- so focus collapses to `<body>` and the screen change is completely
    * silent to a screen reader. Every screen heading carries `tabindex="-1"`
@@ -622,12 +585,8 @@ export class GameUI extends BaseGameUI {
   // ------------------------------------------------------------ Feedback
 
   /**
-   * OVERRIDES `BaseGameUI.showFeedback`, which does
-   * `feedbackArea.className = "feedback " + type` -- an assignment that destroys
-   * `.feedback-area` (and its reserved height) and `.hidden`, replacing them
-   * with a `.feedback` class this game's stylesheet does not define. This uses
-   * `classList` only and never touches inline opacity, which fought `.hidden`'s
-   * `display: none` and left an invisible element still taking up space.
+   * Show feedback text. Uses `classList` only, so `.feedback-area` (and its
+   * reserved height) and `.hidden` survive, and never touches inline opacity.
    * @param {string} message - Text to announce
    * @param {string} [type] - "correct" | "incorrect" | "encourage" | "info"
    * @returns {void}
@@ -642,10 +601,8 @@ export class GameUI extends BaseGameUI {
   }
 
   /**
-   * OVERRIDES `BaseGameUI.hideFeedback`, which only sets `style.opacity = "0"`
-   * -- so stale text stayed in the layout and in the `aria-live` region forever.
-   * This clears the text and hides the element with `.hidden`, the game's single
-   * visibility mechanism, while preserving `.feedback-area`.
+   * Clear the feedback text and hide it with `.hidden`, the game's single
+   * visibility mechanism, so no stale text stays in the `aria-live` region.
    * @returns {void}
    */
   hideFeedback() {

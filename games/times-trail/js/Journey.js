@@ -13,10 +13,9 @@
  * 2. Walking is not gated. Every trail is `TRAIL.SPACES` long and every correct
  *    answer moves the token one space; the last space finishes the trail.
  *    Strength decides which fact is asked next (FactSelector), and the hub shows
- *    it as "N strong", but it never decides whether the token moves. An earlier
- *    design capped the token by how many of the trail's facts were strong, which
- *    takes days of spaced repetition, so a new player was stuck after three
- *    correct answers. See `docs/times-trail-plan.md`.
+ *    it as "N strong", but it never decides whether the token moves: strength
+ *    takes days of spaced repetition, so gating on it would strand a new player
+ *    after a few answers. See `docs/times-trail-plan.md`.
  *
  * Purity: no DOM, no storage, no timers. The clock is the injected `now`. No
  * method mutates its arguments -- in particular `advance` returns a NEW trail
@@ -32,6 +31,7 @@
 import { DEFAULT_TRAIL_ID, STRENGTH, TRAIL, TRAILS } from "./constants.js"
 import { factIdsForTrail, getTrail } from "./facts.js"
 import { createRecord, decayedStrength } from "./MasteryModel.js"
+import { isPlainObject } from "../../shared/validate.js"
 
 /**
  * One trail. Shape mirrors the frozen entries of TRAILS, minus `match`, which
@@ -69,16 +69,6 @@ import { createRecord, decayedStrength } from "./MasteryModel.js"
  */
 
 /**
- * Whether a value can be read as a keyed object (arrays and null rejected).
- * @private
- * @param {unknown} value - Value to test
- * @returns {boolean} True for a non-null, non-array object
- */
-function _isPlainObject(value) {
-  return value !== null && typeof value === "object" && !Array.isArray(value)
-}
-
-/**
  * Every trail id the game knows, in hub order.
  * @returns {string[]} A new array of ids
  */
@@ -105,7 +95,7 @@ export function normalizeTrailId(trailId) {
  * @returns {TrailProgress[]} One entry per trail, in `TRAILS` order
  */
 export function allTrailProgress({ records, spaces, now } = {}) {
-  const positions = _isPlainObject(spaces) ? spaces : {}
+  const positions = isPlainObject(spaces) ? spaces : {}
   return trailIds().map((trailId) =>
     new Journey({ trailId, now }).progress(records, { space: positions[trailId] }),
   )
@@ -124,7 +114,7 @@ export class Journey {
    *   defaults to `() => Date.now()`. Used only for decay.
    */
   constructor(options = {}) {
-    const opts = _isPlainObject(options) ? options : {}
+    const opts = isPlainObject(options) ? options : {}
 
     /** @type {string} @private */
     this._trailId = normalizeTrailId(opts.trailId)
@@ -151,7 +141,7 @@ export class Journey {
    * @returns {Trail} A new, valid trail
    */
   static normalizeTrail(raw) {
-    if (!_isPlainObject(raw) || !Number.isFinite(raw.space)) return Journey.createTrail()
+    if (!isPlainObject(raw) || !Number.isFinite(raw.space)) return Journey.createTrail()
     return { space: Math.min(TRAIL.SPACES - 1, Math.max(0, Math.floor(raw.space))) }
   }
 
@@ -188,7 +178,7 @@ export class Journey {
    */
   progress(records, trail) {
     const now = this._now()
-    const source = _isPlainObject(records) ? records : {}
+    const source = isPlainObject(records) ? records : {}
     let strong = 0
     for (const factId of this._factIds) {
       const record = source[factId] ?? createRecord()

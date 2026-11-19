@@ -11,14 +11,9 @@
  * when the cache has them and `document.getElementById` otherwise, so the class
  * works against a bare `{ elements: {} }` stub as well as a real `GameUI`.
  *
- * Statelessness: this class holds no `isProcessingAnswer` flag and exposes no
- * `resetAnswerProcessing()`. The double-submit guard lives in `game.js`, at the
- * single point where the answer paths converge. A guard here would cover only
- * some of them, and the same question could be answered twice while feedback
- * was on screen.
- *
- * Correctness: `EventManager` never decides whether an answer is right. Answers
- * come from the keypad, and `game.js` asks `challenge.check()`.
+ * Statelessness: the double-submit guard lives in `game.js`, at the single point
+ * where the answer paths converge; a guard here would cover only some of them.
+ * `EventManager` never decides whether an answer is right.
  */
 
 /**

@@ -12,8 +12,9 @@
  *    the flat keypad bonus (5) before the streak multiplier applies.
  *
  * 2. **Nothing is ever subtracted.** A wrong answer earns no stars but costs
- *    none, and gems are milestone trophies that are only ever added. Losing visible progress is where
- *    kids quit, so no path through this module can lower a total. The streak
+ *    none, and gems are milestone trophies that are only ever added. Losing
+ *    visible progress is where kids quit, so no path through this module can
+ *    lower a total. The streak
  *    multiplier is the only thing a miss costs, and that lives in the caller's
  *    session streak, not in a stored balance.
  *
@@ -35,6 +36,7 @@
  */
 
 import { DAILY_GOAL, DAY_MS, FLAME_STAGES, GEM_MILESTONES, STARS, STRENGTH } from "./constants.js"
+import { nonNegativeInt } from "../../shared/validate.js"
 
 /**
  * @typedef {Object} Daily
@@ -125,16 +127,6 @@ function utcMidnight(key) {
   const match = isDateKey(key) ? DATE_KEY_PATTERN.exec(/** @type {string} */ (key)) : null
   if (!match) return null
   return Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
-}
-
-/**
- * Coerces an untrusted counter to a non-negative integer.
- * @private
- * @param {unknown} value - Persisted counter of unknown provenance
- * @returns {number} Floor of value clamped at 0; 0 for anything non-finite
- */
-function nonNegativeInt(value) {
-  return Number.isFinite(value) ? Math.max(0, Math.floor(/** @type {number} */ (value))) : 0
 }
 
 /**

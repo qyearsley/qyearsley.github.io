@@ -3,9 +3,8 @@
  *
  * Each game has its own letter or digit shortcuts. Before any of them acts, it
  * asks two questions: "is this key meant for the page, or for something else?"
- * and "should Escape close the settings dialog?" The answers used to be copied
- * into each game, and the copies drifted. They live here so a check added once
- * reaches all three.
+ * and "should Escape close the settings dialog?" The answers live here so a
+ * check added once reaches all three.
  */
 
 /** Tags that take their own keystrokes. SELECT is here: the settings dialog is full of them. */

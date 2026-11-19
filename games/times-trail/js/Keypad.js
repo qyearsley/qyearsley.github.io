@@ -20,29 +20,22 @@
  * taking a second answer. The buffer transitions are reachable without the DOM
  * (`handleKeyDown`, the getters, `clear`), so the logic is testable directly.
  *
- * The `⌫` key deletes ONE digit. It has to: that glyph means backspace
- * everywhere else a child has seen it, and a two-digit answer typed with the
- * second digit wrong is the common mistake -- clearing both then made her retype
- * a digit she had got right. `Escape` on a physical keyboard is the only
- * clear-all, because it is the only key with nothing equivalent on the pad.
+ * The `⌫` key deletes ONE digit, because that glyph means backspace everywhere
+ * else a child has seen it, and a two-digit answer with the second digit wrong
+ * is the common mistake. `Escape` on a physical keyboard is the only clear-all.
  *
  * Timing: `onChange` fires on every accepted digit press and every backspace or
  * clear press, and that is the hook `game.js` uses to stamp thinking time -- the
  * *first* `onChange` after a question renders is the first interaction. The
  * mastery clock therefore stops at the first keypress, not at the enter tap, so
- * typing two digits costs no more measured time than a single digit. An enter
- * press on an empty buffer is ignored entirely and fires nothing, so tapping the
- * check mark before typing does not start the clock.
+ * typing two digits costs no more measured time than one. An enter press on an
+ * empty buffer fires nothing, so it does not start the clock.
  *
- * Enter does NOT clear the buffer. Her digits stay on screen until `game.js`
+ * Enter does NOT clear the buffer: her digits stay on screen until `game.js`
  * calls `clear()` from the next question render, so a correct answer can be
- * painted green where she typed it instead of vanishing into a "?" the instant
- * she is told she was right. Note that `clear()` fires `onChange`; `game.js`
- * calls it during render and resets its own first-interaction stamp afterwards.
- *
- * Security Note: builds its DOM with `document.createElement` and `textContent`
- * only -- no `innerHTML`, so nothing typed can be interpreted as markup.
- */
+ * painted green where she typed it. `clear()` fires `onChange`; `game.js` calls
+ * it during render and resets its own first-interaction stamp afterwards.
+ * */
 
 import { KEYPAD } from "./constants.js"
 import { keyIsNotForGame } from "../../shared/keyboardGuard.js"

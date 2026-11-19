@@ -136,14 +136,8 @@ export const TOKEN_EMOJI = "🥾"
 /**
  * The five trails, in the order the hub lists them.
  *
- * Each is themed on a PATTERN rather than on a times table, and that is the
- * whole of the 2026-09-18 redesign. The trail used to be one 40-space route
- * through eight regions named after tables, where a region owned every fact
- * whose LARGER operand was its table -- so Doubling Meadow owned exactly one
- * fact, 2x2, Dragon Peak owned eight, and standing in Doubling Meadow you were
- * asked 6x7 anyway, because selection ignored the token's position. The names
- * promised themed practice and the engine gave whole-pool practice. Renaming
- * would only have papered over it.
+ * Each is themed on a PATTERN rather than on a times table, and a trail always
+ * practices all of its own facts.
  *
  * `match` is the definition; `FACT_IDS_BY_TRAIL` in facts.js derives the fact
  * list from it, and `constants.test.js` checks the five sets cover all 36 facts

@@ -14,6 +14,12 @@ Educational web games built with JavaScript.
 - **[Life Garden](life-garden/)** - Grass, rabbits and foxes: a few simple rules that make populations boom and crash
 - **[Turing Tape](turing-tape/)** - Interactive Turing machine simulator
 
+## Conventions
+
+Game code never puts player input into `innerHTML`. Player-visible text from game
+logic goes in with `textContent`; the few `innerHTML` writes use fixed game data
+(clearing a container, static markup, or built-in SVG).
+
 ## Chinese pages
 
 Only Turing Tape and Life Garden have a `/zh/` page, because the other games

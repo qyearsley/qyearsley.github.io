@@ -5,12 +5,7 @@ import { CastleUI } from "./CastleUI.js"
 const VISUAL_ITEM_ANIMATION_DELAY_MS = 100
 
 /**
- * Handles all DOM manipulation and UI updates for Number Garden
- *
- * Security Note: This class uses innerHTML for dynamic content generation.
- * All content is generated from controlled game data (questions, visual representations,
- * garden layouts) and not from user input, making it safe from XSS attacks.
- */
+ * Handles all DOM manipulation and UI updates for Number Garden */
 export class GameUI extends BaseGameUI {
   constructor() {
     super()
@@ -312,10 +307,6 @@ export class GameUI extends BaseGameUI {
   /**
    * Lock the answer controls while an answer is being processed.
    *
-   * OVERRIDES `BaseGameUI.disableAnswerButtons`, which queries `.answer-btn`;
-   * this game's buttons are `.answer-button`, so the inherited version is a
-   * silent no-op here.
-   *
    * There are two entry modes and this has to cover both. Multiple choice locks
    * with a class rather than the `disabled` property, because disabling the
    * element that currently has focus drops focus to `<body>`; the guard in
@@ -333,10 +324,8 @@ export class GameUI extends BaseGameUI {
   /**
    * Hand the answer controls back after a wrong answer.
    *
-   * Typed entry is the half that used to be missing, and it was the more
-   * serious half: `handleKeyboardSubmit` sets `input.disabled` and nothing else
-   * ever cleared it, so the first wrong answer in "Type Answer" mode left a
-   * dead field and a dead button with no way back except leaving the area.
+   * Typed entry must be re-enabled too: `handleKeyboardSubmit` sets
+   * `input.disabled`, and nothing else clears it.
    */
   enableAnswerButtons() {
     this.elements.answerOptions.querySelectorAll(".answer-button:not(.struck)").forEach((btn) => {

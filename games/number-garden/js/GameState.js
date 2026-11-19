@@ -1,4 +1,5 @@
 import { DEFAULTS, AREAS } from "./constants.js"
+import { isPlainObject } from "../../shared/validate.js"
 
 /**
  * @typedef {Object} Stats
@@ -33,22 +34,12 @@ const DIFFICULTIES = ["explorer", "adventurer", "master"]
 const AREA_IDS = new Set(Object.values(AREAS))
 
 /**
- * Whether a value can be read as a keyed object. Arrays are rejected: a
- * persisted array where a map was expected is corruption, not data.
- * @param {unknown} value - Value to test
- * @returns {boolean} True for a non-null, non-array object
- */
-function _isPlainObject(value) {
-  return value !== null && typeof value === "object" && !Array.isArray(value)
-}
-
-/**
  * A persisted value read as a keyed object, or an empty one.
  * @param {unknown} value - Value from a persisted payload
  * @returns {Object} The object, or `{}`
  */
 function _asObject(value) {
-  return _isPlainObject(value) ? value : {}
+  return isPlainObject(value) ? value : {}
 }
 
 /**
@@ -308,7 +299,7 @@ export class GameState {
         _count(stats.currentLevelProgress),
       ),
     }
-    this.garden = Array.isArray(saved.garden) ? saved.garden.filter(_isPlainObject) : []
+    this.garden = Array.isArray(saved.garden) ? saved.garden.filter(isPlainObject) : []
     this.unlockedAreas = _areaSet(saved.unlockedAreas, [AREAS.FLOWER_MEADOW])
     this.completedAreas = _areaSet(saved.completedAreas, [])
     this.projectType = PROJECT_TYPES.includes(saved.projectType) ? saved.projectType : "castle"

@@ -415,9 +415,8 @@ body {
 }
 
 /* Cards (project picker and garden hub) share one treatment: a white surface
-   with the mint-to-pink gradient reduced to a top accent bar. Previously the
-   gradient covered the whole card, so the heading sat on the pink end and its
-   contrast depended on where the gradient happened to land. */
+   with the mint-to-pink gradient reduced to a top accent bar, so the heading's
+   contrast does not depend on where a gradient lands. */
 .project-option {
   position: relative;
   overflow: hidden;
@@ -1268,8 +1267,7 @@ select:focus-visible,
     margin-top: var(--ng-space-lg);
   }
 
-  /* Level complete (folded in from a second 768px block that used to live at
-     the end of the file). */
+  /* Level complete. */
   .celebration {
     padding: 2rem 1rem;
   }
@@ -1469,10 +1467,8 @@ select:focus-visible,
 }
 
 /* ==================== Dark theme ====================
-   Number Garden used to be light-only, with three selectors of dark styling
-   that covered the settings modal and nothing else -- so a dark panel floated
-   over a white game. Everything visible now reads one of the tokens below, and
-   only the tokens change between themes.
+   Everything visible reads one of the tokens below, and only the tokens change
+   between themes.
 
    Two things make this more than a second palette:
 

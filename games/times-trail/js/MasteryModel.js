@@ -16,20 +16,15 @@
  * Two properties of the model are worth stating explicitly:
  *
  * 1. Response time caps strength, it does not add to it. `responseMs` is
- *    *thinking* time: the milliseconds from the question becoming interactive
- *    to the FIRST interaction (the first keypad keypress), never
- *    to submit, so the number of digits typed cannot change the band. A correct
- *    answer ALWAYS promotes by one box; what the band decides is the ceiling it
- *    may promote to. A "fluent" answer may climb all the way to STRENGTH.MAX,
- *    while "slow" and "counting" answers stop at STRENGTH.SLOW_CAP -- so
- *    counting up to the answer still earns progress but does not read as
- *    fluent recall. A correct answer never demotes, with one exception: a
- *    "slow" answer to a fact already above SLOW_CAP steps it down by exactly
- *    one, settling a fact that used to be fluent rather than collapsing it --
- *    5 becomes 4, and 4 becomes 3. So a slow answer CAN cost a fact its
- *    "mastered" standing, which is deliberate: the foiled card is for fluency,
- *    and a fact she now has to work for is not fluent. SLOW_CAP bounds where a
- *    slow answer can lift a fact TO, not where a fact already above it lands.
+ *    *thinking* time: from the question becoming interactive to the FIRST
+ *    keypad keypress, never to submit, so the number of digits typed cannot
+ *    change the band. A correct answer ALWAYS promotes by one box; the band sets
+ *    the ceiling. A "fluent" answer may climb to STRENGTH.MAX, while "slow" and
+ *    "counting" answers stop at STRENGTH.SLOW_CAP. A correct answer never
+ *    demotes, with one exception: a "slow" answer to a fact already above
+ *    SLOW_CAP steps it down by exactly one (5 becomes 4, 4 becomes 3). That can
+ *    cost a fact its "mastered" standing, which is deliberate: the foiled card
+ *    is for fluency, and a fact she now has to work for is not fluent.
  * 2. Decay is computed on read and never written back, so there is no
  *    background job and no migration. `decayedStrength` subtracts one point per
  *    full DECAY.PERIOD_MS the fact is overdue, floored at DECAY.FLOOR_SEEN for
@@ -50,6 +45,7 @@ import {
   STRENGTH,
   STRENGTH_INTERVALS_MS,
 } from "./constants.js"
+import { isPlainObject } from "../../shared/validate.js"
 
 /**
  * One fact's saved memory state. Exactly six fields; there is deliberately no
@@ -99,17 +95,6 @@ import {
  */
 function _clamp(value, min, max) {
   return Math.min(max, Math.max(min, value))
-}
-
-/**
- * Whether a value can be read as a record-shaped object. Arrays are rejected:
- * a persisted array where a map was expected is corruption, not data.
- * @private
- * @param {unknown} value - Value to test
- * @returns {boolean} True for a non-null, non-array object
- */
-function _isPlainObject(value) {
-  return value !== null && typeof value === "object" && !Array.isArray(value)
 }
 
 /**
@@ -180,7 +165,7 @@ export function createRecord() {
  * @returns {MasteryRecord} A new, valid record
  */
 export function normalizeRecord(raw) {
-  if (!_isPlainObject(raw)) return createRecord()
+  if (!isPlainObject(raw)) return createRecord()
   const totalSeen = _count(raw.totalSeen)
   return {
     strength: _storedStrength(raw),
@@ -236,7 +221,7 @@ export function dueAtFor(strength, now) {
  * @returns {boolean} True when the fact is due
  */
 export function isDue(record, now) {
-  if (!_isPlainObject(record)) return true
+  if (!isPlainObject(record)) return true
   if (!Number.isFinite(record.dueAt)) return true
   return now >= record.dueAt
 }
@@ -251,7 +236,7 @@ export function isDue(record, now) {
  * @returns {number} Integer strength in [STRENGTH.MIN, STRENGTH.MAX]
  */
 export function decayedStrength(record, now) {
-  if (!_isPlainObject(record)) return STRENGTH.MIN
+  if (!isPlainObject(record)) return STRENGTH.MIN
   const strength = _storedStrength(record)
   if (!Number.isFinite(record.dueAt)) return strength
   const overdueMs = now - record.dueAt
@@ -267,11 +252,9 @@ export function decayedStrength(record, now) {
 /**
  * Strength after a correct answer, by speed band.
  *
- * Every band promotes; the band only sets the ceiling. Holding strength still
- * for a slow-but-correct answer was the old behaviour and it was wrong: a child
- * who reliably gets 7x8 right by counting up in ten seconds had that fact
- * pinned forever, and since every gate in the game reads strength, she could
- * never unlock anything at all.
+ * Every band promotes; the band only sets the ceiling. A slow-but-correct
+ * answer must still promote: a child who reliably gets 7x8 right by counting up
+ * would otherwise have that fact pinned forever, and every gate reads strength.
  * @private
  * @param {number} base - Decayed strength before the answer
  * @param {SpeedBand} band - Band of this answer
@@ -307,11 +290,11 @@ function _promote(base, band) {
  * @throws {TypeError} When `options.now` is not a finite number
  */
 export function recordAnswer(record, options = {}) {
-  const { correct, now, responseMs } = _isPlainObject(options) ? options : {}
+  const { correct, now, responseMs } = isPlainObject(options) ? options : {}
   if (!Number.isFinite(now)) {
     throw new TypeError("recordAnswer requires a finite now timestamp")
   }
-  const source = _isPlainObject(record) ? record : createRecord()
+  const source = isPlainObject(record) ? record : createRecord()
   const base = decayedStrength(source, now)
   const band = classifySpeed(responseMs)
   const totalSeen = _count(source.totalSeen)
@@ -352,7 +335,7 @@ export function recordAnswer(record, options = {}) {
  * @returns {MasteryTier} "new" until the fact has been asked at least once
  */
 export function masteryTier(record, now) {
-  if (!_isPlainObject(record) || _count(record.totalSeen) === 0) return "new"
+  if (!isPlainObject(record) || _count(record.totalSeen) === 0) return "new"
   const strength = decayedStrength(record, now)
   if (strength <= STRENGTH.WEAK_MAX) return "weak"
   if (strength === STRENGTH.STRENGTHENING) return "strengthening"
@@ -408,7 +391,7 @@ export function selectionWeight(record, now) {
  * @returns {number} How many records are currently mastered; 0 for junk input
  */
 export function countMastered(records, now) {
-  if (!_isPlainObject(records)) return 0
+  if (!isPlainObject(records)) return 0
   let count = 0
   for (const record of Object.values(records)) {
     if (isMastered(record, now)) count += 1
@@ -444,7 +427,7 @@ export class MasteryStore {
    * @param {() => number} [now] - Injected clock returning epoch ms
    */
   constructor(records = {}, now = () => Date.now()) {
-    const source = _isPlainObject(records) ? records : {}
+    const source = isPlainObject(records) ? records : {}
     for (const key of Object.keys(source)) {
       source[key] = normalizeRecord(source[key])
     }
@@ -492,7 +475,7 @@ export class MasteryStore {
    * @returns {MasteryRecord} The new record, also now stored
    */
   apply(factId, answer = {}) {
-    const { correct, responseMs = null } = _isPlainObject(answer) ? answer : {}
+    const { correct, responseMs = null } = isPlainObject(answer) ? answer : {}
     const next = recordAnswer(this.get(factId), { correct, responseMs, now: this._now() })
     this.records[factId] = next
     return next

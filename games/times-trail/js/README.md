@@ -148,11 +148,10 @@ and a longer wait.
 
 Extends `games/shared/BaseGameUI.js` and holds every DOM read and write in the
 game. Takes plain view models built from already-decided numbers and contains no
-game rules. Four base-class methods are overridden because the base behaviour is
-wrong for this page: `showFeedback` and `hideFeedback` (the base destroys class
-names and leaves stale text in an `aria-live` region), `showScreen` (the base
-loses focus to `<body>`), and `updateTitleButtons` (the base knows only Continue
-and Start Fresh, and this game has a third save-dependent title button).
+game rules. It overrides `showScreen` (the base loses focus to `<body>`) and
+`updateTitleButtons` (the base knows only Continue and Start Fresh, and this game
+has a third save-dependent title button). Its `showFeedback` and `hideFeedback`
+use `classList` only, so no stale text stays in an `aria-live` region.
 
 ### Keypad.js
 

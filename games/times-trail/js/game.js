@@ -1,43 +1,10 @@
 /**
  * Times Trail -- the page entry point and session orchestrator.
  *
- * This is the only module that knows about every other one. It owns the live
- * game state, wires the DOM event layer to the pure logic modules, and decides
- * when things happen; it contains no rules of its own beyond sequencing.
- *
- * Architecture: the session loop, in order.
- *
- *   1. `startSession()` resets `this.session`, calls `selector.reset()`
- *      (so a miss from the previous session cannot fire on question 1), rebuilds
- *      `this.journey` for the chosen trail, and shows
- *      the play screen. The hub's trail rows call `startTrail(trailId)`, which
- *      sets the current trail and then does this.
- *   2. `_askNextQuestion()` picks a fact (`FactSelector`), captures its strength
- *      and card tier BEFORE the answer, builds a `Challenge` through
- *      `modes/quickRecall.js`, renders it, and arms the response clock last -- after
- *      the DOM is written, so the player is not charged for the render.
- *   3. The first keypad digit stamps `session.firstInteractionAt` exactly once.
- *      That stamp, not the submit, is the end of the measured thinking time, so
- *      the player is not charged for the motor time of typing.
- *   4. The entry path converges on `_handleAnswer(input)`, which holds the
- *      single double-submit guard, asks `challenge.check(input)` (the sole
- *      authority on correctness), and then updates records, stars, the trail,
- *      the daily goal, milestones, and the save file.
- *   5. A miss always reveals the answer, holds for `TIMING.WRONG_FEEDBACK_MS` so
- *      the marked answer can actually be seen, and then shows the teaching
- *      scaffold, whose two exits ("Got it" and a computed auto-advance timer) both
- *      run one idempotent `_resolveScaffold()`.
- *   6. After `settings.sessionLength` answers, `_finishSession()` increments
- *      `sessionsCompleted` and checks milestones BEFORE building the summary
- *      view, so session 1 can actually show the gem it just earned.
- *
- * Timers: there is exactly ONE pending advance at a time -- the hold after a
- * correct answer, the hold after a miss, or the scaffold's auto-advance -- because
- * those are three sequential phases of one answer. It is held as a
- * `{run, delayMs}` descriptor beside its timer id, so `_pauseTimers()` can put the
- * countdown down and `_resumeTimers()` can pick it back up while the settings
- * modal is open, so a session cannot end underneath the `aria-modal` dialog. The scaffold's skip-count animation is the one concurrent
- * timer and pauses the same way.
+ * The only module that knows about every other one. It owns the live game
+ * state, wires the DOM events to the pure logic modules, and decides when things
+ * happen; it has no rules of its own beyond sequencing. `GameUI` does the
+ * rendering.
  *
  * Two invariants a reader will otherwise trip over:
  *
@@ -49,32 +16,14 @@
  *     while the screen still looks right.
  *   - **Every non-mutating call's return value is assigned.** `Journey.advance`,
  *     `Scoring.applyAnswer`, `Scoring.rollDaily`, and `Scoring.checkMilestones`
- *     all return new values and touch nothing. A dropped return reads exactly like working code and
- *     silently kills the feature. `store.apply()` is the one call that needs no
- *     assignment, because the store writes through the aliased map.
+ *     return new values and touch nothing. A dropped return reads like working
+ *     code and silently kills the feature. `store.apply()` is the one call that
+ *     needs no assignment, because the store writes through the aliased map.
  *
- * DOM ownership: `GameUI` does the rendering. This module touches `document`
- * only for page-level jobs -- toggling `aria-live` on `#question-text` and
- * `#feedback-area` while a scaffold owns the play area, looking up the
- * `#keypad` container once to construct `Keypad`, building the one-time
- * "this browser is not saving" banner (which has to outlive every screen and so
- * cannot be any element `GameUI` already owns), and the bootstrap's error
- * fallback.
- *
- * Error Handling: the `DOMContentLoaded` bootstrap is wrapped in a `try/catch`
- * that puts a readable message on the page instead of leaving a blank screen.
- * `styles/main.css` does not style `.error-container`, so the fallback carries
- * the few inline styles it needs to be legible on its own.
- *
- * Security Note: this module uses `innerHTML` in one place -- the static,
- * hardcoded error template in the bootstrap's `catch`, mirroring
- * `games/number-garden/js/game.js`. It contains no interpolation of any kind.
- * The save-failure banner is built with `createElement` and `textContent` for the
- * same reason every other piece of content is. Every other piece of dynamic
- * content is built by `GameUI` with `createElement` and `textContent` from
- * controlled game data (frozen constant tables, the 36-fact set, and numbers
- * computed by this game's pure modules), so nothing a player can type is ever
- * interpreted as markup.
+ * Timers: only one advance is pending at a time (the hold after a correct
+ * answer, the hold after a miss, or the scaffold's auto-advance). It is kept as
+ * a `{run, delayMs}` descriptor so `_pauseTimers()` and `_resumeTimers()` can
+ * stop and restart it while the settings modal is open.
  */
 
 import {
@@ -122,17 +71,7 @@ const LIVE_REGION_IDS = Object.freeze(["question-text", "feedback-area"])
  */
 const TIMES_SIGN = "×"
 
-/**
- * What a correct answer is told, ahead of the restated fact.
- *
- * One phrase rather than a rotation: the sentence after it changes every question
- * anyway. It exists because `showFeedback(text, "correct")` is the only producer
- * of the `.feedback-area.correct` style, so never calling it left both that rule
- * and the child's only acknowledgement dead -- a correct answer ticked a counter
- * and said nothing.
- * @private
- * @type {string}
- */
+/** Shown ahead of the restated fact on a correct answer. */
 const CORRECT_PRAISE = "Yes!"
 
 /**
@@ -181,15 +120,7 @@ class TimesTrail {
    */
   static RESET_PROMPT = "Start fresh? This erases your trail, your cards, and every star."
 
-  /**
-   * Text of the "leave this session" confirmation.
-   *
-   * The play screen's back button is 68px, top-left, exactly where a hand rests on
-   * an iPad, and a mis-tap at question 15 threw away the streak and the summary
-   * with no way back. The wording is careful to say what is and is not lost:
-   * answered facts were saved as they landed, so only this round goes.
-   * @private
-   */
+  /** Text of the "leave this session" confirmation: says what is and is not lost. @private */
   static ABANDON_PROMPT =
     "Leave this round? Your answers are saved, but this round's streak and summary are not."
 
@@ -237,11 +168,7 @@ class TimesTrail {
     /** @type {import("./storage.js").SaveState} The live, normalized save state. */
     this.progress = loaded ?? defaultProgress()
 
-    /**
-     * The record store. ALIASES `this.progress.facts` -- the two are the same
-     * object from here on, and neither is ever reassigned independently.
-     * @type {MasteryStore}
-     */
+    /** @type {MasteryStore} ALIASES `this.progress.facts`; see the header. */
     this.store = new MasteryStore(this.progress.facts, this._now)
 
     /** @type {Settings} Validated settings; the authority `buildSaveState` persists. */
@@ -250,10 +177,7 @@ class TimesTrail {
     // Assigned back: this returns a new object and mutates nothing.
     this.progress.daily = this.scoring.rollDaily(this.progress.daily)
 
-    /**
-     * @type {Journey} The trail being walked. Rebuilt when the trail changes,
-     * because the trail is a construction argument.
-     */
+    /** @type {Journey} The trail being walked; rebuilt when the trail changes. */
     this.journey = this._buildJourney()
 
     /** @type {SessionState} */
@@ -262,27 +186,13 @@ class TimesTrail {
     /** @type {boolean} The ONE double-submit guard, covering every entry path. @private */
     this._isProcessingAnswer = false
 
-    /**
-     * The one pending "move the session on" action: the hold after a correct
-     * answer, the hold after a miss before the scaffold appears, or the
-     * scaffold's own auto-advance. Only one is ever armed, because those are
-     * three sequential phases of a single answer. Kept as a descriptor rather
-     * than just a timer id so `_pauseTimers` can cancel it and `_resumeTimers`
-     * can put it back.
-     * @type {{run: () => void, delayMs: number}|null}
-     * @private
-     */
+    /** @type {{run: () => void, delayMs: number}|null} The one pending advance. @private */
     this._pendingAdvance = null
 
     /** @type {number|null} Timer id for `_pendingAdvance`. @private */
     this._advanceTimeoutId = null
 
-    /**
-     * The next skip-count number the scaffold animation should light, so it can
-     * pause and resume rather than restart from the first number.
-     * @type {{index: number, total: number}|null}
-     * @private
-     */
+    /** @type {{index: number, total: number}|null} Next skip-count number to light. @private */
     this._pendingSkipTick = null
 
     /** @type {number|null} Timer id for `_pendingSkipTick`. @private */
@@ -389,9 +299,7 @@ class TimesTrail {
    * A banner rather than a `showFeedback` line, because this is not per-answer
    * feedback: it has to survive the next `renderQuestion` and every screen change.
    * `styles/main.css` has no rule for `.save-warning`, so it carries the few
-   * inline styles it needs to be legible on its own -- the same arrangement the
-   * bootstrap's `.error-container` uses, and the fourth of this module's four
-   * direct `document` touches.
+   * inline styles it needs to be legible on its own.
    * @returns {void}
    * @private
    */

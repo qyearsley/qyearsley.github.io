@@ -15,14 +15,11 @@ describe("BaseGameUI", () => {
       <div id="text-element"></div>
       <div id="html-element"></div>
       <button id="test-button" class="disabled"></button>
-      <div id="feedback-area"></div>
       <div id="progress-bar"></div>
       <div id="progress-text"></div>
       <button id="start-button"></button>
       <button id="continue-button" class="hidden"></button>
       <button id="start-fresh-button" class="hidden"></button>
-      <button class="answer-btn disabled"></button>
-      <button class="answer-btn disabled"></button>
     `
     baseGameUI = new BaseGameUI()
   })
@@ -146,89 +143,6 @@ describe("BaseGameUI", () => {
     })
   })
 
-  describe("disableButton and enableButton", () => {
-    test("disables button", () => {
-      const button = document.getElementById("test-button")
-      button.disabled = false
-      button.classList.remove("disabled")
-
-      baseGameUI.disableButton(button)
-
-      expect(button.disabled).toBe(true)
-      expect(button.classList.contains("disabled")).toBe(true)
-    })
-
-    test("enables button", () => {
-      const button = document.getElementById("test-button")
-
-      baseGameUI.enableButton(button)
-
-      expect(button.disabled).toBe(false)
-      expect(button.classList.contains("disabled")).toBe(false)
-    })
-
-    test("handles null button gracefully", () => {
-      expect(() => {
-        baseGameUI.disableButton(null)
-        baseGameUI.enableButton(null)
-      }).not.toThrow()
-    })
-  })
-
-  describe("disableAnswerButtons and enableAnswerButtons", () => {
-    test("disables all answer buttons", () => {
-      const buttons = document.querySelectorAll(".answer-btn")
-      buttons.forEach((btn) => {
-        btn.disabled = false
-        btn.classList.remove("disabled")
-      })
-
-      baseGameUI.disableAnswerButtons()
-
-      buttons.forEach((btn) => {
-        expect(btn.disabled).toBe(true)
-        expect(btn.classList.contains("disabled")).toBe(true)
-      })
-    })
-
-    test("enables all answer buttons", () => {
-      baseGameUI.enableAnswerButtons()
-
-      const buttons = document.querySelectorAll(".answer-btn")
-      buttons.forEach((btn) => {
-        expect(btn.disabled).toBe(false)
-        expect(btn.classList.contains("disabled")).toBe(false)
-      })
-    })
-  })
-
-  describe("showFeedback and hideFeedback", () => {
-    test("shows feedback with message and type", () => {
-      baseGameUI.showFeedback("Great job!", "correct")
-
-      const feedback = document.getElementById("feedback-area")
-      expect(feedback.textContent).toBe("Great job!")
-      expect(feedback.className).toBe("feedback correct")
-      expect(feedback.style.opacity).toBe("1")
-    })
-
-    test("defaults to info type", () => {
-      baseGameUI.showFeedback("Information")
-
-      const feedback = document.getElementById("feedback-area")
-      expect(feedback.className).toBe("feedback info")
-    })
-
-    test("hides feedback", () => {
-      const feedback = document.getElementById("feedback-area")
-      feedback.style.opacity = "1"
-
-      baseGameUI.hideFeedback()
-
-      expect(feedback.style.opacity).toBe("0")
-    })
-  })
-
   describe("updateProgressBar", () => {
     test("updates progress bar width and text", () => {
       baseGameUI.updateProgressBar(5, 10)
@@ -238,13 +152,6 @@ describe("BaseGameUI", () => {
 
       expect(progressBar.style.width).toBe("50%")
       expect(progressText.textContent).toBe("5/10")
-    })
-
-    test("accepts custom percent multiplier", () => {
-      baseGameUI.updateProgressBar(3, 10, 100)
-
-      const progressBar = document.getElementById("progress-bar")
-      expect(progressBar.style.width).toBe("30%")
     })
   })
 
@@ -280,17 +187,11 @@ describe("BaseGameUI", () => {
     })
   })
 
-  describe("markButtonCorrect and markButtonIncorrect", () => {
+  describe("markButtonCorrect", () => {
     test("marks button as correct", () => {
       const button = document.getElementById("test-button")
       baseGameUI.markButtonCorrect(button)
       expect(button.classList.contains("correct")).toBe(true)
-    })
-
-    test("marks button as incorrect", () => {
-      const button = document.getElementById("test-button")
-      baseGameUI.markButtonIncorrect(button)
-      expect(button.classList.contains("incorrect")).toBe(true)
     })
   })
 

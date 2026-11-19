@@ -15,7 +15,7 @@ const HERE = dirname(fileURLToPath(import.meta.url))
 const INDEX_HTML = readFileSync(join(HERE, "..", "index.html"), "utf-8")
 const BODY = INDEX_HTML.replace(/[\s\S]*<body[^>]*>/i, "").replace(/<\/body>[\s\S]*/i, "")
 
-/** Every callback name in the § 17 contract, as a bag of spies. */
+/** Every callback name in the EventManager contract, as a bag of spies. */
 function makeCallbacks() {
   return {
     onStart: jest.fn(),

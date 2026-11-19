@@ -12,12 +12,7 @@ import { TIMING, AREAS, AREA_COUNT, DEFAULTS } from "./constants.js"
 
 /**
  * Main game controller for Number Garden
- * Orchestrates all game systems and handles game flow
- *
- * Security Note: This module sets innerHTML in two places: the project SVG
- * from ProjectVisuals, and the static error message. Both are built from
- * fixed game data, not user input.
- */
+ * Orchestrates all game systems and handles game flow */
 class NumberGarden {
   /**
    * Project type configuration
@@ -239,15 +234,11 @@ class NumberGarden {
    * @param {string} screenId - Screen identifier
    */
   showScreen(screenId) {
-    // Leaving a screen has to cancel whatever that screen queued. A correct
-    // answer arms a 1.5s timeout to draw the next activity or the level-complete
-    // screen; tapping Back inside that window used to let it fire anyway, so the
-    // level-complete screen appeared on top of the hub, or a second
-    // `generateActivity` overwrote a freshly-drawn question.
+    // Leaving a screen cancels whatever it queued. A correct answer arms a 1.5s
+    // timeout to draw the next activity or the level-complete screen, and that
+    // must not fire over the hub or overwrite a freshly-drawn question.
     this._clearPendingAdvance()
-    // Same reasoning for the staggered visual-item and garden-flower
-    // animations: leaving mid-stagger used to let them keep injecting the old
-    // question's items into whatever screen came next.
+    // Same for the staggered visual-item and garden-flower animations.
     this.ui.clearVisualItemTimers()
     this.ui.clearGardenTimers()
     // The activity screen paints the body from the area's own theme; every
@@ -371,10 +362,9 @@ class NumberGarden {
     this._retryTimer = setTimeout(() => {
       this._retryTimer = undefined
       this.ui.enableAnswerButtons()
-      // Releasing the controls without releasing the guard is not a retry.
-      // `resetAnswerProcessing` used to run only from `generateActivity`, which
-      // a wrong answer never reaches, so in "Type Answer" mode the flag stayed
-      // set for the rest of the visit and every later submission was dropped.
+      // Release the guard with the controls: `generateActivity` is the only other
+      // caller of `resetAnswerProcessing`, and a wrong answer never reaches it, so
+      // without this every later "Type Answer" submission is dropped.
       this.events.resetAnswerProcessing()
     }, TIMING.RETRY_DELAY)
   }

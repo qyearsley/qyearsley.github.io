@@ -65,7 +65,7 @@ function cssRule(selector) {
   return match === null ? "" : match[1]
 }
 
-/** Every id in the § 22 DOM contract, copied literally. */
+/** Every id in the DOM contract, copied literally. */
 const CONTRACT_IDS = [
   "game-container",
   "title-screen",

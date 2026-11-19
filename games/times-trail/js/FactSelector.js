@@ -17,16 +17,12 @@
  *      MasteryModel.selectionWeight with one more rng call, so the weakest and
  *      most overdue facts come up most often.
  *
- * Why 30% of draws are facts she already knows. This is not an efficiency
- * choice -- a purely information-greedy selector would ask nothing but weak
- * facts, and would move strengths faster. It is a choice about what practice
- * feels like from the inside. A session made only of the facts she cannot do is
- * a session of being wrong, and that is where an eight-year-old quits. Facts she
- * owns give the run a rhythm of success between the hard ones, let a streak
- * actually build, and turn "I am bad at this" into "I know most of these and I
- * am working on a few". The 30% earns its keep twice over: it is also the only
- * way a mastered fact is ever checked again, so retention is observed instead of
- * assumed and the long tail of STRENGTH_INTERVALS_MS stays honest.
+ * Why 30% of draws are facts she already knows. It is a choice about what
+ * practice feels like, not about efficiency: a session of only the facts she
+ * cannot do is a session of being wrong, and that is where an eight-year-old
+ * quits. Known facts give the run a rhythm of success and let a streak build.
+ * They are also the only way a mastered fact is ever checked again, so
+ * retention is observed instead of assumed.
  *
  * Determinism: every random choice comes from the injected `rng` and every
  * timestamp from the injected `now`. The RNG contract, which the tests depend on:
@@ -46,6 +42,7 @@
 
 import { SELECTION, STRENGTH } from "./constants.js"
 import { createRecord, decayedStrength, isDue, selectionWeight } from "./MasteryModel.js"
+import { isPlainObject } from "../../shared/validate.js"
 
 /**
  * One fact waiting to be re-asked after a miss.
@@ -54,16 +51,6 @@ import { createRecord, decayedStrength, isDue, selectionWeight } from "./Mastery
  * @property {string} factId    - Canonical fact id, e.g. "6x7"
  * @property {number} dueIndex  - Question index at or after which the fact is re-asked
  */
-
-/**
- * Whether a value can be read as a record map or an options bag.
- * @private
- * @param {unknown} value - Value to test
- * @returns {boolean} True for a non-null, non-array object
- */
-function _isPlainObject(value) {
-  return value !== null && typeof value === "object" && !Array.isArray(value)
-}
 
 /**
  * The record for a fact, or a fresh one when the map has no entry. A fact with
@@ -76,9 +63,9 @@ function _isPlainObject(value) {
  * @returns {import("./MasteryModel.js").MasteryRecord} The stored record, or a fresh one
  */
 function _recordFor(records, factId) {
-  if (_isPlainObject(records) && Object.prototype.hasOwnProperty.call(records, factId)) {
+  if (isPlainObject(records) && Object.prototype.hasOwnProperty.call(records, factId)) {
     const record = records[factId]
-    if (_isPlainObject(record)) return record
+    if (isPlainObject(record)) return record
   }
   return createRecord()
 }
@@ -90,7 +77,7 @@ export class FactSelector {
    * @param {() => number} [options.now] - Returns epoch ms; defaults to () => Date.now()
    */
   constructor(options = {}) {
-    const { rng, now } = _isPlainObject(options) ? options : {}
+    const { rng, now } = isPlainObject(options) ? options : {}
     /** @type {() => number} @private */
     this._rng = typeof rng === "function" ? rng : Math.random
     /** @type {() => number} @private */
@@ -194,14 +181,6 @@ export class FactSelector {
     // Array.prototype.sort is stable, so ties keep insertion order.
     this._retryQueue.sort((a, b) => a.dueIndex - b.dueIndex)
     return delay
-  }
-
-  /**
-   * The pending re-ask queue, for the UI and for tests.
-   * @returns {RetryEntry[]} A copy, ascending by dueIndex; mutating it is harmless
-   */
-  peekRetryQueue() {
-    return this._retryQueue.map((entry) => ({ factId: entry.factId, dueIndex: entry.dueIndex }))
   }
 
   /**
