@@ -76,7 +76,7 @@
         const signChar = sign === "0" ? "+" : "-"
         const special = describeNumber(value)
 
-        let formulaHtml = ""
+        let formulaHtml
         if (!special) {
           const prefix = exp.raw === 0 ? "0" : "1"
           formulaHtml = `

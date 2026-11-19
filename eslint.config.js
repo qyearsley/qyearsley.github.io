@@ -1,7 +1,7 @@
 import js from "@eslint/js"
 import prettier from "eslint-config-prettier"
 import html from "eslint-plugin-html"
-import importPlugin from "eslint-plugin-import"
+import importX from "eslint-plugin-import-x"
 
 const browserGlobals = {
   console: "readonly",
@@ -79,7 +79,7 @@ export default [
       "shared/**/*.js",
     ],
     plugins: {
-      import: importPlugin,
+      "import-x": importX,
       html,
     },
     languageOptions: {
@@ -98,13 +98,13 @@ export default [
     rules: {
       ...sharedRules,
       "no-console": ["warn", { allow: ["warn", "error"] }],
-      "import/no-unresolved": "error",
+      "import-x/no-unresolved": "error",
     },
   },
   {
     files: ["build.js", "build.test.js"],
     plugins: {
-      import: importPlugin,
+      "import-x": importX,
     },
     languageOptions: {
       ecmaVersion: 2022,
@@ -116,7 +116,7 @@ export default [
     },
     rules: {
       ...sharedRules,
-      "import/no-unresolved": "error",
+      "import-x/no-unresolved": "error",
     },
   },
   {
